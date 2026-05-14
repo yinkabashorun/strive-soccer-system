@@ -166,7 +166,7 @@ export default function CommandCenter() {
         <section className="card p-5">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <div className="chip">Live · GHL</div>
+              <div className="chip">Live · Unified GHL</div>
               <h2 className="h-display mt-2 text-2xl font-semibold">
                 New leads
               </h2>
@@ -205,7 +205,7 @@ export default function CommandCenter() {
             href="/integrations"
             className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-dashed border-white/10 py-2.5 text-xs text-muted hover:border-white/20 hover:text-bone"
           >
-            Syncing from GoHighLevel → Strive OS
+            Syncing from unified GoHighLevel → Strive OS
           </Link>
         </section>
       </div>

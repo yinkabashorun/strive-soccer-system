@@ -14,10 +14,10 @@ import {
 const integrations = [
   {
     name: "GoHighLevel",
-    role: "CRM + automations · source of truth for leads",
+    role: "Unified CRM + automations · all workspaces merged · single source of truth",
     status: "Wired",
     icon: Zap,
-    note: "Webhook endpoint: /api/ghl/webhook",
+    note: "Webhook endpoint: /api/ghl/webhook · one merged GHL workspace",
   },
   {
     name: "Supabase",
@@ -76,7 +76,7 @@ export default function IntegrationsPage() {
           <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-5">
             <Node label="Manus" sub="Landing pages" />
             <Arrow />
-            <Node label="GoHighLevel" sub="CRM + automations" highlighted />
+            <Node label="GoHighLevel" sub="Unified CRM · all workspaces merged" highlighted />
             <Arrow />
             <Node label="Strive OS" sub="Operating system" accent />
           </div>

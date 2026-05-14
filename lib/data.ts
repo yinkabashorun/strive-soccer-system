@@ -109,9 +109,9 @@ export const players: Player[] = [
     parentName: "Jin Park",
     parentEmail: "jin@example.com",
     parentPhone: "+1 (703) 555-0190",
-    package: "Camp",
+    package: "Group",
     sessionsRemaining: 3,
-    sessionsTotal: 5,
+    sessionsTotal: 8,
     paymentStatus: "Paid",
     joinedAt: "2025-10-20",
     coach: "Coach Yinka Jonny",
@@ -124,7 +124,7 @@ export const players: Player[] = [
 export const todaySessions: Session[] = [
   {
     id: "s_001",
-    title: "U10 Ball Mastery — Group A",
+    title: "Group Training",
     date: "2026-05-14",
     startTime: "16:30",
     endTime: "17:45",
@@ -138,7 +138,7 @@ export const todaySessions: Session[] = [
   },
   {
     id: "s_002",
-    title: "Private — Zara M.",
+    title: "Private Training — Zara M.",
     date: "2026-05-14",
     startTime: "18:00",
     endTime: "19:00",
@@ -151,7 +151,7 @@ export const todaySessions: Session[] = [
   },
   {
     id: "s_003",
-    title: "U13 Composure Lab",
+    title: "Group Training",
     date: "2026-05-14",
     startTime: "19:15",
     endTime: "20:30",
@@ -167,7 +167,7 @@ export const todaySessions: Session[] = [
 export const upcomingSessions: Session[] = [
   {
     id: "s_010",
-    title: "U10 Ball Mastery — Group A",
+    title: "Group Training",
     date: "2026-05-16",
     startTime: "10:00",
     endTime: "11:15",
@@ -180,16 +180,16 @@ export const upcomingSessions: Session[] = [
   },
   {
     id: "s_011",
-    title: "Half-Term Camp Day 1",
+    title: "Private Training — Marcus A.",
     date: "2026-05-18",
     startTime: "09:00",
-    endTime: "12:00",
+    endTime: "10:00",
     location: "Gainesville Middle School · Gainesville, VA",
     coach: "Coach Yinka Jonny",
-    capacity: 24,
-    enrolled: ["p_006"],
+    capacity: 1,
+    enrolled: ["p_001"],
     attended: [],
-    type: "Camp",
+    type: "Private",
   },
 ];
 
@@ -222,7 +222,7 @@ export const leads: Lead[] = [
     id: "l_004",
     name: "Olivia Tran",
     source: "GHL Form",
-    interest: "Camp",
+    interest: "Group Training",
     createdAt: "2026-05-12T11:08:00Z",
     status: "New",
   },
@@ -247,7 +247,7 @@ export const coachTasks: CoachTask[] = [
   },
   {
     id: "t_003",
-    title: "Confirm pitch booking for half-term camp",
+    title: "Confirm Loudoun pitch booking for next week",
     due: "Tomorrow",
     priority: "High",
     done: false,

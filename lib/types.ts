@@ -5,7 +5,7 @@ export type Player = {
   parentName: string;
   parentEmail: string;
   parentPhone: string;
-  package: "Group" | "Private" | "Camp" | "Course";
+  package: "Group" | "Private" | "Course";
   sessionsRemaining: number;
   sessionsTotal: number;
   paymentStatus: "Paid" | "Unpaid" | "Partial";
@@ -27,7 +27,7 @@ export type Session = {
   capacity: number;
   enrolled: string[];
   attended: string[];
-  type: "Group" | "Private" | "Camp";
+  type: "Group" | "Private";
   notes?: string;
 };
 
@@ -35,7 +35,7 @@ export type Lead = {
   id: string;
   name: string;
   source: "TikTok" | "Instagram" | "Referral" | "Website" | "GHL Form";
-  interest: "Group Training" | "Private" | "Camp" | "Course";
+  interest: "Group Training" | "Private" | "Course";
   createdAt: string;
   status: "New" | "Contacted" | "Trial Booked" | "Converted" | "Lost";
   notes?: string;

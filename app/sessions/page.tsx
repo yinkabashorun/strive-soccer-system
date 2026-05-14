@@ -11,7 +11,7 @@ export default function SessionsIndex() {
       <PageHeader
         eyebrow="Sessions"
         title="Every rep. Every roster. Every coach."
-        subtitle="Group, private, and camp sessions. Mobile-first check-in built for the sideline."
+        subtitle="Group and private sessions across Haymarket, Gainesville, and Ashburn. Mobile-first check-in built for the sideline."
         actions={
           <button className="btn-accent">
             <CalendarPlus className="h-4 w-4" />

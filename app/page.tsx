@@ -3,13 +3,15 @@ import {
   CircleDollarSign,
   Flame,
   GraduationCap,
-  Sparkles,
+  Target,
   TrendingUp,
   Users,
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { StatCard } from "@/components/StatCard";
 import { Avatar } from "@/components/Avatar";
+import { MoneyOnTable } from "@/components/MoneyOnTable";
+import { OperatorBrief } from "@/components/OperatorBrief";
 import {
   coachTasks,
   contentItems,
@@ -20,6 +22,8 @@ import {
 } from "@/lib/data";
 import { formatCompact, formatCurrency, formatPct, timeAgo } from "@/lib/utils";
 import Link from "next/link";
+
+export const dynamic = "force-dynamic";
 
 export default function CommandCenter() {
   const unpaid = unpaidPlayers();
@@ -42,16 +46,26 @@ export default function CommandCenter() {
               <CalendarRange className="h-4 w-4" />
               Schedule session
             </button>
-            <button className="btn-accent">
-              <Sparkles className="h-4 w-4" />
-              New TikTok idea
-            </button>
+            <Link href="/pipeline" className="btn-accent">
+              <Target className="h-4 w-4" />
+              Open pipeline
+            </Link>
           </>
         }
       />
 
+      {/* Revenue command — money on the table + today's hit list */}
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+        <div className="xl:col-span-1">
+          <MoneyOnTable />
+        </div>
+        <div className="xl:col-span-2">
+          <OperatorBrief />
+        </div>
+      </div>
+
       {/* Quick stats */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+      <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         <StatCard
           index={0}
           label="MRR"

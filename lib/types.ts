@@ -84,3 +84,57 @@ export type CoachTask = {
   done: boolean;
   owner: string;
 };
+
+export type PipelineStage =
+  | "New Lead"
+  | "Proposal Sent"
+  | "Followed up 1"
+  | "Followed up 2x"
+  | "Promised"
+  | "Signed Up"
+  | "Won"
+  | "Lost";
+
+export type Opportunity = {
+  id: string;
+  name: string;
+  contactName: string;
+  phone?: string;
+  email?: string;
+  stage: PipelineStage;
+  /** $ value as recorded in GHL. 0 means not set yet. */
+  leadValue: number;
+  /** Estimated $ when leadValue is 0 (defaults to Development Pack $319). */
+  expectedValue: number;
+  source?: string;
+  notes?: string;
+  tags?: string[];
+  status: "open" | "won" | "lost";
+  createdAt: string;
+  updatedAt: string;
+  /** Whether the money has actually been collected (only meaningful for Won). */
+  collected: boolean;
+  contactId: string;
+  pipelineId: string;
+  pipelineStageId: string;
+};
+
+export type OperatorBucket =
+  | "promised_uncollected"
+  | "won_uncollected"
+  | "needs_close"
+  | "cooling"
+  | "stale_followup"
+  | "rescue_new"
+  | "signed_unpaid";
+
+export type BriefAction = {
+  id: string;
+  rank: number;
+  opportunityId: string;
+  bucket: OperatorBucket;
+  headline: string;
+  reason: string;
+  script: string;
+  channel: "call" | "sms" | "whatsapp" | "venmo";
+};

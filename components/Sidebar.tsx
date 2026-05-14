@@ -8,16 +8,19 @@ import {
   Home,
   Radio,
   Sparkles,
+  Target,
   UserRound,
   Users,
   Settings,
   Webhook,
 } from "lucide-react";
 import { Logo } from "./Logo";
-import { cn } from "@/lib/utils";
+import { cn, formatCurrency } from "@/lib/utils";
+import { moneyOnTable, summerProgress } from "@/lib/pipeline";
 
 const nav = [
   { href: "/", label: "Command Center", icon: Home },
+  { href: "/pipeline", label: "Pipeline", icon: Target },
   { href: "/sessions", label: "Sessions", icon: CalendarRange },
   { href: "/players", label: "Players", icon: Users },
   { href: "/course", label: "Course", icon: GraduationCap },
@@ -69,24 +72,7 @@ export function Sidebar() {
       </nav>
 
       <div className="mt-auto flex flex-col gap-3">
-        <div className="relative overflow-hidden rounded-2xl border border-white/5 bg-ink-200 p-4">
-          <div className="absolute -right-8 -top-10 h-24 w-24 rounded-full bg-accent/30 blur-2xl" />
-          <div className="relative">
-            <div className="chip-accent">Live</div>
-            <div className="mt-3 text-sm font-semibold leading-snug">
-              3 viral posts this month
-            </div>
-            <div className="mt-1 text-xs text-muted">
-              1.24M reach · keep the velocity up.
-            </div>
-            <Link
-              href="/content"
-              className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-accent hover:underline"
-            >
-              Open Content Engine <Radio className="h-3.5 w-3.5" />
-            </Link>
-          </div>
-        </div>
+        <SidebarMoneyChip />
 
         <Link
           href="/settings"
@@ -97,5 +83,42 @@ export function Sidebar() {
         </Link>
       </div>
     </aside>
+  );
+}
+
+function SidebarMoneyChip() {
+  const m = moneyOnTable();
+  const s = summerProgress();
+  return (
+    <Link
+      href="/pipeline"
+      className="group relative block overflow-hidden rounded-2xl border border-accent/20 bg-ink-200 p-4 transition-colors hover:border-accent/40"
+    >
+      <div className="absolute -right-8 -top-10 h-24 w-24 rounded-full bg-accent/30 blur-2xl" />
+      <div className="relative">
+        <div className="chip-accent">
+          <Radio className="h-3 w-3" />
+          On the table
+        </div>
+        <div className="mt-3 flex items-baseline gap-1">
+          <div className="h-display text-2xl font-semibold tabular-nums">
+            {formatCurrency(m.totalUncollected)}
+          </div>
+        </div>
+        <div className="mt-0.5 text-[11px] text-muted">
+          {m.uncollectedCount} open · {s.daysUntilSessions}d to first session
+        </div>
+        <div className="mt-3 h-1.5 w-full overflow-hidden rounded-full bg-white/5">
+          <div
+            className="h-full rounded-full bg-gradient-to-r from-accent to-accent-soft"
+            style={{ width: `${Math.max(2, Math.min(100, s.pct * 100))}%` }}
+          />
+        </div>
+        <div className="mt-1.5 flex items-center justify-between text-[10px] uppercase tracking-[0.18em] text-muted">
+          <span>Summer</span>
+          <span className="text-bone">{(s.pct * 100).toFixed(1)}%</span>
+        </div>
+      </div>
+    </Link>
   );
 }

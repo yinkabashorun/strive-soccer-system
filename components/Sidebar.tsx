@@ -12,6 +12,7 @@ import {
   UserRound,
   Users,
   Settings,
+  Wand2,
   Webhook,
 } from "lucide-react";
 import { Logo } from "./Logo";
@@ -24,6 +25,7 @@ const nav = [
   { href: "/sessions", label: "Sessions", icon: CalendarRange },
   { href: "/players", label: "Players", icon: Users },
   { href: "/course", label: "Course", icon: GraduationCap },
+  { href: "/studio", label: "AI Ad Studio", icon: Wand2 },
   { href: "/content", label: "AI Content Engine", icon: Sparkles },
   { href: "/portal", label: "Player Portal", icon: UserRound },
   { href: "/integrations", label: "Integrations", icon: Webhook },

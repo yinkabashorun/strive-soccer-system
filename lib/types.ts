@@ -138,3 +138,65 @@ export type BriefAction = {
   script: string;
   channel: "call" | "sms" | "whatsapp" | "venmo";
 };
+
+// ============================================================================
+// AI content studio + scheduling
+// ============================================================================
+
+export type AdPillar =
+  | "Ball Mastery"
+  | "Mindset"
+  | "Behind the Scenes"
+  | "Player Spotlight"
+  | "Education"
+  | "Offer";
+
+export type AdGoal = "Lead-gen" | "Brand" | "Course" | "Camp" | "Booking";
+
+export type GenerationStatus =
+  | "queued"
+  | "writing"
+  | "rendering_video"
+  | "rendering_voice"
+  | "composing"
+  | "ready"
+  | "scheduled"
+  | "posted"
+  | "failed";
+
+export type AdAsset = {
+  id: string;
+  idea: string;
+  pillar: AdPillar;
+  goal: AdGoal;
+  hook: string;
+  script: string;
+  caption: string;
+  cta: string;
+  videoPrompt: string;
+  voiceoverScript: string;
+  voiceoverModel: string;
+  videoModel: string;
+  videoUrl?: string;
+  voiceUrl?: string;
+  posterUrl?: string;
+  durationSec: number;
+  status: GenerationStatus;
+  createdAt: string;
+  scheduledFor?: string;
+  postedAt?: string;
+  ghlPostId?: string;
+  platform: "TikTok" | "Instagram" | "YouTube Shorts";
+  /** Predicted virality score 0-100. */
+  viralityScore?: number;
+  viralityNotes?: string;
+};
+
+export type ScheduledPost = {
+  id: string;
+  adAssetId: string;
+  scheduledFor: string;
+  platform: "TikTok" | "Instagram" | "YouTube Shorts";
+  status: "pending" | "posted" | "failed";
+  ghlPostId?: string;
+};

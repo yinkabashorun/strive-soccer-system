@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft, MapPin, NotebookPen, UserRoundPlus } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { CheckInList } from "@/components/CheckInList";
+import { CampEconomics } from "@/components/CampEconomics";
 import { players, todaySessions, upcomingSessions } from "@/lib/data";
 
 export function generateStaticParams() {
@@ -96,6 +97,8 @@ export default function SessionDetail({ params }: { params: { id: string } }) {
                 "No focus set. Tap to add the day's coaching focus — moves, principles, themes."}
             </p>
           </div>
+
+          <CampEconomics session={session} />
         </section>
       </div>
     </div>

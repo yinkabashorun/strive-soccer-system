@@ -30,6 +30,12 @@ export type Session = {
   type: "Group" | "Private" | "Camp";
   notes?: string;
   partner?: string;
+  pricing?: { label: string; price: number }[];
+  revenueShare?: {
+    perPlayer: number;
+    targetMin: number;
+    targetMax: number;
+  };
 };
 
 export type Lead = {

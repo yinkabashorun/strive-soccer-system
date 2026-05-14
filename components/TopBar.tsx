@@ -52,7 +52,7 @@ export function TopBar() {
             </div>
             <div className="hidden text-xs sm:block">
               <div className="font-semibold leading-tight text-bone">
-                Coach Yinka
+                Coach Yinka Jonny
               </div>
               <div className="text-[10px] uppercase tracking-[0.18em] text-muted">
                 Founder

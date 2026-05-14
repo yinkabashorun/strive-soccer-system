@@ -30,7 +30,14 @@ export default function SessionsIndex() {
               className="card card-hover group relative overflow-hidden p-5"
             >
               <div className="flex items-center justify-between">
-                <span className="chip">{s.type}</span>
+                <div className="flex items-center gap-1.5">
+                  <span className={s.type === "Camp" ? "chip-accent" : "chip"}>
+                    {s.type}
+                  </span>
+                  {s.partner && (
+                    <span className="chip-accent">× {s.partner}</span>
+                  )}
+                </div>
                 <span className="text-[11px] text-muted">{s.date}</span>
               </div>
 

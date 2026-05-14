@@ -27,15 +27,16 @@ export type Session = {
   capacity: number;
   enrolled: string[];
   attended: string[];
-  type: "Group" | "Private";
+  type: "Group" | "Private" | "Camp";
   notes?: string;
+  partner?: string;
 };
 
 export type Lead = {
   id: string;
   name: string;
   source: "TikTok" | "Instagram" | "Referral" | "Website" | "GHL Form";
-  interest: "Group Training" | "Private" | "Course";
+  interest: "Group Training" | "Private" | "Camp" | "Course";
   createdAt: string;
   status: "New" | "Contacted" | "Trial Booked" | "Converted" | "Lost";
   notes?: string;

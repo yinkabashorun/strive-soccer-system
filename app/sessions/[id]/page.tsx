@@ -29,9 +29,9 @@ export default function SessionDetail({ params }: { params: { id: string } }) {
       </Link>
 
       <PageHeader
-        eyebrow={`${session.type} · ${session.date}`}
+        eyebrow={`${session.type} · ${session.date}${session.partner ? ` · × ${session.partner}` : ""}`}
         title={session.title}
-        subtitle={`${session.startTime} – ${session.endTime} · ${session.coach}`}
+        subtitle={`${session.startTime} – ${session.endTime} · ${session.coach}${session.partner ? ` × ${session.partner}` : ""}`}
         actions={
           <>
             <button className="btn">

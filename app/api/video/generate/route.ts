@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { synthesizeAd, pickPillar, pickGoal } from "@/lib/ai-content";
+import { pickPillar, pickGoal } from "@/lib/ai-content";
+import { generateAdStrategy } from "@/lib/anthropic";
 import { composeAd } from "@/lib/video-gen";
 import type { AdAsset, AdGoal, AdPillar } from "@/lib/types";
 
@@ -24,7 +25,7 @@ type Body = {
 export async function POST(req: Request) {
   const body = (await req.json().catch(() => ({}))) as Body;
 
-  const asset = synthesizeAd({
+  const { asset, source } = await generateAdStrategy({
     idea: body.idea ?? "",
     pillar: body.pillar ?? pickPillar(),
     goal: body.goal ?? pickGoal(),
@@ -40,7 +41,7 @@ export async function POST(req: Request) {
   asset.durationSec = composed.durationSec;
   asset.status = "ready";
 
-  return NextResponse.json({ ok: true, asset });
+  return NextResponse.json({ ok: true, asset, strategist: source });
 }
 
 export async function GET() {

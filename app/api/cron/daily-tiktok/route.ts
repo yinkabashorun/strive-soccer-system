@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { pickGoal, pickPillar, synthesizeAd } from "@/lib/ai-content";
+import { pickGoal, pickPillar } from "@/lib/ai-content";
+import { generateAdStrategy } from "@/lib/anthropic";
 import { composeAd } from "@/lib/video-gen";
 import { rememberScheduledPost, scheduleTikTokPost } from "@/lib/ghl-social";
 
@@ -35,7 +36,7 @@ export async function GET(req: Request) {
   }
 
   const now = new Date();
-  const asset = synthesizeAd({
+  const { asset } = await generateAdStrategy({
     idea: "",
     pillar: pickPillar(now),
     goal: pickGoal(now),

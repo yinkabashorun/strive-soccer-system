@@ -1,6 +1,10 @@
-import { CalendarRange, Sparkles, Wand2 } from "lucide-react";
+import { CalendarRange, Sparkles } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { AdStudio } from "@/components/AdStudio";
+import { ScheduledQueue } from "@/components/ScheduledQueue";
+import { isAnthropicConfigured } from "@/lib/anthropic";
+import { isHiggsfieldConfigured, isElevenLabsConfigured } from "@/lib/video-gen";
+import { isGhlSocialConfigured } from "@/lib/ghl-social";
 
 export const dynamic = "force-dynamic";
 
@@ -37,45 +41,78 @@ export default function StudioPage() {
 
       <AdStudio />
 
-      <div className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-3">
-        <InfoBlock
-          icon={Wand2}
-          label="Strategist"
-          body="Rotates pillars day-by-day (Ball Mastery → Player Spotlight → Mindset → Offer → Education → BTS) so the feed never drifts. Goal auto-picks: Lead-gen weekdays, Course Saturday, Brand Sunday."
+      <div className="mt-8">
+        <ScheduledQueue />
+      </div>
+
+      <div className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-4">
+        <ProviderChip
+          label="Strategist (Claude)"
+          configured={isAnthropicConfigured()}
+          note={
+            isAnthropicConfigured()
+              ? "Live · ANTHROPIC_API_KEY set"
+              : "Mock · using template fallback"
+          }
         />
-        <InfoBlock
-          icon={CalendarRange}
-          label="Daily auto-poster"
-          body="The cron at /api/cron/daily-tiktok generates + schedules one TikTok every morning. Wire to Vercel Cron (0 9 * * *) or a GHL workflow. Protected with CRON_SECRET."
+        <ProviderChip
+          label="Video (Higgsfield)"
+          configured={isHiggsfieldConfigured()}
+          note={
+            isHiggsfieldConfigured()
+              ? "Live · HIGGSFIELD_API_KEY set"
+              : "Mock · placeholder mp4"
+          }
         />
-        <InfoBlock
-          icon={Sparkles}
-          label="Provider status"
-          body="Higgsfield + ElevenLabs run in mock mode until HIGGSFIELD_API_KEY and ELEVENLABS_API_KEY are set in .env.local. GHL falls back to mock when GHL_TIKTOK_ACCOUNT_ID is missing."
+        <ProviderChip
+          label="Voice (ElevenLabs)"
+          configured={isElevenLabsConfigured()}
+          note={
+            isElevenLabsConfigured()
+              ? "Live · ELEVENLABS_API_KEY set"
+              : "Mock · placeholder audio"
+          }
+        />
+        <ProviderChip
+          label="Scheduler (GHL)"
+          configured={isGhlSocialConfigured()}
+          note={
+            isGhlSocialConfigured()
+              ? "Live · TikTok wired"
+              : "Mock · returns fake post id"
+          }
         />
       </div>
     </div>
   );
 }
 
-function InfoBlock({
-  icon: Icon,
+function ProviderChip({
   label,
-  body,
+  configured,
+  note,
 }: {
-  icon: React.ComponentType<{ className?: string }>;
   label: string;
-  body: string;
+  configured: boolean;
+  note: string;
 }) {
   return (
     <div className="card p-4">
-      <div className="flex items-center gap-2">
-        <Icon className="h-3.5 w-3.5 text-accent" />
+      <div className="flex items-center justify-between">
         <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">
           {label}
         </div>
+        <span
+          className={
+            configured
+              ? "rounded-full border border-accent/40 bg-accent/15 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-accent"
+              : "rounded-full border border-white/10 bg-white/[0.04] px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wider text-muted"
+          }
+        >
+          {configured ? "Live" : "Mock"}
+        </span>
       </div>
-      <p className="mt-2 text-xs leading-relaxed text-bone/80">{body}</p>
+      <div className="mt-2 text-xs text-bone/80">{note}</div>
     </div>
   );
 }

@@ -1,21 +1,17 @@
 /**
  * GoHighLevel Social Planner client.
  *
- * GHL exposes a Social Media Posting API that can schedule posts across
- * connected channels (TikTok, IG, Facebook, YouTube, LinkedIn, etc.). To use
- * it, the TikTok account must be connected to your GHL Location via Social
- * Planner UI — once connected, GHL gives back a `socialAccountId` that we
- * reference at schedule time.
- *
  * Required env:
- *   GHL_API_KEY        — Private Integration token
- *   GHL_LOCATION_ID    — your Strive Soccer location
- *   GHL_TIKTOK_ACCOUNT_ID — the socialAccountId for your connected TikTok
+ *   GHL_API_KEY               — Private Integration token
+ *   GHL_LOCATION_ID           — your Strive Soccer location id
+ *   GHL_TIKTOK_ACCOUNT_ID     — connected TikTok identity (Social Planner)
  *
- * Docs: https://highlevel.stoplight.io/docs/integrations/ (Social Planner section)
+ * When any of those are missing, every call returns a mock success so the UI
+ * flow is end-to-end testable without credentials.
  */
 
 import type { AdPillar, ScheduledPost } from "./types";
+import { logProvider } from "./store";
 
 const GHL_BASE = "https://services.leadconnectorhq.com";
 const API_VERSION = "2021-07-28";
@@ -44,6 +40,7 @@ export type SchedulePostResult = {
   channel: "tiktok";
   mock?: boolean;
   error?: string;
+  statusCode?: number;
 };
 
 export async function scheduleTikTokPost(
@@ -57,36 +54,102 @@ export async function scheduleTikTokPost(
     process.env.GHL_TIKTOK_ACCOUNT_ID!,
   ];
 
-  // Real call — uncomment when wiring to your GHL account.
-  //
-  // const res = await fetch(`${GHL_BASE}/social-media-posting/${process.env.GHL_LOCATION_ID}/posts`, {
-  //   method: "POST",
-  //   headers: {
-  //     Authorization: `Bearer ${process.env.GHL_API_KEY}`,
-  //     "Content-Type": "application/json",
-  //     Version: API_VERSION,
-  //   },
-  //   body: JSON.stringify({
-  //     accountIds: accounts,
-  //     summary: input.caption,
-  //     media: [
-  //       { url: input.videoUrl, type: "video", thumbnail: input.posterUrl },
-  //     ],
-  //     scheduleDate: input.scheduledFor,
-  //     status: "scheduled",
-  //   }),
-  // });
-  // if (!res.ok) {
-  //   const body = await res.text().catch(() => "");
-  //   return { ok: false, scheduledFor: input.scheduledFor, channel: "tiktok", error: `GHL ${res.status}: ${body}` };
-  // }
-  // const json = (await res.json()) as { id: string };
-  // return { ok: true, ghlPostId: json.id, scheduledFor: input.scheduledFor, channel: "tiktok" };
+  const url = `${GHL_BASE}/social-media-posting/${process.env.GHL_LOCATION_ID}/posts`;
+  const body = {
+    accountIds: accounts,
+    summary: input.caption,
+    media: [
+      {
+        url: input.videoUrl,
+        type: "video" as const,
+        thumbnail: input.posterUrl,
+      },
+    ],
+    scheduleDate: input.scheduledFor,
+    status: "scheduled" as const,
+  };
 
-  void GHL_BASE;
-  void API_VERSION;
-  void accounts;
-  return mockSchedule(input);
+  const start = Date.now();
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${process.env.GHL_API_KEY}`,
+        "Content-Type": "application/json",
+        Version: API_VERSION,
+      },
+      body: JSON.stringify(body),
+    });
+
+    const durationMs = Date.now() - start;
+
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      await logProvider({
+        provider: "ghl",
+        action: "schedule_tiktok",
+        ok: false,
+        statusCode: res.status,
+        durationMs,
+        payload: body,
+        error: text.slice(0, 500),
+      });
+      return {
+        ok: false,
+        scheduledFor: input.scheduledFor,
+        channel: "tiktok",
+        statusCode: res.status,
+        error: friendlyGhlError(res.status, text),
+      };
+    }
+
+    const json = (await res.json()) as { id?: string; postId?: string };
+    const postId = json.id ?? json.postId;
+    await logProvider({
+      provider: "ghl",
+      action: "schedule_tiktok",
+      ok: true,
+      statusCode: res.status,
+      durationMs,
+      payload: { ghlPostId: postId },
+    });
+    return {
+      ok: true,
+      ghlPostId: postId,
+      scheduledFor: input.scheduledFor,
+      channel: "tiktok",
+    };
+  } catch (e) {
+    await logProvider({
+      provider: "ghl",
+      action: "schedule_tiktok",
+      ok: false,
+      durationMs: Date.now() - start,
+      error: e instanceof Error ? e.message : String(e),
+    });
+    return {
+      ok: false,
+      scheduledFor: input.scheduledFor,
+      channel: "tiktok",
+      error: e instanceof Error ? e.message : "Network error",
+    };
+  }
+}
+
+function friendlyGhlError(status: number, body: string): string {
+  if (status === 401) {
+    return "GHL rejected the API key. Check GHL_API_KEY in .env.local — must be a Private Integration token.";
+  }
+  if (status === 403) {
+    return "GHL says forbidden. The Private Integration needs Social Planner write scope. Re-issue the token with the right scope.";
+  }
+  if (status === 404) {
+    return `GHL says not found — check GHL_LOCATION_ID (${process.env.GHL_LOCATION_ID}).`;
+  }
+  if (status === 422) {
+    return `GHL rejected the payload. Common cause: socialAccountId mismatch. Check GHL_TIKTOK_ACCOUNT_ID. Body: ${body.slice(0, 200)}`;
+  }
+  return `GHL ${status}: ${body.slice(0, 200)}`;
 }
 
 function mockSchedule(input: SchedulePostInput): SchedulePostResult {
@@ -111,16 +174,58 @@ export async function listSocialAccounts(): Promise<
       { id: "mock_tiktok_strive", platform: "tiktok", name: "@strivesoccerfc" },
     ];
   }
-  // const res = await fetch(`${GHL_BASE}/social-media-posting/${process.env.GHL_LOCATION_ID}/accounts`, {
-  //   headers: {
-  //     Authorization: `Bearer ${process.env.GHL_API_KEY}`,
-  //     Version: API_VERSION,
-  //   },
-  // });
-  // if (!res.ok) return [];
-  // const json = await res.json();
-  // return json.accounts.map((a) => ({ id: a.id, platform: a.platform, name: a.name }));
-  return [];
+
+  const start = Date.now();
+  try {
+    const res = await fetch(
+      `${GHL_BASE}/social-media-posting/${process.env.GHL_LOCATION_ID}/accounts`,
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.GHL_API_KEY}`,
+          Version: API_VERSION,
+        },
+      },
+    );
+
+    if (!res.ok) {
+      await logProvider({
+        provider: "ghl",
+        action: "list_accounts",
+        ok: false,
+        statusCode: res.status,
+        durationMs: Date.now() - start,
+      });
+      return [];
+    }
+    const json = (await res.json()) as {
+      accounts?: Array<{ id: string; platform: string; name: string }>;
+    };
+    return json.accounts ?? [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Cancel/delete a scheduled GHL post.
+ */
+export async function cancelScheduledPost(ghlPostId: string): Promise<boolean> {
+  if (!isGhlSocialConfigured()) return true;
+  try {
+    const res = await fetch(
+      `${GHL_BASE}/social-media-posting/${process.env.GHL_LOCATION_ID}/posts/${ghlPostId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${process.env.GHL_API_KEY}`,
+          Version: API_VERSION,
+        },
+      },
+    );
+    return res.ok;
+  } catch {
+    return false;
+  }
 }
 
 // ============================================================================
@@ -138,8 +243,10 @@ export function listScheduledPosts(): ScheduledPost[] {
 }
 
 // ============================================================================
-// Demo seed — deterministic 7-day queue so the UI isn't empty before the cron
-// has actually scheduled anything. Drop when Supabase is wired.
+// Demo seed — deterministic 7-day queue so older /studio UI isn't empty before
+// the cron has actually scheduled anything. The real queue lives in
+// lib/store.ts now; this is kept for backward compatibility with components
+// already importing it.
 // ============================================================================
 
 export type QueueRow = {
@@ -203,23 +310,17 @@ const SEED_HOOKS: Array<{ pillar: AdPillar; hook: string; caption: string; v: nu
 const TODAY_REF = new Date("2026-05-14T18:00:00Z");
 
 function morningSlot(daysFromToday: number) {
-  // 9am ET = 13:00 UTC during DST.
   const d = new Date(TODAY_REF);
   d.setUTCDate(d.getUTCDate() + daysFromToday);
   d.setUTCHours(13, 0, 0, 0);
   return d.toISOString();
 }
 
-/**
- * Returns a deterministic 7-day window (3 past, today, 4 upcoming) so the
- * Scheduled Queue UI has content out of the box.
- */
 export function seedScheduledQueue(): QueueRow[] {
   return SEED_HOOKS.map((h, i) => {
-    const offset = i - 3; // -3..+3
+    const offset = i - 3;
     const scheduledFor = morningSlot(offset);
-    const status: ScheduledPost["status"] =
-      offset < 0 ? "posted" : "pending";
+    const status: ScheduledPost["status"] = offset < 0 ? "posted" : "pending";
     return {
       id: `seed_${i}`,
       scheduledFor,

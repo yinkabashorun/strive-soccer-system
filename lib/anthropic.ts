@@ -4,6 +4,7 @@ import {
   pickPillar,
   synthesizeAd,
 } from "./ai-content";
+import { logProvider } from "./store";
 import type { AdAsset, AdGoal, AdPillar } from "./types";
 
 /**
@@ -61,6 +62,7 @@ export async function generateAdStrategy(
     };
   }
 
+  const start = Date.now();
   try {
     const prompt = buildStrategistPrompt({ idea: input.idea, pillar, goal });
     const res = await fetch(ANTHROPIC_API, {
@@ -87,6 +89,14 @@ export async function generateAdStrategy(
 
     if (!res.ok) {
       const errText = await res.text().catch(() => "");
+      await logProvider({
+        provider: "anthropic",
+        action: "generate_ad",
+        ok: false,
+        statusCode: res.status,
+        durationMs: Date.now() - start,
+        error: errText.slice(0, 500),
+      });
       throw new Error(`Anthropic ${res.status}: ${errText.slice(0, 200)}`);
     }
 
@@ -95,6 +105,14 @@ export async function generateAdStrategy(
     };
     const text = json.content?.find((c) => c.type === "text")?.text ?? "";
     const parsed = extractJson(text);
+
+    await logProvider({
+      provider: "anthropic",
+      action: "generate_ad",
+      ok: true,
+      statusCode: 200,
+      durationMs: Date.now() - start,
+    });
 
     const seed = synthesizeAd({ idea: input.idea, pillar, goal, platform });
     const asset: AdAsset = {
@@ -113,7 +131,14 @@ export async function generateAdStrategy(
     };
 
     return { asset, source: "claude" };
-  } catch {
+  } catch (e) {
+    await logProvider({
+      provider: "anthropic",
+      action: "generate_ad",
+      ok: false,
+      durationMs: Date.now() - start,
+      error: e instanceof Error ? e.message : String(e),
+    });
     return {
       asset: synthesizeAd({ idea: input.idea, pillar, goal, platform }),
       source: "fallback",

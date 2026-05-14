@@ -11,15 +11,38 @@ import type { AdAsset, AdGoal, AdPillar } from "./types";
  * `synthesizeAd()` with a streaming LLM call using the prompt builder below.
  */
 
-const BRAND = {
+/**
+ * Brand source of truth. Mirror this with /CLAUDE.md exactly. When pricing,
+ * CTAs, or partnerships change, edit CLAUDE.md first and then update here.
+ */
+export const BRAND = {
   name: "Strive Soccer",
   founder: "Yinka Bashorun",
+  ageRange: "11–15 (privates also for 16+)",
   voice:
     "Direct, energetic, expert-tier. Speaks to soccer parents and players ages 11–15. " +
     "Hormozi on offers — make saying no feel stupid. Andy Elliott on closes. " +
     "No fluff. Every post drives toward a booking, a course buy, or a follow.",
   url: "strivesoccer100x.com",
   ig: "@strivesoccerfc",
+  venmo: "@Yinka-bash",
+  courseUrl: "totalballmastery.netlify.app",
+  locations: ["Long Park", "Gainesville Middle School", "Loudoun HS"],
+  partnerships: [
+    "Coach Gonzalo Ramella (mentor — most respected youth coach NoVA)",
+    "Coach Oscar — DC United co-branded camp",
+    "NVA (MLS Next club)",
+  ],
+  pricing: {
+    dropIn: 40,
+    privateSession: 65,
+    starterPack: { sessions: 6, price: 249 },
+    developmentPack: { sessions: 10, price: 319 }, // MOST POPULAR
+    elitePack: { sessions: 12, price: 379 },
+    oscarCamp: { dates: "July 21–23", price: 75 },
+    course: { name: "30 Day Dribbling Masterclass", price: 60 },
+  },
+  bannedWords: ["elevate", "level up"] as readonly string[],
   hookFormulas: [
     "If you can't do this — you're not training, you're guessing.",
     "Most {audience} skip this. Here's why they freeze.",
@@ -30,10 +53,11 @@ const BRAND = {
   ],
   ctas: {
     "Lead-gen":
-      "DM 'TRAINING' for the summer schedule — spots cap at 6 per group.",
+      "DM 'TRAINING' or comment below — spots cap at 6 per group. Sessions start May 20.",
     Brand: "Follow @strivesoccerfc — new drill every day.",
-    Course: "Link in bio: 30-Day Dribbling Masterclass · $60.",
-    Camp: "Camp July 21–23 with DC United coach. Comment 'CAMP' to lock a spot.",
+    Course:
+      "Link in bio: 30 Day Dribbling Masterclass at totalballmastery.netlify.app · $60.",
+    Camp: "Camp July 21–23 with DC United coach. $75/player. Comment 'CAMP' to lock a spot.",
     Booking:
       "Comment 'TRAINING' or visit strivesoccer100x.com — sessions start May 20.",
   },
@@ -193,18 +217,18 @@ export function buildStrategistPrompt({
   pillar: AdPillar;
   goal: AdGoal;
 }) {
-  return `You are the AI head of marketing for ${BRAND.name} (${BRAND.url}, ${BRAND.ig}).
+  return `You are the AI head of marketing for ${BRAND.name} (${BRAND.url}, ${BRAND.ig}, founder ${BRAND.founder}).
 Voice: ${BRAND.voice}
 
 Task: turn the idea below into a full TikTok-ready short-form ad. Output strict JSON:
 {
-  "hook": "≤15 words, scroll-stopping, opens the first 2 seconds",
+  "hook": "≤15 words, scroll-stopping, opens the first 2 seconds, no emojis",
   "script": "30-second script with [0-2s] [2-5s] [5-15s] [15-25s] [25-30s] timestamps",
   "caption": "≤220 chars, 3–5 hashtags, soft CTA",
   "cta": "explicit close — what action, by when",
-  "videoPrompt": "single paragraph cinematic visual brief for text-to-video model (Higgsfield). Include shot type, lens, lighting, motion, mood.",
+  "videoPrompt": "single paragraph cinematic visual brief for text-to-video model (Higgsfield). Include shot type, lens, lighting, motion, mood. 9:16 vertical.",
   "voiceoverScript": "exact words to be read by AI voice, max 28 seconds at 165wpm",
-  "viralityScore": 0-100 estimate based on hook strength, novelty, emotion, and pattern interrupt",
+  "viralityScore": "integer 0-100 estimating hook strength, novelty, emotion, pattern interrupt",
   "viralityNotes": "1 sentence — what would push it higher"
 }
 
@@ -213,11 +237,14 @@ Goal: ${goal}
 Idea: ${idea || "(auto-pick — surprise me, but stay on pillar)"}
 CTA library to draw from: ${BRAND.ctas[goal]}
 
-Rules:
+Hard rules:
 - No emojis in the hook.
-- Don't use the word "elevate" or "level up" — banned.
-- The script must reference a real Strive Soccer offering (Development Pack $319, Oscar camp, 30-Day Dribbling Masterclass, etc).
-- Speak to the parent OR the player, never both in one ad.`;
+- Banned words: ${BRAND.bannedWords.join(", ")}.
+- Pricing must match exactly: Drop-in $${BRAND.pricing.dropIn} · Private $${BRAND.pricing.privateSession} · Starter Pack 6 · $${BRAND.pricing.starterPack.price} · Development Pack 10 · $${BRAND.pricing.developmentPack.price} (MOST POPULAR) · Elite Pack 12 · $${BRAND.pricing.elitePack.price} · Oscar camp ${BRAND.pricing.oscarCamp.dates} · $${BRAND.pricing.oscarCamp.price}/player · Course $${BRAND.pricing.course.price}.
+- The script must reference a real Strive Soccer offering.
+- Speak to the parent OR the player, never both in one ad.
+- If you mention a partnership, name a real one: ${BRAND.partnerships.join(" / ")}.
+- Venmo handle: ${BRAND.venmo}. Course URL: ${BRAND.courseUrl}.`;
 }
 
 /**

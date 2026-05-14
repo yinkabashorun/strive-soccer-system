@@ -2,10 +2,12 @@
 
 import { motion } from "framer-motion";
 import {
+  AlertCircle,
   Calendar,
   Check,
   Clapperboard,
   Copy,
+  Eye,
   Film,
   Loader2,
   Megaphone,
@@ -16,6 +18,7 @@ import {
   Sparkles,
   Wand2,
 } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
 import type { AdAsset, AdGoal, AdPillar } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -45,6 +48,8 @@ export function AdStudio() {
   const [pillar, setPillar] = useState<AdPillar | "auto">("auto");
   const [goal, setGoal] = useState<AdGoal | "auto">("auto");
   const [asset, setAsset] = useState<AdAsset | null>(null);
+  const [postId, setPostId] = useState<string | null>(null);
+  const [strategist, setStrategist] = useState<"claude" | "fallback" | null>(null);
   const [generating, setGenerating] = useState(false);
   const [scheduling, setScheduling] = useState(false);
   const [scheduledAt, setScheduledAt] = useState<string | null>(null);
@@ -54,6 +59,7 @@ export function AdStudio() {
     setGenerating(true);
     setError(null);
     setAsset(null);
+    setPostId(null);
     setScheduledAt(null);
     try {
       const res = await fetch("/api/video/generate", {
@@ -64,33 +70,50 @@ export function AdStudio() {
           pillar: pillar === "auto" ? undefined : pillar,
           goal: goal === "auto" ? undefined : goal,
           platform: "TikTok",
+          persist: true,
         }),
       });
       const json = await res.json();
-      if (!json.ok) throw new Error(json.error ?? "generation failed");
+      if (!json.ok) {
+        throw new Error(
+          json.error ?? `Generation failed (HTTP ${res.status})`,
+        );
+      }
       setAsset(json.asset);
+      setPostId(json.post?.id ?? null);
+      setStrategist(json.strategist ?? null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Generation failed");
+      setError(
+        e instanceof Error
+          ? e.message
+          : "Generation failed. Check provider status in Settings.",
+      );
     } finally {
       setGenerating(false);
     }
   };
 
-  const schedule = async () => {
-    if (!asset) return;
+  const approveNow = async () => {
+    if (!postId) return;
     setScheduling(true);
     setError(null);
     try {
-      const res = await fetch("/api/ghl/social-post", {
+      const res = await fetch(`/api/posts/${postId}/approve`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ asset }),
+        body: JSON.stringify({}),
       });
       const json = await res.json();
-      if (!json.ok) throw new Error(json.error ?? "schedule failed");
-      setScheduledAt(json.scheduledFor);
+      if (!json.ok) {
+        throw new Error(
+          json.error ?? `Schedule failed (HTTP ${res.status})`,
+        );
+      }
+      setScheduledAt(json.post?.scheduledFor ?? null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Schedule failed");
+      setError(
+        e instanceof Error ? e.message : "Schedule failed. Check Settings.",
+      );
     } finally {
       setScheduling(false);
     }
@@ -211,10 +234,13 @@ export function AdStudio() {
         {asset && (
           <AdPreview
             asset={asset}
-            onSchedule={schedule}
+            postId={postId}
+            strategist={strategist}
+            onSchedule={approveNow}
             onRegenerate={generate}
             scheduling={scheduling}
             scheduledAt={scheduledAt}
+            error={error}
           />
         )}
       </section>
@@ -320,16 +346,22 @@ function GeneratingPreview() {
 
 function AdPreview({
   asset,
+  postId,
+  strategist,
   onSchedule,
   onRegenerate,
   scheduling,
   scheduledAt,
+  error,
 }: {
   asset: AdAsset;
+  postId: string | null;
+  strategist: "claude" | "fallback" | null;
   onSchedule: () => void;
   onRegenerate: () => void;
   scheduling: boolean;
   scheduledAt: string | null;
+  error: string | null;
 }) {
   const [copied, setCopied] = useState<string | null>(null);
   const copy = async (label: string, text: string) => {
@@ -417,41 +449,71 @@ function AdPreview({
             </div>
           </div>
 
+          {!scheduledAt && (
+            <div className="rounded-xl border border-orange-400/30 bg-orange-400/[0.04] p-3 text-[11px] text-orange-200">
+              Saved to <Link href="/queue" className="font-semibold underline">queue</Link>{" "}
+              as <span className="font-semibold">awaiting approval</span>.
+              Review there, or approve right now below.
+            </div>
+          )}
+
           <button
             type="button"
             onClick={onSchedule}
-            disabled={scheduling || !!scheduledAt}
+            disabled={scheduling || !!scheduledAt || !postId}
             className={cn(
               "btn-accent w-full justify-center text-sm",
-              (scheduling || scheduledAt) && "opacity-80",
+              (scheduling || scheduledAt || !postId) && "opacity-80",
             )}
           >
             {scheduledAt ? (
               <>
                 <Check className="h-4 w-4" />
-                Scheduled for {new Date(scheduledAt).toLocaleString()}
+                Scheduled · {new Date(scheduledAt).toLocaleString()}
               </>
             ) : scheduling ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
-                Pushing to GHL…
+                Approving & scheduling…
               </>
             ) : (
               <>
                 <Send className="h-4 w-4" />
-                Schedule on TikTok via GHL
+                Approve & schedule now
               </>
             )}
           </button>
 
-          <button
-            type="button"
-            onClick={onRegenerate}
-            className="btn w-full justify-center text-sm"
-          >
-            <RefreshCw className="h-4 w-4" />
-            Regenerate
-          </button>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={onRegenerate}
+              className="btn justify-center text-sm"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Regenerate
+            </button>
+            <Link href="/queue" className="btn justify-center text-sm">
+              <Eye className="h-4 w-4" />
+              View queue
+            </Link>
+          </div>
+
+          {error && (
+            <div className="flex items-start gap-2 rounded-xl border border-red-500/30 bg-red-500/[0.05] p-3 text-xs text-red-300">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {strategist && (
+            <div className="text-center text-[10px] text-muted">
+              Strategist:{" "}
+              <span className={strategist === "claude" ? "text-accent" : "text-orange-300"}>
+                {strategist === "claude" ? "Claude (live)" : "Template fallback"}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 

@@ -7,6 +7,7 @@ import {
   KeyRound,
   Loader2,
   Save,
+  Wand2,
 } from "lucide-react";
 import { useState } from "react";
 import type { OperatorConfig } from "@/lib/store";
@@ -250,6 +251,129 @@ export function SettingsForm({ initial }: { initial: OperatorConfig }) {
               onChange={(v) => update("ctaBooking", v)}
             />
           </div>
+        </div>
+      </section>
+
+      {/* Higgsfield AI influencer config */}
+      <section className="card p-5">
+        <div className="flex items-center gap-2">
+          <Wand2 className="h-4 w-4 text-accent" />
+          <SectionHeader
+            label="Higgsfield · AI influencer"
+            blurb="The avatar, course, and ad mode the strategist embeds in every daily Higgsfield prompt. Pasted into Claude.ai with the Higgsfield MCP to render the video."
+          />
+        </div>
+
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+          <Field label="Avatar name (for your reference)">
+            <input
+              type="text"
+              value={cfg.higgsfieldAvatarName}
+              onChange={(e) => update("higgsfieldAvatarName", e.target.value)}
+              className={inputClass}
+            />
+          </Field>
+          <Field label="Avatar type">
+            <select
+              value={cfg.higgsfieldAvatarType}
+              onChange={(e) =>
+                update(
+                  "higgsfieldAvatarType",
+                  e.target.value as OperatorConfig["higgsfieldAvatarType"],
+                )
+              }
+              className={inputClass}
+            >
+              <option value="preset" className="bg-ink-200">
+                preset (Higgsfield stock)
+              </option>
+              <option value="custom" className="bg-ink-200">
+                custom (your Soul Character)
+              </option>
+            </select>
+          </Field>
+          <div className="md:col-span-2">
+            <Field label="Avatar id (Higgsfield uuid)">
+              <input
+                type="text"
+                value={cfg.higgsfieldAvatarId}
+                onChange={(e) => update("higgsfieldAvatarId", e.target.value)}
+                className={cn(inputClass, "font-mono text-[12px]")}
+                placeholder="94950cff-b90a-4416-8384-ce554ff387e1"
+              />
+            </Field>
+          </div>
+          <div className="md:col-span-2">
+            <Field label="Course / webproduct URL">
+              <input
+                type="url"
+                value={cfg.higgsfieldWebproductUrl}
+                onChange={(e) =>
+                  update("higgsfieldWebproductUrl", e.target.value)
+                }
+                className={inputClass}
+                placeholder="https://totalballmastery.netlify.app"
+              />
+            </Field>
+          </div>
+          <div className="md:col-span-2">
+            <Field label="Webproduct id (Higgsfield uuid)">
+              <input
+                type="text"
+                value={cfg.higgsfieldWebproductId}
+                onChange={(e) =>
+                  update("higgsfieldWebproductId", e.target.value)
+                }
+                className={cn(inputClass, "font-mono text-[12px]")}
+                placeholder="61d71e62-5acf-41d7-85b6-58798582d1d6"
+              />
+            </Field>
+          </div>
+          <Field label="Marketing Studio mode">
+            <select
+              value={cfg.higgsfieldMode}
+              onChange={(e) => update("higgsfieldMode", e.target.value)}
+              className={inputClass}
+            >
+              {[
+                "UGC",
+                "Tutorial",
+                "Product Review",
+                "Unboxing",
+                "Hyper Motion",
+                "TV Spot",
+                "Wild Card",
+                "UGC Virtual Try On",
+                "Pro Virtual Try On",
+              ].map((m) => (
+                <option key={m} value={m} className="bg-ink-200">
+                  {m}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Duration (seconds)">
+            <input
+              type="number"
+              min={5}
+              max={60}
+              value={cfg.higgsfieldDurationSec}
+              onChange={(e) =>
+                update(
+                  "higgsfieldDurationSec",
+                  Math.max(5, Math.min(60, Number(e.target.value) || 15)),
+                )
+              }
+              className={inputClass}
+            />
+          </Field>
+        </div>
+
+        <div className="mt-4 rounded-xl border border-dashed border-white/10 p-3 text-[11px] text-muted">
+          <span className="text-bone">How it works:</span> the daily cron writes
+          a script and embeds these values in a Higgsfield prompt. You open the
+          post in /queue → "Open in Claude.ai" → Claude with the Higgsfield MCP
+          renders the video → you paste the URL back. Approve → GHL schedules.
         </div>
       </section>
 

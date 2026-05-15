@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { pickPillar, pickGoal } from "@/lib/ai-content";
 import { generateAdStrategy } from "@/lib/anthropic";
-import { composeAd } from "@/lib/video-gen";
-import { adAssetToPost, savePost } from "@/lib/store";
+import { buildHiggsfieldPrompt } from "@/lib/higgsfield-prompt";
+import { adAssetToPost, getConfig, savePost } from "@/lib/store";
 import type { AdAsset, AdGoal, AdPillar } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -13,24 +13,28 @@ type Body = {
   pillar?: AdPillar;
   goal?: AdGoal;
   platform?: AdAsset["platform"];
-  /** When true, persist to queue as awaiting_approval. Default true. */
+  /** When true (default), persist to queue. */
   persist?: boolean;
 };
 
 /**
  * POST /api/video/generate
  *
- * Generates a full ad: strategist (Claude) → video (Higgsfield) → voice
- * (ElevenLabs) → compose. By default the result is persisted to the queue
- * as `awaiting_approval` so Yinka can review before scheduling.
+ * Writes a full ad — strategist (Claude) produces hook + script + caption +
+ * CTA + video prompt + voiceover. Composes the Higgsfield Claude.ai prompt
+ * block from the operator's avatar / webproduct / mode config.
  *
- * Set `persist: false` to get a transient preview without writing.
+ * Status: `awaiting_video`. Yinka generates the video manually in Claude.ai
+ * with the Higgsfield MCP, pastes the URL back via /api/posts/[id]/attach-video.
+ *
+ * No video is rendered server-side — Higgsfield has no public REST API.
  */
 export async function POST(req: Request) {
   const body = (await req.json().catch(() => ({}))) as Body;
   const persist = body.persist !== false;
 
   try {
+    const config = await getConfig();
     const { asset, source } = await generateAdStrategy({
       idea: body.idea ?? "",
       pillar: body.pillar ?? pickPillar(),
@@ -38,35 +42,50 @@ export async function POST(req: Request) {
       platform: body.platform ?? "TikTok",
     });
 
-    asset.status = "rendering_video";
-    const composed = await composeAd(asset);
+    const higgsfieldPrompt = buildHiggsfieldPrompt(
+      {
+        hook: asset.hook,
+        voiceoverScript: asset.voiceoverScript,
+        caption: asset.caption,
+        pillar: asset.pillar,
+        goal: asset.goal,
+        videoPrompt: asset.videoPrompt,
+      },
+      config,
+    );
 
-    asset.videoUrl = composed.videoUrl;
-    asset.voiceUrl = composed.voiceUrl;
-    asset.posterUrl = composed.posterUrl;
-    asset.durationSec = composed.durationSec;
-    asset.status = "ready";
+    asset.status = "awaiting_video";
 
     if (persist) {
       const stored = adAssetToPost(asset, {
         generatedBy: "studio",
-        status: "awaiting_approval",
+        status: "awaiting_video",
+        higgsfieldPrompt,
       });
       await savePost(stored);
       return NextResponse.json({
         ok: true,
         asset,
         post: stored,
+        higgsfieldPrompt,
         strategist: source,
       });
     }
 
-    return NextResponse.json({ ok: true, asset, strategist: source });
+    return NextResponse.json({
+      ok: true,
+      asset,
+      higgsfieldPrompt,
+      strategist: source,
+    });
   } catch (e) {
     return NextResponse.json(
       {
         ok: false,
-        error: e instanceof Error ? e.message : "Generation failed",
+        error:
+          e instanceof Error
+            ? e.message
+            : "Generation failed. Check the Strategist in Settings.",
       },
       { status: 500 },
     );
@@ -76,7 +95,8 @@ export async function POST(req: Request) {
 export async function GET() {
   return NextResponse.json({
     ok: true,
-    endpoint: "Strive Studio · video generator",
+    endpoint: "Strive Studio · script generator",
     accepts: ["POST { idea?, pillar?, goal?, platform?, persist? }"],
+    note: "Generates script + Higgsfield prompt. No server-side video render — Yinka generates the video via Claude.ai with the Higgsfield MCP.",
   });
 }

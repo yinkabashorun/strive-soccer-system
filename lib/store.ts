@@ -21,6 +21,7 @@ import { BRAND } from "./ai-content";
 export type PostStatus =
   | "queued"
   | "rendering"
+  | "awaiting_video"
   | "awaiting_approval"
   | "approved"
   | "scheduled"
@@ -40,6 +41,8 @@ export type StoredPost = {
   platform: "TikTok" | "Instagram" | "YouTube Shorts";
 
   videoPrompt: string;
+  /** Full Claude.ai prompt block including Higgsfield avatar/webproduct/mode params. */
+  higgsfieldPrompt: string | null;
   voiceoverScript: string;
   videoUrl: string | null;
   voiceUrl: string | null;
@@ -76,6 +79,15 @@ export type OperatorConfig = {
   ctaCamp: string;
   ctaBooking: string;
   autoApprove: boolean;
+  // Higgsfield Marketing Studio defaults — used to compose the Claude.ai
+  // prompt the operator pastes to render today's video.
+  higgsfieldAvatarId: string;
+  higgsfieldAvatarName: string;
+  higgsfieldAvatarType: "preset" | "custom";
+  higgsfieldWebproductId: string;
+  higgsfieldWebproductUrl: string;
+  higgsfieldMode: string; // "UGC" | "Tutorial" | "Product Review" | ...
+  higgsfieldDurationSec: number;
   updatedAt: string;
 };
 
@@ -148,6 +160,13 @@ function defaultConfig(): OperatorConfig {
     ctaCamp: BRAND.ctas.Camp,
     ctaBooking: BRAND.ctas.Booking,
     autoApprove: false,
+    higgsfieldAvatarId: "94950cff-b90a-4416-8384-ce554ff387e1",
+    higgsfieldAvatarName: "Malik",
+    higgsfieldAvatarType: "preset",
+    higgsfieldWebproductId: "61d71e62-5acf-41d7-85b6-58798582d1d6",
+    higgsfieldWebproductUrl: "https://totalballmastery.netlify.app",
+    higgsfieldMode: "UGC",
+    higgsfieldDurationSec: 15,
     updatedAt: new Date().toISOString(),
   };
 }
@@ -243,6 +262,7 @@ function seedMemoryPosts(): StoredPost[] {
       goal: s.goal,
       platform: "TikTok",
       videoPrompt: `Cinematic 9:16 ad. ${s.pillar} pillar.`,
+      higgsfieldPrompt: null,
       voiceoverScript: s.hook,
       videoUrl: `https://placehold.co/720x1280/0f0f10/E5FF3D/mp4?seed=${i}`,
       voiceUrl: `https://placehold.co/audio/mp3?seed=${i}`,
@@ -271,7 +291,7 @@ function seedMemoryPosts(): StoredPost[] {
 // ============================================================================
 
 const COLS = `id, hook, script, caption, cta, idea, pillar, goal, platform,
-  video_prompt, voiceover_script, video_url, voice_url, poster_url, duration_sec,
+  video_prompt, higgsfield_prompt, voiceover_script, video_url, voice_url, poster_url, duration_sec,
   video_model, voice_model, virality_score, virality_notes, status,
   scheduled_for, posted_at, ghl_post_id, reject_reason, generated_by,
   created_at, updated_at`;
@@ -288,6 +308,7 @@ function rowToPost(r: Record<string, unknown>): StoredPost {
     goal: r.goal as AdGoal,
     platform: r.platform as StoredPost["platform"],
     videoPrompt: r.video_prompt as string,
+    higgsfieldPrompt: (r.higgsfield_prompt as string) ?? null,
     voiceoverScript: r.voiceover_script as string,
     videoUrl: (r.video_url as string) ?? null,
     voiceUrl: (r.voice_url as string) ?? null,
@@ -320,6 +341,7 @@ function postToRow(p: StoredPost): Record<string, unknown> {
     goal: p.goal,
     platform: p.platform,
     video_prompt: p.videoPrompt,
+    higgsfield_prompt: p.higgsfieldPrompt,
     voiceover_script: p.voiceoverScript,
     video_url: p.videoUrl,
     voice_url: p.voiceUrl,
@@ -342,7 +364,11 @@ function postToRow(p: StoredPost): Record<string, unknown> {
 
 export function adAssetToPost(
   asset: AdAsset,
-  opts: { generatedBy?: StoredPost["generatedBy"]; status?: PostStatus } = {},
+  opts: {
+    generatedBy?: StoredPost["generatedBy"];
+    status?: PostStatus;
+    higgsfieldPrompt?: string;
+  } = {},
 ): StoredPost {
   const now = new Date().toISOString();
   return {
@@ -356,6 +382,7 @@ export function adAssetToPost(
     goal: asset.goal,
     platform: asset.platform,
     videoPrompt: asset.videoPrompt,
+    higgsfieldPrompt: opts.higgsfieldPrompt ?? null,
     voiceoverScript: asset.voiceoverScript,
     videoUrl: asset.videoUrl ?? null,
     voiceUrl: asset.voiceUrl ?? null,
@@ -478,7 +505,11 @@ export async function deletePost(id: string): Promise<void> {
 const CONFIG_COLS = `post_time_local, post_timezone, post_days,
   pillar_rotation, goal_rotation,
   cta_lead_gen, cta_brand, cta_course, cta_camp, cta_booking,
-  auto_approve, updated_at`;
+  auto_approve,
+  higgsfield_avatar_id, higgsfield_avatar_name, higgsfield_avatar_type,
+  higgsfield_webproduct_id, higgsfield_webproduct_url,
+  higgsfield_mode, higgsfield_duration_sec,
+  updated_at`;
 
 function rowToConfig(r: Record<string, unknown>): OperatorConfig {
   return {
@@ -494,6 +525,25 @@ function rowToConfig(r: Record<string, unknown>): OperatorConfig {
     ctaCamp: (r.cta_camp as string) ?? defaultConfig().ctaCamp,
     ctaBooking: (r.cta_booking as string) ?? defaultConfig().ctaBooking,
     autoApprove: Boolean(r.auto_approve),
+    higgsfieldAvatarId:
+      (r.higgsfield_avatar_id as string) ?? defaultConfig().higgsfieldAvatarId,
+    higgsfieldAvatarName:
+      (r.higgsfield_avatar_name as string) ??
+      defaultConfig().higgsfieldAvatarName,
+    higgsfieldAvatarType:
+      ((r.higgsfield_avatar_type as string) ??
+        defaultConfig().higgsfieldAvatarType) as OperatorConfig["higgsfieldAvatarType"],
+    higgsfieldWebproductId:
+      (r.higgsfield_webproduct_id as string) ??
+      defaultConfig().higgsfieldWebproductId,
+    higgsfieldWebproductUrl:
+      (r.higgsfield_webproduct_url as string) ??
+      defaultConfig().higgsfieldWebproductUrl,
+    higgsfieldMode:
+      (r.higgsfield_mode as string) ?? defaultConfig().higgsfieldMode,
+    higgsfieldDurationSec:
+      (r.higgsfield_duration_sec as number) ??
+      defaultConfig().higgsfieldDurationSec,
     updatedAt: (r.updated_at as string) ?? new Date().toISOString(),
   };
 }
@@ -540,6 +590,13 @@ export async function saveConfig(
         cta_camp: merged.ctaCamp,
         cta_booking: merged.ctaBooking,
         auto_approve: merged.autoApprove,
+        higgsfield_avatar_id: merged.higgsfieldAvatarId,
+        higgsfield_avatar_name: merged.higgsfieldAvatarName,
+        higgsfield_avatar_type: merged.higgsfieldAvatarType,
+        higgsfield_webproduct_id: merged.higgsfieldWebproductId,
+        higgsfield_webproduct_url: merged.higgsfieldWebproductUrl,
+        higgsfield_mode: merged.higgsfieldMode,
+        higgsfield_duration_sec: merged.higgsfieldDurationSec,
         updated_at: merged.updatedAt,
       },
       { onConflict: "singleton" },

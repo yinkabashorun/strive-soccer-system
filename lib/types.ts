@@ -156,6 +156,7 @@ export type AdGoal = "Lead-gen" | "Brand" | "Course" | "Camp" | "Booking";
 export type GenerationStatus =
   | "queued"
   | "writing"
+  | "awaiting_video"
   | "rendering_video"
   | "rendering_voice"
   | "composing"

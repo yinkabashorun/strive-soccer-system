@@ -3,7 +3,6 @@
 import { motion } from "framer-motion";
 import {
   AlertCircle,
-  Calendar,
   Check,
   Clapperboard,
   Copy,
@@ -14,7 +13,6 @@ import {
   Mic2,
   Play,
   RefreshCw,
-  Send,
   Sparkles,
   Wand2,
 } from "lucide-react";
@@ -51,8 +49,6 @@ export function AdStudio() {
   const [postId, setPostId] = useState<string | null>(null);
   const [strategist, setStrategist] = useState<"claude" | "fallback" | null>(null);
   const [generating, setGenerating] = useState(false);
-  const [scheduling, setScheduling] = useState(false);
-  const [scheduledAt, setScheduledAt] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const generate = async () => {
@@ -60,7 +56,6 @@ export function AdStudio() {
     setError(null);
     setAsset(null);
     setPostId(null);
-    setScheduledAt(null);
     try {
       const res = await fetch("/api/video/generate", {
         method: "POST",
@@ -90,32 +85,6 @@ export function AdStudio() {
       );
     } finally {
       setGenerating(false);
-    }
-  };
-
-  const approveNow = async () => {
-    if (!postId) return;
-    setScheduling(true);
-    setError(null);
-    try {
-      const res = await fetch(`/api/posts/${postId}/approve`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({}),
-      });
-      const json = await res.json();
-      if (!json.ok) {
-        throw new Error(
-          json.error ?? `Schedule failed (HTTP ${res.status})`,
-        );
-      }
-      setScheduledAt(json.post?.scheduledFor ?? null);
-    } catch (e) {
-      setError(
-        e instanceof Error ? e.message : "Schedule failed. Check Settings.",
-      );
-    } finally {
-      setScheduling(false);
     }
   };
 
@@ -236,10 +205,7 @@ export function AdStudio() {
             asset={asset}
             postId={postId}
             strategist={strategist}
-            onSchedule={approveNow}
             onRegenerate={generate}
-            scheduling={scheduling}
-            scheduledAt={scheduledAt}
             error={error}
           />
         )}
@@ -348,19 +314,13 @@ function AdPreview({
   asset,
   postId,
   strategist,
-  onSchedule,
   onRegenerate,
-  scheduling,
-  scheduledAt,
   error,
 }: {
   asset: AdAsset;
   postId: string | null;
   strategist: "claude" | "fallback" | null;
-  onSchedule: () => void;
   onRegenerate: () => void;
-  scheduling: boolean;
-  scheduledAt: string | null;
   error: string | null;
 }) {
   const [copied, setCopied] = useState<string | null>(null);
@@ -449,55 +409,32 @@ function AdPreview({
             </div>
           </div>
 
-          {!scheduledAt && (
-            <div className="rounded-xl border border-orange-400/30 bg-orange-400/[0.04] p-3 text-[11px] text-orange-200">
-              Saved to <Link href="/queue" className="font-semibold underline">queue</Link>{" "}
-              as <span className="font-semibold">awaiting approval</span>.
-              Review there, or approve right now below.
-            </div>
-          )}
+          <div className="rounded-xl border border-purple-400/30 bg-purple-400/[0.04] p-3 text-[11px] text-purple-200">
+            Saved to{" "}
+            <Link href="/queue" className="font-semibold underline">
+              queue
+            </Link>{" "}
+            as <span className="font-semibold">needs video</span>. Open it in
+            the queue → "Open in Claude.ai" → Higgsfield renders → paste the URL
+            back → approve.
+          </div>
+
+          <Link
+            href="/queue"
+            className="btn-accent w-full justify-center text-sm"
+          >
+            <Eye className="h-4 w-4" />
+            Open in Queue
+          </Link>
 
           <button
             type="button"
-            onClick={onSchedule}
-            disabled={scheduling || !!scheduledAt || !postId}
-            className={cn(
-              "btn-accent w-full justify-center text-sm",
-              (scheduling || scheduledAt || !postId) && "opacity-80",
-            )}
+            onClick={onRegenerate}
+            className="btn w-full justify-center text-sm"
           >
-            {scheduledAt ? (
-              <>
-                <Check className="h-4 w-4" />
-                Scheduled · {new Date(scheduledAt).toLocaleString()}
-              </>
-            ) : scheduling ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Approving & scheduling…
-              </>
-            ) : (
-              <>
-                <Send className="h-4 w-4" />
-                Approve & schedule now
-              </>
-            )}
+            <RefreshCw className="h-4 w-4" />
+            Regenerate script
           </button>
-
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={onRegenerate}
-              className="btn justify-center text-sm"
-            >
-              <RefreshCw className="h-4 w-4" />
-              Regenerate
-            </button>
-            <Link href="/queue" className="btn justify-center text-sm">
-              <Eye className="h-4 w-4" />
-              View queue
-            </Link>
-          </div>
 
           {error && (
             <div className="flex items-start gap-2 rounded-xl border border-red-500/30 bg-red-500/[0.05] p-3 text-xs text-red-300">
@@ -556,18 +493,6 @@ function AdPreview({
         </div>
       )}
 
-      {scheduledAt && (
-        <div className="card flex items-center gap-3 border-accent/30 bg-accent/[0.05] p-4">
-          <Calendar className="h-4 w-4 text-accent" />
-          <div className="text-sm">
-            Locked in for{" "}
-            <span className="font-semibold text-bone">
-              {new Date(scheduledAt).toLocaleString()}
-            </span>{" "}
-            via GHL Social Planner. You can edit / cancel in GHL.
-          </div>
-        </div>
-      )}
     </motion.div>
   );
 }

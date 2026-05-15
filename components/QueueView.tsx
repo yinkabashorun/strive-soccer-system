@@ -3,16 +3,19 @@
 import { motion } from "framer-motion";
 import {
   AlertCircle,
-  CalendarRange,
+  Copy,
   Check,
   CheckCircle2,
   Clock,
+  ExternalLink,
   Eye,
   Film,
+  Link as LinkIcon,
   Loader2,
   RefreshCw,
   Send,
   Sparkles,
+  Wand2,
   X,
   XCircle,
 } from "lucide-react";
@@ -26,6 +29,7 @@ type ViewMode = "queue" | "calendar";
 const STATUS_TONES: Record<PostStatus, string> = {
   queued: "border-white/10 bg-white/[0.03] text-muted",
   rendering: "border-blue-400/30 bg-blue-400/10 text-blue-300",
+  awaiting_video: "border-purple-400/40 bg-purple-400/15 text-purple-200",
   awaiting_approval: "border-orange-400/40 bg-orange-400/15 text-orange-200",
   approved: "border-accent/40 bg-accent/15 text-accent",
   scheduled: "border-accent/30 bg-accent/[0.08] text-accent",
@@ -37,6 +41,7 @@ const STATUS_TONES: Record<PostStatus, string> = {
 const STATUS_LABEL: Record<PostStatus, string> = {
   queued: "Queued",
   rendering: "Rendering",
+  awaiting_video: "Needs video",
   awaiting_approval: "Awaiting approval",
   approved: "Approved",
   scheduled: "Scheduled",
@@ -135,10 +140,30 @@ export function QueueView({ initialPosts }: { initialPosts: StoredPost[] }) {
     }
   };
 
+  const attachVideo = async (post: StoredPost, videoUrl: string) => {
+    setBusyId(post.id);
+    setError(null);
+    try {
+      const res = await fetch(`/api/posts/${post.id}/attach-video`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ videoUrl }),
+      });
+      const json = await res.json();
+      if (!json.ok) throw new Error(json.error ?? "Attach failed");
+      await reload();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Attach failed");
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   const counts = useMemo(() => {
     const c: Record<PostStatus, number> = {
       queued: 0,
       rendering: 0,
+      awaiting_video: 0,
       awaiting_approval: 0,
       approved: 0,
       scheduled: 0,
@@ -198,6 +223,13 @@ export function QueueView({ initialPosts }: { initialPosts: StoredPost[] }) {
         <div className="flex flex-wrap gap-1.5">
           <FilterChip label="All" count={posts.length} active={filter === "all"} onClick={() => setFilter("all")} />
           <FilterChip
+            label="Needs video"
+            count={counts.awaiting_video}
+            active={filter === "awaiting_video"}
+            onClick={() => setFilter("awaiting_video")}
+            highlight
+          />
+          <FilterChip
             label="Awaiting"
             count={counts.awaiting_approval}
             active={filter === "awaiting_approval"}
@@ -240,6 +272,7 @@ export function QueueView({ initialPosts }: { initialPosts: StoredPost[] }) {
           onApprove={approve}
           onReject={reject}
           onRegenerate={regenerate}
+          onAttachVideo={attachVideo}
         />
       ) : (
         <CalendarGrid
@@ -255,6 +288,7 @@ export function QueueView({ initialPosts }: { initialPosts: StoredPost[] }) {
           onApprove={approve}
           onReject={reject}
           onRegenerate={regenerate}
+          onAttachVideo={attachVideo}
           busy={busyId === previewId}
         />
       )}
@@ -303,6 +337,7 @@ function QueueList({
   onApprove,
   onReject,
   onRegenerate,
+  onAttachVideo,
 }: {
   posts: StoredPost[];
   busyId: string | null;
@@ -311,6 +346,7 @@ function QueueList({
   onApprove: (p: StoredPost) => void;
   onReject: (p: StoredPost) => void;
   onRegenerate: (p: StoredPost) => void;
+  onAttachVideo: (p: StoredPost, url: string) => void;
 }) {
   if (posts.length === 0) {
     return (
@@ -376,6 +412,16 @@ function QueueList({
               </button>
             </div>
           </div>
+
+          {p.status === "awaiting_video" && (
+            <AwaitingVideoBlock
+              post={p}
+              busy={busyId === p.id}
+              onAttach={(url) => onAttachVideo(p, url)}
+              onRegenerate={() => onRegenerate(p)}
+              onReject={() => onReject(p)}
+            />
+          )}
 
           {p.status === "awaiting_approval" && (
             <div className="mt-3 flex flex-wrap gap-1.5 border-t border-white/5 pt-3">
@@ -450,6 +496,8 @@ function StatusBadge({ status }: { status: PostStatus }) {
         <CheckCircle2 className="h-2.5 w-2.5" />
       ) : status === "awaiting_approval" ? (
         <Clock className="h-2.5 w-2.5" />
+      ) : status === "awaiting_video" ? (
+        <Wand2 className="h-2.5 w-2.5" />
       ) : status === "rendering" ? (
         <Loader2 className="h-2.5 w-2.5 animate-spin" />
       ) : null}
@@ -570,6 +618,7 @@ function PreviewDrawer({
   onApprove,
   onReject,
   onRegenerate,
+  onAttachVideo,
   busy,
 }: {
   post: StoredPost | null;
@@ -577,6 +626,7 @@ function PreviewDrawer({
   onApprove: (p: StoredPost) => void;
   onReject: (p: StoredPost) => void;
   onRegenerate: (p: StoredPost) => void;
+  onAttachVideo: (p: StoredPost, url: string) => void;
   busy: boolean;
 }) {
   if (!post) return null;
@@ -653,6 +703,16 @@ function PreviewDrawer({
             </Section>
           )}
 
+          {post.status === "awaiting_video" && (
+            <AwaitingVideoBlock
+              post={post}
+              busy={busy}
+              onAttach={(url) => onAttachVideo(post, url)}
+              onRegenerate={() => onRegenerate(post)}
+              onReject={() => onReject(post)}
+            />
+          )}
+
           {post.status === "awaiting_approval" && (
             <div className="grid grid-cols-3 gap-2 pt-2">
               <button
@@ -726,4 +786,148 @@ function formatTime(iso: string) {
 
 function ymd(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+// ============================================================================
+// AwaitingVideoBlock — the manual Higgsfield workflow.
+// Shows the prompt, lets the operator copy / open in Claude.ai, paste the
+// resulting cloudfront video URL back to attach.
+// ============================================================================
+
+function AwaitingVideoBlock({
+  post,
+  busy,
+  onAttach,
+  onRegenerate,
+  onReject,
+}: {
+  post: StoredPost;
+  busy: boolean;
+  onAttach: (url: string) => void;
+  onRegenerate: () => void;
+  onReject: () => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const [videoUrl, setVideoUrl] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  const prompt = post.higgsfieldPrompt ?? "";
+  const claudeLink = prompt
+    ? `https://claude.ai/new?q=${encodeURIComponent(prompt)}`
+    : "https://claude.ai/new";
+
+  const copy = async () => {
+    if (!prompt) return;
+    try {
+      await navigator.clipboard.writeText(prompt);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // ignore
+    }
+  };
+
+  return (
+    <div className="mt-3 border-t border-purple-400/20 pt-3">
+      <div className="flex items-start gap-2">
+        <Wand2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-purple-300" />
+        <div className="flex-1 text-[11px] leading-relaxed text-purple-200/90">
+          Script's ready. Generate the video in Claude.ai (Higgsfield MCP), then
+          paste the URL back.
+        </div>
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-1.5">
+        <a
+          href={claudeLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-accent px-3 py-1.5 text-[11px]"
+        >
+          <ExternalLink className="h-3 w-3" />
+          Open in Claude.ai
+        </a>
+        <button
+          type="button"
+          onClick={copy}
+          disabled={!prompt}
+          className="btn px-3 py-1.5 text-[11px]"
+        >
+          {copied ? (
+            <>
+              <Check className="h-3 w-3 text-accent" />
+              Copied
+            </>
+          ) : (
+            <>
+              <Copy className="h-3 w-3" />
+              Copy prompt
+            </>
+          )}
+        </button>
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          className="btn px-3 py-1.5 text-[11px]"
+        >
+          {expanded ? "Hide prompt" : "View prompt"}
+        </button>
+        <button
+          onClick={onRegenerate}
+          disabled={busy}
+          className="btn px-3 py-1.5 text-[11px]"
+        >
+          <RefreshCw className="h-3 w-3" />
+          Regenerate
+        </button>
+        <button
+          onClick={onReject}
+          disabled={busy}
+          className="btn px-3 py-1.5 text-[11px] hover:border-red-500/30 hover:text-red-300"
+        >
+          <XCircle className="h-3 w-3" />
+          Skip
+        </button>
+      </div>
+
+      {expanded && prompt && (
+        <pre className="mt-2 max-h-64 overflow-y-auto whitespace-pre-wrap rounded-lg border border-white/5 bg-black/40 p-2.5 font-mono text-[10px] leading-relaxed text-bone/80">
+          {prompt}
+        </pre>
+      )}
+
+      <div className="mt-3 rounded-lg border border-white/5 bg-black/30 p-2.5">
+        <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">
+          <LinkIcon className="h-2.5 w-2.5" />
+          Paste rendered video URL
+        </div>
+        <div className="mt-1.5 flex gap-1.5">
+          <input
+            type="url"
+            value={videoUrl}
+            onChange={(e) => setVideoUrl(e.target.value)}
+            placeholder="https://d8j0ntlcm91z4.cloudfront.net/..."
+            className="min-w-0 flex-1 rounded-lg border border-white/5 bg-black/30 px-2.5 py-1.5 font-mono text-[11px] text-bone placeholder:text-muted/50 focus:border-accent/40 focus:outline-none"
+          />
+          <button
+            type="button"
+            onClick={() => onAttach(videoUrl.trim())}
+            disabled={busy || !videoUrl.trim() || !/^https?:\/\//i.test(videoUrl.trim())}
+            className={cn(
+              "btn-accent px-3 py-1.5 text-[11px]",
+              (busy || !videoUrl.trim() || !/^https?:\/\//i.test(videoUrl.trim())) &&
+                "opacity-60",
+            )}
+          >
+            {busy ? (
+              <Loader2 className="h-3 w-3 animate-spin" />
+            ) : (
+              <Check className="h-3 w-3" />
+            )}
+            Attach
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 }

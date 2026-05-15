@@ -1,27 +1,31 @@
-import { CalendarRange, Settings, Sparkles } from "lucide-react";
+import { Settings, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { PageHeader } from "@/components/PageHeader";
 import { QueueView } from "@/components/QueueView";
-import { listPosts, getConfig } from "@/lib/store";
+import { listPosts } from "@/lib/store";
 
 export const dynamic = "force-dynamic";
 
 export default async function QueuePage() {
-  const [posts, config] = await Promise.all([listPosts({}), getConfig()]);
+  const posts = await listPosts({});
 
+  const needsVideo = posts.filter((p) => p.status === "awaiting_video").length;
   const awaiting = posts.filter((p) => p.status === "awaiting_approval").length;
   const scheduled = posts.filter((p) => p.status === "scheduled").length;
+
+  const headline =
+    needsVideo > 0
+      ? `${needsVideo} ${needsVideo === 1 ? "post needs" : "posts need"} video.`
+      : awaiting > 0
+      ? `${awaiting} ${awaiting === 1 ? "post needs" : "posts need"} your approval.`
+      : "All caught up.";
 
   return (
     <div>
       <PageHeader
-        eyebrow={`Content queue · ${posts.length} posts · ${config.autoApprove ? "Auto-approve ON" : "Manual approve"}`}
-        title={
-          awaiting > 0
-            ? `${awaiting} ${awaiting === 1 ? "post needs" : "posts need"} your approval.`
-            : "All caught up."
-        }
-        subtitle="Every AI-generated post in one place. Review, approve, reject, regenerate. Approved posts schedule through GHL Social Planner."
+        eyebrow={`Content queue · ${posts.length} posts · daily Higgsfield workflow`}
+        title={headline}
+        subtitle="Each morning the cron writes the script. Open in Claude.ai → Higgsfield renders → paste URL back → approve → GHL schedules to TikTok."
         actions={
           <>
             <Link href="/settings" className="btn">
@@ -37,18 +41,12 @@ export default async function QueuePage() {
       />
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
-        <Stat label="Awaiting" value={awaiting} tone={awaiting > 0 ? "warn" : "neutral"} />
+        <Stat label="Needs video" value={needsVideo} tone={needsVideo > 0 ? "warn" : "neutral"} />
+        <Stat label="Awaiting approval" value={awaiting} tone={awaiting > 0 ? "warn" : "neutral"} />
         <Stat label="Scheduled" value={scheduled} tone="accent" />
         <Stat
           label="Posted (last 30d)"
           value={posts.filter((p) => p.status === "posted").length}
-        />
-        <Stat
-          label="Failed"
-          value={posts.filter((p) => p.status === "failed").length}
-          tone={
-            posts.some((p) => p.status === "failed") ? "warn" : "neutral"
-          }
         />
       </div>
 

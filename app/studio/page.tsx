@@ -3,7 +3,6 @@ import Link from "next/link";
 import { PageHeader } from "@/components/PageHeader";
 import { AdStudio } from "@/components/AdStudio";
 import { isAnthropicConfigured } from "@/lib/anthropic";
-import { isHiggsfieldConfigured, isElevenLabsConfigured } from "@/lib/video-gen";
 import { isGhlSocialConfigured } from "@/lib/ghl-social";
 import { isStoreLive, listPosts } from "@/lib/store";
 
@@ -35,7 +34,7 @@ export default async function StudioPage() {
 
       <AdStudio />
 
-      <div className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-5">
+      <div className="mt-8 grid grid-cols-1 gap-3 md:grid-cols-4">
         <ProviderChip
           label="Storage"
           configured={isStoreLive()}
@@ -50,15 +49,9 @@ export default async function StudioPage() {
         />
         <ProviderChip
           label="Video · Higgsfield"
-          configured={isHiggsfieldConfigured()}
-          liveNote="Live renders"
-          mockNote="Placeholder mp4"
-        />
-        <ProviderChip
-          label="Voice · ElevenLabs"
-          configured={isElevenLabsConfigured()}
-          liveNote="Live voiceovers"
-          mockNote="Placeholder audio"
+          configured
+          liveNote="Manual via Claude.ai MCP"
+          mockNote=""
         />
         <ProviderChip
           label="Scheduler · GHL"

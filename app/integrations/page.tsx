@@ -37,10 +37,10 @@ const integrationsList = () => [
   },
   {
     name: "Higgsfield",
-    role: "Hyper-realistic UGC creator videos for the dribbling course",
+    role: "Hyper-realistic UGC creator videos · via MCP (not REST)",
     status: status(isHiggsfieldConfigured()),
     icon: Sparkles,
-    note: "POST /api/higgsfield/ugc · set HIGGSFIELD_API_KEY",
+    note: "Strive OS spawns higgsfield-mcp over stdio · set HIGGSFIELD_MCP_COMMAND + HIGGSFIELD_API_KEY",
   },
   {
     name: "ElevenLabs",

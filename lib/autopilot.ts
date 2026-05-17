@@ -67,7 +67,7 @@ async function waitForVideo(jobId: string): Promise<HiggsfieldJob> {
   if (!isHiggsfieldConfigured() || jobId.startsWith("mock_")) {
     return { id: jobId, status: "completed", provider: "mock" };
   }
-  let last: HiggsfieldJob = { id: jobId, status: "queued", provider: "higgsfield" };
+  let last: HiggsfieldJob = { id: jobId, status: "queued", provider: "higgsfield-mcp" };
   while (Date.now() - start < POLL_TIMEOUT_MS) {
     last = await pollUGCVideo(jobId);
     if (last.status === "completed" || last.status === "failed") return last;

@@ -5,11 +5,9 @@
 // - Automations (SMS/email sequences)
 // - Pipelines (sales stages)
 //
-// This file is the contract between GHL and Strive OS. We:
-// 1. Receive webhooks at /api/ghl/webhook
-// 2. Map GHL payloads into our domain types
-// 3. Push outbound events back to GHL
-// 4. Schedule Social Planner posts (the 2x/day cadence)
+// This file handles:
+// 1. GHL webhook mapping
+// 2. Social Planner post scheduling (2x/day cadence)
 
 export type GHLEvent =
   | "contact.created"
@@ -71,7 +69,7 @@ const GHL_BASE = "https://services.leadconnectorhq.com";
 export type SocialPostInput = {
   caption: string;
   mediaUrl?: string;
-  platform?: "TikTok" | "Instagram" | "YouTube Shorts";
+  platform?: "TikTok" | "Instagram" | "Facebook" | "YouTube Shorts";
   scheduledFor: string; // ISO
 };
 
@@ -82,11 +80,24 @@ export type SocialPostResult = {
   status: "scheduled" | "queued-mock";
 };
 
+// GHL Social account IDs are FULL compound IDs:
+// e.g. "69b34fb7529ec10b6f02e928_SjVsI2ZXLXjBrWGA0VfI_17841460768055115"
+// NOT just the oauthId.
 function socialAccountIds(): string[] {
   return (process.env.GHL_SOCIAL_ACCOUNT_IDS ?? "")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
+}
+
+// userId: the GHL user/profile who is scheduling the post.
+// We use GHL_USER_ID if set, otherwise fall back to the first oauthId segment
+// of the first account ID as a best-effort.
+function userId(): string {
+  if (process.env.GHL_USER_ID) return process.env.GHL_USER_ID;
+  const firstId = socialAccountIds()[0] ?? "";
+  // The first segment of a compound ID is the oauthId (which doubles as a user ref)
+  return firstId.split("_")[0] ?? "";
 }
 
 export function dailySlots(): [string, string] {
@@ -118,7 +129,7 @@ export function buildSchedule(count: number, fromDate = new Date()): string[] {
 }
 
 export async function scheduleSocialPost(post: SocialPostInput): Promise<SocialPostResult> {
-  const platform = post.platform ?? "TikTok";
+  const platform = post.platform ?? "Facebook";
   if (!isGHLConfigured()) {
     return {
       id: `mock_post_${Math.random().toString(36).slice(2, 10)}`,
@@ -128,23 +139,29 @@ export async function scheduleSocialPost(post: SocialPostInput): Promise<SocialP
     };
   }
 
+  const locationId = process.env.GHL_LOCATION_ID!;
   const accountIds = socialAccountIds();
-  const locationId = process.env.GHL_LOCATION_ID;
+  const uid = userId();
 
-  // Build the post body — GHL Social Planner v2021-07-28 schema
+  // GHL Social Planner API v2021-07-28
+  // - summary: post text content
+  // - accountIds: full compound account IDs (oauthId_locationId_originId)
+  // - userId: required GHL user identifier
+  // - media: array of media objects (empty array for text-only posts)
+  // - If mediaUrl is provided, include as a media object
+  const media: Array<{ url: string; type: string }> = post.mediaUrl
+    ? [{ url: post.mediaUrl, type: "video" }]
+    : [];
+
   const body: Record<string, unknown> = {
-    locationId,
     type: "post",
     accountIds,
-    content: post.caption,
+    summary: post.caption,
     scheduleDate: post.scheduledFor,
     status: "scheduled",
+    userId: uid,
+    media,
   };
-
-  // Only include mediaUrls if we actually have a video URL
-  if (post.mediaUrl) {
-    body.mediaUrls = [post.mediaUrl];
-  }
 
   const res = await fetch(`${GHL_BASE}/social-media-posting/${locationId}/posts`, {
     method: "POST",
@@ -161,12 +178,23 @@ export async function scheduleSocialPost(post: SocialPostInput): Promise<SocialP
     const detail = await res.text().catch(() => "");
     throw new Error(`ghl_schedule_${res.status}: ${detail.slice(0, 400)}`);
   }
-  const data = (await res.json()) as { id?: string; _id?: string; post?: { id?: string; _id?: string } };
-  const id = data.id ?? data._id ?? data.post?.id ?? data.post?._id ?? `ghl_${Math.random().toString(36).slice(2, 10)}`;
+
+  const data = (await res.json()) as {
+    results?: { post?: { _id?: string; id?: string } };
+    id?: string;
+    _id?: string;
+  };
+  const id =
+    data.results?.post?._id ??
+    data.results?.post?.id ??
+    data.id ??
+    data._id ??
+    `ghl_${Math.random().toString(36).slice(2, 10)}`;
+
   return {
     id,
     scheduledFor: post.scheduledFor,
     platform,
     status: "scheduled",
   };
-      }
+}

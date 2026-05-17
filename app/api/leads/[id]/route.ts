@@ -8,6 +8,7 @@ const ALLOWED_STATUSES = [
   "New",
   "Contacted",
   "Trial Booked",
+  "Won",
   "Converted",
   "Lost",
 ] as const;

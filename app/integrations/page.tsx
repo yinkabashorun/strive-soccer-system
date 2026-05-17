@@ -83,8 +83,8 @@ const integrationsList = () => [
   },
   {
     name: "Supabase",
-    role: "Postgres backend · players, sessions, content, payments",
-    status: "Ready",
+    role: "Postgres backend · players, sessions, content, payments, sync log",
+    status: status(isSupabaseConfigured()),
     icon: Database,
     note: "Set NEXT_PUBLIC_SUPABASE_URL + ANON_KEY to activate",
   },

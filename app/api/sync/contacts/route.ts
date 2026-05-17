@@ -49,16 +49,29 @@ type LeadRow = {
 
 type SyncError = { page: number; contactId?: string; message: string };
 
+// Tags that signal "this contact is already a paying / converted client".
+// Strive's GHL pipeline uses "won" as the terminal stage; we surface those
+// as the priority list in the OS, so map them to status="Won" on ingest.
+const WON_TAGS = new Set(["won", "client", "active client", "active-client", "active_client"]);
+
+function deriveStatus(tags: string[]): string {
+  for (const t of tags) {
+    if (WON_TAGS.has(t.trim().toLowerCase())) return "Won";
+  }
+  return "New";
+}
+
 function mapContact(c: GHLContact): LeadRow {
   const name =
     [c.firstName, c.lastName].filter(Boolean).join(" ").trim() || "Unknown";
+  const tags = Array.isArray(c.tags) ? c.tags : [];
   return {
     ghl_contact_id: c.id,
     name,
     email: c.email || null,
     phone: c.phone || null,
-    status: "new",
-    tags: Array.isArray(c.tags) ? c.tags : [],
+    status: deriveStatus(tags),
+    tags,
     source: c.source || null,
     created_at: c.dateAdded || new Date().toISOString(),
   };

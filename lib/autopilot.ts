@@ -1,39 +1,26 @@
 // Strive OS — Content Autopilot
 //
-// Hands-off pipeline. Runs on a cron. Every run:
-//   1. Generates N fresh on-brand ideas (Claude).
-//   2. Records each voiceover (ElevenLabs).
-//   3. Spins up a UGC-style video (Fal.ai text-to-video).
-//   4. Polls until the video is rendered.
-//   5. Schedules each finished post into the GHL Social Planner on the
-//      configured 2x/day cadence.
+// Fire-and-forget pipeline designed for Vercel's 300s function limit.
+// Every run:
+// 1. Generates N fresh on-brand ideas (Claude).
+// 2. Records each voiceover (ElevenLabs).
+// 3. Kicks off a UGC video job (Fal.ai) — does NOT wait for render.
+// 4. Schedules each post into GHL Social Planner IMMEDIATELY.
 //
-// Returns a manifest of what shipped. Designed to be idempotent per run —
-// no shared state, no manual buttons.
+// Videos render async on Fal.ai. Posts are scheduled right away with caption.
+// No polling = no timeout = GHL always gets the posts.
 
 import { generateIdeaFeed, isAnthropicConfigured, type Idea } from "@/lib/ai";
 import { generateAudio, isElevenLabsConfigured } from "@/lib/elevenlabs";
-import {
-  isFalConfigured,
-  pollUGCVideo,
-  startUGCVideo,
-  type FalJob,
-} from "@/lib/fal";
-import {
-  buildSchedule,
-  isGHLConfigured,
-  scheduleSocialPost,
-} from "@/lib/ghl";
-
-const POLL_INTERVAL_MS = 5000;
-const POLL_TIMEOUT_MS = 5 * 60 * 1000;
+import { isFalConfigured, startUGCVideo } from "@/lib/fal";
+import { buildSchedule, isGHLConfigured, scheduleSocialPost } from "@/lib/ghl";
 
 const CREATOR_STYLES = ["young-mom", "older-athlete", "soccer-dad", "teen-creator"] as const;
 type CreatorStyle = (typeof CREATOR_STYLES)[number];
 
 export type AutopilotConfig = {
-  count?: number; // posts to produce this run
-  waitForVideos?: boolean; // poll until rendered, or fire-and-forget
+  count?: number;
+  waitForVideos?: boolean;
 };
 
 export type AutopilotRunResult = {
@@ -61,25 +48,9 @@ function pickStyle(i: number): CreatorStyle {
   return CREATOR_STYLES[i % CREATOR_STYLES.length];
 }
 
-async function waitForVideo(jobId: string): Promise<FalJob> {
-  const start = Date.now();
-  // Cheap mock: if no real Fal key, return placeholder.
-  if (!isFalConfigured() || jobId.startsWith("mock_")) {
-    return { id: jobId, status: "completed", provider: "mock" };
-  }
-  let last: FalJob = { id: jobId, status: "queued", provider: "fal" };
-  while (Date.now() - start < POLL_TIMEOUT_MS) {
-    last = await pollUGCVideo(jobId);
-    if (last.status === "completed" || last.status === "failed") return last;
-    await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
-  }
-  return last;
-}
-
 export async function runAutopilot(cfg: AutopilotConfig = {}): Promise<AutopilotRunResult> {
   const startedAt = new Date().toISOString();
-  const count = Math.min(Math.max(cfg.count ?? 14, 1), 28); // up to 2 weeks
-  const waitForVideos = cfg.waitForVideos ?? true;
+  const count = Math.min(Math.max(cfg.count ?? 14, 1), 28);
 
   const ideas = await generateIdeaFeed(count);
   const slots = buildSchedule(ideas.length);
@@ -104,7 +75,7 @@ export async function runAutopilot(cfg: AutopilotConfig = {}): Promise<Autopilot
       voiceover = { ok: false, error: err instanceof Error ? err.message : "voiceover_failed" };
     }
 
-    // 2) UGC video
+    // 2) Kick off UGC video job — fire and forget, do NOT poll/wait
     let video: AutopilotRunResult["produced"][number]["video"] = { ok: false };
     let videoUrl: string | undefined;
     try {
@@ -112,29 +83,17 @@ export async function runAutopilot(cfg: AutopilotConfig = {}): Promise<Autopilot
         pitch: idea.creatorPitch,
         pillar: idea.pillar,
         creatorStyle: style,
-        durationSec: 30,
+        durationSec: 5,
         audioDataUri,
         productUrl: process.env.NEXT_PUBLIC_COURSE_URL,
       });
-      if (waitForVideos) {
-        const finished = await waitForVideo(job.id);
-        videoUrl = finished.videoUrl;
-        video = {
-          ok: finished.status === "completed",
-          jobId: finished.id,
-          status: finished.status,
-          videoUrl: finished.videoUrl,
-          error: finished.error,
-        };
-      } else {
-        video = { ok: true, jobId: job.id, status: job.status, videoUrl: job.videoUrl };
-        videoUrl = job.videoUrl;
-      }
+      video = { ok: true, jobId: job.id, status: job.status, videoUrl: job.videoUrl };
+      videoUrl = job.videoUrl;
     } catch (err) {
       video = { ok: false, error: err instanceof Error ? err.message : "video_failed" };
     }
 
-    // 3) Schedule to GHL
+    // 3) Schedule to GHL immediately — no waiting
     let schedule: AutopilotRunResult["produced"][number]["schedule"] = { ok: false };
     try {
       const r = await scheduleSocialPost({

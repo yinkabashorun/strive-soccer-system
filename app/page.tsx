@@ -13,17 +13,70 @@ import { Avatar } from "@/components/Avatar";
 import {
   coachTasks,
   contentItems,
-  leads,
+  leads as mockLeads,
   stats,
   todaySessions,
   unpaidPlayers,
 } from "@/lib/data";
 import { formatCompact, formatCurrency, formatPct, timeAgo } from "@/lib/utils";
+import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 import Link from "next/link";
 
-export default function CommandCenter() {
+export const revalidate = 0;
+export const dynamic = "force-dynamic";
+
+type LeadCard = {
+  id: string;
+  name: string;
+  source: string;
+  interest: string;
+  status: string;
+  createdAt: string;
+};
+
+async function getRecentLeads(): Promise<LeadCard[]> {
+  const fallback: LeadCard[] = mockLeads.map((l) => ({
+    id: l.id,
+    name: l.name,
+    source: l.source,
+    interest: l.interest,
+    status: l.status,
+    createdAt: l.createdAt,
+  }));
+  if (!isSupabaseConfigured()) return fallback;
+  try {
+    const db = supabase();
+    const { data, error } = await db
+      .from("leads")
+      .select("id, name, source, interest, status, created_at")
+      .order("created_at", { ascending: false })
+      .limit(4);
+    if (error) throw error;
+    if (!data || data.length === 0) return fallback;
+    return data.map((d: {
+      id: string;
+      name: string | null;
+      source: string | null;
+      interest: string | null;
+      status: string | null;
+      created_at: string;
+    }) => ({
+      id: d.id,
+      name: d.name || "Unknown",
+      source: d.source || "GHL",
+      interest: d.interest || "—",
+      status: d.status || "New",
+      createdAt: d.created_at,
+    }));
+  } catch {
+    return fallback;
+  }
+}
+
+export default async function CommandCenter() {
   const unpaid = unpaidPlayers();
   const viral = contentItems.filter((c) => c.status === "Viral");
+  const leads = await getRecentLeads();
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",

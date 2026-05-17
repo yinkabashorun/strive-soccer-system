@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CalendarClock,
-  Captions,
   Check,
   Clapperboard,
   Film,
@@ -39,6 +38,25 @@ type FeedIdea = {
 };
 
 type CreatorStyle = "young-mom" | "older-athlete" | "soccer-dad" | "teen-creator";
+
+// Mirror of lib/ghl.ts buildSchedule so the client can pre-compute slots
+// before calling /api/content/schedule for each item.
+function clientSlots(count: number): string[] {
+  const out: string[] = [];
+  const day = new Date();
+  day.setDate(day.getDate() + 1);
+  day.setHours(0, 0, 0, 0);
+  while (out.length < count) {
+    const a = new Date(day);
+    a.setHours(11, 0, 0, 0);
+    const b = new Date(day);
+    b.setHours(19, 0, 0, 0);
+    out.push(a.toISOString());
+    if (out.length < count) out.push(b.toISOString());
+    day.setDate(day.getDate() + 1);
+  }
+  return out;
+}
 
 export function ContentEngine({ items }: { items: ContentItem[] }) {
   const [pillar, setPillar] = useState<Pillar>("Ball Mastery");
@@ -120,24 +138,23 @@ export function ContentEngine({ items }: { items: ContentItem[] }) {
     setBusyIdx({ idx, kind: "ugc" });
     try {
       const idea = feed[idx];
-      const res = await fetch("/api/fal/ugc", {
+      const res = await fetch("/api/content/video", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          pitch: idea.creatorPitch,
-          pillar: idea.pillar,
-          creatorStyle,
-          audioDataUri: idea.audioDataUri,
+          script: idea.script || idea.creatorPitch,
+          style: creatorStyle,
         }),
       });
       const data = await res.json();
-      if (data.id) {
+      const jobId = data.requestId ?? data.id;
+      if (jobId) {
         setFeed((prev) =>
           prev.map((it, j) =>
             j === idx
               ? {
                   ...it,
-                  videoJobId: data.id,
+                  videoJobId: jobId,
                   videoStatus: data.status,
                   videoUrl: data.videoUrl,
                 }
@@ -161,30 +178,32 @@ export function ContentEngine({ items }: { items: ContentItem[] }) {
     setSchedulingState("scheduling");
     setScheduleResult(null);
     try {
-      const res = await fetch("/api/ghl/schedule", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          items: chosen.map((i) => ({
-            caption: i.caption,
-            mediaUrl: i.videoUrl,
+      const slots = clientSlots(chosen.length);
+      let scheduled = 0;
+      let failed = 0;
+      let configured = false;
+      for (let i = 0; i < chosen.length; i++) {
+        const idea = chosen[i];
+        const res = await fetch("/api/content/schedule", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            caption: idea.caption,
+            mediaUrl: idea.videoUrl,
             platform: "TikTok",
-          })),
-          cadence: "2x-daily",
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setSchedulingState("error");
-        setScheduleResult({ scheduled: 0, failed: chosen.length, configured: false });
-        return;
+            scheduledFor: slots[i],
+          }),
+        });
+        const data = await res.json();
+        if (res.ok && data?.id) {
+          scheduled++;
+          configured = configured || Boolean(data.configured);
+        } else {
+          failed++;
+        }
       }
-      setSchedulingState("done");
-      setScheduleResult({
-        scheduled: data.scheduled,
-        failed: data.failed,
-        configured: data.configured,
-      });
+      setSchedulingState(failed === 0 ? "done" : scheduled === 0 ? "error" : "done");
+      setScheduleResult({ scheduled, failed, configured });
     } catch {
       setSchedulingState("error");
     }
@@ -566,59 +585,58 @@ function SinglePillarPanel({ pillar }: { pillar: Pillar }) {
     hook?: string;
     caption?: string;
     script?: string;
-    voiceover?: string;
   }>({});
-  const [loading, setLoading] = useState<string | null>(null);
+  const [hookIdea, setHookIdea] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  async function call(kind: "hook" | "caption" | "script" | "voiceover") {
-    setLoading(kind);
+  async function generate() {
+    setLoading(true);
     try {
-      const res = await fetch("/api/ai/generate", {
+      const res = await fetch("/api/content/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ kind, pillar }),
+        body: JSON.stringify({
+          pillar,
+          hook_idea: hookIdea.trim() || undefined,
+        }),
       });
       const data = await res.json();
-      setOut((prev) => ({ ...prev, [kind]: data[kind] }));
+      if (data.error) {
+        alert(data.error);
+        return;
+      }
+      setOut({ hook: data.hook, script: data.script, caption: data.caption });
     } finally {
-      setLoading(null);
+      setLoading(false);
     }
   }
 
   return (
     <div className="mt-4 space-y-3">
-      <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-        <GenButton
-          label="Hook"
-          icon={<Sparkles className="h-4 w-4" />}
-          loading={loading === "hook"}
-          onClick={() => call("hook")}
+      <div className="grid grid-cols-1 gap-2 md:grid-cols-4">
+        <input
+          value={hookIdea}
+          onChange={(e) => setHookIdea(e.target.value)}
+          placeholder="Optional hook idea to refine"
+          className="md:col-span-3 rounded-2xl border border-white/5 bg-white/[0.03] px-4 py-3 text-sm text-bone placeholder:text-muted focus:border-white/15 focus:outline-none"
         />
         <GenButton
-          label="Caption"
-          icon={<Captions className="h-4 w-4" />}
-          loading={loading === "caption"}
-          onClick={() => call("caption")}
-        />
-        <GenButton
-          label="Script"
+          label={loading ? "Generating…" : "Generate"}
           icon={<Wand2 className="h-4 w-4" />}
-          loading={loading === "script"}
-          onClick={() => call("script")}
-        />
-        <GenButton
-          label="Voiceover"
-          icon={<Mic className="h-4 w-4" />}
-          loading={loading === "voiceover"}
-          onClick={() => call("voiceover")}
+          loading={loading}
+          onClick={generate}
+          primary
         />
       </div>
-      {Object.values(out).some(Boolean) && (
+      {(out.hook || out.script || out.caption) && (
         <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
           {out.hook && <Out label="Hook" value={out.hook} />}
           {out.caption && <Out label="Caption" value={out.caption} />}
-          {out.script && <Out label="Script" value={out.script} mono />}
-          {out.voiceover && <Out label="Voiceover" value={out.voiceover} />}
+          {out.script && (
+            <div className="md:col-span-2">
+              <Out label="Script" value={out.script} mono />
+            </div>
+          )}
         </div>
       )}
     </div>

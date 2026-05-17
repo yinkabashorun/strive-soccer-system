@@ -7,9 +7,9 @@ export const maxDuration = 300;
 
 // GET /api/sync/contacts
 //
-// Pulls every contact from the configured GHL location, page by page, and
-// upserts them into the Supabase `leads` table keyed by ghl_contact_id so
-// re-running is safe. Returns a summary { synced, total, errors }.
+// Pulls every contact from the configured GHL location and upserts them
+// into the Supabase `leads` table keyed by ghl_contact_id so re-runs are
+// safe. Returns a summary { synced, total, errors }.
 
 const GHL_BASE = "https://services.leadconnectorhq.com";
 const GHL_VERSION = "2021-07-28";
@@ -29,7 +29,11 @@ type GHLContact = {
 
 type GHLContactsPage = {
   contacts?: GHLContact[];
-  meta?: { total?: number; nextPageUrl?: string };
+  meta?: {
+    total?: number;
+    currentPage?: number;
+    nextPage?: number | null;
+  };
 };
 
 type LeadRow = {
@@ -63,12 +67,12 @@ function mapContact(c: GHLContact): LeadRow {
 async function fetchPage(
   apiKey: string,
   locationId: string,
-  cursor: string | null,
+  page: number,
 ): Promise<GHLContactsPage> {
   const url = new URL(`${GHL_BASE}/contacts/`);
   url.searchParams.set("locationId", locationId);
   url.searchParams.set("limit", String(PAGE_SIZE));
-  if (cursor) url.searchParams.set("startAfterContactId", cursor);
+  url.searchParams.set("page", String(page));
 
   const res = await fetch(url.toString(), {
     method: "GET",
@@ -118,14 +122,12 @@ export async function GET() {
 
   let total = 0;
   let synced = 0;
-  let cursor: string | null = null;
-  let page = 0;
+  let page = 1;
 
   while (true) {
-    page++;
     let pageData: GHLContactsPage;
     try {
-      pageData = await fetchPage(apiKey, locationId, cursor);
+      pageData = await fetchPage(apiKey, locationId, page);
     } catch (err) {
       const message = err instanceof Error ? err.message : "ghl_fetch_failed";
       console.error(`[sync/contacts] page ${page} fetch failed:`, message);
@@ -134,17 +136,29 @@ export async function GET() {
     }
 
     const contacts = pageData.contacts ?? [];
+    const meta = pageData.meta ?? {};
     console.log(
-      `[sync/contacts] page ${page}: fetched ${contacts.length} contacts (cursor=${cursor ?? "start"})`,
+      `[sync/contacts] page ${page}: fetched ${contacts.length} contacts ` +
+        `(currentPage=${meta.currentPage ?? "?"}, nextPage=${meta.nextPage ?? "none"}, total=${meta.total ?? "?"})`,
     );
 
     if (contacts.length === 0) break;
     total += contacts.length;
 
-    const rows = contacts.map(mapContact);
-    const { error: upsertErr } = await db
+    const rows: LeadRow[] = contacts.map(mapContact);
+
+    // .select('*') forces PostgREST to refresh the schema cache for the
+    // returned columns — works around stale-cache "column not found" errors
+    // immediately after a migration. { count: 'exact' } gives us a verified
+    // row count from Postgres rather than trusting the client array length.
+    const { data, error: upsertErr, count } = await db
       .from("leads")
-      .upsert(rows, { onConflict: "ghl_contact_id", ignoreDuplicates: false });
+      .upsert(rows, {
+        onConflict: "ghl_contact_id",
+        ignoreDuplicates: false,
+        count: "exact",
+      })
+      .select("*");
 
     if (upsertErr) {
       console.error(
@@ -153,12 +167,14 @@ export async function GET() {
       );
       errors.push({ page, message: `db: ${upsertErr.message}` });
     } else {
-      synced += rows.length;
+      const written = count ?? data?.length ?? rows.length;
+      synced += written;
     }
 
-    const last = contacts[contacts.length - 1];
-    if (!last?.id || contacts.length < PAGE_SIZE) break;
-    cursor = last.id;
+    const next = meta.nextPage;
+    if (next === null || next === undefined || next === 0) break;
+    if (contacts.length < PAGE_SIZE) break;
+    page = next;
   }
 
   console.log(

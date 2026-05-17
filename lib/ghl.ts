@@ -60,21 +60,17 @@ export function isGHLConfigured() {
 const GHL_BASE = "https://services.leadconnectorhq.com";
 
 // Verified full compound account IDs for Strive Soccer GHL location
-// Format: oauthId_locationId_originId[_type]
 const ACCOUNTS = {
-  // Facebook page (accepts text-only posts)
   facebook: "69b35261e0bf05fafcdd7ba9_SjVsI2ZXLXjBrWGA0VfI_715752011620505_page",
-  // Instagram profile (requires image or video)
   instagram: "69b34fb7529ec10b6f02e928_SjVsI2ZXLXjBrWGA0VfI_17841460768055115",
-  // TikTok business (requires video)
   tiktok: "69b351a99b61dd3500b9719e_SjVsI2ZXLXjBrWGA0VfI_000gqYzyKZDg205Jz1M7omQrc03h3wkGxp_business",
 };
 
 export type SocialPostInput = {
   caption: string;
   mediaUrl?: string;
-  platform?: "TikTok" | "Instagram" | "Facebook";
-  scheduledFor: string; // ISO
+  platform?: "TikTok" | "Instagram" | "Facebook" | "YouTube Shorts";
+  scheduledFor: string;
 };
 
 export type SocialPostResult = {
@@ -91,7 +87,6 @@ export function dailySlots(): [string, string] {
   return [a, b];
 }
 
-// Build N upcoming slot times (ISO) starting tomorrow morning, two per day.
 export function buildSchedule(count: number, fromDate = new Date()): string[] {
   const [aHm, bHm] = dailySlots();
   const [ah, am] = aHm.split(":").map((n) => parseInt(n, 10));
@@ -125,13 +120,11 @@ export async function scheduleSocialPost(post: SocialPostInput): Promise<SocialP
   const locationId = process.env.GHL_LOCATION_ID!;
   const userId = process.env.GHL_USER_ID || ACCOUNTS.tiktok.split("_")[0];
 
-  // Choose accounts based on available media:
-  // - Facebook page accepts text-only posts
-  // - Instagram + TikTok require media (video/image)
+  // Facebook accepts text-only posts; Instagram + TikTok require media
   const hasMedia = Boolean(post.mediaUrl);
   const accountIds = hasMedia
     ? [ACCOUNTS.facebook, ACCOUNTS.instagram, ACCOUNTS.tiktok]
-    : [ACCOUNTS.facebook]; // text-only: Facebook only
+    : [ACCOUNTS.facebook];
 
   const media: Array<{ url: string; type: string }> = post.mediaUrl
     ? [{ url: post.mediaUrl, type: "video" }]
@@ -181,4 +174,4 @@ export async function scheduleSocialPost(post: SocialPostInput): Promise<SocialP
     platform: hasMedia ? "TikTok" : "Facebook",
     status: "scheduled",
   };
-      }
+}

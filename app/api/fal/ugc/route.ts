@@ -1,37 +1,36 @@
 import { NextResponse } from "next/server";
-import { isHiggsfieldConfigured, pollUGCVideo, startUGCVideo } from "@/lib/higgsfield";
+import { isFalConfigured, pollUGCVideo, startUGCVideo } from "@/lib/fal";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
-// POST /api/higgsfield/ugc
-// Body: { pitch, pillar, creatorStyle?, durationSec?, audioDataUri? }
-// Returns: HiggsfieldJob
+// POST /api/fal/ugc
+// Body: { prompt?, pillar?, durationSec? } — also accepts the legacy
+// { pitch, creatorStyle } fields for backward compatibility.
+// Returns a Fal job. Poll with GET /api/fal/ugc?id=<request_id>.
 
 export async function POST(req: Request) {
   const body = await req.json().catch(() => ({}));
-  if (!body?.pitch || !body?.pillar) {
-    return NextResponse.json({ error: "pitch_and_pillar_required" }, { status: 400 });
-  }
   try {
     const job = await startUGCVideo({
-      pitch: String(body.pitch),
-      pillar: String(body.pillar),
-      creatorStyle: body.creatorStyle,
-      durationSec: body.durationSec ?? 30,
-      audioDataUri: body.audioDataUri,
+      prompt: body?.prompt,
+      pillar: body?.pillar,
+      durationSec: body?.durationSec ?? 5,
+      pitch: body?.pitch,
+      creatorStyle: body?.creatorStyle,
+      audioDataUri: body?.audioDataUri,
       productUrl: process.env.NEXT_PUBLIC_COURSE_URL,
     });
-    return NextResponse.json({ ...job, configured: isHiggsfieldConfigured() });
+    return NextResponse.json({ ...job, configured: isFalConfigured() });
   } catch (err) {
     return NextResponse.json(
-      { error: err instanceof Error ? err.message : "higgsfield_failed" },
+      { error: err instanceof Error ? err.message : "fal_failed" },
       { status: 500 },
     );
   }
 }
 
-// GET /api/higgsfield/ugc?id=...
+// GET /api/fal/ugc?id=...
 export async function GET(req: Request) {
   const id = new URL(req.url).searchParams.get("id");
   if (!id) return NextResponse.json({ error: "id_required" }, { status: 400 });

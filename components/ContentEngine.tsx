@@ -120,7 +120,7 @@ export function ContentEngine({ items }: { items: ContentItem[] }) {
     setBusyIdx({ idx, kind: "ugc" });
     try {
       const idea = feed[idx];
-      const res = await fetch("/api/higgsfield/ugc", {
+      const res = await fetch("/api/fal/ugc", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -477,7 +477,7 @@ function IdeaCard({
         <div className="mt-3 rounded-xl border border-white/5 bg-black/40 p-3 text-xs text-muted">
           <div className="flex items-center gap-2">
             <Clapperboard className="h-3.5 w-3.5 text-accent" />
-            <span>Higgsfield job: </span>
+            <span>Fal.ai job: </span>
             <code className="kbd">{idea.videoJobId}</code>
             <span
               className={cn(

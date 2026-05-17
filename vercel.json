@@ -9,7 +9,7 @@
     "app/api/cron/autopilot/route.ts": {
       "maxDuration": 300
     },
-    "app/api/higgsfield/ugc/route.ts": {
+    "app/api/fal/ugc/route.ts": {
       "maxDuration": 60
     },
     "app/api/elevenlabs/voiceover/route.ts": {

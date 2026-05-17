@@ -3,7 +3,7 @@
 // Hands-off pipeline. Runs on a cron. Every run:
 //   1. Generates N fresh on-brand ideas (Claude).
 //   2. Records each voiceover (ElevenLabs).
-//   3. Spins up a hyper-realistic UGC creator video (Higgsfield).
+//   3. Spins up a UGC-style video (Fal.ai text-to-video).
 //   4. Polls until the video is rendered.
 //   5. Schedules each finished post into the GHL Social Planner on the
 //      configured 2x/day cadence.
@@ -14,11 +14,11 @@
 import { generateIdeaFeed, isAnthropicConfigured, type Idea } from "@/lib/ai";
 import { generateAudio, isElevenLabsConfigured } from "@/lib/elevenlabs";
 import {
-  isHiggsfieldConfigured,
+  isFalConfigured,
   pollUGCVideo,
   startUGCVideo,
-  type HiggsfieldJob,
-} from "@/lib/higgsfield";
+  type FalJob,
+} from "@/lib/fal";
 import {
   buildSchedule,
   isGHLConfigured,
@@ -42,7 +42,7 @@ export type AutopilotRunResult = {
   configured: {
     anthropic: boolean;
     elevenlabs: boolean;
-    higgsfield: boolean;
+    fal: boolean;
     ghl: boolean;
   };
   produced: Array<{
@@ -61,13 +61,13 @@ function pickStyle(i: number): CreatorStyle {
   return CREATOR_STYLES[i % CREATOR_STYLES.length];
 }
 
-async function waitForVideo(jobId: string): Promise<HiggsfieldJob> {
+async function waitForVideo(jobId: string): Promise<FalJob> {
   const start = Date.now();
-  // Cheap mock: if no real Higgsfield key, return placeholder.
-  if (!isHiggsfieldConfigured() || jobId.startsWith("mock_")) {
+  // Cheap mock: if no real Fal key, return placeholder.
+  if (!isFalConfigured() || jobId.startsWith("mock_")) {
     return { id: jobId, status: "completed", provider: "mock" };
   }
-  let last: HiggsfieldJob = { id: jobId, status: "queued", provider: "higgsfield-mcp" };
+  let last: FalJob = { id: jobId, status: "queued", provider: "fal" };
   while (Date.now() - start < POLL_TIMEOUT_MS) {
     last = await pollUGCVideo(jobId);
     if (last.status === "completed" || last.status === "failed") return last;
@@ -169,7 +169,7 @@ export async function runAutopilot(cfg: AutopilotConfig = {}): Promise<Autopilot
     configured: {
       anthropic: isAnthropicConfigured(),
       elevenlabs: isElevenLabsConfigured(),
-      higgsfield: isHiggsfieldConfigured(),
+      fal: isFalConfigured(),
       ghl: isGHLConfigured(),
     },
     produced,

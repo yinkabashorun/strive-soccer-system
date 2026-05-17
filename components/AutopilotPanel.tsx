@@ -16,7 +16,7 @@ import { cn } from "@/lib/utils";
 type Configured = {
   anthropic: boolean;
   elevenlabs: boolean;
-  higgsfield: boolean;
+  fal: boolean;
   ghl: boolean;
 };
 
@@ -125,9 +125,9 @@ export function AutopilotPanel() {
             </h2>
             <p className="mt-2 text-sm text-muted">
               Every Monday at 08:00 UTC, Strive OS generates 14 fresh ideas,
-              voices them with ElevenLabs, films UGC creator videos with
-              Higgsfield, and schedules two posts a day for the week onto
-              your GoHighLevel Social Planner. Zero clicks.
+              voices them with ElevenLabs, films UGC-style videos with
+              Fal.ai, and schedules two posts a day for the week onto your
+              GoHighLevel Social Planner. Zero clicks.
             </p>
           </div>
           <button
@@ -154,7 +154,7 @@ export function AutopilotPanel() {
           <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
             <Tile label="Claude · ideas" ok={status.configured.anthropic} />
             <Tile label="ElevenLabs · voice" ok={status.configured.elevenlabs} />
-            <Tile label="Higgsfield · UGC" ok={status.configured.higgsfield} />
+            <Tile label="Fal.ai · UGC" ok={status.configured.fal} />
             <Tile label="GHL · scheduler" ok={status.configured.ghl} />
           </div>
         )}

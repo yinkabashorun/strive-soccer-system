@@ -13,7 +13,7 @@ import {
 
 import { isAnthropicConfigured } from "@/lib/ai";
 import { isElevenLabsConfigured } from "@/lib/elevenlabs";
-import { isHiggsfieldConfigured } from "@/lib/higgsfield";
+import { isFalConfigured } from "@/lib/fal";
 import { isGHLConfigured } from "@/lib/ghl";
 
 function status(ok: boolean): "Wired" | "Ready" {
@@ -36,11 +36,11 @@ const integrationsList = () => [
     note: "Set ANTHROPIC_API_KEY to switch idea feed from fallback to live",
   },
   {
-    name: "Higgsfield",
-    role: "Hyper-realistic UGC creator videos · via MCP (not REST)",
-    status: status(isHiggsfieldConfigured()),
+    name: "Fal.ai",
+    role: "Text-to-video UGC for the dribbling course",
+    status: status(isFalConfigured()),
     icon: Sparkles,
-    note: "Strive OS spawns higgsfield-mcp over stdio · set HIGGSFIELD_MCP_COMMAND + HIGGSFIELD_API_KEY",
+    note: "POST /api/fal/ugc · queue API · set FAL_KEY (Authorization: Key ...)",
   },
   {
     name: "ElevenLabs",
@@ -98,7 +98,7 @@ export default function IntegrationsPage() {
             <Node label="Strive OS" sub="Operating system" accent />
           </div>
           <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-5">
-            <Node label="Higgsfield" sub="AI video" />
+            <Node label="Fal.ai" sub="AI video" />
             <Arrow />
             <Node label="Content Engine" sub="Inside Strive OS" />
             <Arrow />

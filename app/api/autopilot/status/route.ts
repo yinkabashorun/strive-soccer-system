@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAnthropicConfigured } from "@/lib/ai";
 import { isElevenLabsConfigured } from "@/lib/elevenlabs";
-import { isHiggsfieldConfigured } from "@/lib/higgsfield";
+import { isFalConfigured } from "@/lib/fal";
 import { isGHLConfigured } from "@/lib/ghl";
 import { getAutopilotState, nextScheduledRun } from "@/lib/autopilot-state";
 
@@ -13,7 +13,7 @@ export async function GET() {
   const configured = {
     anthropic: isAnthropicConfigured(),
     elevenlabs: isElevenLabsConfigured(),
-    higgsfield: isHiggsfieldConfigured(),
+    fal: isFalConfigured(),
     ghl: isGHLConfigured(),
   };
   const fullyAutonomous = Object.values(configured).every(Boolean);

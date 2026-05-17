@@ -1,7 +1,7 @@
 // ElevenLabs TTS — converts a voiceover script into MP3 audio.
 //
 // Returns a base64 data URI so the UI can play it inline with <audio> and we
-// can hand the same URI to Higgsfield as the soundtrack for a UGC video.
+// can overlay it on the Fal.ai b-roll video in post.
 
 export function isElevenLabsConfigured() {
   return Boolean(process.env.ELEVENLABS_API_KEY && process.env.ELEVENLABS_VOICE_ID);

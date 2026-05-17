@@ -1,13 +1,6 @@
 // GoHighLevel integration surface.
 //
-// Strive OS does NOT replace GHL. GHL stays the source of truth for:
-// - Leads (form submissions, ads, opt-ins)
-// - Automations (SMS/email sequences)
-// - Pipelines (sales stages)
-//
-// This file handles:
-// 1. GHL webhook mapping
-// 2. Social Planner post scheduling (2x/day cadence)
+// Social Planner post scheduling (2x/day cadence)
 
 export type GHLEvent =
   | "contact.created"
@@ -66,10 +59,21 @@ export function isGHLConfigured() {
 
 const GHL_BASE = "https://services.leadconnectorhq.com";
 
+// Verified full compound account IDs for Strive Soccer GHL location
+// Format: oauthId_locationId_originId[_type]
+const ACCOUNTS = {
+  // Facebook page (accepts text-only posts)
+  facebook: "69b35261e0bf05fafcdd7ba9_SjVsI2ZXLXjBrWGA0VfI_715752011620505_page",
+  // Instagram profile (requires image or video)
+  instagram: "69b34fb7529ec10b6f02e928_SjVsI2ZXLXjBrWGA0VfI_17841460768055115",
+  // TikTok business (requires video)
+  tiktok: "69b351a99b61dd3500b9719e_SjVsI2ZXLXjBrWGA0VfI_000gqYzyKZDg205Jz1M7omQrc03h3wkGxp_business",
+};
+
 export type SocialPostInput = {
   caption: string;
   mediaUrl?: string;
-  platform?: "TikTok" | "Instagram" | "Facebook" | "YouTube Shorts";
+  platform?: "TikTok" | "Instagram" | "Facebook";
   scheduledFor: string; // ISO
 };
 
@@ -79,26 +83,6 @@ export type SocialPostResult = {
   platform: string;
   status: "scheduled" | "queued-mock";
 };
-
-// GHL Social account IDs are FULL compound IDs:
-// e.g. "69b34fb7529ec10b6f02e928_SjVsI2ZXLXjBrWGA0VfI_17841460768055115"
-// NOT just the oauthId.
-function socialAccountIds(): string[] {
-  return (process.env.GHL_SOCIAL_ACCOUNT_IDS ?? "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-}
-
-// userId: the GHL user/profile who is scheduling the post.
-// We use GHL_USER_ID if set, otherwise fall back to the first oauthId segment
-// of the first account ID as a best-effort.
-function userId(): string {
-  if (process.env.GHL_USER_ID) return process.env.GHL_USER_ID;
-  const firstId = socialAccountIds()[0] ?? "";
-  // The first segment of a compound ID is the oauthId (which doubles as a user ref)
-  return firstId.split("_")[0] ?? "";
-}
 
 export function dailySlots(): [string, string] {
   const raw = (process.env.GHL_DAILY_SLOTS ?? "11:00,19:00").split(",");
@@ -129,26 +113,26 @@ export function buildSchedule(count: number, fromDate = new Date()): string[] {
 }
 
 export async function scheduleSocialPost(post: SocialPostInput): Promise<SocialPostResult> {
-  const platform = post.platform ?? "Facebook";
   if (!isGHLConfigured()) {
     return {
       id: `mock_post_${Math.random().toString(36).slice(2, 10)}`,
       scheduledFor: post.scheduledFor,
-      platform,
+      platform: post.platform ?? "Facebook",
       status: "queued-mock",
     };
   }
 
   const locationId = process.env.GHL_LOCATION_ID!;
-  const accountIds = socialAccountIds();
-  const uid = userId();
+  const userId = process.env.GHL_USER_ID || ACCOUNTS.tiktok.split("_")[0];
 
-  // GHL Social Planner API v2021-07-28
-  // - summary: post text content
-  // - accountIds: full compound account IDs (oauthId_locationId_originId)
-  // - userId: required GHL user identifier
-  // - media: array of media objects (empty array for text-only posts)
-  // - If mediaUrl is provided, include as a media object
+  // Choose accounts based on available media:
+  // - Facebook page accepts text-only posts
+  // - Instagram + TikTok require media (video/image)
+  const hasMedia = Boolean(post.mediaUrl);
+  const accountIds = hasMedia
+    ? [ACCOUNTS.facebook, ACCOUNTS.instagram, ACCOUNTS.tiktok]
+    : [ACCOUNTS.facebook]; // text-only: Facebook only
+
   const media: Array<{ url: string; type: string }> = post.mediaUrl
     ? [{ url: post.mediaUrl, type: "video" }]
     : [];
@@ -159,7 +143,7 @@ export async function scheduleSocialPost(post: SocialPostInput): Promise<SocialP
     summary: post.caption,
     scheduleDate: post.scheduledFor,
     status: "scheduled",
-    userId: uid,
+    userId,
     media,
   };
 
@@ -194,7 +178,7 @@ export async function scheduleSocialPost(post: SocialPostInput): Promise<SocialP
   return {
     id,
     scheduledFor: post.scheduledFor,
-    platform,
+    platform: hasMedia ? "TikTok" : "Facebook",
     status: "scheduled",
   };
-}
+      }

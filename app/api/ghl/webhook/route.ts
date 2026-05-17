@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { ghlContactToLead, type GHLContactPayload } from "@/lib/ghl";
+import { supabase } from "@/lib/supabase";
 
 // POST /api/ghl/webhook
 //
@@ -78,14 +79,34 @@ export async function POST(req: Request) {
             if (!contact.id && !contact.firstName) {
                         return NextResponse.json({ error: "no contact id or name" }, { status: 400 });
             }
-            try {
-                        const lead = await ghlContactToLead(contact);
-                        console.log("[ghl-webhook] lead upserted:", JSON.stringify(lead));
-                        return NextResponse.json({ ok: true, event, lead });
-            } catch (err) {
-                        console.error("[ghl-webhook] upsert failed:", err);
-                        return NextResponse.json({ error: "upsert failed", detail: String(err) }, { status: 500 });
-            }
+            const lead = ghlContactToLead(contact);
+                  try {
+                                          const db = supabase();
+                                          const { error: dbErr } = await db.from("leads").upsert(
+                                                  {
+                                                                                          ghl_contact_id: contact.id || null,
+                                                                                          name: lead.name,
+                                                                                          first_name: contact.firstName ?? null,
+                                                                                          last_name: contact.lastName ?? null,
+                                                                                          email: contact.email ?? null,
+                                                                                          phone: contact.phone ?? null,
+                                                                                          source: lead.source,
+                                                                                          interest: lead.interest,
+                                                                                          status: lead.status,
+                                                                                          tags: contact.tags ?? [],
+                                                  },
+                                                  { onConflict: "ghl_contact_id", ignoreDuplicates: false }
+                                                                  );
+                                          if (dbErr) {
+                                                                          console.error("[ghl-webhook] db error:", dbErr);
+                                                                          return NextResponse.json({ error: "db error", detail: dbErr.message }, { status: 500 });
+                                          }
+                                          console.log("[ghl-webhook] saved:", lead.name);
+                                          return NextResponse.json({ ok: true, event, name: lead.name });
+                  } catch (err) {
+                                          console.error("[ghl-webhook] error:", err);
+                                          return NextResponse.json({ error: "unexpected error", detail: String(err) }, { status: 500 });
+                  }
   }
 
   console.log("[ghl-webhook] acknowledged event:", event);

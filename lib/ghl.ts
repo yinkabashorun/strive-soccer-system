@@ -34,8 +34,30 @@ export function ghlContactToLead(c: GHLContactPayload) {
     source: (tag && sourceMap[tag.toLowerCase()]) ?? "GHL Form",
     interest: "Group Training" as const,
     createdAt: new Date().toISOString(),
-    status: "New" as const,
+    status: statusFromTags(c.tags ?? []),
   };
+}
+
+// Tags that signal "this contact is already a paying / converted client".
+// Strive's GHL pipeline uses "won" as the terminal stage; we surface those
+// as the priority list in the OS, so map them to status="Won" on every
+// ingest path (webhook + bulk sync).
+const WON_TAGS = new Set([
+  "won",
+  "client",
+  "active client",
+  "active-client",
+  "active_client",
+]);
+
+export function statusFromTags(tags: string[] | null | undefined): "Won" | "New" {
+  if (!tags || tags.length === 0) return "New";
+  for (const t of tags) {
+    if (typeof t === "string" && WON_TAGS.has(t.trim().toLowerCase())) {
+      return "Won";
+    }
+  }
+  return "New";
 }
 
 export async function pushToGHL(event: GHLEvent, payload: unknown) {

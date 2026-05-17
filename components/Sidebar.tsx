@@ -8,6 +8,7 @@ import {
   Home,
   Radio,
   Sparkles,
+  Star,
   TrendingUp,
   UserRound,
   Users,
@@ -19,6 +20,7 @@ import { cn } from "@/lib/utils";
 
 const nav = [
   { href: "/", label: "Command Center", icon: Home },
+  { href: "/clients", label: "Active Clients", icon: Star },
   { href: "/sessions", label: "Sessions", icon: CalendarRange },
   { href: "/players", label: "Players", icon: Users },
   { href: "/leads", label: "Leads", icon: TrendingUp },

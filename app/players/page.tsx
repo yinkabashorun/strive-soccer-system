@@ -26,12 +26,12 @@ async function getPlayers(): Promise<{ players: Player[]; source: "supabase" | "
 }
 
 export default async function PlayersPage() {
-  const { players, source } = await getPlayers();
+  const { players } = await getPlayers();
 
   return (
     <div>
       <PageHeader
-        eyebrow={`Players · ${source === "supabase" ? "live" : "mock data"}`}
+        eyebrow="Players"
         title="Every player on the roster."
         subtitle="Track packages, sessions remaining, payment status, and progress."
         actions={

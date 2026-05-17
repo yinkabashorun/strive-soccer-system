@@ -27,12 +27,12 @@ async function getSessions(): Promise<{ sessions: Session[]; source: "supabase" 
 }
 
 export default async function SessionsIndex() {
-  const { sessions, source } = await getSessions();
+  const { sessions } = await getSessions();
 
   return (
     <div>
       <PageHeader
-        eyebrow={`Sessions · ${source === "supabase" ? "live" : "mock data"}`}
+        eyebrow="Sessions"
         title="Every rep. Every roster. Every coach."
         subtitle="Group, private, and camp sessions. Mobile-first check-in built for the sideline."
         actions={

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Check, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const STATUSES = ["New", "Contacted", "Trial Booked", "Converted", "Lost"] as const;
+const STATUSES = ["New", "Contacted", "Trial Booked", "Won", "Converted", "Lost"] as const;
 type Status = (typeof STATUSES)[number];
 
 export function LeadStatusPicker({

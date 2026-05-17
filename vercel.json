@@ -3,10 +3,17 @@
     {
       "path": "/api/cron/autopilot",
       "schedule": "0 8 * * 1"
+    },
+    {
+      "path": "/api/cron/sync-contacts",
+      "schedule": "0 6 * * *"
     }
   ],
   "functions": {
     "app/api/cron/autopilot/route.ts": {
+      "maxDuration": 300
+    },
+    "app/api/cron/sync-contacts/route.ts": {
       "maxDuration": 300
     },
     "app/api/fal/ugc/route.ts": {

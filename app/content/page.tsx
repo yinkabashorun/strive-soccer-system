@@ -1,4 +1,5 @@
 import { PageHeader } from "@/components/PageHeader";
+import { AutopilotPanel } from "@/components/AutopilotPanel";
 import { ContentEngine } from "@/components/ContentEngine";
 import { contentItems, stats } from "@/lib/data";
 import { Flame, Sparkles, TrendingUp } from "lucide-react";
@@ -9,18 +10,13 @@ export default function ContentPage() {
     <div>
       <PageHeader
         eyebrow="AI Content Engine"
-        title="The brain behind the brand."
-        subtitle="Generate hooks, scripts, captions, and voiceovers that sound like Strive. Track every idea from concept to viral."
-        actions={
-          <button className="btn-accent">
-            <Sparkles className="h-4 w-4" />
-            Generate TikTok idea
-          </button>
-        }
+        title="Set it once. Strive ships content for you."
+        subtitle="Strive OS writes the ideas, voices them, films UGC videos, and schedules two posts a day to your GoHighLevel calendar. You don't lift a finger."
       />
 
-      {/* Engine + stats banner */}
-      <div className="mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+      <AutopilotPanel />
+
+      <div className="mt-8 mb-6 grid grid-cols-2 gap-3 md:grid-cols-4">
         <BannerStat
           icon={<Flame className="h-4 w-4" />}
           label="Viral · 30d"
@@ -42,8 +38,8 @@ export default function ContentPage() {
         <BannerStat
           icon={<Sparkles className="h-4 w-4" />}
           label="Posting cadence"
-          value="1.4 / day"
-          hint="rolling avg"
+          value="2 / day"
+          hint="autopilot enforced"
         />
       </div>
 

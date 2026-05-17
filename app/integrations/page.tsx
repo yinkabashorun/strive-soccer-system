@@ -11,13 +11,43 @@ import {
   Zap,
 } from "lucide-react";
 
-const integrations = [
+import { isAnthropicConfigured } from "@/lib/ai";
+import { isElevenLabsConfigured } from "@/lib/elevenlabs";
+import { isHiggsfieldConfigured } from "@/lib/higgsfield";
+import { isGHLConfigured } from "@/lib/ghl";
+
+function status(ok: boolean): "Wired" | "Ready" {
+  return ok ? "Wired" : "Ready";
+}
+
+const integrationsList = () => [
   {
     name: "GoHighLevel",
-    role: "CRM + automations · source of truth for leads",
-    status: "Wired",
+    role: "CRM, leads, Social Planner · the 2x/day scheduler",
+    status: status(isGHLConfigured()),
     icon: Zap,
-    note: "Webhook endpoint: /api/ghl/webhook",
+    note: "POST /api/ghl/schedule · webhook at /api/ghl/webhook",
+  },
+  {
+    name: "Anthropic (Claude)",
+    role: "Powers the AI content engine — ideas, hooks, scripts, captions",
+    status: status(isAnthropicConfigured()),
+    icon: Sparkles,
+    note: "Set ANTHROPIC_API_KEY to switch idea feed from fallback to live",
+  },
+  {
+    name: "Higgsfield",
+    role: "Hyper-realistic UGC creator videos for the dribbling course",
+    status: status(isHiggsfieldConfigured()),
+    icon: Sparkles,
+    note: "POST /api/higgsfield/ugc · set HIGGSFIELD_API_KEY",
+  },
+  {
+    name: "ElevenLabs",
+    role: "Voiceovers for Reels and the soundtrack on UGC videos",
+    status: status(isElevenLabsConfigured()),
+    icon: Mic,
+    note: "POST /api/elevenlabs/voiceover · needs ELEVENLABS_API_KEY + VOICE_ID",
   },
   {
     name: "Supabase",
@@ -40,23 +70,10 @@ const integrations = [
     icon: GitBranch,
     note: "Manus drives top of funnel, GHL captures, Strive OS operates",
   },
-  {
-    name: "Higgsfield",
-    role: "AI video generation · feeds the content engine",
-    status: "External",
-    icon: Sparkles,
-    note: "Pipeline: Higgsfield → Edited → Posted in the Content Engine",
-  },
-  {
-    name: "Voiceover Provider",
-    role: "ElevenLabs / OpenAI TTS (pluggable)",
-    status: "Pluggable",
-    icon: Mic,
-    note: "Voiceover button in Content Engine swaps in real TTS when wired",
-  },
 ];
 
 export default function IntegrationsPage() {
+  const integrations = integrationsList();
   return (
     <div>
       <PageHeader

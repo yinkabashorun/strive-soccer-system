@@ -17,6 +17,7 @@ import { isFalConfigured } from "@/lib/fal";
 import { isGHLConfigured } from "@/lib/ghl";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 import { timeAgo } from "@/lib/utils";
+import { SyncContactsButton } from "@/components/SyncContactsButton";
 
 export const revalidate = 0;
 export const dynamic = "force-dynamic";
@@ -182,6 +183,25 @@ export default async function IntegrationsPage() {
           );
         })}
       </div>
+
+      {/* Bulk contact sync */}
+      <section className="card mt-6 p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="max-w-xl">
+            <div className="chip">Bulk sync</div>
+            <h2 className="h-display mt-2 text-xl font-semibold">
+              Pull every GHL contact into Strive OS
+            </h2>
+            <p className="mt-1 text-xs text-muted">
+              Paginates the GoHighLevel Contacts API and upserts every contact
+              into the <code className="kbd">leads</code> table by{" "}
+              <code className="kbd">ghl_contact_id</code>. Safe to re-run —
+              existing leads are updated in place, new ones are inserted.
+            </p>
+          </div>
+          <SyncContactsButton />
+        </div>
+      </section>
 
       {/* Webhook payload sample */}
       <section className="card mt-6 p-6">

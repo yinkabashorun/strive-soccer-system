@@ -32,8 +32,9 @@ async function run(count: number) {
   }
   markAutopilotStart();
   try {
-    // waitForVideos: false — fire-and-forget, schedule GHL posts immediately
-    const result = await runAutopilot({ count, waitForVideos: false });
+    // runAutopilot now waits for each video render (up to ~240s of the
+    // 300s function budget) so every GHL post gets its media attached.
+    const result = await runAutopilot({ count });
     markAutopilotFinish(result);
     return NextResponse.json({ ok: true, result });
   } catch (err) {

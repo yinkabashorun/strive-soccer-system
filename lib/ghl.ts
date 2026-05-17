@@ -1,15 +1,15 @@
 // GoHighLevel integration surface.
 //
 // Strive OS does NOT replace GHL. GHL stays the source of truth for:
-//   - Leads (form submissions, ads, opt-ins)
-//   - Automations (SMS/email sequences)
-//   - Pipelines (sales stages)
+// - Leads (form submissions, ads, opt-ins)
+// - Automations (SMS/email sequences)
+// - Pipelines (sales stages)
 //
 // This file is the contract between GHL and Strive OS. We:
-//   1. Receive webhooks at /api/ghl/webhook
-//   2. Map GHL payloads into our domain types
-//   3. Push outbound events back to GHL
-//   4. Schedule Social Planner posts (the 2x/day cadence)
+// 1. Receive webhooks at /api/ghl/webhook
+// 2. Map GHL payloads into our domain types
+// 3. Push outbound events back to GHL
+// 4. Schedule Social Planner posts (the 2x/day cadence)
 
 export type GHLEvent =
   | "contact.created"
@@ -129,7 +129,24 @@ export async function scheduleSocialPost(post: SocialPostInput): Promise<SocialP
   }
 
   const accountIds = socialAccountIds();
-  const res = await fetch(`${GHL_BASE}/social-media-posting/${process.env.GHL_LOCATION_ID}/posts`, {
+  const locationId = process.env.GHL_LOCATION_ID;
+
+  // Build the post body — GHL Social Planner v2021-07-28 schema
+  const body: Record<string, unknown> = {
+    locationId,
+    type: "post",
+    accountIds,
+    content: post.caption,
+    scheduleDate: post.scheduledFor,
+    status: "scheduled",
+  };
+
+  // Only include mediaUrls if we actually have a video URL
+  if (post.mediaUrl) {
+    body.mediaUrls = [post.mediaUrl];
+  }
+
+  const res = await fetch(`${GHL_BASE}/social-media-posting/${locationId}/posts`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${process.env.GHL_API_KEY}`,
@@ -137,26 +154,19 @@ export async function scheduleSocialPost(post: SocialPostInput): Promise<SocialP
       Version: "2021-07-28",
       Accept: "application/json",
     },
-    body: JSON.stringify({
-      type: "post",
-      accountIds,
-      summary: post.caption.slice(0, 80),
-      content: post.caption,
-      scheduleDate: post.scheduledFor,
-      mediaUrls: post.mediaUrl ? [post.mediaUrl] : [],
-      status: "scheduled",
-    }),
+    body: JSON.stringify(body),
   });
 
   if (!res.ok) {
     const detail = await res.text().catch(() => "");
-    throw new Error(`ghl_schedule_${res.status}: ${detail.slice(0, 200)}`);
+    throw new Error(`ghl_schedule_${res.status}: ${detail.slice(0, 400)}`);
   }
-  const data = (await res.json()) as { id?: string; _id?: string };
+  const data = (await res.json()) as { id?: string; _id?: string; post?: { id?: string; _id?: string } };
+  const id = data.id ?? data._id ?? data.post?.id ?? data.post?._id ?? `ghl_${Math.random().toString(36).slice(2, 10)}`;
   return {
-    id: data.id ?? data._id ?? `ghl_${Math.random().toString(36).slice(2, 10)}`,
+    id,
     scheduledFor: post.scheduledFor,
     platform,
     status: "scheduled",
   };
-}
+      }

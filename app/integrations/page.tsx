@@ -11,13 +11,43 @@ import {
   Zap,
 } from "lucide-react";
 
-const integrations = [
+import { isAnthropicConfigured } from "@/lib/ai";
+import { isElevenLabsConfigured } from "@/lib/elevenlabs";
+import { isFalConfigured } from "@/lib/fal";
+import { isGHLConfigured } from "@/lib/ghl";
+
+function status(ok: boolean): "Wired" | "Ready" {
+  return ok ? "Wired" : "Ready";
+}
+
+const integrationsList = () => [
   {
     name: "GoHighLevel",
-    role: "CRM + automations · source of truth for leads",
-    status: "Wired",
+    role: "CRM, leads, Social Planner · the 2x/day scheduler",
+    status: status(isGHLConfigured()),
     icon: Zap,
-    note: "Webhook endpoint: /api/ghl/webhook",
+    note: "POST /api/ghl/schedule · webhook at /api/ghl/webhook",
+  },
+  {
+    name: "Anthropic (Claude)",
+    role: "Powers the AI content engine — ideas, hooks, scripts, captions",
+    status: status(isAnthropicConfigured()),
+    icon: Sparkles,
+    note: "Set ANTHROPIC_API_KEY to switch idea feed from fallback to live",
+  },
+  {
+    name: "Fal.ai",
+    role: "Text-to-video UGC for the dribbling course",
+    status: status(isFalConfigured()),
+    icon: Sparkles,
+    note: "POST /api/fal/ugc · queue API · set FAL_KEY (Authorization: Key ...)",
+  },
+  {
+    name: "ElevenLabs",
+    role: "Voiceovers for Reels and the soundtrack on UGC videos",
+    status: status(isElevenLabsConfigured()),
+    icon: Mic,
+    note: "POST /api/elevenlabs/voiceover · needs ELEVENLABS_API_KEY + VOICE_ID",
   },
   {
     name: "Supabase",
@@ -40,23 +70,10 @@ const integrations = [
     icon: GitBranch,
     note: "Manus drives top of funnel, GHL captures, Strive OS operates",
   },
-  {
-    name: "Higgsfield",
-    role: "AI video generation · feeds the content engine",
-    status: "External",
-    icon: Sparkles,
-    note: "Pipeline: Higgsfield → Edited → Posted in the Content Engine",
-  },
-  {
-    name: "Voiceover Provider",
-    role: "ElevenLabs / OpenAI TTS (pluggable)",
-    status: "Pluggable",
-    icon: Mic,
-    note: "Voiceover button in Content Engine swaps in real TTS when wired",
-  },
 ];
 
 export default function IntegrationsPage() {
+  const integrations = integrationsList();
   return (
     <div>
       <PageHeader
@@ -81,7 +98,7 @@ export default function IntegrationsPage() {
             <Node label="Strive OS" sub="Operating system" accent />
           </div>
           <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-5">
-            <Node label="Higgsfield" sub="AI video" />
+            <Node label="Fal.ai" sub="AI video" />
             <Arrow />
             <Node label="Content Engine" sub="Inside Strive OS" />
             <Arrow />

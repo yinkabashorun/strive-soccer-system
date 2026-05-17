@@ -57,7 +57,7 @@ export default function CommandCenter() {
           label="MRR"
           value={formatCurrency(stats.monthlyRevenue)}
           delta={stats.revenueDelta}
-          icon={CircleDollarSign}
+          icon={<CircleDollarSign className="h-4 w-4" />}
           hint="vs. last month"
           accent
         />
@@ -66,14 +66,14 @@ export default function CommandCenter() {
           label="Active clients"
           value={String(stats.activeClients)}
           delta={stats.activeClientsDelta}
-          icon={Users}
+          icon={<Users className="h-4 w-4" />}
         />
         <StatCard
           index={2}
           label="Course sales"
           value={String(stats.courseSales)}
           delta={stats.courseSalesDelta}
-          icon={GraduationCap}
+          icon={<GraduationCap className="h-4 w-4" />}
           hint="Ball Mastery · $67"
         />
         <StatCard
@@ -81,13 +81,13 @@ export default function CommandCenter() {
           label="Leads · 7d"
           value={String(stats.newLeads7d)}
           delta={stats.leadsDelta}
-          icon={TrendingUp}
+          icon={<TrendingUp className="h-4 w-4" />}
         />
         <StatCard
           index={4}
           label="Sessions · week"
           value={String(stats.sessionsThisWeek)}
-          icon={CalendarRange}
+          icon={<CalendarRange className="h-4 w-4" />}
           hint={`${formatPct(stats.attendanceRate)} attendance`}
         />
         <StatCard
@@ -95,7 +95,7 @@ export default function CommandCenter() {
           label="Reach · 30d"
           value={formatCompact(stats.contentReachLast30)}
           delta={0.42}
-          icon={Flame}
+          icon={<Flame className="h-4 w-4" />}
           hint={`${stats.viralPostsLast30} viral posts`}
         />
       </div>

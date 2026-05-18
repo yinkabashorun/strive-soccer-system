@@ -15,6 +15,7 @@ import { isAnthropicConfigured } from "@/lib/ai";
 import { isElevenLabsConfigured } from "@/lib/elevenlabs";
 import { isFalConfigured } from "@/lib/fal";
 import { isGHLConfigured } from "@/lib/ghl";
+import { isStripeConfigured } from "@/lib/stripe";
 import { isSupabaseConfigured, supabase } from "@/lib/supabase";
 import { timeAgo } from "@/lib/utils";
 import { SyncContactsButton } from "@/components/SyncContactsButton";
@@ -90,10 +91,10 @@ const integrationsList = () => [
   },
   {
     name: "Stripe",
-    role: "Course checkout + package payments",
-    status: "Ready",
+    role: "$97 Dribbling Course checkout + revenue tracking",
+    status: status(isStripeConfigured()),
     icon: Cloud,
-    note: "Architecture is Stripe-ready · webhooks land in /api/ghl/webhook",
+    note: "Webhook lives at /api/stripe/webhook · saves to course_sales · tags buyer in GHL",
   },
   {
     name: "Manus",

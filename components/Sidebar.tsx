@@ -12,6 +12,8 @@ import {
   Radio,
   Settings,
   Sparkles,
+  Star,
+  TrendingUp,
   UserRound,
   Users,
   Webhook,
@@ -21,8 +23,10 @@ import { cn } from "@/lib/utils";
 
 const nav = [
   { href: "/", label: "Command Center", icon: Home },
+  { href: "/clients", label: "Active Clients", icon: Star },
   { href: "/sessions", label: "Sessions", icon: CalendarRange },
   { href: "/players", label: "Players", icon: Users },
+  { href: "/leads", label: "Leads", icon: TrendingUp },
   { href: "/course", label: "Course", icon: GraduationCap },
   { href: "/content", label: "AI Content Engine", icon: Sparkles },
   { href: "/admin/course-ads", label: "Course Ad Library", icon: Megaphone },

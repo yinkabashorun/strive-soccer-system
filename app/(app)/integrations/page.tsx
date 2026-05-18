@@ -11,18 +11,80 @@ import {
   Zap,
 } from "lucide-react";
 
-const integrations = [
+import { isAnthropicConfigured } from "@/lib/ai";
+import { isElevenLabsConfigured } from "@/lib/elevenlabs";
+import { isFalConfigured } from "@/lib/fal";
+import { isGHLConfigured } from "@/lib/ghl";
+import { isSupabaseConfigured, supabase } from "@/lib/supabase";
+import { timeAgo } from "@/lib/utils";
+import { SyncContactsButton } from "@/components/SyncContactsButton";
+
+export const revalidate = 0;
+export const dynamic = "force-dynamic";
+
+type WebhookLog = {
+  id: string;
+  event: string | null;
+  contact_id: string | null;
+  name: string | null;
+  status: "ok" | "error";
+  detail: string | null;
+  received_at: string;
+};
+
+async function getWebhookLog(): Promise<WebhookLog[]> {
+  if (!isSupabaseConfigured()) return [];
+  try {
+    const db = supabase();
+    const { data, error } = await db
+      .from("ghl_sync_log")
+      .select("*")
+      .order("received_at", { ascending: false })
+      .limit(20);
+    if (error) throw error;
+    return (data as WebhookLog[]) ?? [];
+  } catch {
+    return [];
+  }
+}
+
+function status(ok: boolean): "Wired" | "Ready" {
+  return ok ? "Wired" : "Ready";
+}
+
+const integrationsList = () => [
   {
     name: "GoHighLevel",
-    role: "CRM + automations · source of truth for leads",
-    status: "Wired",
+    role: "CRM, leads, Social Planner · the 2x/day scheduler",
+    status: status(isGHLConfigured()),
     icon: Zap,
-    note: "Webhook endpoint: /api/ghl/webhook",
+    note: "POST /api/ghl/schedule · webhook at /api/ghl/webhook",
+  },
+  {
+    name: "Anthropic (Claude)",
+    role: "Powers the AI content engine — ideas, hooks, scripts, captions",
+    status: status(isAnthropicConfigured()),
+    icon: Sparkles,
+    note: "Set ANTHROPIC_API_KEY to switch idea feed from fallback to live",
+  },
+  {
+    name: "Fal.ai",
+    role: "Text-to-video UGC for the dribbling course",
+    status: status(isFalConfigured()),
+    icon: Sparkles,
+    note: "POST /api/fal/ugc · queue API · set FAL_KEY (Authorization: Key ...)",
+  },
+  {
+    name: "ElevenLabs",
+    role: "Voiceovers for Reels and the soundtrack on UGC videos",
+    status: status(isElevenLabsConfigured()),
+    icon: Mic,
+    note: "POST /api/elevenlabs/voiceover · needs ELEVENLABS_API_KEY + VOICE_ID",
   },
   {
     name: "Supabase",
-    role: "Postgres backend · players, sessions, content, payments",
-    status: "Ready",
+    role: "Postgres backend · players, sessions, content, payments, sync log",
+    status: status(isSupabaseConfigured()),
     icon: Database,
     note: "Set NEXT_PUBLIC_SUPABASE_URL + ANON_KEY to activate",
   },
@@ -40,23 +102,11 @@ const integrations = [
     icon: GitBranch,
     note: "Manus drives top of funnel, GHL captures, Strive OS operates",
   },
-  {
-    name: "Higgsfield",
-    role: "AI video generation · feeds the content engine",
-    status: "External",
-    icon: Sparkles,
-    note: "Pipeline: Higgsfield → Edited → Posted in the Content Engine",
-  },
-  {
-    name: "Voiceover Provider",
-    role: "ElevenLabs / OpenAI TTS (pluggable)",
-    status: "Pluggable",
-    icon: Mic,
-    note: "Voiceover button in Content Engine swaps in real TTS when wired",
-  },
 ];
 
-export default function IntegrationsPage() {
+export default async function IntegrationsPage() {
+  const integrations = integrationsList();
+  const webhookLog = await getWebhookLog();
   return (
     <div>
       <PageHeader
@@ -81,7 +131,7 @@ export default function IntegrationsPage() {
             <Node label="Strive OS" sub="Operating system" accent />
           </div>
           <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-5">
-            <Node label="Higgsfield" sub="AI video" />
+            <Node label="Fal.ai" sub="AI video" />
             <Arrow />
             <Node label="Content Engine" sub="Inside Strive OS" />
             <Arrow />
@@ -134,6 +184,25 @@ export default function IntegrationsPage() {
         })}
       </div>
 
+      {/* Bulk contact sync */}
+      <section className="card mt-6 p-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="max-w-xl">
+            <div className="chip">Bulk sync</div>
+            <h2 className="h-display mt-2 text-xl font-semibold">
+              Pull every GHL contact into Strive OS
+            </h2>
+            <p className="mt-1 text-xs text-muted">
+              Paginates the GoHighLevel Contacts API and upserts every contact
+              into the <code className="kbd">leads</code> table by{" "}
+              <code className="kbd">ghl_contact_id</code>. Safe to re-run —
+              existing leads are updated in place, new ones are inserted.
+            </p>
+          </div>
+          <SyncContactsButton />
+        </div>
+      </section>
+
       {/* Webhook payload sample */}
       <section className="card mt-6 p-6">
         <div className="chip">Webhook contract</div>
@@ -166,6 +235,71 @@ X-GHL-Signature: <hmac>
   }
 }`}
         </pre>
+      </section>
+
+      {/* Webhook activity log */}
+      <section className="card mt-6 overflow-hidden">
+        <div className="flex items-center justify-between border-b border-white/5 px-6 py-5">
+          <div>
+            <div className="chip">Live</div>
+            <h2 className="h-display mt-2 text-xl font-semibold">Webhook log</h2>
+            <p className="mt-1 text-xs text-muted">
+              Last 20 events received at <code className="kbd">/api/ghl/webhook</code>.
+            </p>
+          </div>
+          <span className="text-[11px] text-muted">{webhookLog.length} entries</span>
+        </div>
+
+        {webhookLog.length === 0 ? (
+          <div className="px-6 py-12 text-center text-sm text-muted">
+            No webhook events yet.{" "}
+            {!isSupabaseConfigured() && (
+              <span className="text-muted/70">
+                Wire Supabase to start logging.
+              </span>
+            )}
+          </div>
+        ) : (
+          <>
+            <div className="hidden grid-cols-12 gap-3 border-b border-white/5 px-6 py-3 text-[10px] uppercase tracking-[0.18em] text-muted md:grid">
+              <div className="col-span-2">Time</div>
+              <div className="col-span-3">Event</div>
+              <div className="col-span-2">Contact</div>
+              <div className="col-span-1">Status</div>
+              <div className="col-span-4">Detail</div>
+            </div>
+            {webhookLog.map((row) => (
+              <div
+                key={row.id}
+                className="grid grid-cols-1 gap-2 border-b border-white/5 px-6 py-3 last:border-b-0 md:grid-cols-12"
+              >
+                <div className="col-span-2 text-xs text-muted tabular-nums">
+                  {timeAgo(row.received_at)}
+                </div>
+                <div className="col-span-3 truncate text-xs font-mono text-bone/90">
+                  {row.event ?? "—"}
+                </div>
+                <div className="col-span-2 truncate text-xs text-muted">
+                  {row.name ?? row.contact_id ?? "—"}
+                </div>
+                <div className="col-span-1">
+                  <span
+                    className={
+                      row.status === "ok"
+                        ? "chip-accent"
+                        : "chip border-red-500/20 bg-red-500/10 text-red-300"
+                    }
+                  >
+                    {row.status === "ok" ? "OK" : "ERROR"}
+                  </span>
+                </div>
+                <div className="col-span-4 truncate text-[11px] text-muted">
+                  {row.detail ?? "—"}
+                </div>
+              </div>
+            ))}
+          </>
+        )}
       </section>
     </div>
   );

@@ -3,20 +3,64 @@ import Link from "next/link";
 import { ArrowLeft, MapPin, NotebookPen, UserRoundPlus } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { CheckInList } from "@/components/CheckInList";
-import { players, todaySessions, upcomingSessions } from "@/lib/data";
+import {
+  players as mockPlayers,
+  todaySessions,
+  upcomingSessions,
+} from "@/lib/data";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase";
+import type { Player, Session } from "@/lib/types";
 
-export function generateStaticParams() {
-  return [...todaySessions, ...upcomingSessions].map((s) => ({ id: s.id }));
+export const revalidate = 0;
+export const dynamic = "force-dynamic";
+
+async function getSession(id: string): Promise<Session | null> {
+  if (isSupabaseConfigured()) {
+    try {
+      const db = supabase();
+      const { data, error } = await db
+        .from("sessions")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+      if (error) throw error;
+      if (data) return data as Session;
+    } catch {
+      // fall through
+    }
+  }
+  return (
+    [...todaySessions, ...upcomingSessions].find((s) => s.id === id) ?? null
+  );
 }
 
-export default function SessionDetail({ params }: { params: { id: string } }) {
-  const session = [...todaySessions, ...upcomingSessions].find(
-    (s) => s.id === params.id
-  );
+async function getRoster(ids: string[]): Promise<Player[]> {
+  if (ids.length === 0) return [];
+  if (isSupabaseConfigured()) {
+    try {
+      const db = supabase();
+      const { data, error } = await db.from("players").select("*").in("id", ids);
+      if (error) throw error;
+      if (data && data.length > 0) return data as Player[];
+    } catch {
+      // fall through
+    }
+  }
+  return ids
+    .map((id) => mockPlayers.find((p) => p.id === id))
+    .filter((p): p is Player => Boolean(p));
+}
+
+export default async function SessionDetail({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const session = await getSession(params.id);
   if (!session) return notFound();
-  const roster = session.enrolled
-    .map((id) => players.find((p) => p.id === id))
-    .filter(Boolean) as typeof players;
+
+  const roster = await getRoster(session.enrolled ?? []);
+  const attendedSet = new Set(session.attended ?? []);
 
   return (
     <div>
@@ -52,6 +96,11 @@ export default function SessionDetail({ params }: { params: { id: string } }) {
             <h2 className="h-display text-lg font-semibold">Roster · check-in</h2>
             <div className="text-xs text-muted">
               {roster.length} / {session.capacity}
+              {attendedSet.size > 0 && (
+                <span className="ml-2 text-accent">
+                  · {attendedSet.size} attended
+                </span>
+              )}
             </div>
           </div>
           <CheckInList players={roster} />
@@ -68,14 +117,12 @@ export default function SessionDetail({ params }: { params: { id: string } }) {
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div>
                 <div className="text-muted">Coach</div>
-                <div className="mt-0.5 font-medium text-bone">
-                  {session.coach}
-                </div>
+                <div className="mt-0.5 font-medium text-bone">{session.coach}</div>
               </div>
               <div>
                 <div className="text-muted">Capacity</div>
                 <div className="mt-0.5 font-medium text-bone">
-                  {session.enrolled.length} / {session.capacity}
+                  {session.enrolled?.length ?? 0} / {session.capacity}
                 </div>
               </div>
               <div>

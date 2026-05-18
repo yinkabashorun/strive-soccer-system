@@ -4,6 +4,9 @@ import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
+// `icon` is a rendered ReactNode (e.g. <Sparkles className="h-4 w-4" />)
+// rather than a component reference — RSCs can serialize JSX across the
+// server→client boundary but not raw function references.
 export function StatCard({
   label,
   value,

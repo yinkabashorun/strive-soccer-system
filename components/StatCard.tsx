@@ -1,14 +1,17 @@
 "use client";
 
-import { ArrowDownRight, ArrowUpRight, type LucideIcon } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
+// `icon` is a rendered ReactNode (e.g. <Sparkles className="h-4 w-4" />)
+// rather than a component reference — RSCs can serialize JSX across the
+// server→client boundary but not raw function references.
 export function StatCard({
   label,
   value,
   delta,
-  icon: Icon,
+  icon,
   hint,
   accent = false,
   index = 0,
@@ -16,7 +19,7 @@ export function StatCard({
   label: string;
   value: string;
   delta?: number;
-  icon?: LucideIcon;
+  icon?: React.ReactNode;
   hint?: string;
   accent?: boolean;
   index?: number;
@@ -36,9 +39,9 @@ export function StatCard({
         <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">
           {label}
         </div>
-        {Icon && (
+        {icon && (
           <div className={cn("grid h-8 w-8 place-items-center rounded-lg", accent ? "bg-accent/10 text-accent" : "bg-white/[0.04] text-bone")}>
-            <Icon className="h-4 w-4" />
+            {icon}
           </div>
         )}
       </div>

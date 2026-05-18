@@ -4,6 +4,7 @@ import {
   CheckCircle2,
   CircleOff,
   Cloud,
+  CreditCard,
   RefreshCw,
   Sparkles,
   Webhook,
@@ -13,6 +14,7 @@ import { isAnthropicConfigured } from "@/lib/ai";
 import { isElevenLabsConfigured } from "@/lib/elevenlabs";
 import { isFalConfigured } from "@/lib/fal";
 import { isGHLConfigured } from "@/lib/ghl";
+import { isStripeConfigured, isStripeWebhookConfigured } from "@/lib/stripe";
 import { isSupabaseConfigured } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -23,6 +25,8 @@ export default function SettingsPage() {
   const anthropicOk = isAnthropicConfigured();
   const falOk = isFalConfigured();
   const elevenOk = isElevenLabsConfigured();
+  const stripeOk = isStripeConfigured();
+  const stripeWebhookOk = isStripeWebhookConfigured();
   const cronSecretSet = Boolean(process.env.CRON_SECRET);
   const webhookSecretSet = Boolean(process.env.GHL_WEBHOOK_SECRET);
 
@@ -31,7 +35,7 @@ export default function SettingsPage() {
       <PageHeader
         eyebrow="Settings"
         title="Workspace · Strive OS"
-        subtitle="What's automated, what's wired, and where each cron runs."
+        subtitle="What's automated, what's wired, and the env vars driving every integration."
       />
 
       {/* Automations */}
@@ -42,7 +46,7 @@ export default function SettingsPage() {
           </div>
           <h2 className="h-display mt-2 text-xl font-semibold">Automations</h2>
           <p className="mt-1 text-xs text-muted">
-            These run on Vercel cron — no clicking required.
+            These run on Vercel cron or in response to a webhook — no clicking required.
           </p>
         </div>
         <Automation
@@ -64,6 +68,19 @@ export default function SettingsPage() {
           disabledNote="Needs ANTHROPIC_API_KEY + GHL_API_KEY to publish for real"
         />
         <Automation
+          icon={<CreditCard className="h-4 w-4" />}
+          name="Stripe webhook → course sale + GHL buyer tag"
+          path="/api/stripe/webhook"
+          schedule="Real-time"
+          enabled={stripeOk}
+          enabledNote={
+            stripeWebhookOk
+              ? "Signature-verified · writes to course_sales · tags buyer in GHL"
+              : "No signature verification (set STRIPE_WEBHOOK_SECRET)"
+          }
+          disabledNote="Set STRIPE_SECRET_KEY to receive payments"
+        />
+        <Automation
           icon={<Webhook className="h-4 w-4" />}
           name="GHL webhook → lead intake"
           path="/api/ghl/webhook"
@@ -83,13 +100,18 @@ export default function SettingsPage() {
         <div className="border-b border-white/5 px-6 py-4">
           <div className="chip">Connections</div>
           <h2 className="h-display mt-2 text-xl font-semibold">Service status</h2>
+          <p className="mt-1 text-xs text-muted">
+            Every funnel-critical integration. Status updates on every page load.
+          </p>
         </div>
         <Connection label="Supabase" ok={supabaseOk} env="NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY" />
+        <Connection label="Stripe" ok={stripeOk} env="STRIPE_SECRET_KEY" />
+        <Connection label="Stripe webhook secret" ok={stripeWebhookOk} env="STRIPE_WEBHOOK_SECRET (signature verify)" />
         <Connection label="GoHighLevel" ok={ghlOk} env="GHL_API_KEY + GHL_LOCATION_ID" />
+        <Connection label="GHL webhook secret" ok={webhookSecretSet} env="GHL_WEBHOOK_SECRET (HMAC verify)" />
         <Connection label="Anthropic (Claude)" ok={anthropicOk} env="ANTHROPIC_API_KEY" />
         <Connection label="ElevenLabs" ok={elevenOk} env="ELEVENLABS_API_KEY + ELEVENLABS_VOICE_ID" />
         <Connection label="Fal.ai" ok={falOk} env="FAL_KEY" />
-        <Connection label="GHL webhook secret" ok={webhookSecretSet} env="GHL_WEBHOOK_SECRET (HMAC verify)" />
         <Connection label="Cron secret" ok={cronSecretSet} env="CRON_SECRET (Vercel cron auth)" />
       </section>
 
@@ -98,7 +120,7 @@ export default function SettingsPage() {
           <div className="chip">Brand</div>
           <h3 className="h-display mt-2 text-lg font-semibold">Strive Soccer</h3>
           <p className="mt-1 text-xs text-muted">
-            Modern soccer training brand — ball mastery, creativity, composure.
+            $97 Dribbling Course · UGC ads → VSL → Stripe → GHL follow-up.
           </p>
         </div>
         <div className="card p-5">
@@ -108,7 +130,7 @@ export default function SettingsPage() {
           </h3>
           <p className="mt-1 text-xs text-muted">
             Add env vars in your Vercel project settings, redeploy, and the OS
-            picks them up. Status above updates on every page load.
+            picks them up.
           </p>
           <Link href="/integrations" className="btn-ghost mt-3 text-xs">
             <Cloud className="h-3.5 w-3.5" />

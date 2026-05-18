@@ -1,249 +1,333 @@
 import Link from "next/link";
 import {
-  CalendarRange,
-  ChevronRight,
-  MapPin,
+  AlertTriangle,
+  CheckCircle2,
+  CircleOff,
+  CreditCard,
+  DollarSign,
+  Eye,
+  Film,
+  MousePointerClick,
+  Receipt,
   Sparkles,
   Star,
   TrendingUp,
   Users,
+  Webhook,
 } from "lucide-react";
 import { PageHeader } from "@/components/PageHeader";
 import { StatCard } from "@/components/StatCard";
-import { Avatar } from "@/components/Avatar";
-import { HandsOffPanel } from "@/components/HandsOffPanel";
-import { OneClickContent } from "@/components/OneClickContent";
-import {
-  coachTasks,
-  todaySessions as mockTodaySessions,
-} from "@/lib/data";
-import { timeAgo } from "@/lib/utils";
+import { isAnthropicConfigured } from "@/lib/ai";
+import { isElevenLabsConfigured } from "@/lib/elevenlabs";
+import { isFalConfigured } from "@/lib/fal";
+import { isGHLConfigured } from "@/lib/ghl";
+import { isStripeConfigured } from "@/lib/stripe";
 import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import type { Session } from "@/lib/types";
+import { formatCurrency, timeAgo } from "@/lib/utils";
 
 export const revalidate = 0;
 export const dynamic = "force-dynamic";
 
-type LeadRow = {
-  id: string;
-  name: string;
-  source: string | null;
-  status: string;
-  created_at: string;
+type Dash = {
+  revenueAllCents: number;
+  revenue30Cents: number;
+  salesCount: number;
+  sales30Count: number;
+  leadsCount: number;
+  leads7d: number;
+  vslViews7d: number;
+  ugcGenerated: number;
+  postsReady: number;
+  followUpsNeeded: number;
+  recentSales: Array<{
+    id: string;
+    buyer_email: string | null;
+    buyer_name: string | null;
+    amount_cents: number;
+    created_at: string;
+  }>;
+  recentCreatives: Array<{
+    id: string;
+    hook: string | null;
+    status: string;
+    platform: string | null;
+    created_at: string;
+  }>;
+  recentLeads: Array<{
+    id: string;
+    email: string | null;
+    name: string | null;
+    source: string | null;
+    created_at: string;
+  }>;
 };
 
-type DashboardData = {
-  totalLeads: number;
-  wonClients: number;
-  newLeads7d: number;
-  todaySessions: Session[];
-  recentLeads: LeadRow[];
-  topWon: LeadRow[];
+const EMPTY: Dash = {
+  revenueAllCents: 0,
+  revenue30Cents: 0,
+  salesCount: 0,
+  sales30Count: 0,
+  leadsCount: 0,
+  leads7d: 0,
+  vslViews7d: 0,
+  ugcGenerated: 0,
+  postsReady: 0,
+  followUpsNeeded: 0,
+  recentSales: [],
+  recentCreatives: [],
+  recentLeads: [],
 };
 
-async function loadDashboard(): Promise<DashboardData> {
-  const empty: DashboardData = {
-    totalLeads: 0,
-    wonClients: 0,
-    newLeads7d: 0,
-    todaySessions: [],
-    recentLeads: [],
-    topWon: [],
-  };
-  if (!isSupabaseConfigured()) return empty;
+async function loadDash(): Promise<Dash> {
+  if (!isSupabaseConfigured()) return EMPTY;
   try {
     const db = supabase();
-    const sevenDaysAgo = new Date(
-      Date.now() - 7 * 24 * 60 * 60 * 1000,
-    ).toISOString();
-    const todayISO = new Date().toISOString().slice(0, 10);
+    const since7d = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
+    const since30d = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
     const [
-      totalRes,
-      wonCountRes,
-      newRes,
-      sessionsRes,
-      recentRes,
-      topWonRes,
+      salesRes,
+      sales30Res,
+      leadsCountRes,
+      leads7Res,
+      vsl7Res,
+      ugcRes,
+      readyRes,
+      followUpRes,
+      recentSalesRes,
+      recentCreativesRes,
+      recentLeadsRes,
     ] = await Promise.all([
-      db.from("leads").select("id", { count: "exact", head: true }),
+      db
+        .from("course_sales")
+        .select("amount_cents", { count: "exact" })
+        .eq("status", "paid"),
+      db
+        .from("course_sales")
+        .select("amount_cents", { count: "exact" })
+        .eq("status", "paid")
+        .gte("created_at", since30d),
+      db.from("lead_events").select("id", { count: "exact", head: true }).eq("event_type", "lead_captured"),
+      db
+        .from("lead_events")
+        .select("id", { count: "exact", head: true })
+        .eq("event_type", "lead_captured")
+        .gte("created_at", since7d),
+      db
+        .from("lead_events")
+        .select("id", { count: "exact", head: true })
+        .eq("event_type", "vsl_view")
+        .gte("created_at", since7d),
+      db.from("creatives").select("id", { count: "exact", head: true }),
+      db
+        .from("creatives")
+        .select("id", { count: "exact", head: true })
+        .in("status", ["script_ready", "voiceover_ready", "video_ready"]),
       db
         .from("leads")
         .select("id", { count: "exact", head: true })
         .eq("status", "Won"),
       db
-        .from("leads")
-        .select("id", { count: "exact", head: true })
-        .gte("created_at", sevenDaysAgo),
-      db.from("sessions").select("*").eq("date", todayISO),
-      db
-        .from("leads")
-        .select("id, name, source, status, created_at")
+        .from("course_sales")
+        .select("id, buyer_email, buyer_name, amount_cents, created_at")
+        .eq("status", "paid")
         .order("created_at", { ascending: false })
-        .limit(4),
+        .limit(5),
       db
-        .from("leads")
-        .select("id, name, source, status, created_at")
-        .eq("status", "Won")
+        .from("creatives")
+        .select("id, hook, status, platform, created_at")
+        .order("created_at", { ascending: false })
+        .limit(5),
+      db
+        .from("lead_events")
+        .select("id, email, name, source, created_at")
+        .eq("event_type", "lead_captured")
         .order("created_at", { ascending: false })
         .limit(5),
     ]);
 
-    const todaySessions = (sessionsRes.data as Session[] | null) ?? [];
+    const totalRevenueCents =
+      ((salesRes.data as Array<{ amount_cents: number }> | null) ?? []).reduce(
+        (sum, r) => sum + (r.amount_cents ?? 0),
+        0,
+      );
+    const revenue30Cents =
+      ((sales30Res.data as Array<{ amount_cents: number }> | null) ?? []).reduce(
+        (sum, r) => sum + (r.amount_cents ?? 0),
+        0,
+      );
+
     return {
-      totalLeads: totalRes.count ?? 0,
-      wonClients: wonCountRes.count ?? 0,
-      newLeads7d: newRes.count ?? 0,
-      todaySessions,
-      recentLeads: (recentRes.data as LeadRow[] | null) ?? [],
-      topWon: (topWonRes.data as LeadRow[] | null) ?? [],
+      revenueAllCents: totalRevenueCents,
+      revenue30Cents,
+      salesCount: salesRes.count ?? 0,
+      sales30Count: sales30Res.count ?? 0,
+      leadsCount: leadsCountRes.count ?? 0,
+      leads7d: leads7Res.count ?? 0,
+      vslViews7d: vsl7Res.count ?? 0,
+      ugcGenerated: ugcRes.count ?? 0,
+      postsReady: readyRes.count ?? 0,
+      followUpsNeeded: followUpRes.count ?? 0,
+      recentSales:
+        (recentSalesRes.data as Dash["recentSales"] | null) ?? [],
+      recentCreatives:
+        (recentCreativesRes.data as Dash["recentCreatives"] | null) ?? [],
+      recentLeads:
+        (recentLeadsRes.data as Dash["recentLeads"] | null) ?? [],
     };
   } catch {
-    return empty;
+    return EMPTY;
   }
 }
 
 export default async function CommandCenter() {
-  const data = await loadDashboard();
+  const d = await loadDash();
+  const stripeOk = isStripeConfigured();
+  const supabaseOk = isSupabaseConfigured();
+  const ghlOk = isGHLConfigured();
+  const anthropicOk = isAnthropicConfigured();
+  const falOk = isFalConfigured();
+  const elevenOk = isElevenLabsConfigured();
+
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
   });
 
-  const todaySessions =
-    data.todaySessions.length > 0 ? data.todaySessions : mockTodaySessions;
-  const usingMockSessions = data.todaySessions.length === 0;
-
   return (
     <div>
       <PageHeader
         eyebrow={`Command Center · ${today}`}
-        title="Run Strive Soccer from one screen."
-        subtitle="Active clients, today's schedule, fresh leads, and one-tap content. The crons handle the rest — you stay on the pitch."
+        title="Strive OS · the $97 course sales machine."
+        subtitle="UGC ads → VSL landing page → Stripe checkout → GHL follow-up. Every number on this page is live."
         actions={
           <>
-            <Link href="/clients" className="btn">
-              <Star className="h-4 w-4" />
-              Active clients
-            </Link>
-            <Link href="/content" className="btn-accent">
+            <Link href="/ugc" className="btn">
               <Sparkles className="h-4 w-4" />
-              Content engine
+              New UGC ad
+            </Link>
+            <Link href="/funnel" className="btn-accent">
+              <CreditCard className="h-4 w-4" />
+              Edit funnel
             </Link>
           </>
         }
       />
 
-      {/* Hands-off automation status — what ran while you were away */}
-      <HandsOffPanel />
-
-      {/* Real business stats */}
-      <div className="mt-6 grid grid-cols-2 gap-3 md:grid-cols-4">
+      {/* Revenue + sales row */}
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         <StatCard
           index={0}
-          label="Active clients"
-          value={String(data.wonClients)}
-          icon={<Star className="h-4 w-4" />}
-          hint="Won in pipeline"
+          label="Revenue · all time"
+          value={formatCurrency(d.revenueAllCents / 100)}
+          icon={<DollarSign className="h-4 w-4" />}
+          hint={`${d.salesCount} sales`}
           accent
         />
         <StatCard
           index={1}
-          label="Sessions today"
-          value={String(data.todaySessions.length)}
-          icon={<CalendarRange className="h-4 w-4" />}
-          hint={data.todaySessions.length === 0 ? "Nothing booked" : undefined}
+          label="Revenue · 30d"
+          value={formatCurrency(d.revenue30Cents / 100)}
+          icon={<TrendingUp className="h-4 w-4" />}
+          hint={`${d.sales30Count} sales`}
         />
         <StatCard
           index={2}
-          label="New leads · 7d"
-          value={String(data.newLeads7d)}
-          icon={<TrendingUp className="h-4 w-4" />}
-          hint={`${data.totalLeads} total`}
+          label="Leads captured"
+          value={String(d.leadsCount)}
+          icon={<Users className="h-4 w-4" />}
+          hint={`${d.leads7d} in last 7d`}
         />
         <StatCard
           index={3}
-          label="Total pipeline"
-          value={String(data.totalLeads)}
-          icon={<Users className="h-4 w-4" />}
-          hint="Across all stages"
+          label="VSL views · 7d"
+          value={String(d.vslViews7d)}
+          icon={<Eye className="h-4 w-4" />}
+          hint="Tracked via lead_events"
+        />
+        <StatCard
+          index={4}
+          label="UGC ads generated"
+          value={String(d.ugcGenerated)}
+          icon={<Film className="h-4 w-4" />}
+          hint={`${d.postsReady} ready to ship`}
+        />
+        <StatCard
+          index={5}
+          label="Active follow-ups"
+          value={String(d.followUpsNeeded)}
+          icon={<Star className="h-4 w-4" />}
+          hint="Won contacts in GHL"
         />
       </div>
 
-      {/* One-click content */}
-      <div className="mt-6">
-        <OneClickContent />
-      </div>
+      {/* Integration health */}
+      <section className="mt-6 card p-5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <div className="chip">System status</div>
+            <h2 className="h-display mt-1 text-lg font-semibold">
+              Funnel integrations
+            </h2>
+          </div>
+          <Link href="/settings" className="btn-ghost text-xs">
+            Open settings →
+          </Link>
+        </div>
+        <div className="mt-4 grid grid-cols-2 gap-2 md:grid-cols-3 xl:grid-cols-6">
+          <Health label="Supabase" ok={supabaseOk} />
+          <Health label="Stripe" ok={stripeOk} />
+          <Health label="GoHighLevel" ok={ghlOk} />
+          <Health label="Anthropic" ok={anthropicOk} />
+          <Health label="Fal.ai" ok={falOk} />
+          <Health label="ElevenLabs" ok={elevenOk} />
+        </div>
+      </section>
 
-      {/* Today's schedule + active clients */}
-      <div className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-3">
+      {/* Recent sales + creatives */}
+      <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-3">
         <section className="card p-5 xl:col-span-2">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-3 flex items-center justify-between">
             <div>
-              <div className="chip">Today</div>
-              <h2 className="h-display mt-2 text-2xl font-semibold">
-                Daily schedule
+              <div className="chip-accent">
+                <Receipt className="h-3 w-3" />
+                Money in
+              </div>
+              <h2 className="h-display mt-1 text-xl font-semibold">
+                Recent sales
               </h2>
             </div>
-            <Link href="/sessions" className="btn-ghost text-xs">
-              View all sessions →
+            <Link href="/sales" className="btn-ghost text-xs">
+              All sales →
             </Link>
           </div>
-
-          {todaySessions.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-white/10 p-8 text-center text-sm text-muted">
-              No sessions scheduled today.
+          {d.recentSales.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-white/10 p-6 text-center text-xs text-muted">
+              No completed checkouts yet.{" "}
+              {!stripeOk && (
+                <Link href="/settings" className="text-accent hover:underline">
+                  Wire Stripe to start collecting →
+                </Link>
+              )}
             </div>
           ) : (
             <div className="space-y-2">
-              {usingMockSessions && (
-                <div className="rounded-lg border border-dashed border-white/10 px-3 py-2 text-[10px] uppercase tracking-[0.18em] text-muted">
-                  Example sessions — connect the sessions table to see your real day.
-                </div>
-              )}
-              {todaySessions.map((s) => (
+              {d.recentSales.map((s) => (
                 <div
                   key={s.id}
-                  className="group flex items-center gap-4 rounded-xl border border-white/5 bg-ink-200/40 p-4 transition-all hover:border-white/10 hover:bg-ink-200"
+                  className="flex items-center justify-between gap-3 rounded-xl border border-white/5 bg-ink-200/40 p-3"
                 >
-                  <div className="w-16 shrink-0 border-r border-white/5 pr-4 text-center">
-                    <div className="h-display text-xl font-semibold">
-                      {s.startTime}
+                  <div className="min-w-0">
+                    <div className="truncate text-sm font-semibold">
+                      {s.buyer_name || s.buyer_email || "Unknown buyer"}
                     </div>
-                    <div className="text-[10px] uppercase tracking-[0.18em] text-muted">
-                      {s.endTime}
-                    </div>
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="chip text-[10px]">{s.type}</span>
-                      <div className="truncate text-sm font-semibold">
-                        {s.title}
-                      </div>
-                    </div>
-                    <div className="mt-1 flex items-center gap-1.5 text-xs text-muted">
-                      <MapPin className="h-3 w-3" />
-                      <span className="truncate">
-                        {s.location} · {s.coach}
-                      </span>
+                    <div className="truncate text-[11px] text-muted">
+                      {s.buyer_email ?? "—"} · {timeAgo(s.created_at)}
                     </div>
                   </div>
-                  <div className="hidden items-center gap-3 sm:flex">
-                    <div className="text-right">
-                      <div className="text-sm font-semibold tabular-nums">
-                        {s.enrolled.length}/{s.capacity}
-                      </div>
-                      <div className="text-[10px] uppercase tracking-[0.18em] text-muted">
-                        Enrolled
-                      </div>
-                    </div>
-                    <Link
-                      href={`/sessions/${s.id}`}
-                      className="btn opacity-0 transition-opacity group-hover:opacity-100"
-                    >
-                      Open →
-                    </Link>
+                  <div className="text-sm font-semibold tabular-nums">
+                    {formatCurrency(s.amount_cents / 100)}
                   </div>
                 </div>
               ))}
@@ -252,42 +336,41 @@ export default async function CommandCenter() {
         </section>
 
         <section className="card p-5">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-3 flex items-center justify-between">
             <div>
-              <div className="chip-accent">
-                <Star className="h-3 w-3" /> Priority
+              <div className="chip">
+                <Film className="h-3 w-3" />
+                Pipeline
               </div>
-              <h2 className="h-display mt-2 text-2xl font-semibold">
-                Active clients
+              <h2 className="h-display mt-1 text-xl font-semibold">
+                Latest UGC
               </h2>
             </div>
-            <Link href="/clients" className="btn-ghost text-xs">
-              View all →
+            <Link href="/library" className="btn-ghost text-xs">
+              Library →
             </Link>
           </div>
-          {data.topWon.length === 0 ? (
+          {d.recentCreatives.length === 0 ? (
             <div className="rounded-xl border border-dashed border-white/10 p-6 text-center text-xs text-muted">
-              No Won contacts yet. The daily sync auto-promotes contacts tagged{" "}
-              <code className="kbd">won</code> in GHL — they'll appear here.
+              No ads yet.{" "}
+              <Link href="/ugc" className="text-accent hover:underline">
+                Generate your first →
+              </Link>
             </div>
           ) : (
             <div className="space-y-2">
-              {data.topWon.map((c) => (
+              {d.recentCreatives.map((c) => (
                 <Link
                   key={c.id}
-                  href={`/leads/${c.id}`}
-                  className="flex items-center gap-3 rounded-xl border border-white/5 bg-ink-200/40 p-3 transition-colors hover:border-white/10 hover:bg-ink-200"
+                  href="/library"
+                  className="block rounded-xl border border-white/5 bg-ink-200/40 p-3 hover:border-white/10 hover:bg-ink-200"
                 >
-                  <Avatar name={c.name || "?"} color="#2a2a2f" size={32} />
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-semibold">
-                      {c.name || "Unknown"}
-                    </div>
-                    <div className="truncate text-[11px] text-muted">
-                      {c.source ?? "Direct"} · joined {timeAgo(c.created_at)}
-                    </div>
+                  <div className="text-[10px] uppercase tracking-[0.14em] text-muted">
+                    {c.platform ?? "—"} · {c.status}
                   </div>
-                  <ChevronRight className="h-4 w-4 text-muted" />
+                  <div className="mt-1 line-clamp-2 text-xs">
+                    {c.hook ?? "Untitled"}
+                  </div>
                 </Link>
               ))}
             </div>
@@ -295,102 +378,81 @@ export default async function CommandCenter() {
         </section>
       </div>
 
-      {/* Recent leads + coach tasks */}
-      <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-3">
-        <section className="card p-5 xl:col-span-2">
-          <div className="mb-4 flex items-center justify-between">
+      {/* Recent leads */}
+      <div className="mt-4 grid grid-cols-1 gap-4">
+        <section className="card p-5">
+          <div className="mb-3 flex items-center justify-between">
             <div>
-              <div className="chip">Live · GHL</div>
-              <h2 className="h-display mt-2 text-2xl font-semibold">
+              <div className="chip">
+                <MousePointerClick className="h-3 w-3" />
+                Funnel intake
+              </div>
+              <h2 className="h-display mt-1 text-xl font-semibold">
                 Recent leads
               </h2>
             </div>
-            <Link href="/leads" className="btn-ghost text-xs">
-              View all leads →
+            <Link href="/clients" className="btn-ghost text-xs">
+              Active clients →
             </Link>
           </div>
-          {data.recentLeads.length === 0 ? (
+          {d.recentLeads.length === 0 ? (
             <div className="rounded-xl border border-dashed border-white/10 p-6 text-center text-xs text-muted">
-              No leads yet. New contacts from GoHighLevel land here in real time.
+              No funnel leads yet. POST to{" "}
+              <code className="kbd">/api/ghl/lead</code> from your VSL form to
+              start filling this in.
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-              {data.recentLeads.map((l) => (
-                <Link
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2 lg:grid-cols-3">
+              {d.recentLeads.map((l) => (
+                <div
                   key={l.id}
-                  href={`/leads/${l.id}`}
-                  className="flex items-center gap-3 rounded-xl border border-white/5 bg-ink-200/40 p-3 hover:border-white/10 hover:bg-ink-200"
+                  className="rounded-xl border border-white/5 bg-ink-200/40 p-3"
                 >
-                  <Avatar name={l.name || "?"} color="#2a2a2f" size={32} />
-                  <div className="min-w-0 flex-1">
-                    <div className="truncate text-sm font-semibold">
-                      {l.name || "Unknown"}
-                    </div>
-                    <div className="truncate text-[11px] text-muted">
-                      {l.source ?? "—"} · {timeAgo(l.created_at)}
-                    </div>
+                  <div className="truncate text-sm font-semibold">
+                    {l.name || l.email || "Unknown"}
                   </div>
-                  <span
-                    className={
-                      l.status === "Won"
-                        ? "chip-accent"
-                        : l.status === "New"
-                        ? "chip border-yellow-500/20 bg-yellow-500/10 text-yellow-300"
-                        : l.status === "Lost"
-                        ? "chip border-red-500/20 bg-red-500/10 text-red-300"
-                        : "chip"
-                    }
-                  >
-                    {l.status}
-                  </span>
-                </Link>
+                  <div className="truncate text-[11px] text-muted">
+                    {l.email ?? "—"} · {l.source ?? "Strive OS"} ·{" "}
+                    {timeAgo(l.created_at)}
+                  </div>
+                </div>
               ))}
             </div>
           )}
         </section>
-
-        <section className="card p-5">
-          <div className="mb-4 flex items-center justify-between">
-            <div>
-              <div className="chip">Today</div>
-              <h2 className="h-display mt-2 text-2xl font-semibold">
-                Coach tasks
-              </h2>
-            </div>
-          </div>
-          <div className="space-y-2">
-            {coachTasks.map((t) => (
-              <label
-                key={t.id}
-                className="flex cursor-pointer items-center gap-3 rounded-xl border border-white/5 bg-ink-200/40 p-3 transition-colors hover:bg-ink-200"
-              >
-                <input
-                  type="checkbox"
-                  defaultChecked={t.done}
-                  className="peer h-4 w-4 cursor-pointer accent-accent"
-                />
-                <div className="min-w-0 flex-1 peer-checked:line-through peer-checked:opacity-50">
-                  <div className="truncate text-sm font-medium">{t.title}</div>
-                  <div className="text-[11px] text-muted">
-                    {t.owner} · {t.due}
-                  </div>
-                </div>
-                <span
-                  className={
-                    t.priority === "High"
-                      ? "chip border-red-500/20 bg-red-500/10 text-red-300"
-                      : t.priority === "Med"
-                      ? "chip-accent"
-                      : "chip"
-                  }
-                >
-                  {t.priority}
-                </span>
-              </label>
-            ))}
-          </div>
-        </section>
       </div>
+
+      <div className="mt-6 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-muted">
+        <Webhook className="h-3 w-3" />
+        Webhook receivers · GHL{" "}
+        <code className="kbd">/api/ghl/webhook</code> · Stripe{" "}
+        <code className="kbd">/api/stripe/webhook</code>
+      </div>
+    </div>
+  );
+}
+
+function Health({ label, ok }: { label: string; ok: boolean }) {
+  return (
+    <div
+      className={
+        ok
+          ? "flex items-center gap-2 rounded-xl border border-accent/30 bg-accent/[0.05] px-3 py-2"
+          : "flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2"
+      }
+    >
+      {ok ? (
+        <CheckCircle2 className="h-3.5 w-3.5 text-accent" />
+      ) : (
+        <CircleOff className="h-3.5 w-3.5 text-muted" />
+      )}
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-xs font-medium">{label}</div>
+        <div className="text-[10px] uppercase tracking-[0.18em] text-muted">
+          {ok ? "Wired" : "Not set"}
+        </div>
+      </div>
+      {!ok && <AlertTriangle className="h-3 w-3 text-amber-300" />}
     </div>
   );
 }

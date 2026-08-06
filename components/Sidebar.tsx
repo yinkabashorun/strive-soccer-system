@@ -22,7 +22,7 @@ import { Logo } from "./Logo";
 import { cn } from "@/lib/utils";
 
 const nav = [
-  { href: "/", label: "Command Center", icon: Home },
+  { href: "/os", label: "Command Center", icon: Home },
   { href: "/clients", label: "Active Clients", icon: Star },
   { href: "/sessions", label: "Sessions", icon: CalendarRange },
   { href: "/players", label: "Players", icon: Users },
@@ -46,8 +46,8 @@ export function Sidebar() {
         </div>
         {nav.map((item) => {
           const active =
-            item.href === "/"
-              ? pathname === "/"
+            item.href === "/os"
+              ? pathname === "/os"
               : pathname?.startsWith(item.href);
           const Icon = item.icon;
           return (

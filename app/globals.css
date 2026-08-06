@@ -10,13 +10,33 @@ html,
 body {
   background: #000;
   color: #f5f4ef;
+  font-family: "Barlow", ui-sans-serif, system-ui, sans-serif;
   font-feature-settings: "ss01", "cv11";
   -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  overflow-x: hidden;
 }
 
 ::selection {
   background: #e5ff3d;
   color: #000;
+}
+
+/* iOS: prevent input zoom + honor safe areas */
+input,
+textarea,
+select {
+  font-size: 16px;
+}
+
+.pt-safe {
+  padding-top: env(safe-area-inset-top);
+}
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 .scrollbar-thin::-webkit-scrollbar {
@@ -59,6 +79,16 @@ body {
   .divider {
     @apply h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent;
   }
+  /* Strive Elite display headline */
+  .display {
+    @apply font-display font-black uppercase leading-[0.92] tracking-[-0.01em];
+  }
+  .eyebrow {
+    @apply font-body text-[11px] font-semibold uppercase tracking-[0.28em] text-white/40;
+  }
+  .elite-card {
+    @apply rounded-3xl border border-white/[0.07] bg-white/[0.02] shadow-soft;
+  }
 }
 
 .dot-grid {
@@ -78,4 +108,8 @@ body {
   padding: 1px 6px;
   font-size: 11px;
   color: #c9c9d1;
+}
+
+.text-balance {
+  text-wrap: balance;
 }

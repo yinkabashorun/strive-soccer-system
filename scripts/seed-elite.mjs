@@ -207,7 +207,7 @@ async function main() {
     full_name: COACH.full_name,
     avatar_color: COACH.avatar_color,
   });
-  await supabase.from("profiles").upsert({
+  await supabase.from("elite_profiles").upsert({
     id: coachId,
     role: "coach",
     full_name: COACH.full_name,
@@ -222,7 +222,7 @@ async function main() {
       full_name: p.full_name,
       avatar_color: p.avatar_color,
     });
-    await supabase.from("profiles").upsert({
+    await supabase.from("elite_profiles").upsert({
       id: profileId,
       role: "player",
       full_name: p.full_name,
@@ -231,10 +231,10 @@ async function main() {
     });
 
     // remove any prior player row for a clean reseed
-    await supabase.from("players").delete().eq("profile_id", profileId);
+    await supabase.from("elite_players").delete().eq("profile_id", profileId);
 
     const { data: playerRow, error: perr } = await supabase
-      .from("players")
+      .from("elite_players")
       .insert({
         profile_id: profileId,
         coach_id: coachId,
@@ -257,7 +257,7 @@ async function main() {
     if (perr) throw perr;
     const playerId = playerRow.id;
 
-    await supabase.from("progress").insert(
+    await supabase.from("elite_progress").insert(
       METRICS.map((metric, i) => ({
         player_id: playerId,
         metric,
@@ -266,7 +266,7 @@ async function main() {
       }))
     );
 
-    await supabase.from("homework").insert(
+    await supabase.from("elite_homework").insert(
       p.homework.map(([title, exercise, reps, completed], i) => ({
         player_id: playerId,
         week: p.current_week,
@@ -279,14 +279,14 @@ async function main() {
       }))
     );
 
-    await supabase.from("messages").insert({
+    await supabase.from("elite_messages").insert({
       player_id: playerId,
       from_role: "coach",
       from_name: COACH.full_name,
       body: p.message,
     });
 
-    await supabase.from("achievements").insert({
+    await supabase.from("elite_achievements").insert({
       player_id: playerId,
       title: p.achievement[0],
       detail: p.achievement[1],

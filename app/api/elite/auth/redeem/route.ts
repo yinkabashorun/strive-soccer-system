@@ -44,7 +44,7 @@ export async function POST(req: Request) {
 
   // 1) validate the code (unused + not expired)
   const { data: invite } = await admin
-    .from("invite_codes")
+    .from("elite_invite_codes")
     .select("id, created_by, used_by, expires_at")
     .eq("code", code)
     .maybeSingle();
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
   const userId = created.user.id;
 
   // 3) ensure the profile row (the auth trigger also does this)
-  await admin.from("profiles").upsert({
+  await admin.from("elite_profiles").upsert({
     id: userId,
     role: "player",
     full_name: fullName,
@@ -83,7 +83,7 @@ export async function POST(req: Request) {
   });
 
   // 4) provision an active player linked to the inviting coach
-  await admin.from("players").insert({
+  await admin.from("elite_players").insert({
     profile_id: userId,
     coach_id: invite.created_by,
     full_name: fullName,
@@ -96,7 +96,7 @@ export async function POST(req: Request) {
 
   // 5) burn the code
   await admin
-    .from("invite_codes")
+    .from("elite_invite_codes")
     .update({ used_by: userId, used_at: new Date().toISOString() })
     .eq("id", invite.id);
 

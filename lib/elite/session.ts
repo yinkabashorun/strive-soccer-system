@@ -56,7 +56,7 @@ export async function getViewer(): Promise<Viewer | null> {
     } = await supabase.auth.getUser();
     if (user) {
       const { data: profile } = await supabase
-        .from("profiles")
+        .from("elite_profiles")
         .select("*")
         .eq("id", user.id)
         .single();
@@ -65,7 +65,7 @@ export async function getViewer(): Promise<Viewer | null> {
       let playerId: string | null = null;
       if (role === "player") {
         const { data: player } = await supabase
-          .from("players")
+          .from("elite_players")
           .select("id")
           .eq("profile_id", user.id)
           .maybeSingle();

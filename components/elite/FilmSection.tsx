@@ -33,7 +33,7 @@ export function FilmSection({
     if (supabase) {
       const path = `${playerId}/${Date.now()}-${file.name}`;
       const { error } = await supabase.storage
-        .from("film")
+        .from("elite-film")
         .upload(path, file, { upsert: false });
       if (error) {
         setMsg("Upload failed: " + error.message);

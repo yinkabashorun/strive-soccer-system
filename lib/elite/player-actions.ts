@@ -10,7 +10,7 @@ export async function toggleHomework(id: string, completed: boolean) {
   const supabase = createClient();
   if (supabase) {
     await supabase
-      .from("homework")
+      .from("elite_homework")
       .update({
         completed,
         completed_at: completed ? new Date().toISOString() : null,
@@ -31,7 +31,7 @@ export async function recordFilm(input: {
   if (!viewer?.playerId) return { ok: false };
   const supabase = createClient();
   if (supabase) {
-    await supabase.from("film_uploads").insert({
+    await supabase.from("elite_film_uploads").insert({
       player_id: viewer.playerId,
       title: input.title,
       url: input.url ?? null,
@@ -48,7 +48,7 @@ export async function sendPlayerMessage(body: string) {
   if (!viewer?.playerId) return { ok: false };
   const supabase = createClient();
   if (supabase) {
-    await supabase.from("messages").insert({
+    await supabase.from("elite_messages").insert({
       player_id: viewer.playerId,
       from_role: "player",
       from_name: viewer.profile.full_name,

@@ -60,7 +60,7 @@ export async function POST(req: Request) {
           null;
         if (supabase) {
           await supabase
-            .from("subscriptions")
+            .from("elite_subscriptions")
             .update({
               status,
               current_period_end: periodEnd
@@ -102,12 +102,12 @@ async function syncByEmail(
   patch: SubPatch
 ) {
   const { data: profile } = await supabase
-    .from("profiles")
+    .from("elite_profiles")
     .select("id")
     .eq("email", email)
     .maybeSingle();
 
-  await supabase.from("subscriptions").insert({
+  await supabase.from("elite_subscriptions").insert({
     profile_id: profile?.id ?? null,
     ...patch,
     current_period_end: null,
@@ -116,7 +116,7 @@ async function syncByEmail(
   // reflect on the player's status for quick reads
   if (profile?.id) {
     await supabase
-      .from("players")
+      .from("elite_players")
       .update({ subscription_status: patch.status })
       .eq("profile_id", profile.id);
   }

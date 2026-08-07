@@ -36,7 +36,7 @@ export async function generateInviteCode(note: string) {
     return { ok: true as const, code: newCode(), demo: true };
   }
   const code = newCode();
-  const { error } = await supabase.from("invite_codes").insert({
+  const { error } = await supabase.from("elite_invite_codes").insert({
     code,
     note: note?.trim() || "",
     created_by: viewer.profile.id,
@@ -52,7 +52,7 @@ export async function listInviteCodes(): Promise<InviteCode[]> {
   const supabase = createClient();
   if (!supabase) return [];
   const { data } = await supabase
-    .from("invite_codes")
+    .from("elite_invite_codes")
     .select("id, code, note, used_by, used_at, created_at")
     .order("created_at", { ascending: false });
   return (data as InviteCode[] | null) ?? [];

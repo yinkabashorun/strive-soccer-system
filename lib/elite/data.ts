@@ -28,7 +28,7 @@ export async function getPlayers(): Promise<Player[]> {
   const supabase = createClient();
   if (!supabase) return DEMO_PLAYERS;
   const { data } = await supabase
-    .from("players")
+    .from("elite_players")
     .select("*")
     .order("full_name");
   return (data as Player[] | null) ?? [];
@@ -38,7 +38,7 @@ export async function getPlayer(id: string): Promise<Player | null> {
   const supabase = createClient();
   if (!supabase) return DEMO_PLAYERS.find((p) => p.id === id) ?? null;
   const { data } = await supabase
-    .from("players")
+    .from("elite_players")
     .select("*")
     .eq("id", id)
     .maybeSingle();
@@ -52,7 +52,7 @@ export async function getHomework(playerId: string): Promise<Homework[]> {
       (a, b) => a.sort - b.sort
     );
   const { data } = await supabase
-    .from("homework")
+    .from("elite_homework")
     .select("*")
     .eq("player_id", playerId)
     .order("sort");
@@ -63,7 +63,7 @@ export async function getProgress(playerId: string): Promise<Progress[]> {
   const supabase = createClient();
   if (!supabase) return DEMO_PROGRESS.filter((p) => p.player_id === playerId);
   const { data } = await supabase
-    .from("progress")
+    .from("elite_progress")
     .select("*")
     .eq("player_id", playerId);
   return (data as Progress[] | null) ?? [];
@@ -76,7 +76,7 @@ export async function getFilm(playerId: string): Promise<FilmUpload[]> {
       b.created_at.localeCompare(a.created_at)
     );
   const { data } = await supabase
-    .from("film_uploads")
+    .from("elite_film_uploads")
     .select("*")
     .eq("player_id", playerId)
     .order("created_at", { ascending: false });
@@ -90,7 +90,7 @@ export async function getNotes(playerId: string): Promise<CoachNote[]> {
       b.created_at.localeCompare(a.created_at)
     );
   const { data } = await supabase
-    .from("coach_notes")
+    .from("elite_coach_notes")
     .select("*")
     .eq("player_id", playerId)
     .order("created_at", { ascending: false });
@@ -104,7 +104,7 @@ export async function getMessages(playerId: string): Promise<Message[]> {
       b.created_at.localeCompare(a.created_at)
     );
   const { data } = await supabase
-    .from("messages")
+    .from("elite_messages")
     .select("*")
     .eq("player_id", playerId)
     .order("created_at", { ascending: false });
@@ -118,7 +118,7 @@ export async function getAchievements(playerId: string): Promise<Achievement[]> 
       (a, b) => b.earned_at.localeCompare(a.earned_at)
     );
   const { data } = await supabase
-    .from("achievements")
+    .from("elite_achievements")
     .select("*")
     .eq("player_id", playerId)
     .order("earned_at", { ascending: false });
@@ -134,7 +134,7 @@ export async function getParentReports(
       (a, b) => b.created_at.localeCompare(a.created_at)
     );
   const { data } = await supabase
-    .from("parent_reports")
+    .from("elite_parent_reports")
     .select("*")
     .eq("player_id", playerId)
     .order("created_at", { ascending: false });

@@ -132,8 +132,9 @@ dashboard, *Invite a client*, copy the code → send them the code and the
    URL**, **anon key**, and **service_role key** into `.env.local`.
 2. Run the schema: open the **SQL Editor** and paste
    `supabase/migrations/005_strive_elite.sql` (or `supabase db push`). This
-   creates every table, Row-Level-Security policy, the `film` storage bucket,
-   and the trigger that creates a `profiles` row on sign-up.
+   creates every `elite_*` table (namespaced to coexist with Strive OS),
+   Row-Level-Security policies, the `elite-film` storage bucket, and the
+   trigger that creates an `elite_profiles` row on sign-up.
 3. **Auth → Providers → Email**: enable email/password. For the fastest demo,
    turn *Confirm email* off (sign-ups get a session immediately).
 4. Seed real demo accounts (optional):

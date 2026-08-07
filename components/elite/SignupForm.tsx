@@ -36,7 +36,9 @@ export function SignupForm({ configured }: { configured: boolean }) {
         data: { full_name: fullName, role },
         emailRedirectTo:
           typeof window !== "undefined"
-            ? `${window.location.origin}/login`
+            ? `${window.location.origin}/auth/callback?next=${
+                role === "coach" ? "/coach" : "/dashboard"
+              }`
             : undefined,
       },
     });

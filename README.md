@@ -103,6 +103,29 @@ Copy `.env.example` → `.env.local`. All are optional for demo mode.
 
 ---
 
+## Access control (paid mentorship)
+
+Strive Elite is invite-only. Nobody buys their way in by simply registering:
+
+- **Coaches** are provisioned only by you (the seed script / Supabase). There is
+  **no public path to a coach account** — the signup form is player-only.
+- **Players** can only create an account by redeeming a **single-use invite
+  code**. Generate codes from the coach dashboard (*Invite a client*) and hand
+  one out after a client pays. Redeeming a code creates their account already
+  **provisioned and active** — and confirms their email automatically, so there's
+  no confirmation-link step.
+- **Revoking access**: set a client to *Paused* on their profile (or their
+  Stripe subscription lapses) and they immediately hit a "membership paused"
+  screen instead of the program.
+- Row-Level Security still guarantees a player only ever sees their own data.
+
+**Onboard a paying client in 3 steps:** collect payment → open the coach
+dashboard, *Invite a client*, copy the code → send them the code and the
+`/signup` link. Done.
+
+> Requires `SUPABASE_SERVICE_ROLE_KEY` (server-only) so redemption can create
+> confirmed accounts. Apply migration `006_invite_codes.sql` alongside `005`.
+
 ## Connect Supabase
 
 1. Create a project at [supabase.com](https://supabase.com). Copy the **Project

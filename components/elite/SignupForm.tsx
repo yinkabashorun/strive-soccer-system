@@ -3,108 +3,88 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Loader2, User, Users } from "lucide-react";
+import { KeyRound, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/elite/supabase/client";
 import { enterDemoPlayer, enterDemoCoach } from "@/lib/elite/auth-actions";
-import { cn } from "@/lib/utils";
 
-type Role = "player" | "coach";
-
+// Player-only signup gated by a single-use invite code. Coaches are
+// provisioned separately (seed script / admin) — there is deliberately no
+// public path to a coach account.
 export function SignupForm({ configured }: { configured: boolean }) {
   const router = useRouter();
-  const [role, setRole] = useState<Role>("player");
+  const [code, setCode] = useState("");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [done, setDone] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    const supabase = createClient();
-    if (!supabase) {
+    if (!configured) {
       setError("Sign-up isn't configured yet. Try a demo account below.");
       return;
     }
     setLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: fullName, role },
-        emailRedirectTo:
-          typeof window !== "undefined"
-            ? `${window.location.origin}/auth/callback?next=${
-                role === "coach" ? "/coach" : "/dashboard"
-              }`
-            : undefined,
-      },
+
+    // 1) redeem the invite code + create a provisioned, active account
+    const res = await fetch("/api/elite/auth/redeem", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code, fullName, email, password }),
     });
-    if (error) {
-      setError(error.message);
+    const data = await res.json();
+    if (!res.ok) {
+      setError(data.error || "Something went wrong. Please try again.");
       setLoading(false);
       return;
     }
-    // If email confirmation is off, a session is returned immediately.
-    if (data.session) {
-      router.push(role === "coach" ? "/coach" : "/dashboard");
-      router.refresh();
-      return;
-    }
-    setDone(true);
-    setLoading(false);
-  }
 
-  if (done) {
-    return (
-      <div className="elite-card p-8 text-center">
-        <h1 className="font-display text-3xl font-black uppercase tracking-tight">
-          Check your email
-        </h1>
-        <p className="mt-3 text-white/55">
-          We sent a confirmation link to{" "}
-          <span className="text-bone">{email}</span>. Confirm it, then sign in
-          to start the program.
-        </p>
-        <Link href="/login" className="btn-accent mt-7 inline-flex px-6 py-3">
-          Go to sign in
-        </Link>
-      </div>
-    );
+    // 2) sign in to establish the session, then into the app
+    const supabase = createClient();
+    if (supabase) {
+      const { error: signInErr } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+      if (signInErr) {
+        setError("Account created. Please sign in.");
+        setLoading(false);
+        router.push("/login");
+        return;
+      }
+    }
+    router.push("/dashboard");
+    router.refresh();
   }
 
   return (
     <div className="elite-card p-7 sm:p-8">
+      <div className="chip-accent mb-3 inline-flex">
+        <KeyRound className="h-3.5 w-3.5" /> Invite only
+      </div>
       <h1 className="font-display text-3xl font-black uppercase tracking-tight">
-        Join Strive Elite
+        Activate your membership
       </h1>
       <p className="mt-1.5 text-sm text-white/50">
-        Create your account and start developing.
+        Enter the invite code your coach sent you to create your Strive Elite
+        account.
       </p>
 
-      <div className="mt-6 grid grid-cols-2 gap-3">
-        <RoleTab
-          active={role === "player"}
-          onClick={() => setRole("player")}
-          icon={<User className="h-4 w-4" />}
-          label="I'm a Player / Parent"
-        />
-        <RoleTab
-          active={role === "coach"}
-          onClick={() => setRole("coach")}
-          icon={<Users className="h-4 w-4" />}
-          label="I'm a Coach"
-        />
-      </div>
-
-      <form onSubmit={onSubmit} className="mt-5 space-y-4">
+      <form onSubmit={onSubmit} className="mt-6 space-y-4">
         <Input
-          label="Full name"
+          label="Invite code"
+          value={code}
+          onChange={(v) => setCode(v.toUpperCase())}
+          placeholder="STRIVE-XXXXXX"
+          autoComplete="off"
+        />
+        <Input
+          label="Player name"
           value={fullName}
           onChange={setFullName}
-          placeholder={role === "coach" ? "Coach name" : "Player name"}
+          placeholder="Player's full name"
           autoComplete="name"
         />
         <Input
@@ -134,7 +114,7 @@ export function SignupForm({ configured }: { configured: boolean }) {
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            "Create account"
+            "Create my account"
           )}
         </button>
       </form>
@@ -143,6 +123,12 @@ export function SignupForm({ configured }: { configured: boolean }) {
         Already have an account?{" "}
         <Link href="/login" className="text-accent hover:underline">
           Sign in
+        </Link>
+      </p>
+      <p className="mt-2 text-center text-xs text-white/30">
+        Don&apos;t have a code?{" "}
+        <Link href="/pricing" className="text-white/50 hover:text-accent">
+          See membership options
         </Link>
       </p>
 
@@ -162,34 +148,6 @@ export function SignupForm({ configured }: { configured: boolean }) {
         </div>
       )}
     </div>
-  );
-}
-
-function RoleTab({
-  active,
-  onClick,
-  icon,
-  label,
-}: {
-  active: boolean;
-  onClick: () => void;
-  icon: React.ReactNode;
-  label: string;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "flex flex-col items-start gap-2 rounded-xl border p-3 text-left transition-all",
-        active
-          ? "border-accent/40 bg-accent/[0.06] text-bone"
-          : "border-white/10 bg-white/[0.02] text-white/50 hover:border-white/20"
-      )}
-    >
-      <span className={active ? "text-accent" : "text-white/40"}>{icon}</span>
-      <span className="text-xs font-medium leading-tight">{label}</span>
-    </button>
   );
 }
 

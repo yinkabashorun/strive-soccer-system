@@ -16,6 +16,8 @@ import {
 } from "@/lib/elite/data";
 import { Avatar } from "@/components/Avatar";
 import { StatTile } from "@/components/elite/StatTile";
+import { InvitePanel } from "@/components/elite/InvitePanel";
+import { listInviteCodes } from "@/lib/elite/invite-actions";
 import { cn, relativeDay } from "@/lib/utils";
 
 export default async function CoachDashboard() {
@@ -38,6 +40,8 @@ export default async function CoachDashboard() {
       };
     })
   );
+
+  const inviteCodes = await listInviteCodes();
 
   const avgHw =
     cards.length > 0
@@ -70,6 +74,8 @@ export default async function CoachDashboard() {
         <StatTile label="Avg homework" value={`${avgHw}%`} sub="This week" />
         <StatTile label="Film to review" value={totalReview} sub="Awaiting notes" />
       </section>
+
+      <InvitePanel initial={inviteCodes} />
 
       <section>
         <h2 className="mb-3 flex items-center gap-2 font-display text-xl font-bold uppercase tracking-tight">

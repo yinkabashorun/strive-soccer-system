@@ -30,6 +30,7 @@ import { ProgressPanel } from "@/components/elite/ProgressPanel";
 import { SessionNotesStudio } from "@/components/elite/SessionNotesStudio";
 import { EditableChips } from "@/components/elite/EditableChips";
 import { QuickComposer } from "@/components/elite/QuickComposer";
+import { StatusControl } from "@/components/elite/StatusControl";
 import { cn, formatSessionDate, relativeDay, timeAgo } from "@/lib/utils";
 
 export default async function PlayerProfile({
@@ -178,6 +179,11 @@ export default async function PlayerProfile({
 
         {/* Side column */}
         <div className="space-y-5 lg:col-span-2">
+          <StatusControl
+            playerId={player.id}
+            initial={player.subscription_status}
+          />
+
           {/* Today's focus */}
           <div className="rounded-3xl border border-accent/20 bg-accent/[0.05] p-5">
             <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">

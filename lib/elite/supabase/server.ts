@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { createClient as createAdminClient } from "@supabase/supabase-js";
 
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
@@ -38,21 +39,14 @@ export function createClient() {
   });
 }
 
-// Service-role client for privileged server work (webhooks, admin writes).
-// Never expose this to the browser.
+// Service-role client for privileged server work (webhooks, admin writes,
+// coach bootstrap). A true admin client — no user cookies — so it reliably
+// bypasses RLS. Never expose this to the browser.
 export function createServiceClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !serviceKey) return null;
-  const cookieStore = cookies();
-  return createServerClient(url, serviceKey, {
-    cookies: {
-      getAll() {
-        return cookieStore.getAll();
-      },
-      setAll() {
-        /* no-op for service client */
-      },
-    },
+  return createAdminClient(url, serviceKey, {
+    auth: { autoRefreshToken: false, persistSession: false },
   });
 }

@@ -28,16 +28,11 @@ const config: Config = {
         muted: "#8a8a92",
       },
       fontFamily: {
-        sans: [
-          "ui-sans-serif",
-          "system-ui",
-          "-apple-system",
-          "Segoe UI",
-          "Roboto",
-          "Inter",
-          "sans-serif",
-        ],
-        display: ["ui-sans-serif", "system-ui", "sans-serif"],
+        // Barlow / Barlow Condensed = Strive Soccer FC brand type.
+        // Loaded via <link> in app/layout.tsx (no build-time fetch).
+        sans: ["Barlow", "ui-sans-serif", "system-ui", "-apple-system", "sans-serif"],
+        body: ["Barlow", "ui-sans-serif", "system-ui", "sans-serif"],
+        display: ["'Barlow Condensed'", "ui-sans-serif", "system-ui", "sans-serif"],
         mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       },
       letterSpacing: {
@@ -46,6 +41,8 @@ const config: Config = {
       boxShadow: {
         glow: "0 0 0 1px rgba(229,255,61,0.15), 0 0 40px -10px rgba(229,255,61,0.35)",
         card: "0 1px 0 0 rgba(255,255,255,0.04) inset, 0 30px 60px -30px rgba(0,0,0,0.8)",
+        soft: "0 10px 40px -20px rgba(0,0,0,0.6)",
+        lift: "0 20px 50px -25px rgba(0,0,0,0.85)",
       },
       backgroundImage: {
         "grid-faint":
@@ -53,9 +50,14 @@ const config: Config = {
         "radial-spot":
           "radial-gradient(60% 60% at 50% 0%, rgba(229,255,61,0.10) 0%, rgba(0,0,0,0) 70%)",
       },
+      borderRadius: {
+        "4xl": "2rem",
+      },
       animation: {
         "pulse-soft": "pulse-soft 2.4s ease-in-out infinite",
         marquee: "marquee 40s linear infinite",
+        "fade-up": "fade-up 0.6s cubic-bezier(0.16,1,0.3,1) both",
+        "fade-in": "fade-in 0.5s ease-out both",
       },
       keyframes: {
         "pulse-soft": {
@@ -65,6 +67,14 @@ const config: Config = {
         marquee: {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: "translateX(-50%)" },
+        },
+        "fade-up": {
+          "0%": { opacity: "0", transform: "translateY(16px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "fade-in": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
         },
       },
     },

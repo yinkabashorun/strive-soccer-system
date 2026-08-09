@@ -34,6 +34,43 @@ export function initials(name: string) {
     .toUpperCase();
 }
 
+export function formatSessionDate(iso: string | null): string {
+  if (!iso) return "To be scheduled";
+  const d = new Date(iso);
+  return d.toLocaleDateString("en-US", {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+}
+
+export function relativeDay(iso: string | null): string {
+  if (!iso) return "TBD";
+  const d = new Date(iso);
+  const now = new Date();
+  const days = Math.round(
+    (d.setHours(0, 0, 0, 0) - now.setHours(0, 0, 0, 0)) / 86400000
+  );
+  if (days === 0) return "Today";
+  if (days === 1) return "Tomorrow";
+  if (days === -1) return "Yesterday";
+  if (days > 1 && days < 7) return `In ${days} days`;
+  if (days < 0) return `${Math.abs(days)} days ago`;
+  return new Date(iso).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
+}
+
+export function greeting(): string {
+  const h = new Date().getHours();
+  if (h < 12) return "Good morning";
+  if (h < 18) return "Good afternoon";
+  return "Good evening";
+}
+
 export function timeAgo(iso: string) {
   const then = new Date(iso).getTime();
   const now = Date.now();

@@ -127,9 +127,12 @@ export function SignupForm({ configured }: { configured: boolean }) {
       </p>
       <p className="mt-2 text-center text-xs text-white/30">
         Don&apos;t have a code?{" "}
-        <Link href="/pricing" className="text-white/50 hover:text-accent">
-          See membership options
-        </Link>
+        <a
+          href="https://strivesoccer100x.com"
+          className="text-white/50 hover:text-accent"
+        >
+          Apply to join
+        </a>
       </p>
 
       {!configured && (

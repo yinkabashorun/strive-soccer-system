@@ -1,5 +1,9 @@
 import { cookies } from "next/headers";
-import { createClient, isSupabaseConfigured } from "./supabase/server";
+import {
+  createClient,
+  createServiceClient,
+  isSupabaseConfigured,
+} from "./supabase/server";
 import type { Profile, Role } from "./types";
 import { DEMO_COACH, DEMO_PLAYERS, DEMO_PLAYER_ID } from "./demo";
 
@@ -8,6 +12,18 @@ import { DEMO_COACH, DEMO_PLAYERS, DEMO_PLAYER_ID } from "./demo";
 // screen so the deployed app is instantly tourable.
 
 export const DEMO_COOKIE = "strive_demo_role";
+
+// Emails that should always be coaches. Set STRIVE_COACH_EMAILS in the
+// environment (comma-separated). This is how the owner — and any future
+// assistant coaches — get coach access without touching the database.
+const COACH_EMAILS = (process.env.STRIVE_COACH_EMAILS || "")
+  .split(",")
+  .map((s) => s.trim().toLowerCase())
+  .filter(Boolean);
+
+function isAllowlistedCoach(email?: string | null): boolean {
+  return Boolean(email && COACH_EMAILS.includes(email.toLowerCase()));
+}
 
 export type Viewer = {
   profile: Profile;
@@ -59,9 +75,33 @@ export async function getViewer(): Promise<Viewer | null> {
         .from("elite_profiles")
         .select("*")
         .eq("id", user.id)
-        .single();
+        .maybeSingle();
 
-      const role: Role = (profile?.role as Role) ?? "player";
+      let role: Role = (profile?.role as Role) ?? "player";
+
+      // Coach bootstrap: an allowlisted email is always a coach. Self-heal
+      // the profile row (via the service role) so RLS also grants coach
+      // access, then treat this request as a coach. Idempotent.
+      if (role !== "coach" && isAllowlistedCoach(user.email)) {
+        const admin = createServiceClient();
+        if (admin) {
+          await admin.from("elite_profiles").upsert(
+            {
+              id: user.id,
+              role: "coach",
+              full_name:
+                profile?.full_name ||
+                (user.user_metadata?.full_name as string) ||
+                "Coach",
+              email: user.email ?? "",
+              avatar_color: profile?.avatar_color ?? "#E5FF3D",
+            },
+            { onConflict: "id" }
+          );
+        }
+        role = "coach";
+      }
+
       let playerId: string | null = null;
       if (role === "player") {
         const { data: player } = await supabase

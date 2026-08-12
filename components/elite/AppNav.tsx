@@ -12,9 +12,11 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Wordmark } from "./Wordmark";
+import { NotificationBell } from "./NotificationBell";
 import { Avatar } from "@/components/Avatar";
 import { cn } from "@/lib/utils";
 import { signOut } from "@/lib/elite/auth-actions";
+import type { EliteNotification } from "@/lib/elite/types";
 
 export type NavItem = { href: string; label: string; icon: string };
 
@@ -33,11 +35,13 @@ export function AppNav({
   name,
   color,
   roleLabel,
+  notifications,
 }: {
   items: NavItem[];
   name: string;
   color?: string;
   roleLabel: string;
+  notifications?: EliteNotification[];
 }) {
   const pathname = usePathname();
   const isActive = (href: string) =>
@@ -47,11 +51,14 @@ export function AppNav({
     <>
       {/* Desktop rail */}
       <aside className="sticky top-0 hidden h-screen w-[248px] shrink-0 flex-col border-r border-white/5 bg-black/40 px-4 py-6 backdrop-blur-md lg:flex">
-        <div className="px-2">
-          <Wordmark size="md" />
-          <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/30">
-            {roleLabel}
+        <div className="flex items-start justify-between px-2">
+          <div>
+            <Wordmark size="md" />
+            <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/30">
+              {roleLabel}
+            </div>
           </div>
+          {notifications && <NotificationBell initial={notifications} />}
         </div>
 
         <nav className="mt-8 flex flex-col gap-1">
@@ -106,7 +113,8 @@ export function AppNav({
       {/* Mobile top bar */}
       <div className="sticky top-0 z-40 flex items-center justify-between border-b border-white/5 bg-black/70 px-5 py-3 backdrop-blur-xl pt-safe lg:hidden">
         <Wordmark size="sm" />
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          {notifications && <NotificationBell initial={notifications} />}
           <Avatar name={name} color={color} size={32} />
           <form action={signOut}>
             <button

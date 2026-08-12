@@ -65,6 +65,52 @@ export async function sendCoachMessage(playerId: string, body: string) {
   return { ok: true };
 }
 
+// Clone a week's drills from one player to another (or to a new week for
+// the same player). Uses the elite_duplicate_week RPC when available, with
+// a TS fallback for before 009_player_loop.sql is applied.
+export async function duplicateWeek(input: {
+  fromPlayerId: string;
+  week: number;
+  toPlayerId: string;
+  toWeek: number;
+}) {
+  if (!(await requireCoach())) return { ok: false as const, cloned: 0 };
+  const supabase = createClient();
+  if (!supabase) return { ok: true as const, cloned: 0 }; // demo
+
+  const { data, error } = await supabase.rpc("elite_duplicate_week", {
+    p_from_player: input.fromPlayerId,
+    p_week: input.week,
+    p_to_player: input.toPlayerId,
+    p_to_week: input.toWeek,
+  });
+  if (!error) {
+    revalidatePath(`/coach/players/${input.toPlayerId}`);
+    return { ok: true as const, cloned: (data as number) ?? 0 };
+  }
+
+  // fallback: clone in application code
+  const { data: rows } = await supabase
+    .from("elite_homework")
+    .select("title, exercise, reps, duration_min, video_url, notes, sort")
+    .eq("player_id", input.fromPlayerId)
+    .eq("week", input.week)
+    .order("sort");
+  if (!rows || rows.length === 0) return { ok: true as const, cloned: 0 };
+
+  await supabase
+    .from("elite_homework")
+    .delete()
+    .eq("player_id", input.toPlayerId)
+    .eq("week", input.toWeek);
+
+  await supabase.from("elite_homework").insert(
+    rows.map((r) => ({ ...r, player_id: input.toPlayerId, week: input.toWeek }))
+  );
+  revalidatePath(`/coach/players/${input.toPlayerId}`);
+  return { ok: true as const, cloned: rows.length };
+}
+
 export async function setFilmNotes(filmId: string, playerId: string, notes: string) {
   if (!(await requireCoach())) return { ok: false };
   const supabase = createClient();

@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { AppNav, type NavItem } from "@/components/elite/AppNav";
 import { Wordmark } from "@/components/elite/Wordmark";
 import { getViewer } from "@/lib/elite/session";
-import { getPlayer } from "@/lib/elite/data";
+import { getNotifications, getPlayer } from "@/lib/elite/data";
 import { signOut } from "@/lib/elite/auth-actions";
 
 const PLAYER_NAV: NavItem[] = [
@@ -44,6 +44,8 @@ export default async function PlayerLayout({
     );
   }
 
+  const notifications = await getNotifications(viewer.playerId);
+
   return (
     <div className="min-h-[100svh] bg-black text-bone lg:flex">
       <AppNav
@@ -51,6 +53,7 @@ export default async function PlayerLayout({
         name={viewer.profile.full_name}
         color={viewer.profile.avatar_color}
         roleLabel="Player"
+        notifications={notifications}
       />
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-28 pt-5 sm:px-6 lg:pb-12 lg:pt-8">
         {children}

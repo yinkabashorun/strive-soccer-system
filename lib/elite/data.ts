@@ -12,12 +12,15 @@ import {
 import type {
   Achievement,
   CoachNote,
+  EliteNotification,
   FilmUpload,
   Homework,
   Message,
   ParentReport,
   Player,
+  PlayerSummary,
   Progress,
+  RosterRow,
 } from "./types";
 
 // Server-side data access for Strive Elite. Reads from Supabase when
@@ -139,6 +142,173 @@ export async function getParentReports(
     .eq("player_id", playerId)
     .order("created_at", { ascending: false });
   return (data as ParentReport[] | null) ?? [];
+}
+
+// ---------------------------------------------------------------------------
+// Player-loop metrics
+// ---------------------------------------------------------------------------
+
+const DEFAULT_DRILL_MIN = 15;
+
+function nyDay(iso: string): string {
+  // America/New_York local calendar date, YYYY-MM-DD.
+  return new Date(iso).toLocaleDateString("en-CA", {
+    timeZone: "America/New_York",
+  });
+}
+
+function shiftDay(day: string, delta: number): string {
+  const d = new Date(day + "T00:00:00Z");
+  d.setUTCDate(d.getUTCDate() + delta);
+  return d.toISOString().slice(0, 10);
+}
+
+// Pure TS equivalent of the elite_player_summary RPC — used in demo mode and
+// as a fallback before 009_player_loop.sql is applied.
+export function computeSummary(hw: Homework[]): PlayerSummary {
+  const completed = hw.filter((h) => h.completed && h.completed_at);
+
+  // streak: consecutive NY days ending today or yesterday
+  const days = new Set(completed.map((h) => nyDay(h.completed_at as string)));
+  const todayNY = new Date().toLocaleDateString("en-CA", {
+    timeZone: "America/New_York",
+  });
+  let cursor = days.has(todayNY) ? todayNY : shiftDay(todayNY, -1);
+  let streak = 0;
+  while (days.has(cursor)) {
+    streak++;
+    cursor = shiftDay(cursor, -1);
+  }
+
+  // sessions: weeks where every assigned drill is completed
+  const byWeek = new Map<number, { total: number; done: number }>();
+  for (const h of hw) {
+    const w = byWeek.get(h.week) ?? { total: 0, done: 0 };
+    w.total++;
+    if (h.completed) w.done++;
+    byWeek.set(h.week, w);
+  }
+  let sessions = 0;
+  for (const w of byWeek.values()) if (w.total > 0 && w.done === w.total) sessions++;
+
+  const total = hw.length;
+  const done = completed.length;
+  const minutes = completed.reduce(
+    (s, h) => s + (h.duration_min ?? DEFAULT_DRILL_MIN),
+    0
+  );
+  const lastActive = completed.reduce<string | null>(
+    (m, h) => (!m || (h.completed_at as string) > m ? (h.completed_at as string) : m),
+    null
+  );
+
+  return {
+    current_streak: streak,
+    sessions_completed: sessions,
+    homework_total: total,
+    homework_completed: done,
+    homework_pct: total > 0 ? Math.round((done / total) * 100) : 0,
+    training_minutes: minutes,
+    last_active: lastActive,
+  };
+}
+
+export async function getPlayerSummary(playerId: string): Promise<PlayerSummary> {
+  const supabase = createClient();
+  if (supabase) {
+    const { data, error } = await supabase.rpc("elite_player_summary", {
+      p_player_id: playerId,
+    });
+    const row = Array.isArray(data) ? data[0] : data;
+    if (!error && row) {
+      return {
+        current_streak: row.current_streak ?? 0,
+        sessions_completed: row.sessions_completed ?? 0,
+        homework_total: row.homework_total ?? 0,
+        homework_completed: row.homework_completed ?? 0,
+        homework_pct: row.homework_pct ?? 0,
+        training_minutes: row.training_minutes ?? 0,
+        last_active: row.last_active ?? null,
+      };
+    }
+  }
+  // fallback (demo / pre-migration)
+  return computeSummary(await getHomework(playerId));
+}
+
+export async function getNotifications(
+  playerId: string
+): Promise<EliteNotification[]> {
+  const supabase = createClient();
+  if (!supabase) {
+    // demo: one sample unread notification so the bell is visible
+    return [
+      {
+        id: "demo-notif-1",
+        player_id: playerId,
+        kind: "new_week",
+        title: "Week 7 is ready",
+        body: "Scan before you receive — two looks minimum.",
+        read: false,
+        created_at: new Date().toISOString(),
+      },
+    ];
+  }
+  const { data, error } = await supabase
+    .from("elite_notifications")
+    .select("*")
+    .eq("player_id", playerId)
+    .order("created_at", { ascending: false })
+    .limit(30);
+  if (error) return []; // table not created yet
+  return (data as EliteNotification[] | null) ?? [];
+}
+
+export async function getCoachRoster(): Promise<RosterRow[]> {
+  const supabase = createClient();
+  if (supabase) {
+    const { data, error } = await supabase.rpc("elite_coach_roster");
+    if (!error && Array.isArray(data)) {
+      return data as RosterRow[];
+    }
+    // fallback: per-player compute (pre-migration)
+    const players = await getPlayers();
+    return Promise.all(
+      players.map(async (p) => {
+        const s = computeSummary(await getHomework(p.id));
+        return {
+          player_id: p.id,
+          full_name: p.full_name,
+          avatar_color: p.avatar_color,
+          current_week: p.current_week,
+          subscription_status: p.subscription_status,
+          last_active: s.last_active,
+          current_streak: s.current_streak,
+          homework_pct: s.homework_pct,
+          training_minutes: s.training_minutes,
+          sessions_completed: s.sessions_completed,
+        };
+      })
+    );
+  }
+  // demo
+  return Promise.all(
+    DEMO_PLAYERS.map(async (p) => {
+      const s = computeSummary(await getHomework(p.id));
+      return {
+        player_id: p.id,
+        full_name: p.full_name,
+        avatar_color: p.avatar_color,
+        current_week: p.current_week,
+        subscription_status: p.subscription_status,
+        last_active: s.last_active,
+        current_streak: s.current_streak,
+        homework_pct: s.homework_pct,
+        training_minutes: s.training_minutes,
+        sessions_completed: s.sessions_completed,
+      };
+    })
+  );
 }
 
 // Derived stats used across the dashboards.

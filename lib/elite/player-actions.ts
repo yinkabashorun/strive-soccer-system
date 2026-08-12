@@ -42,6 +42,32 @@ export async function recordFilm(input: {
   return { ok: true };
 }
 
+// Mark a single notification read.
+export async function markNotificationRead(id: string) {
+  const supabase = createClient();
+  if (supabase) {
+    await supabase.from("elite_notifications").update({ read: true }).eq("id", id);
+    revalidatePath("/dashboard");
+  }
+  return { ok: true };
+}
+
+// Mark all of the current player's notifications read.
+export async function markAllNotificationsRead() {
+  const viewer = await getViewer();
+  if (!viewer?.playerId) return { ok: false };
+  const supabase = createClient();
+  if (supabase) {
+    await supabase
+      .from("elite_notifications")
+      .update({ read: true })
+      .eq("player_id", viewer.playerId)
+      .eq("read", false);
+    revalidatePath("/dashboard");
+  }
+  return { ok: true };
+}
+
 // Player replies to their coach.
 export async function sendPlayerMessage(body: string) {
   const viewer = await getViewer();

@@ -20,12 +20,12 @@ import {
   getHomework,
   getMessages,
   getPlayer,
+  getPlayerSummary,
   getProgress,
-  homeworkCompletion,
   overallProgress,
 } from "@/lib/elite/data";
 import { ProgressRing } from "@/components/elite/ProgressRing";
-import { HomeworkList } from "@/components/elite/HomeworkList";
+import { WeekList } from "@/components/elite/WeekList";
 import { StatTile } from "@/components/elite/StatTile";
 import { greeting, relativeDay, timeAgo } from "@/lib/utils";
 
@@ -46,14 +46,15 @@ export default async function DashboardPage() {
   const player = await getPlayer(viewer.playerId);
   if (!player) return null;
 
-  const [homework, progress, achievements, messages] = await Promise.all([
-    getHomework(player.id),
-    getProgress(player.id),
-    getAchievements(player.id),
-    getMessages(player.id),
-  ]);
+  const [homework, progress, achievements, messages, summary] =
+    await Promise.all([
+      getHomework(player.id),
+      getProgress(player.id),
+      getAchievements(player.id),
+      getMessages(player.id),
+      getPlayerSummary(player.id),
+    ]);
 
-  const hwPct = homeworkCompletion(homework);
   const overall = overallProgress(progress);
   const latestMessage = messages[0];
   const firstName = player.full_name.split(" ")[0];
@@ -86,27 +87,40 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      {/* Quick stats */}
+      {/* Loop metrics */}
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatTile label="Weekly" value={`${hwPct}%`} sub="Homework done" accent />
-        <StatTile label="Overall" value={overall} sub="Development score" />
-        <StatTile label="Week" value={player.current_week} sub="In the program" />
         <StatTile
           label="Streak"
-          value={achievements.length}
-          sub="Achievements"
+          value={summary.current_streak}
+          sub={summary.current_streak === 1 ? "day" : "days in a row"}
+          accent
+        />
+        <StatTile
+          label="Sessions"
+          value={summary.sessions_completed}
+          sub="Weeks completed"
+        />
+        <StatTile
+          label="Homework"
+          value={`${summary.homework_pct}%`}
+          sub="Completion"
+        />
+        <StatTile
+          label="Minutes"
+          value={summary.training_minutes}
+          sub="Trained"
         />
       </section>
 
-      {/* Homework + upcoming/coach column */}
+      {/* This week + upcoming/coach column */}
       <div className="grid gap-5 lg:grid-cols-5">
         <section className="lg:col-span-3">
-          <SectionHead
-            icon={Clipboard}
-            title="This week's homework"
-            href="/homework"
+          <SectionHead icon={Clipboard} title="This week" href="/homework" />
+          <WeekList
+            items={homework}
+            currentWeek={player.current_week}
+            showPast={false}
           />
-          <HomeworkList items={homework} />
         </section>
 
         <div className="space-y-5 lg:col-span-2">

@@ -50,11 +50,48 @@ export type Homework = {
   title: string;
   exercise: string;
   reps: string;
+  duration_min?: number; // minutes for this drill (009_player_loop adds the column)
   video_url: string | null;
   notes: string | null;
   completed: boolean;
   completed_at: string | null;
   sort: number;
+};
+
+// Rolled-up player-loop metrics (elite_player_summary RPC / TS fallback).
+export type PlayerSummary = {
+  current_streak: number; // consecutive America/New_York days with >=1 done
+  sessions_completed: number; // weeks fully completed
+  homework_total: number;
+  homework_completed: number;
+  homework_pct: number; // 0-100
+  training_minutes: number; // sum of duration_min over completed drills
+  last_active: string | null; // ISO of most recent completion
+};
+
+// In-app notification (elite_notifications).
+export type EliteNotification = {
+  id: string;
+  player_id: string;
+  kind: string; // e.g. "new_week"
+  title: string;
+  body: string;
+  read: boolean;
+  created_at: string;
+};
+
+// One roster row for the coach (elite_coach_roster RPC / TS fallback).
+export type RosterRow = {
+  player_id: string;
+  full_name: string;
+  avatar_color: string;
+  current_week: number;
+  subscription_status: SubscriptionStatus;
+  last_active: string | null;
+  current_streak: number;
+  homework_pct: number;
+  training_minutes: number;
+  sessions_completed: number;
 };
 
 // The seven tracked development pillars.

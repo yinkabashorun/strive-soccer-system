@@ -31,6 +31,7 @@ import { SessionNotesStudio } from "@/components/elite/SessionNotesStudio";
 import { EditableChips } from "@/components/elite/EditableChips";
 import { QuickComposer } from "@/components/elite/QuickComposer";
 import { StatusControl } from "@/components/elite/StatusControl";
+import { DuplicateWeekButton } from "@/components/elite/DuplicateWeekButton";
 import { cn, formatSessionDate, relativeDay, timeAgo } from "@/lib/utils";
 
 export default async function PlayerProfile({
@@ -182,6 +183,11 @@ export default async function PlayerProfile({
           <StatusControl
             playerId={player.id}
             initial={player.subscription_status}
+          />
+
+          <DuplicateWeekButton
+            playerId={player.id}
+            currentWeek={player.current_week}
           />
 
           {/* Today's focus */}

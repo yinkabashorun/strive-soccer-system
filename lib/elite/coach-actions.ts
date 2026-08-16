@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "./supabase/server";
 import { getViewer } from "./session";
+import { sendPlayerEmail } from "./email";
 import type { GeneratedPlan } from "./types";
 
 async function requireCoach() {
@@ -60,6 +61,48 @@ export async function sendCoachMessage(playerId: string, body: string) {
       from_name: viewer.profile.full_name,
       body,
     });
+    // In-app notification + email for the player (best-effort).
+    await supabase.from("elite_notifications").insert({
+      player_id: playerId,
+      kind: "coach_message",
+      title: "Message from your coach",
+      body: body.slice(0, 140),
+    });
+    await sendPlayerEmail(playerId, {
+      subject: "Your coach sent you a message",
+      body: `${viewer.profile.full_name}: "${body}"`,
+    }).catch(() => undefined);
+    revalidatePath(`/coach/players/${playerId}`);
+  }
+  return { ok: true };
+}
+
+// Coach replies to a player's weekly check-in.
+export async function addCheckinFeedback(
+  checkinId: string,
+  playerId: string,
+  feedback: string
+) {
+  if (!(await requireCoach())) return { ok: false };
+  const supabase = createClient();
+  if (supabase) {
+    await supabase
+      .from("elite_checkins")
+      .update({
+        coach_feedback: feedback.trim(),
+        coach_feedback_at: new Date().toISOString(),
+      })
+      .eq("id", checkinId);
+    await supabase.from("elite_notifications").insert({
+      player_id: playerId,
+      kind: "checkin_feedback",
+      title: "Coach replied to your check-in",
+      body: feedback.slice(0, 140),
+    });
+    await sendPlayerEmail(playerId, {
+      subject: "Your coach replied to your check-in",
+      body: feedback,
+    }).catch(() => undefined);
     revalidatePath(`/coach/players/${playerId}`);
   }
   return { ok: true };
@@ -258,6 +301,13 @@ export async function applyGeneratedPlan(
       last_session_at: new Date().toISOString(),
     })
     .eq("id", playerId);
+
+  // 7) tell the player their new week is ready (email — the in-app
+  //    notification is fired by the elite_notify_new_week DB trigger).
+  await sendPlayerEmail(playerId, {
+    subject: `Week ${week} is ready`,
+    body: `Your new training week is live.\n\nThis week's focus: ${plan.weekly_focus}\n\nFour sessions, each starting with your plyometric warm-up. Open Strive Elite to get going.`,
+  }).catch(() => undefined);
 
   revalidatePath(`/coach/players/${playerId}`);
   return { ok: true };

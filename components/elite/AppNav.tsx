@@ -8,6 +8,7 @@ import {
   Film,
   Home,
   LogOut,
+  MessageSquare,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -26,6 +27,7 @@ const ICONS: Record<string, LucideIcon> = {
   BarChart3,
   Film,
   Users,
+  MessageSquare,
 };
 
 // Responsive shell navigation: a left rail on desktop, a thumb-friendly

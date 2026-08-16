@@ -41,6 +41,27 @@ export type Player = {
   last_session_at: string | null; // ISO
   joined_at: string;
   subscription_status: SubscriptionStatus;
+  // Intake + AI memory (012_intake_memory_checkins)
+  club?: string;
+  dominant_foot?: string;
+  self_assessment?: Partial<Record<ProgressMetric, number>>; // 0-100 self ratings
+  coach_memory?: string; // coach's freeform memory note, always fed to the AI
+  onboarded_at?: string | null; // ISO; null = intake not completed yet
+};
+
+// A player's structured weekly check-in (elite_checkins).
+export type Checkin = {
+  id: string;
+  player_id: string;
+  week: number;
+  rating: number | null; // 1-5, how the week went
+  energy: number | null; // 1-5
+  went_well: string;
+  struggled: string;
+  note: string;
+  coach_feedback: string;
+  coach_feedback_at: string | null;
+  created_at: string;
 };
 
 export type Homework = {
@@ -115,6 +136,17 @@ export type Progress = {
   value: number; // 0-100
   prev_value: number; // previous rating, for trend deltas
   updated_at: string;
+};
+
+// One historical rating point (elite_progress_history) — powers the
+// season-long trend + AI memory.
+export type ProgressPoint = {
+  id: string;
+  player_id: string;
+  metric: ProgressMetric;
+  value: number;
+  week: number;
+  created_at: string;
 };
 
 export type FilmUpload = {

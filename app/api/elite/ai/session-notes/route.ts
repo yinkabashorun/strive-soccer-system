@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getViewer } from "@/lib/elite/session";
 import { getPlayer } from "@/lib/elite/data";
 import { generatePlanFromNotes } from "@/lib/elite/ai-coach";
+import { buildPlayerMemory } from "@/lib/elite/memory";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -29,6 +30,17 @@ export async function POST(req: Request) {
     ? (await getPlayer(body.playerId)) ?? undefined
     : undefined;
 
-  const { plan, source } = await generatePlanFromNotes(notes, player);
+  // Assemble the player's training memory so the AI plans around their
+  // real history, not just the notes. Best-effort — never blocks generation.
+  let memory = "";
+  if (player) {
+    try {
+      memory = await buildPlayerMemory(player);
+    } catch {
+      memory = "";
+    }
+  }
+
+  const { plan, source } = await generatePlanFromNotes(notes, player, memory);
   return NextResponse.json({ plan, source });
 }

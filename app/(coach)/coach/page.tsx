@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowUpRight, Clock, Flame, Users } from "lucide-react";
 import { getViewer } from "@/lib/elite/session";
-import { getCoachRoster } from "@/lib/elite/data";
+import { getCoachInbox, getCoachRoster } from "@/lib/elite/data";
 import { Avatar } from "@/components/Avatar";
 import { StatTile } from "@/components/elite/StatTile";
 import { InvitePanel } from "@/components/elite/InvitePanel";
@@ -11,10 +11,11 @@ import { cn, relativeDay } from "@/lib/utils";
 export default async function CoachDashboard() {
   const viewer = await getViewer();
 
-  // One-call rollup: every player + their loop metrics.
-  const [roster, inviteCodes] = await Promise.all([
+  // One-call rollup: every player + their loop metrics + what needs a reply.
+  const [roster, inviteCodes, inbox] = await Promise.all([
     getCoachRoster(),
     listInviteCodes(),
+    getCoachInbox(),
   ]);
 
   const avgHw =
@@ -22,7 +23,7 @@ export default async function CoachDashboard() {
       ? Math.round(roster.reduce((s, r) => s + r.homework_pct, 0) / roster.length)
       : 0;
   const active = roster.filter((r) => r.subscription_status === "active").length;
-  const onStreak = roster.filter((r) => r.current_streak > 0).length;
+  const toAnswer = inbox.pendingCheckins + inbox.unreadMessages;
 
   const first = viewer?.profile.full_name.split(" ").slice(-1)[0] ?? "Coach";
 
@@ -44,7 +45,12 @@ export default async function CoachDashboard() {
         <StatTile label="Players" value={roster.length} sub="On the program" accent />
         <StatTile label="Active" value={active} sub="Paying members" />
         <StatTile label="Avg homework" value={`${avgHw}%`} sub="Completion" />
-        <StatTile label="On a streak" value={onStreak} sub="Training daily" />
+        <StatTile
+          label="To answer"
+          value={toAnswer}
+          sub="Check-ins + messages"
+          accent={toAnswer > 0}
+        />
       </section>
 
       <InvitePanel initial={inviteCodes} />
@@ -61,7 +67,10 @@ export default async function CoachDashboard() {
           </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {roster.map((r) => (
+            {roster.map((r) => {
+              const needs = inbox.byPlayer[r.player_id];
+              const needsCount = needs ? needs.checkins + needs.messages : 0;
+              return (
               <Link
                 key={r.player_id}
                 href={`/coach/players/${r.player_id}`}
@@ -80,6 +89,11 @@ export default async function CoachDashboard() {
                       Week {r.current_week}
                     </div>
                   </div>
+                  {needsCount > 0 && (
+                    <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold text-black">
+                      {needsCount} new
+                    </span>
+                  )}
                   <StatusDot status={r.subscription_status} />
                 </div>
 
@@ -113,7 +127,8 @@ export default async function CoachDashboard() {
                   </span>
                 </div>
               </Link>
-            ))}
+              );
+            })}
           </div>
         )}
       </section>

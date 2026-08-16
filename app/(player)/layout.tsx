@@ -9,6 +9,7 @@ const PLAYER_NAV: NavItem[] = [
   { href: "/dashboard", label: "Home", icon: "Home" },
   { href: "/homework", label: "Training", icon: "Clipboard" },
   { href: "/progress", label: "Progress", icon: "BarChart3" },
+  { href: "/messages", label: "Coach", icon: "MessageSquare" },
 ];
 
 export default async function PlayerLayout({
@@ -30,9 +31,18 @@ export default async function PlayerLayout({
     );
   }
 
+  const player = await getPlayer(viewer.playerId);
+
+  // Onboarding gate: a redeemed player who hasn't completed intake is sent
+  // to the standalone onboarding flow first (demo players are pre-onboarded).
+  // Strict `=== null` so that before 012 is applied (column absent → the key
+  // is undefined) we degrade to the old behavior instead of trapping players.
+  if (!viewer.demo && player && player.onboarded_at === null) {
+    redirect("/onboarding");
+  }
+
   // Membership gate: access requires an active/trialing subscription. This
   // lets the coach revoke access by flipping a player to inactive.
-  const player = await getPlayer(viewer.playerId);
   const status = player?.subscription_status ?? "none";
   if (status !== "active" && status !== "trialing") {
     return (

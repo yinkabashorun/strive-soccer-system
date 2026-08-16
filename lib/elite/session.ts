@@ -79,16 +79,16 @@ export async function getViewer(): Promise<Viewer | null> {
 
       let role: Role = (profile?.role as Role) ?? "player";
 
-      // Coach bootstrap: an allowlisted email is always a coach. Self-heal
-      // the profile row (via the service role) so RLS also grants coach
-      // access, then treat this request as a coach. Idempotent.
-      if (role !== "coach" && isAllowlistedCoach(user.email)) {
+      // Owner bootstrap: an allowlisted email is always an ADMIN — the head
+      // coach who sees every player across all coaches. Self-heal the profile
+      // row (via the service role) so RLS grants full access. Idempotent.
+      if (role !== "admin" && isAllowlistedCoach(user.email)) {
         const admin = createServiceClient();
         if (admin) {
           await admin.from("elite_profiles").upsert(
             {
               id: user.id,
-              role: "coach",
+              role: "admin",
               full_name:
                 profile?.full_name ||
                 (user.user_metadata?.full_name as string) ||
@@ -99,7 +99,7 @@ export async function getViewer(): Promise<Viewer | null> {
             { onConflict: "id" }
           );
         }
-        role = "coach";
+        role = "admin";
       }
 
       let playerId: string | null = null;

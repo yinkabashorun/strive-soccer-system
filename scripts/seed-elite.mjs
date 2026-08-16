@@ -251,6 +251,7 @@ async function main() {
         parent_name: p.parent_name,
         parent_email: p.email,
         subscription_status: p.subscription_status,
+        onboarded_at: new Date().toISOString(),
       })
       .select("id")
       .single();

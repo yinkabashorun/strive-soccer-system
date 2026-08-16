@@ -15,6 +15,7 @@ import {
 import { getViewer } from "@/lib/elite/session";
 import {
   getAchievements,
+  getCheckins,
   getHomework,
   getMessages,
   getPlayer,
@@ -24,6 +25,7 @@ import {
 } from "@/lib/elite/data";
 import { ProgressRing } from "@/components/elite/ProgressRing";
 import { WeekList } from "@/components/elite/WeekList";
+import { CheckinCard } from "@/components/elite/CheckinCard";
 import { StatTile } from "@/components/elite/StatTile";
 import { greeting, relativeDay, timeAgo } from "@/lib/utils";
 
@@ -44,14 +46,19 @@ export default async function DashboardPage() {
   const player = await getPlayer(viewer.playerId);
   if (!player) return null;
 
-  const [homework, progress, achievements, messages, summary] =
+  const [homework, progress, achievements, messages, summary, checkins] =
     await Promise.all([
       getHomework(player.id),
       getProgress(player.id),
       getAchievements(player.id),
       getMessages(player.id),
       getPlayerSummary(player.id),
+      getCheckins(player.id),
     ]);
+
+  const checkedInThisWeek = checkins.some(
+    (c) => c.week === player.current_week
+  );
 
   const overall = overallProgress(progress);
   const latestMessage = messages[0];
@@ -149,6 +156,9 @@ export default async function DashboardPage() {
               </div>
             </section>
           )}
+
+          {/* Weekly check-in */}
+          <CheckinCard week={player.current_week} alreadyDone={checkedInThisWeek} />
 
           {/* Plyometrics reminder */}
           <section className="rounded-3xl border border-red-500/20 bg-red-500/[0.04] p-5">

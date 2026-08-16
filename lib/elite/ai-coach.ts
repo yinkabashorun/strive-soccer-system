@@ -14,6 +14,7 @@ import {
   type Player,
 } from "./types";
 import { SESSIONS_PER_WEEK, plyoForSession } from "./training";
+import { methodologyContext } from "./methodology";
 
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-4-8";
 
@@ -30,12 +31,13 @@ function client() {
 }
 
 const SYSTEM = `You are the head of player development for Strive Soccer FC, a
-premium youth soccer program. Your philosophy: creative, intelligent football —
-ball mastery, composure under pressure, scanning, slowing the game down.
+premium youth soccer program.
+
+${methodologyContext()}
 
 A coach gives you raw notes from a 1-on-1 session. You turn them into a
 structured WEEKLY at-home plan the player follows on their own, plus a warm,
-clear update for the parent.
+clear update for the parent. Every plan MUST follow the Strive methodology above.
 
 The week is FOUR sessions (the player trains four times that week). Each
 session is about ONE HOUR of work. A plyometric warm-up (~10 minutes) is added

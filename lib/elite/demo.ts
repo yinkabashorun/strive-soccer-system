@@ -255,28 +255,28 @@ const plyo = (variant: number) =>
       exercise:
         "Pogo hops x20, tuck jumps x10, split-squat jumps x8 each leg. Land soft, explode up.",
       reps: "3 rounds",
-      duration_min: 8,
+      duration_min: 10,
     },
     {
       title: "Plyo warm-up — Lateral Power",
       exercise:
         "Lateral bounds x10 each side, skater hops x12 each side, squat jumps x12.",
       reps: "3 rounds",
-      duration_min: 8,
+      duration_min: 10,
     },
     {
       title: "Plyo warm-up — Quick Feet",
       exercise:
         "Ankle pogos x30, broad-jump-to-stick x6, single-leg hops x8 each leg.",
       reps: "3 rounds",
-      duration_min: 8,
+      duration_min: 10,
     },
     {
       title: "Plyo warm-up — Explosive",
       exercise:
         "Tuck jumps x10, split jumps x10 each leg, step-down-to-jump x6.",
       reps: "3 rounds",
-      duration_min: 8,
+      duration_min: 10,
     },
   ][variant - 1];
 
@@ -288,7 +288,7 @@ export const DEMO_HOMEWORK: Homework[] = [
       title: "Wall pass mastery",
       exercise: "Two-touch wall passes, alternating feet, scan between reps",
       reps: "200 total",
-      duration_min: 20,
+      duration_min: 50,
       session: 1,
       completed: true,
     },
@@ -298,7 +298,7 @@ export const DEMO_HOMEWORK: Homework[] = [
       title: "Scanning under pressure",
       exercise: "Shadow rondo — two shoulder checks before every touch",
       reps: "3 x 5 min",
-      duration_min: 15,
+      duration_min: 45,
       session: 2,
       completed: true,
     },
@@ -308,7 +308,7 @@ export const DEMO_HOMEWORK: Homework[] = [
       title: "Weak-foot finishing",
       exercise: "Left-foot finishes from the edge of the box, laces through",
       reps: "50 strikes",
-      duration_min: 20,
+      duration_min: 50,
       session: 3,
       notes: "Plant foot pointed at target.",
     },
@@ -318,7 +318,7 @@ export const DEMO_HOMEWORK: Homework[] = [
       title: "Study & apply",
       exercise: "Study Rodri's body shape before receiving, then 50 wall passes copying it.",
       reps: "1 clip + 50 reps",
-      duration_min: 20,
+      duration_min: 50,
       session: 4,
       video_url: "https://www.youtube.com/results?search_query=rodri+scanning",
     },

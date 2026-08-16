@@ -23,7 +23,7 @@ export const PLYO_WARMUPS: Drill[] = [
     exercise:
       "Pogo hops x20, tuck jumps x10, split-squat jumps x8 each leg. Land soft and quiet, explode straight back up.",
     reps: "3 rounds",
-    minutes: 8,
+    minutes: 10,
     notes: "In your room. Bare feet or trainers. Full recovery between rounds.",
   },
   {
@@ -31,7 +31,7 @@ export const PLYO_WARMUPS: Drill[] = [
     exercise:
       "Lateral bounds x10 each side, skater hops x12 each side, squat jumps x12. Stick every landing for one second.",
     reps: "3 rounds",
-    minutes: 8,
+    minutes: 10,
     notes: "Push off the outside foot, absorb quietly.",
   },
   {
@@ -39,7 +39,7 @@ export const PLYO_WARMUPS: Drill[] = [
     exercise:
       "Ankle pogos x30, broad-jump-to-stick x6, single-leg hops x8 each leg. Stay light and springy.",
     reps: "3 rounds",
-    minutes: 8,
+    minutes: 10,
     notes: "Minimal ground contact — think 'hot floor'.",
   },
   {
@@ -47,7 +47,7 @@ export const PLYO_WARMUPS: Drill[] = [
     exercise:
       "Tuck jumps x10, split jumps x10 each leg, step-down-to-jump off a low step x6. Maximum effort, soft landings.",
     reps: "3 rounds",
-    minutes: 8,
+    minutes: 10,
     notes: "Use the edge of a bed or a sturdy step for the step-downs.",
   },
 ];

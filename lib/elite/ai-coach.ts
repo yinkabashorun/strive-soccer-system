@@ -1,13 +1,19 @@
 // Strive Elite AI coaching engine.
 //
-// Turns a coach's plain-English session notes into a structured development
-// plan: weekly focus, homework checklist, parent update, player summary,
-// progress updates, and next week's objectives. Uses Claude when
-// ANTHROPIC_API_KEY is set; otherwise a deterministic fallback keeps the
-// feature fully functional offline / in demo mode.
+// Turns a coach's plain-English session notes into a structured WEEKLY plan:
+// four training sessions (each starting with a plyometric warm-up, added
+// automatically), plus a parent update, player summary, progress updates,
+// and next week's objectives. Uses Claude when ANTHROPIC_API_KEY is set;
+// otherwise a deterministic fallback keeps it fully functional.
 
 import Anthropic from "@anthropic-ai/sdk";
-import { PROGRESS_METRICS, type GeneratedPlan, type Player } from "./types";
+import {
+  PROGRESS_METRICS,
+  type GeneratedPlan,
+  type GeneratedSession,
+  type Player,
+} from "./types";
+import { SESSIONS_PER_WEEK, plyoForSession } from "./training";
 
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-4-8";
 
@@ -28,14 +34,20 @@ premium youth soccer program. Your philosophy: creative, intelligent football �
 ball mastery, composure under pressure, scanning, slowing the game down.
 
 A coach gives you raw notes from a 1-on-1 session. You turn them into a
-structured weekly development plan for the player and a warm, clear update for
-the parent.
+structured WEEKLY at-home plan the player follows on their own, plus a warm,
+clear update for the parent.
+
+The week is FOUR sessions (the player trains four times that week). Each
+session has 2-3 skill drills built around the week's focus, progressing across
+the week. Do NOT include a warm-up — a plyometric warm-up is added to every
+session automatically, so only give the skill drills.
 
 Voice:
 - Confident, direct, encouraging. Never corny. No emoji. No exclamation marks.
 - Parent update: warm and specific, celebrates real progress, plain English.
 - Player summary: motivating, second person ("you"), short.
-- Homework: concrete drills with clear rep counts a young player can follow.
+- Drills: concrete, room- or yard-doable, with clear rep counts a young player
+  can follow on their own.
 
 The seven development pillars you may rate are exactly:
 Ball Mastery, Weak Foot, Passing, Scanning, Decision Making, Confidence, Speed.
@@ -43,14 +55,18 @@ Ball Mastery, Weak Foot, Passing, Scanning, Decision Making, Confidence, Speed.
 Return ONLY valid JSON, no prose, matching this shape:
 {
   "weekly_focus": "one sentence, the single theme for the week",
-  "homework": [ { "title": "...", "exercise": "...", "reps": "...", "notes": "..." } ],
+  "sessions": [
+    { "title": "Session 1 — short label",
+      "drills": [ { "title": "...", "exercise": "...", "reps": "...", "minutes": 15, "notes": "..." } ] }
+  ],
   "parent_update": "2-4 sentences for the parent",
   "player_summary": "2-3 sentences to the player, second person",
   "progress_updates": [ { "metric": "Scanning", "value": 72 } ],
   "next_week_objectives": [ "objective 1", "objective 2", "objective 3" ]
 }
 Rules:
-- 3 to 5 homework items.
+- EXACTLY 4 sessions. 2-3 skill drills each (no warm-ups — added automatically).
+- minutes: an integer per drill (5-30).
 - progress_updates: only pillars the notes actually touched, value 0-100.
 - next_week_objectives: 2-4 items.`;
 
@@ -73,26 +89,64 @@ function extractJSON<T>(raw: string): T | null {
   }
 }
 
+function clampMin(v: unknown): number {
+  const n = Math.round(Number(v));
+  if (!Number.isFinite(n)) return 15;
+  return Math.max(5, Math.min(30, n));
+}
+
+// Normalizes to EXACTLY four sessions and prepends the plyometric warm-up to
+// each one — the plyo-first rule holds no matter what the AI returned.
+function buildSessions(
+  raw: GeneratedSession[] | undefined,
+  focus: string
+): GeneratedSession[] {
+  const src = Array.isArray(raw) ? raw : [];
+  const out: GeneratedSession[] = [];
+  for (let i = 0; i < SESSIONS_PER_WEEK; i++) {
+    const s = src[i];
+    let skills = (s?.drills ?? [])
+      .filter((d) => d && d.title)
+      .slice(0, 4)
+      .map((d) => ({
+        title: String(d.title),
+        exercise: String(d.exercise ?? ""),
+        reps: String(d.reps ?? ""),
+        minutes: clampMin(d.minutes),
+        notes: d.notes ? String(d.notes) : undefined,
+      }));
+    if (skills.length === 0) {
+      skills = [
+        {
+          title: "Focus reps",
+          exercise: focus,
+          reps: "15 min",
+          minutes: 15,
+          notes: undefined,
+        },
+      ];
+    }
+    out.push({
+      title: s?.title?.trim() || `Session ${i + 1}`,
+      drills: [{ ...plyoForSession(i + 1) }, ...skills],
+    });
+  }
+  return out;
+}
+
 function sanitize(plan: Partial<GeneratedPlan>, player?: Player): GeneratedPlan {
   const validMetrics = new Set(PROGRESS_METRICS as readonly string[]);
+  const weekly_focus =
+    plan.weekly_focus?.trim() || "Sharpen this week's technical focus";
   return {
-    weekly_focus:
-      plan.weekly_focus?.trim() || "Sharpen this week's technical focus",
-    homework: (plan.homework ?? [])
-      .filter((h) => h && h.title)
-      .slice(0, 5)
-      .map((h) => ({
-        title: String(h.title),
-        exercise: String(h.exercise ?? ""),
-        reps: String(h.reps ?? ""),
-        notes: h.notes ? String(h.notes) : undefined,
-      })),
+    weekly_focus,
+    sessions: buildSessions(plan.sessions, weekly_focus),
     parent_update:
       plan.parent_update?.trim() ||
-      `${player?.full_name ?? "Your player"} put in strong work this session and has a clear plan for the week ahead.`,
+      `${player?.full_name ?? "Your player"} put in strong work this session and has a clear four-session plan for the week ahead.`,
     player_summary:
       plan.player_summary?.trim() ||
-      "Great session. Stay on the homework this week and you'll feel the difference.",
+      "Great session. Hit all four sessions this week — start each one with your plyometrics — and you'll feel the difference.",
     progress_updates: (plan.progress_updates ?? [])
       .filter((p) => p && validMetrics.has(p.metric))
       .map((p) => ({
@@ -105,16 +159,14 @@ function sanitize(plan: Partial<GeneratedPlan>, player?: Player): GeneratedPlan 
   };
 }
 
-// Deterministic fallback: light heuristic parse of the coach's notes so the
-// feature works with no API key.
 function titleCase(s: string): string {
   const t = s.trim().replace(/[.:;]+$/, "");
   return t ? t[0].toUpperCase() + t.slice(1) : t;
 }
 
+// Deterministic fallback so the feature works with no API key: parse skill
+// drills from the notes and spread them across four sessions.
 function fallbackPlan(notes: string, player?: Player): GeneratedPlan {
-  // Split the notes into a "coaching" part and an explicit homework part
-  // when the coach used a "Homework:" heading (common in the product).
   const hwSplit = notes.split(/homework\s*:/i);
   const coachingText = hwSplit[0];
   const homeworkText = hwSplit.slice(1).join("\n");
@@ -124,13 +176,12 @@ function fallbackPlan(notes: string, player?: Player): GeneratedPlan {
     .map((l) => l.trim())
     .filter(Boolean);
 
-  // Homework items: split the homework section on newlines / commas.
   const rawHwItems = (homeworkText || coachingText)
     .split(/\n|,(?![^(]*\))/)
     .map((l) => l.replace(/^[-*•\d.\s]+/, "").trim())
     .filter((l) => l.length > 2);
 
-  const homework = (
+  const skillDrills = (
     homeworkText
       ? rawHwItems
       : rawHwItems.filter((l) =>
@@ -139,7 +190,7 @@ function fallbackPlan(notes: string, player?: Player): GeneratedPlan {
           )
         )
   )
-    .slice(0, 5)
+    .slice(0, 8)
     .map((l, i) => {
       const repMatch = l.match(/\b\d+[\s\w]*/);
       const title = titleCase(
@@ -149,24 +200,24 @@ function fallbackPlan(notes: string, player?: Player): GeneratedPlan {
         title: title.slice(0, 52) || `Focus drill ${i + 1}`,
         exercise: titleCase(l),
         reps: repMatch ? repMatch[0].trim() : "10-15 min",
+        minutes: 15,
       };
     });
 
-  if (homework.length === 0) {
-    homework.push({
-      title: "Session focus reps",
-      exercise: titleCase(sentences[0] ?? "Repeat this session's key drill"),
-      reps: "15 min daily",
-    });
-  }
-
   const focus = titleCase(sentences[0] ?? "").slice(0, 120) ||
     "This week's technical focus";
+
+  // spread the drills round-robin across four sessions
+  const buckets: GeneratedSession[] = Array.from(
+    { length: SESSIONS_PER_WEEK },
+    (_, i) => ({ title: `Session ${i + 1}`, drills: [] })
+  );
+  skillDrills.forEach((d, i) => buckets[i % SESSIONS_PER_WEEK].drills.push(d));
+
   const touched: GeneratedPlan["progress_updates"] = [];
   const lower = notes.toLowerCase();
-  const bump = (metric: (typeof PROGRESS_METRICS)[number], base: number) => {
+  const bump = (metric: (typeof PROGRESS_METRICS)[number], base: number) =>
     touched.push({ metric, value: base });
-  };
   if (/scan/.test(lower)) bump("Scanning", 70);
   if (/weak foot|left foot|right foot/.test(lower)) bump("Weak Foot", 58);
   if (/pass/.test(lower)) bump("Passing", 74);
@@ -178,14 +229,14 @@ function fallbackPlan(notes: string, player?: Player): GeneratedPlan {
   return sanitize(
     {
       weekly_focus: focus,
-      homework,
-      parent_update: `${player?.full_name ?? "Your player"} had a productive session focused on ${focus.toLowerCase()}. We've set clear homework for the week and will track the progress closely.`,
-      player_summary: `Good work this session. Lock in on your homework — ${homework[0]?.title.toLowerCase() ?? "the basics"} — and you'll see the jump.`,
+      sessions: buckets,
+      parent_update: `${player?.full_name ?? "Your player"} had a productive session focused on ${focus.toLowerCase()}. We've built a four-session week — each session opens with a plyometric warm-up — and will track the progress closely.`,
+      player_summary: `Good work this session. Get all four sessions in this week, and always start with your plyometrics.`,
       progress_updates: touched,
       next_week_objectives: [
-        "Complete all assigned homework",
+        "Complete all four sessions",
         focus,
-        "Bring the same intensity to the next session",
+        "Start every session with the plyometric warm-up",
       ],
     },
     player
@@ -205,12 +256,12 @@ export async function generatePlanFromNotes(
       : "";
     const res = await c.messages.create({
       model: MODEL,
-      max_tokens: 1600,
+      max_tokens: 2200,
       system: SYSTEM,
       messages: [
         {
           role: "user",
-          content: `${context}\n\nCoach's raw session notes:\n"""\n${notes}\n"""\n\nGenerate the plan JSON now.`,
+          content: `${context}\n\nCoach's raw session notes:\n"""\n${notes}\n"""\n\nGenerate the four-session weekly plan JSON now.`,
         },
       ],
     });

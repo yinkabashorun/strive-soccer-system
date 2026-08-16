@@ -141,25 +141,51 @@ export function SessionNotesStudio({ playerId }: { playerId: string }) {
             <p className="text-lg font-medium text-bone">{plan.weekly_focus}</p>
           </Block>
 
-          {/* Homework */}
-          <Block icon={Check} title="Homework checklist">
-            <ul className="space-y-2">
-              {plan.homework.map((h, i) => (
-                <li
-                  key={i}
-                  className="rounded-xl border border-white/8 bg-white/[0.02] p-3"
+          {/* Four sessions */}
+          <Block icon={Check} title="The week · 4 sessions">
+            <div className="space-y-3">
+              {plan.sessions.map((s, si) => (
+                <div
+                  key={si}
+                  className="rounded-2xl border border-white/8 bg-white/[0.02] p-3"
                 >
-                  <div className="flex items-center justify-between gap-3">
-                    <span className="font-semibold text-bone">{h.title}</span>
-                    <span className="chip shrink-0">{h.reps}</span>
+                  <div className="mb-2 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">
+                    <span className="grid h-5 w-5 place-items-center rounded-md bg-accent/15 font-display">
+                      {si + 1}
+                    </span>
+                    {s.title}
                   </div>
-                  <p className="mt-1 text-sm text-white/55">{h.exercise}</p>
-                  {h.notes && (
-                    <p className="mt-1 text-xs text-white/40">{h.notes}</p>
-                  )}
-                </li>
+                  <ul className="space-y-1.5">
+                    {s.drills.map((d, di) => (
+                      <li
+                        key={di}
+                        className={
+                          "rounded-xl border p-2.5 " +
+                          (di === 0
+                            ? "border-red-500/25 bg-red-500/[0.04]"
+                            : "border-white/6 bg-white/[0.02]")
+                        }
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="flex items-center gap-2 font-medium text-bone">
+                            {di === 0 && (
+                              <span className="rounded bg-red-500/90 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white">
+                                Plyo
+                              </span>
+                            )}
+                            {d.title}
+                          </span>
+                          <span className="chip shrink-0 whitespace-nowrap">
+                            {d.reps}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs text-white/55">{d.exercise}</p>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ))}
-            </ul>
+            </div>
           </Block>
 
           {/* Progress updates */}

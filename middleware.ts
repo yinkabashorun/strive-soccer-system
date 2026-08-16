@@ -12,7 +12,6 @@ export const config = {
     "/dashboard/:path*",
     "/homework/:path*",
     "/progress/:path*",
-    "/film/:path*",
     "/coach/:path*",
     "/login",
     "/signup",

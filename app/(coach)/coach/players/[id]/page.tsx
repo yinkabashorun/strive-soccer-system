@@ -3,30 +3,25 @@ import { notFound } from "next/navigation";
 import {
   ArrowLeft,
   CalendarClock,
-  Film as FilmIcon,
   MessageSquare,
   StickyNote,
   Target,
   Users,
 } from "lucide-react";
 import {
-  getFilm,
   getHomework,
   getMessages,
   getNotes,
   getParentReports,
   getPlayer,
+  getPlayerSummary,
   getProgress,
-  homeworkCompletion,
 } from "@/lib/elite/data";
-import {
-  addCoachNote,
-  sendCoachMessage,
-  setFilmNotes,
-} from "@/lib/elite/coach-actions";
+import { addCoachNote, sendCoachMessage } from "@/lib/elite/coach-actions";
 import { Avatar } from "@/components/Avatar";
 import { StatTile } from "@/components/elite/StatTile";
 import { ProgressPanel } from "@/components/elite/ProgressPanel";
+import { CoachWeekView } from "@/components/elite/CoachWeekView";
 import { SessionNotesStudio } from "@/components/elite/SessionNotesStudio";
 import { EditableChips } from "@/components/elite/EditableChips";
 import { QuickComposer } from "@/components/elite/QuickComposer";
@@ -42,16 +37,29 @@ export default async function PlayerProfile({
   const player = await getPlayer(params.id);
   if (!player) notFound();
 
-  const [homework, progress, notes, messages, film, reports] = await Promise.all([
-    getHomework(player.id),
-    getProgress(player.id),
-    getNotes(player.id),
-    getMessages(player.id),
-    getFilm(player.id),
-    getParentReports(player.id),
-  ]);
+  const [homework, progress, notes, messages, reports, summary] =
+    await Promise.all([
+      getHomework(player.id),
+      getProgress(player.id),
+      getNotes(player.id),
+      getMessages(player.id),
+      getParentReports(player.id),
+      getPlayerSummary(player.id),
+    ]);
 
-  const hwPct = homeworkCompletion(homework);
+  // this-week session completion
+  const thisWeek = homework.filter((h) => h.week === player.current_week);
+  const sess = new Map<number, boolean>();
+  const sessAll = new Map<number, boolean[]>();
+  for (const h of thisWeek) {
+    const s = h.session ?? 1;
+    const arr = sessAll.get(s) ?? [];
+    arr.push(h.completed);
+    sessAll.set(s, arr);
+  }
+  for (const [s, arr] of sessAll) sess.set(s, arr.every(Boolean));
+  const totalSessions = sessAll.size || 0;
+  const doneSessions = [...sess.values()].filter(Boolean).length;
 
   return (
     <div className="space-y-6">
@@ -70,8 +78,9 @@ export default async function PlayerProfile({
               {player.full_name}
             </h1>
             <div className="mt-1.5 text-sm text-white/50">
-              Age {player.age} · {player.position} · {player.level} · Week{" "}
-              {player.current_week}
+              {player.age ? `Age ${player.age} · ` : ""}
+              {player.position || "Player"} · Week {player.current_week} · Last
+              active {summary.last_active ? relativeDay(summary.last_active) : "—"}
             </div>
           </div>
           <span
@@ -89,70 +98,54 @@ export default async function PlayerProfile({
         </div>
       </div>
 
-      {/* Quick stats */}
+      {/* Snapshot */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatTile label="Homework" value={`${hwPct}%`} sub="This week" accent />
-        <StatTile label="Film" value={film.length} sub="Clips uploaded" />
         <StatTile
-          label="Last session"
-          value={relativeDay(player.last_session_at)}
-          sub={player.last_session_at ? "" : "—"}
+          label="Streak"
+          value={summary.current_streak}
+          sub={summary.current_streak === 1 ? "day" : "days"}
+          accent
         />
         <StatTile
-          label="Next session"
-          value={relativeDay(player.next_session_at)}
-          sub=""
+          label="This week"
+          value={`${doneSessions}/${totalSessions || 4}`}
+          sub="Sessions done"
+        />
+        <StatTile
+          label="Homework"
+          value={`${summary.homework_pct}%`}
+          sub="Completion"
+        />
+        <StatTile
+          label="Minutes"
+          value={summary.training_minutes}
+          sub="Trained"
         />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Main column */}
         <div className="space-y-6 lg:col-span-3">
+          {/* This week — are they doing the work */}
+          <section>
+            <h2 className="mb-3 flex items-center gap-2 font-display text-xl font-bold uppercase tracking-tight">
+              <CalendarClock className="h-4 w-4 text-accent" /> This week
+            </h2>
+            <CoachWeekView
+              homework={homework}
+              currentWeek={player.current_week}
+            />
+          </section>
+
+          {/* Build next week */}
           <SessionNotesStudio playerId={player.id} />
 
+          {/* Progress */}
           <section>
             <h2 className="mb-3 font-display text-xl font-bold uppercase tracking-tight">
               Progress
             </h2>
             <ProgressPanel progress={progress} />
-          </section>
-
-          {/* Film review */}
-          <section>
-            <h2 className="mb-3 flex items-center gap-2 font-display text-xl font-bold uppercase tracking-tight">
-              <FilmIcon className="h-4 w-4 text-accent" /> Film
-            </h2>
-            {film.length === 0 ? (
-              <div className="elite-card p-6 text-sm text-white/45">
-                No film uploaded yet.
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {film.map((f) => (
-                  <div key={f.id} className="elite-card p-5">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="font-semibold text-bone">{f.title}</span>
-                      <span className="text-xs text-white/40">
-                        {timeAgo(f.created_at)}
-                      </span>
-                    </div>
-                    {f.coach_notes ? (
-                      <p className="mt-2 rounded-xl border border-white/8 bg-white/[0.02] p-3 text-sm text-white/70">
-                        {f.coach_notes}
-                      </p>
-                    ) : (
-                      <div className="mt-3">
-                        <QuickComposer
-                          action={setFilmNotes.bind(null, f.id, player.id)}
-                          placeholder="Add coach notes tied to this film…"
-                          cta="Save notes"
-                        />
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
           </section>
 
           {/* Parent reports */}
@@ -190,31 +183,14 @@ export default async function PlayerProfile({
             currentWeek={player.current_week}
           />
 
-          {/* Today's focus */}
+          {/* This week's focus */}
           <div className="rounded-3xl border border-accent/20 bg-accent/[0.05] p-5">
             <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
-              <Target className="h-3.5 w-3.5" /> Today&apos;s focus
+              <Target className="h-3.5 w-3.5" /> This week&apos;s focus
             </div>
-            <p className="mt-1.5 font-medium text-bone">{player.today_focus}</p>
-          </div>
-
-          {/* Sessions */}
-          <div className="elite-card p-5">
-            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
-              <CalendarClock className="h-3.5 w-3.5" /> Sessions
-            </div>
-            <div className="mt-3 space-y-2 text-sm">
-              <Row label="Next" value={formatSessionDate(player.next_session_at)} />
-              <Row label="Last" value={formatSessionDate(player.last_session_at)} />
-              <Row
-                label="Joined"
-                value={new Date(player.joined_at).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  year: "numeric",
-                })}
-              />
-            </div>
+            <p className="mt-1.5 font-medium text-bone">
+              {player.today_focus || "Not set yet — build a plan below."}
+            </p>
           </div>
 
           <EditableChips
@@ -240,7 +216,8 @@ export default async function PlayerProfile({
           {/* Message player */}
           <div className="elite-card p-5">
             <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
-              <MessageSquare className="h-3.5 w-3.5" /> Message {player.full_name.split(" ")[0]}
+              <MessageSquare className="h-3.5 w-3.5" /> Message{" "}
+              {player.full_name.split(" ")[0]}
             </div>
             <QuickComposer
               action={sendCoachMessage.bind(null, player.id)}
@@ -261,7 +238,7 @@ export default async function PlayerProfile({
             )}
           </div>
 
-          {/* Coach notes */}
+          {/* Private notes */}
           <div className="elite-card p-5">
             <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
               <StickyNote className="h-3.5 w-3.5" /> Private notes
@@ -283,6 +260,25 @@ export default async function PlayerProfile({
                 ))}
               </div>
             )}
+          </div>
+
+          {/* Sessions dates */}
+          <div className="elite-card p-5">
+            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
+              <CalendarClock className="h-3.5 w-3.5" /> 1-on-1 sessions
+            </div>
+            <div className="mt-3 space-y-2 text-sm">
+              <Row label="Next" value={formatSessionDate(player.next_session_at)} />
+              <Row label="Last" value={formatSessionDate(player.last_session_at)} />
+              <Row
+                label="Joined"
+                value={new Date(player.joined_at).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                  year: "numeric",
+                })}
+              />
+            </div>
           </div>
         </div>
       </div>

@@ -1,9 +1,7 @@
 import Link from "next/link";
 import {
-  ArrowRight,
   CalendarClock,
   Clipboard,
-  Film,
   Flame,
   MessageSquare,
   Sparkles,
@@ -133,7 +131,7 @@ export default async function DashboardPage() {
               {relativeDay(player.next_session_at)}
             </div>
             <div className="mt-1 text-sm text-white/50">
-              1-on-1 with Coach Ramella
+              1-on-1 with your coach
             </div>
           </section>
 
@@ -152,22 +150,17 @@ export default async function DashboardPage() {
             </section>
           )}
 
-          {/* Film CTA */}
-          <Link
-            href="/film"
-            className="group flex items-center gap-4 rounded-3xl border border-white/8 bg-white/[0.02] p-5 transition-colors hover:border-white/15"
-          >
-            <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-accent/10 text-accent">
-              <Film className="h-[22px] w-[22px]" />
+          {/* Plyometrics reminder */}
+          <section className="rounded-3xl border border-red-500/20 bg-red-500/[0.04] p-5">
+            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-red-300">
+              <Flame className="h-3.5 w-3.5" /> Every session starts here
             </div>
-            <div className="flex-1">
-              <div className="font-semibold text-bone">Upload game film</div>
-              <div className="text-xs text-white/45">
-                Get coach notes on your footage
-              </div>
-            </div>
-            <ArrowRight className="h-4 w-4 text-white/30 transition-transform group-hover:translate-x-1" />
-          </Link>
+            <p className="mt-2 text-sm leading-relaxed text-white/75">
+              Begin all four sessions with your plyometric warm-up — right in
+              your room. Explosive, springy, soft landings. This is what turns
+              training into results.
+            </p>
+          </section>
         </div>
       </div>
 

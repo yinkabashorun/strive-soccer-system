@@ -180,16 +180,18 @@ export function computeSummary(hw: Homework[]): PlayerSummary {
     cursor = shiftDay(cursor, -1);
   }
 
-  // sessions: weeks where every assigned drill is completed
-  const byWeek = new Map<number, { total: number; done: number }>();
+  // sessions: each (week, session) where every assigned drill is completed
+  const bySession = new Map<string, { total: number; done: number }>();
   for (const h of hw) {
-    const w = byWeek.get(h.week) ?? { total: 0, done: 0 };
+    const key = `${h.week}:${h.session ?? 1}`;
+    const w = bySession.get(key) ?? { total: 0, done: 0 };
     w.total++;
     if (h.completed) w.done++;
-    byWeek.set(h.week, w);
+    bySession.set(key, w);
   }
   let sessions = 0;
-  for (const w of byWeek.values()) if (w.total > 0 && w.done === w.total) sessions++;
+  for (const w of bySession.values())
+    if (w.total > 0 && w.done === w.total) sessions++;
 
   const total = hw.length;
   const done = completed.length;

@@ -7,9 +7,8 @@ import { signOut } from "@/lib/elite/auth-actions";
 
 const PLAYER_NAV: NavItem[] = [
   { href: "/dashboard", label: "Home", icon: "Home" },
-  { href: "/homework", label: "Homework", icon: "Clipboard" },
+  { href: "/homework", label: "Training", icon: "Clipboard" },
   { href: "/progress", label: "Progress", icon: "BarChart3" },
-  { href: "/film", label: "Film", icon: "Film" },
 ];
 
 export default async function PlayerLayout({

@@ -235,9 +235,11 @@ const hw = (
     id: `${playerId}-hw-${week}-${i}`,
     player_id: playerId,
     week,
+    session: it.session ?? 1,
     title: it.title,
     exercise: it.exercise,
     reps: it.reps,
+    duration_min: it.duration_min ?? 15,
     video_url: it.video_url ?? null,
     notes: it.notes ?? null,
     completed: it.completed ?? false,
@@ -245,31 +247,79 @@ const hw = (
     sort: i,
   }));
 
+// A room plyometric warm-up to open each demo session.
+const plyo = (variant: number) =>
+  [
+    {
+      title: "Plyo warm-up — Pogo & Tuck",
+      exercise:
+        "Pogo hops x20, tuck jumps x10, split-squat jumps x8 each leg. Land soft, explode up.",
+      reps: "3 rounds",
+      duration_min: 8,
+    },
+    {
+      title: "Plyo warm-up — Lateral Power",
+      exercise:
+        "Lateral bounds x10 each side, skater hops x12 each side, squat jumps x12.",
+      reps: "3 rounds",
+      duration_min: 8,
+    },
+    {
+      title: "Plyo warm-up — Quick Feet",
+      exercise:
+        "Ankle pogos x30, broad-jump-to-stick x6, single-leg hops x8 each leg.",
+      reps: "3 rounds",
+      duration_min: 8,
+    },
+    {
+      title: "Plyo warm-up — Explosive",
+      exercise:
+        "Tuck jumps x10, split jumps x10 each leg, step-down-to-jump x6.",
+      reps: "3 rounds",
+      duration_min: 8,
+    },
+  ][variant - 1];
+
 export const DEMO_HOMEWORK: Homework[] = [
   ...hw("p-marcus", 7, [
+    // Session 1 (done)
+    { ...plyo(1), session: 1, completed: true },
     {
       title: "Wall pass mastery",
       exercise: "Two-touch wall passes, alternating feet, scan between reps",
-      reps: "200 total (100 each foot)",
-      video_url: "https://www.youtube.com/results?search_query=wall+pass+drill",
+      reps: "200 total",
+      duration_min: 20,
+      session: 1,
       completed: true,
     },
+    // Session 2 (done)
+    { ...plyo(2), session: 2, completed: true },
     {
       title: "Scanning under pressure",
-      exercise: "Rondo scanning — two shoulder checks before every touch",
+      exercise: "Shadow rondo — two shoulder checks before every touch",
       reps: "3 x 5 min",
+      duration_min: 15,
+      session: 2,
       completed: true,
     },
+    // Session 3 (in progress — Next up lands here)
+    { ...plyo(3), session: 3 },
     {
       title: "Weak-foot finishing",
       exercise: "Left-foot finishes from the edge of the box, laces through",
       reps: "50 strikes",
-      notes: "Plant foot pointed at target. Film 5 for review.",
+      duration_min: 20,
+      session: 3,
+      notes: "Plant foot pointed at target.",
     },
+    // Session 4
+    { ...plyo(4), session: 4 },
     {
-      title: "Watch & note",
-      exercise: "Study Rodri — body shape before receiving. Note 3 moments.",
-      reps: "1 clip breakdown",
+      title: "Study & apply",
+      exercise: "Study Rodri's body shape before receiving, then 50 wall passes copying it.",
+      reps: "1 clip + 50 reps",
+      duration_min: 20,
+      session: 4,
       video_url: "https://www.youtube.com/results?search_query=rodri+scanning",
     },
   ]),

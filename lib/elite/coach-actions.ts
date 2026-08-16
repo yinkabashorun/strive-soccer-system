@@ -135,13 +135,24 @@ export async function applyGeneratedPlan(
   const supabase = createClient();
   if (!supabase) return { ok: true }; // demo mode: nothing to persist
 
-  // current week for tagging
+  // Decide which week this plan fills. A brand-new player sits on week 1
+  // with no drills — the first plan should FILL week 1, not skip to week 2.
+  // Otherwise advance to the next week.
   const { data: player } = await supabase
     .from("elite_players")
     .select("current_week")
     .eq("id", playerId)
     .maybeSingle();
-  const week = (player?.current_week ?? 1) + 1;
+  const currentWeek = player?.current_week ?? 1;
+  const { data: existingThisWeek } = await supabase
+    .from("elite_homework")
+    .select("id")
+    .eq("player_id", playerId)
+    .eq("week", currentWeek)
+    .limit(1);
+  const week = existingThisWeek && existingThisWeek.length > 0
+    ? currentWeek + 1
+    : currentWeek;
 
   // 1) record the session
   await supabase.from("elite_sessions").insert({
@@ -151,20 +162,34 @@ export async function applyGeneratedPlan(
     raw_notes: rawNotes,
   });
 
-  // 2) replace this week's homework
+  // 2) replace this week's homework — four sessions, each starting with a
+  //    plyometric warm-up (already baked into plan.sessions).
   await supabase.from("elite_homework").delete().eq("player_id", playerId).eq("week", week);
-  if (plan.homework.length) {
-    await supabase.from("elite_homework").insert(
-      plan.homework.map((h, i) => ({
-        player_id: playerId,
-        week,
-        title: h.title,
-        exercise: h.exercise,
-        reps: h.reps,
-        notes: h.notes ?? null,
-        sort: i,
-      }))
-    );
+  const rows = plan.sessions.flatMap((s, si) =>
+    s.drills.map((d, di) => ({
+      player_id: playerId,
+      week,
+      session: si + 1,
+      title: d.title,
+      exercise: d.exercise,
+      reps: d.reps,
+      duration_min: d.minutes ?? 15,
+      notes: d.notes ?? null,
+      sort: di,
+    }))
+  );
+  if (rows.length) {
+    const { error: hwErr } = await supabase.from("elite_homework").insert(rows);
+    if (hwErr) {
+      // 010 not applied yet (no `session` column) — retry without it so
+      // plan-building still works; drills collapse into one session until
+      // the migration lands.
+      await supabase
+        .from("elite_homework")
+        .insert(
+          rows.map(({ session: _session, ...r }) => r)
+        );
+    }
   }
 
   // 3) bump progress ratings (store prev for trend)
@@ -187,13 +212,32 @@ export async function applyGeneratedPlan(
     );
   }
 
-  // 4) weekly plan
+  // 3b) append to progress history so long-term progression is real +
+  //     chartable (best-effort — ignored if 011 isn't applied yet).
+  if (plan.progress_updates.length) {
+    await supabase
+      .from("elite_progress_history")
+      .insert(
+        plan.progress_updates.map((upd) => ({
+          player_id: playerId,
+          metric: upd.metric,
+          value: upd.value,
+          week,
+        }))
+      )
+      .then(
+        () => undefined,
+        () => undefined
+      );
+  }
+
+  // 4) weekly plan (stores the four-session structure)
   await supabase.from("elite_weekly_plans").insert({
     player_id: playerId,
     week,
     focus: plan.weekly_focus,
     objectives: plan.next_week_objectives,
-    homework: plan.homework,
+    homework: plan.sessions,
   });
 
   // 5) parent report
@@ -201,7 +245,7 @@ export async function applyGeneratedPlan(
     player_id: playerId,
     summary: plan.player_summary,
     improvement: plan.parent_update,
-    homework: plan.homework.map((h) => `${h.title} — ${h.reps}`).join("; "),
+    homework: `Four at-home sessions this week, each opening with a plyometric warm-up. Focus: ${plan.weekly_focus}`,
     next_focus: plan.next_week_objectives.join("; "),
   });
 

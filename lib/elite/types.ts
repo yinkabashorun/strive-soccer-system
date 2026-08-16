@@ -47,6 +47,7 @@ export type Homework = {
   id: string;
   player_id: string;
   week: number;
+  session?: number; // 1..4 — which of the week's four sessions (010 adds the column)
   title: string;
   exercise: string;
   reps: string;
@@ -164,10 +165,27 @@ export type ParentReport = {
   created_at: string;
 };
 
-// The structured object Claude returns from raw session notes.
+// A single drill inside a session.
+export type GeneratedDrill = {
+  title: string;
+  exercise: string;
+  reps: string;
+  minutes?: number;
+  notes?: string;
+};
+
+// One of the week's four sessions.
+export type GeneratedSession = {
+  title: string;
+  drills: GeneratedDrill[];
+};
+
+// The structured object Claude returns from raw session notes. A week is
+// FOUR sessions; each one starts with a plyometric warm-up (guaranteed
+// server-side).
 export type GeneratedPlan = {
   weekly_focus: string;
-  homework: { title: string; exercise: string; reps: string; notes?: string }[];
+  sessions: GeneratedSession[];
   parent_update: string;
   player_summary: string;
   progress_updates: { metric: ProgressMetric; value: number }[];

@@ -64,6 +64,11 @@ export default async function DashboardPage() {
   const latestMessage = messages[0];
   const firstName = player.full_name.split(" ")[0];
 
+  // Only show numbers that mean something. No training assigned yet → no
+  // stat zeros; no ratings yet → no 0% ring; no session booked → no card.
+  const hasTraining = homework.length > 0;
+  const hasRatings = progress.length > 0;
+
   return (
     <div className="space-y-5">
       {/* Header */}
@@ -76,7 +81,9 @@ export default async function DashboardPage() {
             {greeting()}, {firstName}
           </h1>
         </div>
-        <ProgressRing value={overall} size={78} stroke={7} sublabel="Overall" />
+        {hasRatings && (
+          <ProgressRing value={overall} size={78} stroke={7} sublabel="Overall" />
+        )}
       </header>
 
       {/* Today's focus */}
@@ -92,30 +99,32 @@ export default async function DashboardPage() {
         </div>
       </section>
 
-      {/* Loop metrics */}
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatTile
-          label="Streak"
-          value={summary.current_streak}
-          sub={summary.current_streak === 1 ? "day" : "days in a row"}
-          accent
-        />
-        <StatTile
-          label="Sessions"
-          value={summary.sessions_completed}
-          sub="Weeks completed"
-        />
-        <StatTile
-          label="Homework"
-          value={`${summary.homework_pct}%`}
-          sub="Completion"
-        />
-        <StatTile
-          label="Minutes"
-          value={summary.training_minutes}
-          sub="Trained"
-        />
-      </section>
+      {/* Loop metrics — only once real training exists to measure */}
+      {hasTraining && (
+        <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <StatTile
+            label="Streak"
+            value={summary.current_streak}
+            sub={summary.current_streak === 1 ? "day" : "days in a row"}
+            accent
+          />
+          <StatTile
+            label="Sessions"
+            value={summary.sessions_completed}
+            sub="Weeks completed"
+          />
+          <StatTile
+            label="Homework"
+            value={`${summary.homework_pct}%`}
+            sub="Completion"
+          />
+          <StatTile
+            label="Minutes"
+            value={summary.training_minutes}
+            sub="Trained"
+          />
+        </section>
+      )}
 
       {/* This week + upcoming/coach column */}
       <div className="grid gap-5 lg:grid-cols-5">
@@ -129,18 +138,20 @@ export default async function DashboardPage() {
         </section>
 
         <div className="space-y-5 lg:col-span-2">
-          {/* Upcoming session */}
-          <section className="elite-card p-5">
-            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
-              <CalendarClock className="h-3.5 w-3.5" /> Next session
-            </div>
-            <div className="mt-2 font-display text-2xl font-black">
-              {relativeDay(player.next_session_at)}
-            </div>
-            <div className="mt-1 text-sm text-white/50">
-              1-on-1 with your coach
-            </div>
-          </section>
+          {/* Upcoming session — only when one is actually booked */}
+          {player.next_session_at && (
+            <section className="elite-card p-5">
+              <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
+                <CalendarClock className="h-3.5 w-3.5" /> Next session
+              </div>
+              <div className="mt-2 font-display text-2xl font-black">
+                {relativeDay(player.next_session_at)}
+              </div>
+              <div className="mt-1 text-sm text-white/50">
+                1-on-1 with your coach
+              </div>
+            </section>
+          )}
 
           {/* Coach message */}
           {latestMessage && (

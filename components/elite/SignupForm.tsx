@@ -9,10 +9,17 @@ import { enterDemoPlayer, enterDemoCoach } from "@/lib/elite/auth-actions";
 
 // Player-only signup gated by a single-use invite code. Coaches are
 // provisioned separately (seed script / admin) — there is deliberately no
-// public path to a coach account.
-export function SignupForm({ configured }: { configured: boolean }) {
+// public path to a coach account. An invite LINK (/signup?code=…) prefills
+// the code so parents just fill in name/email/password.
+export function SignupForm({
+  configured,
+  initialCode = "",
+}: {
+  configured: boolean;
+  initialCode?: string;
+}) {
   const router = useRouter();
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState(initialCode.toUpperCase());
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

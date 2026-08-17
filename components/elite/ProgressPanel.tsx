@@ -9,11 +9,31 @@ import { overallProgress } from "@/lib/elite/data";
 // ordered by the canonical metric list. Used on the player progress page
 // and inside the coach's player profile.
 export function ProgressPanel({ progress }: { progress: Progress[] }) {
+  // No ratings yet → an honest empty state, not a page of zeros. Ratings
+  // come from real coaching sessions, so this fills in after week one.
+  if (progress.length === 0) {
+    return (
+      <div className="elite-card p-8 text-center">
+        <div className="font-display text-lg font-bold uppercase tracking-tight text-white/70">
+          Your baseline is coming
+        </div>
+        <p className="mx-auto mt-2 max-w-sm text-sm text-white/45">
+          Your coach rates the seven pillars from your actual training — the
+          first ratings land with your first training week, then you watch
+          them climb.
+        </p>
+      </div>
+    );
+  }
+
   const overall = overallProgress(progress);
   const byMetric = new Map(progress.map((p) => [p.metric, p]));
-  const biggestGain = [...progress].sort(
+  const gains = [...progress].sort(
     (a, b) => b.value - b.prev_value - (a.value - a.prev_value)
-  )[0];
+  );
+  // Only celebrate a gain that actually happened.
+  const biggestGain =
+    gains[0] && gains[0].value > gains[0].prev_value ? gains[0] : null;
 
   return (
     <div className="space-y-5">
@@ -25,7 +45,7 @@ export function ProgressPanel({ progress }: { progress: Progress[] }) {
               Development score
             </div>
             <div className="mt-1 text-sm text-white/55">
-              Across {progress.length || PROGRESS_METRICS.length} pillars
+              Across {progress.length} pillars
             </div>
           </div>
         </div>
@@ -49,14 +69,15 @@ export function ProgressPanel({ progress }: { progress: Progress[] }) {
       </div>
 
       <div className="elite-card space-y-4 p-6">
-        {PROGRESS_METRICS.map((metric) => {
-          const p = byMetric.get(metric);
+        {/* Only pillars that have actually been rated — no zero bars. */}
+        {PROGRESS_METRICS.filter((m) => byMetric.has(m)).map((metric) => {
+          const p = byMetric.get(metric)!;
           return (
             <ProgressBar
               key={metric}
               label={metric}
-              value={p?.value ?? 0}
-              prev={p?.prev_value}
+              value={p.value}
+              prev={p.prev_value}
             />
           );
         })}

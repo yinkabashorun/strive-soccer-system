@@ -111,30 +111,38 @@ export default async function PlayerProfile({
         </div>
       </div>
 
-      {/* Snapshot */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatTile
-          label="Streak"
-          value={summary.current_streak}
-          sub={summary.current_streak === 1 ? "day" : "days"}
-          accent
-        />
-        <StatTile
-          label="This week"
-          value={`${doneSessions}/${totalSessions || 4}`}
-          sub="Sessions done"
-        />
-        <StatTile
-          label="Homework"
-          value={`${summary.homework_pct}%`}
-          sub="Completion"
-        />
-        <StatTile
-          label="Minutes"
-          value={summary.training_minutes}
-          sub="Trained"
-        />
-      </div>
+      {/* Snapshot — real numbers once training exists; a clear next step
+          before then, not a row of zeros. */}
+      {homework.length > 0 ? (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <StatTile
+            label="Streak"
+            value={summary.current_streak}
+            sub={summary.current_streak === 1 ? "day" : "days"}
+            accent
+          />
+          <StatTile
+            label="This week"
+            value={`${doneSessions}/${totalSessions || 4}`}
+            sub="Sessions done"
+          />
+          <StatTile
+            label="Homework"
+            value={`${summary.homework_pct}%`}
+            sub="Completion"
+          />
+          <StatTile
+            label="Minutes"
+            value={summary.training_minutes}
+            sub="Trained"
+          />
+        </div>
+      ) : (
+        <div className="rounded-3xl border border-accent/20 bg-accent/[0.05] p-5 text-sm text-white/70">
+          No training assigned yet — type your session notes below and build
+          their first week.
+        </div>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Main column */}
@@ -288,8 +296,13 @@ export default async function PlayerProfile({
               <CalendarClock className="h-3.5 w-3.5" /> 1-on-1 sessions
             </div>
             <div className="mt-3 space-y-2 text-sm">
-              <Row label="Next" value={formatSessionDate(player.next_session_at)} />
-              <Row label="Last" value={formatSessionDate(player.last_session_at)} />
+              {/* Only real dates — no "to be scheduled" filler rows. */}
+              {player.next_session_at && (
+                <Row label="Next" value={formatSessionDate(player.next_session_at)} />
+              )}
+              {player.last_session_at && (
+                <Row label="Last" value={formatSessionDate(player.last_session_at)} />
+              )}
               <Row
                 label="Joined"
                 value={new Date(player.joined_at).toLocaleDateString("en-US", {

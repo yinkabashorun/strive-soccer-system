@@ -5,9 +5,10 @@ import { Loader2 } from "lucide-react";
 import { updatePlayerFields } from "@/lib/elite/coach-actions";
 import { cn } from "@/lib/utils";
 
+// Single membership tier: a client is either Active (full access) or
+// Paused (dashboard locked). "canceled" is our stored value for paused.
 const OPTIONS: { value: string; label: string }[] = [
   { value: "active", label: "Active" },
-  { value: "trialing", label: "Trial" },
   { value: "canceled", label: "Paused" },
 ];
 
@@ -43,7 +44,7 @@ export function StatusControl({
         </div>
         {pending && <Loader2 className="h-3.5 w-3.5 animate-spin text-white/40" />}
       </div>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 gap-2">
         {OPTIONS.map((o) => (
           <button
             key={o.value}

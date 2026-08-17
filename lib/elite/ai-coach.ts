@@ -14,6 +14,7 @@ import {
   type Player,
 } from "./types";
 import { SESSIONS_PER_WEEK, plyoForSession } from "./training";
+import { methodologyContext } from "./methodology";
 
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-4-8";
 
@@ -30,12 +31,13 @@ function client() {
 }
 
 const SYSTEM = `You are the head of player development for Strive Soccer FC, a
-premium youth soccer program. Your philosophy: creative, intelligent football —
-ball mastery, composure under pressure, scanning, slowing the game down.
+premium youth soccer program.
+
+${methodologyContext()}
 
 A coach gives you raw notes from a 1-on-1 session. You turn them into a
 structured WEEKLY at-home plan the player follows on their own, plus a warm,
-clear update for the parent.
+clear update for the parent. Every plan MUST follow the Strive methodology above.
 
 The week is FOUR sessions (the player trains four times that week). Each
 session is about ONE HOUR of work. A plyometric warm-up (~10 minutes) is added
@@ -257,7 +259,8 @@ function fallbackPlan(notes: string, player?: Player): GeneratedPlan {
 
 export async function generatePlanFromNotes(
   notes: string,
-  player?: Player
+  player?: Player,
+  memory?: string
 ): Promise<{ plan: GeneratedPlan; source: "ai" | "fallback" }> {
   const c = client();
   if (!c) return { plan: fallbackPlan(notes, player), source: "fallback" };
@@ -266,6 +269,7 @@ export async function generatePlanFromNotes(
     const context = player
       ? `Player: ${player.full_name}, age ${player.age}, ${player.position}, level ${player.level}. Current goals: ${player.goals.join("; ") || "n/a"}. Known weaknesses: ${player.weaknesses.join("; ") || "n/a"}.`
       : "";
+    const memoryBlock = memory?.trim() ? `\n\n${memory.trim()}` : "";
     const res = await c.messages.create({
       model: MODEL,
       max_tokens: 2200,
@@ -273,7 +277,7 @@ export async function generatePlanFromNotes(
       messages: [
         {
           role: "user",
-          content: `${context}\n\nCoach's raw session notes:\n"""\n${notes}\n"""\n\nGenerate the four-session weekly plan JSON now.`,
+          content: `${context}${memoryBlock}\n\nCoach's raw session notes:\n"""\n${notes}\n"""\n\nUsing everything you know about this player above, generate the four-session weekly plan JSON now. Plan around their history, follow-through, trends, and the coach's note.`,
         },
       ],
     });

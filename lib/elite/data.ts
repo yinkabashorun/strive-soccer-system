@@ -1,6 +1,7 @@
 import { createClient } from "./supabase/server";
 import {
   DEMO_ACHIEVEMENTS,
+  DEMO_CHECKINS,
   DEMO_FILM,
   DEMO_HOMEWORK,
   DEMO_MESSAGES,
@@ -8,9 +9,11 @@ import {
   DEMO_PARENT_REPORTS,
   DEMO_PLAYERS,
   DEMO_PROGRESS,
+  DEMO_WEEKLY_PLANS,
 } from "./demo";
 import type {
   Achievement,
+  Checkin,
   CoachNote,
   EliteNotification,
   FilmUpload,
@@ -20,7 +23,9 @@ import type {
   Player,
   PlayerSummary,
   Progress,
+  ProgressPoint,
   RosterRow,
+  WeeklyPlan,
 } from "./types";
 
 // Server-side data access for Strive Elite. Reads from Supabase when
@@ -142,6 +147,61 @@ export async function getParentReports(
     .eq("player_id", playerId)
     .order("created_at", { ascending: false });
   return (data as ParentReport[] | null) ?? [];
+}
+
+export async function getCheckins(playerId: string): Promise<Checkin[]> {
+  const supabase = createClient();
+  if (!supabase)
+    return DEMO_CHECKINS.filter((c) => c.player_id === playerId).sort((a, b) =>
+      b.created_at.localeCompare(a.created_at)
+    );
+  const { data, error } = await supabase
+    .from("elite_checkins")
+    .select("*")
+    .eq("player_id", playerId)
+    .order("created_at", { ascending: false });
+  if (error) return []; // table not created yet (pre-012)
+  return (data as Checkin[] | null) ?? [];
+}
+
+export async function getWeeklyPlans(playerId: string): Promise<WeeklyPlan[]> {
+  const supabase = createClient();
+  if (!supabase)
+    return DEMO_WEEKLY_PLANS.filter((p) => p.player_id === playerId).sort(
+      (a, b) => b.week - a.week
+    );
+  const { data } = await supabase
+    .from("elite_weekly_plans")
+    .select("*")
+    .eq("player_id", playerId)
+    .order("week", { ascending: false });
+  return (data as WeeklyPlan[] | null) ?? [];
+}
+
+export async function getProgressHistory(
+  playerId: string
+): Promise<ProgressPoint[]> {
+  const supabase = createClient();
+  if (!supabase) {
+    // demo: synthesize a gentle upward trend from current values
+    return DEMO_PROGRESS.filter((p) => p.player_id === playerId).flatMap((p) =>
+      [4, 2, 0].map((back, i) => ({
+        id: `${p.id}-h${i}`,
+        player_id: p.player_id,
+        metric: p.metric,
+        value: Math.max(0, p.value - back * 3),
+        week: 7 - back,
+        created_at: new Date(Date.now() - back * 7 * 864e5).toISOString(),
+      }))
+    );
+  }
+  const { data, error } = await supabase
+    .from("elite_progress_history")
+    .select("*")
+    .eq("player_id", playerId)
+    .order("created_at", { ascending: true });
+  if (error) return []; // pre-011
+  return (data as ProgressPoint[] | null) ?? [];
 }
 
 // ---------------------------------------------------------------------------
@@ -311,6 +371,64 @@ export async function getCoachRoster(): Promise<RosterRow[]> {
       };
     })
   );
+}
+
+// What needs the coach's attention: unanswered check-ins and unread player
+// messages, per player. RLS scopes rows to the coach's own players.
+export type CoachInbox = {
+  pendingCheckins: number;
+  unreadMessages: number;
+  byPlayer: Record<string, { checkins: number; messages: number }>;
+};
+
+export async function getCoachInbox(): Promise<CoachInbox> {
+  const empty: CoachInbox = {
+    pendingCheckins: 0,
+    unreadMessages: 0,
+    byPlayer: {},
+  };
+  const supabase = createClient();
+
+  const bump = (
+    inbox: CoachInbox,
+    playerId: string,
+    field: "checkins" | "messages"
+  ) => {
+    const row = inbox.byPlayer[playerId] ?? { checkins: 0, messages: 0 };
+    row[field]++;
+    inbox.byPlayer[playerId] = row;
+    if (field === "checkins") inbox.pendingCheckins++;
+    else inbox.unreadMessages++;
+  };
+
+  if (!supabase) {
+    // demo: derive from the demo dataset
+    const inbox: CoachInbox = { ...empty, byPlayer: {} };
+    for (const c of DEMO_CHECKINS)
+      if (!c.coach_feedback) bump(inbox, c.player_id, "checkins");
+    for (const m of DEMO_MESSAGES)
+      if (m.from_role === "player" && !m.read)
+        bump(inbox, m.player_id, "messages");
+    return inbox;
+  }
+
+  const inbox: CoachInbox = { ...empty, byPlayer: {} };
+  const { data: checkins } = await supabase
+    .from("elite_checkins")
+    .select("player_id, coach_feedback")
+    .or("coach_feedback.is.null,coach_feedback.eq.");
+  for (const c of (checkins as { player_id: string }[] | null) ?? [])
+    bump(inbox, c.player_id, "checkins");
+
+  const { data: msgs } = await supabase
+    .from("elite_messages")
+    .select("player_id, from_role, read")
+    .eq("from_role", "player")
+    .eq("read", false);
+  for (const m of (msgs as { player_id: string }[] | null) ?? [])
+    bump(inbox, m.player_id, "messages");
+
+  return inbox;
 }
 
 // Derived stats used across the dashboards.

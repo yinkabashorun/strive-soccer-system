@@ -6,6 +6,15 @@ export const metadata: Metadata = {
   title: "Get started · Strive Elite",
 };
 
-export default function SignupPage() {
-  return <SignupForm configured={isSupabaseConfigured()} />;
+export default function SignupPage({
+  searchParams,
+}: {
+  searchParams?: { code?: string };
+}) {
+  return (
+    <SignupForm
+      configured={isSupabaseConfigured()}
+      initialCode={searchParams?.code ?? ""}
+    />
+  );
 }

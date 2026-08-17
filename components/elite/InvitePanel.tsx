@@ -42,9 +42,15 @@ export function InvitePanel({ initial }: { initial: InviteCode[] }) {
     });
   }
 
+  // Copy a ready-to-send signup LINK — the code rides along in the URL and
+  // prefills at signup, so the parent just fills in name/email/password.
+  function inviteLink(code: string): string {
+    return `${window.location.origin}/signup?code=${encodeURIComponent(code)}`;
+  }
+
   async function copy(code: string) {
     try {
-      await navigator.clipboard.writeText(code);
+      await navigator.clipboard.writeText(inviteLink(code));
       setCopied(code);
       setTimeout(() => setCopied(null), 1800);
     } catch {
@@ -63,8 +69,9 @@ export function InvitePanel({ initial }: { initial: InviteCode[] }) {
         <span className="text-xs text-white/40">{outstanding} unused</span>
       </div>
       <p className="mt-1 text-sm text-white/50">
-        Generate a single-use code and send it to a client after they pay. They
-        redeem it at sign-up to unlock the program.
+        Generate a single-use invite and send the link to a client (or their
+        parent) after they pay. It opens sign-up with the code already filled
+        in.
       </p>
 
       <div className="mt-4 flex gap-2">
@@ -94,7 +101,7 @@ export function InvitePanel({ initial }: { initial: InviteCode[] }) {
         <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-accent/25 bg-accent/[0.06] px-4 py-3">
           <div>
             <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">
-              New code — share it
+              New invite — send the link
             </div>
             <div className="font-display text-xl font-black tracking-wide">
               {fresh}
@@ -106,7 +113,7 @@ export function InvitePanel({ initial }: { initial: InviteCode[] }) {
             ) : (
               <Copy className="h-4 w-4" />
             )}
-            Copy
+            Copy link
           </button>
         </div>
       )}
@@ -124,16 +131,32 @@ export function InvitePanel({ initial }: { initial: InviteCode[] }) {
                   <span className="ml-2 text-white/40">· {c.note}</span>
                 )}
               </div>
-              <span
-                className={cn(
-                  "shrink-0 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em]",
-                  c.used_by
-                    ? "border-white/12 text-white/40"
-                    : "border-accent/30 text-accent"
+              <div className="flex shrink-0 items-center gap-2">
+                {!c.used_by && (
+                  <button
+                    onClick={() => copy(c.code)}
+                    className="grid h-7 w-7 place-items-center rounded-lg text-white/40 transition-colors hover:bg-white/5 hover:text-accent"
+                    aria-label={`Copy invite link for ${c.code}`}
+                    title="Copy invite link"
+                  >
+                    {copied === c.code ? (
+                      <Check className="h-3.5 w-3.5 text-accent" />
+                    ) : (
+                      <Copy className="h-3.5 w-3.5" />
+                    )}
+                  </button>
                 )}
-              >
-                {c.used_by ? "Redeemed" : "Unused"}
-              </span>
+                <span
+                  className={cn(
+                    "rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em]",
+                    c.used_by
+                      ? "border-white/12 text-white/40"
+                      : "border-accent/30 text-accent"
+                  )}
+                >
+                  {c.used_by ? "Redeemed" : "Unused"}
+                </span>
+              </div>
             </li>
           ))}
         </ul>

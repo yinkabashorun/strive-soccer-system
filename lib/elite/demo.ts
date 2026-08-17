@@ -1,5 +1,6 @@
 import type {
   Achievement,
+  Checkin,
   CoachNote,
   FilmUpload,
   Homework,
@@ -22,7 +23,7 @@ import type {
 
 export const DEMO_COACH = {
   id: "coach-ramella",
-  full_name: "Coach Ramella",
+  full_name: "Coach Yinka",
   email: "coach@strivesoccerfc.com",
   role: "coach" as const,
   avatar_color: "#E5FF3D",
@@ -60,6 +61,11 @@ export const DEMO_PLAYERS: Player[] = [
     last_session_at: daysFromNow(-3),
     joined_at: "2026-04-11",
     subscription_status: "active",
+    club: "Riverside United U14",
+    dominant_foot: "Right",
+    coach_memory:
+      "Responds to challenges, not repetition. Left-foot weakness is mental, not technical — keeps skipping weak-foot reps. Tight hamstrings; keep the plyos controlled. Loves a target to beat.",
+    onboarded_at: "2026-04-11T00:00:00.000Z",
   },
   {
     id: "p-sofia",
@@ -464,7 +470,7 @@ export const DEMO_MESSAGES: Message[] = [
     id: "m-marcus-1",
     player_id: "p-marcus",
     from_role: "coach",
-    from_name: "Coach Ramella",
+    from_name: "Coach Yinka",
     body: "Loved your work rate at the last session. This week is all about the weak foot — send me 5 clips by Friday.",
     created_at: daysFromNow(-2),
     read: false,
@@ -473,7 +479,7 @@ export const DEMO_MESSAGES: Message[] = [
     id: "m-sofia-1",
     player_id: "p-sofia",
     from_role: "coach",
-    from_name: "Coach Ramella",
+    from_name: "Coach Yinka",
     body: "Your acceleration is unfair. Let's make that first touch just as scary. See you tomorrow.",
     created_at: daysFromNow(-1),
     read: false,
@@ -482,7 +488,7 @@ export const DEMO_MESSAGES: Message[] = [
     id: "m-diego-1",
     player_id: "p-diego",
     from_role: "coach",
-    from_name: "Coach Ramella",
+    from_name: "Coach Yinka",
     body: "Academy scout was impressed. Keep commanding that back line. Full breakdown of your trial film coming today.",
     created_at: daysFromNow(-1),
     read: true,
@@ -491,7 +497,7 @@ export const DEMO_MESSAGES: Message[] = [
     id: "m-aisha-1",
     player_id: "p-aisha",
     from_role: "coach",
-    from_name: "Coach Ramella",
+    from_name: "Coach Yinka",
     body: "You were braver in the box last session — I saw it. Keep finishing first-time and the goals will come.",
     created_at: daysFromNow(-2),
     read: false,
@@ -500,10 +506,40 @@ export const DEMO_MESSAGES: Message[] = [
     id: "m-liam-1",
     player_id: "p-liam",
     from_role: "coach",
-    from_name: "Coach Ramella",
+    from_name: "Coach Yinka",
     body: "Your crossing is getting sharp. This week we time the overlaps. Big season ahead.",
     created_at: daysFromNow(-3),
     read: true,
+  },
+];
+
+export const DEMO_CHECKINS: Checkin[] = [
+  {
+    id: "ci-marcus-7",
+    player_id: "p-marcus",
+    week: 7,
+    rating: 4,
+    energy: 3,
+    went_well: "Scanning is becoming automatic — caught myself checking both shoulders without thinking.",
+    struggled: "Weak-foot finishing still feels awkward under any pressure.",
+    note: "Legs a bit heavy midweek but pushed through all four sessions.",
+    coach_feedback:
+      "That scanning progress is exactly what we're after — it's a habit now. We'll take the weak foot slower this week, unopposed first, then add a defender.",
+    coach_feedback_at: daysFromNow(-2),
+    created_at: daysFromNow(-3),
+  },
+  {
+    id: "ci-marcus-6",
+    player_id: "p-marcus",
+    week: 6,
+    rating: 3,
+    energy: 4,
+    went_well: "Hit every session. Wall passes felt sharp.",
+    struggled: "Got frustrated with the weak-foot reps and rushed them.",
+    note: "",
+    coach_feedback: "",
+    coach_feedback_at: null,
+    created_at: daysFromNow(-10),
   },
 ];
 

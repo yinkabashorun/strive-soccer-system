@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { getViewer } from "@/lib/elite/session";
 import {
   ArrowLeft,
   CalendarClock,
@@ -9,6 +10,7 @@ import {
   Users,
 } from "lucide-react";
 import {
+  getCheckins,
   getHomework,
   getMessages,
   getNotes,
@@ -24,6 +26,10 @@ import { ProgressPanel } from "@/components/elite/ProgressPanel";
 import { CoachWeekView } from "@/components/elite/CoachWeekView";
 import { SessionNotesStudio } from "@/components/elite/SessionNotesStudio";
 import { EditableChips } from "@/components/elite/EditableChips";
+import { EditableMemory } from "@/components/elite/EditableMemory";
+import { CheckinsPanel } from "@/components/elite/CheckinsPanel";
+import { MessageThread } from "@/components/elite/MessageThread";
+import { IntakePanel } from "@/components/elite/IntakePanel";
 import { QuickComposer } from "@/components/elite/QuickComposer";
 import { StatusControl } from "@/components/elite/StatusControl";
 import { DuplicateWeekButton } from "@/components/elite/DuplicateWeekButton";
@@ -34,10 +40,11 @@ export default async function PlayerProfile({
 }: {
   params: { id: string };
 }) {
+  const viewer = await getViewer();
   const player = await getPlayer(params.id);
   if (!player) notFound();
 
-  const [homework, progress, notes, messages, reports, summary] =
+  const [homework, progress, notes, messages, reports, summary, checkins] =
     await Promise.all([
       getHomework(player.id),
       getProgress(player.id),
@@ -45,7 +52,13 @@ export default async function PlayerProfile({
       getMessages(player.id),
       getParentReports(player.id),
       getPlayerSummary(player.id),
+      getCheckins(player.id),
     ]);
+
+  async function sendMessage(body: string) {
+    "use server";
+    return sendCoachMessage(player!.id, body);
+  }
 
   // this-week session completion
   const thisWeek = homework.filter((h) => h.week === player.current_week);
@@ -98,30 +111,38 @@ export default async function PlayerProfile({
         </div>
       </div>
 
-      {/* Snapshot */}
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <StatTile
-          label="Streak"
-          value={summary.current_streak}
-          sub={summary.current_streak === 1 ? "day" : "days"}
-          accent
-        />
-        <StatTile
-          label="This week"
-          value={`${doneSessions}/${totalSessions || 4}`}
-          sub="Sessions done"
-        />
-        <StatTile
-          label="Homework"
-          value={`${summary.homework_pct}%`}
-          sub="Completion"
-        />
-        <StatTile
-          label="Minutes"
-          value={summary.training_minutes}
-          sub="Trained"
-        />
-      </div>
+      {/* Snapshot — real numbers once training exists; a clear next step
+          before then, not a row of zeros. */}
+      {homework.length > 0 ? (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <StatTile
+            label="Streak"
+            value={summary.current_streak}
+            sub={summary.current_streak === 1 ? "day" : "days"}
+            accent
+          />
+          <StatTile
+            label="This week"
+            value={`${doneSessions}/${totalSessions || 4}`}
+            sub="Sessions done"
+          />
+          <StatTile
+            label="Homework"
+            value={`${summary.homework_pct}%`}
+            sub="Completion"
+          />
+          <StatTile
+            label="Minutes"
+            value={summary.training_minutes}
+            sub="Trained"
+          />
+        </div>
+      ) : (
+        <div className="rounded-3xl border border-accent/20 bg-accent/[0.05] p-5 text-sm text-white/70">
+          No training assigned yet — type your session notes below and build
+          their first week.
+        </div>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Main column */}
@@ -135,6 +156,14 @@ export default async function PlayerProfile({
               homework={homework}
               currentWeek={player.current_week}
             />
+          </section>
+
+          {/* Weekly check-ins — the player's own words */}
+          <section>
+            <h2 className="mb-3 flex items-center gap-2 font-display text-xl font-bold uppercase tracking-tight">
+              <MessageSquare className="h-4 w-4 text-accent" /> Weekly check-ins
+            </h2>
+            <CheckinsPanel playerId={player.id} checkins={checkins} />
           </section>
 
           {/* Build next week */}
@@ -178,6 +207,15 @@ export default async function PlayerProfile({
             initial={player.subscription_status}
           />
 
+          {/* AI memory note — steers every generated week */}
+          <EditableMemory
+            playerId={player.id}
+            initial={player.coach_memory ?? ""}
+          />
+
+          {/* Intake snapshot */}
+          <IntakePanel player={player} />
+
           <DuplicateWeekButton
             playerId={player.id}
             currentWeek={player.current_week}
@@ -213,29 +251,19 @@ export default async function PlayerProfile({
             initial={player.weaknesses}
           />
 
-          {/* Message player */}
+          {/* Message player — full thread */}
           <div className="elite-card p-5">
             <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
               <MessageSquare className="h-3.5 w-3.5" /> Message{" "}
               {player.full_name.split(" ")[0]}
             </div>
-            <QuickComposer
-              action={sendCoachMessage.bind(null, player.id)}
+            <MessageThread
+              messages={messages}
+              meRole="coach"
+              meName={viewer?.profile.full_name ?? "Coach"}
+              send={sendMessage}
               placeholder="Send an encouraging message…"
-              cta="Send"
             />
-            {messages.length > 0 && (
-              <div className="mt-4 space-y-2 border-t border-white/6 pt-3">
-                {messages.slice(0, 3).map((m) => (
-                  <div key={m.id} className="text-sm">
-                    <span className="text-white/70">{m.body}</span>
-                    <span className="ml-1 text-xs text-white/30">
-                      · {timeAgo(m.created_at)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
 
           {/* Private notes */}
@@ -268,8 +296,13 @@ export default async function PlayerProfile({
               <CalendarClock className="h-3.5 w-3.5" /> 1-on-1 sessions
             </div>
             <div className="mt-3 space-y-2 text-sm">
-              <Row label="Next" value={formatSessionDate(player.next_session_at)} />
-              <Row label="Last" value={formatSessionDate(player.last_session_at)} />
+              {/* Only real dates — no "to be scheduled" filler rows. */}
+              {player.next_session_at && (
+                <Row label="Next" value={formatSessionDate(player.next_session_at)} />
+              )}
+              {player.last_session_at && (
+                <Row label="Last" value={formatSessionDate(player.last_session_at)} />
+              )}
               <Row
                 label="Joined"
                 value={new Date(player.joined_at).toLocaleDateString("en-US", {

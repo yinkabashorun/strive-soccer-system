@@ -50,6 +50,7 @@ export async function completeOnboarding(input: OnboardingInput) {
 
   // Tell the coach a new player finished onboarding.
   await sendCoachEmail(viewer.playerId, {
+    event: "player_onboarded",
     subject: `${viewer.profile.full_name} completed their intake`,
     body: `${viewer.profile.full_name} just finished onboarding and is ready for their first week. Open their profile to build it.`,
   }).catch(() => undefined);
@@ -136,6 +137,7 @@ export async function sendPlayerMessage(body: string) {
     });
     // Nudge the coach by email (best-effort).
     await sendCoachEmail(viewer.playerId, {
+      event: "player_message",
       subject: `New message from ${viewer.profile.full_name}`,
       body: `${viewer.profile.full_name} sent you a message:\n\n"${body}"`,
     }).catch(() => undefined);
@@ -178,6 +180,7 @@ export async function submitCheckin(input: CheckinInput) {
   });
 
   await sendCoachEmail(viewer.playerId, {
+    event: "checkin_submitted",
     subject: `${viewer.profile.full_name} submitted their weekly check-in`,
     body: `${viewer.profile.full_name} checked in for week ${player?.current_week ?? 1}.\n\nWent well: ${input.went_well || "—"}\nStruggled: ${input.struggled || "—"}\nNote: ${input.note || "—"}`,
   }).catch(() => undefined);

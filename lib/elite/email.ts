@@ -1,8 +1,12 @@
-// Strive Elite transactional email.
+// Strive Elite outbound notifications (player + parent + coach).
 //
-// Best-effort, no-op-safe. Sends via Resend when RESEND_API_KEY is set;
-// otherwise every function quietly does nothing so the app is fully
-// functional without email configured. Never throws to the caller.
+// Two channels, both best-effort and no-op-safe:
+//   1. GoHighLevel — POSTs the event to a GHL Inbound Webhook (GHL_WEBHOOK_URL)
+//      so your GHL workflow sends the actual email/SMS with your branding.
+//   2. Resend — a direct transactional email fallback if RESEND_API_KEY is set.
+//
+// Nothing here throws to the caller. With neither configured, every function
+// quietly does nothing and the app is fully functional.
 
 import { createServiceClient } from "./supabase/server";
 
@@ -12,17 +16,54 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://app.strivesoccer100x
 export function isEmailConfigured(): boolean {
   return Boolean(process.env.RESEND_API_KEY);
 }
+export function isGhlConfigured(): boolean {
+  return Boolean(process.env.GHL_WEBHOOK_URL);
+}
 
-type Mail = { subject: string; body: string };
+type Mail = { subject: string; body: string; event?: string };
 
-// Low-level send. Wraps the body in a minimal branded HTML shell.
-export async function sendEmail(
-  to: string | string[],
+type Contact = { name: string; email: string };
+
+// POST an event to the GoHighLevel Inbound Webhook. The GHL workflow reads
+// these fields to send the branded email/SMS and match the contact.
+async function dispatchGHL(payload: {
+  event: string;
+  audience: "player" | "coach";
+  subject: string;
+  body: string;
+  recipients: Contact[];
+  player?: { name: string; week?: number };
+}): Promise<boolean> {
+  const url = process.env.GHL_WEBHOOK_URL;
+  if (!url || payload.recipients.length === 0) return false;
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...payload,
+        // flat fields for easy mapping inside a GHL workflow
+        to_name: payload.recipients[0]?.name ?? "",
+        to_email: payload.recipients[0]?.email ?? "",
+        emails: payload.recipients.map((r) => r.email).filter(Boolean),
+        app_url: APP_URL,
+        source: "strive-elite",
+      }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+// Resend fallback — a branded HTML email.
+async function dispatchResend(
+  recipients: Contact[],
   mail: Mail
 ): Promise<boolean> {
   const key = process.env.RESEND_API_KEY;
-  const recipients = (Array.isArray(to) ? to : [to]).filter(Boolean);
-  if (!key || recipients.length === 0) return false;
+  const to = recipients.map((r) => r.email).filter(Boolean);
+  if (!key || to.length === 0) return false;
 
   const html = `<div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#0a0a0a;color:#f5f3ea;padding:32px">
   <div style="max-width:520px;margin:0 auto">
@@ -42,12 +83,7 @@ export async function sendEmail(
         Authorization: `Bearer ${key}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        from: FROM,
-        to: recipients,
-        subject: mail.subject,
-        html,
-      }),
+      body: JSON.stringify({ from: FROM, to, subject: mail.subject, html }),
     });
     return res.ok;
   } catch {
@@ -55,55 +91,81 @@ export async function sendEmail(
   }
 }
 
-// Email the player + their parent contact.
+// Notify the player + their parent contact.
 export async function sendPlayerEmail(
   playerId: string,
   mail: Mail
 ): Promise<boolean> {
-  if (!isEmailConfigured()) return false;
+  if (!isGhlConfigured() && !isEmailConfigured()) return false;
   const admin = createServiceClient();
   if (!admin) return false;
   const { data: player } = await admin
     .from("elite_players")
-    .select("parent_email, profile_id")
+    .select("full_name, parent_email, parent_name, current_week, profile_id")
     .eq("id", playerId)
     .maybeSingle();
   if (!player) return false;
 
-  const emails = new Set<string>();
-  if (player.parent_email) emails.add(player.parent_email);
+  const recipients: Contact[] = [];
+  if (player.parent_email)
+    recipients.push({ name: player.parent_name || "", email: player.parent_email });
   if (player.profile_id) {
     const { data: prof } = await admin
       .from("elite_profiles")
-      .select("email")
+      .select("email, full_name")
       .eq("id", player.profile_id)
       .maybeSingle();
-    if (prof?.email) emails.add(prof.email);
+    if (prof?.email)
+      recipients.push({ name: prof.full_name || player.full_name, email: prof.email });
   }
-  return sendEmail([...emails], mail);
+  if (recipients.length === 0) return false;
+
+  const ghl = await dispatchGHL({
+    event: mail.event ?? "player_notification",
+    audience: "player",
+    subject: mail.subject,
+    body: mail.body,
+    recipients,
+    player: { name: player.full_name, week: player.current_week },
+  });
+  const email = await dispatchResend(recipients, mail);
+  return ghl || email;
 }
 
-// Email the coach who manages this player.
+// Notify the coach who manages this player.
 export async function sendCoachEmail(
   playerId: string,
   mail: Mail
 ): Promise<boolean> {
-  if (!isEmailConfigured()) return false;
+  if (!isGhlConfigured() && !isEmailConfigured()) return false;
   const admin = createServiceClient();
   if (!admin) return false;
   const { data: player } = await admin
     .from("elite_players")
-    .select("coach_id")
+    .select("full_name, coach_id")
     .eq("id", playerId)
     .maybeSingle();
   if (!player?.coach_id) return false;
   const { data: coach } = await admin
     .from("elite_profiles")
-    .select("email")
+    .select("email, full_name")
     .eq("id", player.coach_id)
     .maybeSingle();
   if (!coach?.email) return false;
-  return sendEmail(coach.email, mail);
+
+  const recipients: Contact[] = [
+    { name: coach.full_name || "Coach", email: coach.email },
+  ];
+  const ghl = await dispatchGHL({
+    event: mail.event ?? "coach_notification",
+    audience: "coach",
+    subject: mail.subject,
+    body: mail.body,
+    recipients,
+    player: { name: player.full_name },
+  });
+  const email = await dispatchResend(recipients, mail);
+  return ghl || email;
 }
 
 function escapeHtml(s: string): string {

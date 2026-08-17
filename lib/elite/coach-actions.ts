@@ -69,6 +69,7 @@ export async function sendCoachMessage(playerId: string, body: string) {
       body: body.slice(0, 140),
     });
     await sendPlayerEmail(playerId, {
+      event: "coach_message",
       subject: "Your coach sent you a message",
       body: `${viewer.profile.full_name}: "${body}"`,
     }).catch(() => undefined);
@@ -100,6 +101,7 @@ export async function addCheckinFeedback(
       body: feedback.slice(0, 140),
     });
     await sendPlayerEmail(playerId, {
+      event: "checkin_feedback",
       subject: "Your coach replied to your check-in",
       body: feedback,
     }).catch(() => undefined);
@@ -305,6 +307,7 @@ export async function applyGeneratedPlan(
   // 7) tell the player their new week is ready (email — the in-app
   //    notification is fired by the elite_notify_new_week DB trigger).
   await sendPlayerEmail(playerId, {
+    event: "new_week",
     subject: `Week ${week} is ready`,
     body: `Your new training week is live.\n\nThis week's focus: ${plan.weekly_focus}\n\nFour sessions, each starting with your plyometric warm-up. Open Strive Elite to get going.`,
   }).catch(() => undefined);

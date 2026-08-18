@@ -139,6 +139,16 @@ function buildSessions(
           notes: undefined,
         },
       ];
+    } else if (skills.length === 1) {
+      // A session is always ~an hour: plyo + TWO drills. Pad a thin
+      // session by re-applying its drill at game speed.
+      skills.push({
+        title: "Apply under pressure",
+        exercise: `Repeat at game speed, tighter space, quicker decisions: ${skills[0].title.toLowerCase()}`,
+        reps: "25 min",
+        minutes: 25,
+        notes: undefined,
+      });
     }
     out.push({
       title: s?.title?.trim() || `Session ${i + 1}`,

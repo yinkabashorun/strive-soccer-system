@@ -34,14 +34,14 @@ export function LoginForm({ configured }: { configured: boolean }) {
       setLoading(false);
       return;
     }
-    // Route by role.
+    // Route by role — coaches and admins go to the coach app.
     const { data: profile } = await supabase
-      .from("profiles")
+      .from("elite_profiles")
       .select("role")
       .eq("id", data.user.id)
       .maybeSingle();
-    const dest =
-      next || (profile?.role === "coach" ? "/coach" : "/dashboard");
+    const isStaff = profile?.role === "coach" || profile?.role === "admin";
+    const dest = next || (isStaff ? "/coach" : "/dashboard");
     router.push(dest);
     router.refresh();
   }
@@ -94,6 +94,12 @@ export function LoginForm({ configured }: { configured: boolean }) {
         >
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
         </button>
+
+        <p className="text-center text-xs">
+          <Link href="/forgot" className="text-white/40 hover:text-accent">
+            Forgot your password?
+          </Link>
+        </p>
       </form>
 
       <p className="mt-5 text-center text-sm text-white/50">

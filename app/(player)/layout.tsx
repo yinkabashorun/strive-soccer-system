@@ -19,7 +19,8 @@ export default async function PlayerLayout({
 }) {
   const viewer = await getViewer();
   if (!viewer) redirect("/login?next=/dashboard");
-  if (viewer.role === "coach") redirect("/coach");
+  // Coaches AND admins live in the coach app, never the player shell.
+  if (viewer.role !== "player") redirect("/coach");
 
   // Authenticated player whose coach hasn't set up their profile yet.
   if (!viewer.playerId) {

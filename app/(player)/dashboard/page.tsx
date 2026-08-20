@@ -132,7 +132,6 @@ export default async function DashboardPage() {
           session={current.n}
           totalSessions={sessions.length || 4}
           drills={current.list}
-          focus={player.today_focus || "Today's session"}
           firstName={firstName}
         />
       ) : (

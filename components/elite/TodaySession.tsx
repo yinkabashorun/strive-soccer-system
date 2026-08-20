@@ -13,13 +13,11 @@ export function TodaySession({
   session,
   totalSessions,
   drills,
-  focus,
   firstName,
 }: {
   session: number;
   totalSessions: number;
   drills: Homework[];
-  focus: string;
   firstName: string;
 }) {
   const [state, setState] = useState<Record<string, boolean>>(() =>
@@ -64,9 +62,11 @@ export function TodaySession({
           {doneCount}/{drills.length} done
         </div>
       </div>
-      <p className="mt-1.5 font-display text-2xl font-black uppercase leading-tight sm:text-3xl">
-        {allDone ? `Session complete, ${firstName}` : focus}
-      </p>
+      {allDone && (
+        <p className="mt-1.5 font-display text-2xl font-black uppercase leading-tight sm:text-3xl">
+          Session complete, {firstName}
+        </p>
+      )}
 
       {/* completion moment */}
       {allDone ? (

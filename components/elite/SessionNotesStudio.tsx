@@ -250,6 +250,8 @@ export function SessionNotesStudio({ playerId }: { playerId: string }) {
                             </>
                           ) : (
                             <>
+                              {/* Edits happen in place — the draft looks
+                                  exactly like the published plan. */}
                               <div className="flex items-center gap-2">
                                 <input
                                   value={d.title}
@@ -257,34 +259,42 @@ export function SessionNotesStudio({ playerId }: { playerId: string }) {
                                     editDrill(si, di, { title: e.target.value })
                                   }
                                   disabled={saved}
-                                  className="min-w-0 flex-1 bg-transparent font-medium text-bone outline-none focus:text-accent"
+                                  className="min-w-0 flex-1 bg-transparent font-medium text-bone outline-none placeholder:text-white/25 focus:text-accent"
+                                  placeholder="Drill name"
                                 />
-                                <input
-                                  value={d.reps}
-                                  onChange={(e) =>
-                                    editDrill(si, di, { reps: e.target.value })
-                                  }
-                                  disabled={saved}
-                                  className="w-20 rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1 text-right text-xs text-white/70 outline-none focus:border-accent/40"
-                                />
-                                <input
-                                  type="number"
-                                  min={5}
-                                  max={45}
-                                  value={d.minutes ?? 25}
-                                  onChange={(e) =>
-                                    editDrill(si, di, {
-                                      minutes: Number(e.target.value),
-                                    })
-                                  }
-                                  disabled={saved}
-                                  className="w-14 rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1 text-right text-xs text-white/70 outline-none focus:border-accent/40"
-                                  title="Minutes"
-                                />
+                                <span className="chip shrink-0">
+                                  <input
+                                    value={d.reps}
+                                    onChange={(e) =>
+                                      editDrill(si, di, { reps: e.target.value })
+                                    }
+                                    disabled={saved}
+                                    size={Math.max(3, d.reps.length)}
+                                    className="bg-transparent text-right uppercase tracking-[0.14em] outline-none"
+                                    aria-label="Reps"
+                                  />
+                                </span>
+                                <span className="chip shrink-0 whitespace-nowrap">
+                                  <input
+                                    type="number"
+                                    min={5}
+                                    max={45}
+                                    value={d.minutes ?? 25}
+                                    onChange={(e) =>
+                                      editDrill(si, di, {
+                                        minutes: Number(e.target.value),
+                                      })
+                                    }
+                                    disabled={saved}
+                                    className="no-spin w-7 bg-transparent text-right outline-none"
+                                    aria-label="Minutes"
+                                  />
+                                  min
+                                </span>
                                 {!saved && (
                                   <button
                                     onClick={() => removeDrill(si, di)}
-                                    className="grid h-6 w-6 shrink-0 place-items-center rounded text-white/30 hover:text-red-400"
+                                    className="grid h-6 w-6 shrink-0 place-items-center rounded-full text-white/20 transition-colors hover:text-red-400"
                                     aria-label="Remove drill"
                                     title="Remove drill"
                                   >

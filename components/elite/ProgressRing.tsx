@@ -8,7 +8,7 @@ export function ProgressRing({
   stroke = 10,
   label,
   sublabel,
-  color = "#E5FF3D",
+  color = "#F5C518",
   className,
 }: {
   value: number; // 0-100

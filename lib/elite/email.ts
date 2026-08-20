@@ -67,11 +67,11 @@ async function dispatchResend(
 
   const html = `<div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#0a0a0a;color:#f5f3ea;padding:32px">
   <div style="max-width:520px;margin:0 auto">
-    <div style="font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#E5FF3D;font-size:14px">Strive Elite</div>
+    <div style="font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#F5C518;font-size:14px">Strive Elite</div>
     <div style="margin-top:20px;font-size:16px;line-height:1.6;color:#e8e6dd;white-space:pre-line">${escapeHtml(
       mail.body
     )}</div>
-    <a href="${APP_URL}" style="display:inline-block;margin-top:28px;background:#E5FF3D;color:#0a0a0a;font-weight:700;text-decoration:none;padding:12px 22px;border-radius:10px">Open Strive Elite</a>
+    <a href="${APP_URL}" style="display:inline-block;margin-top:28px;background:#ffffff;color:#0a0a0a;font-weight:700;text-decoration:none;padding:12px 22px;border-radius:10px">Open Strive Elite</a>
     <div style="margin-top:28px;font-size:12px;color:#8a887f">Strive Soccer FC · You're receiving this because you're part of the Strive Elite program.</div>
   </div>
 </div>`;

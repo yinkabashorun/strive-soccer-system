@@ -34,6 +34,12 @@ import type {
 // configured, otherwise returns the demo dataset. The UI is identical in
 // both modes so the deployed app is fully tourable before wiring Supabase.
 
+// Demo-tour ids ("p-marcus"…) ALWAYS serve demo data — even in production
+// with Supabase configured — so the login-page "tour the app" experience
+// works everywhere and never touches real rows.
+const DEMO_IDS = new Set(DEMO_PLAYERS.map((p) => p.id));
+const isDemo = (id: string) => DEMO_IDS.has(id);
+
 export async function getPlayers(): Promise<Player[]> {
   const supabase = createClient();
   if (!supabase) return DEMO_PLAYERS;
@@ -46,7 +52,7 @@ export async function getPlayers(): Promise<Player[]> {
 
 export async function getPlayer(id: string): Promise<Player | null> {
   const supabase = createClient();
-  if (!supabase) return DEMO_PLAYERS.find((p) => p.id === id) ?? null;
+  if (!supabase || isDemo(id)) return DEMO_PLAYERS.find((p) => p.id === id) ?? null;
   const { data } = await supabase
     .from("elite_players")
     .select("*")
@@ -57,7 +63,7 @@ export async function getPlayer(id: string): Promise<Player | null> {
 
 export async function getHomework(playerId: string): Promise<Homework[]> {
   const supabase = createClient();
-  if (!supabase)
+  if (!supabase || isDemo(playerId))
     return DEMO_HOMEWORK.filter((h) => h.player_id === playerId).sort(
       (a, b) => a.sort - b.sort
     );
@@ -71,7 +77,7 @@ export async function getHomework(playerId: string): Promise<Homework[]> {
 
 export async function getProgress(playerId: string): Promise<Progress[]> {
   const supabase = createClient();
-  if (!supabase) return DEMO_PROGRESS.filter((p) => p.player_id === playerId);
+  if (!supabase || isDemo(playerId)) return DEMO_PROGRESS.filter((p) => p.player_id === playerId);
   const { data } = await supabase
     .from("elite_progress")
     .select("*")
@@ -81,7 +87,7 @@ export async function getProgress(playerId: string): Promise<Progress[]> {
 
 export async function getFilm(playerId: string): Promise<FilmUpload[]> {
   const supabase = createClient();
-  if (!supabase)
+  if (!supabase || isDemo(playerId))
     return DEMO_FILM.filter((f) => f.player_id === playerId).sort((a, b) =>
       b.created_at.localeCompare(a.created_at)
     );
@@ -95,7 +101,7 @@ export async function getFilm(playerId: string): Promise<FilmUpload[]> {
 
 export async function getNotes(playerId: string): Promise<CoachNote[]> {
   const supabase = createClient();
-  if (!supabase)
+  if (!supabase || isDemo(playerId))
     return DEMO_NOTES.filter((n) => n.player_id === playerId).sort((a, b) =>
       b.created_at.localeCompare(a.created_at)
     );
@@ -109,7 +115,7 @@ export async function getNotes(playerId: string): Promise<CoachNote[]> {
 
 export async function getMessages(playerId: string): Promise<Message[]> {
   const supabase = createClient();
-  if (!supabase)
+  if (!supabase || isDemo(playerId))
     return DEMO_MESSAGES.filter((m) => m.player_id === playerId).sort((a, b) =>
       b.created_at.localeCompare(a.created_at)
     );
@@ -123,7 +129,7 @@ export async function getMessages(playerId: string): Promise<Message[]> {
 
 export async function getAchievements(playerId: string): Promise<Achievement[]> {
   const supabase = createClient();
-  if (!supabase)
+  if (!supabase || isDemo(playerId))
     return DEMO_ACHIEVEMENTS.filter((a) => a.player_id === playerId).sort(
       (a, b) => b.earned_at.localeCompare(a.earned_at)
     );
@@ -139,7 +145,7 @@ export async function getParentReports(
   playerId: string
 ): Promise<ParentReport[]> {
   const supabase = createClient();
-  if (!supabase)
+  if (!supabase || isDemo(playerId))
     return DEMO_PARENT_REPORTS.filter((r) => r.player_id === playerId).sort(
       (a, b) => b.created_at.localeCompare(a.created_at)
     );
@@ -153,7 +159,7 @@ export async function getParentReports(
 
 export async function getGames(playerId: string): Promise<Game[]> {
   const supabase = createClient();
-  if (!supabase)
+  if (!supabase || isDemo(playerId))
     return DEMO_GAMES.filter((g) => g.player_id === playerId).sort((a, b) =>
       a.game_date.localeCompare(b.game_date)
     );
@@ -168,7 +174,7 @@ export async function getGames(playerId: string): Promise<Game[]> {
 
 export async function getCheckins(playerId: string): Promise<Checkin[]> {
   const supabase = createClient();
-  if (!supabase)
+  if (!supabase || isDemo(playerId))
     return DEMO_CHECKINS.filter((c) => c.player_id === playerId).sort((a, b) =>
       b.created_at.localeCompare(a.created_at)
     );
@@ -183,7 +189,7 @@ export async function getCheckins(playerId: string): Promise<Checkin[]> {
 
 export async function getWeeklyPlans(playerId: string): Promise<WeeklyPlan[]> {
   const supabase = createClient();
-  if (!supabase)
+  if (!supabase || isDemo(playerId))
     return DEMO_WEEKLY_PLANS.filter((p) => p.player_id === playerId).sort(
       (a, b) => b.week - a.week
     );
@@ -199,7 +205,7 @@ export async function getProgressHistory(
   playerId: string
 ): Promise<ProgressPoint[]> {
   const supabase = createClient();
-  if (!supabase) {
+  if (!supabase || isDemo(playerId)) {
     // demo: synthesize a gentle upward trend from current values
     return DEMO_PROGRESS.filter((p) => p.player_id === playerId).flatMap((p) =>
       [4, 2, 0].map((back, i) => ({
@@ -294,7 +300,7 @@ export function computeSummary(hw: Homework[]): PlayerSummary {
 
 export async function getPlayerSummary(playerId: string): Promise<PlayerSummary> {
   const supabase = createClient();
-  if (supabase) {
+  if (supabase && !isDemo(playerId)) {
     const { data, error } = await supabase.rpc("elite_player_summary", {
       p_player_id: playerId,
     });
@@ -319,7 +325,7 @@ export async function getNotifications(
   playerId: string
 ): Promise<EliteNotification[]> {
   const supabase = createClient();
-  if (!supabase) {
+  if (!supabase || isDemo(playerId)) {
     // demo: one sample unread notification so the bell is visible
     return [
       {

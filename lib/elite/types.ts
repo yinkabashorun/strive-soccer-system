@@ -159,6 +159,7 @@ export type FilmUpload = {
   coach_notes: string | null;
   status: "Uploaded" | "Reviewed" | "Analyzing";
   created_at: string;
+  month?: number; // program month (1, 2, 3…) — one review per month (015)
 };
 
 export type CoachNote = {

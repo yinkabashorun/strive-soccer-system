@@ -10,6 +10,7 @@ const PLAYER_NAV: NavItem[] = [
   { href: "/dashboard", label: "Home", icon: "Home" },
   { href: "/homework", label: "Training", icon: "Clipboard" },
   { href: "/progress", label: "Progress", icon: "BarChart3" },
+  { href: "/film", label: "Film", icon: "Film" },
   { href: "/messages", label: "Coach", icon: "MessageSquare" },
 ];
 

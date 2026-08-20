@@ -4,6 +4,7 @@ import { getViewer } from "@/lib/elite/session";
 import {
   ArrowLeft,
   CalendarClock,
+  Clapperboard,
   MessageSquare,
   StickyNote,
   Target,
@@ -11,6 +12,7 @@ import {
 } from "lucide-react";
 import {
   getCheckins,
+  getFilm,
   getHomework,
   getMessages,
   getNotes,
@@ -30,6 +32,7 @@ import { SessionNotesStudio } from "@/components/elite/SessionNotesStudio";
 import { EditableChips } from "@/components/elite/EditableChips";
 import { EditableMemory } from "@/components/elite/EditableMemory";
 import { CheckinsPanel } from "@/components/elite/CheckinsPanel";
+import { CoachFilmPanel } from "@/components/elite/CoachFilmPanel";
 import { MessageThread } from "@/components/elite/MessageThread";
 import { IntakePanel } from "@/components/elite/IntakePanel";
 import { QuickComposer } from "@/components/elite/QuickComposer";
@@ -46,7 +49,7 @@ export default async function PlayerProfile({
   const player = await getPlayer(params.id);
   if (!player) notFound();
 
-  const [homework, progress, notes, messages, reports, summary, checkins, plans] =
+  const [homework, progress, notes, messages, reports, summary, checkins, plans, films] =
     await Promise.all([
       getHomework(player.id),
       getProgress(player.id),
@@ -56,6 +59,7 @@ export default async function PlayerProfile({
       getPlayerSummary(player.id),
       getCheckins(player.id),
       getWeeklyPlans(player.id),
+      getFilm(player.id),
     ]);
 
   // A week approved but not yet unlocked (drops Monday morning VA time).
@@ -182,6 +186,14 @@ export default async function PlayerProfile({
               <MessageSquare className="h-4 w-4 text-accent" /> Weekly check-ins
             </h2>
             <CheckinsPanel playerId={player.id} checkins={checkins} />
+          </section>
+
+          {/* Monthly film review */}
+          <section>
+            <h2 className="mb-3 flex items-center gap-2 font-display text-xl font-bold uppercase tracking-tight">
+              <Clapperboard className="h-4 w-4 text-accent" /> Monthly film
+            </h2>
+            <CoachFilmPanel playerId={player.id} films={films} />
           </section>
 
           {/* Build next week */}

@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient, createServiceClient } from "./supabase/server";
 import { getViewer } from "./session";
 import { sendCoachEmail } from "./email";
+import { monthFromWeek } from "./time";
 import type { ProgressMetric } from "./types";
 
 export type OnboardingInput = {
@@ -77,24 +78,61 @@ export async function toggleHomework(id: string, completed: boolean) {
   return { ok: true };
 }
 
-// Record a film upload's metadata after the file lands in Storage.
-export async function recordFilm(input: {
-  title: string;
-  url?: string | null;
-}) {
+// Player submits their monthly film LINK (Veo/Hudl/YouTube/etc.) for the
+// current program month. One submission per month.
+export async function submitFilm(input: { url: string; note: string }) {
   const viewer = await getViewer();
-  if (!viewer?.playerId) return { ok: false };
-  const supabase = createClient();
-  if (supabase) {
-    await supabase.from("elite_film_uploads").insert({
-      player_id: viewer.playerId,
-      title: input.title,
-      url: input.url ?? null,
-      status: "Uploaded",
-    });
-    revalidatePath("/film");
+  if (!viewer?.playerId) return { ok: false as const, error: "unauthorized" };
+  const url = input.url.trim();
+  if (!/^https?:\/\/.+\..+/.test(url)) {
+    return { ok: false as const, error: "Paste a full video link (starting with http)." };
   }
-  return { ok: true };
+  const supabase = createClient();
+  if (!supabase) return { ok: true as const }; // demo
+
+  const { data: player } = await supabase
+    .from("elite_players")
+    .select("current_week, full_name")
+    .eq("id", viewer.playerId)
+    .maybeSingle();
+  const month = monthFromWeek(player?.current_week ?? 1);
+
+  // one film per program month
+  const { data: existing } = await supabase
+    .from("elite_film_uploads")
+    .select("id")
+    .eq("player_id", viewer.playerId)
+    .eq("month", month)
+    .limit(1);
+  if (existing && existing.length > 0) {
+    return {
+      ok: false as const,
+      error: "This month's film is already in — your coach is on it.",
+    };
+  }
+
+  const row = {
+    player_id: viewer.playerId,
+    title: input.note.trim() || `Month ${month} film`,
+    url,
+    month,
+    status: "Uploaded",
+  };
+  const { error } = await supabase.from("elite_film_uploads").insert(row);
+  if (error) {
+    // pre-015 (no month column) — insert without it so nothing breaks
+    const { month: _m, ...legacy } = row;
+    await supabase.from("elite_film_uploads").insert(legacy);
+  }
+
+  await sendCoachEmail(viewer.playerId, {
+    event: "film_submitted",
+    subject: `${viewer.profile.full_name} submitted month ${month} film`,
+    body: `${viewer.profile.full_name} submitted their film for month ${month}.\n\n${url}\n\nNote: ${input.note || "—"}\n\nWatch it and leave feedback on their profile.`,
+  }).catch(() => undefined);
+
+  revalidatePath("/film");
+  return { ok: true as const };
 }
 
 // Mark a single notification read.

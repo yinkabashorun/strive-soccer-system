@@ -61,3 +61,8 @@ export function fmtMonday(monday: string): string {
     timeZone: NY,
   });
 }
+
+// Program month from the live week: weeks 1-4 → month 1, 5-8 → month 2…
+export function monthFromWeek(week: number): number {
+  return Math.floor((Math.max(1, week) - 1) / 4) + 1;
+}

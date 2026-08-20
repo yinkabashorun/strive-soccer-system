@@ -157,6 +157,8 @@ export async function duplicateWeek(input: {
   return { ok: true as const, cloned: rows.length };
 }
 
+// Coach reviews a monthly film submission — feedback lands in the app and
+// pings the player/parent.
 export async function setFilmNotes(filmId: string, playerId: string, notes: string) {
   if (!(await requireCoach())) return { ok: false };
   const supabase = createClient();
@@ -165,7 +167,19 @@ export async function setFilmNotes(filmId: string, playerId: string, notes: stri
       .from("elite_film_uploads")
       .update({ coach_notes: notes, status: "Reviewed" })
       .eq("id", filmId);
+    await supabase.from("elite_notifications").insert({
+      player_id: playerId,
+      kind: "film_feedback",
+      title: "Your film review is in",
+      body: notes.slice(0, 140),
+    });
+    await sendPlayerEmail(playerId, {
+      event: "film_feedback",
+      subject: "Coach reviewed your film",
+      body: `Your monthly film review is in:\n\n${notes}\n\nOpen the app to see it with your film.`,
+    }).catch(() => undefined);
     revalidatePath(`/coach/players/${playerId}`);
+    revalidatePath("/film");
   }
   return { ok: true };
 }

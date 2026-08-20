@@ -25,6 +25,7 @@ import { CheckinCard } from "@/components/elite/CheckinCard";
 import { StatTile } from "@/components/elite/StatTile";
 import { fmtMonday, nextMondayNY } from "@/lib/elite/time";
 import { greeting, timeAgo } from "@/lib/utils";
+import { TourGuide } from "@/components/elite/TourGuide";
 
 const ICONS: Record<string, LucideIcon> = {
   Eye,
@@ -92,6 +93,8 @@ export default async function DashboardPage() {
 
   return (
     <div className="space-y-5">
+      {viewer.demo && <TourGuide page="home" />}
+
       {/* Header — name + streak, nothing else */}
       <header className="flex items-end justify-between gap-4 animate-fade-up">
         <div>

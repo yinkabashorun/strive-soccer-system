@@ -3,6 +3,7 @@ import { getViewer } from "@/lib/elite/session";
 import { getNotes, getPlayer, getProgress } from "@/lib/elite/data";
 import { ProgressPanel } from "@/components/elite/ProgressPanel";
 import { timeAgo } from "@/lib/utils";
+import { TourGuide } from "@/components/elite/TourGuide";
 
 export default async function ProgressPage() {
   const viewer = await getViewer();
@@ -15,6 +16,8 @@ export default async function ProgressPage() {
 
   return (
     <div className="space-y-6">
+      {viewer.demo && <TourGuide page="progress" />}
+
       <header className="animate-fade-up">
         <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
           {player?.position} · {player?.level}

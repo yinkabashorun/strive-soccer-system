@@ -4,6 +4,7 @@ import { getFilm, getGames, getPlayer } from "@/lib/elite/data";
 import { monthFromWeek } from "@/lib/elite/time";
 import { FilmTimeline } from "@/components/elite/FilmTimeline";
 import { GameSchedule } from "@/components/elite/GameSchedule";
+import { TourGuide } from "@/components/elite/TourGuide";
 
 export const metadata = { title: "Film · Strive Elite" };
 
@@ -24,6 +25,8 @@ export default async function FilmPage() {
 
   return (
     <div className="space-y-5">
+      {viewer.demo && <TourGuide page="film" />}
+
       <header className="animate-fade-up">
         <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
           <Clapperboard className="h-3.5 w-3.5 text-accent" /> Month {currentMonth}

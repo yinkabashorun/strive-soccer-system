@@ -291,9 +291,9 @@ export const DEMO_HOMEWORK: Homework[] = [
   ...hw("p-marcus", 5, [
     { ...plyo(1), session: 1, completed: true, completed_at: daysFromNow(-11) },
     {
-      title: "Gate passing — both feet",
-      exercise: "Two shoes make a gate. Two-touch passes through it from 8 yards, collect, go again",
-      reps: "40 passes",
+      title: "Cushion rebound passing",
+      exercise: "Lean a couch cushion against a chair — firm two-touch passes off the return, both feet",
+      reps: "80 passes",
       duration_min: 10,
       session: 1,
       completed: true,
@@ -309,8 +309,8 @@ export const DEMO_HOMEWORK: Homework[] = [
       completed_at: daysFromNow(-11),
     },
     {
-      title: "Pass and move",
-      exercise: "Pass through the gate, sprint onto it, turn, play the other way",
+      title: "Rebound rhythm",
+      exercise: "One-touch returns off the cushion — stay on your toes, scan between reps",
       reps: "3 x 3 min",
       duration_min: 10,
       session: 1,
@@ -319,9 +319,9 @@ export const DEMO_HOMEWORK: Homework[] = [
     },
     { ...plyo(2), session: 2, completed: true, completed_at: daysFromNow(-10) },
     {
-      title: "Weak-foot gate passing",
-      exercise: "Left foot only — through the gate, collect, repeat",
-      reps: "40 passes",
+      title: "Weak-foot rebound passing",
+      exercise: "Left foot only off the cushion — cushion the return, keep the rhythm",
+      reps: "60 passes",
       duration_min: 10,
       session: 2,
       completed: true,
@@ -348,7 +348,7 @@ export const DEMO_HOMEWORK: Homework[] = [
     { ...plyo(3), session: 3, completed: true, completed_at: daysFromNow(-9) },
     {
       title: "Scan then pass",
-      exercise: "Shoulder check, call out what you saw, then hit the gate",
+      exercise: "Shoulder check, call out what you saw, then hit the cushion",
       reps: "40 reps",
       duration_min: 10,
       session: 3,
@@ -357,7 +357,7 @@ export const DEMO_HOMEWORK: Homework[] = [
     },
     {
       title: "Half-turn and play forward",
-      exercise: "Self-toss, receive on the half-turn, pass through the far gate",
+      exercise: "Receive the cushion return on the half-turn, play it back firm",
       reps: "30 reps",
       duration_min: 10,
       session: 3,
@@ -366,7 +366,7 @@ export const DEMO_HOMEWORK: Homework[] = [
     },
     {
       title: "Touch-pass combo",
-      exercise: "First touch out of your feet, pass through the gate on your second",
+      exercise: "First touch out of your feet off the rebound, pass back on your second",
       reps: "3 x 3 min",
       duration_min: 10,
       session: 3,
@@ -376,7 +376,7 @@ export const DEMO_HOMEWORK: Homework[] = [
     { ...plyo(4), session: 4, completed: true, completed_at: daysFromNow(-8) },
     {
       title: "Pressure passing circuit",
-      exercise: "Two gates, alternate targets, two-touch max at game speed",
+      exercise: "Off the cushion at game speed — two-touch max, scan every rep",
       reps: "3 rounds",
       duration_min: 10,
       session: 4,
@@ -394,7 +394,7 @@ export const DEMO_HOMEWORK: Homework[] = [
     },
     {
       title: "Study a passer",
-      exercise: "Watch a pro's passing angles, copy 3 patterns with your gates",
+      exercise: "Watch a pro's passing angles, copy 3 patterns off the cushion",
       reps: "1 clip + 30 reps",
       duration_min: 10,
       session: 4,
@@ -451,8 +451,8 @@ export const DEMO_HOMEWORK: Homework[] = [
       completed_at: daysFromNow(-5),
     },
     {
-      title: "Gate passing rhythm",
-      exercise: "Two-touch through the gate, alternating feet",
+      title: "Rebound passing rhythm",
+      exercise: "Two-touch off the cushion, alternating feet",
       reps: "60 passes",
       duration_min: 10,
       session: 2,
@@ -508,7 +508,7 @@ export const DEMO_HOMEWORK: Homework[] = [
     },
     {
       title: "Apply at game speed",
-      exercise: "Self-toss, scan, play through a gate — two touches max",
+      exercise: "Off the cushion — receive, scan, play it back in two touches",
       reps: "20 reps",
       duration_min: 10,
       session: 4,
@@ -520,8 +520,8 @@ export const DEMO_HOMEWORK: Homework[] = [
     // Session 1 (done) — plyo + 3 drills
     { ...plyo(1), session: 1, completed: true, completed_at: daysFromNow(-2) },
     {
-      title: "Gate passing — scan first",
-      exercise: "Shoulder check, then two-touch through the gate — both feet",
+      title: "Rebound passing — scan first",
+      exercise: "Shoulder check, then two-touch off the cushion — both feet",
       reps: "60 passes",
       duration_min: 10,
       session: 1,
@@ -586,15 +586,15 @@ export const DEMO_HOMEWORK: Homework[] = [
       notes: "Plant foot pointed at target.",
     },
     {
-      title: "Weak-foot gate passes",
-      exercise: "Left foot only — through the gate, collect, repeat",
-      reps: "40 passes",
+      title: "Weak-foot rebound passes",
+      exercise: "Left foot only off the cushion — cushion and return in rhythm",
+      reps: "60 passes",
       duration_min: 10,
       session: 3,
     },
     {
       title: "Apply under pressure",
-      exercise: "Self-toss, scan, strike left-footed in two touches — game speed",
+      exercise: "Off the cushion — scan, strike left-footed in two touches, game speed",
       reps: "20 reps",
       duration_min: 10,
       session: 3,
@@ -856,7 +856,7 @@ export const DEMO_CHECKINS: Checkin[] = [
     week: 5,
     rating: 3,
     energy: 4,
-    went_well: "Hit every session. Gate passing felt sharp.",
+    went_well: "Hit every session. The cushion rebound passing felt sharp.",
     struggled: "Got frustrated with the weak-foot reps and rushed them.",
     note: "",
     coach_feedback: "",
@@ -877,7 +877,7 @@ export const DEMO_WEEKLY_PLANS: WeeklyPlan[] = [
       "Play forward on the half-turn when it's on",
     ],
     homework: [
-      { title: "Gate passing", exercise: "Two-touch through the gate, both feet", reps: "60" },
+      { title: "Rebound passing", exercise: "Two-touch off the cushion, both feet", reps: "60" },
       { title: "Weak-foot finishing", exercise: "Left-foot from the box", reps: "50" },
     ],
     created_at: daysFromNow(-3),
@@ -893,7 +893,7 @@ export const DEMO_PARENT_REPORTS: ParentReport[] = [
     improvement:
       "Scanning jumped from 58 to 71. He's now checking his shoulder automatically — a habit that separates good players from great ones.",
     homework:
-      "Gate passing with a scan first, left-foot strikes at a target, and a Rodri film study on body shape.",
+      "Rebound passing with a scan first, left-foot strikes at a target, and a Rodri film study on body shape.",
     next_focus:
       "Weak-foot finishing under fatigue and playing forward on the half-turn.",
     created_at: daysFromNow(-3),

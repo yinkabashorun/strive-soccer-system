@@ -60,16 +60,17 @@ export const METHOD_PILLARS: PillarGuide[] = [
     drills: [
       "Weak-foot-only dribble patterns through shoes/cones",
       "Weak-foot toe-taps and push-pulls",
+      "Weak-foot cushion rebound passes — weak side only, cushion the return",
       "Weak-foot strikes at a target (a shoe, a bag — anything to hit)",
     ],
   },
   {
     pillar: "Passing",
-    lens: "Weight, accuracy, and a scan before every pass.",
+    lens: "Weight, accuracy, and a scan before every pass. The ball must come back — a rebound surface makes solo passing real.",
     drills: [
-      "Gate passing — pass through two shoes, follow the ball, turn, repeat with the other foot",
-      "Target passing — hit a shoe/cone from 5, 10, 15 steps, both feet",
-      "Weighted rolls — inside-of-foot passes that stop dead on a marker",
+      "Cushion rebound passing — lean a couch cushion or mattress against a wall/chair, firm two-touch passes off the return, both feet",
+      "Rebound rhythm — one-touch returns off the cushion, stay on your toes, scan between reps",
+      "Weighted rolls — inside-of-foot passes that stop dead on a towel/marker",
     ],
   },
   {

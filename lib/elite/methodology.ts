@@ -18,6 +18,10 @@ export const METHOD_STRUCTURE = {
   warmupMinutes: 10,
   skillDrillsPerSession: 2, // fewer, deeper drills — not a long list
   setting: "at-home / room-and-yard friendly",
+  // The ONLY equipment we assume: a ball and a small space. Anything else
+  // (wall, goal, rebounder, partner, ladder) must come from the coach's
+  // notes or the player's profile — never assumed.
+  assumedEquipment: "a ball and a small room/yard space",
 };
 
 // The Strive philosophy — the principles behind every plan.
@@ -54,25 +58,25 @@ export const METHOD_PILLARS: PillarGuide[] = [
     pillar: "Weak Foot",
     lens: "Two-footed players are twice the problem. Force the weak side.",
     drills: [
-      "Weak-foot wall passes, cushion and return",
+      "Weak-foot-only dribble patterns through shoes/cones",
       "Weak-foot toe-taps and push-pulls",
-      "Weak-foot finishes into a net or target",
+      "Weak-foot strikes at a target (a shoe, a bag — anything to hit)",
     ],
   },
   {
     pillar: "Passing",
     lens: "Weight, accuracy, and a scan before every pass.",
     drills: [
-      "Two-touch wall passes, alternating feet, scan between reps",
-      "Driven passes to a target from 15–20 yards",
-      "One-touch returns off the wall at increasing pace",
+      "Gate passing — pass through two shoes, follow the ball, turn, repeat with the other foot",
+      "Target passing — hit a shoe/cone from 5, 10, 15 steps, both feet",
+      "Weighted rolls — inside-of-foot passes that stop dead on a marker",
     ],
   },
   {
     pillar: "Scanning",
     lens: "Two shoulder checks before every touch — make it automatic.",
     drills: [
-      "Shoulder-check before every wall pass",
+      "Shoulder-check before every touch in a dribble pattern",
       "Number-call scanning (a parent holds up fingers to read)",
       "Shadow rondo — receive on the half-turn away from pressure",
     ],
@@ -123,6 +127,12 @@ Weekly structure:
 - ${METHOD_STRUCTURE.sessionsPerWeek} sessions that week, about ${METHOD_STRUCTURE.minutesPerSession} minutes each.
 - Every session opens with a ${METHOD_STRUCTURE.warmupMinutes}-minute room plyometric warm-up (added automatically).
 - ${METHOD_STRUCTURE.skillDrillsPerSession} focused skill drills per session — fewer, deeper reps, ${METHOD_STRUCTURE.setting}.
+
+Equipment rule (strict): assume the player has ONLY ${METHOD_STRUCTURE.assumedEquipment}.
+Never prescribe a wall, rebounder, goal, net, ladder, or a partner unless the
+coach's notes or the player's profile explicitly mention them. If the coach
+mentions one (e.g. "200 wall passes"), you may use exactly that — nothing more.
+Shoes or household objects as markers/targets are always fine.
 
 The seven development pillars and how Strive coaches them (draw drills from here, adapted to the player's focus and level):
 ${pillars}`;

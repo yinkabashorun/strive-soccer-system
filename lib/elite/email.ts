@@ -16,8 +16,22 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://thestriveapp.com";
 export function isEmailConfigured(): boolean {
   return Boolean(process.env.RESEND_API_KEY);
 }
+// GHL is configured if the catch-all URL or ANY per-event URL is set
+// (GHL_WEBHOOK_URL, GHL_WEBHOOK_URL_PLAYER_SIGNED_UP, …).
 export function isGhlConfigured(): boolean {
-  return Boolean(process.env.GHL_WEBHOOK_URL);
+  return Object.keys(process.env).some(
+    (k) => k.startsWith("GHL_WEBHOOK_URL") && process.env[k]
+  );
+}
+
+// Each automation can have its own GHL workflow: set
+// GHL_WEBHOOK_URL_<EVENT> (uppercased) to route that event to its own
+// Inbound Webhook; GHL_WEBHOOK_URL is the catch-all fallback.
+function ghlUrlFor(event: string): string | undefined {
+  return (
+    process.env[`GHL_WEBHOOK_URL_${event.toUpperCase()}`] ||
+    process.env.GHL_WEBHOOK_URL
+  );
 }
 
 type Mail = { subject: string; body: string; event?: string };
@@ -34,7 +48,7 @@ async function dispatchGHL(payload: {
   recipients: Contact[];
   player?: { name: string; week?: number };
 }): Promise<boolean> {
-  const url = process.env.GHL_WEBHOOK_URL;
+  const url = ghlUrlFor(payload.event);
   if (!url || payload.recipients.length === 0) return false;
   try {
     const res = await fetch(url, {

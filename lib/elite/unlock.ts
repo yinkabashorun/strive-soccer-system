@@ -7,6 +7,7 @@
 
 import { createServiceClient } from "./supabase/server";
 import { sendPlayerEmail } from "./email";
+import { buildParentRecap } from "./parent-recap";
 
 let lastRun = 0;
 
@@ -63,5 +64,21 @@ export async function unlockDueWeeks(): Promise<void> {
       subject: first ? `${first} — Week ${plan.week} is live` : `Week ${plan.week} is live`,
       body: `The new training week just unlocked.\n\nThis week's focus: ${plan.focus}\n\nFour sessions, plyo warm-up first, every time. Open the app and start Session 1.`,
     }).catch(() => undefined);
+
+    // The weekly parent recap — real numbers from the week that just
+    // ended, written by the AI (template fallback), sent alongside the
+    // Monday unlock. Best-effort; never blocks the unlock itself.
+    try {
+      const recap = await buildParentRecap(plan.player_id, plan.week - 1);
+      if (recap) {
+        await sendPlayerEmail(plan.player_id, {
+          event: "parent_weekly_report",
+          subject: `${recap.playerFirst} — week ${recap.week} report`,
+          body: recap.text,
+        });
+      }
+    } catch {
+      /* recap is a bonus — the unlock already succeeded */
+    }
   }
 }

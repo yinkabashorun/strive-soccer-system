@@ -40,11 +40,11 @@ structured WEEKLY at-home plan the player follows on their own, plus a warm,
 clear update for the parent. Every plan MUST follow the Strive methodology above.
 
 The week is FOUR sessions (the player trains four times that week). Each
-session is about ONE HOUR of work. A plyometric warm-up (~10 minutes) is added
-to every session automatically, so give EXACTLY 2 skill drills per session and
-size their minutes so the warm-up plus your two drills totals about 60 minutes
-(roughly 25 minutes each). Fewer, deeper drills — not a long list. Do NOT
-include a warm-up; only give the 2 skill drills.
+session is about 40 MINUTES of work. A plyometric warm-up (~10 minutes) is
+added to every session automatically, so give EXACTLY 2 skill drills per
+session and size their minutes so the warm-up plus your two drills totals
+about 40 minutes (roughly 15 minutes each). Fewer, deeper drills — not a
+long list. Do NOT include a warm-up; only give the 2 skill drills.
 
 Voice:
 - Confident, direct, encouraging. Never corny. No emoji. No exclamation marks.
@@ -70,8 +70,8 @@ Return ONLY valid JSON, no prose, matching this shape:
 }
 Rules:
 - EXACTLY 4 sessions. EXACTLY 2 skill drills each (no warm-ups — added
-  automatically). Each session ~60 minutes total including the ~10-min warm-up.
-- minutes: an integer per drill (15-40), so the two drills sum to ~50 minutes.
+  automatically). Each session ~40 minutes total including the ~10-min warm-up.
+- minutes: an integer per drill (10-20), so the two drills sum to ~30 minutes.
 - progress_updates: only pillars the notes actually touched, value 0-100.
 - next_week_objectives: 2-4 items.`;
 
@@ -96,8 +96,8 @@ function extractJSON<T>(raw: string): T | null {
 
 function clampMin(v: unknown): number {
   const n = Math.round(Number(v));
-  if (!Number.isFinite(n)) return 25;
-  return Math.max(10, Math.min(40, n));
+  if (!Number.isFinite(n)) return 15;
+  return Math.max(8, Math.min(25, n));
 }
 
 // Normalizes to EXACTLY four sessions and prepends the plyometric warm-up to
@@ -110,7 +110,7 @@ function buildSessions(
   const out: GeneratedSession[] = [];
   for (let i = 0; i < SESSIONS_PER_WEEK; i++) {
     const s = src[i];
-    // Two focused skill drills per session (a ~1-hour session with the
+    // Two focused skill drills per session (a ~40-minute session with the
     // auto-added ~10-min warm-up).
     let skills = (s?.drills ?? [])
       .filter((d) => d && d.title)
@@ -127,26 +127,26 @@ function buildSessions(
         {
           title: "Focus block",
           exercise: focus,
-          reps: "25 min",
-          minutes: 25,
+          reps: "15 min",
+          minutes: 15,
           notes: undefined,
         },
         {
           title: "Apply under pressure",
           exercise: `Repeat the focus at game speed: ${focus}`,
-          reps: "25 min",
-          minutes: 25,
+          reps: "15 min",
+          minutes: 15,
           notes: undefined,
         },
       ];
     } else if (skills.length === 1) {
-      // A session is always ~an hour: plyo + TWO drills. Pad a thin
+      // A session is always ~40 minutes: plyo + TWO drills. Pad a thin
       // session by re-applying its drill at game speed.
       skills.push({
         title: "Apply under pressure",
         exercise: `Repeat at game speed, tighter space, quicker decisions: ${skills[0].title.toLowerCase()}`,
-        reps: "25 min",
-        minutes: 25,
+        reps: "15 min",
+        minutes: 15,
         notes: undefined,
       });
     }
@@ -223,8 +223,8 @@ function fallbackPlan(notes: string, player?: Player): GeneratedPlan {
       return {
         title: title.slice(0, 52) || `Focus drill ${i + 1}`,
         exercise: titleCase(l),
-        reps: repMatch ? repMatch[0].trim() : "25 min",
-        minutes: 25,
+        reps: repMatch ? repMatch[0].trim() : "15 min",
+        minutes: 15,
       };
     });
 

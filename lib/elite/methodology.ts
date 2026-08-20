@@ -13,7 +13,7 @@ import { SESSIONS_PER_WEEK } from "./training";
 // The non-negotiable structure of a Strive training week.
 export const METHOD_STRUCTURE = {
   sessionsPerWeek: SESSIONS_PER_WEEK, // 4 — the player trains four times
-  minutesPerSession: 60, // ~1 hour each
+  minutesPerSession: 40, // ~40 minutes each
   warmup: "plyometrics", // every session opens with a room plyo warm-up
   warmupMinutes: 10,
   skillDrillsPerSession: 2, // fewer, deeper drills — not a long list

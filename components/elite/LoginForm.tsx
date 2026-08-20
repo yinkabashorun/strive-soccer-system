@@ -109,6 +109,17 @@ export function LoginForm({ configured }: { configured: boolean }) {
         </Link>
       </p>
 
+      {/* The sales door: anyone can walk through a fully-loaded player
+          experience — no account, no friction. */}
+      <form action={enterDemoPlayer} className="mt-6 border-t border-white/8 pt-5">
+        <button className="btn w-full py-3 text-sm">
+          Just looking? Tour the app as a player →
+        </button>
+        <p className="mt-2 text-center text-xs text-white/30">
+          Explore a live demo — training week, progress, film, all of it.
+        </p>
+      </form>
+
       {!configured && (
         <div className="mt-7 border-t border-white/8 pt-6">
           <div className="mb-3 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">

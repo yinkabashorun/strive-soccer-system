@@ -13,6 +13,7 @@ import {
 import {
   getCheckins,
   getFilm,
+  getGames,
   getHomework,
   getMessages,
   getNotes,
@@ -33,6 +34,7 @@ import { EditableChips } from "@/components/elite/EditableChips";
 import { EditableMemory } from "@/components/elite/EditableMemory";
 import { CheckinsPanel } from "@/components/elite/CheckinsPanel";
 import { CoachFilmPanel } from "@/components/elite/CoachFilmPanel";
+import { CoachGamesPanel } from "@/components/elite/CoachGamesPanel";
 import { MessageThread } from "@/components/elite/MessageThread";
 import { IntakePanel } from "@/components/elite/IntakePanel";
 import { QuickComposer } from "@/components/elite/QuickComposer";
@@ -49,7 +51,7 @@ export default async function PlayerProfile({
   const player = await getPlayer(params.id);
   if (!player) notFound();
 
-  const [homework, progress, notes, messages, reports, summary, checkins, plans, films] =
+  const [homework, progress, notes, messages, reports, summary, checkins, plans, films, games] =
     await Promise.all([
       getHomework(player.id),
       getProgress(player.id),
@@ -60,6 +62,7 @@ export default async function PlayerProfile({
       getCheckins(player.id),
       getWeeklyPlans(player.id),
       getFilm(player.id),
+      getGames(player.id),
     ]);
 
   // A week approved but not yet unlocked (drops Monday morning VA time).
@@ -194,6 +197,14 @@ export default async function PlayerProfile({
               <Clapperboard className="h-4 w-4 text-accent" /> Monthly film
             </h2>
             <CoachFilmPanel playerId={player.id} films={films} />
+          </section>
+
+          {/* Upcoming games — pull up to NoVA ones */}
+          <section>
+            <h2 className="mb-3 flex items-center gap-2 font-display text-xl font-bold uppercase tracking-tight">
+              <CalendarClock className="h-4 w-4 text-accent" /> Upcoming games
+            </h2>
+            <CoachGamesPanel playerId={player.id} games={games} />
           </section>
 
           {/* Build next week */}

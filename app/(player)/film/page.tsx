@@ -1,8 +1,9 @@
-import { Clapperboard } from "lucide-react";
+import { CalendarDays, Clapperboard } from "lucide-react";
 import { getViewer } from "@/lib/elite/session";
-import { getFilm, getPlayer } from "@/lib/elite/data";
+import { getFilm, getGames, getPlayer } from "@/lib/elite/data";
 import { monthFromWeek } from "@/lib/elite/time";
 import { FilmTimeline } from "@/components/elite/FilmTimeline";
+import { GameSchedule } from "@/components/elite/GameSchedule";
 
 export const metadata = { title: "Film · Strive Elite" };
 
@@ -11,9 +12,10 @@ export const metadata = { title: "Film · Strive Elite" };
 export default async function FilmPage() {
   const viewer = await getViewer();
   if (!viewer?.playerId) return null;
-  const [player, films] = await Promise.all([
+  const [player, films, games] = await Promise.all([
     getPlayer(viewer.playerId),
     getFilm(viewer.playerId),
+    getGames(viewer.playerId),
   ]);
   if (!player) return null;
 
@@ -40,6 +42,14 @@ export default async function FilmPage() {
         currentMonth={currentMonth}
         firstName={firstName}
       />
+
+      {/* Game schedule — Coach shows up to NoVA games */}
+      <section className="pt-2">
+        <h2 className="mb-3 flex items-center gap-2 font-display text-xl font-bold uppercase tracking-tight">
+          <CalendarDays className="h-4 w-4 text-accent" /> Your games
+        </h2>
+        <GameSchedule games={games} />
+      </section>
     </div>
   );
 }

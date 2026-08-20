@@ -162,6 +162,20 @@ export type FilmUpload = {
   month?: number; // program month (1, 2, 3…) — one review per month (015)
 };
 
+// An upcoming game the player posted (elite_games) — the coach can mark
+// attendance for Northern Virginia games.
+export type Game = {
+  id: string;
+  player_id: string;
+  game_date: string; // YYYY-MM-DD
+  kickoff: string;
+  opponent: string;
+  location: string;
+  notes: string;
+  coach_attending: boolean;
+  created_at: string;
+};
+
 export type CoachNote = {
   id: string;
   player_id: string;

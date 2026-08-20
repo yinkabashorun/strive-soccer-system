@@ -3,6 +3,7 @@ import type {
   Checkin,
   CoachNote,
   FilmUpload,
+  Game,
   Homework,
   Message,
   ParentReport,
@@ -29,7 +30,7 @@ export const DEMO_COACH = {
   avatar_color: "#F5C518",
 };
 
-const now = new Date("2026-08-06T12:00:00Z");
+const now = new Date(); // demo dates stay fresh relative to today
 function daysFromNow(d: number): string {
   const t = new Date(now);
   t.setDate(t.getDate() + d);
@@ -408,6 +409,7 @@ export const DEMO_FILM: FilmUpload[] = [
   {
     id: "f-marcus-1",
     player_id: "p-marcus",
+    month: 2,
     title: "League game vs. Riverside — full half",
     url: null,
     thumbnail: null,
@@ -419,6 +421,7 @@ export const DEMO_FILM: FilmUpload[] = [
   {
     id: "f-marcus-2",
     player_id: "p-marcus",
+    month: 1,
     title: "Weak-foot finishing session",
     url: null,
     thumbnail: null,
@@ -510,6 +513,31 @@ export const DEMO_MESSAGES: Message[] = [
     body: "Your crossing is getting sharp. This week we time the overlaps. Big season ahead.",
     created_at: daysFromNow(-3),
     read: true,
+  },
+];
+
+export const DEMO_GAMES: Game[] = [
+  {
+    id: "g-marcus-1",
+    player_id: "p-marcus",
+    game_date: daysFromNow(4).slice(0, 10),
+    kickoff: "10:30 AM",
+    opponent: "Loudoun United U14",
+    location: "Haymarket, VA",
+    notes: "League game — starting CAM",
+    coach_attending: true,
+    created_at: daysFromNow(-2),
+  },
+  {
+    id: "g-marcus-2",
+    player_id: "p-marcus",
+    game_date: daysFromNow(11).slice(0, 10),
+    kickoff: "1:00 PM",
+    opponent: "Arlington SA",
+    location: "Arlington, VA",
+    notes: "",
+    coach_attending: false,
+    created_at: daysFromNow(-1),
   },
 ];
 

@@ -2,6 +2,7 @@ import { createClient } from "./supabase/server";
 import {
   DEMO_ACHIEVEMENTS,
   DEMO_CHECKINS,
+  DEMO_GAMES,
   DEMO_FILM,
   DEMO_HOMEWORK,
   DEMO_MESSAGES,
@@ -14,6 +15,7 @@ import {
 import type {
   Achievement,
   Checkin,
+  Game,
   CoachNote,
   EliteNotification,
   FilmUpload,
@@ -147,6 +149,21 @@ export async function getParentReports(
     .eq("player_id", playerId)
     .order("created_at", { ascending: false });
   return (data as ParentReport[] | null) ?? [];
+}
+
+export async function getGames(playerId: string): Promise<Game[]> {
+  const supabase = createClient();
+  if (!supabase)
+    return DEMO_GAMES.filter((g) => g.player_id === playerId).sort((a, b) =>
+      a.game_date.localeCompare(b.game_date)
+    );
+  const { data, error } = await supabase
+    .from("elite_games")
+    .select("*")
+    .eq("player_id", playerId)
+    .order("game_date", { ascending: true });
+  if (error) return []; // table not created yet (pre-016)
+  return (data as Game[] | null) ?? [];
 }
 
 export async function getCheckins(playerId: string): Promise<Checkin[]> {

@@ -12,7 +12,8 @@ coaches** — this doc explains the "why" behind it.
 
 Every player's week is **four training sessions**, roughly **one hour each**,
 built to be done **at home — in a room or a yard**. No pitch, no partner, no
-equipment beyond a ball and a wall required.
+equipment beyond **a ball and a small space** — a wall, goal, rebounder, or
+partner is only ever prescribed if the coach's notes say the player has one.
 
 Every single session **opens with a room plyometric warm-up (~10 minutes)**.
 This is non-negotiable and is added to every session automatically by the

@@ -135,6 +135,45 @@ export async function submitFilm(input: { url: string; note: string }) {
   return { ok: true as const };
 }
 
+// Player posts an upcoming game so the coach can plan to attend
+// (Northern Virginia games especially).
+export async function addGame(input: {
+  game_date: string;
+  kickoff: string;
+  opponent: string;
+  location: string;
+  notes: string;
+}) {
+  const viewer = await getViewer();
+  if (!viewer?.playerId) return { ok: false as const, error: "unauthorized" };
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(input.game_date)) {
+    return { ok: false as const, error: "Pick a game date." };
+  }
+  const supabase = createClient();
+  if (!supabase) return { ok: true as const }; // demo
+
+  const { error } = await supabase.from("elite_games").insert({
+    player_id: viewer.playerId,
+    game_date: input.game_date,
+    kickoff: input.kickoff.trim(),
+    opponent: input.opponent.trim(),
+    location: input.location.trim(),
+    notes: input.notes.trim(),
+  });
+  if (error) {
+    return { ok: false as const, error: "Couldn't save the game. Try again." };
+  }
+
+  await sendCoachEmail(viewer.playerId, {
+    event: "game_submitted",
+    subject: `${viewer.profile.full_name} added a game`,
+    body: `${viewer.profile.full_name} has a game on ${input.game_date}${input.kickoff ? ` at ${input.kickoff}` : ""}${input.opponent ? ` vs ${input.opponent}` : ""}${input.location ? ` — ${input.location}` : ""}.\n\nOpen their profile to mark yourself as attending.`,
+  }).catch(() => undefined);
+
+  revalidatePath("/film");
+  return { ok: true as const };
+}
+
 // Mark a single notification read.
 export async function markNotificationRead(id: string) {
   const supabase = createClient();

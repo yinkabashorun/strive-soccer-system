@@ -157,6 +157,40 @@ export async function duplicateWeek(input: {
   return { ok: true as const, cloned: rows.length };
 }
 
+// Coach marks (or unmarks) attendance for a player's game. Marking it
+// tells the player Coach is coming — the premium moment.
+export async function setGameAttendance(
+  gameId: string,
+  playerId: string,
+  attending: boolean,
+  gameDate?: string
+) {
+  if (!(await requireCoach())) return { ok: false };
+  const supabase = createClient();
+  if (supabase) {
+    await supabase
+      .from("elite_games")
+      .update({ coach_attending: attending })
+      .eq("id", gameId);
+    if (attending) {
+      await supabase.from("elite_notifications").insert({
+        player_id: playerId,
+        kind: "coach_attending",
+        title: "Coach is coming to your game",
+        body: gameDate ? `See you out there on ${gameDate}. Play brave.` : "See you out there. Play brave.",
+      });
+      await sendPlayerEmail(playerId, {
+        event: "coach_attending",
+        subject: "Coach is coming to the game",
+        body: `Coach marked himself as attending${gameDate ? ` the game on ${gameDate}` : " the upcoming game"}. See you out there.`,
+      }).catch(() => undefined);
+    }
+    revalidatePath(`/coach/players/${playerId}`);
+    revalidatePath("/film");
+  }
+  return { ok: true };
+}
+
 // Coach reviews a monthly film submission — feedback lands in the app and
 // pings the player/parent.
 export async function setFilmNotes(filmId: string, playerId: string, notes: string) {

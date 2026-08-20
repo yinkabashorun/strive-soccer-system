@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description:
     "The complete development system for serious soccer players. Personalized coaching, weekly homework, progress tracking, film analysis, and accountability — from Strive Soccer FC.",
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL || "https://strive-soccer-system.vercel.app"
+    process.env.NEXT_PUBLIC_APP_URL || "https://thestriveapp.com"
   ),
   openGraph: {
     title: "Strive Elite · Premium Player Development",

@@ -18,7 +18,9 @@ import {
   getPlayer,
   getPlayerSummary,
   getProgress,
+  getWeeklyPlans,
 } from "@/lib/elite/data";
+import { fmtMonday, nextMondayNY } from "@/lib/elite/time";
 import { addCoachNote, sendCoachMessage } from "@/lib/elite/coach-actions";
 import { Avatar } from "@/components/Avatar";
 import { StatTile } from "@/components/elite/StatTile";
@@ -44,7 +46,7 @@ export default async function PlayerProfile({
   const player = await getPlayer(params.id);
   if (!player) notFound();
 
-  const [homework, progress, notes, messages, reports, summary, checkins] =
+  const [homework, progress, notes, messages, reports, summary, checkins, plans] =
     await Promise.all([
       getHomework(player.id),
       getProgress(player.id),
@@ -53,7 +55,16 @@ export default async function PlayerProfile({
       getParentReports(player.id),
       getPlayerSummary(player.id),
       getCheckins(player.id),
+      getWeeklyPlans(player.id),
     ]);
+
+  // A week approved but not yet unlocked (drops Monday morning VA time).
+  const scheduled = plans.find(
+    (p) =>
+      p.week > player.current_week &&
+      p.unlocks_at &&
+      new Date(p.unlocks_at).getTime() > Date.now()
+  );
 
   async function sendMessage(body: string) {
     "use server";
@@ -152,6 +163,13 @@ export default async function PlayerProfile({
             <h2 className="mb-3 flex items-center gap-2 font-display text-xl font-bold uppercase tracking-tight">
               <CalendarClock className="h-4 w-4 text-accent" /> This week
             </h2>
+            {scheduled && (
+              <div className="mb-3 rounded-2xl border border-accent/25 bg-accent/[0.05] px-4 py-3 text-sm text-white/75">
+                Week {scheduled.week} is approved and scheduled — unlocks{" "}
+                {fmtMonday(nextMondayNY())} morning. Re-publish below anytime
+                before then to change it.
+              </div>
+            )}
             <CoachWeekView
               homework={homework}
               currentWeek={player.current_week}

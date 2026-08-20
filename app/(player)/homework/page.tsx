@@ -7,7 +7,10 @@ export default async function HomeworkPage() {
   const viewer = await getViewer();
   if (!viewer?.playerId) return null;
   const player = await getPlayer(viewer.playerId);
-  const homework = await getHomework(viewer.playerId);
+  const all = await getHomework(viewer.playerId);
+  // Players only ever see unlocked weeks — scheduled weeks stay invisible
+  // until they flip live Monday morning (VA time).
+  const homework = all.filter((h) => h.week <= (player?.current_week ?? 1));
 
   return (
     <div className="space-y-6">

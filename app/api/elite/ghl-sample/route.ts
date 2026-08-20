@@ -27,6 +27,10 @@ const SAMPLES: Record<string, { subject: string; body: string }> = {
     subject: "Your coach replied to your check-in",
     body: "That scanning progress is exactly what we're after. We'll build on it next week.",
   },
+  parent_weekly_report: {
+    subject: "Test Player — week 1 report",
+    body: "Test Player completed all 4 sessions this week — 210 minutes of focused work and a 6-day streak. His scanning is becoming automatic; next week we take the weak foot head-on. The new training week is live now.",
+  },
 };
 
 export async function GET(req: Request) {

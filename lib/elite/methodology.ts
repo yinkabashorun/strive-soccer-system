@@ -60,16 +60,16 @@ export const METHOD_PILLARS: PillarGuide[] = [
     drills: [
       "Weak-foot-only dribble patterns through shoes/cones",
       "Weak-foot toe-taps and push-pulls",
-      "Weak-foot cushion rebound passes — weak side only, cushion the return",
+      "Weak-foot rebound passes — weak side only off a wall (or couch cushion), cushion the return",
       "Weak-foot strikes at a target (a shoe, a bag — anything to hit)",
     ],
   },
   {
     pillar: "Passing",
-    lens: "Weight, accuracy, and a scan before every pass. The ball must come back — a rebound surface makes solo passing real.",
+    lens: "Weight, accuracy, and a scan before every pass. The ball must come back — a wall (or a cushion rebounder) makes solo passing real.",
     drills: [
-      "Cushion rebound passing — lean a couch cushion or mattress against a wall/chair, firm two-touch passes off the return, both feet",
-      "Rebound rhythm — one-touch returns off the cushion, stay on your toes, scan between reps",
+      "Rebound passing — use a wall if you have one, otherwise lean a couch cushion against a chair; firm two-touch passes off the return, both feet",
+      "Rebound rhythm — one-touch returns off the wall/cushion, stay on your toes, scan between reps",
       "Weighted rolls — inside-of-foot passes that stop dead on a towel/marker",
     ],
   },
@@ -130,10 +130,13 @@ Weekly structure:
 - ${METHOD_STRUCTURE.skillDrillsPerSession} focused skill drills per session — fewer, deeper reps, ${METHOD_STRUCTURE.setting}.
 
 Equipment rule (strict): assume the player has ONLY ${METHOD_STRUCTURE.assumedEquipment}.
-Never prescribe a wall, rebounder, goal, net, ladder, or a partner unless the
-coach's notes or the player's profile explicitly mention them. If the coach
-mentions one (e.g. "200 wall passes"), you may use exactly that — nothing more.
-Shoes or household objects as markers/targets are always fine.
+Rebound drills are always allowed WITH the built-in fallback phrased in the
+drill itself: "use a wall if you have one — otherwise lean a couch cushion
+against a chair." Never prescribe a goal, net, ladder, rebounder machine, or
+a partner unless the coach's notes or the player's profile explicitly mention
+them. If the coach mentions equipment (e.g. "200 wall passes"), use exactly
+that — nothing more. Shoes or household objects as markers/targets are
+always fine.
 
 The seven development pillars and how Strive coaches them (draw drills from here, adapted to the player's focus and level):
 ${pillars}`;

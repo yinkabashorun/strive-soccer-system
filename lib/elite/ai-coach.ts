@@ -41,10 +41,10 @@ clear update for the parent. Every plan MUST follow the Strive methodology above
 
 The week is FOUR sessions (the player trains four times that week). Each
 session is about 40 MINUTES of work. A plyometric warm-up (~10 minutes) is
-added to every session automatically, so give EXACTLY 2 skill drills per
-session and size their minutes so the warm-up plus your two drills totals
-about 40 minutes (roughly 15 minutes each). Fewer, deeper drills — not a
-long list. Do NOT include a warm-up; only give the 2 skill drills.
+added to every session automatically, so give EXACTLY 3 skill drills per
+session and size their minutes so the warm-up plus your three drills totals
+about 40 minutes (roughly 10 minutes each). Focused drills, done with
+intent. Do NOT include a warm-up; only give the 3 skill drills.
 
 Voice:
 - Confident, direct, encouraging. Never corny. No emoji. No exclamation marks.
@@ -61,7 +61,7 @@ Return ONLY valid JSON, no prose, matching this shape:
   "weekly_focus": "one sentence, the single theme for the week",
   "sessions": [
     { "title": "Session 1 — short label",
-      "drills": [ { "title": "...", "exercise": "...", "reps": "...", "minutes": 15, "notes": "..." } ] }
+      "drills": [ { "title": "...", "exercise": "...", "reps": "...", "minutes": 10, "notes": "..." } ] }
   ],
   "parent_update": "2-4 sentences for the parent",
   "player_summary": "2-3 sentences to the player, second person",
@@ -69,9 +69,9 @@ Return ONLY valid JSON, no prose, matching this shape:
   "next_week_objectives": [ "objective 1", "objective 2", "objective 3" ]
 }
 Rules:
-- EXACTLY 4 sessions. EXACTLY 2 skill drills each (no warm-ups — added
+- EXACTLY 4 sessions. EXACTLY 3 skill drills each (no warm-ups — added
   automatically). Each session ~40 minutes total including the ~10-min warm-up.
-- minutes: an integer per drill (10-20), so the two drills sum to ~30 minutes.
+- minutes: an integer per drill (8-15), so the three drills sum to ~30 minutes.
 - progress_updates: only pillars the notes actually touched, value 0-100.
 - next_week_objectives: 2-4 items.`;
 
@@ -96,8 +96,8 @@ function extractJSON<T>(raw: string): T | null {
 
 function clampMin(v: unknown): number {
   const n = Math.round(Number(v));
-  if (!Number.isFinite(n)) return 15;
-  return Math.max(8, Math.min(25, n));
+  if (!Number.isFinite(n)) return 10;
+  return Math.max(5, Math.min(15, n));
 }
 
 // Normalizes to EXACTLY four sessions and prepends the plyometric warm-up to
@@ -110,11 +110,11 @@ function buildSessions(
   const out: GeneratedSession[] = [];
   for (let i = 0; i < SESSIONS_PER_WEEK; i++) {
     const s = src[i];
-    // Two focused skill drills per session (a ~40-minute session with the
-    // auto-added ~10-min warm-up).
+    // Three focused skill drills per session (a ~40-minute session with
+    // the auto-added ~10-min warm-up).
     let skills = (s?.drills ?? [])
       .filter((d) => d && d.title)
-      .slice(0, 2)
+      .slice(0, 3)
       .map((d) => ({
         title: String(d.title),
         exercise: String(d.exercise ?? ""),
@@ -127,28 +127,30 @@ function buildSessions(
         {
           title: "Focus block",
           exercise: focus,
-          reps: "15 min",
-          minutes: 15,
-          notes: undefined,
-        },
-        {
-          title: "Apply under pressure",
-          exercise: `Repeat the focus at game speed: ${focus}`,
-          reps: "15 min",
-          minutes: 15,
+          reps: "10 min",
+          minutes: 10,
           notes: undefined,
         },
       ];
-    } else if (skills.length === 1) {
-      // A session is always ~40 minutes: plyo + TWO drills. Pad a thin
-      // session by re-applying its drill at game speed.
+    }
+    // A session is always ~40 minutes: plyo + THREE drills. Pad a thin
+    // session by re-applying its work at game speed, then at full detail.
+    const PADS = [
+      (t: string) =>
+        `Repeat at game speed, tighter space, quicker decisions: ${t.toLowerCase()}`,
+      (t: string) =>
+        `Final block — slow it down, perfect technique, max focus: ${t.toLowerCase()}`,
+    ];
+    let padIdx = 0;
+    while (skills.length < 3 && padIdx < PADS.length) {
       skills.push({
-        title: "Apply under pressure",
-        exercise: `Repeat at game speed, tighter space, quicker decisions: ${skills[0].title.toLowerCase()}`,
-        reps: "15 min",
-        minutes: 15,
+        title: padIdx === 0 ? "Apply under pressure" : "Perfect the detail",
+        exercise: PADS[padIdx](skills[0].title),
+        reps: "10 min",
+        minutes: 10,
         notes: undefined,
       });
+      padIdx++;
     }
     out.push({
       title: s?.title?.trim() || `Session ${i + 1}`,
@@ -223,8 +225,8 @@ function fallbackPlan(notes: string, player?: Player): GeneratedPlan {
       return {
         title: title.slice(0, 52) || `Focus drill ${i + 1}`,
         exercise: titleCase(l),
-        reps: repMatch ? repMatch[0].trim() : "15 min",
-        minutes: 15,
+        reps: repMatch ? repMatch[0].trim() : "10 min",
+        minutes: 10,
       };
     });
 

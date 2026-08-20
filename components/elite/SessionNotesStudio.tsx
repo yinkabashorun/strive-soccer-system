@@ -279,7 +279,7 @@ export function SessionNotesStudio({ playerId }: { playerId: string }) {
                                     type="number"
                                     min={5}
                                     max={30}
-                                    value={d.minutes ?? 15}
+                                    value={d.minutes ?? 10}
                                     onChange={(e) =>
                                       editDrill(si, di, {
                                         minutes: Number(e.target.value),

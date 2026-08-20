@@ -289,45 +289,105 @@ const plyo = (variant: number) =>
 
 export const DEMO_HOMEWORK: Homework[] = [
   ...hw("p-marcus", 7, [
-    // Session 1 (done)
+    // Session 1 (done) — plyo + 3 drills
     { ...plyo(1), session: 1, completed: true },
     {
       title: "Wall pass mastery",
       exercise: "Two-touch wall passes, alternating feet, scan between reps",
-      reps: "200 total",
-      duration_min: 15,
+      reps: "100 total",
+      duration_min: 10,
       session: 1,
       completed: true,
     },
-    // Session 2 (done)
+    {
+      title: "Sole rolls & V-pulls",
+      exercise: "Foundations, sole rolls, V-pulls — eyes up the whole time",
+      reps: "10 min",
+      duration_min: 10,
+      session: 1,
+      completed: true,
+    },
+    {
+      title: "First touch off the wall",
+      exercise: "Cushion the return, first touch out of your feet into space",
+      reps: "60 touches",
+      duration_min: 10,
+      session: 1,
+      completed: true,
+    },
+    // Session 2 (done) — plyo + 3 drills
     { ...plyo(2), session: 2, completed: true },
     {
       title: "Scanning under pressure",
       exercise: "Shadow rondo — two shoulder checks before every touch",
-      reps: "3 x 5 min",
-      duration_min: 45,
+      reps: "3 x 3 min",
+      duration_min: 10,
       session: 2,
       completed: true,
     },
-    // Session 3 (in progress — Next up lands here)
+    {
+      title: "Half-turn receiving",
+      exercise: "Receive on the half-turn, open your hips before the ball arrives",
+      reps: "50 reps",
+      duration_min: 10,
+      session: 2,
+      completed: true,
+    },
+    {
+      title: "Number-call scanning",
+      exercise: "A parent holds up fingers mid-rep — call the number before your touch",
+      reps: "3 x 3 min",
+      duration_min: 10,
+      session: 2,
+      completed: true,
+    },
+    // Session 3 (in progress — Next up lands here) — plyo + 3 drills
     { ...plyo(3), session: 3 },
     {
       title: "Weak-foot finishing",
       exercise: "Left-foot finishes from the edge of the box, laces through",
-      reps: "50 strikes",
-      duration_min: 15,
+      reps: "30 strikes",
+      duration_min: 10,
       session: 3,
       notes: "Plant foot pointed at target.",
     },
-    // Session 4
+    {
+      title: "Weak-foot wall passes",
+      exercise: "Left foot only — cushion and return, keep the rhythm",
+      reps: "80 passes",
+      duration_min: 10,
+      session: 3,
+    },
+    {
+      title: "Apply under pressure",
+      exercise: "Game speed: receive, scan, finish left-footed in two touches",
+      reps: "20 reps",
+      duration_min: 10,
+      session: 3,
+    },
+    // Session 4 — plyo + 3 drills
     { ...plyo(4), session: 4 },
     {
       title: "Study & apply",
-      exercise: "Study Rodri's body shape before receiving, then 50 wall passes copying it.",
-      reps: "1 clip + 50 reps",
-      duration_min: 15,
+      exercise: "Study Rodri's body shape before receiving, then copy it against the wall.",
+      reps: "1 clip + 30 reps",
+      duration_min: 10,
       session: 4,
       video_url: "https://www.youtube.com/results?search_query=rodri+scanning",
+    },
+    {
+      title: "Two-gate decisions",
+      exercise: "Two gates, a caller picks one late — take your touch through it",
+      reps: "3 x 3 min",
+      duration_min: 10,
+      session: 4,
+    },
+    {
+      title: "Juggling record",
+      exercise: "Beat your record — both feet, thighs allowed, no hands",
+      reps: "3 attempts",
+      duration_min: 10,
+      session: 4,
     },
   ]),
   ...hw("p-sofia", 5, [

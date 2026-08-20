@@ -21,9 +21,9 @@ system. Explosive plyometrics are what turn technical training into
 on-field results — they build the fast-twitch power behind the first step,
 the change of direction, the spring.
 
-After the warm-up, each session is **exactly two focused skill drills**.
-Fewer, deeper reps done with intent beat a long list rushed. The two drills
-plus the warm-up fill the ~40 minutes.
+After the warm-up, each session is **exactly three focused skill drills**
+(~10 minutes each), done with intent. The three drills plus the warm-up
+fill the ~40 minutes.
 
 ## The principles
 

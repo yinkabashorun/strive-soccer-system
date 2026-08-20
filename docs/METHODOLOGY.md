@@ -10,7 +10,7 @@ coaches** — this doc explains the "why" behind it.
 
 ## The week
 
-Every player's week is **four training sessions**, roughly **one hour each**,
+Every player's week is **four training sessions**, roughly **40 minutes each**,
 built to be done **at home — in a room or a yard**. No pitch, no partner, no
 equipment beyond **a ball and a small space** — a wall, goal, rebounder, or
 partner is only ever prescribed if the coach's notes say the player has one.
@@ -23,7 +23,7 @@ the change of direction, the spring.
 
 After the warm-up, each session is **exactly two focused skill drills**.
 Fewer, deeper reps done with intent beat a long list rushed. The two drills
-plus the warm-up fill the ~60 minutes.
+plus the warm-up fill the ~40 minutes.
 
 ## The principles
 

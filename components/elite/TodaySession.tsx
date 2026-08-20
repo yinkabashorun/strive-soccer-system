@@ -61,7 +61,7 @@ export function TodaySession({
           Today · Session {session} of {totalSessions}
         </div>
         <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
-          {doneCount}/{drills.length}
+          {doneCount}/{drills.length} done
         </div>
       </div>
       <p className="mt-1.5 font-display text-2xl font-black uppercase leading-tight sm:text-3xl">

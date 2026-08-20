@@ -2,6 +2,7 @@ import { Dumbbell } from "lucide-react";
 import { getViewer } from "@/lib/elite/session";
 import { getHomework, getPlayer } from "@/lib/elite/data";
 import { WeekList } from "@/components/elite/WeekList";
+import { TourGuide } from "@/components/elite/TourGuide";
 
 export default async function HomeworkPage() {
   const viewer = await getViewer();
@@ -14,6 +15,8 @@ export default async function HomeworkPage() {
 
   return (
     <div className="space-y-6">
+      {viewer.demo && <TourGuide page="training" />}
+
       <header className="animate-fade-up">
         <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
           Week {player?.current_week} · Your workout

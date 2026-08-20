@@ -44,12 +44,6 @@ export function TourGuide({ page }: { page: keyof typeof COPY | string }) {
         </span>
       </div>
       <p className="mt-1.5 text-sm leading-relaxed text-white/65">{c.body}</p>
-      <a
-        href="https://strivesoccer100x.com"
-        className="mt-2 inline-block text-sm font-semibold text-accent hover:underline"
-      >
-        Want this for your player? Claim a spot →
-      </a>
     </section>
   );
 }

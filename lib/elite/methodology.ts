@@ -16,7 +16,7 @@ export const METHOD_STRUCTURE = {
   minutesPerSession: 40, // ~40 minutes each
   warmup: "plyometrics", // every session opens with a room plyo warm-up
   warmupMinutes: 10,
-  skillDrillsPerSession: 2, // fewer, deeper drills — not a long list
+  skillDrillsPerSession: 3, // three focused drills, done with intent
   setting: "at-home / room-and-yard friendly",
   // The ONLY equipment we assume: a ball and a small space. Anything else
   // (wall, goal, rebounder, partner, ladder) must come from the coach's

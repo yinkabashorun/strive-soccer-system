@@ -11,23 +11,23 @@ const COPY: Record<
 > = {
   home: {
     headline: "You're touring Marcus — 13, attacking mid, 7 weeks in.",
-    body: "Everything here is live and real. One session at a time, about 40 minutes, built by his coach around what he did last week. Your player gets exactly this from day one.",
+    body: "Everything here is live and real. One session at a time, about 40 minutes — we built this week for him, around what he did last week. Your player gets exactly this from day one.",
   },
   training: {
-    headline: "No templates. This week was written for Marcus.",
-    body: "Every weekend the coach reads what he completed, what he struggled with, and how his skills are trending — then builds next week from scratch. It unlocks Monday morning, every Monday.",
+    headline: "No templates. We wrote this week for Marcus.",
+    body: "Every weekend we read what he completed, what he struggled with, and how his skills are trending — then we build his next week from scratch. It unlocks Monday morning, every Monday.",
   },
   progress: {
-    headline: "Scored by the coach — not by vibes.",
-    body: "Seven skills rated from real training and tracked all season, so you watch improvement happen instead of wondering if it is. Parents get a weekly report with these numbers too.",
+    headline: "We score these from real training — not vibes.",
+    body: "Seven skills we rate from his actual sessions and track all season, so you watch improvement happen instead of wondering. Parents get a weekly report with these numbers too.",
   },
   film: {
-    headline: "A real coach watches real footage.",
-    body: "Once a month Marcus sends a game link and gets a personal breakdown. Players post their schedule too — Coach shows up to Northern Virginia games.",
+    headline: "We watch the real footage.",
+    body: "Once a month Marcus sends us a game link and we break it down for him personally. Players post their schedule too — we show up to Northern Virginia games.",
   },
   coach: {
-    headline: "A direct line — not a group chat.",
-    body: "Questions between sessions get answered by the coach, and every weekly check-in shapes the next plan. This is what personal coaching looks like between sessions.",
+    headline: "A direct line to us — not a group chat.",
+    body: "Questions between sessions get answered, and every weekly check-in shapes the next plan we build. This is what personal coaching looks like between sessions.",
   },
 };
 

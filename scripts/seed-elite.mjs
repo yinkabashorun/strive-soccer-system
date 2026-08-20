@@ -40,14 +40,14 @@ const METRICS = [
 const COACH = {
   email: "coach@strivesoccerfc.com",
   full_name: "Coach Ramella",
-  avatar_color: "#E5FF3D",
+  avatar_color: "#F5C518",
 };
 
 const PLAYERS = [
   {
     email: "marcus@strivedemo.com",
     full_name: "Marcus Bello",
-    avatar_color: "#E5FF3D",
+    avatar_color: "#F5C518",
     age: 13,
     position: "Attacking Midfield",
     level: "Advanced",

@@ -67,8 +67,10 @@ select {
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-4 py-2 text-sm font-medium text-bone transition-all hover:border-white/20 hover:bg-white/[0.06] active:scale-[0.98];
   }
+  /* Primary CTA matches the site: inverted white-on-black (like
+     "REGISTER FOR FALL"). Gold stays a sparse accent, never a button. */
   .btn-accent {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-accent px-4 py-2 text-sm font-semibold text-black transition-all hover:bg-accent-soft active:scale-[0.98];
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-black transition-all hover:bg-white/90 active:scale-[0.98];
   }
   .btn-ghost {
     @apply inline-flex items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm text-muted transition-colors hover:text-bone;

@@ -4,6 +4,7 @@ import { Wordmark } from "@/components/elite/Wordmark";
 import { getViewer } from "@/lib/elite/session";
 import { getNotifications, getPlayer } from "@/lib/elite/data";
 import { signOut } from "@/lib/elite/auth-actions";
+import { unlockDueWeeks } from "@/lib/elite/unlock";
 
 const PLAYER_NAV: NavItem[] = [
   { href: "/dashboard", label: "Home", icon: "Home" },
@@ -21,6 +22,9 @@ export default async function PlayerLayout({
   if (!viewer) redirect("/login?next=/dashboard");
   // Coaches AND admins live in the coach app, never the player shell.
   if (viewer.role !== "player") redirect("/coach");
+
+  // Process any weeks due to unlock (Monday-morning flip, VA time).
+  await unlockDueWeeks().catch(() => undefined);
 
   // Authenticated player whose coach hasn't set up their profile yet.
   if (!viewer.playerId) {

@@ -1,15 +1,13 @@
 import Link from "next/link";
 import {
-  CalendarClock,
-  Clipboard,
   Flame,
   MessageSquare,
   Sparkles,
-  Target,
   Trophy,
   type LucideIcon,
   Eye,
   CheckCircle2,
+  Target,
   Zap,
 } from "lucide-react";
 import { getViewer } from "@/lib/elite/session";
@@ -20,14 +18,13 @@ import {
   getMessages,
   getPlayer,
   getPlayerSummary,
-  getProgress,
-  overallProgress,
+  getWeeklyPlans,
 } from "@/lib/elite/data";
-import { ProgressRing } from "@/components/elite/ProgressRing";
-import { WeekList } from "@/components/elite/WeekList";
+import { TodaySession, VictoryLap } from "@/components/elite/TodaySession";
 import { CheckinCard } from "@/components/elite/CheckinCard";
 import { StatTile } from "@/components/elite/StatTile";
-import { greeting, relativeDay, timeAgo } from "@/lib/utils";
+import { fmtMonday, nextMondayNY } from "@/lib/elite/time";
+import { greeting, timeAgo } from "@/lib/utils";
 
 const ICONS: Record<string, LucideIcon> = {
   Eye,
@@ -39,6 +36,8 @@ const ICONS: Record<string, LucideIcon> = {
   Target,
 };
 
+// The player's home: one thing on screen — today's session. Everything
+// else earns its place below or lives behind a tab.
 export default async function DashboardPage() {
   const viewer = await getViewer();
   if (!viewer?.playerId) return null; // layout renders the "almost there" state
@@ -46,32 +45,54 @@ export default async function DashboardPage() {
   const player = await getPlayer(viewer.playerId);
   if (!player) return null;
 
-  const [homework, progress, achievements, messages, summary, checkins] =
+  const [allHomework, achievements, messages, summary, checkins, plans] =
     await Promise.all([
       getHomework(player.id),
-      getProgress(player.id),
       getAchievements(player.id),
       getMessages(player.id),
       getPlayerSummary(player.id),
       getCheckins(player.id),
+      getWeeklyPlans(player.id),
     ]);
 
+  const firstName = player.full_name.split(" ")[0];
+
+  // Only unlocked weeks exist for the player.
+  const homework = allHomework.filter((h) => h.week <= player.current_week);
+  const thisWeek = homework.filter((h) => h.week === player.current_week);
+
+  // Group the live week into its sessions; the hero is the first session
+  // with anything left to do.
+  const bySession = new Map<number, typeof thisWeek>();
+  for (const h of thisWeek) {
+    const s = h.session ?? 1;
+    bySession.set(s, [...(bySession.get(s) ?? []), h]);
+  }
+  const sessions = [...bySession.entries()]
+    .map(([n, list]) => ({ n, list: [...list].sort((a, b) => a.sort - b.sort) }))
+    .sort((a, b) => a.n - b.n);
+  const current = sessions.find((s) => s.list.some((h) => !h.completed));
+  const weekDone = sessions.length > 0 && !current;
+
+  // What to say about next week — never a false "it's ready".
+  const nextScheduled = plans.find(
+    (p) =>
+      p.week > player.current_week &&
+      p.unlocks_at &&
+      new Date(p.unlocks_at).getTime() > Date.now()
+  );
+  const nextWeekLine = nextScheduled
+    ? `Week ${nextScheduled.week} unlocks ${fmtMonday(nextMondayNY())}.`
+    : `Your coach is building week ${player.current_week + 1} — it drops Monday.`;
+
+  const latestMessage = messages[0];
   const checkedInThisWeek = checkins.some(
     (c) => c.week === player.current_week
   );
 
-  const overall = overallProgress(progress);
-  const latestMessage = messages[0];
-  const firstName = player.full_name.split(" ")[0];
-
-  // Only show numbers that mean something. No training assigned yet → no
-  // stat zeros; no ratings yet → no 0% ring; no session booked → no card.
-  const hasTraining = homework.length > 0;
-  const hasRatings = progress.length > 0;
-
   return (
     <div className="space-y-5">
-      {/* Header */}
+      {/* Header — name + streak, nothing else */}
       <header className="flex items-end justify-between gap-4 animate-fade-up">
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
@@ -81,37 +102,79 @@ export default async function DashboardPage() {
             {greeting()}, {firstName}
           </h1>
         </div>
-        {hasRatings && (
-          <ProgressRing value={overall} size={78} stroke={7} sublabel="Overall" />
+        {summary.current_streak > 0 && (
+          <div className="flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/[0.07] px-3.5 py-2">
+            <Flame className="h-4 w-4 text-accent" />
+            <span className="font-display text-xl font-black text-accent">
+              {summary.current_streak}
+            </span>
+            <span className="text-[10px] uppercase tracking-wider text-white/50">
+              day{summary.current_streak === 1 ? "" : "s"}
+            </span>
+          </div>
         )}
       </header>
 
-      {/* Today's focus */}
-      <section className="relative overflow-hidden rounded-3xl border border-accent/20 bg-gradient-to-br from-accent/[0.09] to-transparent p-5 sm:p-6 animate-fade-up">
-        <div className="absolute -right-10 -top-12 h-40 w-40 rounded-full bg-accent/15 blur-3xl" />
-        <div className="relative">
-          <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
-            <Target className="h-3.5 w-3.5" /> Today&apos;s focus
-          </div>
-          <p className="mt-2 text-xl font-semibold leading-snug text-bone sm:text-2xl">
-            {player.today_focus}
+      {/* THE thing: today's session (or the victory lap) */}
+      {weekDone ? (
+        <VictoryLap
+          week={player.current_week}
+          firstName={firstName}
+          minutes={summary.training_minutes}
+          streak={summary.current_streak}
+          nextWeekLine={nextWeekLine}
+        />
+      ) : current ? (
+        <TodaySession
+          session={current.n}
+          totalSessions={sessions.length || 4}
+          drills={current.list}
+          focus={player.today_focus || "Today's session"}
+          firstName={firstName}
+        />
+      ) : (
+        <section className="elite-card p-6 text-center">
+          <p className="font-display text-xl font-black uppercase">
+            Your first week is coming, {firstName}
           </p>
-        </div>
-      </section>
+          <p className="mx-auto mt-2 max-w-sm text-sm text-white/50">
+            Your coach is building it around your profile right now. You&apos;ll
+            get a notification the moment it&apos;s live.
+          </p>
+        </section>
+      )}
 
-      {/* Loop metrics — only once real training exists to measure */}
-      {hasTraining && (
-        <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <StatTile
-            label="Streak"
-            value={summary.current_streak}
-            sub={summary.current_streak === 1 ? "day" : "days in a row"}
-            accent
-          />
+      {/* Full week, one tap away */}
+      {sessions.length > 0 && (
+        <Link
+          href="/homework"
+          className="flex items-center justify-between rounded-2xl border border-white/8 bg-white/[0.02] px-4 py-3 text-sm text-white/60 transition-colors hover:border-white/15 hover:text-bone"
+        >
+          <span>
+            Full week ·{" "}
+            {sessions.filter((s) => s.list.every((h) => h.completed)).length}/
+            {sessions.length} sessions done
+          </span>
+          <span className="text-accent">→</span>
+        </Link>
+      )}
+
+      {/* Check-in appears once the week is conquered */}
+      {(weekDone || checkedInThisWeek) && (
+        <CheckinCard
+          week={player.current_week}
+          alreadyDone={checkedInThisWeek}
+          firstName={firstName}
+        />
+      )}
+
+      {/* Compact truth strip */}
+      {homework.length > 0 && (
+        <section className="grid grid-cols-3 gap-3">
           <StatTile
             label="Sessions"
             value={summary.sessions_completed}
-            sub="Weeks completed"
+            sub="Completed"
           />
           <StatTile
             label="Homework"
@@ -126,69 +189,29 @@ export default async function DashboardPage() {
         </section>
       )}
 
-      {/* This week + upcoming/coach column */}
-      <div className="grid gap-5 lg:grid-cols-5">
-        <section className="lg:col-span-3">
-          <SectionHead icon={Clipboard} title="This week" href="/homework" />
-          <WeekList
-            items={homework}
-            currentWeek={player.current_week}
-            showPast={false}
-          />
-        </section>
-
-        <div className="space-y-5 lg:col-span-2">
-          {/* Upcoming session — only when one is actually booked */}
-          {player.next_session_at && (
-            <section className="elite-card p-5">
-              <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
-                <CalendarClock className="h-3.5 w-3.5" /> Next session
-              </div>
-              <div className="mt-2 font-display text-2xl font-black">
-                {relativeDay(player.next_session_at)}
-              </div>
-              <div className="mt-1 text-sm text-white/50">
-                1-on-1 with your coach
-              </div>
-            </section>
-          )}
-
-          {/* Coach message */}
-          {latestMessage && (
-            <section className="elite-card p-5">
-              <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
-                <MessageSquare className="h-3.5 w-3.5" /> From your coach
-              </div>
-              <p className="mt-2 text-sm leading-relaxed text-white/75">
-                “{latestMessage.body}”
-              </p>
-              <div className="mt-2 text-xs text-white/35">
-                {timeAgo(latestMessage.created_at)}
-              </div>
-            </section>
-          )}
-
-          {/* Weekly check-in */}
-          <CheckinCard week={player.current_week} alreadyDone={checkedInThisWeek} />
-
-          {/* Plyometrics reminder */}
-          <section className="rounded-3xl border border-red-500/20 bg-red-500/[0.04] p-5">
-            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-red-300">
-              <Flame className="h-3.5 w-3.5" /> Every session starts here
+      {/* Coach's latest word */}
+      {latestMessage && (
+        <Link href="/messages" className="block">
+          <section className="elite-card p-5 transition-colors hover:border-white/15">
+            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
+              <MessageSquare className="h-3.5 w-3.5" /> From your coach
             </div>
             <p className="mt-2 text-sm leading-relaxed text-white/75">
-              Begin all four sessions with your plyometric warm-up — right in
-              your room. Explosive, springy, soft landings. This is what turns
-              training into results.
+              “{latestMessage.body}”
             </p>
+            <div className="mt-2 text-xs text-white/35">
+              {timeAgo(latestMessage.created_at)} · Reply →
+            </div>
           </section>
-        </div>
-      </div>
+        </Link>
+      )}
 
-      {/* Achievements */}
+      {/* Earned, in gold */}
       {achievements.length > 0 && (
         <section>
-          <SectionHead icon={Trophy} title="Recent achievements" />
+          <h2 className="mb-3 flex items-center gap-2 font-display text-xl font-bold uppercase tracking-tight">
+            <Trophy className="h-4 w-4 text-accent" /> Recent achievements
+          </h2>
           <div className="grid gap-3 sm:grid-cols-3">
             {achievements.slice(0, 3).map((a) => {
               const Icon = ICONS[a.icon] ?? Trophy;
@@ -204,32 +227,6 @@ export default async function DashboardPage() {
             })}
           </div>
         </section>
-      )}
-    </div>
-  );
-}
-
-function SectionHead({
-  icon: Icon,
-  title,
-  href,
-}: {
-  icon: LucideIcon;
-  title: string;
-  href?: string;
-}) {
-  return (
-    <div className="mb-3 flex items-center justify-between">
-      <h2 className="flex items-center gap-2 font-display text-xl font-bold uppercase tracking-tight">
-        <Icon className="h-4 w-4 text-accent" /> {title}
-      </h2>
-      {href && (
-        <Link
-          href={href}
-          className="text-xs font-medium text-white/45 hover:text-accent"
-        >
-          View all →
-        </Link>
       )}
     </div>
   );

@@ -10,9 +10,11 @@ import { cn } from "@/lib/utils";
 export function CheckinCard({
   week,
   alreadyDone,
+  firstName,
 }: {
   week: number;
   alreadyDone: boolean;
+  firstName?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [done, setDone] = useState(alreadyDone);
@@ -58,8 +60,8 @@ export function CheckinCard({
       {!open ? (
         <>
           <p className="mt-2 text-sm text-white/60">
-            Tell your coach how week {week} really went. Two minutes — it shapes
-            your next plan.
+            {firstName ? `${firstName} — how` : "How"} did week {week} really
+            go? Two minutes for your coach — it shapes your next plan.
           </p>
           <button onClick={() => setOpen(true)} className="btn mt-3 w-full py-2.5">
             Start check-in

@@ -47,6 +47,7 @@ export type Player = {
   self_assessment?: Partial<Record<ProgressMetric, number>>; // 0-100 self ratings
   coach_memory?: string; // coach's freeform memory note, always fed to the AI
   onboarded_at?: string | null; // ISO; null = intake not completed yet
+  week1_monday?: string | null; // NY Monday the program clock started (014)
 };
 
 // A player's structured weekly check-in (elite_checkins).
@@ -185,6 +186,8 @@ export type WeeklyPlan = {
   objectives: string[];
   homework: { title: string; exercise: string; reps: string }[];
   created_at: string;
+  unlocks_at?: string | null; // when this week goes live (014)
+  notified?: boolean; // unlock notification already sent
 };
 
 export type ParentReport = {

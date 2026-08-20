@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { AppNav, type NavItem } from "@/components/elite/AppNav";
 import { getViewer } from "@/lib/elite/session";
+import { unlockDueWeeks } from "@/lib/elite/unlock";
 
 const COACH_NAV: NavItem[] = [
   { href: "/coach", label: "Roster", icon: "Users" },
@@ -14,6 +15,9 @@ export default async function CoachLayout({
   const viewer = await getViewer();
   if (!viewer) redirect("/login?next=/coach");
   if (viewer.role === "player") redirect("/dashboard");
+
+  // Process any weeks due to unlock (Monday-morning flip, VA time).
+  await unlockDueWeeks().catch(() => undefined);
 
   return (
     <div className="min-h-[100svh] bg-black text-bone lg:flex">

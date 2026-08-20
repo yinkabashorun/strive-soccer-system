@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "./supabase/server";
 import { getViewer } from "./session";
 import { sendPlayerEmail } from "./email";
+import { mondayOfWeekNY, nextMondayNY, unlockInstant } from "./time";
 import type { GeneratedPlan } from "./types";
 
 async function requireCoach() {
@@ -169,7 +170,13 @@ export async function setFilmNotes(filmId: string, playerId: string, notes: stri
   return { ok: true };
 }
 
-// Persist an AI-generated plan across all the tables it touches.
+// Persist an approved plan across all the tables it touches.
+//
+// Timing model (America/New_York): a player's FIRST week goes live the
+// moment it's published (week1_monday = this NY week's Monday), so
+// onboarding never dead-ends. Every later plan targets the NEXT week and
+// unlocks automatically Monday morning — publishing twice in one evening
+// can never fast-forward anyone again.
 export async function applyGeneratedPlan(
   playerId: string,
   rawNotes: string,
@@ -180,24 +187,37 @@ export async function applyGeneratedPlan(
   const supabase = createClient();
   if (!supabase) return { ok: true }; // demo mode: nothing to persist
 
-  // Decide which week this plan fills. A brand-new player sits on week 1
-  // with no drills — the first plan should FILL week 1, not skip to week 2.
-  // Otherwise advance to the next week.
   const { data: player } = await supabase
     .from("elite_players")
-    .select("current_week")
+    .select("current_week, week1_monday, full_name")
     .eq("id", playerId)
     .maybeSingle();
+
+  const firstWeek = !player?.week1_monday;
   const currentWeek = player?.current_week ?? 1;
-  const { data: existingThisWeek } = await supabase
-    .from("elite_homework")
-    .select("id")
-    .eq("player_id", playerId)
-    .eq("week", currentWeek)
-    .limit(1);
-  const week = existingThisWeek && existingThisWeek.length > 0
-    ? currentWeek + 1
-    : currentWeek;
+  let week: number;
+  let unlocksAt: string; // ISO
+  let goesLiveNow: boolean;
+  if (firstWeek) {
+    week = 1;
+    unlocksAt = new Date().toISOString();
+    goesLiveNow = true;
+  } else {
+    // Re-publishing before the scheduled week unlocks REPLACES it (edit
+    // window); otherwise target the week after the live one.
+    const { data: pending } = await supabase
+      .from("elite_weekly_plans")
+      .select("week")
+      .eq("player_id", playerId)
+      .eq("notified", false)
+      .gt("unlocks_at", new Date().toISOString())
+      .order("week", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    week = pending?.week ?? currentWeek + 1;
+    unlocksAt = unlockInstant(nextMondayNY());
+    goesLiveNow = false;
+  }
 
   // 1) record the session
   await supabase.from("elite_sessions").insert({
@@ -276,14 +296,32 @@ export async function applyGeneratedPlan(
       );
   }
 
-  // 4) weekly plan (stores the four-session structure)
-  await supabase.from("elite_weekly_plans").insert({
+  // 4) weekly plan (stores the four-session structure + unlock schedule).
+  //    Replace any prior draft for the same week so re-publishing edits.
+  await supabase
+    .from("elite_weekly_plans")
+    .delete()
+    .eq("player_id", playerId)
+    .eq("week", week);
+  const { error: planErr } = await supabase.from("elite_weekly_plans").insert({
     player_id: playerId,
     week,
     focus: plan.weekly_focus,
     objectives: plan.next_week_objectives,
     homework: plan.sessions,
+    unlocks_at: unlocksAt,
+    notified: goesLiveNow, // live-now weeks are notified inline below
   });
+  if (planErr) {
+    // pre-014 database — fall back to the legacy shape
+    await supabase.from("elite_weekly_plans").insert({
+      player_id: playerId,
+      week,
+      focus: plan.weekly_focus,
+      objectives: plan.next_week_objectives,
+      homework: plan.sessions,
+    });
+  }
 
   // 5) parent report
   await supabase.from("elite_parent_reports").insert({
@@ -294,24 +332,39 @@ export async function applyGeneratedPlan(
     next_focus: plan.next_week_objectives.join("; "),
   });
 
-  // 6) advance the player's week + today's focus
+  // 6) record the session date; go-live handling depends on timing.
   await supabase
     .from("elite_players")
-    .update({
-      current_week: week,
-      today_focus: plan.weekly_focus,
-      last_session_at: new Date().toISOString(),
-    })
+    .update({ last_session_at: new Date().toISOString() })
     .eq("id", playerId);
 
-  // 7) tell the player their new week is ready (email — the in-app
-  //    notification is fired by the elite_notify_new_week DB trigger).
-  await sendPlayerEmail(playerId, {
-    event: "new_week",
-    subject: `Week ${week} is ready`,
-    body: `Your new training week is live.\n\nThis week's focus: ${plan.weekly_focus}\n\nFour sessions, each starting with your plyometric warm-up. Open Strive Elite to get going.`,
-  }).catch(() => undefined);
+  if (goesLiveNow) {
+    // First week: live immediately. Anchor the program clock to this NY
+    // week's Monday and tell the player now.
+    const first = player?.full_name?.split(" ")[0] ?? "";
+    await supabase
+      .from("elite_players")
+      .update({
+        current_week: week,
+        today_focus: plan.weekly_focus,
+        week1_monday: mondayOfWeekNY(0),
+      })
+      .eq("id", playerId);
+    await supabase.from("elite_notifications").insert({
+      player_id: playerId,
+      kind: "new_week",
+      title: first ? `Week ${week} is ready, ${first}` : `Week ${week} is ready`,
+      body: plan.weekly_focus || "Your coach set your focus for the week.",
+    });
+    await sendPlayerEmail(playerId, {
+      event: "new_week",
+      subject: first ? `${first} — your first week is live` : "Your first week is live",
+      body: `Your Strive Elite training starts now.\n\nThis week's focus: ${plan.weekly_focus}\n\nFour sessions, each opening with your plyometric warm-up. Open the app and start Session 1.`,
+    }).catch(() => undefined);
+  }
+  // Scheduled weeks stay silent until Monday morning — unlockDueWeeks()
+  // flips them live and notifies then.
 
   revalidatePath(`/coach/players/${playerId}`);
-  return { ok: true };
+  return { ok: true, week, goesLiveNow, unlocksAt };
 }

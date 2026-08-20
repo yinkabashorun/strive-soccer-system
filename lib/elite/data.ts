@@ -333,7 +333,7 @@ export async function getNotifications(
         player_id: playerId,
         kind: "new_week",
         title: "Week 7 is ready",
-        body: "Scan before you receive — two looks minimum.",
+        body: "Own your 1v1 — sell the fake, explode past.",
         read: false,
         created_at: new Date().toISOString(),
       },

@@ -113,10 +113,10 @@ export function LoginForm({ configured }: { configured: boolean }) {
           experience - no account, no friction. */}
       <form action={enterDemoPlayer} className="mt-6 border-t border-white/8 pt-5">
         <button className="btn w-full py-3 text-sm">
-          Just looking? Tour the app as a player →
+          See the app as a player →
         </button>
         <p className="mt-2 text-center text-xs text-white/30">
-          Explore a live demo: training week, progress, film, all of it.
+          No account needed.
         </p>
       </form>
 

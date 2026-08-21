@@ -805,7 +805,7 @@ export const DEMO_MESSAGES: Message[] = [
     player_id: "p-marcus",
     from_role: "coach",
     from_name: "Coach Yinka",
-    body: "Your stepover got nasty this week. Now we chain it — the chop comes next. Trust the reps.",
+    body: "Your stepover is winning you space every single rep now. This week we chain it — stepover into the chop, full speed. Defenders can stop one move. They can't stop two.",
     created_at: daysFromNow(-2),
     read: false,
   },

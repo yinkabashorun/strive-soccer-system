@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { CheckCircle2, Clapperboard, Loader2, Lock, PlayCircle } from "lucide-react";
 import type { FilmUpload } from "@/lib/elite/types";
 import { submitFilm } from "@/lib/elite/player-actions";
+import { FilmReviewView } from "@/components/elite/FilmReviewView";
 import { cn, timeAgo } from "@/lib/utils";
 
 // Month 1 / Month 2 / Month 3 film timeline. One video link per program
@@ -110,7 +111,7 @@ function MonthCard({
       <section
         className={cn(
           "rounded-3xl border p-5",
-          film?.coach_notes
+          film?.review || film?.coach_notes
             ? "border-accent/25 bg-accent/[0.04]"
             : "border-white/10 bg-white/[0.02]"
         )}
@@ -127,12 +128,19 @@ function MonthCard({
             <span className="truncate">{film.title || "Watch your film"}</span>
           </a>
         )}
-        {film?.coach_notes ? (
+        {film?.review ? (
+          <div className="mt-3 rounded-2xl border border-white/8 bg-black/40 p-4 sm:p-5">
+            <div className="mb-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">
+              Coach&apos;s breakdown
+            </div>
+            <FilmReviewView review={film.review} />
+          </div>
+        ) : film?.coach_notes ? (
           <div className="mt-3 rounded-2xl border border-white/8 bg-black/40 p-4">
             <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-accent">
               Coach&apos;s review
             </div>
-            <p className="mt-1.5 text-sm leading-relaxed text-white/80">
+            <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-white/80">
               {film.coach_notes}
             </p>
           </div>

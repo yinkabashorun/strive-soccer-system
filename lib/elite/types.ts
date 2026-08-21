@@ -150,6 +150,25 @@ export type ProgressPoint = {
   created_at: string;
 };
 
+// A timestamped moment inside a film breakdown. kind marks it as a
+// highlight to keep ("good") or a teaching point ("fix").
+export type FilmMoment = {
+  time: string; // "12:30" — mm:ss into the video
+  note: string;
+  kind: "good" | "fix";
+};
+
+// The coach's structured monthly film analysis (elite_film_uploads.review,
+// 017). coach_notes keeps the summary so pre-017 rows and older clients
+// still render something.
+export type FilmReview = {
+  summary: string; // the big picture, in the coach's voice
+  moments: FilmMoment[]; // timestamped key moments
+  strengths: string[]; // what's working
+  fixes: string[]; // what we're fixing
+  next_steps: string[]; // marching orders for the next block
+};
+
 export type FilmUpload = {
   id: string;
   player_id: string;
@@ -160,6 +179,7 @@ export type FilmUpload = {
   status: "Uploaded" | "Reviewed" | "Analyzing";
   created_at: string;
   month?: number; // program month (1, 2, 3…) — one review per month (015)
+  review?: FilmReview | null; // structured breakdown (017)
 };
 
 // An upcoming game the player posted (elite_games) — the coach can mark

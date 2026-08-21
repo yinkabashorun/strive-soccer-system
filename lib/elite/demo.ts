@@ -704,7 +704,48 @@ export const DEMO_FILM: FilmUpload[] = [
     url: null,
     thumbnail: null,
     coach_notes:
-      "Great composure in the first 20. Watch 12:30 — you had a runner in behind and didn't scan. Two looks earlier and that's an assist.",
+      "You played brave, Marcus — that's the headline. Six take-ons attempted, four clean.",
+    review: {
+      summary:
+        "You played brave, Marcus — that's the headline. Six take-ons attempted, four clean. Most players your age pass backwards the second a defender steps up; you attacked. What we build now is what happens after the move — the first two steps decide whether a beaten defender stays beaten.",
+      moments: [
+        {
+          time: "04:12",
+          note: "Body feint, pushed past the fullback on your first touch. That's the exact move we've been drilling — straight game transfer.",
+          kind: "good",
+        },
+        {
+          time: "12:30",
+          note: "Runner in behind and you never scanned. Two looks before the ball arrives and that's an assist.",
+          kind: "fix",
+        },
+        {
+          time: "19:47",
+          note: "Took it on the half-turn under pressure and escaped left. Pure composure.",
+          kind: "good",
+        },
+        {
+          time: "26:05",
+          note: "Beat your man clean, then slowed down and let him recover. Finish the move — burst for two steps after every take-on.",
+          kind: "fix",
+        },
+      ],
+      strengths: [
+        "Take-on bravery — 6 attempted, 4 clean. That ratio is rare at your age.",
+        "First touch under pressure — you kill the ball instead of panicking.",
+        "The right-side body feint is already game-real.",
+      ],
+      fixes: [
+        "Exit speed — the move beats the defender, the burst keeps him beaten.",
+        "Left-side escapes — you exited right on 5 of your 6 take-ons. Defenders will learn that.",
+        "Scanning before you receive in the final third.",
+      ],
+      next_steps: [
+        "Every take-on rep this week ends with a two-step burst — no exceptions.",
+        "The left-exit work in your plan is there because of this film. Own it.",
+        "Film your next league game — I'm counting your left exits.",
+      ],
+    },
     status: "Reviewed",
     created_at: daysFromNow(-33),
   },

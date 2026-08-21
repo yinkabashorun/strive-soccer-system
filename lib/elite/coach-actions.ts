@@ -5,7 +5,7 @@ import { createClient } from "./supabase/server";
 import { getViewer } from "./session";
 import { sendPlayerEmail } from "./email";
 import { mondayOfWeekNY, nextMondayNY, unlockInstant } from "./time";
-import type { GeneratedPlan } from "./types";
+import type { FilmReview, GeneratedPlan } from "./types";
 
 async function requireCoach() {
   const viewer = await getViewer();
@@ -193,24 +193,85 @@ export async function setGameAttendance(
 
 // Coach reviews a monthly film submission — feedback lands in the app and
 // pings the player/parent.
-export async function setFilmNotes(filmId: string, playerId: string, notes: string) {
+// Trim, drop empties, and cap sizes on a client-composed review so junk
+// input can't bloat the row or the player's screen.
+function cleanReview(raw: FilmReview): FilmReview {
+  const line = (s: string) => s.trim().slice(0, 300);
+  const list = (a: string[] | undefined) =>
+    (a ?? []).map(line).filter(Boolean).slice(0, 8);
+  return {
+    summary: (raw.summary ?? "").trim().slice(0, 1200),
+    moments: (raw.moments ?? [])
+      .map((m) => ({
+        time: (m.time ?? "").trim().slice(0, 8),
+        note: line(m.note ?? ""),
+        kind: m.kind === "good" ? ("good" as const) : ("fix" as const),
+      }))
+      .filter((m) => m.note)
+      .slice(0, 12),
+    strengths: list(raw.strengths),
+    fixes: list(raw.fixes),
+    next_steps: list(raw.next_steps),
+  };
+}
+
+// Flatten a structured review into plain text — for the email and for the
+// pre-017 fallback where the review column doesn't exist yet.
+function flattenReview(r: FilmReview): string {
+  const parts: string[] = [r.summary];
+  if (r.moments.length)
+    parts.push(
+      "Key moments:\n" +
+        r.moments
+          .map((m) => `${m.time ? m.time + " — " : ""}${m.note}`)
+          .join("\n")
+    );
+  if (r.strengths.length)
+    parts.push("What's working:\n" + r.strengths.map((s) => `• ${s}`).join("\n"));
+  if (r.fixes.length)
+    parts.push("What we're fixing:\n" + r.fixes.map((s) => `• ${s}`).join("\n"));
+  if (r.next_steps.length)
+    parts.push(
+      "Next steps:\n" + r.next_steps.map((s, i) => `${i + 1}. ${s}`).join("\n")
+    );
+  return parts.filter(Boolean).join("\n\n");
+}
+
+// Send the coach's structured film breakdown: store it, mark the film
+// Reviewed, and notify the player in-app + email. coach_notes gets the
+// summary so anything still reading the old field shows the right thing.
+export async function sendFilmReview(
+  filmId: string,
+  playerId: string,
+  rawReview: FilmReview
+) {
   if (!(await requireCoach())) return { ok: false };
+  const review = cleanReview(rawReview);
+  if (!review.summary) return { ok: false, error: "Write the summary first." };
   const supabase = createClient();
   if (supabase) {
-    await supabase
+    const { error } = await supabase
       .from("elite_film_uploads")
-      .update({ coach_notes: notes, status: "Reviewed" })
+      .update({ review, coach_notes: review.summary, status: "Reviewed" })
       .eq("id", filmId);
+    if (error) {
+      // review column not migrated yet (pre-017) — store the full breakdown
+      // as plain text so nothing is lost.
+      await supabase
+        .from("elite_film_uploads")
+        .update({ coach_notes: flattenReview(review), status: "Reviewed" })
+        .eq("id", filmId);
+    }
     await supabase.from("elite_notifications").insert({
       player_id: playerId,
       kind: "film_feedback",
-      title: "Your film review is in",
-      body: notes.slice(0, 140),
+      title: "Your film breakdown is in",
+      body: review.summary.slice(0, 140),
     });
     await sendPlayerEmail(playerId, {
       event: "film_feedback",
-      subject: "Coach reviewed your film",
-      body: `Your monthly film review is in:\n\n${notes}\n\nOpen the app to see it with your film.`,
+      subject: "Coach broke down your film",
+      body: `Your monthly film breakdown is in:\n\n${flattenReview(review)}\n\nOpen the app to see it with your film.`,
     }).catch(() => undefined);
     revalidatePath(`/coach/players/${playerId}`);
     revalidatePath("/film");

@@ -4,7 +4,7 @@ export const runtime = "nodejs";
 
 // Contact form sink. Logs the enquiry (visible in Vercel logs) and, if a
 // GHL webhook is configured, forwards it into the CRM. Kept intentionally
-// simple — no PII stored server-side beyond the log line.
+// simple - no PII stored server-side beyond the log line.
 export async function POST(req: Request) {
   let body: Record<string, unknown> = {};
   try {

@@ -2,7 +2,7 @@ import Link from "next/link";
 /* eslint-disable @next/next/no-img-element */
 import { cn } from "@/lib/utils";
 
-// Strive Elite wordmark — the round Strive Soccer badge next to Barlow
+// Strive Elite wordmark - the round Strive Soccer badge next to Barlow
 // Condensed display type. The badge is white-circle artwork, so it reads
 // as a clean coin on the dark ground.
 export function Wordmark({

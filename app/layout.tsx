@@ -4,14 +4,14 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Strive Elite · Premium Player Development",
   description:
-    "The complete development system for serious soccer players. Personalized coaching, weekly homework, progress tracking, film analysis, and accountability — from Strive Soccer FC.",
+    "The complete development system for serious soccer players. Personalized coaching, weekly homework, progress tracking, film analysis, and accountability, from Strive Soccer FC.",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL || "https://thestriveapp.com"
   ),
   openGraph: {
     title: "Strive Elite · Premium Player Development",
     description:
-      "A complete development system, not just private sessions. Coaching, homework, progress, and film — in one premium app.",
+      "A complete development system, not just private sessions. Coaching, homework, progress, and film, in one premium app.",
     type: "website",
   },
 };

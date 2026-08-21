@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     : undefined;
 
   // Assemble the player's training memory so the AI plans around their
-  // real history, not just the notes. Best-effort — never blocks generation.
+  // real history, not just the notes. Best-effort - never blocks generation.
   let memory = "";
   if (player) {
     try {

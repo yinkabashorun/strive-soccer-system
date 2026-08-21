@@ -63,7 +63,7 @@ export default async function CoachDashboard() {
         {roster.length === 0 ? (
           <div className="elite-card p-8 text-center text-white/45">
             No players yet. Generate an invite code above and send it to your
-            first client — they&apos;ll appear here the moment they sign up.
+            first client. They&apos;ll appear here the moment they sign up.
           </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">

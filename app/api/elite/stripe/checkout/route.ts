@@ -26,7 +26,7 @@ export async function POST(req: Request) {
     process.env.NEXT_PUBLIC_APP_URL ||
     "http://localhost:3000";
 
-  // Not wired up yet — send the user into signup so the flow still completes.
+  // Not wired up yet - send the user into signup so the flow still completes.
   if (!isStripeConfigured() || !process.env[cfg.env]) {
     return NextResponse.json({
       url: null,

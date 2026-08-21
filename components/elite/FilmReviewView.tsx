@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 
 // The deep film breakdown, rendered the same way for the player (inside
 // FilmTimeline) and the coach (inside CoachFilmPanel after sending).
-// Pure presentation — no state, no actions.
+// Pure presentation - no state, no actions.
 export function FilmReviewView({
   review,
   compact = false,

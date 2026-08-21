@@ -1,4 +1,4 @@
-// Strive Elite — per-player AI memory.
+// Strive Elite - per-player AI memory.
 //
 // Before the AI builds a new week, we assemble everything we know about a
 // player into a compact block: their profile + intake, the coach's freeform
@@ -29,7 +29,7 @@ export async function buildPlayerMemory(player: Player): Promise<string> {
 
   const lines: string[] = [];
 
-  // Coach's freeform memory note — the most important human signal.
+  // Coach's freeform memory note - the most important human signal.
   if (player.coach_memory?.trim()) {
     lines.push(`COACH'S NOTE ON THIS PLAYER (weight this heavily): ${player.coach_memory.trim()}`);
   }
@@ -46,13 +46,13 @@ export async function buildPlayerMemory(player: Player): Promise<string> {
   }
   if (intake.length) lines.push(`INTAKE: ${intake.join("; ")}.`);
 
-  // Recent weeks (last 3) — build forward, don't repeat.
+  // Recent weeks (last 3) - build forward, don't repeat.
   const recentPlans = plans.slice(0, 3);
   if (recentPlans.length) {
     const summary = recentPlans
       .map((p) => `Week ${p.week}: "${p.focus}"`)
       .join(" | ");
-    lines.push(`RECENT WEEKS (most recent first): ${summary}. Build forward from these — do not simply repeat them.`);
+    lines.push(`RECENT WEEKS (most recent first): ${summary}. Build forward from these; do not simply repeat them.`);
   }
 
   // Completion signal for the most recent trained week.
@@ -82,7 +82,7 @@ export async function buildPlayerMemory(player: Player): Promise<string> {
     .join("\n")}`;
 }
 
-// For the most recently-trained week, report what was completed vs skipped —
+// For the most recently-trained week, report what was completed vs skipped -
 // a drill a player keeps skipping should be rethought, not re-sent.
 function mostRecentWeekCompletion(
   homework: { week: number; title: string; completed: boolean }[]
@@ -97,7 +97,7 @@ function mostRecentWeekCompletion(
   let s = `LAST WEEK'S FOLLOW-THROUGH: completed ${done.length}/${wk.length} drills (${pct}%)`;
   if (skipped.length) {
     const names = skipped.slice(0, 4).map((h) => h.title).join(", ");
-    s += `. Repeatedly left undone: ${names} — reconsider or reframe these`;
+    s += `. Repeatedly left undone: ${names}. Reconsider or reframe these`;
   }
   return s + ".";
 }

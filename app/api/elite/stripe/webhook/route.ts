@@ -52,7 +52,7 @@ export async function POST(req: Request) {
             ? "canceled"
             : mapStatus(sub.status);
         // Across Stripe API versions current_period_end lives either on the
-        // subscription or on its first item — read whichever is present.
+        // subscription or on its first item - read whichever is present.
         const periodEnd =
           (sub as unknown as { current_period_end?: number })
             .current_period_end ??

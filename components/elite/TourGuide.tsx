@@ -1,8 +1,8 @@
-// Demo-tour guide strips — shown ONLY to demo visitors (viewer.demo).
+// Demo-tour guide strips - shown ONLY to demo visitors (viewer.demo).
 //
 // The tour is an invisible funnel: each page gets one clear, helpful
 // explainer that orients a cold visitor AND answers the exact objection
-// that page exists to kill — without ever sounding like selling. Real
+// that page exists to kill - without ever sounding like selling. Real
 // players never see these.
 
 const COPY: Record<
@@ -10,23 +10,23 @@ const COPY: Record<
   { headline: string; body: string }
 > = {
   home: {
-    headline: "Meet Marcus — our example player.",
+    headline: "Meet Marcus, our example player.",
     body: "Marcus isn't real, but everything else is. This is exactly the app your player gets: one session at a time, about 40 minutes, a new week we build around them every weekend. We fast-forwarded Marcus a few weeks so you can see all of it working.",
   },
   training: {
     headline: "No templates. We build each week from scratch.",
-    body: "Every weekend we read what got completed, what they struggled with, and how their skills are trending — then we write the next week around it. It unlocks Monday morning, every Monday.",
+    body: "Every weekend we read what got completed, what they struggled with, and how their skills are trending. Then we write the next week around it. It unlocks Monday morning, every Monday.",
   },
   progress: {
-    headline: "We score these from real training — not vibes.",
+    headline: "We score these from real training, not vibes.",
     body: "Seven skills, rated from actual sessions and tracked all season, so you watch improvement happen instead of wondering. You get a weekly report with these numbers too.",
   },
   film: {
     headline: "We watch the real footage.",
-    body: "Once a month your player sends us a game link and we break it down personally. Post the game schedule too — we show up to Northern Virginia games.",
+    body: "Once a month your player sends us a game link and we break it down personally. Post the game schedule too. We show up to Northern Virginia games.",
   },
   coach: {
-    headline: "A direct line to us — not a group chat.",
+    headline: "A direct line to us, not a group chat.",
     body: "Questions between sessions get answered, and every weekly check-in shapes the next plan we build. This is what personal coaching looks like between sessions.",
   },
 };

@@ -42,7 +42,7 @@ export function InvitePanel({ initial }: { initial: InviteCode[] }) {
     });
   }
 
-  // Copy a ready-to-send signup LINK — the code rides along in the URL and
+  // Copy a ready-to-send signup LINK - the code rides along in the URL and
   // prefills at signup, so the parent just fills in name/email/password.
   function inviteLink(code: string): string {
     return `${window.location.origin}/signup?code=${encodeURIComponent(code)}`;
@@ -54,7 +54,7 @@ export function InvitePanel({ initial }: { initial: InviteCode[] }) {
       setCopied(code);
       setTimeout(() => setCopied(null), 1800);
     } catch {
-      /* clipboard blocked — user can select manually */
+      /* clipboard blocked - user can select manually */
     }
   }
 
@@ -101,7 +101,7 @@ export function InvitePanel({ initial }: { initial: InviteCode[] }) {
         <div className="mt-3 flex items-center justify-between gap-3 rounded-xl border border-accent/25 bg-accent/[0.06] px-4 py-3">
           <div>
             <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">
-              New invite — send the link
+              New invite: send the link
             </div>
             <div className="font-display text-xl font-black tracking-wide">
               {fresh}

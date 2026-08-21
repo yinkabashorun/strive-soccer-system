@@ -1,9 +1,9 @@
 // Strive Elite outbound notifications (player + parent + coach).
 //
 // Two channels, both best-effort and no-op-safe:
-//   1. GoHighLevel — POSTs the event to a GHL Inbound Webhook (GHL_WEBHOOK_URL)
+//   1. GoHighLevel - POSTs the event to a GHL Inbound Webhook (GHL_WEBHOOK_URL)
 //      so your GHL workflow sends the actual email/SMS with your branding.
-//   2. Resend — a direct transactional email fallback if RESEND_API_KEY is set.
+//   2. Resend - a direct transactional email fallback if RESEND_API_KEY is set.
 //
 // Nothing here throws to the caller. With neither configured, every function
 // quietly does nothing and the app is fully functional.
@@ -70,7 +70,7 @@ async function dispatchGHL(payload: {
   }
 }
 
-// Resend fallback — a branded HTML email.
+// Resend fallback - a branded HTML email.
 async function dispatchResend(
   recipients: Contact[],
   mail: Mail

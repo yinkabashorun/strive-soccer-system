@@ -45,7 +45,7 @@ export default function DribblingCourseSuccessPage({
             You're in. Let's build something real.
           </h1>
           <p className="mx-auto mt-4 max-w-lg text-base text-bone/85 md:text-lg">
-            Check your email — your course access is on its way. The
+            Check your email - your course access is on its way. The
             <span className="text-accent"> Day 1 </span>
             walkthrough is waiting inside.
           </p>
@@ -62,7 +62,7 @@ export default function DribblingCourseSuccessPage({
               n={2}
               icon={<Play className="h-4 w-4" />}
               title="Start Module 1"
-              body="Ball Mastery Foundation. 30 minutes. A ball and a flat surface — that's it."
+              body="Ball Mastery Foundation. 30 minutes. A ball and a flat surface - that's it."
             />
             <Step
               n={3}

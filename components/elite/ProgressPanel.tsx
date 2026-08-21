@@ -18,7 +18,7 @@ export function ProgressPanel({ progress }: { progress: Progress[] }) {
           Your baseline is coming
         </div>
         <p className="mx-auto mt-2 max-w-sm text-sm text-white/45">
-          Your coach rates the seven pillars from your actual training — the
+          Your coach rates the seven pillars from your actual training. The
           first ratings land with your first training week, then you watch
           them climb.
         </p>
@@ -69,7 +69,7 @@ export function ProgressPanel({ progress }: { progress: Progress[] }) {
       </div>
 
       <div className="elite-card space-y-4 p-6">
-        {/* Only pillars that have actually been rated — no zero bars. */}
+        {/* Only pillars that have actually been rated - no zero bars. */}
         {PROGRESS_METRICS.filter((m) => byMetric.has(m)).map((metric) => {
           const p = byMetric.get(metric)!;
           return (

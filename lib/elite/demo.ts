@@ -48,7 +48,7 @@ export const DEMO_PLAYERS: Player[] = [
     position: "Attacking Midfield",
     level: "Advanced",
     current_week: 7,
-    today_focus: "Own your 1v1 — sell the fake, explode past",
+    today_focus: "Own your 1v1. Sell the fake, explode past",
     goals: [
       "Make the regional development squad by spring",
       "Two-footed under pressure",
@@ -65,7 +65,7 @@ export const DEMO_PLAYERS: Player[] = [
     club: "Riverside United U14",
     dominant_foot: "Right",
     coach_memory:
-      "Responds to challenges, not repetition. Left-foot weakness is mental, not technical — keeps skipping weak-foot reps. Tight hamstrings; keep the plyos controlled. Loves a target to beat.",
+      "Responds to challenges, not repetition. Left-foot weakness is mental, not technical. He keeps skipping weak-foot reps. Tight hamstrings; keep the plyos controlled. Loves a target to beat.",
     onboarded_at: "2026-04-11T00:00:00.000Z",
   },
   {
@@ -128,7 +128,7 @@ export const DEMO_PLAYERS: Player[] = [
     position: "Striker",
     level: "Developing",
     current_week: 3,
-    today_focus: "Finish first-time — don't take the extra touch",
+    today_focus: "Finish first-time. Don't take the extra touch",
     goals: [
       "Learn to shoot with laces cleanly",
       "Stop drifting out of the game",
@@ -153,7 +153,7 @@ export const DEMO_PLAYERS: Player[] = [
     position: "Full Back",
     level: "Competitive",
     current_week: 6,
-    today_focus: "Overlap timing — arrive as the ball is played",
+    today_focus: "Overlap timing. Arrive as the ball is played",
     goals: [
       "Become a threat going forward",
       "Sharper 1v1 defending",
@@ -258,28 +258,28 @@ const hw = (
 const plyo = (variant: number) =>
   [
     {
-      title: "Plyo warm-up — Pogo & Tuck",
+      title: "Plyo warm-up: Pogo & Tuck",
       exercise:
         "Pogo hops x20, tuck jumps x10, split-squat jumps x8 each leg. Land soft, explode up.",
       reps: "3 rounds",
       duration_min: 10,
     },
     {
-      title: "Plyo warm-up — Lateral Power",
+      title: "Plyo warm-up: Lateral Power",
       exercise:
         "Lateral bounds x10 each side, skater hops x12 each side, squat jumps x12.",
       reps: "3 rounds",
       duration_min: 10,
     },
     {
-      title: "Plyo warm-up — Quick Feet",
+      title: "Plyo warm-up: Quick Feet",
       exercise:
         "Ankle pogos x30, broad-jump-to-stick x6, single-leg hops x8 each leg.",
       reps: "3 rounds",
       duration_min: 10,
     },
     {
-      title: "Plyo warm-up — Explosive",
+      title: "Plyo warm-up: Explosive",
       exercise:
         "Tuck jumps x10, split jumps x10 each leg, step-down-to-jump x6.",
       reps: "3 rounds",
@@ -291,7 +291,7 @@ export const DEMO_HOMEWORK: Homework[] = [
   ...hw("p-marcus", 5, [
     { ...plyo(1), session: 1, completed: true, completed_at: daysFromNow(-11) },
     {
-      title: "Body feint — slow motion",
+      title: "Body feint: slow motion",
       exercise: "Drop the shoulder low, push off the far foot. Ten perfect slow reps each way before any speed",
       reps: "20 each way",
       duration_min: 10,
@@ -329,7 +329,7 @@ export const DEMO_HOMEWORK: Homework[] = [
     },
     {
       title: "Stepover at speed",
-      exercise: "Approach, stepover, dip the shoulder, go the other way — full commitment or it fools nobody",
+      exercise: "Approach, stepover, dip the shoulder, go the other way. Full commitment or it fools nobody",
       reps: "16 take-ons",
       duration_min: 10,
       session: 2,
@@ -366,7 +366,7 @@ export const DEMO_HOMEWORK: Homework[] = [
     },
     {
       title: "Chop late",
-      exercise: "Sprint at the shoe, chop at the LAST step — late is what beats real defenders",
+      exercise: "Sprint at the shoe, chop at the LAST step. Late is what beats real defenders",
       reps: "12 take-ons",
       duration_min: 10,
       session: 3,
@@ -376,7 +376,7 @@ export const DEMO_HOMEWORK: Homework[] = [
     { ...plyo(4), session: 4, completed: true, completed_at: daysFromNow(-8) },
     {
       title: "Move roulette",
-      exercise: "A parent calls the move mid-approach — feint, stepover, or chop. No repeats back-to-back",
+      exercise: "A parent calls the move mid-approach: feint, stepover, or chop. No repeats back-to-back",
       reps: "20 take-ons",
       duration_min: 10,
       session: 4,
@@ -385,7 +385,7 @@ export const DEMO_HOMEWORK: Homework[] = [
     },
     {
       title: "Shadow 1v1",
-      exercise: "Thirty seconds nonstop attacking an imaginary defender — every move you own, game speed",
+      exercise: "Thirty seconds nonstop attacking an imaginary defender. Every move you own, game speed",
       reps: "5 rounds",
       duration_min: 10,
       session: 4,
@@ -405,7 +405,7 @@ export const DEMO_HOMEWORK: Homework[] = [
   ...hw("p-marcus", 6, [
     { ...plyo(1), session: 1, completed: true, completed_at: daysFromNow(-6) },
     {
-      title: "La croqueta — mechanics",
+      title: "La croqueta: mechanics",
       exercise: "One touch across your body, one touch out. Two touches, one heartbeat",
       reps: "20 each way",
       duration_min: 10,
@@ -424,7 +424,7 @@ export const DEMO_HOMEWORK: Homework[] = [
     },
     {
       title: "Croqueta on the move",
-      exercise: "Dribble in, croqueta at speed — without slowing down first",
+      exercise: "Dribble in, croqueta at speed, without slowing down first",
       reps: "12 reps",
       duration_min: 10,
       session: 1,
@@ -443,7 +443,7 @@ export const DEMO_HOMEWORK: Homework[] = [
     },
     {
       title: "V-pull + turn",
-      exercise: "Pull, half-turn, first touch away — receive and escape in one motion",
+      exercise: "Pull, half-turn, first touch away. Receive and escape in one motion",
       reps: "16 reps",
       duration_min: 10,
       session: 2,
@@ -462,7 +462,7 @@ export const DEMO_HOMEWORK: Homework[] = [
     { ...plyo(3), session: 3, completed: true, completed_at: daysFromNow(-4) },
     {
       title: "Sole-roll escape",
-      exercise: "Roll across, plant, go — the simplest move that still works at every level",
+      exercise: "Roll across, plant, go. The simplest move that still works at every level",
       reps: "20 each way",
       duration_min: 10,
       session: 3,
@@ -480,7 +480,7 @@ export const DEMO_HOMEWORK: Homework[] = [
     },
     {
       title: "Weak-foot escapes",
-      exercise: "Every escape with the left only. Slow is fine — clean is required",
+      exercise: "Every escape with the left only. Slow is fine. Clean is required",
       reps: "3 x 2 min",
       duration_min: 10,
       session: 3,
@@ -508,7 +508,7 @@ export const DEMO_HOMEWORK: Homework[] = [
     },
     {
       title: "Shadow press escape",
-      exercise: "Feel the press arriving — scan, escape move, burst out the far side",
+      exercise: "Feel the press arriving: scan, escape move, burst out the far side",
       reps: "12 chains",
       duration_min: 10,
       session: 4,
@@ -548,7 +548,7 @@ export const DEMO_HOMEWORK: Homework[] = [
     { ...plyo(2), session: 2, completed: true, completed_at: daysFromNow(-1) },
     {
       title: "Scan, then move",
-      exercise: "Shoulder check BEFORE the move — know where you're escaping to",
+      exercise: "Shoulder check BEFORE the move. Know where you're escaping to",
       reps: "16 reps",
       duration_min: 10,
       session: 2,
@@ -575,7 +575,7 @@ export const DEMO_HOMEWORK: Homework[] = [
     },
     { ...plyo(3), session: 3 },
     {
-      title: "Croqueta + burst — test day",
+      title: "Croqueta + burst: test day",
       exercise: "Twelve clean at full speed, each way. This is the benchmark rep",
       reps: "24 total",
       duration_min: 10,
@@ -584,14 +584,14 @@ export const DEMO_HOMEWORK: Homework[] = [
     },
     {
       title: "Double-move take-ons",
-      exercise: "Feint into stepover, stepover into chop — beat the shoe with two lies",
+      exercise: "Feint into stepover, stepover into chop. Beat the shoe with two lies",
       reps: "16 take-ons",
       duration_min: 10,
       session: 3,
     },
     {
       title: "Left-exit chains",
-      exercise: "Any move you like — but every exit touch is left foot, then burst",
+      exercise: "Any move you like, but every exit touch is left foot, then burst",
       reps: "14 chains",
       duration_min: 10,
       session: 3,
@@ -606,7 +606,7 @@ export const DEMO_HOMEWORK: Homework[] = [
       video_url: "https://www.youtube.com/results?search_query=neymar+1v1+moves",
     },
     {
-      title: "Move roulette — final",
+      title: "Move roulette: final",
       exercise: "All eight moves in the pool now. React to the call",
       reps: "24 take-ons",
       duration_min: 10,
@@ -614,7 +614,7 @@ export const DEMO_HOMEWORK: Homework[] = [
     },
     {
       title: "Shadow 1v1 gauntlet",
-      exercise: "Forty-five seconds on, fifteen off — attack, escape, attack. Empty the tank",
+      exercise: "Forty-five seconds on, fifteen off: attack, escape, attack. Empty the tank",
       reps: "5 rounds",
       duration_min: 10,
       session: 4,
@@ -629,7 +629,7 @@ export const DEMO_HOMEWORK: Homework[] = [
     },
     {
       title: "1v1 acceleration",
-      exercise: "Cone 1v1 — explode past on the second touch",
+      exercise: "Cone 1v1. Explode past on the second touch",
       reps: "4 x 8 reps",
     },
     {
@@ -641,7 +641,7 @@ export const DEMO_HOMEWORK: Homework[] = [
   ...hw("p-diego", 11, [
     {
       title: "Defensive body shape",
-      exercise: "Half-turn defending — open hips, show them the line",
+      exercise: "Half-turn defending. Open hips, show them the line",
       reps: "3 x 6 min",
       completed: true,
     },
@@ -684,7 +684,7 @@ export const DEMO_HOMEWORK: Homework[] = [
     },
     {
       title: "Overlap timing",
-      exercise: "Shadow overlaps — arrive as the ball is released",
+      exercise: "Shadow overlaps. Arrive as the ball is released",
       reps: "3 x 8 reps",
     },
     {
@@ -700,18 +700,18 @@ export const DEMO_FILM: FilmUpload[] = [
     id: "f-marcus-1",
     player_id: "p-marcus",
     month: 1,
-    title: "League game vs. Riverside — full first half",
+    title: "League game vs. Riverside, first half",
     url: null,
     thumbnail: null,
     coach_notes:
-      "You played brave, Marcus — that's the headline. Six take-ons attempted, four clean.",
+      "You played brave, Marcus. That's the headline. Six take-ons attempted, four clean.",
     review: {
       summary:
-        "You played brave, Marcus — that's the headline. Six take-ons attempted, four clean. Most players your age pass backwards the second a defender steps up; you attacked. What we build now is what happens after the move — the first two steps decide whether a beaten defender stays beaten.",
+        "You played brave, Marcus. That's the headline. Six take-ons attempted, four clean. Most players your age pass backwards the second a defender steps up; you attacked. What we build now is what happens after the move - the first two steps decide whether a beaten defender stays beaten.",
       moments: [
         {
           time: "04:12",
-          note: "Body feint, pushed past the fullback on your first touch. That's the exact move we've been drilling — straight game transfer.",
+          note: "Body feint, pushed past the fullback on your first touch. That's the exact move we've been drilling. Straight game transfer.",
           kind: "good",
         },
         {
@@ -726,24 +726,24 @@ export const DEMO_FILM: FilmUpload[] = [
         },
         {
           time: "26:05",
-          note: "Beat your man clean, then slowed down and let him recover. Finish the move — burst for two steps after every take-on.",
+          note: "Beat your man clean, then slowed down and let him recover. Finish the move: burst for two steps after every take-on.",
           kind: "fix",
         },
       ],
       strengths: [
-        "Take-on bravery — 6 attempted, 4 clean. That ratio is rare at your age.",
-        "First touch under pressure — you kill the ball instead of panicking.",
+        "Take-on bravery: 6 attempted, 4 clean. That ratio is rare at your age.",
+        "First touch under pressure: you kill the ball instead of panicking.",
         "The right-side body feint is already game-real.",
       ],
       fixes: [
-        "Exit speed — the move beats the defender, the burst keeps him beaten.",
-        "Left-side escapes — you exited right on 5 of your 6 take-ons. Defenders will learn that.",
+        "Exit speed: the move beats the defender, the burst keeps him beaten.",
+        "Left-side escapes: you exited right on 5 of your 6 take-ons. Defenders will learn that.",
         "Scanning before you receive in the final third.",
       ],
       next_steps: [
-        "Every take-on rep this week ends with a two-step burst — no exceptions.",
+        "Every take-on rep this week ends with a two-step burst. No exceptions.",
         "The left-exit work in your plan is there because of this film. Own it.",
-        "Film your next league game — I'm counting your left exits.",
+        "Film your next league game. I'm counting your left exits.",
       ],
     },
     status: "Reviewed",
@@ -753,7 +753,7 @@ export const DEMO_FILM: FilmUpload[] = [
     id: "f-marcus-2",
     player_id: "p-marcus",
     month: 2,
-    title: "League game vs. Arlington — second half",
+    title: "League game vs. Arlington, second half",
     url: null,
     thumbnail: null,
     coach_notes: null,
@@ -763,22 +763,22 @@ export const DEMO_FILM: FilmUpload[] = [
   {
     id: "f-sofia-1",
     player_id: "p-sofia",
-    title: "1v1 clips — training",
+    title: "1v1 clips from training",
     url: null,
     thumbnail: null,
     coach_notes:
-      "Your acceleration is elite. First touch on 3 of 6 was heavy — push it further into space and you're gone.",
+      "Your acceleration is elite. First touch on 3 of 6 was heavy. Push it further into space and you're gone.",
     status: "Reviewed",
     created_at: daysFromNow(-5),
   },
   {
     id: "f-diego-1",
     player_id: "p-diego",
-    title: "Academy trial — full game",
+    title: "Academy trial, full game",
     url: null,
     thumbnail: null,
     coach_notes:
-      "Dominant in the air. One turn at 38:00 you got caught — trust the early body shape.",
+      "Dominant in the air. One turn at 38:00 you got caught. Trust the early body shape.",
     status: "Analyzing",
     created_at: daysFromNow(-2),
   },
@@ -794,7 +794,7 @@ export const DEMO_NOTES: CoachNote[] = [
   {
     id: "n-sofia-1",
     player_id: "p-sofia",
-    body: "Fearless in 1v1. If we sharpen the first touch she's a real problem for defenders. Confidence is high — keep feeding it.",
+    body: "Fearless in 1v1. If we sharpen the first touch she's a real problem for defenders. Confidence is high. Keep feeding it.",
     created_at: daysFromNow(-4),
   },
 ];
@@ -805,7 +805,7 @@ export const DEMO_MESSAGES: Message[] = [
     player_id: "p-marcus",
     from_role: "coach",
     from_name: "Coach Yinka",
-    body: "Your stepover is winning you space every single rep now. This week we chain it — stepover into the chop, full speed. Defenders can stop one move. They can't stop two.",
+    body: "Your stepover is winning you space every single rep now. This week we chain it: stepover into the chop, full speed. Defenders can stop one move. They can't stop two.",
     created_at: daysFromNow(-2),
     read: false,
   },
@@ -832,7 +832,7 @@ export const DEMO_MESSAGES: Message[] = [
     player_id: "p-aisha",
     from_role: "coach",
     from_name: "Coach Yinka",
-    body: "You were braver in the box last session — I saw it. Keep finishing first-time and the goals will come.",
+    body: "You were braver in the box last session. I saw it. Keep finishing first-time and the goals will come.",
     created_at: daysFromNow(-2),
     read: false,
   },
@@ -855,7 +855,7 @@ export const DEMO_GAMES: Game[] = [
     kickoff: "10:30 AM",
     opponent: "Loudoun United U14",
     location: "Haymarket, VA",
-    notes: "League game — starting CAM",
+    notes: "League game, starting CAM",
     coach_attending: true,
     created_at: daysFromNow(-2),
   },
@@ -879,11 +879,11 @@ export const DEMO_CHECKINS: Checkin[] = [
     week: 6,
     rating: 4,
     energy: 3,
-    went_well: "Scanning is becoming automatic — caught myself checking both shoulders without thinking.",
+    went_well: "Scanning is becoming automatic. I caught myself checking both shoulders without thinking.",
     struggled: "Left-foot exits still feel a step slow.",
     note: "Legs a bit heavy midweek but pushed through all four sessions.",
     coach_feedback:
-      "That croqueta click is real — I can see it. Left-foot exits get slow reps this week; speed comes after clean.",
+      "That croqueta click is real. I can see it. Left-foot exits get slow reps this week; speed comes after clean.",
     coach_feedback_at: daysFromNow(-2),
     created_at: daysFromNow(-3),
   },
@@ -893,7 +893,7 @@ export const DEMO_CHECKINS: Checkin[] = [
     week: 5,
     rating: 3,
     energy: 4,
-    went_well: "The croqueta finally clicked — both directions.",
+    went_well: "The croqueta finally clicked. Both directions.",
     struggled: "Got frustrated with the weak-foot reps and rushed them.",
     note: "",
     coach_feedback: "",
@@ -914,8 +914,8 @@ export const DEMO_WEEKLY_PLANS: WeeklyPlan[] = [
       "Every exit touch on the weak foot",
     ],
     homework: [
-      { title: "Croqueta + burst — test day", exercise: "Twelve clean at full speed, each way", reps: "24" },
-      { title: "Left-exit chains", exercise: "Any move — every exit touch left-footed, then burst", reps: "14" },
+      { title: "Croqueta + burst: test day", exercise: "Twelve clean at full speed, each way", reps: "24" },
+      { title: "Left-exit chains", exercise: "Any move, every exit touch left-footed, then burst", reps: "14" },
     ],
     created_at: daysFromNow(-3),
   },
@@ -928,7 +928,7 @@ export const DEMO_PARENT_REPORTS: ParentReport[] = [
     summary:
       "This week Marcus worked on scanning before receiving and staying composed under a press. His decision-making is visibly sharper.",
     improvement:
-      "Scanning jumped from 58 to 71. He's now checking his shoulder automatically — a habit that separates good players from great ones.",
+      "Scanning jumped from 58 to 71. He's now checking his shoulder automatically, a habit that separates good players from great ones.",
     homework:
       "Two-move chains at game speed, left-foot exits, and a film study on deciding late in 1v1s.",
     next_focus:

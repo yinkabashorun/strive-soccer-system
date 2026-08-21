@@ -69,7 +69,7 @@ export type Homework = {
   id: string;
   player_id: string;
   week: number;
-  session?: number; // 1..4 — which of the week's four sessions (010 adds the column)
+  session?: number; // 1..4 - which of the week's four sessions (010 adds the column)
   title: string;
   exercise: string;
   reps: string;
@@ -139,7 +139,7 @@ export type Progress = {
   updated_at: string;
 };
 
-// One historical rating point (elite_progress_history) — powers the
+// One historical rating point (elite_progress_history) - powers the
 // season-long trend + AI memory.
 export type ProgressPoint = {
   id: string;
@@ -153,7 +153,7 @@ export type ProgressPoint = {
 // A timestamped moment inside a film breakdown. kind marks it as a
 // highlight to keep ("good") or a teaching point ("fix").
 export type FilmMoment = {
-  time: string; // "12:30" — mm:ss into the video
+  time: string; // "12:30" - mm:ss into the video
   note: string;
   kind: "good" | "fix";
 };
@@ -178,11 +178,11 @@ export type FilmUpload = {
   coach_notes: string | null;
   status: "Uploaded" | "Reviewed" | "Analyzing";
   created_at: string;
-  month?: number; // program month (1, 2, 3…) — one review per month (015)
+  month?: number; // program month (1, 2, 3…) - one review per month (015)
   review?: FilmReview | null; // structured breakdown (017)
 };
 
-// An upcoming game the player posted (elite_games) — the coach can mark
+// An upcoming game the player posted (elite_games) - the coach can mark
 // attendance for Northern Virginia games.
 export type Game = {
   id: string;

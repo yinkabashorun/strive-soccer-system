@@ -8,7 +8,7 @@ function isPlyo(title: string): boolean {
 
 // Read-only view of a player's current-week plan for the coach: the four
 // sessions and exactly which drills the player has completed. Answers the
-// question a coach actually asks — "are they doing the work?"
+// question a coach actually asks - "are they doing the work?"
 export function CoachWeekView({
   homework,
   currentWeek,

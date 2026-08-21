@@ -34,7 +34,7 @@ export function LoginForm({ configured }: { configured: boolean }) {
       setLoading(false);
       return;
     }
-    // Route by role — coaches and admins go to the coach app.
+    // Route by role - coaches and admins go to the coach app.
     const { data: profile } = await supabase
       .from("elite_profiles")
       .select("role")
@@ -110,13 +110,13 @@ export function LoginForm({ configured }: { configured: boolean }) {
       </p>
 
       {/* The sales door: anyone can walk through a fully-loaded player
-          experience — no account, no friction. */}
+          experience - no account, no friction. */}
       <form action={enterDemoPlayer} className="mt-6 border-t border-white/8 pt-5">
         <button className="btn w-full py-3 text-sm">
           Just looking? Tour the app as a player →
         </button>
         <p className="mt-2 text-center text-xs text-white/30">
-          Explore a live demo — training week, progress, film, all of it.
+          Explore a live demo: training week, progress, film, all of it.
         </p>
       </form>
 
@@ -134,7 +134,7 @@ export function LoginForm({ configured }: { configured: boolean }) {
             </form>
           </div>
           <p className="mt-3 text-center text-xs text-white/30">
-            No account needed — tour the full experience.
+            No account needed. Tour the full experience.
           </p>
         </div>
       )}

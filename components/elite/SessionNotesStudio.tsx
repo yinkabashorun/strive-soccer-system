@@ -16,7 +16,7 @@ import type { GeneratedPlan } from "@/lib/elite/types";
 import { applyGeneratedPlan } from "@/lib/elite/coach-actions";
 import { cn } from "@/lib/utils";
 
-const EXAMPLE = `Today we worked on scanning before receiving. Body shape needs to be quicker — he's still square-on when the ball arrives. Composure was better under pressure.
+const EXAMPLE = `Today we worked on scanning before receiving. Body shape needs to be quicker. He's still square-on when the ball arrives. Composure was better under pressure.
 
 Homework:
 200 wall passes
@@ -168,8 +168,8 @@ export function SessionNotesStudio({ playerId }: { playerId: string }) {
               <span className="flex items-center gap-1.5 text-sm font-medium text-accent">
                 <CheckCircle2 className="h-4 w-4" />
                 {savedInfo?.goesLiveNow
-                  ? `Published — week ${savedInfo.week ?? ""} is live now`
-                  : `Approved — week ${savedInfo?.week ?? ""} unlocks Monday morning`}
+                  ? `Published. Week ${savedInfo.week ?? ""} is live now`
+                  : `Approved. Week ${savedInfo?.week ?? ""} unlocks Monday morning`}
               </span>
             ) : (
               <div className="text-right">
@@ -198,7 +198,7 @@ export function SessionNotesStudio({ playerId }: { playerId: string }) {
             <p className="text-lg font-medium text-bone">{plan.weekly_focus}</p>
           </Block>
 
-          {/* Four sessions — a fully editable draft until published */}
+          {/* Four sessions - a fully editable draft until published */}
           <Block icon={Check} title="The week · 4 sessions · tap to edit">
             <div className="space-y-3">
               {plan.sessions.map((s, si) => (
@@ -231,7 +231,7 @@ export function SessionNotesStudio({ playerId }: { playerId: string }) {
                           }
                         >
                           {isPlyo ? (
-                            // The plyo warm-up is the method — not editable.
+                            // The plyo warm-up is the method - not editable.
                             <>
                               <div className="flex items-center justify-between gap-3">
                                 <span className="flex items-center gap-2 font-medium text-bone">
@@ -250,7 +250,7 @@ export function SessionNotesStudio({ playerId }: { playerId: string }) {
                             </>
                           ) : (
                             <>
-                              {/* Edits happen in place — the draft looks
+                              {/* Edits happen in place - the draft looks
                                   exactly like the published plan. */}
                               <div className="flex items-center gap-2">
                                 <input

@@ -60,8 +60,8 @@ export function CheckinCard({
       {!open ? (
         <>
           <p className="mt-2 text-sm text-white/60">
-            {firstName ? `${firstName} — how` : "How"} did week {week} really
-            go? Two minutes for your coach — it shapes your next plan.
+            {firstName ? `${firstName}, how` : "How"} did week {week} really
+            go? Two minutes for your coach. It shapes your next plan.
           </p>
           <button onClick={() => setOpen(true)} className="btn mt-3 w-full py-2.5">
             Start check-in
@@ -81,7 +81,7 @@ export function CheckinCard({
             label="What did you struggle with?"
             value={struggled}
             onChange={setStruggled}
-            placeholder="Be honest — this is how your coach helps."
+            placeholder="Be honest. This is how your coach helps."
           />
           <TextArea
             label="Anything else? (optional)"

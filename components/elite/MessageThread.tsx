@@ -5,7 +5,7 @@ import { Loader2, Send } from "lucide-react";
 import type { Message, Role } from "@/lib/elite/types";
 import { cn } from "@/lib/utils";
 
-// Shared 1-on-1 chat thread. Works for both sides — the caller passes the
+// Shared 1-on-1 chat thread. Works for both sides - the caller passes the
 // bound send action and which role "me" is, so bubbles align correctly.
 export function MessageThread({
   messages,

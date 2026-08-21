@@ -1,8 +1,8 @@
-// The weekly parent recap — the retention engine.
+// The weekly parent recap - the retention engine.
 //
 // When a player's new week unlocks (Monday morning VA time), we assemble
-// the TRUE numbers from the week that just ended — sessions completed,
-// minutes, streak, the coach's parent note, the player's own check-in —
+// the TRUE numbers from the week that just ended - sessions completed,
+// minutes, streak, the coach's parent note, the player's own check-in -
 // and have Claude turn them into 2–3 warm, specific sentences for the
 // parent. No AI available → a clean stats template sends instead. Facts
 // only; the model never invents results.
@@ -82,11 +82,11 @@ export async function buildParentRecap(
   const first = player.full_name.split(" ")[0];
   const stats = { playerFirst: first, week, sessionsDone, sessionsTotal, minutes, streak };
 
-  // Honest fallback template — used when no API key or the call fails.
+  // Honest fallback template - used when no API key or the call fails.
   const fallback =
     sessionsDone >= sessionsTotal
-      ? `${first} completed all ${sessionsTotal} sessions this week — ${minutes} minutes of focused work${streak > 1 ? ` and a ${streak}-day streak` : ""}. The new training week is live now.`
-      : `${first} completed ${sessionsDone} of ${sessionsTotal} sessions this week (${minutes} minutes trained). We'll pick the pace back up — the new week is live now.`;
+      ? `${first} completed all ${sessionsTotal} sessions this week: ${minutes} minutes of focused work${streak > 1 ? ` and a ${streak}-day streak` : ""}. The new training week is live now.`
+      : `${first} completed ${sessionsDone} of ${sessionsTotal} sessions this week (${minutes} minutes trained). We'll pick the pace back up. The new week is live now.`;
 
   if (!process.env.ANTHROPIC_API_KEY) return { ...stats, text: fallback };
 
@@ -113,14 +113,16 @@ English. No emoji. No exclamation marks. Never corny.
 Rules:
 - 2 to 3 sentences, suitable for a text message.
 - Use ONLY the facts provided. Never invent results, drills, or progress.
-- Be honest about incomplete weeks — constructive, never guilt-tripping.
+- Be honest about incomplete weeks: constructive, never guilt-tripping.
 - Refer to the player by first name. End by noting the new week is live.
+- Plain punctuation only. NEVER use an em dash (\u2014). Periods and commas.
 - Return ONLY the message text, no preamble.`,
       messages: [{ role: "user", content: facts }],
     });
     const text = res.content
       .map((b) => (b.type === "text" ? b.text : ""))
       .join("")
+      .replace(/\s*—\s*/g, " - ") // prompt bans these; scrub any that slip
       .trim();
     return { ...stats, text: text || fallback };
   } catch {

@@ -19,7 +19,7 @@ export function FilmTimeline({
   currentMonth: number;
   firstName: string;
 }) {
-  // Always show at least three months — the program's arc.
+  // Always show at least three months - the program's arc.
   const monthsToShow = Math.max(3, currentMonth);
   const byMonth = new Map<number, FilmUpload>();
   for (const f of films) byMonth.set(f.month ?? 1, f);
@@ -146,7 +146,7 @@ function MonthCard({
           </div>
         ) : (
           <p className="mt-2 text-sm text-white/50">
-            Film received{film ? ` ${timeAgo(film.created_at)}` : ""} — your
+            Film received{film ? ` ${timeAgo(film.created_at)}` : ""}. Your
             coach is reviewing it, {firstName}. The breakdown lands here.
           </p>
         )}
@@ -164,7 +164,7 @@ function MonthCard({
     >
       {label}
       <p className="mt-2 text-sm text-white/60">
-        Drop a link to game or training footage (Veo, Hudl, YouTube — anything
+        Drop a link to game or training footage (Veo, Hudl, YouTube, anything
         watchable). Coach breaks it down once a month.
       </p>
       <div className="mt-3 space-y-2">

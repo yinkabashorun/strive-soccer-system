@@ -29,7 +29,7 @@ export default async function MessagesPage() {
           Your coach
         </h1>
         <p className="mt-2 text-white/50">
-          Questions, wins, clips to talk through — message your coach directly.
+          Questions, wins, clips to talk through. Message your coach directly.
         </p>
       </header>
 

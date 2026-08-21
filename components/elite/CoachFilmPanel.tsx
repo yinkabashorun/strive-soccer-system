@@ -21,7 +21,7 @@ export function CoachFilmPanel({
   if (films.length === 0) {
     return (
       <div className="elite-card p-6 text-center text-sm text-white/40">
-        No film yet. Their monthly submission will land here — watch it, then
+        No film yet. Their monthly submission will land here. Watch it, then
         drop the breakdown.
       </div>
     );
@@ -159,12 +159,12 @@ function FilmRow({ playerId, film }: { playerId: string; film: FilmUpload }) {
         </div>
       ) : (
         <div className="mt-3 space-y-3">
-          <Field label="The big picture" hint="What you saw overall — their headline.">
+          <Field label="The big picture" hint="What you saw overall. Their headline.">
             <textarea
               rows={2}
               value={summary}
               onChange={(e) => setSummary(e.target.value)}
-              placeholder="You played brave — that's the headline…"
+              placeholder="You played brave. That's the headline…"
               className={inputCls}
             />
           </Field>
@@ -176,7 +176,7 @@ function FilmRow({ playerId, film }: { playerId: string; film: FilmUpload }) {
               rows={3}
               value={momentsText}
               onChange={(e) => setMomentsText(e.target.value)}
-              placeholder={"04:12 + body feint into space — exactly what we drilled\n12:30 - runner in behind, never scanned"}
+              placeholder={"04:12 + body feint into space, exactly what we drilled\n12:30 - runner in behind, never scanned"}
               className={inputCls}
             />
           </Field>
@@ -186,7 +186,7 @@ function FilmRow({ playerId, film }: { playerId: string; film: FilmUpload }) {
                 rows={3}
                 value={strengthsText}
                 onChange={(e) => setStrengthsText(e.target.value)}
-                placeholder="Take-on bravery — 6 attempted, 4 clean"
+                placeholder="Take-on bravery: 6 attempted, 4 clean"
                 className={inputCls}
               />
             </Field>
@@ -200,7 +200,7 @@ function FilmRow({ playerId, film }: { playerId: string; film: FilmUpload }) {
               />
             </Field>
           </div>
-          <Field label="Next steps" hint="One per line — their marching orders.">
+          <Field label="Next steps" hint="One per line. Their marching orders.">
             <textarea
               rows={2}
               value={stepsText}

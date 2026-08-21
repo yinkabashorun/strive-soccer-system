@@ -1,4 +1,4 @@
-// Strive Elite time model — everything runs on Virginia time
+// Strive Elite time model - everything runs on Virginia time
 // (America/New_York). A training week is Monday→Sunday NY; new weeks
 // unlock Monday morning. These helpers are the single source of truth for
 // week math so "week 3" always means the player's third real week.
@@ -34,7 +34,7 @@ export function nextMondayNY(): string {
   return mondayOfWeekNY(1);
 }
 
-// Unlock instant for a given NY Monday: 10:00 UTC = 6am EDT / 5am EST —
+// Unlock instant for a given NY Monday: 10:00 UTC = 6am EDT / 5am EST -
 // always early Monday morning in Virginia, year-round, no DST math.
 export function unlockInstant(monday: string): string {
   return `${monday}T10:00:00.000Z`;

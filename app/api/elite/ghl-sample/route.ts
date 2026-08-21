@@ -16,20 +16,20 @@ const SAMPLES: Record<string, { subject: string; body: string }> = {
     body: "Test Player is officially in the Strive Elite program. Next step: open the app and complete the quick player profile.",
   },
   new_week: {
-    subject: "Test — Week 2 is live",
+    subject: "Test: Week 2 is live",
     body: "The new training week just unlocked.\n\nThis week's focus: Scan before you receive.\n\nFour sessions, plyo warm-up first, every time.",
   },
   coach_message: {
     subject: "Your coach sent you a message",
-    body: 'Coach: "Great work this week — session 3 was your best yet."',
+    body: 'Coach: "Great work this week. Session 3 was your best yet."',
   },
   checkin_feedback: {
     subject: "Your coach replied to your check-in",
     body: "That scanning progress is exactly what we're after. We'll build on it next week.",
   },
   parent_weekly_report: {
-    subject: "Test Player — week 1 report",
-    body: "Test Player completed all 4 sessions this week — 210 minutes of focused work and a 6-day streak. His scanning is becoming automatic; next week we take the weak foot head-on. The new training week is live now.",
+    subject: "Test Player's week 1 report",
+    body: "Test Player completed all 4 sessions this week: 210 minutes of focused work and a 6-day streak. His scanning is becoming automatic; next week we take the weak foot head-on. The new training week is live now.",
   },
 };
 
@@ -73,8 +73,8 @@ export async function GET(req: Request) {
       status: res.status,
       sent_event: event,
       hint: res.ok
-        ? "Sample delivered — go back to GHL and click 'Check for new requests'."
-        : "GHL rejected the request — double-check the webhook URL.",
+        ? "Sample delivered. Go back to GHL and click 'Check for new requests'."
+        : "GHL rejected the request. Double-check the webhook URL.",
     });
   } catch {
     return NextResponse.json({ ok: false, error: "delivery_failed" }, { status: 502 });

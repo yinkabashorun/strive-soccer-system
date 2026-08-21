@@ -8,7 +8,7 @@ import { TourGuide } from "@/components/elite/TourGuide";
 
 export const metadata = { title: "Film · Strive Elite" };
 
-// Monthly film review — Month 1, Month 2, Month 3. One link per month,
+// Monthly film review - Month 1, Month 2, Month 3. One link per month,
 // one coach breakdown per month.
 export default async function FilmPage() {
   const viewer = await getViewer();
@@ -35,7 +35,7 @@ export default async function FilmPage() {
           Film review
         </h1>
         <p className="mt-2 text-white/50">
-          Once a month, Coach breaks down your real footage — what&apos;s
+          Once a month, Coach breaks down your real footage: what&apos;s
           working, what&apos;s next.
         </p>
       </header>
@@ -46,7 +46,7 @@ export default async function FilmPage() {
         firstName={firstName}
       />
 
-      {/* Game schedule — Coach shows up to NoVA games */}
+      {/* Game schedule - Coach shows up to NoVA games */}
       <section className="pt-2">
         <h2 className="mb-3 flex items-center gap-2 font-display text-xl font-bold uppercase tracking-tight">
           <CalendarDays className="h-4 w-4 text-accent" /> Your games

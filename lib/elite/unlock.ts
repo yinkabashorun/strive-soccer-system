@@ -1,5 +1,5 @@
 // Processes due week unlocks (Monday morning VA time). Called lazily from
-// app layouts on load — idempotent and cheap (indexed query, usually zero
+// app layouts on load - idempotent and cheap (indexed query, usually zero
 // rows), so the app needs no cron: the first visit after Monday 6am ET
 // flips the week live, fires the in-app notification, and sends the
 // email/SMS event. Uses the service client so a player's own visit can
@@ -61,11 +61,11 @@ export async function unlockDueWeeks(): Promise<void> {
 
     await sendPlayerEmail(plan.player_id, {
       event: "new_week",
-      subject: first ? `${first} — Week ${plan.week} is live` : `Week ${plan.week} is live`,
+      subject: first ? `Week ${plan.week} is live, ${first}` : `Week ${plan.week} is live`,
       body: `The new training week just unlocked.\n\nThis week's focus: ${plan.focus}\n\nFour sessions, plyo warm-up first, every time. Open the app and start Session 1.`,
     }).catch(() => undefined);
 
-    // The weekly parent recap — real numbers from the week that just
+    // The weekly parent recap - real numbers from the week that just
     // ended, written by the AI (template fallback), sent alongside the
     // Monday unlock. Best-effort; never blocks the unlock itself.
     try {
@@ -73,12 +73,12 @@ export async function unlockDueWeeks(): Promise<void> {
       if (recap) {
         await sendPlayerEmail(plan.player_id, {
           event: "parent_weekly_report",
-          subject: `${recap.playerFirst} — week ${recap.week} report`,
+          subject: `${recap.playerFirst}'s week ${recap.week} report`,
           body: recap.text,
         });
       }
     } catch {
-      /* recap is a bonus — the unlock already succeeded */
+      /* recap is a bonus - the unlock already succeeded */
     }
   }
 }

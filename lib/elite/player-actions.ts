@@ -107,7 +107,7 @@ export async function submitFilm(input: { url: string; note: string }) {
   if (existing && existing.length > 0) {
     return {
       ok: false as const,
-      error: "This month's film is already in — your coach is on it.",
+      error: "This month's film is already in. Your coach is on it.",
     };
   }
 
@@ -120,7 +120,7 @@ export async function submitFilm(input: { url: string; note: string }) {
   };
   const { error } = await supabase.from("elite_film_uploads").insert(row);
   if (error) {
-    // pre-015 (no month column) — insert without it so nothing breaks
+    // pre-015 (no month column) - insert without it so nothing breaks
     const { month: _m, ...legacy } = row;
     await supabase.from("elite_film_uploads").insert(legacy);
   }
@@ -128,7 +128,7 @@ export async function submitFilm(input: { url: string; note: string }) {
   await sendCoachEmail(viewer.playerId, {
     event: "film_submitted",
     subject: `${viewer.profile.full_name} submitted month ${month} film`,
-    body: `${viewer.profile.full_name} submitted their film for month ${month}.\n\n${url}\n\nNote: ${input.note || "—"}\n\nWatch it and leave feedback on their profile.`,
+    body: `${viewer.profile.full_name} submitted their film for month ${month}.\n\n${url}\n\nNote: ${input.note || "-"}\n\nWatch it and leave feedback on their profile.`,
   }).catch(() => undefined);
 
   revalidatePath("/film");
@@ -167,7 +167,7 @@ export async function addGame(input: {
   await sendCoachEmail(viewer.playerId, {
     event: "game_submitted",
     subject: `${viewer.profile.full_name} added a game`,
-    body: `${viewer.profile.full_name} has a game on ${input.game_date}${input.kickoff ? ` at ${input.kickoff}` : ""}${input.opponent ? ` vs ${input.opponent}` : ""}${input.location ? ` — ${input.location}` : ""}.\n\nOpen their profile to mark yourself as attending.`,
+    body: `${viewer.profile.full_name} has a game on ${input.game_date}${input.kickoff ? ` at ${input.kickoff}` : ""}${input.opponent ? ` vs ${input.opponent}` : ""}${input.location ? ` - ${input.location}` : ""}.\n\nOpen their profile to mark yourself as attending.`,
   }).catch(() => undefined);
 
   revalidatePath("/film");
@@ -259,7 +259,7 @@ export async function submitCheckin(input: CheckinInput) {
   await sendCoachEmail(viewer.playerId, {
     event: "checkin_submitted",
     subject: `${viewer.profile.full_name} submitted their weekly check-in`,
-    body: `${viewer.profile.full_name} checked in for week ${player?.current_week ?? 1}.\n\nWent well: ${input.went_well || "—"}\nStruggled: ${input.struggled || "—"}\nNote: ${input.note || "—"}`,
+    body: `${viewer.profile.full_name} checked in for week ${player?.current_week ?? 1}.\n\nWent well: ${input.went_well || "-"}\nStruggled: ${input.struggled || "-"}\nNote: ${input.note || "-"}`,
   }).catch(() => undefined);
 
   revalidatePath("/dashboard");

@@ -39,7 +39,7 @@ export default function DribblingCoursePage() {
             className="btn-accent text-xs md:text-sm"
           >
             <Sparkles className="h-3.5 w-3.5" />
-            Get Instant Access — $97
+            Get Instant Access - $97
           </a>
         </div>
       </header>
@@ -61,7 +61,7 @@ export default function DribblingCoursePage() {
             <p className="mx-auto mt-6 max-w-2xl text-base text-bone/85 md:text-lg">
               The Strive Dribbling System is a 4-module online course that
               builds real ball mastery and 1v1 confidence in youth soccer
-              players ages 9-18 — in 30 minutes a day, from anywhere, for{" "}
+              players ages 9-18 - in 30 minutes a day, from anywhere, for{" "}
               <span className="text-bone">$97</span>.
             </p>
             <div className="mt-8 flex flex-col items-center gap-2">
@@ -122,7 +122,7 @@ export default function DribblingCoursePage() {
             </p>
             <p className="border-l-2 border-accent/60 pl-4 italic text-accent">
               Ball mastery is built through creative, pressure-simulated
-              repetition that teaches the body to respond automatically — so
+              repetition that teaches the body to respond automatically - so
               that when the game gets fast, the player gets calm.
             </p>
           </div>
@@ -154,7 +154,7 @@ export default function DribblingCoursePage() {
           </div>
           <p className="mt-8 text-base leading-relaxed text-bone/85 md:text-lg">
             The confidence is real. A kid who trusts their feet carries
-            themselves differently — on the pitch and off it.
+            themselves differently - on the pitch and off it.
           </p>
         </div>
       </section>
@@ -227,7 +227,7 @@ export default function DribblingCoursePage() {
                 "Module 4 · Creative Play Unlocked sessions",
                 "Lifetime access · train at your own pace",
                 "Built for ages 9-18, every level",
-                "Solo training — no special equipment, no team needed",
+                "Solo training - no special equipment, no team needed",
               ].map((item) => (
                 <li
                   key={item}
@@ -297,8 +297,8 @@ export default function DribblingCoursePage() {
             </div>
             <p className="text-base leading-relaxed text-bone/90 md:text-lg">
               Run the course for 14 days. If your player isn't visibly more
-              comfortable on the ball — calmer under pressure, sharper first
-              touch, real confidence — email me and you get every dollar back.
+              comfortable on the ball - calmer under pressure, sharper first
+              touch, real confidence - email me and you get every dollar back.
               No friction, no fine print. The risk is entirely on us.
             </p>
           </div>

@@ -37,7 +37,7 @@ const ICONS: Record<string, LucideIcon> = {
   Target,
 };
 
-// The player's home: one thing on screen — today's session. Everything
+// The player's home: one thing on screen - today's session. Everything
 // else earns its place below or lives behind a tab.
 export default async function DashboardPage() {
   const viewer = await getViewer();
@@ -75,7 +75,7 @@ export default async function DashboardPage() {
   const current = sessions.find((s) => s.list.some((h) => !h.completed));
   const weekDone = sessions.length > 0 && !current;
 
-  // What to say about next week — never a false "it's ready".
+  // What to say about next week - never a false "it's ready".
   const nextScheduled = plans.find(
     (p) =>
       p.week > player.current_week &&
@@ -84,7 +84,7 @@ export default async function DashboardPage() {
   );
   const nextWeekLine = nextScheduled
     ? `Week ${nextScheduled.week} unlocks ${fmtMonday(nextMondayNY())}.`
-    : `Your coach is building week ${player.current_week + 1} — it drops Monday.`;
+    : `Your coach is building week ${player.current_week + 1}. It drops Monday.`;
 
   const latestMessage = messages[0];
   const checkedInThisWeek = checkins.some(
@@ -95,7 +95,7 @@ export default async function DashboardPage() {
     <div className="space-y-5">
       {viewer.demo && <TourGuide page="home" />}
 
-      {/* Header — name + streak, nothing else */}
+      {/* Header - name + streak, nothing else */}
       <header className="flex items-end justify-between gap-4 animate-fade-up">
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">

@@ -42,7 +42,7 @@ export function EditableMemory({
         ) : null}
       </div>
       <p className="mb-3 text-xs text-white/40">
-        Your read on this player — how they respond, what to push, what to
+        Your read on this player: how they respond, what to push, what to
         avoid. Fed to the AI every time you build a week.
       </p>
       <textarea
@@ -53,7 +53,7 @@ export function EditableMemory({
           setSaved(false);
         }}
         onBlur={() => dirty && save()}
-        placeholder="e.g. Responds to challenges, not repetition. Tight hamstrings — keep plyos controlled. Weak-foot block is mental."
+        placeholder="e.g. Responds to challenges, not repetition. Tight hamstrings, keep plyos controlled. Weak-foot block is mental."
         className="w-full resize-y rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-sm leading-relaxed text-bone placeholder:text-white/25 focus:border-accent/40 focus:outline-none"
       />
       {dirty && (

@@ -14,8 +14,8 @@ import { DEMO_COACH, DEMO_PLAYERS, DEMO_PLAYER_ID } from "./demo";
 export const DEMO_COOKIE = "strive_demo_role";
 
 // Emails that should always be coaches. Set STRIVE_COACH_EMAILS in the
-// environment (comma-separated). This is how the owner — and any future
-// assistant coaches — get coach access without touching the database.
+// environment (comma-separated). This is how the owner - and any future
+// assistant coaches - get coach access without touching the database.
 const COACH_EMAILS = (process.env.STRIVE_COACH_EMAILS || "")
   .split(",")
   .map((s) => s.trim().toLowerCase())
@@ -79,7 +79,7 @@ export async function getViewer(): Promise<Viewer | null> {
 
       let role: Role = (profile?.role as Role) ?? "player";
 
-      // Owner bootstrap: an allowlisted email is always an ADMIN — the head
+      // Owner bootstrap: an allowlisted email is always an ADMIN - the head
       // coach who sees every player across all coaches. Self-heal the profile
       // row (via the service role) so RLS grants full access. Idempotent.
       if (role !== "admin" && isAllowlistedCoach(user.email)) {

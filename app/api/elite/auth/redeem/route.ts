@@ -94,7 +94,7 @@ export async function POST(req: Request) {
       parent_name: fullName,
       subscription_status: "active",
       current_week: 1,
-      today_focus: "Welcome to Strive Elite — your coach will set your first focus.",
+      today_focus: "Welcome to Strive Elite. Your coach will set your first focus.",
     })
     .select("id")
     .single();
@@ -105,7 +105,7 @@ export async function POST(req: Request) {
     .update({ used_by: userId, used_at: new Date().toISOString() })
     .eq("id", invite.id);
 
-  // 6) welcome the new member — in-app notification + GHL welcome
+  // 6) welcome the new member - in-app notification + GHL welcome
   //    email/SMS. Both best-effort; signup never fails because of them.
   if (playerRow?.id) {
     await admin
@@ -123,7 +123,7 @@ export async function POST(req: Request) {
     await sendPlayerEmail(playerRow.id, {
       event: "player_signed_up",
       subject: "Welcome to Strive Elite",
-      body: `${fullName} is officially in the Strive Elite program.\n\nNext step: open the app and complete the quick player profile — your coach uses it to build the first training week. Four sessions a week, every one starting with an explosive plyometric warm-up. Let's get to work.`,
+      body: `${fullName} is officially in the Strive Elite program.\n\nNext step: open the app and complete the quick player profile. Your coach uses it to build the first training week. Four sessions a week, every one starting with an explosive plyometric warm-up. Let's get to work.`,
     }).catch(() => undefined);
   }
 

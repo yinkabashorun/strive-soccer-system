@@ -8,7 +8,7 @@ import { createClient } from "@/lib/elite/supabase/client";
 import { enterDemoPlayer, enterDemoCoach } from "@/lib/elite/auth-actions";
 
 // Player-only signup gated by a single-use invite code. Coaches are
-// provisioned separately (seed script / admin) — there is deliberately no
+// provisioned separately (seed script / admin) - there is deliberately no
 // public path to a coach account. An invite LINK (/signup?code=…) prefills
 // the code so parents just fill in name/email/password.
 export function SignupForm({

@@ -126,7 +126,7 @@ export function OnboardingForm({ defaultName }: { defaultName: string }) {
       {/* Self assessment */}
       <Section title="Rate yourself" step="3">
         <p className="-mt-2 mb-4 text-sm text-white/45">
-          Be honest — this is your starting line. Your coach will re-rate you as
+          Be honest. This is your starting line. Your coach will re-rate you as
           you grow, and you&apos;ll watch these climb.
         </p>
         <div className="space-y-4">

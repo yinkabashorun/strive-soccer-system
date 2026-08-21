@@ -34,8 +34,8 @@ import type {
 // configured, otherwise returns the demo dataset. The UI is identical in
 // both modes so the deployed app is fully tourable before wiring Supabase.
 
-// Demo-tour ids ("p-marcus"…) ALWAYS serve demo data — even in production
-// with Supabase configured — so the login-page "tour the app" experience
+// Demo-tour ids ("p-marcus"…) ALWAYS serve demo data - even in production
+// with Supabase configured - so the login-page "tour the app" experience
 // works everywhere and never touches real rows.
 const DEMO_IDS = new Set(DEMO_PLAYERS.map((p) => p.id));
 const isDemo = (id: string) => DEMO_IDS.has(id);
@@ -246,7 +246,7 @@ function shiftDay(day: string, delta: number): string {
   return d.toISOString().slice(0, 10);
 }
 
-// Pure TS equivalent of the elite_player_summary RPC — used in demo mode and
+// Pure TS equivalent of the elite_player_summary RPC - used in demo mode and
 // as a fallback before 009_player_loop.sql is applied.
 export function computeSummary(hw: Homework[]): PlayerSummary {
   const completed = hw.filter((h) => h.completed && h.completed_at);
@@ -333,7 +333,7 @@ export async function getNotifications(
         player_id: playerId,
         kind: "new_week",
         title: "Week 7 is ready",
-        body: "Own your 1v1 — sell the fake, explode past.",
+        body: "Own your 1v1. Sell the fake, explode past.",
         read: false,
         created_at: new Date().toISOString(),
       },

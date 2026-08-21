@@ -12,8 +12,8 @@ export const metadata: Metadata = {
   },
 };
 
-// Public funnel layout — no sidebar, no topbar, no Strive OS chrome.
-// This is what strangers see — the page that converts clicks into $97 sales.
+// Public funnel layout - no sidebar, no topbar, no Strive OS chrome.
+// This is what strangers see - the page that converts clicks into $97 sales.
 export default function PublicLayout({
   children,
 }: {

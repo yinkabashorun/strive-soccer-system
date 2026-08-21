@@ -111,7 +111,7 @@ export default async function PlayerProfile({
             <div className="mt-1.5 text-sm text-white/50">
               {player.age ? `Age ${player.age} · ` : ""}
               {player.position || "Player"} · Week {player.current_week} · Last
-              active {summary.last_active ? relativeDay(summary.last_active) : "—"}
+              active {summary.last_active ? relativeDay(summary.last_active) : "-"}
             </div>
           </div>
           <span
@@ -129,7 +129,7 @@ export default async function PlayerProfile({
         </div>
       </div>
 
-      {/* Snapshot — real numbers once training exists; a clear next step
+      {/* Snapshot - real numbers once training exists; a clear next step
           before then, not a row of zeros. */}
       {homework.length > 0 ? (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -157,7 +157,7 @@ export default async function PlayerProfile({
         </div>
       ) : (
         <div className="rounded-3xl border border-accent/20 bg-accent/[0.05] p-5 text-sm text-white/70">
-          No training assigned yet — type your session notes below and build
+          No training assigned yet. Type your session notes below and build
           their first week.
         </div>
       )}
@@ -165,14 +165,14 @@ export default async function PlayerProfile({
       <div className="grid gap-6 lg:grid-cols-5">
         {/* Main column */}
         <div className="space-y-6 lg:col-span-3">
-          {/* This week — are they doing the work */}
+          {/* This week - are they doing the work */}
           <section>
             <h2 className="mb-3 flex items-center gap-2 font-display text-xl font-bold uppercase tracking-tight">
               <CalendarClock className="h-4 w-4 text-accent" /> This week
             </h2>
             {scheduled && (
               <div className="mb-3 rounded-2xl border border-accent/25 bg-accent/[0.05] px-4 py-3 text-sm text-white/75">
-                Week {scheduled.week} is approved and scheduled — unlocks{" "}
+                Week {scheduled.week} is approved and scheduled. Unlocks{" "}
                 {fmtMonday(nextMondayNY())} morning. Re-publish below anytime
                 before then to change it.
               </div>
@@ -183,7 +183,7 @@ export default async function PlayerProfile({
             />
           </section>
 
-          {/* Weekly check-ins — the player's own words */}
+          {/* Weekly check-ins - the player's own words */}
           <section>
             <h2 className="mb-3 flex items-center gap-2 font-display text-xl font-bold uppercase tracking-tight">
               <MessageSquare className="h-4 w-4 text-accent" /> Weekly check-ins
@@ -199,7 +199,7 @@ export default async function PlayerProfile({
             <CoachFilmPanel playerId={player.id} films={films} />
           </section>
 
-          {/* Upcoming games — pull up to NoVA ones */}
+          {/* Upcoming games - pull up to NoVA ones */}
           <section>
             <h2 className="mb-3 flex items-center gap-2 font-display text-xl font-bold uppercase tracking-tight">
               <CalendarClock className="h-4 w-4 text-accent" /> Upcoming games
@@ -248,7 +248,7 @@ export default async function PlayerProfile({
             initial={player.subscription_status}
           />
 
-          {/* AI memory note — steers every generated week */}
+          {/* AI memory note - steers every generated week */}
           <EditableMemory
             playerId={player.id}
             initial={player.coach_memory ?? ""}
@@ -268,7 +268,7 @@ export default async function PlayerProfile({
               <Target className="h-3.5 w-3.5" /> This week&apos;s focus
             </div>
             <p className="mt-1.5 font-medium text-bone">
-              {player.today_focus || "Not set yet — build a plan below."}
+              {player.today_focus || "Not set yet. Build a plan below."}
             </p>
           </div>
 
@@ -292,7 +292,7 @@ export default async function PlayerProfile({
             initial={player.weaknesses}
           />
 
-          {/* Message player — full thread */}
+          {/* Message player - full thread */}
           <div className="elite-card p-5">
             <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
               <MessageSquare className="h-3.5 w-3.5" /> Message{" "}
@@ -337,7 +337,7 @@ export default async function PlayerProfile({
               <CalendarClock className="h-3.5 w-3.5" /> 1-on-1 sessions
             </div>
             <div className="mt-3 space-y-2 text-sm">
-              {/* Only real dates — no "to be scheduled" filler rows. */}
+              {/* Only real dates - no "to be scheduled" filler rows. */}
               {player.next_session_at && (
                 <Row label="Next" value={formatSessionDate(player.next_session_at)} />
               )}

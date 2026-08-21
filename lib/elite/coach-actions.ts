@@ -158,7 +158,7 @@ export async function duplicateWeek(input: {
 }
 
 // Coach marks (or unmarks) attendance for a player's game. Marking it
-// tells the player Coach is coming — the premium moment.
+// tells the player Coach is coming - the premium moment.
 export async function setGameAttendance(
   gameId: string,
   playerId: string,
@@ -191,7 +191,7 @@ export async function setGameAttendance(
   return { ok: true };
 }
 
-// Coach reviews a monthly film submission — feedback lands in the app and
+// Coach reviews a monthly film submission - feedback lands in the app and
 // pings the player/parent.
 // Trim, drop empties, and cap sizes on a client-composed review so junk
 // input can't bloat the row or the player's screen.
@@ -215,7 +215,7 @@ function cleanReview(raw: FilmReview): FilmReview {
   };
 }
 
-// Flatten a structured review into plain text — for the email and for the
+// Flatten a structured review into plain text - for the email and for the
 // pre-017 fallback where the review column doesn't exist yet.
 function flattenReview(r: FilmReview): string {
   const parts: string[] = [r.summary];
@@ -223,7 +223,7 @@ function flattenReview(r: FilmReview): string {
     parts.push(
       "Key moments:\n" +
         r.moments
-          .map((m) => `${m.time ? m.time + " — " : ""}${m.note}`)
+          .map((m) => `${m.time ? m.time + " - " : ""}${m.note}`)
           .join("\n")
     );
   if (r.strengths.length)
@@ -255,7 +255,7 @@ export async function sendFilmReview(
       .update({ review, coach_notes: review.summary, status: "Reviewed" })
       .eq("id", filmId);
     if (error) {
-      // review column not migrated yet (pre-017) — store the full breakdown
+      // review column not migrated yet (pre-017) - store the full breakdown
       // as plain text so nothing is lost.
       await supabase
         .from("elite_film_uploads")
@@ -284,7 +284,7 @@ export async function sendFilmReview(
 // Timing model (America/New_York): a player's FIRST week goes live the
 // moment it's published (week1_monday = this NY week's Monday), so
 // onboarding never dead-ends. Every later plan targets the NEXT week and
-// unlocks automatically Monday morning — publishing twice in one evening
+// unlocks automatically Monday morning - publishing twice in one evening
 // can never fast-forward anyone again.
 export async function applyGeneratedPlan(
   playerId: string,
@@ -336,7 +336,7 @@ export async function applyGeneratedPlan(
     raw_notes: rawNotes,
   });
 
-  // 2) replace this week's homework — four sessions, each starting with a
+  // 2) replace this week's homework - four sessions, each starting with a
   //    plyometric warm-up (already baked into plan.sessions).
   await supabase.from("elite_homework").delete().eq("player_id", playerId).eq("week", week);
   const rows = plan.sessions.flatMap((s, si) =>
@@ -355,7 +355,7 @@ export async function applyGeneratedPlan(
   if (rows.length) {
     const { error: hwErr } = await supabase.from("elite_homework").insert(rows);
     if (hwErr) {
-      // 010 not applied yet (no `session` column) — retry without it so
+      // 010 not applied yet (no `session` column) - retry without it so
       // plan-building still works; drills collapse into one session until
       // the migration lands.
       await supabase
@@ -387,7 +387,7 @@ export async function applyGeneratedPlan(
   }
 
   // 3b) append to progress history so long-term progression is real +
-  //     chartable (best-effort — ignored if 011 isn't applied yet).
+  //     chartable (best-effort - ignored if 011 isn't applied yet).
   if (plan.progress_updates.length) {
     await supabase
       .from("elite_progress_history")
@@ -422,7 +422,7 @@ export async function applyGeneratedPlan(
     notified: goesLiveNow, // live-now weeks are notified inline below
   });
   if (planErr) {
-    // pre-014 database — fall back to the legacy shape
+    // pre-014 database - fall back to the legacy shape
     await supabase.from("elite_weekly_plans").insert({
       player_id: playerId,
       week,
@@ -467,11 +467,11 @@ export async function applyGeneratedPlan(
     });
     await sendPlayerEmail(playerId, {
       event: "new_week",
-      subject: first ? `${first} — your first week is live` : "Your first week is live",
+      subject: first ? `${first}, your first week is live` : "Your first week is live",
       body: `Your Strive Elite training starts now.\n\nThis week's focus: ${plan.weekly_focus}\n\nFour sessions, each opening with your plyometric warm-up. Open the app and start Session 1.`,
     }).catch(() => undefined);
   }
-  // Scheduled weeks stay silent until Monday morning — unlockDueWeeks()
+  // Scheduled weeks stay silent until Monday morning - unlockDueWeeks()
   // flips them live and notifies then.
 
   revalidatePath(`/coach/players/${playerId}`);

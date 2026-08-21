@@ -6,7 +6,7 @@ import { KeyRound, Loader2, MailCheck } from "lucide-react";
 import { createClient } from "@/lib/elite/supabase/client";
 
 // Self-serve password reset. Sends a recovery email whose link lands on
-// /auth/callback?next=/reset — the callback exchanges the code for a
+// /auth/callback?next=/reset - the callback exchanges the code for a
 // session, then /reset lets the user set a new password.
 export function ForgotForm({ configured }: { configured: boolean }) {
   const [email, setEmail] = useState("");

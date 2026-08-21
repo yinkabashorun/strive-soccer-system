@@ -1,5 +1,5 @@
 // =====================================================================
-// Strive Soccer FC — training methodology (single source of truth)
+// Strive Soccer FC - training methodology (single source of truth)
 // =====================================================================
 // This is THE canonical description of how Strive trains. The AI plan
 // generator builds every weekly plan from it, so editing this file changes
@@ -12,7 +12,7 @@ import { SESSIONS_PER_WEEK } from "./training";
 
 // The non-negotiable structure of a Strive training week.
 export const METHOD_STRUCTURE = {
-  sessionsPerWeek: SESSIONS_PER_WEEK, // 4 — the player trains four times
+  sessionsPerWeek: SESSIONS_PER_WEEK, // 4 - the player trains four times
   minutesPerSession: 40, // ~40 minutes each
   warmup: "plyometrics", // every session opens with a room plyo warm-up
   warmupMinutes: 10,
@@ -20,18 +20,18 @@ export const METHOD_STRUCTURE = {
   setting: "at-home / room-and-yard friendly",
   // The ONLY equipment we assume: a ball and a small space. Anything else
   // (wall, goal, rebounder, partner, ladder) must come from the coach's
-  // notes or the player's profile — never assumed.
+  // notes or the player's profile - never assumed.
   assumedEquipment: "a ball and a small room/yard space",
 };
 
-// The Strive philosophy — the principles behind every plan.
+// The Strive philosophy - the principles behind every plan.
 export const METHOD_PRINCIPLES: string[] = [
   "Creative, intelligent football over robotic drills.",
-  "Touches before tricks — master the basics or get exposed.",
+  "Touches before tricks: master the basics or get exposed.",
   "The fastest player is the one who decides fastest, not who runs most.",
   "Composure is taught. So is panic. We teach composure.",
-  "Scan before you receive — see the picture before the ball arrives.",
-  "Every session starts with explosive plyometrics in the room — this is what turns training into results.",
+  "Scan before you receive: see the picture before the ball arrives.",
+  "Every session starts with explosive plyometrics in the room. This is what turns training into results.",
   "Five focused minutes a day compounds. Consistency beats intensity.",
   "Fewer, deeper reps done with intent beat a long list rushed.",
 ];
@@ -60,26 +60,26 @@ export const METHOD_PILLARS: PillarGuide[] = [
     drills: [
       "Weak-foot-only dribble patterns through shoes/cones",
       "Weak-foot toe-taps and push-pulls",
-      "Weak-foot rebound passes — weak side only off a wall (or couch cushion), cushion the return",
-      "Weak-foot strikes at a target (a shoe, a bag — anything to hit)",
+      "Weak-foot rebound passes: weak side only off a wall (or couch cushion), cushion the return",
+      "Weak-foot strikes at a target (a shoe, a bag, anything to hit)",
     ],
   },
   {
     pillar: "Passing",
-    lens: "Weight, accuracy, and a scan before every pass. The ball must come back — a wall (or a cushion rebounder) makes solo passing real.",
+    lens: "Weight, accuracy, and a scan before every pass. The ball must come back: a wall (or a cushion rebounder) makes solo passing real.",
     drills: [
-      "Rebound passing — use a wall if you have one, otherwise lean a couch cushion against a chair; firm two-touch passes off the return, both feet",
-      "Rebound rhythm — one-touch returns off the wall/cushion, stay on your toes, scan between reps",
-      "Weighted rolls — inside-of-foot passes that stop dead on a towel/marker",
+      "Rebound passing: use a wall if you have one, otherwise lean a couch cushion against a chair; firm two-touch passes off the return, both feet",
+      "Rebound rhythm: one-touch returns off the wall/cushion, stay on your toes, scan between reps",
+      "Weighted rolls: inside-of-foot passes that stop dead on a towel/marker",
     ],
   },
   {
     pillar: "Scanning",
-    lens: "Two shoulder checks before every touch — make it automatic.",
+    lens: "Two shoulder checks before every touch. Make it automatic.",
     drills: [
       "Shoulder-check before every touch in a dribble pattern",
       "Number-call scanning (a parent holds up fingers to read)",
-      "Shadow rondo — receive on the half-turn away from pressure",
+      "Shadow rondo: receive on the half-turn away from pressure",
     ],
   },
   {
@@ -87,7 +87,7 @@ export const METHOD_PILLARS: PillarGuide[] = [
     lens: "Right choice, right time. Read the cue, then act.",
     drills: [
       "Two-gate finish: pick the open gate on a cue",
-      "1v1 shadow — commit the defender, then decide",
+      "1v1 shadow: commit the defender, then decide",
       "Clip breakdown: study a pro, note 3 decisions, copy them",
     ],
   },
@@ -95,8 +95,8 @@ export const METHOD_PILLARS: PillarGuide[] = [
     pillar: "Confidence",
     lens: "Bravery on the ball is trained. Reps remove fear.",
     drills: [
-      "Take-on reps — beat an imaginary defender, no hesitation",
-      "Juggling records — beat yesterday's number",
+      "Take-on reps: beat an imaginary defender, no hesitation",
+      "Juggling records: beat yesterday's number",
       "Mirror skill moves until they're automatic",
     ],
   },
@@ -105,7 +105,7 @@ export const METHOD_PILLARS: PillarGuide[] = [
     lens: "Explosive first steps and quick feet, not just top speed.",
     drills: [
       "Quick-feet ladder/line drills for 20 seconds on, 40 off",
-      "Acceleration starts — 5-yard explosions from a still position",
+      "Acceleration starts: 5-yard explosions from a still position",
       "Reaction starts off a visual cue",
     ],
   },
@@ -127,15 +127,15 @@ ${principles}
 Weekly structure:
 - ${METHOD_STRUCTURE.sessionsPerWeek} sessions that week, about ${METHOD_STRUCTURE.minutesPerSession} minutes each.
 - Every session opens with a ${METHOD_STRUCTURE.warmupMinutes}-minute room plyometric warm-up (added automatically).
-- ${METHOD_STRUCTURE.skillDrillsPerSession} focused skill drills per session — fewer, deeper reps, ${METHOD_STRUCTURE.setting}.
+- ${METHOD_STRUCTURE.skillDrillsPerSession} focused skill drills per session. Fewer, deeper reps, ${METHOD_STRUCTURE.setting}.
 
 Equipment rule (strict): assume the player has ONLY ${METHOD_STRUCTURE.assumedEquipment}.
 Rebound drills are always allowed WITH the built-in fallback phrased in the
-drill itself: "use a wall if you have one — otherwise lean a couch cushion
+drill itself: "use a wall if you have one, otherwise lean a couch cushion
 against a chair." Never prescribe a goal, net, ladder, rebounder machine, or
 a partner unless the coach's notes or the player's profile explicitly mention
 them. If the coach mentions equipment (e.g. "200 wall passes"), use exactly
-that — nothing more. Shoes or household objects as markers/targets are
+that, nothing more. Shoes or household objects as markers/targets are
 always fine.
 
 The seven development pillars and how Strive coaches them (draw drills from here, adapted to the player's focus and level):

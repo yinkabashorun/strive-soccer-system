@@ -22,7 +22,7 @@ function isPlyo(title: string): boolean {
 // The player's weekly loop: the current week broken into its four sessions,
 // each starting with a plyometric warm-up (badged). A red "Next up" marks
 // the first incomplete drill. Earlier weeks collapse. When the whole week is
-// done, the player is told the next week drops at the weekend — no false
+// done, the player is told the next week drops at the weekend - no false
 // "new week ready" until the coach actually builds it.
 export function WeekList({
   items,
@@ -61,7 +61,7 @@ export function WeekList({
   if (!items.length) {
     return (
       <div className="elite-card p-8 text-center text-white/45">
-        No drills assigned yet. Your coach builds your week — it lands here soon.
+        No drills assigned yet. Your coach builds your week. It lands here soon.
       </div>
     );
   }
@@ -118,7 +118,7 @@ export function WeekList({
               Week complete
             </div>
             <p className="mt-1 text-sm text-white/60">
-              All four sessions done — real work. Rest and recover; your coach
+              All four sessions done. Real work. Rest and recover; your coach
               drops next week&apos;s plan over the weekend.
             </p>
           </div>

@@ -48,7 +48,7 @@ export function GameSchedule({ games }: { games: Game[] }) {
       ))}
       {added && (
         <p className="text-sm text-white/50">
-          Game added — Coach has been notified.
+          Game added. Coach has been notified.
         </p>
       )}
 
@@ -103,7 +103,7 @@ export function GameSchedule({ games }: { games: Game[] }) {
 
       {upcoming.length === 0 && !open && !added && (
         <p className="text-sm text-white/40">
-          Drop your game schedule — if it&apos;s in Northern Virginia, Coach
+          Drop your game schedule. If it&apos;s in Northern Virginia, Coach
           might pull up.
         </p>
       )}

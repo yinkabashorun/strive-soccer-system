@@ -6,8 +6,8 @@ import type { Homework } from "@/lib/elite/types";
 import { toggleHomework } from "@/lib/elite/player-actions";
 import { cn } from "@/lib/utils";
 
-// The heart of the player experience: ONE session on screen — the plyo
-// warm-up plus two drills — with big satisfying tap-to-complete targets
+// The heart of the player experience: ONE session on screen - the plyo
+// warm-up plus two drills - with big satisfying tap-to-complete targets
 // and a proper completion moment when the session is done.
 export function TodaySession({
   session,
@@ -148,7 +148,7 @@ export function TodaySession({
   );
 }
 
-// Shown when all four sessions are done: the week is conquered — stats,
+// Shown when all four sessions are done: the week is conquered - stats,
 // a bonus option, and when the next week drops. No false "new week" alert.
 export function VictoryLap({
   week,
@@ -179,8 +179,8 @@ export function VictoryLap({
           <Stat label="Streak" value={`${streak}d`} />
         </div>
         <p className="mt-4 text-sm leading-relaxed text-white/65">
-          Victory lap: rerun your favorite session or get free plyo reps in —
-          it keeps the streak alive.
+          Victory lap: rerun your favorite session or get free plyo reps in.
+          It keeps the streak alive.
         </p>
         <p className="mt-2 text-sm font-medium text-white/80">{nextWeekLine}</p>
       </div>

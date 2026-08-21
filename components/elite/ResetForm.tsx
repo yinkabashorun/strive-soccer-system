@@ -85,7 +85,7 @@ export function ResetForm() {
         Set a new password
       </h1>
       <p className="mt-1.5 text-sm text-white/50">
-        You&apos;re verified — choose a new password for your account.
+        You&apos;re verified. Choose a new password for your account.
       </p>
 
       <form onSubmit={onSubmit} className="mt-6 space-y-4">

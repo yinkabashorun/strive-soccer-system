@@ -60,7 +60,7 @@ Return ONLY valid JSON, no prose, matching this shape:
 {
   "weekly_focus": "one sentence, the single theme for the week",
   "sessions": [
-    { "title": "Session 1 — short label",
+    { "title": "Session 1: short label",
       "drills": [ { "title": "...", "exercise": "...", "reps": "...", "minutes": 10, "notes": "..." } ] }
   ],
   "parent_update": "2-4 sentences for the parent",
@@ -69,15 +69,21 @@ Return ONLY valid JSON, no prose, matching this shape:
   "next_week_objectives": [ "objective 1", "objective 2", "objective 3" ]
 }
 Rules:
-- EXACTLY 4 sessions. EXACTLY 3 skill drills each (no warm-ups — added
+- EXACTLY 4 sessions. EXACTLY 3 skill drills each (no warm-ups; added
   automatically). Each session ~40 minutes total including the ~10-min warm-up.
 - minutes: an integer per drill (8-15), so the three drills sum to ~30 minutes.
 - progress_updates: only pillars the notes actually touched, value 0-100.
-- next_week_objectives: 2-4 items.`;
+- next_week_objectives: 2-4 items.
+- Write like a real coach texting his player: plain punctuation only. NEVER
+  use an em dash (\u2014) anywhere. Use periods, commas, or colons instead.`;
 
 function extractJSON<T>(raw: string): T | null {
   const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
-  const body = (fenced ? fenced[1] : raw).trim();
+  // Belt-and-suspenders: the prompt bans em dashes, but scrub any that slip
+  // through so they never reach a player's screen.
+  const body = (fenced ? fenced[1] : raw)
+    .replace(/\s*—\s*/g, " - ")
+    .trim();
   try {
     return JSON.parse(body) as T;
   } catch {
@@ -101,7 +107,7 @@ function clampMin(v: unknown): number {
 }
 
 // Normalizes to EXACTLY four sessions and prepends the plyometric warm-up to
-// each one — the plyo-first rule holds no matter what the AI returned.
+// each one - the plyo-first rule holds no matter what the AI returned.
 function buildSessions(
   raw: GeneratedSession[] | undefined,
   focus: string
@@ -139,7 +145,7 @@ function buildSessions(
       (t: string) =>
         `Repeat at game speed, tighter space, quicker decisions: ${t.toLowerCase()}`,
       (t: string) =>
-        `Final block — slow it down, perfect technique, max focus: ${t.toLowerCase()}`,
+        `Final block. Slow it down, perfect technique, max focus: ${t.toLowerCase()}`,
     ];
     let padIdx = 0;
     while (skills.length < 3 && padIdx < PADS.length) {
@@ -172,7 +178,7 @@ function sanitize(plan: Partial<GeneratedPlan>, player?: Player): GeneratedPlan 
       `${player?.full_name ?? "Your player"} put in strong work this session and has a clear four-session plan for the week ahead.`,
     player_summary:
       plan.player_summary?.trim() ||
-      "Great session. Hit all four sessions this week — start each one with your plyometrics — and you'll feel the difference.",
+      "Great session. Hit all four sessions this week, start each one with your plyometrics, and you'll feel the difference.",
     progress_updates: (plan.progress_updates ?? [])
       .filter((p) => p && validMetrics.has(p.metric))
       .map((p) => ({
@@ -256,7 +262,7 @@ function fallbackPlan(notes: string, player?: Player): GeneratedPlan {
     {
       weekly_focus: focus,
       sessions: buckets,
-      parent_update: `${player?.full_name ?? "Your player"} had a productive session focused on ${focus.toLowerCase()}. We've built a four-session week — each session opens with a plyometric warm-up — and will track the progress closely.`,
+      parent_update: `${player?.full_name ?? "Your player"} had a productive session focused on ${focus.toLowerCase()}. We've built a four-session week. Each session opens with a plyometric warm-up - and will track the progress closely.`,
       player_summary: `Good work this session. Get all four sessions in this week, and always start with your plyometrics.`,
       progress_updates: touched,
       next_week_objectives: [

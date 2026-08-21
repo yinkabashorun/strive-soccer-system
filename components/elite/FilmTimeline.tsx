@@ -98,10 +98,7 @@ function MonthCard({
     return (
       <section className="rounded-3xl border border-white/6 bg-white/[0.01] p-5 opacity-60">
         {label}
-        <p className="mt-2 text-sm text-white/35">
-          Your month {month} film review opens when you get there. Keep
-          stacking weeks.
-        </p>
+        <p className="mt-2 text-sm text-white/35">Keep stacking weeks.</p>
       </section>
     );
   }

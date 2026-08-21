@@ -176,9 +176,15 @@ export async function addGame(input: {
 
 // Mark a single notification read.
 export async function markNotificationRead(id: string) {
+  const viewer = await getViewer();
+  if (!viewer?.playerId) return { ok: false };
   const supabase = createClient();
   if (supabase) {
-    await supabase.from("elite_notifications").update({ read: true }).eq("id", id);
+    await supabase
+      .from("elite_notifications")
+      .update({ read: true })
+      .eq("id", id)
+      .eq("player_id", viewer.playerId);
     revalidatePath("/dashboard");
   }
   return { ok: true };

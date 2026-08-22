@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient, createServiceClient } from "./supabase/server";
 import { getViewer } from "./session";
+import { maybeAwardAchievements } from "./achievements";
 import { sendCoachEmail } from "./email";
 import { monthFromWeek } from "./time";
 import type { ProgressMetric } from "./types";
@@ -72,6 +73,12 @@ export async function toggleHomework(id: string, completed: boolean) {
         completed_at: completed ? new Date().toISOString() : null,
       })
       .eq("id", id);
+    if (completed) {
+      const viewer = await getViewer();
+      if (viewer?.playerId) {
+        await maybeAwardAchievements(viewer.playerId).catch(() => undefined);
+      }
+    }
     revalidatePath("/homework");
     revalidatePath("/dashboard");
   }

@@ -38,7 +38,7 @@ import type {
 // with Supabase configured - so the login-page "tour the app" experience
 // works everywhere and never touches real rows.
 const DEMO_IDS = new Set(DEMO_PLAYERS.map((p) => p.id));
-const isDemo = (id: string) => DEMO_IDS.has(id);
+export const isDemo = (id: string) => DEMO_IDS.has(id);
 
 export async function getPlayers(): Promise<Player[]> {
   const supabase = createClient();

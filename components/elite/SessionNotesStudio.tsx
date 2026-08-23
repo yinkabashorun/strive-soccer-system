@@ -5,6 +5,7 @@ import {
   Brain,
   Check,
   CheckCircle2,
+  Copy,
   Loader2,
   Save,
   Sparkles,
@@ -27,6 +28,7 @@ export function SessionNotesStudio({ playerId }: { playerId: string }) {
   const [notes, setNotes] = useState("");
   const [plan, setPlan] = useState<GeneratedPlan | null>(null);
   const [source, setSource] = useState<"ai" | "fallback" | null>(null);
+  const [parentCopied, setParentCopied] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -357,11 +359,31 @@ export function SessionNotesStudio({ playerId }: { playerId: string }) {
             </Block>
           )}
 
-          {/* Parent update */}
+          {/* Parent update - written to be copy-pasted into a text */}
           <Block icon={Users} title="Parent update">
             <p className="text-sm leading-relaxed text-white/70">
               {plan.parent_update}
             </p>
+            <button
+              onClick={() => {
+                navigator.clipboard?.writeText(plan.parent_update).then(() => {
+                  setParentCopied(true);
+                  setTimeout(() => setParentCopied(false), 2500);
+                });
+              }}
+              className="mt-2.5 flex items-center gap-1.5 text-xs font-semibold text-accent transition-colors hover:text-bone"
+            >
+              {parentCopied ? (
+                <>
+                  <Check className="h-3.5 w-3.5" /> Copied. Paste it into your
+                  text to the parent
+                </>
+              ) : (
+                <>
+                  <Copy className="h-3.5 w-3.5" /> Copy to send to the parent
+                </>
+              )}
+            </button>
           </Block>
 
           {/* Player summary */}

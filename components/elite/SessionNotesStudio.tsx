@@ -193,6 +193,22 @@ export function SessionNotesStudio({ playerId }: { playerId: string }) {
             )}
           </div>
 
+          {/* Loud warning when the AI didn't run: the template echoes the
+              coach's raw notes verbatim, which the player would see. */}
+          {source === "fallback" && !saved && (
+            <div className="rounded-2xl border border-red-500/35 bg-red-500/[0.07] p-4 text-sm">
+              <p className="font-semibold text-red-300">
+                Strive AI didn&apos;t run. This is a basic template, not a real plan.
+              </p>
+              <p className="mt-1 leading-relaxed text-white/60">
+                Your notes were copied in word for word and the player would
+                see them exactly as written. Check that ANTHROPIC_API_KEY is
+                set in Vercel, then generate again. Only publish this if you
+                rewrite the focus and drills yourself first.
+              </p>
+            </div>
+          )}
+
           {/* Weekly focus */}
           <Block icon={Target} title="Weekly focus">
             <p className="text-lg font-medium text-bone">{plan.weekly_focus}</p>

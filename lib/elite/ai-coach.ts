@@ -14,7 +14,7 @@ import {
   type Player,
 } from "./types";
 import { SESSIONS_PER_WEEK, plyoForSession } from "./training";
-import { methodologyContext } from "./methodology";
+import { METHOD_PILLARS, methodologyContext } from "./methodology";
 
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-4-8";
 
@@ -196,79 +196,68 @@ function titleCase(s: string): string {
   return t ? t[0].toUpperCase() + t.slice(1) : t;
 }
 
-// Deterministic fallback so the feature works with no API key: parse skill
-// drills from the notes and spread them across four sessions.
+// Deterministic fallback when the AI can't run. HARD RULE: nothing the
+// coach typed may appear in any player-visible field — the notes are used
+// ONLY to pick which pillars to train. Drills come verbatim from the
+// Strive methodology library, so the week is generic but always real.
 function fallbackPlan(notes: string, player?: Player): GeneratedPlan {
-  const hwSplit = notes.split(/homework\s*:/i);
-  const coachingText = hwSplit[0];
-  const homeworkText = hwSplit.slice(1).join("\n");
+  const haystack = `${notes}\n${(player?.weaknesses ?? []).join("\n")}`.toLowerCase();
+  const PILLAR_HINTS: [RegExp, (typeof PROGRESS_METRICS)[number]][] = [
+    [/touch|control|mastery|dribbl/, "Ball Mastery"],
+    [/scan|head up|shoulder|awareness/, "Scanning"],
+    [/weak foot|left foot|right foot|both feet/, "Weak Foot"],
+    [/pass/, "Passing"],
+    [/decision|choice|pressure|composure/, "Decision Making"],
+    [/confiden|brave|fear|1v1|take.?on/, "Confidence"],
+    [/speed|quick|fast|explos|strong|stab|agil/, "Speed"],
+  ];
+  const picked: (typeof PROGRESS_METRICS)[number][] = [];
+  for (const [re, pillar] of PILLAR_HINTS) {
+    if (re.test(haystack) && !picked.includes(pillar)) picked.push(pillar);
+  }
+  for (const fill of [
+    "Ball Mastery",
+    "Scanning",
+    "Decision Making",
+    "Confidence",
+  ] as const) {
+    if (picked.length >= SESSIONS_PER_WEEK) break;
+    if (!picked.includes(fill)) picked.push(fill);
+  }
+  const pillars = picked.slice(0, SESSIONS_PER_WEEK);
 
-  const sentences = coachingText
-    .split(/\n|(?<=[.!?])\s+/)
-    .map((l) => l.trim())
-    .filter(Boolean);
-
-  const rawHwItems = (homeworkText || coachingText)
-    .split(/\n|,(?![^(]*\))/)
-    .map((l) => l.replace(/^[-*•\d.\s]+/, "").trim())
-    .filter((l) => l.length > 2);
-
-  const skillDrills = (
-    homeworkText
-      ? rawHwItems
-      : rawHwItems.filter((l) =>
-          /\b(\d+|watch|practice|work on|drill|reps|passes|finishes|touches|study)\b/i.test(
-            l
-          )
-        )
-  )
-    .slice(0, 8)
-    .map((l, i) => {
-      const repMatch = l.match(/\b\d+[\s\w]*/);
-      const title = titleCase(
-        l.replace(/\b\d+[\s\w]*(passes|reps|finishes|touches|strikes)?/i, "").trim()
-      );
+  // One pillar per session, three library drills each (cycling if short).
+  const sessions: GeneratedSession[] = pillars.map((pillar, i) => {
+    const guide = METHOD_PILLARS.find((g) => g.pillar === pillar);
+    const library = guide?.drills ?? [];
+    const drills = Array.from({ length: 3 }, (_, d) => {
+      const src = library[d % Math.max(1, library.length)] ?? "Focused reps, full intent";
+      const title = titleCase(src.split(/[,:(]/)[0]).slice(0, 52) || `${pillar} drill`;
       return {
-        title: title.slice(0, 52) || `Focus drill ${i + 1}`,
-        exercise: titleCase(l),
-        reps: repMatch ? repMatch[0].trim() : "10 min",
+        title,
+        exercise: src,
+        reps: "10 min",
         minutes: 10,
       };
     });
+    return { title: `${pillar} day`, drills };
+  });
 
-  const focus = titleCase(sentences[0] ?? "").slice(0, 120) ||
-    "This week's technical focus";
-
-  // spread the drills round-robin across four sessions
-  const buckets: GeneratedSession[] = Array.from(
-    { length: SESSIONS_PER_WEEK },
-    (_, i) => ({ title: `Session ${i + 1}`, drills: [] })
-  );
-  skillDrills.forEach((d, i) => buckets[i % SESSIONS_PER_WEEK].drills.push(d));
-
-  const touched: GeneratedPlan["progress_updates"] = [];
-  const lower = notes.toLowerCase();
-  const bump = (metric: (typeof PROGRESS_METRICS)[number], base: number) =>
-    touched.push({ metric, value: base });
-  if (/scan/.test(lower)) bump("Scanning", 70);
-  if (/weak foot|left foot|right foot/.test(lower)) bump("Weak Foot", 58);
-  if (/pass/.test(lower)) bump("Passing", 74);
-  if (/touch|control|mastery|dribbl/.test(lower)) bump("Ball Mastery", 78);
-  if (/decision|choice|pressure/.test(lower)) bump("Decision Making", 68);
-  if (/confiden|brave|fear/.test(lower)) bump("Confidence", 76);
-  if (/speed|quick|fast|explos/.test(lower)) bump("Speed", 72);
+  const names = pillars.map((p) => p.toLowerCase());
+  const focus = `Back to the pillars: ${names.join(", ")}`;
 
   return sanitize(
     {
       weekly_focus: focus,
-      sessions: buckets,
-      parent_update: `${player?.full_name ?? "Your player"} had a productive session focused on ${focus.toLowerCase()}. We've built a four-session week. Each session opens with a plyometric warm-up - and will track the progress closely.`,
-      player_summary: `Good work this session. Get all four sessions in this week, and always start with your plyometrics.`,
-      progress_updates: touched,
+      sessions,
+      parent_update: `${player?.full_name ?? "Your player"} has a full four-session week ready, built on the Strive pillars: ${names.join(", ")}. Every session opens with a plyometric warm-up.`,
+      player_summary:
+        "Four sessions this week. Start each one with your plyometrics and attack every rep.",
+      progress_updates: [],
       next_week_objectives: [
         "Complete all four sessions",
-        focus,
-        "Start every session with the plyometric warm-up",
+        `Sharpen ${names[0]}`,
+        "Start every session with the plyo warm-up",
       ],
     },
     player

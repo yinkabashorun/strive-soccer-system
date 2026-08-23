@@ -85,7 +85,9 @@ Rules:
   use an em dash (\u2014) anywhere. Use periods, commas, or colons instead.`;
 
 function extractJSON<T>(raw: string): T | null {
-  const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/);
+  // Tolerates markdown fences (including an unclosed one from a truncated
+  // response) and prose around the JSON; falls back to first-{ .. last-}.
+  const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)(?:```|$)/);
   // Belt-and-suspenders: the prompt bans em dashes, but scrub any that slip
   // through so they never reach a player's screen.
   const body = (fenced ? fenced[1] : raw)
@@ -283,43 +285,74 @@ export async function generatePlanFromNotes(
 ): Promise<{
   plan: GeneratedPlan;
   source: "ai" | "fallback";
-  reason?: string; // why the fallback ran, so the coach sees the real cause
+  reason?: string; // human-readable cause shown to the coach
+  reasonKind?: "no_key" | "parse" | "api_error"; // drives the banner's advice
 }> {
   const c = client();
   if (!c)
-    return { plan: fallbackPlan(notes, player), source: "fallback", reason: "no_key" };
+    return {
+      plan: fallbackPlan(notes, player),
+      source: "fallback",
+      reason: "no_key",
+      reasonKind: "no_key",
+    };
 
   try {
     const context = player
       ? `Player: ${player.full_name}, age ${player.age}, ${player.position}, level ${player.level}. Current goals: ${player.goals.join("; ") || "n/a"}. Known weaknesses: ${player.weaknesses.join("; ") || "n/a"}.`
       : "";
     const memoryBlock = memory?.trim() ? `\n\n${memory.trim()}` : "";
-    const res = await c.messages.create({
-      model: MODEL,
-      max_tokens: 2200,
-      system: SYSTEM,
-      messages: [
-        {
-          role: "user",
-          content: `${context}${memoryBlock}\n\nCoach's raw session notes:\n"""\n${notes}\n"""\n\nUsing everything you know about this player above, generate the four-session weekly plan JSON now. Plan around their history, follow-through, trends, and the coach's note.`,
-        },
-      ],
-    });
-    const text = res.content
-      .map((b) => (b.type === "text" ? b.text : ""))
-      .join("")
-      .trim();
-    const parsed = extractJSON<Partial<GeneratedPlan>>(text);
+    const userMsg = `${context}${memoryBlock}\n\nCoach's raw session notes:\n"""\n${notes}\n"""\n\nUsing everything you know about this player above, generate the four-session weekly plan JSON now. Plan around their history, follow-through, trends, and the coach's note.`;
+
+    // One attempt at a given output cap, with enough logging that a parse
+    // failure is diagnosable from Vercel logs instead of guessed at.
+    const attempt = async (maxTokens: number) => {
+      const res = await c.messages.create({
+        model: MODEL,
+        max_tokens: maxTokens,
+        system: SYSTEM,
+        messages: [{ role: "user", content: userMsg }],
+      });
+      const text = res.content
+        .map((b) => (b.type === "text" ? b.text : ""))
+        .join("")
+        .trim();
+      console.log(
+        `[strive-ai] model=${res.model} stop_reason=${res.stop_reason} max_tokens=${maxTokens} output_chars=${text.length}`
+      );
+      console.log(`[strive-ai] head: ${text.slice(0, 500)}`);
+      console.log(`[strive-ai] tail: ${text.slice(-500)}`);
+      return { stop: res.stop_reason, text };
+    };
+
+    let { stop, text } = await attempt(4096);
+    let parsed = extractJSON<Partial<GeneratedPlan>>(text);
+    if (!parsed || stop === "max_tokens") {
+      // Truncated or malformed: one retry with double the room.
+      console.log("[strive-ai] retrying: parse failed or hit max_tokens");
+      ({ stop, text } = await attempt(8192));
+      parsed = extractJSON<Partial<GeneratedPlan>>(text);
+    }
     if (!parsed)
       return {
         plan: fallbackPlan(notes, player),
         source: "fallback",
-        reason: "The AI responded but the plan could not be parsed. Generate again.",
+        reason:
+          stop === "max_tokens"
+            ? "The plan came back longer than the output limit twice and got cut off. Trim the notes a little and generate again."
+            : "The AI responded but the plan could not be read. Generate again; if it repeats, check the Vercel logs for [strive-ai] lines.",
+        reasonKind: "parse",
       };
     return { plan: sanitize(parsed, player), source: "ai" };
   } catch (err) {
     const msg =
       err instanceof Error ? err.message.slice(0, 200) : "unknown error";
-    return { plan: fallbackPlan(notes, player), source: "fallback", reason: msg };
+    console.log(`[strive-ai] api error: ${msg}`);
+    return {
+      plan: fallbackPlan(notes, player),
+      source: "fallback",
+      reason: msg,
+      reasonKind: "api_error",
+    };
   }
 }

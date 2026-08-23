@@ -5,7 +5,8 @@ import { generatePlanFromNotes } from "@/lib/elite/ai-coach";
 import { buildPlayerMemory } from "@/lib/elite/memory";
 
 export const runtime = "nodejs";
-export const maxDuration = 60;
+// Long enough for a full generation plus one parse-failure retry.
+export const maxDuration = 120;
 
 // POST { playerId, notes } -> structured GeneratedPlan. Coach-only.
 export async function POST(req: Request) {
@@ -41,6 +42,10 @@ export async function POST(req: Request) {
     }
   }
 
-  const { plan, source, reason } = await generatePlanFromNotes(notes, player, memory);
-  return NextResponse.json({ plan, source, reason });
+  const { plan, source, reason, reasonKind } = await generatePlanFromNotes(
+    notes,
+    player,
+    memory
+  );
+  return NextResponse.json({ plan, source, reason, reasonKind });
 }

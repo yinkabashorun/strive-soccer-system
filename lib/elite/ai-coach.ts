@@ -63,7 +63,7 @@ Return ONLY valid JSON, no prose, matching this shape:
     { "title": "Session 1: short label",
       "drills": [ { "title": "...", "exercise": "...", "reps": "...", "minutes": 10, "notes": "..." } ] }
   ],
-  "parent_update": "2-4 sentences for the parent",
+  "parent_update": "2-4 sentences the coach can copy and paste directly into a text message to the parent. First person, the coach's voice ('I saw', 'this week I have him working on'). Refer to the player by first name. No greeting, no sign-off, no app jargon. It must read like a coach texting a parent, not a system summary.",
   "player_summary": "2-3 sentences to the player, second person",
   "progress_updates": [ { "metric": "Scanning", "value": 72 } ],
   "next_week_objectives": [ "objective 1", "objective 2", "objective 3" ]
@@ -250,7 +250,7 @@ function fallbackPlan(notes: string, player?: Player): GeneratedPlan {
     {
       weekly_focus: focus,
       sessions,
-      parent_update: `${player?.full_name ?? "Your player"} has a full four-session week ready, built on the Strive pillars: ${names.join(", ")}. Every session opens with a plyometric warm-up.`,
+      parent_update: `I've built ${player?.full_name?.split(" ")[0] ?? "your player"}'s full training week: four at-home sessions built on ${names.join(", ")}, each opening with a plyometric warm-up. It's all in the app, and I'll be watching what gets completed.`,
       player_summary:
         "Four sessions this week. Start each one with your plyometrics and attack every rep.",
       progress_updates: [],

@@ -41,6 +41,6 @@ export async function POST(req: Request) {
     }
   }
 
-  const { plan, source } = await generatePlanFromNotes(notes, player, memory);
-  return NextResponse.json({ plan, source });
+  const { plan, source, reason } = await generatePlanFromNotes(notes, player, memory);
+  return NextResponse.json({ plan, source, reason });
 }

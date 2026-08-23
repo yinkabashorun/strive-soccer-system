@@ -121,19 +121,27 @@ function buildSessions(
     let skills = (s?.drills ?? [])
       .filter((d) => d && d.title)
       .slice(0, 3)
-      .map((d) => ({
-        title: String(d.title),
-        exercise: String(d.exercise ?? ""),
-        reps: String(d.reps ?? ""),
-        minutes: clampMin(d.minutes),
-        notes: d.notes ? String(d.notes) : undefined,
-      }));
+      .map((d) => {
+        const rawReps = String(d.reps ?? "").trim();
+        // The minutes chip already shows duration; a reps value that is
+        // just "10 min" would render the same number twice.
+        const reps = /^\d+\s*min(ute)?s?$/i.test(rawReps)
+          ? "Quality reps"
+          : rawReps;
+        return {
+          title: String(d.title),
+          exercise: String(d.exercise ?? ""),
+          reps,
+          minutes: clampMin(d.minutes),
+          notes: d.notes ? String(d.notes) : undefined,
+        };
+      });
     if (skills.length === 0) {
       skills = [
         {
           title: "Focus block",
           exercise: focus,
-          reps: "10 min",
+          reps: "Quality reps",
           minutes: 10,
           notes: undefined,
         },
@@ -152,7 +160,7 @@ function buildSessions(
       skills.push({
         title: padIdx === 0 ? "Apply under pressure" : "Perfect the detail",
         exercise: PADS[padIdx](skills[0].title),
-        reps: "10 min",
+        reps: padIdx === 0 ? "Game speed" : "Slow + perfect",
         minutes: 10,
         notes: undefined,
       });
@@ -236,7 +244,7 @@ function fallbackPlan(notes: string, player?: Player): GeneratedPlan {
       return {
         title,
         exercise: src,
-        reps: "10 min",
+        reps: "Quality reps",
         minutes: 10,
       };
     });

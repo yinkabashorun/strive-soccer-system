@@ -135,9 +135,11 @@ export function TodaySession({
                       </span>
                     )}
                   </span>
-                  <span className="chip shrink-0 whitespace-nowrap">
-                    {d.reps}
-                  </span>
+                  {d.reps && (
+                    <span className="chip shrink-0 whitespace-nowrap">
+                      {d.reps}
+                    </span>
+                  )}
                 </button>
               </li>
             );

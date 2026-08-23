@@ -29,6 +29,7 @@ export function SessionNotesStudio({ playerId }: { playerId: string }) {
   const [plan, setPlan] = useState<GeneratedPlan | null>(null);
   const [source, setSource] = useState<"ai" | "fallback" | null>(null);
   const [parentCopied, setParentCopied] = useState(false);
+  const [fallbackReason, setFallbackReason] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -99,6 +100,7 @@ export function SessionNotesStudio({ playerId }: { playerId: string }) {
       }
       setPlan(data.plan);
       setSource(data.source);
+      setFallbackReason(data.reason ?? null);
     } catch {
       setError("Something went wrong. Try again.");
     }
@@ -205,8 +207,11 @@ export function SessionNotesStudio({ playerId }: { playerId: string }) {
               </p>
               <p className="mt-1 leading-relaxed text-white/60">
                 Your notes were only used to pick the pillars; the player
-                never sees them. Check that ANTHROPIC_API_KEY is set in
-                Vercel, then generate again for the real personalized week.
+                never sees them.{" "}
+                {fallbackReason && fallbackReason !== "no_key"
+                  ? `The AI call failed: ${fallbackReason} This usually means the API key at console.anthropic.com is invalid or out of credits.`
+                  : "ANTHROPIC_API_KEY is not set in Vercel (Settings, Environment Variables, then redeploy)."}{" "}
+                Fix it and generate again for the real personalized week.
               </p>
             </div>
           )}
@@ -269,7 +274,9 @@ export function SessionNotesStudio({ playerId }: { playerId: string }) {
                           ) : (
                             <>
                               {/* Edits happen in place - the draft looks
-                                  exactly like the published plan. */}
+                                  exactly like the published plan. Stacked
+                                  layout so it stays readable on a phone:
+                                  name, then how, then reps + minutes. */}
                               <div className="flex items-center gap-2">
                                 <input
                                   value={d.title}
@@ -280,35 +287,6 @@ export function SessionNotesStudio({ playerId }: { playerId: string }) {
                                   className="min-w-0 flex-1 bg-transparent font-medium text-bone outline-none placeholder:text-white/25 focus:text-accent"
                                   placeholder="Drill name"
                                 />
-                                <span className="chip shrink-0">
-                                  <input
-                                    value={d.reps}
-                                    onChange={(e) =>
-                                      editDrill(si, di, { reps: e.target.value })
-                                    }
-                                    disabled={saved}
-                                    size={Math.max(3, d.reps.length)}
-                                    className="bg-transparent text-right uppercase tracking-[0.14em] outline-none"
-                                    aria-label="Reps"
-                                  />
-                                </span>
-                                <span className="chip shrink-0 whitespace-nowrap">
-                                  <input
-                                    type="number"
-                                    min={5}
-                                    max={30}
-                                    value={d.minutes ?? 10}
-                                    onChange={(e) =>
-                                      editDrill(si, di, {
-                                        minutes: Number(e.target.value),
-                                      })
-                                    }
-                                    disabled={saved}
-                                    className="no-spin w-7 bg-transparent text-right outline-none"
-                                    aria-label="Minutes"
-                                  />
-                                  min
-                                </span>
                                 {!saved && (
                                   <button
                                     onClick={() => removeDrill(si, di)}
@@ -329,6 +307,38 @@ export function SessionNotesStudio({ playerId }: { playerId: string }) {
                                 rows={2}
                                 className="mt-1 w-full resize-none bg-transparent text-xs leading-snug text-white/55 outline-none focus:text-white/80"
                               />
+                              <div className="mt-1.5 flex items-center gap-2">
+                                <span className="chip shrink-0">
+                                  <input
+                                    value={d.reps}
+                                    onChange={(e) =>
+                                      editDrill(si, di, { reps: e.target.value })
+                                    }
+                                    disabled={saved}
+                                    size={Math.max(8, d.reps.length)}
+                                    className="bg-transparent uppercase tracking-[0.14em] outline-none"
+                                    aria-label="Sets and reps"
+                                    placeholder="3 x 20"
+                                  />
+                                </span>
+                                <span className="chip shrink-0 whitespace-nowrap">
+                                  <input
+                                    type="number"
+                                    min={5}
+                                    max={30}
+                                    value={d.minutes ?? 10}
+                                    onChange={(e) =>
+                                      editDrill(si, di, {
+                                        minutes: Number(e.target.value),
+                                      })
+                                    }
+                                    disabled={saved}
+                                    className="no-spin w-7 bg-transparent text-right outline-none"
+                                    aria-label="Minutes"
+                                  />
+                                  min
+                                </span>
+                              </div>
                             </>
                           )}
                         </li>

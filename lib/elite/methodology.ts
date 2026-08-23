@@ -38,10 +38,18 @@ export const METHOD_PRINCIPLES: string[] = [
 
 // The seven development pillars, each with the coaching lens Strive uses and
 // a starter library of room/yard-friendly drills the AI can draw from.
+// Every drill carries a real prescription: sets x reps, never a bare
+// duration. These are shown to players verbatim when the AI is offline.
+export type PillarDrill = {
+  title: string;
+  how: string; // what to actually do, with the coaching cue
+  reps: string; // real sets and reps: "3 x 20 each foot", "4 x 45 sec"
+};
+
 export type PillarGuide = {
   pillar: ProgressMetric;
   lens: string;
-  drills: string[];
+  drills: PillarDrill[];
 };
 
 export const METHOD_PILLARS: PillarGuide[] = [
@@ -49,64 +57,152 @@ export const METHOD_PILLARS: PillarGuide[] = [
     pillar: "Ball Mastery",
     lens: "The ball is an extension of the foot. Manipulate, don't kick.",
     drills: [
-      "Foundations + sole rolls, both feet, eyes up",
-      "Toe-taps and V-pulls to a metronome",
-      "Figure-8 dribble through two shoes/cones in the room",
+      {
+        title: "Foundations + sole rolls",
+        how: "Foundations into sole rolls, both feet, eyes up for the whole set",
+        reps: "4 x 45 sec",
+      },
+      {
+        title: "Toe-taps + V-pulls",
+        how: "Toe-taps into V-pulls at a steady rhythm, switch the lead foot every set",
+        reps: "3 x 30 each foot",
+      },
+      {
+        title: "Figure-8 dribble",
+        how: "Tight figure-8 through two shoes, close touches, head up on the straights",
+        reps: "5 x 40 sec",
+      },
     ],
   },
   {
     pillar: "Weak Foot",
     lens: "Two-footed players are twice the problem. Force the weak side.",
     drills: [
-      "Weak-foot-only dribble patterns through shoes/cones",
-      "Weak-foot toe-taps and push-pulls",
-      "Weak-foot rebound passes: weak side only off a wall (or couch cushion), cushion the return",
-      "Weak-foot strikes at a target (a shoe, a bag, anything to hit)",
+      {
+        title: "Weak-foot patterns",
+        how: "Dribble patterns through shoes, weak foot only. Slow is fine, clean is required",
+        reps: "4 x 30 sec",
+      },
+      {
+        title: "Weak-foot push-pulls",
+        how: "Push-pulls and toe-taps, weak foot only, eyes up on the last five",
+        reps: "3 x 25",
+      },
+      {
+        title: "Weak-foot rebounds",
+        how: "Rebound passes off a wall if you have one, otherwise a couch cushion against a chair. Weak side only, cushion the return",
+        reps: "3 x 20",
+      },
+      {
+        title: "Weak-foot strikes",
+        how: "Strikes at a target: a shoe, a bag, anything to hit. Laces, follow through",
+        reps: "3 x 10",
+      },
     ],
   },
   {
     pillar: "Passing",
     lens: "Weight, accuracy, and a scan before every pass. The ball must come back: a wall (or a cushion rebounder) makes solo passing real.",
     drills: [
-      "Rebound passing: use a wall if you have one, otherwise lean a couch cushion against a chair; firm two-touch passes off the return, both feet",
-      "Rebound rhythm: one-touch returns off the wall/cushion, stay on your toes, scan between reps",
-      "Weighted rolls: inside-of-foot passes that stop dead on a towel/marker",
+      {
+        title: "Rebound passing",
+        how: "Use a wall if you have one, otherwise lean a couch cushion against a chair. Firm two-touch passes off the return, both feet",
+        reps: "4 x 20",
+      },
+      {
+        title: "Rebound rhythm",
+        how: "One-touch returns off the wall or cushion, stay on your toes, scan between reps",
+        reps: "3 x 30 sec",
+      },
+      {
+        title: "Weighted rolls",
+        how: "Inside-of-foot passes that stop dead on a towel or marker. Weight over power",
+        reps: "3 x 12 each foot",
+      },
     ],
   },
   {
     pillar: "Scanning",
     lens: "Two shoulder checks before every touch. Make it automatic.",
     drills: [
-      "Shoulder-check before every touch in a dribble pattern",
-      "Number-call scanning (a parent holds up fingers to read)",
-      "Shadow rondo: receive on the half-turn away from pressure",
+      {
+        title: "Scan + touch",
+        how: "Shoulder-check before every touch in a dribble pattern. Say what you saw out loud",
+        reps: "4 x 45 sec",
+      },
+      {
+        title: "Number-call scanning",
+        how: "A parent holds up fingers mid-drill. Read the number before your next touch",
+        reps: "3 x 20 touches",
+      },
+      {
+        title: "Half-turn receives",
+        how: "Shadow rondo: receive on the half-turn away from imagined pressure, first touch out of your feet",
+        reps: "3 x 15",
+      },
     ],
   },
   {
     pillar: "Decision Making",
     lens: "Right choice, right time. Read the cue, then act.",
     drills: [
-      "Two-gate finish: pick the open gate on a cue",
-      "1v1 shadow: commit the defender, then decide",
-      "Clip breakdown: study a pro, note 3 decisions, copy them",
+      {
+        title: "Two-gate finish",
+        how: "Two gates made of shoes. Attack, then pick the open gate on a late call and explode through it",
+        reps: "4 x 8",
+      },
+      {
+        title: "1v1 shadow",
+        how: "Commit the imaginary defender with a move, then decide: exit left, exit right, or stop and shield",
+        reps: "3 x 10",
+      },
+      {
+        title: "Clip study",
+        how: "Watch a pro in your position, note three decisions they made early, copy them tomorrow",
+        reps: "3 takeaways",
+      },
     ],
   },
   {
     pillar: "Confidence",
     lens: "Bravery on the ball is trained. Reps remove fear.",
     drills: [
-      "Take-on reps: beat an imaginary defender, no hesitation",
-      "Juggling records: beat yesterday's number",
-      "Mirror skill moves until they're automatic",
+      {
+        title: "Take-on reps",
+        how: "Attack an imaginary defender, sell the move, burst two steps past. No hesitation",
+        reps: "4 x 10",
+      },
+      {
+        title: "Juggling record",
+        how: "Beat yesterday's best number, any surface counts",
+        reps: "5 attempts",
+      },
+      {
+        title: "Move mirror",
+        how: "One skill move in slow motion until it's clean, then at full speed",
+        reps: "3 x 12 each side",
+      },
     ],
   },
   {
     pillar: "Speed",
     lens: "Explosive first steps and quick feet, not just top speed.",
     drills: [
-      "Quick-feet ladder/line drills for 20 seconds on, 40 off",
-      "Acceleration starts: 5-yard explosions from a still position",
-      "Reaction starts off a visual cue",
+      {
+        title: "Quick feet",
+        how: "Fast feet over a line or low ladder, minimal ground contact, think hot floor",
+        reps: "6 x 20 sec",
+      },
+      {
+        title: "Acceleration starts",
+        how: "5-yard explosions from a standstill, walk back to recover fully",
+        reps: "8 sprints",
+      },
+      {
+        title: "Reaction starts",
+        how: "Sprint on a visual cue from a parent or a dropped sock. React, don't guess",
+        reps: "6 starts",
+      },
     ],
   },
 ];
@@ -117,7 +213,9 @@ export function methodologyContext(): string {
   const principles = METHOD_PRINCIPLES.map((p) => `- ${p}`).join("\n");
   const pillars = METHOD_PILLARS.map(
     (g) =>
-      `- ${g.pillar}: ${g.lens} Sample drills: ${g.drills.join("; ")}.`
+      `- ${g.pillar}: ${g.lens} Sample drills: ${g.drills
+        .map((d) => `${d.title} (${d.reps}): ${d.how}`)
+        .join("; ")}.`
   ).join("\n");
   return `STRIVE TRAINING METHODOLOGY (follow this exactly):
 

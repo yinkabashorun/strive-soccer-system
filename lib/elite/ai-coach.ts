@@ -61,7 +61,7 @@ Return ONLY valid JSON, no prose, matching this shape:
   "weekly_focus": "one sentence, the single theme for the week",
   "sessions": [
     { "title": "Session 1: short label",
-      "drills": [ { "title": "...", "exercise": "...", "reps": "...", "minutes": 10, "notes": "..." } ] }
+      "drills": [ { "title": "...", "exercise": "...", "reps": "real sets and reps like '3 x 20 each foot' or '4 x 45 sec', NEVER a bare duration", "minutes": 10, "notes": "..." } ] }
   ],
   "parent_update": "2-4 sentences the coach can copy and paste directly into a text message to the parent. First person, the coach's voice ('I saw', 'this week I have him working on'). Refer to the player by first name. No greeting, no sign-off, no app jargon. It must read like a coach texting a parent, not a system summary.",
   "player_summary": "2-3 sentences to the player, second person",
@@ -124,10 +124,8 @@ function buildSessions(
       .map((d) => {
         const rawReps = String(d.reps ?? "").trim();
         // The minutes chip already shows duration; a reps value that is
-        // just "10 min" would render the same number twice.
-        const reps = /^\d+\s*min(ute)?s?$/i.test(rawReps)
-          ? "Quality reps"
-          : rawReps;
+        // just "10 min" adds nothing, so drop it (the chip hides when empty).
+        const reps = /^\d+\s*min(ute)?s?$/i.test(rawReps) ? "" : rawReps;
         return {
           title: String(d.title),
           exercise: String(d.exercise ?? ""),
@@ -141,7 +139,7 @@ function buildSessions(
         {
           title: "Focus block",
           exercise: focus,
-          reps: "Quality reps",
+          reps: "",
           minutes: 10,
           notes: undefined,
         },
@@ -235,16 +233,15 @@ function fallbackPlan(notes: string, player?: Player): GeneratedPlan {
   const pillars = picked.slice(0, SESSIONS_PER_WEEK);
 
   // One pillar per session, three library drills each (cycling if short).
-  const sessions: GeneratedSession[] = pillars.map((pillar, i) => {
+  const sessions: GeneratedSession[] = pillars.map((pillar) => {
     const guide = METHOD_PILLARS.find((g) => g.pillar === pillar);
     const library = guide?.drills ?? [];
     const drills = Array.from({ length: 3 }, (_, d) => {
-      const src = library[d % Math.max(1, library.length)] ?? "Focused reps, full intent";
-      const title = titleCase(src.split(/[,:(]/)[0]).slice(0, 52) || `${pillar} drill`;
+      const src = library[d % Math.max(1, library.length)];
       return {
-        title,
-        exercise: src,
-        reps: "Quality reps",
+        title: src?.title ?? `${pillar} drill`,
+        exercise: src?.how ?? "Focused reps, full intent",
+        reps: src?.reps ?? "3 x 10",
         minutes: 10,
       };
     });
@@ -276,9 +273,14 @@ export async function generatePlanFromNotes(
   notes: string,
   player?: Player,
   memory?: string
-): Promise<{ plan: GeneratedPlan; source: "ai" | "fallback" }> {
+): Promise<{
+  plan: GeneratedPlan;
+  source: "ai" | "fallback";
+  reason?: string; // why the fallback ran, so the coach sees the real cause
+}> {
   const c = client();
-  if (!c) return { plan: fallbackPlan(notes, player), source: "fallback" };
+  if (!c)
+    return { plan: fallbackPlan(notes, player), source: "fallback", reason: "no_key" };
 
   try {
     const context = player
@@ -301,9 +303,16 @@ export async function generatePlanFromNotes(
       .join("")
       .trim();
     const parsed = extractJSON<Partial<GeneratedPlan>>(text);
-    if (!parsed) return { plan: fallbackPlan(notes, player), source: "fallback" };
+    if (!parsed)
+      return {
+        plan: fallbackPlan(notes, player),
+        source: "fallback",
+        reason: "The AI responded but the plan could not be parsed. Generate again.",
+      };
     return { plan: sanitize(parsed, player), source: "ai" };
-  } catch {
-    return { plan: fallbackPlan(notes, player), source: "fallback" };
+  } catch (err) {
+    const msg =
+      err instanceof Error ? err.message.slice(0, 200) : "unknown error";
+    return { plan: fallbackPlan(notes, player), source: "fallback", reason: msg };
   }
 }

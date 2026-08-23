@@ -220,7 +220,7 @@ function DrillRow({
             </h4>
           </div>
           <div className="flex shrink-0 items-center gap-1.5">
-            <span className="chip whitespace-nowrap">{hw.reps}</span>
+            {hw.reps && <span className="chip whitespace-nowrap">{hw.reps}</span>}
             <span className="chip flex items-center gap-1 whitespace-nowrap">
               <Clock className="h-3 w-3" />
               {hw.duration_min ?? DEFAULT_MIN}m

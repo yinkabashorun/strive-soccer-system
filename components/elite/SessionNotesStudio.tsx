@@ -198,13 +198,13 @@ export function SessionNotesStudio({ playerId }: { playerId: string }) {
           {source === "fallback" && !saved && (
             <div className="rounded-2xl border border-red-500/35 bg-red-500/[0.07] p-4 text-sm">
               <p className="font-semibold text-red-300">
-                Strive AI didn&apos;t run. This is a basic template, not a real plan.
+                Strive AI didn&apos;t run. This is a generic library week, not
+                a personalized plan.
               </p>
               <p className="mt-1 leading-relaxed text-white/60">
-                Your notes were copied in word for word and the player would
-                see them exactly as written. Check that ANTHROPIC_API_KEY is
-                set in Vercel, then generate again. Only publish this if you
-                rewrite the focus and drills yourself first.
+                Your notes were only used to pick the pillars; the player
+                never sees them. Check that ANTHROPIC_API_KEY is set in
+                Vercel, then generate again for the real personalized week.
               </p>
             </div>
           )}

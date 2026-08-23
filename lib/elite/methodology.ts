@@ -43,7 +43,8 @@ export const METHOD_PRINCIPLES: string[] = [
 export type PillarDrill = {
   title: string;
   how: string; // what to actually do, with the coaching cue
-  reps: string; // real sets and reps: "3 x 20 each foot", "4 x 45 sec"
+  reps: string; // real sets and reps WITH rest where it matters
+  minutes: number; // honest time: work + rest between sets + setup
 };
 
 export type PillarGuide = {
@@ -60,17 +61,20 @@ export const METHOD_PILLARS: PillarGuide[] = [
       {
         title: "Foundations + sole rolls",
         how: "Foundations into sole rolls, both feet, eyes up for the whole set",
-        reps: "4 x 45 sec",
+        reps: "6 x 60 sec on, 40 sec off",
+        minutes: 10,
       },
       {
         title: "Toe-taps + V-pulls",
         how: "Toe-taps into V-pulls at a steady rhythm, switch the lead foot every set",
-        reps: "3 x 30 each foot",
+        reps: "4 x 30 each foot, rest 30 sec",
+        minutes: 8,
       },
       {
         title: "Figure-8 dribble",
         how: "Tight figure-8 through two shoes, close touches, head up on the straights",
-        reps: "5 x 40 sec",
+        reps: "6 x 45 sec on, 45 sec off",
+        minutes: 9,
       },
     ],
   },
@@ -81,22 +85,26 @@ export const METHOD_PILLARS: PillarGuide[] = [
       {
         title: "Weak-foot patterns",
         how: "Dribble patterns through shoes, weak foot only. Slow is fine, clean is required",
-        reps: "4 x 30 sec",
+        reps: "6 x 45 sec weak foot only, 45 sec off",
+        minutes: 9,
       },
       {
         title: "Weak-foot push-pulls",
         how: "Push-pulls and toe-taps, weak foot only, eyes up on the last five",
-        reps: "3 x 25",
+        reps: "4 x 40, rest 30 sec",
+        minutes: 8,
       },
       {
         title: "Weak-foot rebounds",
         how: "Rebound passes off a wall if you have one, otherwise a couch cushion against a chair. Weak side only, cushion the return",
-        reps: "3 x 20",
+        reps: "4 x 20, rest 45 sec",
+        minutes: 9,
       },
       {
         title: "Weak-foot strikes",
         how: "Strikes at a target: a shoe, a bag, anything to hit. Laces, follow through",
-        reps: "3 x 10",
+        reps: "4 x 10, collect and reset between sets",
+        minutes: 9,
       },
     ],
   },
@@ -107,17 +115,20 @@ export const METHOD_PILLARS: PillarGuide[] = [
       {
         title: "Rebound passing",
         how: "Use a wall if you have one, otherwise lean a couch cushion against a chair. Firm two-touch passes off the return, both feet",
-        reps: "4 x 20",
+        reps: "5 x 20 two-touch, rest 40 sec",
+        minutes: 10,
       },
       {
         title: "Rebound rhythm",
         how: "One-touch returns off the wall or cushion, stay on your toes, scan between reps",
-        reps: "3 x 30 sec",
+        reps: "5 x 45 sec one-touch, 45 sec off",
+        minutes: 8,
       },
       {
         title: "Weighted rolls",
         how: "Inside-of-foot passes that stop dead on a towel or marker. Weight over power",
-        reps: "3 x 12 each foot",
+        reps: "3 x 12 each foot, walk and reset each set",
+        minutes: 9,
       },
     ],
   },
@@ -128,17 +139,20 @@ export const METHOD_PILLARS: PillarGuide[] = [
       {
         title: "Scan + touch",
         how: "Shoulder-check before every touch in a dribble pattern. Say what you saw out loud",
-        reps: "4 x 45 sec",
+        reps: "5 x 45 sec on, 45 sec off",
+        minutes: 8,
       },
       {
         title: "Number-call scanning",
         how: "A parent holds up fingers mid-drill. Read the number before your next touch",
-        reps: "3 x 20 touches",
+        reps: "4 x 20 touches, rest 30 sec",
+        minutes: 8,
       },
       {
         title: "Half-turn receives",
         how: "Shadow rondo: receive on the half-turn away from imagined pressure, first touch out of your feet",
-        reps: "3 x 15",
+        reps: "3 x 15, reset after every receive",
+        minutes: 10,
       },
     ],
   },
@@ -149,17 +163,20 @@ export const METHOD_PILLARS: PillarGuide[] = [
       {
         title: "Two-gate finish",
         how: "Two gates made of shoes. Attack, then pick the open gate on a late call and explode through it",
-        reps: "4 x 8",
+        reps: "5 x 8, walk-back reset each rep",
+        minutes: 10,
       },
       {
         title: "1v1 shadow",
         how: "Commit the imaginary defender with a move, then decide: exit left, exit right, or stop and shield",
-        reps: "3 x 10",
+        reps: "4 x 10, rest 40 sec",
+        minutes: 9,
       },
       {
         title: "Clip study",
         how: "Watch a pro in your position, note three decisions they made early, copy them tomorrow",
-        reps: "3 takeaways",
+        reps: "10 focused minutes, 3 takeaways written down",
+        minutes: 10,
       },
     ],
   },
@@ -170,17 +187,20 @@ export const METHOD_PILLARS: PillarGuide[] = [
       {
         title: "Take-on reps",
         how: "Attack an imaginary defender, sell the move, burst two steps past. No hesitation",
-        reps: "4 x 10",
+        reps: "5 x 10 full speed, rest 45 sec",
+        minutes: 10,
       },
       {
         title: "Juggling record",
         how: "Beat yesterday's best number, any surface counts",
-        reps: "5 attempts",
+        reps: "6 record attempts, rest as needed",
+        minutes: 8,
       },
       {
         title: "Move mirror",
         how: "One skill move in slow motion until it's clean, then at full speed",
-        reps: "3 x 12 each side",
+        reps: "3 x 12 each side, slow then full speed",
+        minutes: 9,
       },
     ],
   },
@@ -191,17 +211,20 @@ export const METHOD_PILLARS: PillarGuide[] = [
       {
         title: "Quick feet",
         how: "Fast feet over a line or low ladder, minimal ground contact, think hot floor",
-        reps: "6 x 20 sec",
+        reps: "8 x 20 sec on, 40 sec off",
+        minutes: 8,
       },
       {
         title: "Acceleration starts",
         how: "5-yard explosions from a standstill, walk back to recover fully",
-        reps: "8 sprints",
+        reps: "8 sprints, walk back for full recovery",
+        minutes: 10,
       },
       {
         title: "Reaction starts",
         how: "Sprint on a visual cue from a parent or a dropped sock. React, don't guess",
-        reps: "6 starts",
+        reps: "6 starts, full recovery between",
+        minutes: 8,
       },
     ],
   },
@@ -214,7 +237,7 @@ export function methodologyContext(): string {
   const pillars = METHOD_PILLARS.map(
     (g) =>
       `- ${g.pillar}: ${g.lens} Sample drills: ${g.drills
-        .map((d) => `${d.title} (${d.reps}): ${d.how}`)
+        .map((d) => `${d.title} (${d.reps} = ~${d.minutes} min): ${d.how}`)
         .join("; ")}.`
   ).join("\n");
   return `STRIVE TRAINING METHODOLOGY (follow this exactly):

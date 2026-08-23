@@ -72,6 +72,13 @@ Rules:
 - EXACTLY 4 sessions. EXACTLY 3 skill drills each (no warm-ups; added
   automatically). Each session ~40 minutes total including the ~10-min warm-up.
 - minutes: an integer per drill (8-15), so the three drills sum to ~30 minutes.
+- TIMING MUST ADD UP. minutes = work time + rest between sets + setup, and the
+  reps string must fill that time. 4 x 45 sec of work with 45 sec rests is
+  6 minutes, not 10. If a drill is 10 minutes, prescribe enough sets to fill
+  it (e.g. "6 x 60 sec on, 40 sec off") and bake the rest into the reps
+  string. Short-burst speed work needs long recoveries spelled out
+  ("8 sprints, walk back for full recovery"). Never pair a 3-minute
+  prescription with a 10-minute drill.
 - progress_updates: only pillars the notes actually touched, value 0-100.
 - next_week_objectives: 2-4 items.
 - Write like a real coach texting his player: plain punctuation only. NEVER
@@ -242,7 +249,7 @@ function fallbackPlan(notes: string, player?: Player): GeneratedPlan {
         title: src?.title ?? `${pillar} drill`,
         exercise: src?.how ?? "Focused reps, full intent",
         reps: src?.reps ?? "3 x 10",
-        minutes: 10,
+        minutes: src?.minutes ?? 10,
       };
     });
     return { title: `${pillar} day`, drills };

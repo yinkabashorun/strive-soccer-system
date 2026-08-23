@@ -30,6 +30,9 @@ export function SessionNotesStudio({ playerId }: { playerId: string }) {
   const [source, setSource] = useState<"ai" | "fallback" | null>(null);
   const [parentCopied, setParentCopied] = useState(false);
   const [fallbackReason, setFallbackReason] = useState<string | null>(null);
+  const [fallbackKind, setFallbackKind] = useState<
+    "no_key" | "parse" | "api_error" | null
+  >(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
@@ -101,6 +104,7 @@ export function SessionNotesStudio({ playerId }: { playerId: string }) {
       setPlan(data.plan);
       setSource(data.source);
       setFallbackReason(data.reason ?? null);
+      setFallbackKind(data.reasonKind ?? null);
     } catch {
       setError("Something went wrong. Try again.");
     }
@@ -208,10 +212,12 @@ export function SessionNotesStudio({ playerId }: { playerId: string }) {
               <p className="mt-1 leading-relaxed text-white/60">
                 Your notes were only used to pick the pillars; the player
                 never sees them.{" "}
-                {fallbackReason && fallbackReason !== "no_key"
-                  ? `The AI call failed: ${fallbackReason} This usually means the API key at console.anthropic.com is invalid or out of credits.`
-                  : "ANTHROPIC_API_KEY is not set in Vercel (Settings, Environment Variables, then redeploy)."}{" "}
-                Fix it and generate again for the real personalized week.
+                {fallbackKind === "parse"
+                  ? `${fallbackReason ?? "The AI responded but the plan could not be read."} This is NOT a key or billing problem.`
+                  : fallbackKind === "api_error"
+                    ? `The AI call failed: ${fallbackReason ?? "unknown error"}. If this mentions authentication or credits, fix the key or billing at console.anthropic.com.`
+                    : "ANTHROPIC_API_KEY is not set in Vercel (Settings, Environment Variables, then redeploy)."}{" "}
+                Then generate again for the real personalized week.
               </p>
             </div>
           )}

@@ -5,6 +5,7 @@ import { getCoachInbox, getCoachRoster } from "@/lib/elite/data";
 import { Avatar } from "@/components/Avatar";
 import { StatTile } from "@/components/elite/StatTile";
 import { InvitePanel } from "@/components/elite/InvitePanel";
+import { WeeklyDeposits } from "@/components/elite/WeeklyDeposits";
 import { listInviteCodes } from "@/lib/elite/invite-actions";
 import { cn, relativeDay } from "@/lib/utils";
 
@@ -52,6 +53,8 @@ export default async function CoachDashboard() {
           accent={toAnswer > 0}
         />
       </section>
+
+      <WeeklyDeposits />
 
       <InvitePanel initial={inviteCodes} />
 

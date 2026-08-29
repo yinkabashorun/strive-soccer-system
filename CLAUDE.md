@@ -7,15 +7,16 @@ prices, dates, or numbers not listed here. Flag anything unconfirmed.
 
 | Day | What | Times |
 |---|---|---|
-| Sunday | Drop-ins | 5-6, 6-7, 7-8pm · **Makeup Session 6pm @ Gainesville Middle** |
+| Sunday | Drop-ins | 5-6, 6-7, 7-8pm · **Makeup Session 6pm @ Gainesville Middle** · Assessment calls in the afternoon (before 5pm) |
 | Monday | 1-on-1s | 9-10am, 10-11am, 3-4pm (Catharpin Park), 5-6pm, 7-8pm (Catharpin) |
 | Tuesday | 1-on-1s | same as Monday |
 | Wednesday | OFF FIELD | **Assessment calls 6-9pm** |
 | Thursday | OFF FIELD | **Assessment calls 6-9pm** |
 | Friday | Group sessions | HS comp 5pm · MS comp 6pm · MS/ES regular 7pm |
-| Saturday | Drop-ins | 8-9, 9-10, 10-11, 11-12am |
+| Saturday | Drop-ins | 8-9, 9-10, 10-11, 11-12am · Assessment calls in the evening |
 
-Assessment call calendar: 15-min slots, 15-min buffer, max 4/day, 3h notice.
+Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
+(~1-4pm). 15-min slots, 15-min buffer, max 4/day, 3h notice.
 
 ## Confirmed prices
 

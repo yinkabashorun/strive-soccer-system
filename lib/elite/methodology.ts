@@ -154,7 +154,7 @@ export const METHOD_PILLARS: PillarGuide[] = [
   },
   {
     pillar: "Passing",
-    lens: "Weight, accuracy, and a scan before every pass. A wall makes solo passing real; without one, pass-and-chase does the job.",
+    lens: "Weight, accuracy, and a scan before every pass. Passing is trained on a wall (garage door, brick wall, fence): the ball must come back. A player with no wall does their passing work in coached sessions, never through watered-down solo substitutes.",
     drills: [
       {
         title: "Rebound passing",
@@ -173,25 +173,20 @@ export const METHOD_PILLARS: PillarGuide[] = [
         needsWall: true,
       },
       {
-        title: "Weighted rolls",
-        how: "Set a marker 10 yards out. Inside-of-foot passes that stop dead on it",
-        reps: "3 x 12 each foot, walk and reset each set",
-        minutes: 9,
-        cues: "Weight over power, the ball dies on the marker",
+        title: "Pass, turn, pass",
+        how: "5 yards off the wall. Pass with the right, receive on the half-turn, two touches away, pass back with the left. Alternate every rep",
+        reps: "5 x 12, rest 40 sec",
+        minutes: 10,
+        cues: "Scan before the ball comes back, back-foot receive, both feet equal",
+        needsWall: true,
       },
       {
-        title: "Pass and chase",
-        how: "Set a marker 15 yards out. Drive a firm pass at it, sprint after the ball, control it before it stops, pass back the other way. Both feet",
-        reps: "5 x 8 passes, the sprint is the rest",
+        title: "Driven wall passes",
+        how: "Back up to 15 yards from the wall. Driven passes with pace, control the return before it stops, reset and go again. Both feet",
+        reps: "4 x 10 each foot, rest 40 sec",
         minutes: 10,
-        cues: "Firm pass, sprint immediately, clean first touch on arrival",
-      },
-      {
-        title: "Split the defenders",
-        how: "Two cones a yard apart, 15 yards out: that's two defenders. Thread a firm through-ball between them into the space behind, sprint onto it, take it in stride, attack back the other way",
-        reps: "4 x 8 each foot, the sprint is the rest",
-        minutes: 10,
-        cues: "Disguise the pass, firm enough to beat the gap, first touch in stride",
+        cues: "Strike through the ball, kill the return with one touch",
+        needsWall: true,
       },
     ],
   },
@@ -215,7 +210,7 @@ export const METHOD_PILLARS: PillarGuide[] = [
       },
       {
         title: "Half-turn receives",
-        how: "Roll the ball to yourself or off a rebound. Receive on the half-turn away from imagined pressure, first touch out of your feet into space",
+        how: "Roll the ball out in front of you. Receive on the half-turn away from imagined pressure, first touch out of your feet into space",
         reps: "3 x 15, reset after every receive",
         minutes: 10,
         cues: "Shoulder-check before the ball arrives, open your hips, touch into space",
@@ -338,9 +333,10 @@ Weekly structure:
 Equipment rule (strict): assume the player has ONLY ${METHOD_STRUCTURE.assumedEquipment}.
 The player's TRAINING ENVIRONMENT line (in the user message) is a HARD
 constraint. Wall drills (marked "wall" below) ONLY for players who HAVE a
-wall; a goal only for players who HAVE a goal. If they lack it, the plan
-simply doesn't include those drills; swap in ball-and-space work that trains
-the same pillar (pass and chase, gate passing, weighted rolls). NEVER
+wall; a goal only for players who HAVE a goal. Passing drills are wall
+drills, full stop: a player with no wall gets NO passing-focused drills or
+sessions (their passing work happens in coached sessions); give them other
+pillars instead. NEVER
 prescribe furniture or improvised household equipment: no couch cushions,
 chairs, mattresses, or anything that sounds like a hack. This is a
 professional program; every drill must sound like it. Never prescribe a

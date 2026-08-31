@@ -1,7 +1,13 @@
 import Link from "next/link";
-import { ArrowUpRight, Clock, Flame, Users } from "lucide-react";
+import { ArrowUpRight, CalendarPlus, Clock, Flame, Users } from "lucide-react";
 import { getViewer } from "@/lib/elite/session";
-import { getCoachInbox, getCoachRoster } from "@/lib/elite/data";
+import {
+  getCoachInbox,
+  getCoachRoster,
+  getPlanCoverage,
+  getPlayers,
+} from "@/lib/elite/data";
+import { liveWeekNumber, nyDayNumber } from "@/lib/elite/time";
 import { Avatar } from "@/components/Avatar";
 import { StatTile } from "@/components/elite/StatTile";
 import { InvitePanel } from "@/components/elite/InvitePanel";
@@ -9,21 +15,53 @@ import { WeeklyDeposits } from "@/components/elite/WeeklyDeposits";
 import { listInviteCodes } from "@/lib/elite/invite-actions";
 import { cn, relativeDay } from "@/lib/utils";
 
+// Where a player stands in the plan pipeline. next_ready = their next week
+// is already built; needs_next = current week is live but next isn't built;
+// no_plan = nothing built for the week they're in right now.
+type PlanState = "next_ready" | "needs_next" | "no_plan";
+
 export default async function CoachDashboard() {
   const viewer = await getViewer();
 
   // One-call rollup: every player + their loop metrics + what needs a reply.
-  const [roster, inviteCodes, inbox] = await Promise.all([
+  const [roster, inviteCodes, inbox, coverage, players] = await Promise.all([
     getCoachRoster(),
     listInviteCodes(),
     getCoachInbox(),
+    getPlanCoverage(),
+    getPlayers(),
   ]);
+
+  // Live week per player from their real start Monday (VA time), falling
+  // back to the stored week counter for pre-014 rows.
+  const week1ByPlayer = Object.fromEntries(
+    players.map((p) => [p.id, p.week1_monday ?? null])
+  );
+  const day = nyDayNumber(); // 1 Mon .. 7 Sun, same VA week for everyone
+  const planInfo: Record<string, { week: number; state: PlanState }> = {};
+  for (const r of roster) {
+    const week1 = week1ByPlayer[r.player_id];
+    const week = week1 ? liveWeekNumber(week1) : r.current_week;
+    const built = coverage[r.player_id] ?? 0;
+    const state: PlanState =
+      built > week ? "next_ready" : built === week ? "needs_next" : "no_plan";
+    planInfo[r.player_id] = { week, state };
+  }
+  // Most urgent first: players with nothing live, then next-week gaps.
+  const sortedRoster = [...roster].sort((a, b) => {
+    const rank = { no_plan: 0, needs_next: 1, next_ready: 2 } as const;
+    return (
+      rank[planInfo[a.player_id].state] - rank[planInfo[b.player_id].state]
+    );
+  });
+  const toBuild = roster.filter(
+    (r) => planInfo[r.player_id].state !== "next_ready"
+  ).length;
 
   const avgHw =
     roster.length > 0
       ? Math.round(roster.reduce((s, r) => s + r.homework_pct, 0) / roster.length)
       : 0;
-  const active = roster.filter((r) => r.subscription_status === "active").length;
   const toAnswer = inbox.pendingCheckins + inbox.unreadMessages;
 
   const first = viewer?.profile.full_name.split(" ").slice(-1)[0] ?? "Coach";
@@ -44,7 +82,12 @@ export default async function CoachDashboard() {
 
       <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatTile label="Players" value={roster.length} sub="On the program" accent />
-        <StatTile label="Active" value={active} sub="Paying members" />
+        <StatTile
+          label="Plans to build"
+          value={toBuild}
+          sub={toBuild > 0 ? "Before their Monday" : "All weeks built"}
+          accent={toBuild > 0}
+        />
         <StatTile label="Avg homework" value={`${avgHw}%`} sub="Completion" />
         <StatTile
           label="To answer"
@@ -70,9 +113,10 @@ export default async function CoachDashboard() {
           </div>
         ) : (
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {roster.map((r) => {
+            {sortedRoster.map((r) => {
               const needs = inbox.byPlayer[r.player_id];
               const needsCount = needs ? needs.checkins + needs.messages : 0;
+              const plan = planInfo[r.player_id];
               return (
               <Link
                 key={r.player_id}
@@ -89,7 +133,7 @@ export default async function CoachDashboard() {
                       <ArrowUpRight className="h-4 w-4 shrink-0 text-white/25 transition-colors group-hover:text-accent" />
                     </div>
                     <div className="text-xs text-white/45">
-                      Week {r.current_week}
+                      Week {plan.week} · Day {day}
                     </div>
                   </div>
                   {needsCount > 0 && (
@@ -100,7 +144,11 @@ export default async function CoachDashboard() {
                   <StatusDot status={r.subscription_status} />
                 </div>
 
-                <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+                <div className="mt-3">
+                  <PlanChip state={plan.state} week={plan.week} />
+                </div>
+
+                <div className="mt-3 grid grid-cols-3 gap-2 text-center">
                   <MiniStat
                     label="Streak"
                     value={r.current_streak}
@@ -136,6 +184,30 @@ export default async function CoachDashboard() {
         )}
       </section>
     </div>
+  );
+}
+
+// The pipeline flag: is this player's training built ahead of them?
+function PlanChip({ state, week }: { state: PlanState; week: number }) {
+  if (state === "no_plan") {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/15 px-2.5 py-1 text-[11px] font-bold text-red-300">
+        <CalendarPlus className="h-3 w-3" /> No plan for week {week} - build it
+        now
+      </span>
+    );
+  }
+  if (state === "needs_next") {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-400/15 px-2.5 py-1 text-[11px] font-bold text-amber-300">
+        <CalendarPlus className="h-3 w-3" /> Build week {week + 1}
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.04] px-2.5 py-1 text-[11px] font-medium text-white/40">
+      Week {week + 1} ready
+    </span>
   );
 }
 

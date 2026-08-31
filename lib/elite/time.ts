@@ -52,6 +52,11 @@ export function liveWeekNumber(week1Monday: string | null | undefined): number {
   return Math.max(1, weeks + 1);
 }
 
+// Day of the NY training week: 1 = Monday … 7 = Sunday.
+export function nyDayNumber(): number {
+  return mondayIndex(nyToday()) + 1;
+}
+
 // Short human date for a Monday, e.g. "Mon, Aug 24".
 export function fmtMonday(monday: string): string {
   return new Date(monday + "T12:00:00Z").toLocaleDateString("en-US", {

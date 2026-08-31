@@ -17,11 +17,11 @@ export const METHOD_STRUCTURE = {
   warmup: "plyometrics", // every session opens with a room plyo warm-up
   warmupMinutes: 10,
   skillDrillsPerSession: 3, // three focused drills, done with intent
-  setting: "at-home / room-and-yard friendly",
+  setting: "solo, at home or nearby: driveway, backyard, garage, or a park",
   // The ONLY equipment we assume: a ball and a small space. Anything else
   // (wall, goal, rebounder, partner, ladder) must come from the coach's
   // notes or the player's profile - never assumed.
-  assumedEquipment: "a ball and a small room/yard space",
+  assumedEquipment: "a ball and a small open space",
 };
 
 // The Strive philosophy - the principles behind every plan.
@@ -96,7 +96,7 @@ export const METHOD_PILLARS: PillarGuide[] = [
       },
       {
         title: "Weak-foot rebounds",
-        how: "Rebound passes off a wall if you have one, otherwise a couch cushion against a chair. Weak side only, cushion the return",
+        how: "Rebound passes off a wall: garage door, brick wall, or fence. Weak side only, cushion the return. No wall? Pass to a marker, sprint to the ball, repeat",
         reps: "4 x 20, rest 45 sec",
         minutes: 9,
       },
@@ -110,17 +110,17 @@ export const METHOD_PILLARS: PillarGuide[] = [
   },
   {
     pillar: "Passing",
-    lens: "Weight, accuracy, and a scan before every pass. The ball must come back: a wall (or a cushion rebounder) makes solo passing real.",
+    lens: "Weight, accuracy, and a scan before every pass. The ball must come back: a wall makes solo passing real.",
     drills: [
       {
         title: "Rebound passing",
-        how: "Use a wall if you have one, otherwise lean a couch cushion against a chair. Firm two-touch passes off the return, both feet",
+        how: "Firm two-touch passes off a wall: garage door, brick wall, or fence. Both feet. No wall? Pass to a marker, sprint to the ball, pass back the other way",
         reps: "5 x 20 two-touch, rest 40 sec",
         minutes: 10,
       },
       {
         title: "Rebound rhythm",
-        how: "One-touch returns off the wall or cushion, stay on your toes, scan between reps",
+        how: "One-touch returns off the wall, stay on your toes, scan between reps",
         reps: "5 x 45 sec one-touch, 45 sec off",
         minutes: 8,
       },
@@ -251,13 +251,16 @@ Weekly structure:
 - ${METHOD_STRUCTURE.skillDrillsPerSession} focused skill drills per session. Fewer, deeper reps, ${METHOD_STRUCTURE.setting}.
 
 Equipment rule (strict): assume the player has ONLY ${METHOD_STRUCTURE.assumedEquipment}.
-Rebound drills are always allowed WITH the built-in fallback phrased in the
-drill itself: "use a wall if you have one, otherwise lean a couch cushion
-against a chair." Never prescribe a goal, net, ladder, rebounder machine, or
-a partner unless the coach's notes or the player's profile explicitly mention
-them. If the coach mentions equipment (e.g. "200 wall passes"), use exactly
-that, nothing more. Shoes or household objects as markers/targets are
-always fine.
+Rebound drills may assume a real wall: a garage door, brick wall, or fence.
+When a player might not have one, build the alternative into the drill itself
+using only the ball and space (e.g. "no wall? pass to a marker, sprint to the
+ball, repeat"). NEVER prescribe furniture or improvised household equipment:
+no couch cushions, chairs, mattresses, or anything that sounds like a hack.
+This is a professional program; every drill must sound like it. Never
+prescribe a goal, net, ladder, rebounder machine, or a partner unless the
+coach's notes or the player's profile explicitly mention them. If the coach
+mentions equipment (e.g. "200 wall passes"), use exactly that, nothing more.
+Shoes as markers or targets are fine.
 
 The seven development pillars and how Strive coaches them (draw drills from here, adapted to the player's focus and level):
 ${pillars}`;

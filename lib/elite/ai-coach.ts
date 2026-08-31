@@ -63,7 +63,7 @@ Return ONLY valid JSON, no prose, matching this shape:
   "weekly_focus": "one sentence, the single theme for the week",
   "sessions": [
     { "title": "Session 1: short label",
-      "drills": [ { "title": "...", "exercise": "...", "reps": "real sets and reps like '3 x 20 each foot' or '4 x 45 sec', NEVER a bare duration", "minutes": 10, "notes": "..." } ] }
+      "drills": [ { "title": "...", "exercise": "Setup first, one short sentence (what to lay out, e.g. 'Line of 5 cones a yard apart.'). Then the execution: exactly what to do, concrete and stepwise.", "reps": "real sets and reps like '3 x 20 each foot' or '4 x 45 sec', NEVER a bare duration", "minutes": 10, "notes": "2-3 key cues, short and punchy, like 'Sell the fake, drop the shoulder, explode out'" } ] }
   ],
   "parent_update": "2-4 sentences the coach can copy and paste directly into a text message to the parent. First person, the coach's voice ('I saw', 'this week I have him working on'). Refer to the player by first name. No greeting, no sign-off, no app jargon. It must read like a coach texting a parent, not a system summary.",
   "player_summary": "2-3 sentences to the player, second person",
@@ -81,6 +81,9 @@ Rules:
   string. Short-burst speed work needs long recoveries spelled out
   ("8 sprints, walk back for full recovery"). Never pair a 3-minute
   prescription with a 10-minute drill.
+- Every drill's exercise reads setup then execution, and every drill has
+  notes with 2-3 key cues. A player should be able to run the drill from
+  the card alone: what to set up, what to do, what to feel.
 - progress_updates: only pillars the notes actually touched, value 0-100.
 - next_week_objectives: 2-4 items.
 - Write like a real coach texting his player: plain punctuation only. NEVER
@@ -257,6 +260,7 @@ function fallbackPlan(notes: string, player?: Player): GeneratedPlan {
         exercise: src?.how ?? "Focused reps, full intent",
         reps: src?.reps ?? "3 x 10",
         minutes: src?.minutes ?? 10,
+        notes: src?.cues,
       };
     });
     return { title: `${pillar} day`, drills };

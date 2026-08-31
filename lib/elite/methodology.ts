@@ -42,9 +42,10 @@ export const METHOD_PRINCIPLES: string[] = [
 // duration. These are shown to players verbatim when the AI is offline.
 export type PillarDrill = {
   title: string;
-  how: string; // what to actually do, with the coaching cue
+  how: string; // setup first, then the execution
   reps: string; // real sets and reps WITH rest where it matters
   minutes: number; // honest time: work + rest between sets + setup
+  cues?: string; // 2-3 key cues, short and punchy
   needsWall?: boolean; // only prescribed to players who have a wall (019)
 };
 
@@ -74,39 +75,45 @@ export const METHOD_PILLARS: PillarGuide[] = [
     drills: [
       {
         title: "Inside-outside cone weave",
-        how: "Line of 5 markers a yard apart. Weave through with inside and outside of the foot only, tight touches, eyes up between gates",
+        how: "Line of 5 cones a yard apart. Weave through with inside and outside of the foot only, tight touches",
         reps: "6 x 45 sec on, 45 sec off",
         minutes: 9,
+        cues: "Small touches, ball close, eyes up between gates",
       },
       {
         title: "La Croqueta cone weave",
-        how: "Weave the line using la croqueta at every marker: quick shift left foot to right, glide past. Both directions",
+        how: "Line of 5 cones a yard apart. La croqueta at every cone: quick shift foot to foot, glide past. Both directions",
         reps: "5 x 45 sec on, 45 sec off",
         minutes: 8,
+        cues: "Quick shift, stay low, accelerate out",
       },
       {
         title: "8-cone freestyle",
-        how: "8 markers in a box. Free dribble, every surface of both feet, one skill move at each marker you pass",
+        how: "8 cones scattered in a box. Free dribble, every surface of both feet, one skill move at each cone you pass",
         reps: "5 x 60 sec on, 45 sec off",
         minutes: 9,
+        cues: "Never the same move twice, change direction, head up",
       },
       {
         title: "Ronaldinho drill",
-        how: "Inside-touch inside-touch between the feet, then a sole roll to reset. Steady rhythm, eyes up on the last 10 of every set",
+        how: "Ball at your feet, small space. Inside-touch inside-touch between the feet, then a sole roll to reset. Steady rhythm",
         reps: "4 x 60 sec on, 30 sec off",
         minutes: 8,
+        cues: "Rhythm over speed, soft touches, eyes up on the last 10",
       },
       {
         title: "Figure-8 dribble",
-        how: "Tight figure-8 through two markers, close touches, head up on the straights",
+        how: "Two cones two yards apart. Tight figure-8 through them, close touches both feet",
         reps: "6 x 45 sec on, 45 sec off",
         minutes: 9,
+        cues: "Ball glued to the foot, head up on the straights",
       },
       {
         title: "Foundations + sole rolls",
-        how: "Foundations into sole rolls, both feet, eyes up for the whole set",
+        how: "Ball at your feet, small space. Foundations into sole rolls, both feet",
         reps: "6 x 60 sec on, 40 sec off",
         minutes: 10,
+        cues: "Eyes up the whole set, quick feet, stay on your toes",
       },
     ],
   },
@@ -116,28 +123,32 @@ export const METHOD_PILLARS: PillarGuide[] = [
     drills: [
       {
         title: "Weak-foot patterns",
-        how: "Dribble patterns through shoes, weak foot only. Slow is fine, clean is required",
+        how: "Line of cones or shoes. Dribble patterns through them, weak foot only",
         reps: "6 x 45 sec weak foot only, 45 sec off",
         minutes: 9,
+        cues: "Slow is fine, clean is required, every surface of the foot",
       },
       {
         title: "Weak-foot push-pulls",
-        how: "Push-pulls and toe-taps, weak foot only, eyes up on the last five",
+        how: "Ball at your feet, small space. Push-pulls and toe-taps, weak foot only",
         reps: "4 x 40, rest 30 sec",
         minutes: 8,
+        cues: "Sole to inside, steady rhythm, eyes up on the last five",
       },
       {
         title: "Weak-foot rebounds",
-        how: "Rebound passes off your wall: garage door, brick wall, or fence. Weak side only, cushion the return",
+        how: "Stand 5 yards from your wall: garage door, brick wall, or fence. Rebound passes, weak side only",
         reps: "4 x 20, rest 45 sec",
         minutes: 9,
+        cues: "Cushion the return, firm pass back, ankle locked",
         needsWall: true,
       },
       {
         title: "Weak-foot strikes",
-        how: "Strikes at a target: a shoe, a bag, anything to hit. Laces, follow through",
+        how: "Set a target 10 yards out: a cone, a shoe, a fence post. Strikes with the weak foot, laces only",
         reps: "4 x 10, collect and reset between sets",
         minutes: 9,
+        cues: "Plant foot beside the ball, laces, follow through at the target",
       },
     ],
   },
@@ -147,35 +158,40 @@ export const METHOD_PILLARS: PillarGuide[] = [
     drills: [
       {
         title: "Rebound passing",
-        how: "Firm two-touch passes off your wall: garage door, brick wall, or fence. Both feet",
+        how: "Stand 5 yards from your wall: garage door, brick wall, or fence. Firm two-touch passes, both feet",
         reps: "5 x 20 two-touch, rest 40 sec",
         minutes: 10,
+        cues: "Scan before the ball arrives, firm pass, first touch out of your feet",
         needsWall: true,
       },
       {
         title: "Rebound rhythm",
-        how: "One-touch returns off the wall, stay on your toes, scan between reps",
+        how: "Close to the wall, 3 yards. One-touch returns, keep the rally alive",
         reps: "5 x 45 sec one-touch, 45 sec off",
         minutes: 8,
+        cues: "On your toes, ankle locked, scan between reps",
         needsWall: true,
       },
       {
         title: "Weighted rolls",
-        how: "Inside-of-foot passes that stop dead on a towel or marker. Weight over power",
+        how: "Set a marker 10 yards out. Inside-of-foot passes that stop dead on it",
         reps: "3 x 12 each foot, walk and reset each set",
         minutes: 9,
+        cues: "Weight over power, the ball dies on the marker",
       },
       {
         title: "Pass and chase",
-        how: "Drive a firm pass to a marker 15 yards out, sprint after it, control before it stops, pass back the other way. Both feet",
+        how: "Set a marker 15 yards out. Drive a firm pass at it, sprint after the ball, control it before it stops, pass back the other way. Both feet",
         reps: "5 x 8 passes, the sprint is the rest",
         minutes: 10,
+        cues: "Firm pass, sprint immediately, clean first touch on arrival",
       },
       {
         title: "Gate passing",
         how: "Two markers a foot apart, 10 yards out. Pass through the gate, jog to collect, widen the distance every clean set",
         reps: "4 x 10 each foot, collect between sets",
         minutes: 9,
+        cues: "Strike through the middle, follow through at the gate",
       },
     ],
   },
@@ -185,21 +201,24 @@ export const METHOD_PILLARS: PillarGuide[] = [
     drills: [
       {
         title: "Scan + touch",
-        how: "Shoulder-check before every touch in a dribble pattern. Say what you saw out loud",
+        how: "Ball at your feet, open space. Shoulder-check before every touch in a dribble pattern",
         reps: "5 x 45 sec on, 45 sec off",
         minutes: 8,
+        cues: "Check both shoulders, say what you saw out loud",
       },
       {
         title: "Number-call scanning",
-        how: "A parent holds up fingers mid-drill. Read the number before your next touch",
+        how: "A parent or sibling stands behind you holding up fingers mid-drill. Read the number before your next touch",
         reps: "4 x 20 touches, rest 30 sec",
         minutes: 8,
+        cues: "Scan first, touch second, never guess",
       },
       {
         title: "Half-turn receives",
-        how: "Shadow rondo: receive on the half-turn away from imagined pressure, first touch out of your feet",
+        how: "Roll the ball to yourself or off a rebound. Receive on the half-turn away from imagined pressure, first touch out of your feet into space",
         reps: "3 x 15, reset after every receive",
         minutes: 10,
+        cues: "Shoulder-check before the ball arrives, open your hips, touch into space",
       },
     ],
   },
@@ -209,21 +228,24 @@ export const METHOD_PILLARS: PillarGuide[] = [
     drills: [
       {
         title: "Two-gate finish",
-        how: "Two gates made of shoes. Attack, then pick the open gate on a late call and explode through it",
+        how: "Two gates of cones or shoes, 5 yards apart. Attack the middle, pick one gate late, and explode through it",
         reps: "5 x 8, walk-back reset each rep",
         minutes: 10,
+        cues: "Decide late, commit fully, burst through the gate",
       },
       {
         title: "1v1 shadow",
-        how: "Commit the imaginary defender with a move, then decide: exit left, exit right, or stop and shield",
+        how: "One cone as the defender. Dribble at it, commit it with a move, then decide: exit left, exit right, or stop and shield",
         reps: "4 x 10, rest 40 sec",
         minutes: 9,
+        cues: "Sell the move, decide on the way in, never the same exit twice",
       },
       {
         title: "Clip study",
-        how: "Watch a pro in your position, note three decisions they made early, copy them tomorrow",
+        how: "Pull up a full match or extended highlights of a pro in your position. Watch them off the ball, note three decisions they made early",
         reps: "10 focused minutes, 3 takeaways written down",
         minutes: 10,
+        cues: "Watch the player, not the ball, steal one habit tomorrow",
       },
     ],
   },
@@ -233,27 +255,31 @@ export const METHOD_PILLARS: PillarGuide[] = [
     drills: [
       {
         title: "Move of the day",
-        how: `The cone is the defender. Pick one move (${ONE_V_ONE_MOVES.slice(0, 4).join(", ")}...), dribble at the cone, hit the move right at it, burst two steps past. Slow until clean, then full speed`,
+        how: `One cone as the defender, 10 yards of run-up. Pick one move (${ONE_V_ONE_MOVES.slice(0, 4).join(", ")}...), dribble at the cone, hit the move right at it, burst two steps past. Slow until clean, then full speed`,
         reps: "3 x 12 each side, slow then full speed",
         minutes: 9,
+        cues: "Sell the fake, drop the shoulder, explode out",
       },
       {
         title: "Chain two moves",
-        how: "Two cones 5 yards apart. Dribble at the first, hit move one, attack the second, hit move two: stepover into the chop, body feint into la croqueta. Defenders stop one move, not two",
+        how: "Two cones 5 yards apart. Dribble at the first, hit move one, attack the second, hit move two: stepover into the chop, body feint into la croqueta",
         reps: "4 x 10 full speed, rest 40 sec",
         minutes: 9,
+        cues: "Defenders stop one move, not two, accelerate between cones",
       },
       {
         title: "1v1 freestyle",
-        how: "Dribble at the cone with speed, sell any move from the library right at it, explode past. No hesitation, no repeats back to back",
+        how: "One cone as the defender, full run-up. Dribble at it with speed, sell any move from the library right at the cone, explode past",
         reps: "5 x 8 full speed, walk-back reset",
         minutes: 10,
+        cues: "No hesitation, no repeats back to back, game speed only",
       },
       {
         title: "Juggling record",
-        how: "Beat yesterday's best number, any surface counts",
+        how: "Just you and the ball. Beat yesterday's best number, any surface counts",
         reps: "6 record attempts, rest as needed",
         minutes: 8,
+        cues: "Soft touches, knees bent, reset calmly after a drop",
       },
     ],
   },
@@ -263,21 +289,24 @@ export const METHOD_PILLARS: PillarGuide[] = [
     drills: [
       {
         title: "Quick feet",
-        how: "Fast feet over a line or low ladder, minimal ground contact, think hot floor",
+        how: "Any line on the ground. Fast feet over and back, minimal ground contact",
         reps: "8 x 20 sec on, 40 sec off",
         minutes: 8,
+        cues: "Think hot floor, stay on the balls of your feet, arms pumping",
       },
       {
         title: "Acceleration starts",
-        how: "5-yard explosions from a standstill, walk back to recover fully",
+        how: "Two markers 5 yards apart. Explode from a standstill to the far marker, walk back",
         reps: "8 sprints, walk back for full recovery",
         minutes: 10,
+        cues: "Low first step, drive the arms, full recovery every rep",
       },
       {
         title: "Reaction starts",
-        how: "Sprint on a visual cue from a parent or a dropped sock. React, don't guess",
+        how: "Athletic stance, 10 yards of space. Sprint on a visual cue: a parent's hand drop or a tossed ball hitting the ground",
         reps: "6 starts, full recovery between",
         minutes: 8,
+        cues: "React, don't guess, first step forward never up",
       },
     ],
   },
@@ -292,7 +321,7 @@ export function methodologyContext(): string {
       `- ${g.pillar}: ${g.lens} Sample drills: ${g.drills
         .map(
           (d) =>
-            `${d.title}${d.needsWall ? " [wall]" : ""} (${d.reps} = ~${d.minutes} min): ${d.how}`
+            `${d.title}${d.needsWall ? " [wall]" : ""} (${d.reps} = ~${d.minutes} min): ${d.how}${d.cues ? `. Cues: ${d.cues}` : ""}`
         )
         .join("; ")}.`
   ).join("\n");

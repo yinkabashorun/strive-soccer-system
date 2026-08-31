@@ -75,6 +75,28 @@ export async function getHomework(playerId: string): Promise<Homework[]> {
   return (data as Homework[] | null) ?? [];
 }
 
+// Highest week number each player has homework for - i.e. how far ahead
+// their plan is built. One bulk query; the coach dashboard uses it to flag
+// who still needs next week built.
+export async function getPlanCoverage(): Promise<Record<string, number>> {
+  const supabase = createClient();
+  const out: Record<string, number> = {};
+  if (!supabase) {
+    for (const h of DEMO_HOMEWORK) {
+      out[h.player_id] = Math.max(out[h.player_id] ?? 0, h.week);
+    }
+    return out;
+  }
+  const { data, error } = await supabase
+    .from("elite_homework")
+    .select("player_id, week");
+  if (error || !data) return out;
+  for (const h of data as { player_id: string; week: number }[]) {
+    out[h.player_id] = Math.max(out[h.player_id] ?? 0, h.week ?? 0);
+  }
+  return out;
+}
+
 export async function getProgress(playerId: string): Promise<Progress[]> {
   const supabase = createClient();
   if (!supabase || isDemo(playerId)) return DEMO_PROGRESS.filter((p) => p.player_id === playerId);

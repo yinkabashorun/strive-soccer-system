@@ -238,6 +238,9 @@ function fallbackPlan(notes: string, player?: Player): GeneratedPlan {
   ];
   const picked: (typeof PROGRESS_METRICS)[number][] = [];
   for (const [re, pillar] of PILLAR_HINTS) {
+    // Passing is wall-only: a player with no wall trains it in coached
+    // sessions, so the pillar never becomes an at-home day for them.
+    if (pillar === "Passing" && player?.has_wall !== true) continue;
     if (re.test(haystack) && !picked.includes(pillar)) picked.push(pillar);
   }
   for (const fill of [
@@ -318,7 +321,7 @@ export async function generatePlanFromNotes(
       ? `TRAINING ENVIRONMENT (hard constraint): ${
           player.has_wall
             ? "HAS a wall to pass against (garage door, brick wall, or fence). Rebound and wall-passing drills are allowed."
-            : "NO wall available. NEVER prescribe rebound, wall-pass, or wall-return drills of any kind. Use ball-and-space alternatives instead (pass to a marker and sprint to the ball, weighted rolls that stop dead on a target, partner-free passing patterns)."
+            : "NO wall available. NEVER prescribe rebound, wall-pass, or wall-return drills of any kind. Passing cannot be trained properly solo without a wall, so do NOT build passing-focused drills or sessions for this player. Train other pillars; their passing work happens in coached sessions."
         } ${
           player.has_goal
             ? "HAS a goal to shoot at. Finishing drills at a real goal are allowed."

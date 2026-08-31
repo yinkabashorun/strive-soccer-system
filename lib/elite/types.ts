@@ -46,6 +46,10 @@ export type Player = {
   dominant_foot?: string;
   self_assessment?: Partial<Record<ProgressMetric, number>>; // 0-100 self ratings
   coach_memory?: string; // coach's freeform memory note, always fed to the AI
+  // Training environment (019): what the player can actually train with.
+  // null/undefined = never asked; the AI treats that as "no wall, no goal".
+  has_wall?: boolean | null;
+  has_goal?: boolean | null;
   onboarded_at?: string | null; // ISO; null = intake not completed yet
   week1_monday?: string | null; // NY Monday the program clock started (014)
 };

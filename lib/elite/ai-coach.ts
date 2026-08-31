@@ -244,9 +244,12 @@ function fallbackPlan(notes: string, player?: Player): GeneratedPlan {
   const pillars = picked.slice(0, SESSIONS_PER_WEEK);
 
   // One pillar per session, three library drills each (cycling if short).
+  // Wall drills only go to players who told us they have a wall.
   const sessions: GeneratedSession[] = pillars.map((pillar) => {
     const guide = METHOD_PILLARS.find((g) => g.pillar === pillar);
-    const library = guide?.drills ?? [];
+    const library = (guide?.drills ?? []).filter(
+      (d) => !d.needsWall || player?.has_wall === true
+    );
     const drills = Array.from({ length: 3 }, (_, d) => {
       const src = library[d % Math.max(1, library.length)];
       return {
@@ -300,8 +303,21 @@ export async function generatePlanFromNotes(
     };
 
   try {
+    // What this player can actually train with. Unknown (pre-019 intake)
+    // is treated as having neither, so drills always make sense.
+    const env = player
+      ? `TRAINING ENVIRONMENT (hard constraint): ${
+          player.has_wall
+            ? "HAS a wall to pass against (garage door, brick wall, or fence). Rebound and wall-passing drills are allowed."
+            : "NO wall available. NEVER prescribe rebound, wall-pass, or wall-return drills of any kind. Use ball-and-space alternatives instead (pass to a marker and sprint to the ball, weighted rolls that stop dead on a target, partner-free passing patterns)."
+        } ${
+          player.has_goal
+            ? "HAS a goal to shoot at. Finishing drills at a real goal are allowed."
+            : "NO goal available. Never prescribe shooting at a goal or net; strikes go at a target like a cone, a shoe, or a fence line."
+        }`
+      : "";
     const context = player
-      ? `Player: ${player.full_name}, age ${player.age}, ${player.position}, level ${player.level}. Current goals: ${player.goals.join("; ") || "n/a"}. Known weaknesses: ${player.weaknesses.join("; ") || "n/a"}.`
+      ? `Player: ${player.full_name}, age ${player.age}, ${player.position}, level ${player.level}. Current goals: ${player.goals.join("; ") || "n/a"}. Known weaknesses: ${player.weaknesses.join("; ") || "n/a"}.\n${env}`
       : "";
     const memoryBlock = memory?.trim() ? `\n\n${memory.trim()}` : "";
     const userMsg = `${context}${memoryBlock}\n\nCoach's raw session notes:\n"""\n${notes}\n"""\n\nUsing everything you know about this player above, generate the four-session weekly plan JSON now. Plan around their history, follow-through, trends, and the coach's note.`;

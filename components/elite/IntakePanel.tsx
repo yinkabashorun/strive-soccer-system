@@ -12,6 +12,10 @@ export function IntakePanel({ player }: { player: Player }) {
   if (player.dominant_foot) rows.push(["Dominant foot", player.dominant_foot]);
   if (player.parent_name) rows.push(["Parent", player.parent_name]);
   if (player.parent_email) rows.push(["Parent email", player.parent_email]);
+  if (typeof player.has_wall === "boolean")
+    rows.push(["Wall nearby", player.has_wall ? "Yes" : "No"]);
+  if (typeof player.has_goal === "boolean")
+    rows.push(["Goal nearby", player.has_goal ? "Yes" : "No"]);
 
   const hasIntake = rows.length > 0 || selfEntries.length > 0;
 

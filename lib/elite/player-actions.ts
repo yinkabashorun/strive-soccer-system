@@ -19,6 +19,8 @@ export type OnboardingInput = {
   self_assessment: Partial<Record<ProgressMetric, number>>;
   parent_name: string;
   parent_email: string;
+  has_wall: boolean;
+  has_goal: boolean;
 };
 
 // Complete a player's intake. Players cannot UPDATE their own elite_players
@@ -33,22 +35,31 @@ export async function completeOnboarding(input: OnboardingInput) {
   const admin = createServiceClient();
   if (!admin) return { ok: false as const };
 
-  await admin
+  const update = {
+    age: input.age || 0,
+    position: input.position.trim(),
+    level: input.level || "Developing",
+    club: input.club.trim(),
+    dominant_foot: input.dominant_foot,
+    goals: input.goals.filter(Boolean).slice(0, 6),
+    weaknesses: input.weaknesses.filter(Boolean).slice(0, 6),
+    self_assessment: input.self_assessment,
+    parent_name: input.parent_name.trim(),
+    parent_email: input.parent_email.trim(),
+    has_wall: input.has_wall,
+    has_goal: input.has_goal,
+    onboarded_at: new Date().toISOString(),
+  };
+  const { error } = await admin
     .from("elite_players")
-    .update({
-      age: input.age || 0,
-      position: input.position.trim(),
-      level: input.level || "Developing",
-      club: input.club.trim(),
-      dominant_foot: input.dominant_foot,
-      goals: input.goals.filter(Boolean).slice(0, 6),
-      weaknesses: input.weaknesses.filter(Boolean).slice(0, 6),
-      self_assessment: input.self_assessment,
-      parent_name: input.parent_name.trim(),
-      parent_email: input.parent_email.trim(),
-      onboarded_at: new Date().toISOString(),
-    })
+    .update(update)
     .eq("id", viewer.playerId);
+  if (error) {
+    // pre-019 (no has_wall/has_goal columns): save the rest so onboarding
+    // never blocks on a pending migration
+    const { has_wall: _w, has_goal: _g, ...legacy } = update;
+    await admin.from("elite_players").update(legacy).eq("id", viewer.playerId);
+  }
 
   // Tell the coach a new player finished onboarding.
   await sendCoachEmail(viewer.playerId, {

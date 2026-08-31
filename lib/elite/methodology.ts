@@ -45,6 +45,7 @@ export type PillarDrill = {
   how: string; // what to actually do, with the coaching cue
   reps: string; // real sets and reps WITH rest where it matters
   minutes: number; // honest time: work + rest between sets + setup
+  needsWall?: boolean; // only prescribed to players who have a wall (019)
 };
 
 export type PillarGuide = {
@@ -53,28 +54,59 @@ export type PillarGuide = {
   drills: PillarDrill[];
 };
 
+// Coach Yinka's 1v1 move library - the named moves every take-on drill
+// draws from. Shown to players by name so the vocabulary sticks.
+export const ONE_V_ONE_MOVES = [
+  "Stepover",
+  "Body Feint",
+  "Neymar Feint",
+  "Maradona",
+  "Mbappe Chop",
+  "La Croqueta",
+  "Elastico",
+  "Reverse Elastico",
+] as const;
+
 export const METHOD_PILLARS: PillarGuide[] = [
   {
     pillar: "Ball Mastery",
-    lens: "The ball is an extension of the foot. Manipulate, don't kick.",
+    lens: "The ball is an extension of the foot. Manipulate, don't kick. Cone work builds the touches; cones or shoes as markers.",
     drills: [
+      {
+        title: "Inside-outside cone weave",
+        how: "Line of 5 markers a yard apart. Weave through with inside and outside of the foot only, tight touches, eyes up between gates",
+        reps: "6 x 45 sec on, 45 sec off",
+        minutes: 9,
+      },
+      {
+        title: "La Croqueta cone weave",
+        how: "Weave the line using la croqueta at every marker: quick shift left foot to right, glide past. Both directions",
+        reps: "5 x 45 sec on, 45 sec off",
+        minutes: 8,
+      },
+      {
+        title: "8-cone freestyle",
+        how: "8 markers in a box. Free dribble, every surface of both feet, one skill move at each marker you pass",
+        reps: "5 x 60 sec on, 45 sec off",
+        minutes: 9,
+      },
+      {
+        title: "Ronaldinho drill",
+        how: "Inside-touch inside-touch between the feet, then a sole roll to reset. Steady rhythm, eyes up on the last 10 of every set",
+        reps: "4 x 60 sec on, 30 sec off",
+        minutes: 8,
+      },
+      {
+        title: "Figure-8 dribble",
+        how: "Tight figure-8 through two markers, close touches, head up on the straights",
+        reps: "6 x 45 sec on, 45 sec off",
+        minutes: 9,
+      },
       {
         title: "Foundations + sole rolls",
         how: "Foundations into sole rolls, both feet, eyes up for the whole set",
         reps: "6 x 60 sec on, 40 sec off",
         minutes: 10,
-      },
-      {
-        title: "Toe-taps + V-pulls",
-        how: "Toe-taps into V-pulls at a steady rhythm, switch the lead foot every set",
-        reps: "4 x 30 each foot, rest 30 sec",
-        minutes: 8,
-      },
-      {
-        title: "Figure-8 dribble",
-        how: "Tight figure-8 through two shoes, close touches, head up on the straights",
-        reps: "6 x 45 sec on, 45 sec off",
-        minutes: 9,
       },
     ],
   },
@@ -96,9 +128,10 @@ export const METHOD_PILLARS: PillarGuide[] = [
       },
       {
         title: "Weak-foot rebounds",
-        how: "Rebound passes off a wall: garage door, brick wall, or fence. Weak side only, cushion the return. No wall? Pass to a marker, sprint to the ball, repeat",
+        how: "Rebound passes off your wall: garage door, brick wall, or fence. Weak side only, cushion the return",
         reps: "4 x 20, rest 45 sec",
         minutes: 9,
+        needsWall: true,
       },
       {
         title: "Weak-foot strikes",
@@ -110,24 +143,38 @@ export const METHOD_PILLARS: PillarGuide[] = [
   },
   {
     pillar: "Passing",
-    lens: "Weight, accuracy, and a scan before every pass. The ball must come back: a wall makes solo passing real.",
+    lens: "Weight, accuracy, and a scan before every pass. A wall makes solo passing real; without one, pass-and-chase does the job.",
     drills: [
       {
         title: "Rebound passing",
-        how: "Firm two-touch passes off a wall: garage door, brick wall, or fence. Both feet. No wall? Pass to a marker, sprint to the ball, pass back the other way",
+        how: "Firm two-touch passes off your wall: garage door, brick wall, or fence. Both feet",
         reps: "5 x 20 two-touch, rest 40 sec",
         minutes: 10,
+        needsWall: true,
       },
       {
         title: "Rebound rhythm",
         how: "One-touch returns off the wall, stay on your toes, scan between reps",
         reps: "5 x 45 sec one-touch, 45 sec off",
         minutes: 8,
+        needsWall: true,
       },
       {
         title: "Weighted rolls",
         how: "Inside-of-foot passes that stop dead on a towel or marker. Weight over power",
         reps: "3 x 12 each foot, walk and reset each set",
+        minutes: 9,
+      },
+      {
+        title: "Pass and chase",
+        how: "Drive a firm pass to a marker 15 yards out, sprint after it, control before it stops, pass back the other way. Both feet",
+        reps: "5 x 8 passes, the sprint is the rest",
+        minutes: 10,
+      },
+      {
+        title: "Gate passing",
+        how: "Two markers a foot apart, 10 yards out. Pass through the gate, jog to collect, widen the distance every clean set",
+        reps: "4 x 10 each foot, collect between sets",
         minutes: 9,
       },
     ],
@@ -182,12 +229,24 @@ export const METHOD_PILLARS: PillarGuide[] = [
   },
   {
     pillar: "Confidence",
-    lens: "Bravery on the ball is trained. Reps remove fear.",
+    lens: `Bravery on the ball is trained. Reps remove fear. The Strive 1v1 move library: ${ONE_V_ONE_MOVES.join(", ")}. Every take-on drill names a real move from this list.`,
     drills: [
       {
-        title: "Take-on reps",
-        how: "Attack an imaginary defender, sell the move, burst two steps past. No hesitation",
-        reps: "5 x 10 full speed, rest 45 sec",
+        title: "Move of the day",
+        how: `Pick one move (${ONE_V_ONE_MOVES.slice(0, 4).join(", ")}...). Slow motion until it's clean, then full speed with a two-step burst out`,
+        reps: "3 x 12 each side, slow then full speed",
+        minutes: 9,
+      },
+      {
+        title: "Chain two moves",
+        how: "Chain yesterday's move into a second one at a marker: stepover into the chop, body feint into la croqueta. Defenders stop one move, not two",
+        reps: "4 x 10 full speed, rest 40 sec",
+        minutes: 9,
+      },
+      {
+        title: "1v1 freestyle",
+        how: "Attack an imaginary defender, sell any move from the library, burst two steps past. No hesitation, no repeats back to back",
+        reps: "5 x 8 full speed, walk-back reset",
         minutes: 10,
       },
       {
@@ -195,12 +254,6 @@ export const METHOD_PILLARS: PillarGuide[] = [
         how: "Beat yesterday's best number, any surface counts",
         reps: "6 record attempts, rest as needed",
         minutes: 8,
-      },
-      {
-        title: "Move mirror",
-        how: "One skill move in slow motion until it's clean, then at full speed",
-        reps: "3 x 12 each side, slow then full speed",
-        minutes: 9,
       },
     ],
   },
@@ -237,7 +290,10 @@ export function methodologyContext(): string {
   const pillars = METHOD_PILLARS.map(
     (g) =>
       `- ${g.pillar}: ${g.lens} Sample drills: ${g.drills
-        .map((d) => `${d.title} (${d.reps} = ~${d.minutes} min): ${d.how}`)
+        .map(
+          (d) =>
+            `${d.title}${d.needsWall ? " [wall]" : ""} (${d.reps} = ~${d.minutes} min): ${d.how}`
+        )
         .join("; ")}.`
   ).join("\n");
   return `STRIVE TRAINING METHODOLOGY (follow this exactly):
@@ -251,16 +307,18 @@ Weekly structure:
 - ${METHOD_STRUCTURE.skillDrillsPerSession} focused skill drills per session. Fewer, deeper reps, ${METHOD_STRUCTURE.setting}.
 
 Equipment rule (strict): assume the player has ONLY ${METHOD_STRUCTURE.assumedEquipment}.
-Rebound drills may assume a real wall: a garage door, brick wall, or fence.
-When a player might not have one, build the alternative into the drill itself
-using only the ball and space (e.g. "no wall? pass to a marker, sprint to the
-ball, repeat"). NEVER prescribe furniture or improvised household equipment:
-no couch cushions, chairs, mattresses, or anything that sounds like a hack.
-This is a professional program; every drill must sound like it. Never
-prescribe a goal, net, ladder, rebounder machine, or a partner unless the
-coach's notes or the player's profile explicitly mention them. If the coach
-mentions equipment (e.g. "200 wall passes"), use exactly that, nothing more.
-Shoes as markers or targets are fine.
+The player's TRAINING ENVIRONMENT line (in the user message) is a HARD
+constraint. Wall drills (marked "wall" below) ONLY for players who HAVE a
+wall; a goal only for players who HAVE a goal. If they lack it, the plan
+simply doesn't include those drills; swap in ball-and-space work that trains
+the same pillar (pass and chase, gate passing, weighted rolls). NEVER
+prescribe furniture or improvised household equipment: no couch cushions,
+chairs, mattresses, or anything that sounds like a hack. This is a
+professional program; every drill must sound like it. Never prescribe a
+net, ladder, rebounder machine, or a partner unless the coach's notes or
+the player's profile explicitly mention them. If the coach mentions
+equipment (e.g. "200 wall passes"), use exactly that, nothing more.
+Cones or shoes as markers, gates, and targets are always fine.
 
 The seven development pillars and how Strive coaches them (draw drills from here, adapted to the player's focus and level):
 ${pillars}`;

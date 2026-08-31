@@ -8,6 +8,7 @@ import { completeOnboarding } from "@/lib/elite/player-actions";
 
 const LEVELS = ["Developing", "Competitive", "Advanced", "Elite"];
 const FEET = ["Right", "Left", "Both"];
+const YES_NO = ["Yes", "No"];
 
 export function OnboardingForm({ defaultName }: { defaultName: string }) {
   const router = useRouter();
@@ -23,6 +24,8 @@ export function OnboardingForm({ defaultName }: { defaultName: string }) {
   const [weaknesses, setWeaknesses] = useState("");
   const [parentName, setParentName] = useState("");
   const [parentEmail, setParentEmail] = useState("");
+  const [hasWall, setHasWall] = useState("No");
+  const [hasGoal, setHasGoal] = useState("No");
   const [assessment, setAssessment] = useState<Record<string, number>>(
     Object.fromEntries(PROGRESS_METRICS.map((m) => [m, 50]))
   );
@@ -50,6 +53,8 @@ export function OnboardingForm({ defaultName }: { defaultName: string }) {
       self_assessment,
       parent_name: parentName,
       parent_email: parentEmail,
+      has_wall: hasWall === "Yes",
+      has_goal: hasGoal === "Yes",
     });
     if (!res.ok) {
       setError("Something went wrong saving your profile. Please try again.");
@@ -154,8 +159,24 @@ export function OnboardingForm({ defaultName }: { defaultName: string }) {
         </div>
       </Section>
 
+      {/* Training space */}
+      <Section title="Your training space" step="4">
+        <p className="-mt-2 mb-4 text-sm text-white/45">
+          Your plan only uses what you actually have. Answer honestly and
+          every drill will make sense.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Wall you can pass against nearby? (garage door, brick wall, fence)">
+            <Segmented options={YES_NO} value={hasWall} onChange={setHasWall} />
+          </Field>
+          <Field label="Goal you can shoot at nearby?">
+            <Segmented options={YES_NO} value={hasGoal} onChange={setHasGoal} />
+          </Field>
+        </div>
+      </Section>
+
       {/* Parent */}
-      <Section title="Parent / guardian" step="4">
+      <Section title="Parent / guardian" step="5">
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Parent or guardian name">
             <input

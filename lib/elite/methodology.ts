@@ -229,23 +229,23 @@ export const METHOD_PILLARS: PillarGuide[] = [
   },
   {
     pillar: "Confidence",
-    lens: `Bravery on the ball is trained. Reps remove fear. The Strive 1v1 move library: ${ONE_V_ONE_MOVES.join(", ")}. Every take-on drill names a real move from this list.`,
+    lens: `Bravery on the ball is trained. Reps remove fear. The Strive 1v1 move library: ${ONE_V_ONE_MOVES.join(", ")}. Every take-on drill names a real move from this list and follows the Strive pattern: the cone is the defender, dribble at it, hit the move right at the cone, explode past.`,
     drills: [
       {
         title: "Move of the day",
-        how: `Pick one move (${ONE_V_ONE_MOVES.slice(0, 4).join(", ")}...). Slow motion until it's clean, then full speed with a two-step burst out`,
+        how: `The cone is the defender. Pick one move (${ONE_V_ONE_MOVES.slice(0, 4).join(", ")}...), dribble at the cone, hit the move right at it, burst two steps past. Slow until clean, then full speed`,
         reps: "3 x 12 each side, slow then full speed",
         minutes: 9,
       },
       {
         title: "Chain two moves",
-        how: "Chain yesterday's move into a second one at a marker: stepover into the chop, body feint into la croqueta. Defenders stop one move, not two",
+        how: "Two cones 5 yards apart. Dribble at the first, hit move one, attack the second, hit move two: stepover into the chop, body feint into la croqueta. Defenders stop one move, not two",
         reps: "4 x 10 full speed, rest 40 sec",
         minutes: 9,
       },
       {
         title: "1v1 freestyle",
-        how: "Attack an imaginary defender, sell any move from the library, burst two steps past. No hesitation, no repeats back to back",
+        how: "Dribble at the cone with speed, sell any move from the library right at it, explode past. No hesitation, no repeats back to back",
         reps: "5 x 8 full speed, walk-back reset",
         minutes: 10,
       },

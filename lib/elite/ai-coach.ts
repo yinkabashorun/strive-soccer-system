@@ -71,7 +71,7 @@ Return ONLY valid JSON, no prose, matching this shape:
       "drills": [ { "title": "...", "exercise": "Setup first, one short sentence (what to lay out, e.g. 'Line of 5 cones a yard apart.'). Then the execution: exactly what to do, concrete and stepwise.", "reps": "real sets and reps like '3 x 20 each foot' or '4 x 45 sec', NEVER a bare duration", "minutes": 10, "notes": "2-3 key cues, short and punchy, like 'Sell the fake, drop the shoulder, explode out'" } ] }
   ],
   "parent_update": "2-4 sentences the coach can copy and paste directly into a text message to the parent. First person, the coach's voice ('I saw', 'this week I have him working on'). Refer to the player by first name. No greeting, no sign-off, no app jargon. It must read like a coach texting a parent, not a system summary.",
-  "player_summary": "2-3 sentences to the player, second person. The LAST sentence is always a future pace: the exact in-game moment this week's work buys them, concrete and visible (e.g. 'By Friday, that first touch under pressure is already taking you past the defender instead of into him.'). Never a vague 'you'll improve'.",
+  "player_summary": "2-3 sentences to the player, second person",
   "progress_updates": [ { "metric": "Scanning", "value": 72 } ],
   "next_week_objectives": [ "objective 1", "objective 2", "objective 3" ]
 }
@@ -203,7 +203,7 @@ function sanitize(plan: Partial<GeneratedPlan>, player?: Player): GeneratedPlan 
       `${player?.full_name ?? "Your player"} put in strong work this session and has a clear four-session plan for the week ahead.`,
     player_summary:
       plan.player_summary?.trim() ||
-      "Great session. Hit all four sessions this week, start each one with your plyometrics. By the weekend, the work you did alone is what shows up when the ball finds you in a game.",
+      "Great session. Hit all four sessions this week, start each one with your plyometrics, and you'll feel the difference.",
     progress_updates: (plan.progress_updates ?? [])
       .filter((p) => p && validMetrics.has(p.metric))
       .map((p) => ({

@@ -77,7 +77,7 @@ export function TodaySession({
             </span>
             <div>
               <div className="font-semibold text-bone">
-                {FUTURE_PACE[(session - 1) % FUTURE_PACE.length]}
+                That&apos;s how it&apos;s done.
               </div>
               <div className="text-sm text-white/55">
                 {session < totalSessions
@@ -150,16 +150,6 @@ export function TodaySession({
   );
 }
 
-// Completion lines rotate by session number. Each one points at the game,
-// not the workout: the rep they just did is a moment they'll live on the
-// field. Future pacing, built into the loop.
-const FUTURE_PACE = [
-  "Those touches show up Saturday.",
-  "Somewhere, the kid guarding you skipped today.",
-  "That rep is a defender you beat this weekend.",
-  "Game speed is built on days like this.",
-];
-
 // Shown when all four sessions are done: the week is conquered - stats,
 // a bonus option, and when the next week drops. No false "new week" alert.
 export function VictoryLap({
@@ -191,9 +181,6 @@ export function VictoryLap({
           <Stat label="Streak" value={`${streak}d`} />
         </div>
         <p className="mt-4 text-sm leading-relaxed text-white/65">
-          Four sessions nobody watched. The next game is where they show.
-        </p>
-        <p className="mt-2 text-sm leading-relaxed text-white/55">
           Victory lap: rerun your favorite session or get free plyo reps in.
           It keeps the streak alive.
         </p>

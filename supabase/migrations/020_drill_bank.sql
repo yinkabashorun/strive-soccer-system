@@ -5,7 +5,8 @@
 -- edited by the coach at /coach/drills. Generation COMPOSES weeks from
 -- these rows (reps/minutes may be adapted per player); it never invents
 -- drills. Seeded from the built-in Strive method library, including the
--- 1v1 Moves Series from the Strive course deck.
+-- 1v1 Moves Series from the Strive course deck. Every drill is fully
+-- solo, one factor max beyond the ball.
 --
 -- Coach-only: players never read this table (published plans copy the
 -- drill text into elite_homework).
@@ -33,9 +34,7 @@ create policy elite_drills_coach_all on public.elite_drills
   for all using (public.elite_is_coach()) with check (public.elite_is_coach());
 
 -- Seed: inserts any library drill whose title isn't in the bank yet, so
--- this is safe to run on an empty bank AND on one seeded by an earlier
--- version of this migration. Never touches drills the coach edited
--- (matching is by title only on insert; existing rows are left alone).
+-- it is safe to re-run and never touches drills the coach edited.
 insert into public.elite_drills (pillar, title, how, reps, minutes, cues, needs_wall, sort)
 select * from ( values
   ('Ball Mastery', 'Inside-outside cone weave', 'Line of 5 cones a yard apart. Weave through with inside and outside of the foot only, tight touches', '6 x 45 sec on, 45 sec off', 9, 'Small touches, ball close, eyes up between gates', false, 10),
@@ -53,7 +52,7 @@ select * from ( values
     ('Passing', 'Pass, turn, pass', '5 yards off the wall. Pass with the right, receive on the half-turn, two touches away, pass back with the left. Alternate every rep', '5 x 12, rest 40 sec', 10, 'Scan before the ball comes back, back-foot receive, both feet equal', true, 130),
     ('Passing', 'Driven wall passes', 'Back up to 15 yards from the wall. Driven passes with pace, control the return before it stops, reset and go again. Both feet', '4 x 10 each foot, rest 40 sec', 10, 'Strike through the ball, kill the return with one touch', true, 140),
     ('Scanning', 'Scan + touch', 'Ball at your feet, open space. Shoulder-check before every touch in a dribble pattern', '5 x 45 sec on, 45 sec off', 8, 'Check both shoulders, say what you saw out loud', false, 150),
-    ('Scanning', 'Number-call scanning', 'A parent or sibling stands behind you holding up fingers mid-drill. Read the number before your next touch', '4 x 20 touches, rest 30 sec', 8, 'Scan first, touch second, never guess', false, 160),
+    ('Scanning', 'Check and turn', 'Box of 4 cones, 5 yards apart. Dribble to the middle, shoulder-check both ways, then exit through a different side every rep', '4 x 10 turns, rest 30 sec', 8, 'Check both shoulders, decide from what you saw, never the same exit twice', false, 160),
     ('Scanning', 'Half-turn receives', 'Roll the ball out in front of you. Receive on the half-turn away from imagined pressure, first touch out of your feet into space', '3 x 15, reset after every receive', 10, 'Shoulder-check before the ball arrives, open your hips, touch into space', false, 170),
     ('Decision Making', 'Two-gate finish', 'Two gates of cones or shoes, 5 yards apart. Attack the middle, pick one gate late, and explode through it', '5 x 8, walk-back reset each rep', 10, 'Decide late, commit fully, burst through the gate', false, 180),
     ('Decision Making', '1v1 shadow', 'One cone as the defender. Dribble at it, commit it with a move, then decide: exit left, exit right, or stop and shield', '4 x 10, rest 40 sec', 9, 'Sell the move, decide on the way in, never the same exit twice', false, 190),
@@ -71,6 +70,6 @@ select * from ( values
     ('Confidence', 'Juggling record', 'Just you and the ball. Beat yesterday''s best number, any surface counts', '6 record attempts, rest as needed', 8, 'Soft touches, knees bent, reset calmly after a drop', false, 310),
     ('Speed', 'Quick feet', 'Any line on the ground. Fast feet over and back, minimal ground contact', '8 x 20 sec on, 40 sec off', 8, 'Think hot floor, stay on the balls of your feet, arms pumping', false, 320),
     ('Speed', 'Acceleration starts', 'Two markers 5 yards apart. Explode from a standstill to the far marker, walk back', '8 sprints, walk back for full recovery', 10, 'Low first step, drive the arms, full recovery every rep', false, 330),
-    ('Speed', 'Reaction starts', 'Athletic stance, 10 yards of space. Sprint on a visual cue: a parent''s hand drop or a tossed ball hitting the ground', '6 starts, full recovery between', 8, 'React, don''t guess, first step forward never up', false, 340)
+    ('Speed', 'Reaction starts', 'Athletic stance, 10 yards of space. Toss the ball out in front of you and sprint the instant it hits the ground', '6 starts, full recovery between', 8, 'React, don''t anticipate, first step forward never up', false, 340)
 ) as seed(pillar, title, how, reps, minutes, cues, needs_wall, sort)
 where seed.title not in (select title from public.elite_drills);

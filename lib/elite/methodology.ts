@@ -202,11 +202,11 @@ export const METHOD_PILLARS: PillarGuide[] = [
         cues: "Check both shoulders, say what you saw out loud",
       },
       {
-        title: "Number-call scanning",
-        how: "A parent or sibling stands behind you holding up fingers mid-drill. Read the number before your next touch",
-        reps: "4 x 20 touches, rest 30 sec",
+        title: "Check and turn",
+        how: "Box of 4 cones, 5 yards apart. Dribble to the middle, shoulder-check both ways, then exit through a different side every rep",
+        reps: "4 x 10 turns, rest 30 sec",
         minutes: 8,
-        cues: "Scan first, touch second, never guess",
+        cues: "Check both shoulders, decide from what you saw, never the same exit twice",
       },
       {
         title: "Half-turn receives",
@@ -349,10 +349,10 @@ export const METHOD_PILLARS: PillarGuide[] = [
       },
       {
         title: "Reaction starts",
-        how: "Athletic stance, 10 yards of space. Sprint on a visual cue: a parent's hand drop or a tossed ball hitting the ground",
+        how: "Athletic stance, 10 yards of space. Toss the ball out in front of you and sprint the instant it hits the ground",
         reps: "6 starts, full recovery between",
         minutes: 8,
-        cues: "React, don't guess, first step forward never up",
+        cues: "React, don't anticipate, first step forward never up",
       },
     ],
   },
@@ -411,10 +411,16 @@ sessions (their passing work happens in coached sessions); give them other
 pillars instead. NEVER
 prescribe furniture or improvised household equipment: no couch cushions,
 chairs, mattresses, or anything that sounds like a hack. This is a
-professional program; every drill must sound like it. Never prescribe a
-net, ladder, rebounder machine, or a partner unless the coach's notes or
-the player's profile explicitly mention them. If the coach mentions
-equipment (e.g. "200 wall passes"), use exactly that, nothing more.
+professional program; every drill must sound like it.
+
+FRICTION RULE (strict): every drill is FULLY SOLO and needs at most ONE
+factor beyond the ball: cones/markers, OR a wall, OR a phone (clip study).
+Never a second person (no parents, siblings, partners) and never two
+factors in one drill (e.g. a wall AND a person). Training must be
+no-nonsense and repetitive with zero friction between reps: one simple
+setup, then reps. Never prescribe a net, ladder, or rebounder machine.
+If the coach's notes explicitly mention equipment or a partner (e.g.
+"200 wall passes", "with his brother"), use exactly that, nothing more.
 Cones or shoes as markers, gates, and targets are always fine.
 
 THE DRILL BANK (compose-only, strict): every drill you prescribe MUST come

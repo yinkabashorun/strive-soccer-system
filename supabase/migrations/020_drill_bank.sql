@@ -4,7 +4,8 @@
 -- Every drill the AI is allowed to prescribe lives here, owned and
 -- edited by the coach at /coach/drills. Generation COMPOSES weeks from
 -- these rows (reps/minutes may be adapted per player); it never invents
--- drills. Seeded from the built-in Strive method library.
+-- drills. Seeded from the built-in Strive method library, including the
+-- 1v1 Moves Series from the Strive course deck.
 --
 -- Coach-only: players never read this table (published plans copy the
 -- drill text into elite_homework).
@@ -31,7 +32,10 @@ drop policy if exists elite_drills_coach_all on public.elite_drills;
 create policy elite_drills_coach_all on public.elite_drills
   for all using (public.elite_is_coach()) with check (public.elite_is_coach());
 
--- Seed once: only when the bank is empty, so re-running never duplicates.
+-- Seed: inserts any library drill whose title isn't in the bank yet, so
+-- this is safe to run on an empty bank AND on one seeded by an earlier
+-- version of this migration. Never touches drills the coach edited
+-- (matching is by title only on insert; existing rows are left alone).
 insert into public.elite_drills (pillar, title, how, reps, minutes, cues, needs_wall, sort)
 select * from ( values
   ('Ball Mastery', 'Inside-outside cone weave', 'Line of 5 cones a yard apart. Weave through with inside and outside of the foot only, tight touches', '6 x 45 sec on, 45 sec off', 9, 'Small touches, ball close, eyes up between gates', false, 10),
@@ -54,12 +58,19 @@ select * from ( values
     ('Decision Making', 'Two-gate finish', 'Two gates of cones or shoes, 5 yards apart. Attack the middle, pick one gate late, and explode through it', '5 x 8, walk-back reset each rep', 10, 'Decide late, commit fully, burst through the gate', false, 180),
     ('Decision Making', '1v1 shadow', 'One cone as the defender. Dribble at it, commit it with a move, then decide: exit left, exit right, or stop and shield', '4 x 10, rest 40 sec', 9, 'Sell the move, decide on the way in, never the same exit twice', false, 190),
     ('Decision Making', 'Clip study', 'Pull up a full match or extended highlights of a pro in your position. Watch them off the ball, note three decisions they made early', '10 focused minutes, 3 takeaways written down', 10, 'Watch the player, not the ball, steal one habit tomorrow', false, 200),
-    ('Confidence', 'Move of the day', 'One cone as the defender, 10 yards of run-up. Pick one move (Stepover, Body Feint, Neymar Feint, Maradona...), dribble at the cone, hit the move right at it, burst two steps past. Slow until clean, then full speed', '3 x 12 each side, slow then full speed', 9, 'Sell the fake, drop the shoulder, explode out', false, 210),
-    ('Confidence', 'Chain two moves', 'Two cones 5 yards apart. Dribble at the first, hit move one, attack the second, hit move two: stepover into the chop, body feint into la croqueta', '4 x 10 full speed, rest 40 sec', 9, 'Defenders stop one move, not two, accelerate between cones', false, 220),
-    ('Confidence', '1v1 freestyle', 'One cone as the defender, full run-up. Dribble at it with speed, sell any move from the library right at the cone, explode past', '5 x 8 full speed, walk-back reset', 10, 'No hesitation, no repeats back to back, game speed only', false, 230),
-    ('Confidence', 'Juggling record', 'Just you and the ball. Beat yesterday''s best number, any surface counts', '6 record attempts, rest as needed', 8, 'Soft touches, knees bent, reset calmly after a drop', false, 240),
-    ('Speed', 'Quick feet', 'Any line on the ground. Fast feet over and back, minimal ground contact', '8 x 20 sec on, 40 sec off', 8, 'Think hot floor, stay on the balls of your feet, arms pumping', false, 250),
-    ('Speed', 'Acceleration starts', 'Two markers 5 yards apart. Explode from a standstill to the far marker, walk back', '8 sprints, walk back for full recovery', 10, 'Low first step, drive the arms, full recovery every rep', false, 260),
-    ('Speed', 'Reaction starts', 'Athletic stance, 10 yards of space. Sprint on a visual cue: a parent''s hand drop or a tossed ball hitting the ground', '6 starts, full recovery between', 8, 'React, don''t guess, first step forward never up', false, 270)
+    ('Confidence', 'Neymar Feint', 'Open space or a single cone as the defender. Dribble forward, stop abruptly, and drop your shoulder in the opposite direction. Explode forward past the defender', '3 x 12 each side, rest 45 sec', 9, 'Sell the fake, drop shoulder, explode out', false, 210),
+    ('Confidence', 'Body Feint', 'One cone as the defender, 10 yards of run-up. Dribble at the cone, plant and dip your shoulder one way, take the ball the other way with the outside of the opposite foot', '3 x 12 each side, rest 45 sec', 9, 'Dip the shoulder, eyes sell it, cut sharp', false, 220),
+    ('Confidence', 'Maradona', 'One cone as the defender. Dribble in, stop the ball with one sole, spin 180 over it, drag it away with the other sole and accelerate out', '3 x 12 each side, rest 45 sec', 9, 'Stay low through the spin, body between ball and defender, exit at speed', false, 230),
+    ('Confidence', 'Mbappe Chop', 'One cone as the defender, attack it with speed. Light hop and chop the ball behind your plant leg with the inside of the foot, cutting across the defender', '3 x 12 each side, rest 45 sec', 9, 'Chop late, cut across his feet, first touch forward', false, 240),
+    ('Confidence', 'La Croqueta', 'One cone as the defender. Dribble at it and shift the ball from one foot to the other in one quick motion, sliding past the cone', '3 x 12 each side, rest 45 sec', 9, 'One clean shift, tight feet, burst the moment it moves', false, 250),
+    ('Confidence', 'Elastico', 'One cone as the defender. Push the outside of your foot into the ball, then snap it back inside in one fluid touch and go past', '3 x 12 each side, rest 45 sec', 9, 'One motion, sell the outside push, snap inside late', false, 260),
+    ('Confidence', 'Reverse Elastico', 'One cone as the defender. Fake inside with the inside of the foot, then snap the ball outside in one motion and accelerate away', '3 x 12 each side, rest 45 sec', 9, 'Sell the inside fake, snap out, go', false, 270),
+    ('Confidence', 'Stepover', 'One cone as the defender. Circle your foot over and around the ball to sell the cut, then take it the other way with the outside of the opposite foot', '3 x 12 each side, rest 45 sec', 9, 'Big sell, low hips, explode off the fake', false, 280),
+    ('Confidence', 'Chain two moves', 'Two cones 5 yards apart. Dribble at the first, hit move one, attack the second, hit move two: stepover into the chop, body feint into la croqueta', '4 x 10 full speed, rest 40 sec', 9, 'Defenders stop one move, not two, accelerate between cones', false, 290),
+    ('Confidence', '1v1 freestyle', 'One cone as the defender, full run-up. Dribble at it with speed, sell any move from the library right at the cone, explode past', '5 x 8 full speed, walk-back reset', 10, 'No hesitation, no repeats back to back, game speed only', false, 300),
+    ('Confidence', 'Juggling record', 'Just you and the ball. Beat yesterday''s best number, any surface counts', '6 record attempts, rest as needed', 8, 'Soft touches, knees bent, reset calmly after a drop', false, 310),
+    ('Speed', 'Quick feet', 'Any line on the ground. Fast feet over and back, minimal ground contact', '8 x 20 sec on, 40 sec off', 8, 'Think hot floor, stay on the balls of your feet, arms pumping', false, 320),
+    ('Speed', 'Acceleration starts', 'Two markers 5 yards apart. Explode from a standstill to the far marker, walk back', '8 sprints, walk back for full recovery', 10, 'Low first step, drive the arms, full recovery every rep', false, 330),
+    ('Speed', 'Reaction starts', 'Athletic stance, 10 yards of space. Sprint on a visual cue: a parent''s hand drop or a tossed ball hitting the ground', '6 starts, full recovery between', 8, 'React, don''t guess, first step forward never up', false, 340)
 ) as seed(pillar, title, how, reps, minutes, cues, needs_wall, sort)
-where not exists (select 1 from public.elite_drills);
+where seed.title not in (select title from public.elite_drills);

@@ -248,12 +248,63 @@ export const METHOD_PILLARS: PillarGuide[] = [
     pillar: "Confidence",
     lens: `Bravery on the ball is trained. Reps remove fear. The Strive 1v1 move library: ${ONE_V_ONE_MOVES.join(", ")}. Every take-on drill names a real move from this list and follows the Strive pattern: the cone is the defender, dribble at it, hit the move right at the cone, explode past.`,
     drills: [
+      // The 1v1 Moves Series from the Strive course deck: one drill per
+      // named move, all on the same pattern - the cone is the defender.
       {
-        title: "Move of the day",
-        how: `One cone as the defender, 10 yards of run-up. Pick one move (${ONE_V_ONE_MOVES.slice(0, 4).join(", ")}...), dribble at the cone, hit the move right at it, burst two steps past. Slow until clean, then full speed`,
-        reps: "3 x 12 each side, slow then full speed",
+        title: "Neymar Feint",
+        how: "Open space or a single cone as the defender. Dribble forward, stop abruptly, and drop your shoulder in the opposite direction. Explode forward past the defender",
+        reps: "3 x 12 each side, rest 45 sec",
         minutes: 9,
-        cues: "Sell the fake, drop the shoulder, explode out",
+        cues: "Sell the fake, drop shoulder, explode out",
+      },
+      {
+        title: "Body Feint",
+        how: "One cone as the defender, 10 yards of run-up. Dribble at the cone, plant and dip your shoulder one way, take the ball the other way with the outside of the opposite foot",
+        reps: "3 x 12 each side, rest 45 sec",
+        minutes: 9,
+        cues: "Dip the shoulder, eyes sell it, cut sharp",
+      },
+      {
+        title: "Maradona",
+        how: "One cone as the defender. Dribble in, stop the ball with one sole, spin 180 over it, drag it away with the other sole and accelerate out",
+        reps: "3 x 12 each side, rest 45 sec",
+        minutes: 9,
+        cues: "Stay low through the spin, body between ball and defender, exit at speed",
+      },
+      {
+        title: "Mbappe Chop",
+        how: "One cone as the defender, attack it with speed. Light hop and chop the ball behind your plant leg with the inside of the foot, cutting across the defender",
+        reps: "3 x 12 each side, rest 45 sec",
+        minutes: 9,
+        cues: "Chop late, cut across his feet, first touch forward",
+      },
+      {
+        title: "La Croqueta",
+        how: "One cone as the defender. Dribble at it and shift the ball from one foot to the other in one quick motion, sliding past the cone",
+        reps: "3 x 12 each side, rest 45 sec",
+        minutes: 9,
+        cues: "One clean shift, tight feet, burst the moment it moves",
+      },
+      {
+        title: "Elastico",
+        how: "One cone as the defender. Push the outside of your foot into the ball, then snap it back inside in one fluid touch and go past",
+        reps: "3 x 12 each side, rest 45 sec",
+        minutes: 9,
+        cues: "One motion, sell the outside push, snap inside late",
+      },
+      {
+        title: "Reverse Elastico",
+        how: "One cone as the defender. Fake inside with the inside of the foot, then snap the ball outside in one motion and accelerate away",
+        reps: "3 x 12 each side, rest 45 sec",
+        minutes: 9,
+        cues: "Sell the inside fake, snap out, go",
+      },
+      {
+        title: "Stepover",
+        how: "One cone as the defender. Circle your foot over and around the ball to sell the cut, then take it the other way with the outside of the opposite foot",
+        reps: "3 x 12 each side, rest 45 sec",
+        minutes: 9,
+        cues: "Big sell, low hips, explode off the fake",
       },
       {
         title: "Chain two moves",

@@ -5,6 +5,7 @@ import { unlockDueWeeks } from "@/lib/elite/unlock";
 
 const COACH_NAV: NavItem[] = [
   { href: "/coach", label: "Roster", icon: "Users" },
+  { href: "/coach/drills", label: "Drill bank", icon: "Dumbbell" },
 ];
 
 export default async function CoachLayout({

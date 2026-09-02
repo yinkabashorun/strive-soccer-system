@@ -7,7 +7,7 @@
 // docs/METHODOLOGY.md.
 // =====================================================================
 
-import { PROGRESS_METRICS, type ProgressMetric } from "./types";
+import { PROGRESS_METRICS, type Drill, type ProgressMetric } from "./types";
 import { SESSIONS_PER_WEEK } from "./training";
 
 // The non-negotiable structure of a Strive training week.
@@ -308,18 +308,39 @@ export const METHOD_PILLARS: PillarGuide[] = [
 ];
 
 // Builds the methodology block injected into the AI coach's system prompt so
-// every generated plan follows the Strive method.
-export function methodologyContext(): string {
+// every generated plan follows the Strive method. When the coach's drill
+// bank is passed, the AI composes strictly from it; without one it uses the
+// built-in library the same way.
+export function methodologyContext(bank?: Drill[]): string {
   const principles = METHOD_PRINCIPLES.map((p) => `- ${p}`).join("\n");
-  const pillars = METHOD_PILLARS.map(
-    (g) =>
-      `- ${g.pillar}: ${g.lens} Sample drills: ${g.drills
-        .map(
-          (d) =>
-            `${d.title}${d.needsWall ? " [wall]" : ""} (${d.reps} = ~${d.minutes} min): ${d.how}${d.cues ? `. Cues: ${d.cues}` : ""}`
-        )
-        .join("; ")}.`
-  ).join("\n");
+  const lensFor = (pillar: string) =>
+    METHOD_PILLARS.find((g) => g.pillar === pillar)?.lens ?? "";
+  const grouped = new Map<string, { title: string; how: string; reps: string; minutes: number; cues: string; wall: boolean }[]>();
+  if (bank && bank.length > 0) {
+    for (const d of bank) {
+      const list = grouped.get(d.pillar) ?? [];
+      list.push({ title: d.title, how: d.how, reps: d.reps, minutes: d.minutes, cues: d.cues, wall: d.needs_wall });
+      grouped.set(d.pillar, list);
+    }
+  } else {
+    for (const g of METHOD_PILLARS) {
+      grouped.set(
+        g.pillar,
+        g.drills.map((d) => ({ title: d.title, how: d.how, reps: d.reps, minutes: d.minutes, cues: d.cues ?? "", wall: Boolean(d.needsWall) }))
+      );
+    }
+  }
+  const pillars = Array.from(grouped.entries())
+    .map(
+      ([pillar, drills]) =>
+        `- ${pillar}: ${lensFor(pillar)} Drills: ${drills
+          .map(
+            (d) =>
+              `${d.title}${d.wall ? " [wall]" : ""} (${d.reps} = ~${d.minutes} min): ${d.how}${d.cues ? `. Cues: ${d.cues}` : ""}`
+          )
+          .join("; ")}.`
+    )
+    .join("\n");
   return `STRIVE TRAINING METHODOLOGY (follow this exactly):
 
 Principles:
@@ -345,7 +366,16 @@ the player's profile explicitly mention them. If the coach mentions
 equipment (e.g. "200 wall passes"), use exactly that, nothing more.
 Cones or shoes as markers, gates, and targets are always fine.
 
-The seven development pillars and how Strive coaches them (draw drills from here, adapted to the player's focus and level):
+THE DRILL BANK (compose-only, strict): every drill you prescribe MUST come
+from the bank below: keep the drill's title, setup/execution and cues
+essentially verbatim. What you ADAPT per player is the selection (which
+drills fit their weaknesses and the coach's notes) and the reps/minutes
+(scaled to their level, timing still adding up). Do NOT invent new drills,
+rename bank drills, or merge two into one. If the notes ask for work no
+bank drill covers, pick the closest bank drill and say what to emphasize
+in its notes field.
+
+The bank, by pillar:
 ${pillars}`;
 }
 

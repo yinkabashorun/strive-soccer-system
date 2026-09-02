@@ -17,6 +17,7 @@ import type {
   Checkin,
   Game,
   CoachNote,
+  Drill,
   EliteNotification,
   FilmUpload,
   Homework,
@@ -29,6 +30,7 @@ import type {
   RosterRow,
   WeeklyPlan,
 } from "./types";
+import { METHOD_PILLARS } from "./methodology";
 
 // Server-side data access for Strive Elite. Reads from Supabase when
 // configured, otherwise returns the demo dataset. The UI is identical in
@@ -95,6 +97,49 @@ export async function getPlanCoverage(): Promise<Record<string, number>> {
     out[h.player_id] = Math.max(out[h.player_id] ?? 0, h.week ?? 0);
   }
   return out;
+}
+
+// The built-in Strive method library shaped as Drill rows - what the bank
+// looks like before migration 020 runs (or in demo mode). Read-only.
+export function libraryDrills(): Drill[] {
+  const out: Drill[] = [];
+  let sort = 0;
+  for (const g of METHOD_PILLARS) {
+    for (const d of g.drills) {
+      sort += 10;
+      out.push({
+        id: `lib-${sort}`,
+        pillar: g.pillar,
+        title: d.title,
+        how: d.how,
+        reps: d.reps,
+        minutes: d.minutes,
+        cues: d.cues ?? "",
+        needs_wall: Boolean(d.needsWall),
+        active: true,
+        sort,
+      });
+    }
+  }
+  return out;
+}
+
+// The coach's drill bank: every drill the AI may prescribe. Falls back to
+// the built-in library pre-020 (or demo) so generation never has an empty
+// bank.
+export async function getDrillBank(): Promise<{ drills: Drill[]; fromDb: boolean }> {
+  const supabase = createClient();
+  if (!supabase) return { drills: libraryDrills(), fromDb: false };
+  const { data, error } = await supabase
+    .from("elite_drills")
+    .select("*")
+    .eq("active", true)
+    .order("pillar")
+    .order("sort");
+  if (error || !data || data.length === 0) {
+    return { drills: libraryDrills(), fromDb: false };
+  }
+  return { drills: data as Drill[], fromDb: true };
 }
 
 export async function getProgress(playerId: string): Promise<Progress[]> {

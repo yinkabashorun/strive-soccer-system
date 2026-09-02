@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getViewer } from "@/lib/elite/session";
-import { getPlayer } from "@/lib/elite/data";
+import { getDrillBank, getPlayer } from "@/lib/elite/data";
 import { generatePlanFromNotes } from "@/lib/elite/ai-coach";
 import { buildPlayerMemory } from "@/lib/elite/memory";
 
@@ -42,10 +42,15 @@ export async function POST(req: Request) {
     }
   }
 
+  // The coach's drill bank: generation composes strictly from it (falls
+  // back to the built-in library pre-020).
+  const { drills } = await getDrillBank();
+
   const { plan, source, reason, reasonKind } = await generatePlanFromNotes(
     notes,
     player,
-    memory
+    memory,
+    drills
   );
   return NextResponse.json({ plan, source, reason, reasonKind });
 }

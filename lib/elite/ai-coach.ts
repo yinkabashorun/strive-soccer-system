@@ -9,6 +9,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import {
   PROGRESS_METRICS,
+  type Drill,
   type GeneratedPlan,
   type GeneratedSession,
   type Player,
@@ -30,10 +31,12 @@ function client() {
   return _client;
 }
 
-const SYSTEM = `You are the head of player development for Strive Soccer FC, a
+// The system prompt is built per call so it always carries the coach's
+// CURRENT drill bank (the AI composes strictly from it).
+const buildSystem = (bank?: Drill[]) => `You are the head of player development for Strive Soccer FC, a
 premium youth soccer program.
 
-${methodologyContext()}
+${methodologyContext(bank)}
 
 A coach gives you raw notes from a 1-on-1 session. You turn them into a
 structured WEEKLY at-home plan the player follows on their own, plus a warm,
@@ -224,8 +227,9 @@ function titleCase(s: string): string {
 // Deterministic fallback when the AI can't run. HARD RULE: nothing the
 // coach typed may appear in any player-visible field — the notes are used
 // ONLY to pick which pillars to train. Drills come verbatim from the
-// Strive methodology library, so the week is generic but always real.
-function fallbackPlan(notes: string, player?: Player): GeneratedPlan {
+// coach's drill bank (or the built-in library when no bank is passed), so
+// the week is generic but always real.
+function fallbackPlan(notes: string, player?: Player, bank?: Drill[]): GeneratedPlan {
   const haystack = `${notes}\n${(player?.weaknesses ?? []).join("\n")}`.toLowerCase();
   const PILLAR_HINTS: [RegExp, (typeof PROGRESS_METRICS)[number]][] = [
     [/touch|control|mastery|dribbl/, "Ball Mastery"],
@@ -236,11 +240,27 @@ function fallbackPlan(notes: string, player?: Player): GeneratedPlan {
     [/confiden|brave|fear|1v1|take.?on/, "Confidence"],
     [/speed|quick|fast|explos|strong|stab|agil/, "Speed"],
   ];
+  // One pillar per session, three bank drills each (cycling if short).
+  // Wall drills only go to players who told us they have a wall.
+  const bankFor = (pillar: string) => {
+    if (bank && bank.length > 0) {
+      return bank
+        .filter((d) => d.pillar === pillar)
+        .map((d) => ({ title: d.title, how: d.how, reps: d.reps, minutes: d.minutes, cues: d.cues || undefined, needsWall: d.needs_wall }));
+    }
+    return METHOD_PILLARS.find((g) => g.pillar === pillar)?.drills ?? [];
+  };
+  // A pillar is only schedulable when the bank actually has drills the
+  // player can do (wall rules included).
+  const usable = (pillar: string) =>
+    bankFor(pillar).some((d) => !d.needsWall || player?.has_wall === true);
+
   const picked: (typeof PROGRESS_METRICS)[number][] = [];
   for (const [re, pillar] of PILLAR_HINTS) {
     // Passing is wall-only: a player with no wall trains it in coached
     // sessions, so the pillar never becomes an at-home day for them.
     if (pillar === "Passing" && player?.has_wall !== true) continue;
+    if (!usable(pillar)) continue;
     if (re.test(haystack) && !picked.includes(pillar)) picked.push(pillar);
   }
   for (const fill of [
@@ -248,17 +268,20 @@ function fallbackPlan(notes: string, player?: Player): GeneratedPlan {
     "Scanning",
     "Decision Making",
     "Confidence",
+    "Weak Foot",
+    "Speed",
   ] as const) {
     if (picked.length >= SESSIONS_PER_WEEK) break;
-    if (!picked.includes(fill)) picked.push(fill);
+    if (!picked.includes(fill) && usable(fill)) picked.push(fill);
   }
   const pillars = picked.slice(0, SESSIONS_PER_WEEK);
-
-  // One pillar per session, three library drills each (cycling if short).
-  // Wall drills only go to players who told us they have a wall.
+  // A thin bank can leave fewer usable pillars than sessions: repeat real
+  // pillar days rather than padding the week with filler.
+  for (let i = 0; pillars.length > 0 && pillars.length < SESSIONS_PER_WEEK; i++) {
+    pillars.push(pillars[i % picked.length]);
+  }
   const sessions: GeneratedSession[] = pillars.map((pillar) => {
-    const guide = METHOD_PILLARS.find((g) => g.pillar === pillar);
-    const library = (guide?.drills ?? []).filter(
+    const library = bankFor(pillar).filter(
       (d) => !d.needsWall || player?.has_wall === true
     );
     const drills = Array.from({ length: 3 }, (_, d) => {
@@ -298,7 +321,8 @@ function fallbackPlan(notes: string, player?: Player): GeneratedPlan {
 export async function generatePlanFromNotes(
   notes: string,
   player?: Player,
-  memory?: string
+  memory?: string,
+  bank?: Drill[] // the coach's drill bank; composition is restricted to it
 ): Promise<{
   plan: GeneratedPlan;
   source: "ai" | "fallback";
@@ -308,7 +332,7 @@ export async function generatePlanFromNotes(
   const c = client();
   if (!c)
     return {
-      plan: fallbackPlan(notes, player),
+      plan: fallbackPlan(notes, player, bank),
       source: "fallback",
       reason: "no_key",
       reasonKind: "no_key",
@@ -340,7 +364,7 @@ export async function generatePlanFromNotes(
       const res = await c.messages.create({
         model: MODEL,
         max_tokens: maxTokens,
-        system: SYSTEM,
+        system: buildSystem(bank),
         messages: [{ role: "user", content: userMsg }],
       });
       const text = res.content
@@ -365,7 +389,7 @@ export async function generatePlanFromNotes(
     }
     if (!parsed)
       return {
-        plan: fallbackPlan(notes, player),
+        plan: fallbackPlan(notes, player, bank),
         source: "fallback",
         reason:
           stop === "max_tokens"
@@ -379,7 +403,7 @@ export async function generatePlanFromNotes(
       err instanceof Error ? err.message.slice(0, 200) : "unknown error";
     console.log(`[strive-ai] api error: ${msg}`);
     return {
-      plan: fallbackPlan(notes, player),
+      plan: fallbackPlan(notes, player, bank),
       source: "fallback",
       reason: msg,
       reasonKind: "api_error",

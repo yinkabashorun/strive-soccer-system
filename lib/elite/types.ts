@@ -54,6 +54,21 @@ export type Player = {
   week1_monday?: string | null; // NY Monday the program clock started (014)
 };
 
+// One drill in the coach's drill bank (elite_drills, 020). The AI composes
+// weeks strictly from these; the coach owns them at /coach/drills.
+export type Drill = {
+  id: string;
+  pillar: ProgressMetric;
+  title: string;
+  how: string;
+  reps: string;
+  minutes: number;
+  cues: string;
+  needs_wall: boolean;
+  active: boolean;
+  sort: number;
+};
+
 // A player's structured weekly check-in (elite_checkins).
 export type Checkin = {
   id: string;

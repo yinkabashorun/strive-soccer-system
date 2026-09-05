@@ -182,6 +182,34 @@ export async function sendCoachEmail(
   return ghl || email;
 }
 
+// The coach's daily digest - one message to every coach/admin, built by the
+// cron route. Rides the same GHL webhook (audience "coach"), so the GHL
+// workflow that texts the coach picks it up with zero extra setup.
+export async function sendCoachDigest(body: string): Promise<boolean> {
+  if (!isGhlConfigured() && !isEmailConfigured()) return false;
+  const admin = createServiceClient();
+  if (!admin) return false;
+  const { data: coaches } = await admin
+    .from("elite_profiles")
+    .select("email, full_name")
+    .in("role", ["coach", "admin"]);
+  const recipients: Contact[] = ((coaches as { email: string | null; full_name: string | null }[] | null) ?? [])
+    .filter((c) => c.email)
+    .map((c) => ({ name: c.full_name || "Coach", email: c.email as string }));
+  if (recipients.length === 0) return false;
+
+  const mail: Mail = { subject: "Strive daily digest", body, event: "coach_daily_digest" };
+  const ghl = await dispatchGHL({
+    event: "coach_daily_digest",
+    audience: "coach",
+    subject: mail.subject,
+    body: mail.body,
+    recipients,
+  });
+  const email = await dispatchResend(recipients, mail);
+  return ghl || email;
+}
+
 function escapeHtml(s: string): string {
   return s
     .replace(/&/g, "&amp;")

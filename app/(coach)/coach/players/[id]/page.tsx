@@ -30,6 +30,8 @@ import { StatTile } from "@/components/elite/StatTile";
 import { ProgressPanel } from "@/components/elite/ProgressPanel";
 import { CoachWeekView } from "@/components/elite/CoachWeekView";
 import { SessionNotesStudio } from "@/components/elite/SessionNotesStudio";
+import { WeekRecapCard } from "@/components/elite/WeekRecapCard";
+import { buildWeekRecap } from "@/lib/elite/recap";
 import { EditableChips } from "@/components/elite/EditableChips";
 import { EditableMemory } from "@/components/elite/EditableMemory";
 import { CheckinsPanel } from "@/components/elite/CheckinsPanel";
@@ -91,6 +93,9 @@ export default async function PlayerProfile({
   for (const [s, arr] of sessAll) sess.set(s, arr.every(Boolean));
   const totalSessions = sessAll.size || 0;
   const doneSessions = [...sess.values()].filter(Boolean).length;
+
+  // Last week's accountability recap for the parent (null in week 1).
+  const recap = buildWeekRecap(player, homework);
 
   return (
     <div className="space-y-6">
@@ -206,6 +211,9 @@ export default async function PlayerProfile({
             </h2>
             <CoachGamesPanel playerId={player.id} games={games} />
           </section>
+
+          {/* Last week's parent recap - the accountability text */}
+          {recap && <WeekRecapCard recap={recap} />}
 
           {/* Build next week */}
           <SessionNotesStudio playerId={player.id} />

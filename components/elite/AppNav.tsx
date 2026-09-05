@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   BarChart3,
   Clipboard,
+  Dumbbell,
   Film,
   Home,
   LogOut,
@@ -25,6 +26,7 @@ const ICONS: Record<string, LucideIcon> = {
   Home,
   Clipboard,
   BarChart3,
+  Dumbbell,
   Film,
   Users,
   MessageSquare,

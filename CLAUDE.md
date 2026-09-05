@@ -21,8 +21,10 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
 ## Confirmed prices
 
 - 1:1 Drop-in: $75 · Starter 4 sessions: $280 · Development 8: $520 · Elite Season 12: $720
+- Duo (2 players, semi-private, same hour): drop-in $120 · 4-pack $440 · 8-pack $800 · Duo Hybrid $650/mo (weekly duo session + both on app). Quoted live Sept 2026.
 - Group drop-in: $45 · Small Group monthly: $148 (groups of 10, assistant coach)
 - Hybrid: $400/mo · App-only (Strive Elite): $199/mo (Coach leaned $199, stamp when fully confirmed)
+- September founding window: rate locked for life + first film breakdown free; closes Sept 30. App rises to $249 for new members Oct 1 (announced).
 - Camps: ~$3k profit each, quarterly · Youth pickup: $15 entry, monthly
 
 ## Policies

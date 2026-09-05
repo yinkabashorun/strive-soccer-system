@@ -7,7 +7,7 @@
 // docs/METHODOLOGY.md.
 // =====================================================================
 
-import { PROGRESS_METRICS, type ProgressMetric } from "./types";
+import { PROGRESS_METRICS, type Drill, type ProgressMetric } from "./types";
 import { SESSIONS_PER_WEEK } from "./training";
 
 // The non-negotiable structure of a Strive training week.
@@ -202,11 +202,11 @@ export const METHOD_PILLARS: PillarGuide[] = [
         cues: "Check both shoulders, say what you saw out loud",
       },
       {
-        title: "Number-call scanning",
-        how: "A parent or sibling stands behind you holding up fingers mid-drill. Read the number before your next touch",
-        reps: "4 x 20 touches, rest 30 sec",
+        title: "Check and turn",
+        how: "Box of 4 cones, 5 yards apart. Dribble to the middle, shoulder-check both ways, then exit through a different side every rep",
+        reps: "4 x 10 turns, rest 30 sec",
         minutes: 8,
-        cues: "Scan first, touch second, never guess",
+        cues: "Check both shoulders, decide from what you saw, never the same exit twice",
       },
       {
         title: "Half-turn receives",
@@ -248,12 +248,63 @@ export const METHOD_PILLARS: PillarGuide[] = [
     pillar: "Confidence",
     lens: `Bravery on the ball is trained. Reps remove fear. The Strive 1v1 move library: ${ONE_V_ONE_MOVES.join(", ")}. Every take-on drill names a real move from this list and follows the Strive pattern: the cone is the defender, dribble at it, hit the move right at the cone, explode past.`,
     drills: [
+      // The 1v1 Moves Series from the Strive course deck: one drill per
+      // named move, all on the same pattern - the cone is the defender.
       {
-        title: "Move of the day",
-        how: `One cone as the defender, 10 yards of run-up. Pick one move (${ONE_V_ONE_MOVES.slice(0, 4).join(", ")}...), dribble at the cone, hit the move right at it, burst two steps past. Slow until clean, then full speed`,
-        reps: "3 x 12 each side, slow then full speed",
+        title: "Neymar Feint",
+        how: "Open space or a single cone as the defender. Dribble forward, stop abruptly, and drop your shoulder in the opposite direction. Explode forward past the defender",
+        reps: "3 x 12 each side, rest 45 sec",
         minutes: 9,
-        cues: "Sell the fake, drop the shoulder, explode out",
+        cues: "Sell the fake, drop shoulder, explode out",
+      },
+      {
+        title: "Body Feint",
+        how: "One cone as the defender, 10 yards of run-up. Dribble at the cone, plant and dip your shoulder one way, take the ball the other way with the outside of the opposite foot",
+        reps: "3 x 12 each side, rest 45 sec",
+        minutes: 9,
+        cues: "Dip the shoulder, eyes sell it, cut sharp",
+      },
+      {
+        title: "Maradona",
+        how: "One cone as the defender. Dribble in, stop the ball with one sole, spin 180 over it, drag it away with the other sole and accelerate out",
+        reps: "3 x 12 each side, rest 45 sec",
+        minutes: 9,
+        cues: "Stay low through the spin, body between ball and defender, exit at speed",
+      },
+      {
+        title: "Mbappe Chop",
+        how: "One cone as the defender, attack it with speed. Light hop and chop the ball behind your plant leg with the inside of the foot, cutting across the defender",
+        reps: "3 x 12 each side, rest 45 sec",
+        minutes: 9,
+        cues: "Chop late, cut across his feet, first touch forward",
+      },
+      {
+        title: "La Croqueta",
+        how: "One cone as the defender. Dribble at it and shift the ball from one foot to the other in one quick motion, sliding past the cone",
+        reps: "3 x 12 each side, rest 45 sec",
+        minutes: 9,
+        cues: "One clean shift, tight feet, burst the moment it moves",
+      },
+      {
+        title: "Elastico",
+        how: "One cone as the defender. Push the outside of your foot into the ball, then snap it back inside in one fluid touch and go past",
+        reps: "3 x 12 each side, rest 45 sec",
+        minutes: 9,
+        cues: "One motion, sell the outside push, snap inside late",
+      },
+      {
+        title: "Reverse Elastico",
+        how: "One cone as the defender. Fake inside with the inside of the foot, then snap the ball outside in one motion and accelerate away",
+        reps: "3 x 12 each side, rest 45 sec",
+        minutes: 9,
+        cues: "Sell the inside fake, snap out, go",
+      },
+      {
+        title: "Stepover",
+        how: "One cone as the defender. Circle your foot over and around the ball to sell the cut, then take it the other way with the outside of the opposite foot",
+        reps: "3 x 12 each side, rest 45 sec",
+        minutes: 9,
+        cues: "Big sell, low hips, explode off the fake",
       },
       {
         title: "Chain two moves",
@@ -298,28 +349,49 @@ export const METHOD_PILLARS: PillarGuide[] = [
       },
       {
         title: "Reaction starts",
-        how: "Athletic stance, 10 yards of space. Sprint on a visual cue: a parent's hand drop or a tossed ball hitting the ground",
+        how: "Athletic stance, 10 yards of space. Toss the ball out in front of you and sprint the instant it hits the ground",
         reps: "6 starts, full recovery between",
         minutes: 8,
-        cues: "React, don't guess, first step forward never up",
+        cues: "React, don't anticipate, first step forward never up",
       },
     ],
   },
 ];
 
 // Builds the methodology block injected into the AI coach's system prompt so
-// every generated plan follows the Strive method.
-export function methodologyContext(): string {
+// every generated plan follows the Strive method. When the coach's drill
+// bank is passed, the AI composes strictly from it; without one it uses the
+// built-in library the same way.
+export function methodologyContext(bank?: Drill[]): string {
   const principles = METHOD_PRINCIPLES.map((p) => `- ${p}`).join("\n");
-  const pillars = METHOD_PILLARS.map(
-    (g) =>
-      `- ${g.pillar}: ${g.lens} Sample drills: ${g.drills
-        .map(
-          (d) =>
-            `${d.title}${d.needsWall ? " [wall]" : ""} (${d.reps} = ~${d.minutes} min): ${d.how}${d.cues ? `. Cues: ${d.cues}` : ""}`
-        )
-        .join("; ")}.`
-  ).join("\n");
+  const lensFor = (pillar: string) =>
+    METHOD_PILLARS.find((g) => g.pillar === pillar)?.lens ?? "";
+  const grouped = new Map<string, { title: string; how: string; reps: string; minutes: number; cues: string; wall: boolean }[]>();
+  if (bank && bank.length > 0) {
+    for (const d of bank) {
+      const list = grouped.get(d.pillar) ?? [];
+      list.push({ title: d.title, how: d.how, reps: d.reps, minutes: d.minutes, cues: d.cues, wall: d.needs_wall });
+      grouped.set(d.pillar, list);
+    }
+  } else {
+    for (const g of METHOD_PILLARS) {
+      grouped.set(
+        g.pillar,
+        g.drills.map((d) => ({ title: d.title, how: d.how, reps: d.reps, minutes: d.minutes, cues: d.cues ?? "", wall: Boolean(d.needsWall) }))
+      );
+    }
+  }
+  const pillars = Array.from(grouped.entries())
+    .map(
+      ([pillar, drills]) =>
+        `- ${pillar}: ${lensFor(pillar)} Drills: ${drills
+          .map(
+            (d) =>
+              `${d.title}${d.wall ? " [wall]" : ""} (${d.reps} = ~${d.minutes} min): ${d.how}${d.cues ? `. Cues: ${d.cues}` : ""}`
+          )
+          .join("; ")}.`
+    )
+    .join("\n");
   return `STRIVE TRAINING METHODOLOGY (follow this exactly):
 
 Principles:
@@ -339,13 +411,28 @@ sessions (their passing work happens in coached sessions); give them other
 pillars instead. NEVER
 prescribe furniture or improvised household equipment: no couch cushions,
 chairs, mattresses, or anything that sounds like a hack. This is a
-professional program; every drill must sound like it. Never prescribe a
-net, ladder, rebounder machine, or a partner unless the coach's notes or
-the player's profile explicitly mention them. If the coach mentions
-equipment (e.g. "200 wall passes"), use exactly that, nothing more.
+professional program; every drill must sound like it.
+
+FRICTION RULE (strict): every drill is FULLY SOLO and needs at most ONE
+factor beyond the ball: cones/markers, OR a wall, OR a phone (clip study).
+Never a second person (no parents, siblings, partners) and never two
+factors in one drill (e.g. a wall AND a person). Training must be
+no-nonsense and repetitive with zero friction between reps: one simple
+setup, then reps. Never prescribe a net, ladder, or rebounder machine.
+If the coach's notes explicitly mention equipment or a partner (e.g.
+"200 wall passes", "with his brother"), use exactly that, nothing more.
 Cones or shoes as markers, gates, and targets are always fine.
 
-The seven development pillars and how Strive coaches them (draw drills from here, adapted to the player's focus and level):
+THE DRILL BANK (compose-only, strict): every drill you prescribe MUST come
+from the bank below: keep the drill's title, setup/execution and cues
+essentially verbatim. What you ADAPT per player is the selection (which
+drills fit their weaknesses and the coach's notes) and the reps/minutes
+(scaled to their level, timing still adding up). Do NOT invent new drills,
+rename bank drills, or merge two into one. If the notes ask for work no
+bank drill covers, pick the closest bank drill and say what to emphasize
+in its notes field.
+
+The bank, by pillar:
 ${pillars}`;
 }
 

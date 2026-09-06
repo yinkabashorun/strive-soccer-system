@@ -21,6 +21,9 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
 ## Confirmed prices
 
 - 1:1 Drop-in: $75 · Starter 4 sessions: $280 · Development 8: $520 · Elite Season 12: $720
+- 1:1 Monthly: $280/mo — weekly fixed 1:1 slot, reschedule within the week via
+  Carla, no month-to-month rollover. Sits under Hybrid (pitch Hybrid first;
+  the $120 gap = app + film). Counts against the same scarce 1:1 slots.
 - Duo (2 players, semi-private, same hour): drop-in $120 · 4-pack $440 · 8-pack $800 · Duo Hybrid $650/mo (weekly duo session + both on app). Quoted live Sept 2026.
 - Group drop-in: $45 · Small Group monthly: $148 (groups of 10, assistant coach)
 - Hybrid: $400/mo · App-only (Strive Elite): $199/mo (Coach leaned $199, stamp when fully confirmed)

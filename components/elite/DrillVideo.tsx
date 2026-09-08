@@ -1,22 +1,39 @@
 "use client";
 
 import { useState } from "react";
-import { PlayCircle, X } from "lucide-react";
+import { Play, X } from "lucide-react";
 
-// Inline demo player for a drill card. Tap to expand a framed player right
-// in place: portrait crop that keeps the ball work centered without
-// swallowing the screen, tap the X (or the button again) to collapse.
-// preload="metadata" so a week full of videos costs nothing until tapped.
-export function DrillVideo({ src, label = "Watch the demo" }: { src: string; label?: string }) {
+// Inline demo player for a drill card. Collapsed it shows a real thumbnail
+// (the video's own opening frame via #t=0.5 + preload=metadata) with a play
+// badge; tapping expands a framed player in place - portrait crop that
+// keeps the ball work centered without swallowing the screen.
+export function DrillVideo({ src, label = "Watch demo" }: { src: string; label?: string }) {
   const [open, setOpen] = useState(false);
 
   if (!open) {
     return (
       <button
         onClick={() => setOpen(true)}
-        className="mt-1.5 inline-flex items-center gap-1.5 text-xs font-medium text-accent hover:underline"
+        className="relative mt-2 block w-full max-w-[170px] overflow-hidden rounded-xl border border-white/12 bg-black text-left transition-transform active:scale-[0.98]"
+        aria-label={label}
       >
-        <PlayCircle className="h-4 w-4" /> {label}
+        <video
+          src={`${src}#t=0.5`}
+          preload="metadata"
+          muted
+          playsInline
+          aria-hidden
+          tabIndex={-1}
+          className="pointer-events-none aspect-[16/10] w-full object-cover opacity-90"
+        />
+        <span className="pointer-events-none absolute inset-0 grid place-items-center">
+          <span className="grid h-10 w-10 place-items-center rounded-full bg-black/55 backdrop-blur-sm">
+            <Play className="ml-0.5 h-4 w-4 text-white" fill="currentColor" />
+          </span>
+        </span>
+        <span className="pointer-events-none absolute bottom-1.5 left-2 text-[10px] font-semibold uppercase tracking-wider text-white/85">
+          {label}
+        </span>
       </button>
     );
   }

@@ -1,10 +1,13 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
-import { Dumbbell, Loader2, Pencil, Plus, Trash2, X } from "lucide-react";
+import { useMemo, useRef, useState, useTransition } from "react";
+import { Dumbbell, Loader2, Pencil, Plus, Trash2, Upload, X } from "lucide-react";
 import { PROGRESS_METRICS, type Drill } from "@/lib/elite/types";
 import { saveDrill, deleteDrill, type DrillInput } from "@/lib/elite/drill-actions";
+import { createClient } from "@/lib/elite/supabase/client";
 import { cn } from "@/lib/utils";
+
+const MAX_VIDEO_MB = 150;
 
 // The coach's drill bank. Everything the AI is allowed to prescribe lives
 // here: edit a drill once and every future plan uses the fixed version.
@@ -33,7 +36,51 @@ export function DrillBank({
 }) {
   const [editing, setEditing] = useState<DrillInput | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
   const [pending, startTransition] = useTransition();
+
+  // Straight from the browser into the project's drill-videos bucket
+  // (coach session, RLS-gated) - no server hop, no size ceiling issues.
+  async function uploadVideo(file: File) {
+    setError(null);
+    if (file.size > MAX_VIDEO_MB * 1024 * 1024) {
+      setError(`That video is over ${MAX_VIDEO_MB}MB. Trim or compress it first.`);
+      return;
+    }
+    const supabase = createClient();
+    if (!supabase) {
+      setError("Uploads need the live app (Supabase not connected here).");
+      return;
+    }
+    setUploading(true);
+    try {
+      const ext = (file.name.split(".").pop() || "mp4").toLowerCase();
+      const slug = (editing?.title || "drill")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .slice(0, 40) || "drill";
+      const path = `${slug}-${Date.now()}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("drill-videos")
+        .upload(path, file, {
+          contentType: file.type || "video/mp4",
+          cacheControl: "31536000",
+        });
+      if (upErr) {
+        setError(
+          "Upload failed. Run database migration 022 first, or try again."
+        );
+        return;
+      }
+      const { data } = supabase.storage.from("drill-videos").getPublicUrl(path);
+      setEditing((e) => (e ? { ...e, video_url: data.publicUrl } : e));
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
 
   const byPillar = useMemo(() => {
     const m = new Map<string, Drill[]>();
@@ -152,12 +199,38 @@ export function DrillBank({
             className={inputCls}
           />
           <div className="grid gap-3 sm:grid-cols-2">
-            <input
-              value={editing.video_url}
-              onChange={(e) => setEditing({ ...editing, video_url: e.target.value })}
-              placeholder="Demo video link (https://...)"
-              className={inputCls}
-            />
+            <div className="flex gap-2">
+              <input
+                value={editing.video_url}
+                onChange={(e) => setEditing({ ...editing, video_url: e.target.value })}
+                placeholder="Demo video link (or upload)"
+                className={inputCls}
+              />
+              <input
+                ref={fileRef}
+                type="file"
+                accept="video/*"
+                hidden
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) void uploadVideo(f);
+                }}
+              />
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+                className="flex shrink-0 items-center gap-1.5 rounded-xl border border-white/15 px-3.5 text-sm font-medium text-white/70 hover:border-accent/40 hover:text-accent"
+                title="Upload a video file"
+              >
+                {uploading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Upload className="h-4 w-4" />
+                )}
+                {uploading ? "Uploading" : "Upload"}
+              </button>
+            </div>
             <input
               value={editing.demo_by}
               onChange={(e) => setEditing({ ...editing, demo_by: e.target.value })}

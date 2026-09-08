@@ -6,11 +6,11 @@ import {
   ChevronDown,
   Clock,
   PartyPopper,
-  PlayCircle,
   StickyNote,
 } from "lucide-react";
 import type { Homework } from "@/lib/elite/types";
 import { toggleHomework } from "@/lib/elite/player-actions";
+import { DrillVideo } from "./DrillVideo";
 import { cn } from "@/lib/utils";
 
 const DEFAULT_MIN = 15;
@@ -236,16 +236,7 @@ function DrillRow({
             {hw.notes}
           </p>
         )}
-        {hw.video_url && (
-          <a
-            href={hw.video_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-accent hover:underline"
-          >
-            <PlayCircle className="h-4 w-4" /> Watch reference
-          </a>
-        )}
+        {hw.video_url && <DrillVideo src={hw.video_url} />}
       </div>
     </li>
   );

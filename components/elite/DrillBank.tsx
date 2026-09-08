@@ -20,6 +20,8 @@ const EMPTY: DrillInput = {
   minutes: 10,
   cues: "",
   needs_wall: false,
+  video_url: "",
+  demo_by: "",
 };
 
 export function DrillBank({
@@ -149,6 +151,20 @@ export function DrillBank({
             placeholder="Key cues: Sell the fake, drop the shoulder, explode out"
             className={inputCls}
           />
+          <div className="grid gap-3 sm:grid-cols-2">
+            <input
+              value={editing.video_url}
+              onChange={(e) => setEditing({ ...editing, video_url: e.target.value })}
+              placeholder="Demo video link (https://...)"
+              className={inputCls}
+            />
+            <input
+              value={editing.demo_by}
+              onChange={(e) => setEditing({ ...editing, demo_by: e.target.value })}
+              placeholder="Demoed by (e.g. Marcus, Salisbury)"
+              className={inputCls}
+            />
+          </div>
           {error && <p className="text-sm text-red-400">{error}</p>}
           <button onClick={submit} disabled={pending} className="btn-accent px-5 py-2.5 text-sm">
             {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save drill"}
@@ -181,6 +197,20 @@ export function DrillBank({
                           wall
                         </span>
                       )}
+                      {d.video_url ? (
+                        <a
+                          href={d.video_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="rounded-full border border-accent/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-accent hover:bg-accent/10"
+                        >
+                          video
+                        </a>
+                      ) : (
+                        <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/25">
+                          no video
+                        </span>
+                      )}
                     </div>
                     <p className="mt-1 text-sm leading-snug text-white/55">{d.how}</p>
                     {d.cues && (
@@ -199,6 +229,8 @@ export function DrillBank({
                           minutes: d.minutes,
                           cues: d.cues,
                           needs_wall: d.needs_wall,
+                          video_url: d.video_url ?? "",
+                          demo_by: d.demo_by ?? "",
                         })
                       }
                       className="rounded-lg p-2 text-white/40 hover:bg-white/5 hover:text-bone"

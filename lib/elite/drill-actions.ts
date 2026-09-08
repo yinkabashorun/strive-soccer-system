@@ -14,6 +14,8 @@ export type DrillInput = {
   minutes: number;
   cues: string;
   needs_wall: boolean;
+  video_url: string;
+  demo_by: string;
 };
 
 // Coach-only writes. Demo mode returns ok without persisting so the tour
@@ -43,12 +45,23 @@ export async function saveDrill(input: DrillInput) {
     minutes: Math.max(3, Math.min(30, Math.round(input.minutes) || 10)),
     cues: input.cues.trim().slice(0, 240),
     needs_wall: Boolean(input.needs_wall),
+    video_url: /^https?:\/\/.+/.test(input.video_url.trim())
+      ? input.video_url.trim().slice(0, 500)
+      : "",
+    demo_by: input.demo_by.trim().slice(0, 80),
   };
   if (!row.title) return { ok: false as const, error: "Give the drill a name." };
 
-  const { error } = input.id
-    ? await c.supabase.from("elite_drills").update(row).eq("id", input.id)
-    : await c.supabase.from("elite_drills").insert(row);
+  const write = (r: object) =>
+    input.id
+      ? c.supabase.from("elite_drills").update(r).eq("id", input.id)
+      : c.supabase.from("elite_drills").insert(r);
+  let { error } = await write(row);
+  if (error) {
+    // pre-021 (no video columns): save the rest so editing never blocks
+    const { video_url: _v, demo_by: _d, ...legacy } = row;
+    ({ error } = await write(legacy));
+  }
   if (error) {
     // pre-020: the table doesn't exist yet
     return {

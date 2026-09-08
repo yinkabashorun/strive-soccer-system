@@ -67,6 +67,9 @@ export type Drill = {
   needs_wall: boolean;
   active: boolean;
   sort: number;
+  // 021: demo video + credit ("" = none)
+  video_url?: string;
+  demo_by?: string;
 };
 
 // A player's structured weekly check-in (elite_checkins).

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
-import { Check, Flame } from "lucide-react";
+import { Check, Flame, PlayCircle } from "lucide-react";
 import type { Homework } from "@/lib/elite/types";
 import { toggleHomework } from "@/lib/elite/player-actions";
 import { cn } from "@/lib/utils";
@@ -141,6 +141,16 @@ export function TodaySession({
                     </span>
                   )}
                 </button>
+                {d.video_url && !done && (
+                  <a
+                    href={d.video_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-1.5 inline-flex items-center gap-1.5 pl-[52px] text-xs font-medium text-accent hover:underline"
+                  >
+                    <PlayCircle className="h-4 w-4" /> Watch the demo
+                  </a>
+                )}
               </li>
             );
           })}

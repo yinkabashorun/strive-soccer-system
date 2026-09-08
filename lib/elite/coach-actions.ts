@@ -5,6 +5,7 @@ import { createClient } from "./supabase/server";
 import { getViewer } from "./session";
 import { sendPlayerEmail } from "./email";
 import { mondayOfWeekNY, nextMondayNY, unlockInstant } from "./time";
+import { getDrillBank } from "./data";
 import type { FilmReview, GeneratedPlan } from "./types";
 
 async function requireCoach() {
@@ -339,6 +340,19 @@ export async function applyGeneratedPlan(
   // 2) replace this week's homework - four sessions, each starting with a
   //    plyometric warm-up (already baked into plan.sessions).
   await supabase.from("elite_homework").delete().eq("player_id", playerId).eq("week", week);
+
+  // Each drill carries its demo video from the bank (matched by title,
+  // case-insensitive). Best-effort: no bank, no videos, nothing breaks.
+  const videoByTitle = new Map<string, string>();
+  try {
+    const { drills: bank } = await getDrillBank();
+    for (const b of bank) {
+      if (b.video_url) videoByTitle.set(b.title.trim().toLowerCase(), b.video_url);
+    }
+  } catch {
+    // bank unavailable: publish without videos
+  }
+
   const rows = plan.sessions.flatMap((s, si) =>
     s.drills.map((d, di) => ({
       player_id: playerId,
@@ -349,6 +363,7 @@ export async function applyGeneratedPlan(
       reps: d.reps,
       duration_min: d.minutes ?? 15,
       notes: d.notes ?? null,
+      video_url: videoByTitle.get(d.title.trim().toLowerCase()) ?? null,
       sort: di,
     }))
   );

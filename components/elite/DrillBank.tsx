@@ -5,6 +5,7 @@ import { Dumbbell, Loader2, Pencil, Plus, Trash2, Upload, X } from "lucide-react
 import { PROGRESS_METRICS, type Drill } from "@/lib/elite/types";
 import { saveDrill, deleteDrill, type DrillInput } from "@/lib/elite/drill-actions";
 import { createClient } from "@/lib/elite/supabase/client";
+import { DrillVideo } from "./DrillVideo";
 import { cn } from "@/lib/utils";
 
 const MAX_VIDEO_MB = 150;
@@ -270,16 +271,7 @@ export function DrillBank({
                           wall
                         </span>
                       )}
-                      {d.video_url ? (
-                        <a
-                          href={d.video_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="rounded-full border border-accent/40 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-accent hover:bg-accent/10"
-                        >
-                          video
-                        </a>
-                      ) : (
+                      {!d.video_url && (
                         <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/25">
                           no video
                         </span>
@@ -289,6 +281,7 @@ export function DrillBank({
                     {d.cues && (
                       <p className="mt-1 text-xs text-white/40">Cues: {d.cues}</p>
                     )}
+                    {d.video_url && <DrillVideo src={d.video_url} label="Preview" />}
                   </div>
                   <div className={cn("flex shrink-0 gap-1", pending && "opacity-40")}>
                     <button

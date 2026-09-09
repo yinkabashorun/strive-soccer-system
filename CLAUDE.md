@@ -20,7 +20,7 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
 
 ## Confirmed prices
 
-- 1:1 Drop-in: $75 · Starter 4 sessions: $280 · Development 8: $520 · Elite Season 12: $720
+- 1:1 Drop-in: $80 (raised from $75, Sept 2026) · Starter 4 sessions: $280 · Development 8: $520 · Elite Season 12: $720
 - 1:1 Monthly: $280/mo — weekly fixed 1:1 slot, reschedule within the week via
   Carla, no month-to-month rollover. Sits under Hybrid (pitch Hybrid first;
   the $120 gap = app + film). Counts against the same scarce 1:1 slots.
@@ -49,6 +49,11 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
 - Mateo ("Teo"): Ashburn territory partner, old teammate. Strive gets 30% of all
   Ashburn gross (group/privates/app); sponsors 100% Strive; runs on Strive app +
   CRM; posts content for Strive IG. One-page memo drafted, get it signed.
+- Gary Grigoryan: partner coach (1:1s, group, content, promotion), announced
+  Sept 2026. Resume: Armenia U19 NT (UEFA U19 qualifiers), SC Fortuna Koln U19
+  (U19 Bundesliga), Armenia U16/17 NT, Captain of VDA, 2x Mid-Atlantic
+  All-Conference First Team. Split negotiated at $75 sessions (Gary $40 /
+  Strive $35); UNCONFIRMED how the $80 raise splits. One-pager unsigned.
 - Assistant coach planned for Friday groups.
 
 ## Business context

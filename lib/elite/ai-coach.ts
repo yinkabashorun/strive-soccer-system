@@ -211,7 +211,18 @@ function buildSessions(
     }
     out.push({
       title: s?.title?.trim() || `Session ${i + 1}`,
-      drills: [{ ...plyoForSession(spin + i + 1, plyos) }, ...skills],
+      // Recorded bank plyos are single exercises (~4 min each), so a session
+      // opens with TWO back to back for a real ~8-minute warm-up block. The
+      // built-in fallbacks are full circuits, so one of those is enough.
+      drills: [
+        ...(plyos && plyos.length >= 2
+          ? [
+              { ...plyoForSession(spin + 2 * i + 1, plyos) },
+              { ...plyoForSession(spin + 2 * i + 2, plyos) },
+            ]
+          : [{ ...plyoForSession(spin + i + 1, plyos) }]),
+        ...skills,
+      ],
     });
   }
   return out;

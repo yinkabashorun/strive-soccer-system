@@ -58,7 +58,7 @@ export type Player = {
 // weeks strictly from these; the coach owns them at /coach/drills.
 export type Drill = {
   id: string;
-  pillar: ProgressMetric;
+  pillar: ProgressMetric | typeof PLYO_PILLAR;
   title: string;
   how: string;
   reps: string;
@@ -151,6 +151,11 @@ export const PROGRESS_METRICS = [
 ] as const;
 
 export type ProgressMetric = (typeof PROGRESS_METRICS)[number];
+
+// Drill-bank pillar for plyometric warm-ups. Not a tracked progress metric:
+// every session opens with one automatically, so the AI never prescribes
+// them as skill drills and players aren't rated on them.
+export const PLYO_PILLAR = "Plyo";
 
 export type Progress = {
   id: string;

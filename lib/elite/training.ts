@@ -52,6 +52,10 @@ export const PLYO_WARMUPS: Drill[] = [
   },
 ];
 
-export function plyoForSession(session: number): Drill {
-  return PLYO_WARMUPS[(session - 1) % PLYO_WARMUPS.length];
+// When the coach's drill bank has recorded plyo warm-ups (pillar "Plyo"),
+// those replace the built-in four - which also means every warm-up carries
+// its demo video. The built-ins remain the fallback for an empty bank.
+export function plyoForSession(session: number, plyos?: Drill[]): Drill {
+  const pool = plyos && plyos.length > 0 ? plyos : PLYO_WARMUPS;
+  return pool[(session - 1) % pool.length];
 }

@@ -7,7 +7,7 @@
 // docs/METHODOLOGY.md.
 // =====================================================================
 
-import { PROGRESS_METRICS, type Drill, type ProgressMetric } from "./types";
+import { PLYO_PILLAR, PROGRESS_METRICS, type Drill, type ProgressMetric } from "./types";
 import { SESSIONS_PER_WEEK } from "./training";
 
 // The non-negotiable structure of a Strive training week.
@@ -369,11 +369,17 @@ export function methodologyContext(bank?: Drill[]): string {
   const grouped = new Map<string, { title: string; how: string; reps: string; minutes: number; cues: string; wall: boolean }[]>();
   if (bank && bank.length > 0) {
     for (const d of bank) {
+      // Plyo warm-ups are prepended server-side; the AI must never see
+      // them as prescribable skill drills.
+      if (d.pillar === PLYO_PILLAR) continue;
       const list = grouped.get(d.pillar) ?? [];
       list.push({ title: d.title, how: d.how, reps: d.reps, minutes: d.minutes, cues: d.cues, wall: d.needs_wall });
       grouped.set(d.pillar, list);
     }
-  } else {
+  }
+  // No bank, or a bank holding only plyo warm-ups: compose from the
+  // built-in library so the AI is never handed an empty bank.
+  if (grouped.size === 0) {
     for (const g of METHOD_PILLARS) {
       grouped.set(
         g.pillar,

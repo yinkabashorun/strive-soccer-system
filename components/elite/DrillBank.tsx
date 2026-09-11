@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState, useTransition } from "react";
 import { Dumbbell, Loader2, Pencil, Plus, Trash2, Upload, X } from "lucide-react";
-import { PROGRESS_METRICS, type Drill } from "@/lib/elite/types";
+import { PLYO_PILLAR, PROGRESS_METRICS, type Drill } from "@/lib/elite/types";
 import { saveDrill, deleteDrill, type DrillInput } from "@/lib/elite/drill-actions";
 import { createClient } from "@/lib/elite/supabase/client";
 import { DrillVideo } from "./DrillVideo";
@@ -85,6 +85,7 @@ export function DrillBank({
 
   const byPillar = useMemo(() => {
     const m = new Map<string, Drill[]>();
+    m.set(PLYO_PILLAR, []);
     for (const p of PROGRESS_METRICS) m.set(p, []);
     for (const d of initial) m.get(d.pillar)?.push(d);
     return m;
@@ -151,9 +152,9 @@ export function DrillBank({
               onChange={(e) => setEditing({ ...editing, pillar: e.target.value })}
               className={inputCls}
             >
-              {PROGRESS_METRICS.map((p) => (
+              {[PLYO_PILLAR, ...PROGRESS_METRICS].map((p) => (
                 <option key={p} value={p} className="bg-black">
-                  {p}
+                  {p === PLYO_PILLAR ? "Plyo (session warm-ups)" : p}
                 </option>
               ))}
             </select>
@@ -252,7 +253,9 @@ export function DrillBank({
             <h2 className="mb-2.5 flex items-center gap-2 font-display text-lg font-bold uppercase tracking-tight">
               <Dumbbell className="h-4 w-4 text-accent" /> {pillar}
               <span className="text-sm font-normal normal-case text-white/35">
-                {drills.length} drills
+                {pillar === PLYO_PILLAR
+                  ? `${drills.length} warm-ups · every session opens with one, rotated`
+                  : `${drills.length} drills`}
               </span>
             </h2>
             <div className="space-y-2">

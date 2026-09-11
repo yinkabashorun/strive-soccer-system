@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "./supabase/server";
 import { getViewer } from "./session";
-import { PROGRESS_METRICS } from "./types";
+import { PLYO_PILLAR, PROGRESS_METRICS } from "./types";
 
 export type DrillInput = {
   id?: string; // present = update, absent = create
@@ -34,12 +34,20 @@ export async function saveDrill(input: DrillInput) {
   if ("error" in c) return { ok: false as const, error: c.error };
   if ("demo" in c) return { ok: true as const };
 
-  const pillar = (PROGRESS_METRICS as readonly string[]).includes(input.pillar)
-    ? input.pillar
-    : "Ball Mastery";
+  const pillar =
+    input.pillar === PLYO_PILLAR ||
+    (PROGRESS_METRICS as readonly string[]).includes(input.pillar)
+      ? input.pillar
+      : "Ball Mastery";
+  // Plyo titles get the standard prefix so the player UI badges them as
+  // warm-ups ("Plyo warm-up: Pogo & Tuck") without the coach typing it.
+  let title = input.title.trim().slice(0, 120);
+  if (pillar === PLYO_PILLAR && title && !/plyo|warm.?up/i.test(title)) {
+    title = `Plyo warm-up: ${title}`.slice(0, 120);
+  }
   const row = {
     pillar,
-    title: input.title.trim().slice(0, 120),
+    title,
     how: input.how.trim().slice(0, 600),
     reps: input.reps.trim().slice(0, 120),
     minutes: Math.max(3, Math.min(30, Math.round(input.minutes) || 10)),

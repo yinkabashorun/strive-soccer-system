@@ -8,6 +8,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import {
+  PLYO_PILLAR,
   PROGRESS_METRICS,
   type Drill,
   type GeneratedPlan,
@@ -128,14 +129,36 @@ function clampMin(v: unknown): number {
   return Math.max(5, Math.min(15, n));
 }
 
+// The coach's recorded plyo warm-ups (bank pillar "Plyo"), mapped to the
+// homework drill shape. Empty when the bank has none - plyoForSession then
+// falls back to the built-in four.
+function plyosFrom(bank?: Drill[]) {
+  return (bank ?? [])
+    .filter((d) => d.pillar === PLYO_PILLAR)
+    .map((d) => ({
+      title: d.title,
+      exercise: d.how,
+      reps: d.reps,
+      minutes: d.minutes,
+      notes: d.cues || undefined,
+    }));
+}
+
 // Normalizes to EXACTLY four sessions and prepends the plyometric warm-up to
 // each one - the plyo-first rule holds no matter what the AI returned.
 function buildSessions(
   raw: GeneratedSession[] | undefined,
-  focus: string
+  focus: string,
+  plyos?: ReturnType<typeof plyosFrom>
 ): GeneratedSession[] {
   const src = Array.isArray(raw) ? raw : [];
   const out: GeneratedSession[] = [];
+  // With more recorded warm-ups than sessions, start the rotation at a
+  // different point each week so all of them get used over time.
+  const spin =
+    plyos && plyos.length > SESSIONS_PER_WEEK
+      ? Math.floor(Math.random() * plyos.length)
+      : 0;
   for (let i = 0; i < SESSIONS_PER_WEEK; i++) {
     const s = src[i];
     // Three focused skill drills per session (a ~40-minute session with
@@ -188,19 +211,23 @@ function buildSessions(
     }
     out.push({
       title: s?.title?.trim() || `Session ${i + 1}`,
-      drills: [{ ...plyoForSession(i + 1) }, ...skills],
+      drills: [{ ...plyoForSession(spin + i + 1, plyos) }, ...skills],
     });
   }
   return out;
 }
 
-function sanitize(plan: Partial<GeneratedPlan>, player?: Player): GeneratedPlan {
+function sanitize(
+  plan: Partial<GeneratedPlan>,
+  player?: Player,
+  plyos?: ReturnType<typeof plyosFrom>
+): GeneratedPlan {
   const validMetrics = new Set(PROGRESS_METRICS as readonly string[]);
   const weekly_focus =
     plan.weekly_focus?.trim() || "Sharpen this week's technical focus";
   return {
     weekly_focus,
-    sessions: buildSessions(plan.sessions, weekly_focus),
+    sessions: buildSessions(plan.sessions, weekly_focus, plyos),
     parent_update:
       plan.parent_update?.trim() ||
       `${player?.full_name ?? "Your player"} put in strong work this session and has a clear four-session plan for the week ahead.`,
@@ -314,7 +341,8 @@ function fallbackPlan(notes: string, player?: Player, bank?: Drill[]): Generated
         "Start every session with the plyo warm-up",
       ],
     },
-    player
+    player,
+    plyosFrom(bank)
   );
 }
 
@@ -397,7 +425,7 @@ export async function generatePlanFromNotes(
             : "The AI responded but the plan could not be read. Generate again; if it repeats, check the Vercel logs for [strive-ai] lines.",
         reasonKind: "parse",
       };
-    return { plan: sanitize(parsed, player), source: "ai" };
+    return { plan: sanitize(parsed, player, plyosFrom(bank)), source: "ai" };
   } catch (err) {
     const msg =
       err instanceof Error ? err.message.slice(0, 200) : "unknown error";

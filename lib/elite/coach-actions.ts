@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "./supabase/server";
 import { getViewer } from "./session";
 import { sendPlayerEmail } from "./email";
-import { mondayOfWeekNY, nextMondayNY, unlockInstant } from "./time";
+import { liveWeekFor, mondayOfWeekNY, nextMondayNY, unlockInstant } from "./time";
 import { getDrillBank } from "./data";
 import type { FilmReview, GeneratedPlan } from "./types";
 
@@ -322,9 +322,12 @@ export async function sendFilmReview(
 //
 // Timing model (America/New_York): a player's FIRST week goes live the
 // moment it's published (week1_monday = this NY week's Monday), so
-// onboarding never dead-ends. Every later plan targets the NEXT week and
-// unlocks automatically Monday morning - publishing twice in one evening
-// can never fast-forward anyone again.
+// onboarding never dead-ends. If the coach is BEHIND (the live calendar
+// week has no plan yet), the new plan lands AS the live week and goes
+// live immediately - missed weeks simply never existed, no holes, no
+// waiting for Monday. Only when the live week is already built does a
+// plan target the NEXT week and unlock Monday morning, so publishing
+// twice in one evening can never fast-forward anyone.
 export async function applyGeneratedPlan(
   playerId: string,
   rawNotes: string,
@@ -342,12 +345,26 @@ export async function applyGeneratedPlan(
     .maybeSingle();
 
   const firstWeek = !player?.week1_monday;
-  const currentWeek = player?.current_week ?? 1;
+  const liveWeek = liveWeekFor(player?.week1_monday, player?.current_week);
+  const { data: latestBuilt } = await supabase
+    .from("elite_homework")
+    .select("week")
+    .eq("player_id", playerId)
+    .order("week", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const maxBuilt = latestBuilt?.week ?? 0;
   let week: number;
   let unlocksAt: string; // ISO
   let goesLiveNow: boolean;
   if (firstWeek) {
     week = 1;
+    unlocksAt = new Date().toISOString();
+    goesLiveNow = true;
+  } else if (maxBuilt < liveWeek) {
+    // Catch-up publish: the live week has no plan, so this one IS the
+    // live week and the player gets it right now.
+    week = liveWeek;
     unlocksAt = new Date().toISOString();
     goesLiveNow = true;
   } else {
@@ -362,7 +379,7 @@ export async function applyGeneratedPlan(
       .order("week", { ascending: false })
       .limit(1)
       .maybeSingle();
-    week = pending?.week ?? currentWeek + 1;
+    week = pending?.week ?? liveWeek + 1;
     unlocksAt = unlockInstant(nextMondayNY());
     goesLiveNow = false;
   }
@@ -501,15 +518,16 @@ export async function applyGeneratedPlan(
     .eq("id", playerId);
 
   if (goesLiveNow) {
-    // First week: live immediately. Anchor the program clock to this NY
-    // week's Monday and tell the player now.
+    // Live immediately: a player's first week (anchor the program clock
+    // to this NY week's Monday) or a catch-up publish for the live week
+    // (never re-anchor - the calendar keeps counting).
     const first = player?.full_name?.split(" ")[0] ?? "";
     await supabase
       .from("elite_players")
       .update({
         current_week: week,
         today_focus: plan.weekly_focus,
-        week1_monday: mondayOfWeekNY(0),
+        ...(firstWeek ? { week1_monday: mondayOfWeekNY(0) } : {}),
       })
       .eq("id", playerId);
     await supabase.from("elite_notifications").insert({
@@ -520,8 +538,16 @@ export async function applyGeneratedPlan(
     });
     await sendPlayerEmail(playerId, {
       event: "new_week",
-      subject: first ? `${first}, your first week is live` : "Your first week is live",
-      body: `Your Strive Elite training starts now.\n\nThis week's focus: ${plan.weekly_focus}\n\nFour sessions, each opening with your plyometric warm-up. Open the app and start Session 1.`,
+      subject: firstWeek
+        ? first
+          ? `${first}, your first week is live`
+          : "Your first week is live"
+        : first
+          ? `${first}, week ${week} just dropped`
+          : `Week ${week} just dropped`,
+      body: firstWeek
+        ? `Your Strive Elite training starts now.\n\nThis week's focus: ${plan.weekly_focus}\n\nFour sessions, each opening with your plyometric warm-up. Open the app and start Session 1.`
+        : `Your new training week is live.\n\nThis week's focus: ${plan.weekly_focus}\n\nFour sessions, plyo warm-up first. Open the app and start Session 1.`,
     }).catch(() => undefined);
   }
   // Scheduled weeks stay silent until Monday morning - unlockDueWeeks()

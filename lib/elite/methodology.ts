@@ -419,6 +419,21 @@ prescribe furniture or improvised household equipment: no couch cushions,
 chairs, mattresses, or anything that sounds like a hack. This is a
 professional program; every drill must sound like it.
 
+PILLAR MAP (strict): three pillars are trained without their own drill
+days, so NEVER build a session for them:
+- Speed is trained by the plyometric warm-ups that open every session.
+  If the notes call for speed work, push warm-up intent in the player
+  summary ("attack every rep of the warm-ups this week"), never a speed day.
+- Decision Making is trained in film sessions with the coach, never in
+  solo homework. If the notes call for decision work, mention the film
+  focus in the parent update, never a decision-making drill day.
+- Scanning lives INSIDE wall work: wall drills carry a shoulder-check
+  habit while the ball travels to the wall and back. When the notes flag
+  scanning, keep the bank drills verbatim but use each wall drill's notes
+  field to add ONE scan emphasis (e.g. "shoulder check both ways while
+  the ball travels"). For a player with no wall, put the same scan
+  emphasis in the notes of their cone drills instead.
+
 WALL DAY RULE (strict): a wall drill means the player travels to a wall,
 so wall work is BATCHED, never scattered. If a session contains any wall
 drill, EVERY skill drill in that session must be a wall drill - the player

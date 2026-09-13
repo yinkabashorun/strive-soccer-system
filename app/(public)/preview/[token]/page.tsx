@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Dumbbell, ShieldCheck } from "lucide-react";
+import { Dumbbell } from "lucide-react";
 import { createServiceClient } from "@/lib/elite/supabase/server";
 import { PLYO_PILLAR, PROGRESS_METRICS, type Drill } from "@/lib/elite/types";
 import { DrillVideo } from "@/components/elite/DrillVideo";
@@ -66,10 +66,7 @@ export default async function CoachPreviewPage({
 
   return (
     <div className="mx-auto max-w-3xl px-5 py-10">
-      <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">
-        <ShieldCheck className="h-3.5 w-3.5" /> Private link, just for you
-      </div>
-      <h1 className="mt-2 font-display text-3xl font-bold leading-tight sm:text-4xl">
+      <h1 className="font-display text-3xl font-bold leading-tight sm:text-4xl">
         Strive Elite
       </h1>
       <p className="mt-3 max-w-xl text-white/60">

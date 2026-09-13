@@ -18,28 +18,28 @@ export const metadata: Metadata = {
 
 const STRUCTURE: [string, string][] = [
   [
-    "Personal weekly plans",
-    "Every player gets a 4 session week built around their weaknesses, age and level. About 40 minutes per session, built by the coach with AI assistance and approved before it ships.",
+    "Every player gets a personal week",
+    "4 sessions, about 40 minutes each, built around that kid's weaknesses and level. I sign off on every plan before it goes out.",
   ],
   [
-    "Plyo first, every session",
-    "Each session opens with two plyometric warm-up blocks, rotated through a filmed warm-up library so it never goes stale.",
+    "Plyos open every session",
+    "Two explosive warm-up blocks, rotated so it never gets stale.",
   ],
   [
-    "Every drill on video",
-    "Players never guess what a rep looks like. Every drill in the bank carries a filmed demo, shot vertical for the phone in their pocket.",
+    "Every drill is on video",
+    "Nobody guesses what a rep looks like. Every drill has a filmed demo.",
   ],
   [
-    "Wall days are batched",
-    "A wall drill means traveling to a wall, so wall work is grouped: a session is all wall or wall free, never one wall drill lost in the middle. Players without a wall get a program that fully works without one.",
+    "Wall work gets its own days",
+    "If a kid travels to a wall, the whole session uses the wall. No wall? The program fully works without one.",
   ],
   [
-    "Scanning lives inside the work",
-    "Shoulder checks are built into the wall drills themselves. Speed is trained through the plyo openers. Decision making happens in film sessions with the coach, not in solo homework.",
+    "Nothing is wasted",
+    "Scanning is built into the wall work, speed lives in the warm-ups, and decision making happens in film sessions with me.",
   ],
   [
-    "Accountability is automatic",
-    "Completion tracking per drill, weekly parent recaps that celebrate consistency and flag missed sessions, and a weekly live Film Room call.",
+    "Parents stay in the loop",
+    "The app tracks every drill, I send parents a weekly recap, and I run a live film room every week.",
   ],
 ];
 
@@ -73,12 +73,12 @@ export default async function CoachPreviewPage({
         Strive Elite
       </h1>
       <p className="mt-3 max-w-xl text-white/60">
-        The full training system behind the Strive Soccer app: how a week is
-        built, and every drill a player can be assigned. Nothing here is
-        player data, this is the program itself.
+        This is the system behind my app: how I build every player&apos;s
+        week, and every drill they can be assigned. Take your time with the
+        videos.
       </p>
 
-      {/* How the course is structured */}
+      {/* How the course is structured - Coach Yinka's voice, quick read */}
       <section className="mt-8 space-y-3">
         {STRUCTURE.map(([title, body]) => (
           <div key={title} className="rounded-2xl border border-white/8 bg-white/[0.02] p-4">
@@ -95,8 +95,8 @@ export default async function CoachPreviewPage({
         The drill bank
       </h2>
       <p className="mt-1 text-sm text-white/50">
-        {drills.length} drills, every one filmed. The AI composes weekly plans
-        strictly from this bank.
+        {drills.length} drills, every one filmed. Every week I assign comes
+        from this bank.
       </p>
 
       {pillars.map((pillar) => {

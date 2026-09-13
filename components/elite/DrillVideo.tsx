@@ -44,6 +44,7 @@ export function DrillVideo({ src, label = "Watch demo" }: { src: string; label?:
         src={src}
         controls
         autoPlay
+        muted
         playsInline
         preload="metadata"
         className="aspect-[4/5] w-full object-cover"

@@ -11,9 +11,17 @@ import { DrillVideo } from "@/components/elite/DrillVideo";
 const PREVIEW_TOKEN = process.env.COURSE_PREVIEW_TOKEN || "coach-x9k42m";
 
 export const metadata: Metadata = {
-  title: "Strive Elite · Coach Preview",
-  description: "The Strive Elite training system, drill bank and structure.",
+  title: "Strive Remote Training",
+  description: "How Strive Remote Training is structured, and the full drill bank behind it.",
   robots: { index: false, follow: false },
+  // Full override so link previews (iMessage, Instagram, etc.) never
+  // inherit the dribbling-course layout's title/price - this page shares
+  // that layout but is a completely different link.
+  openGraph: {
+    title: "Strive Remote Training",
+    description: "How Strive Remote Training is structured, and the full drill bank behind it.",
+    type: "website",
+  },
 };
 
 const STRUCTURE: [string, string][] = [
@@ -67,7 +75,7 @@ export default async function CoachPreviewPage({
   return (
     <div className="mx-auto max-w-3xl px-5 py-10">
       <h1 className="font-display text-3xl font-bold leading-tight sm:text-4xl">
-        Strive Elite
+        Strive Remote Training
       </h1>
       <p className="mt-3 max-w-xl text-white/60">
         This is the training system behind my app, how I build a

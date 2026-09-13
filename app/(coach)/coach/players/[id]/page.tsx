@@ -39,6 +39,7 @@ import { CoachFilmPanel } from "@/components/elite/CoachFilmPanel";
 import { CoachGamesPanel } from "@/components/elite/CoachGamesPanel";
 import { MessageThread } from "@/components/elite/MessageThread";
 import { IntakePanel } from "@/components/elite/IntakePanel";
+import { DeletePlayerButton } from "@/components/elite/DeletePlayerButton";
 import { QuickComposer } from "@/components/elite/QuickComposer";
 import { StatusControl } from "@/components/elite/StatusControl";
 import { DuplicateWeekButton } from "@/components/elite/DuplicateWeekButton";
@@ -362,6 +363,11 @@ export default async function PlayerProfile({
               />
             </div>
           </div>
+
+          <DeletePlayerButton
+            playerId={player.id}
+            playerName={player.full_name.split(" ")[0]}
+          />
         </div>
       </div>
     </div>

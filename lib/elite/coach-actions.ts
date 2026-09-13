@@ -63,6 +63,23 @@ export async function setTrainingEnvironment(
   return { ok: true };
 }
 
+// Permanently remove a player and everything attached to them (homework,
+// plans, progress, messages, film, reports - all cascade from the player
+// row). The login account survives; if that person signs in again they
+// simply start at onboarding as a fresh player.
+export async function deletePlayer(playerId: string) {
+  if (!(await requireCoach())) return { ok: false as const };
+  const supabase = createClient();
+  if (!supabase) return { ok: true as const };
+  const { error } = await supabase
+    .from("elite_players")
+    .delete()
+    .eq("id", playerId);
+  if (error) return { ok: false as const };
+  revalidatePath("/coach");
+  return { ok: true as const };
+}
+
 export async function addCoachNote(playerId: string, body: string) {
   if (!(await requireCoach())) return { ok: false };
   const supabase = createClient();

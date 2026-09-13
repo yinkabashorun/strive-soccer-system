@@ -26,8 +26,16 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
   the $120 gap = app + film). Counts against the same scarce 1:1 slots.
 - Duo (2 players, semi-private, same hour): drop-in $120 · 4-pack $440 · 8-pack $800 · Duo Hybrid $650/mo (weekly duo session + both on app). Quoted live Sept 2026.
 - Group drop-in: $45 · Small Group monthly: $148 (groups of 10, assistant coach)
-- Hybrid: $400/mo · App-only (Strive Elite): $199/mo (Coach leaned $199, stamp when fully confirmed)
-- September founding window: rate locked for life + first film breakdown free; closes Sept 30. App rises to $249 for new members Oct 1 (announced).
+- App-only (Strive Elite): $249/mo for new members from Oct 1 (stamped Sept 13,
+  NOT yet announced publicly - announce before charging). Founding members and
+  anyone quoted $199 who joins by Sept 30 keep $199 locked for life.
+- Remote Academy: $400/mo, HARD CAP 15 members (say the cap publicly). App +
+  weekly Film Room + monthly private film breakdown + weekly parent report.
+  Call-close only; pitch Academy first on remote calls, downsell to App $249.
+- Hybrid: $400/mo (PROPOSED raise to $500 alongside ladder, unconfirmed)
+- 1:1 Monthly: PROPOSED raise $280 -> $320 to match $80 rate, unconfirmed
+- September founding window: rate locked for life + first film breakdown free;
+  closes Sept 30.
 - Camps: ~$3k profit each, quarterly · Youth pickup: $15 entry, monthly
 
 ## Policies

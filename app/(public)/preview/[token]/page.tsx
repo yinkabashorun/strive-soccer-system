@@ -18,28 +18,28 @@ export const metadata: Metadata = {
 
 const STRUCTURE: [string, string][] = [
   [
-    "Real structure, every single week",
-    "4 sessions, about 40 minutes each, same rhythm every week. Players stop wondering what to train and just train. I sign off on every plan before it goes out.",
+    "The same rhythm every week",
+    "4 sessions, about 40 minutes each. Same structure every time, so a player just shows up and trains instead of wondering what today is. I look over every plan before it goes out.",
   ],
   [
-    "Plyos open every session",
-    "Two explosive blocks before the ball work, so players build athleticism every session and it compounds over months, not left to chance.",
+    "Athleticism, not just touches",
+    "Every session opens with two warm-up blocks built for power and speed. Nothing flashy, just the kind of work that adds up week over week.",
   ],
   [
-    "Drills picked for the player, not the group",
-    "Every week is built around that specific kid's weaknesses. Players naturally avoid what they're bad at. This program does not let them.",
+    "Built around the kid, not the group",
+    "The week is different for every player, based on what they're actually weak at. Left alone, a kid will practice what he's already good at. This doesn't let him.",
   ],
   [
-    "Every drill is on video",
-    "Nobody guesses what a rep looks like. Every drill has a filmed demo, so technique stays clean between coached sessions.",
+    "A video for every drill",
+    "So nobody's guessing what a rep should look like when I'm not standing there.",
   ],
   [
-    "Wall work gets its own days",
-    "If a kid travels to a wall, the whole session uses the wall. Scanning habits are built into that wall work. No wall? The program fully works without one.",
+    "Wall days are their own thing",
+    "If a kid's driving to a wall, the whole session happens there, and it does double duty for scanning habits too. No wall nearby, the program still works fine without one.",
   ],
   [
-    "Accountability is built in",
-    "The app tracks every drill, parents get a weekly recap from me, and I run a live film room every week. Skipped work gets seen.",
+    "Parents actually know what's going on",
+    "The app tracks what gets done, I send a weekly recap, and there's a live film session every week. Nothing slips by quietly.",
   ],
 ];
 
@@ -66,23 +66,23 @@ export default async function CoachPreviewPage({
 
   return (
     <div className="mx-auto max-w-3xl px-5 py-10">
-      <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">
-        <ShieldCheck className="h-3.5 w-3.5" /> Coach preview · read only
+      <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/35">
+        <ShieldCheck className="h-3.5 w-3.5" /> Private link, just for you
       </div>
-      <h1 className="mt-2 font-display text-4xl font-black uppercase leading-none sm:text-5xl">
+      <h1 className="mt-2 font-display text-3xl font-bold leading-tight sm:text-4xl">
         Strive Elite
       </h1>
       <p className="mt-3 max-w-xl text-white/60">
-        This is the system behind my app: how I build every player&apos;s
-        week, and every drill they can be assigned. Take your time with the
-        videos.
+        This is the training system behind my app, how I build a
+        player&apos;s week and what every drill actually looks like. No
+        rush, look through it whenever you have a few minutes.
       </p>
 
       {/* How the course is structured - Coach Yinka's voice, quick read */}
       <section className="mt-8 space-y-3">
         {STRUCTURE.map(([title, body]) => (
           <div key={title} className="rounded-2xl border border-white/8 bg-white/[0.02] p-4">
-            <div className="font-display text-base font-bold uppercase tracking-tight">
+            <div className="font-display text-base font-semibold">
               {title}
             </div>
             <p className="mt-1 text-sm leading-relaxed text-white/55">{body}</p>
@@ -91,22 +91,22 @@ export default async function CoachPreviewPage({
       </section>
 
       {/* The drill bank */}
-      <h2 className="mt-10 font-display text-2xl font-black uppercase tracking-tight">
+      <h2 className="mt-10 font-display text-xl font-bold">
         The drill bank
       </h2>
       <p className="mt-1 text-sm text-white/50">
-        {drills.length} drills, every one filmed. Every week I assign comes
-        from this bank.
+        {drills.length} drills, every one filmed, and this is the only
+        library I build weeks from.
       </p>
 
       {pillars.map((pillar) => {
         const list = drills.filter((d) => d.pillar === pillar);
         return (
           <section key={pillar} className="mt-7">
-            <h3 className="mb-2.5 flex items-center gap-2 font-display text-lg font-bold uppercase tracking-tight">
+            <h3 className="mb-2.5 flex items-center gap-2 font-display text-lg font-bold">
               <Dumbbell className="h-4 w-4 text-accent" />
               {pillar === PLYO_PILLAR ? "Plyo warm-ups" : pillar}
-              <span className="text-sm font-normal normal-case text-white/35">
+              <span className="text-sm font-normal text-white/35">
                 {list.length} {pillar === PLYO_PILLAR ? "warm-ups" : "drills"}
               </span>
             </h3>
@@ -136,8 +136,8 @@ export default async function CoachPreviewPage({
       })}
 
       <p className="mt-10 border-t border-white/8 pt-5 text-center text-xs text-white/35">
-        Strive Soccer · thestriveapp.com · This preview is private, please
-        don&apos;t share the link.
+        Strive Soccer · thestriveapp.com · Just between us, hold onto the
+        link.
       </p>
     </div>
   );

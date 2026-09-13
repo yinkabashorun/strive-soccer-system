@@ -42,6 +42,27 @@ export async function updatePlayerFields(
   return { ok: true };
 }
 
+// Coach-side switch for a player's training environment (wall / goal
+// access). Onboarding asks the player once; this lets the coach correct
+// or set it any time - the next generated plan picks it up.
+export async function setTrainingEnvironment(
+  playerId: string,
+  patch: { has_wall?: boolean; has_goal?: boolean }
+) {
+  if (!(await requireCoach())) return { ok: false };
+  const supabase = createClient();
+  if (supabase) {
+    const { error } = await supabase
+      .from("elite_players")
+      .update(patch)
+      .eq("id", playerId);
+    // pre-019 (columns missing): nothing to update, surface quietly
+    if (error) return { ok: false };
+    revalidatePath(`/coach/players/${playerId}`);
+  }
+  return { ok: true };
+}
+
 export async function addCoachNote(playerId: string, body: string) {
   if (!(await requireCoach())) return { ok: false };
   const supabase = createClient();

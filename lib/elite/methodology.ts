@@ -419,6 +419,14 @@ prescribe furniture or improvised household equipment: no couch cushions,
 chairs, mattresses, or anything that sounds like a hack. This is a
 professional program; every drill must sound like it.
 
+WALL DAY RULE (strict): a wall drill means the player travels to a wall,
+so wall work is BATCHED, never scattered. If a session contains any wall
+drill, EVERY skill drill in that session must be a wall drill - the player
+goes to the wall once and gets a full session out of the trip. Build the
+week as one or two dedicated wall sessions (for players who have a wall)
+and keep the remaining sessions completely wall-free. Never place a single
+wall drill inside an otherwise no-wall session.
+
 FRICTION RULE (strict): every drill is FULLY SOLO and needs at most ONE
 factor beyond the ball: cones/markers, OR a wall, OR a phone (clip study).
 Never a second person (no parents, siblings, partners) and never two

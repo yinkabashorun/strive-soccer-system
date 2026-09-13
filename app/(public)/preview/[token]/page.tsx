@@ -18,28 +18,28 @@ export const metadata: Metadata = {
 
 const STRUCTURE: [string, string][] = [
   [
-    "Every player gets a personal week",
-    "4 sessions, about 40 minutes each, built around that kid's weaknesses and level. I sign off on every plan before it goes out.",
+    "Real structure, every single week",
+    "4 sessions, about 40 minutes each, same rhythm every week. Players stop wondering what to train and just train. I sign off on every plan before it goes out.",
   ],
   [
     "Plyos open every session",
-    "Two explosive warm-up blocks, rotated so it never gets stale.",
+    "Two explosive blocks before the ball work, so players build athleticism every session and it compounds over months, not left to chance.",
+  ],
+  [
+    "Drills picked for the player, not the group",
+    "Every week is built around that specific kid's weaknesses. Players naturally avoid what they're bad at. This program does not let them.",
   ],
   [
     "Every drill is on video",
-    "Nobody guesses what a rep looks like. Every drill has a filmed demo.",
+    "Nobody guesses what a rep looks like. Every drill has a filmed demo, so technique stays clean between coached sessions.",
   ],
   [
     "Wall work gets its own days",
-    "If a kid travels to a wall, the whole session uses the wall. No wall? The program fully works without one.",
+    "If a kid travels to a wall, the whole session uses the wall. Scanning habits are built into that wall work. No wall? The program fully works without one.",
   ],
   [
-    "Nothing is wasted",
-    "Scanning is built into the wall work, speed lives in the warm-ups, and decision making happens in film sessions with me.",
-  ],
-  [
-    "Parents stay in the loop",
-    "The app tracks every drill, I send parents a weekly recap, and I run a live film room every week.",
+    "Accountability is built in",
+    "The app tracks every drill, parents get a weekly recap from me, and I run a live film room every week. Skipped work gets seen.",
   ],
 ];
 

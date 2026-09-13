@@ -1,7 +1,7 @@
 import { CalendarDays, Clapperboard } from "lucide-react";
 import { getViewer } from "@/lib/elite/session";
 import { getFilm, getGames, getPlayer } from "@/lib/elite/data";
-import { monthFromWeek } from "@/lib/elite/time";
+import { liveWeekFor, monthFromWeek } from "@/lib/elite/time";
 import { FilmTimeline } from "@/components/elite/FilmTimeline";
 import { GameSchedule } from "@/components/elite/GameSchedule";
 import { TourGuide } from "@/components/elite/TourGuide";
@@ -20,7 +20,7 @@ export default async function FilmPage() {
   ]);
   if (!player) return null;
 
-  const currentMonth = monthFromWeek(player.current_week);
+  const currentMonth = monthFromWeek(liveWeekFor(player.week1_monday, player.current_week));
   const firstName = player.full_name.split(" ")[0];
 
   return (

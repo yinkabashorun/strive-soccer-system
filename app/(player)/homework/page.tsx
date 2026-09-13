@@ -1,6 +1,7 @@
 import { Dumbbell } from "lucide-react";
 import { getViewer } from "@/lib/elite/session";
 import { getHomework, getPlayer } from "@/lib/elite/data";
+import { liveWeekFor } from "@/lib/elite/time";
 import { WeekList } from "@/components/elite/WeekList";
 import { TourGuide } from "@/components/elite/TourGuide";
 
@@ -9,9 +10,13 @@ export default async function HomeworkPage() {
   if (!viewer?.playerId) return null;
   const player = await getPlayer(viewer.playerId);
   const all = await getHomework(viewer.playerId);
-  // Players only ever see unlocked weeks - scheduled weeks stay invisible
-  // until they flip live Monday morning (VA time).
-  const homework = all.filter((h) => h.week <= (player?.current_week ?? 1));
+  // Weeks derive from the calendar: unlocked weeks flip live Monday
+  // automatically, and "this week" is the latest built week within the
+  // live one.
+  const live = liveWeekFor(player?.week1_monday, player?.current_week);
+  const maxBuilt = all.reduce((m, h) => Math.max(m, h.week), 0);
+  const contentWeek = Math.max(1, Math.min(live, maxBuilt || 1));
+  const homework = all.filter((h) => h.week <= live);
 
   return (
     <div className="space-y-6">
@@ -19,7 +24,7 @@ export default async function HomeworkPage() {
 
       <header className="animate-fade-up">
         <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
-          Week {player?.current_week} · Your workout
+          Week {contentWeek} · Your workout
         </div>
         <h1 className="mt-1 flex items-center gap-2.5 font-display text-3xl font-black sm:text-4xl">
           <Dumbbell className="h-7 w-7 text-accent" /> Homework
@@ -30,7 +35,7 @@ export default async function HomeworkPage() {
         </p>
       </header>
 
-      <WeekList items={homework} currentWeek={player?.current_week ?? 1} />
+      <WeekList items={homework} currentWeek={contentWeek} />
     </div>
   );
 }

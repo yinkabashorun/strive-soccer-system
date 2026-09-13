@@ -5,7 +5,7 @@ import { createClient, createServiceClient } from "./supabase/server";
 import { getViewer } from "./session";
 import { maybeAwardAchievements } from "./achievements";
 import { sendCoachEmail } from "./email";
-import { monthFromWeek } from "./time";
+import { liveWeekFor, monthFromWeek } from "./time";
 import type { ProgressMetric } from "./types";
 
 export type OnboardingInput = {
@@ -110,10 +110,10 @@ export async function submitFilm(input: { url: string; note: string }) {
 
   const { data: player } = await supabase
     .from("elite_players")
-    .select("current_week, full_name")
+    .select("current_week, week1_monday, full_name")
     .eq("id", viewer.playerId)
     .maybeSingle();
-  const month = monthFromWeek(player?.current_week ?? 1);
+  const month = monthFromWeek(liveWeekFor(player?.week1_monday, player?.current_week));
 
   // one film per program month
   const { data: existing } = await supabase
@@ -263,16 +263,26 @@ export async function submitCheckin(input: CheckinInput) {
   const supabase = createClient();
   if (!supabase) return { ok: true as const }; // demo
 
-  // week = the player's current week
+  // week = the week the player is actually training: live calendar week,
+  // clamped to their latest built week.
   const { data: player } = await supabase
     .from("elite_players")
-    .select("current_week, full_name")
+    .select("current_week, week1_monday, full_name")
     .eq("id", viewer.playerId)
     .maybeSingle();
+  const { data: latest } = await supabase
+    .from("elite_homework")
+    .select("week")
+    .eq("player_id", viewer.playerId)
+    .order("week", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const live = liveWeekFor(player?.week1_monday, player?.current_week);
+  const checkinWeek = Math.max(1, Math.min(live, latest?.week ?? 1));
 
   await supabase.from("elite_checkins").insert({
     player_id: viewer.playerId,
-    week: player?.current_week ?? 1,
+    week: checkinWeek,
     rating: input.rating || null,
     energy: input.energy || null,
     went_well: input.went_well.trim(),
@@ -283,7 +293,7 @@ export async function submitCheckin(input: CheckinInput) {
   await sendCoachEmail(viewer.playerId, {
     event: "checkin_submitted",
     subject: `${viewer.profile.full_name} submitted their weekly check-in`,
-    body: `${viewer.profile.full_name} checked in for week ${player?.current_week ?? 1}.\n\nWent well: ${input.went_well || "-"}\nStruggled: ${input.struggled || "-"}\nNote: ${input.note || "-"}`,
+    body: `${viewer.profile.full_name} checked in for week ${checkinWeek}.\n\nWent well: ${input.went_well || "-"}\nStruggled: ${input.struggled || "-"}\nNote: ${input.note || "-"}`,
   }).catch(() => undefined);
 
   revalidatePath("/dashboard");

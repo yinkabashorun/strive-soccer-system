@@ -8,6 +8,7 @@
 // Nothing here throws to the caller. With neither configured, every function
 // quietly does nothing and the app is fully functional.
 
+import { liveWeekFor } from "./time";
 import { createServiceClient } from "./supabase/server";
 
 const FROM = process.env.RESEND_FROM || "Strive Elite <coach@strivesoccer100x.com>";
@@ -115,7 +116,7 @@ export async function sendPlayerEmail(
   if (!admin) return false;
   const { data: player } = await admin
     .from("elite_players")
-    .select("full_name, parent_email, parent_name, current_week, profile_id")
+    .select("full_name, parent_email, parent_name, current_week, week1_monday, profile_id")
     .eq("id", playerId)
     .maybeSingle();
   if (!player) return false;
@@ -140,7 +141,7 @@ export async function sendPlayerEmail(
     subject: mail.subject,
     body: mail.body,
     recipients,
-    player: { name: player.full_name, week: player.current_week },
+    player: { name: player.full_name, week: liveWeekFor(player.week1_monday, player.current_week) },
   });
   const email = await dispatchResend(recipients, mail);
   return ghl || email;

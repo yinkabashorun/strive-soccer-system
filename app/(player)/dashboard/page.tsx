@@ -23,7 +23,7 @@ import {
 import { TodaySession, VictoryLap } from "@/components/elite/TodaySession";
 import { CheckinCard } from "@/components/elite/CheckinCard";
 import { StatTile } from "@/components/elite/StatTile";
-import { fmtMonday, nextMondayNY } from "@/lib/elite/time";
+import { fmtMonday, liveWeekFor, nextMondayNY } from "@/lib/elite/time";
 import { greeting, timeAgo } from "@/lib/utils";
 import { TourGuide } from "@/components/elite/TourGuide";
 
@@ -58,9 +58,16 @@ export default async function DashboardPage() {
 
   const firstName = player.full_name.split(" ")[0];
 
+  // Weeks are DERIVED from the calendar, never a stored counter: the live
+  // week comes from week1_monday (flips Monday automatically), and the
+  // player trains their latest built week if the coach is behind.
+  const live = liveWeekFor(player.week1_monday, player.current_week);
+  const maxBuilt = allHomework.reduce((m, h) => Math.max(m, h.week), 0);
+  const contentWeek = Math.max(1, Math.min(live, maxBuilt || 1));
+
   // Only unlocked weeks exist for the player.
-  const homework = allHomework.filter((h) => h.week <= player.current_week);
-  const thisWeek = homework.filter((h) => h.week === player.current_week);
+  const homework = allHomework.filter((h) => h.week <= live);
+  const thisWeek = homework.filter((h) => h.week === contentWeek);
 
   // Group the live week into its sessions; the hero is the first session
   // with anything left to do.
@@ -78,18 +85,18 @@ export default async function DashboardPage() {
   // What to say about next week - never a false "it's ready".
   const nextScheduled = plans.find(
     (p) =>
-      p.week > player.current_week &&
+      p.week > contentWeek &&
       p.unlocks_at &&
       new Date(p.unlocks_at).getTime() > Date.now()
   );
   const nextWeekLine = nextScheduled
     ? `Week ${nextScheduled.week} unlocks ${fmtMonday(nextMondayNY())}.`
-    : `Your coach is building week ${player.current_week + 1}. It drops Monday.`;
+    : maxBuilt < live
+      ? `Your coach is building week ${live}. It lands the moment it's ready.`
+      : `Your coach is building week ${live + 1}. It drops Monday.`;
 
   const latestMessage = messages[0];
-  const checkedInThisWeek = checkins.some(
-    (c) => c.week === player.current_week
-  );
+  const checkedInThisWeek = checkins.some((c) => c.week === contentWeek);
 
   return (
     <div className="space-y-5">
@@ -99,7 +106,7 @@ export default async function DashboardPage() {
       <header className="flex items-end justify-between gap-4 animate-fade-up">
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
-            Week {player.current_week} · {player.level}
+            Week {contentWeek} · {player.level}
           </div>
           <h1 className="mt-1 font-display text-3xl font-black leading-none sm:text-4xl">
             {greeting()}, {firstName}
@@ -121,7 +128,7 @@ export default async function DashboardPage() {
       {/* THE thing: today's session (or the victory lap) */}
       {weekDone ? (
         <VictoryLap
-          week={player.current_week}
+          week={contentWeek}
           firstName={firstName}
           minutes={summary.training_minutes}
           streak={summary.current_streak}
@@ -164,7 +171,7 @@ export default async function DashboardPage() {
       {/* Check-in appears once the week is conquered */}
       {(weekDone || checkedInThisWeek) && (
         <CheckinCard
-          week={player.current_week}
+          week={contentWeek}
           alreadyDone={checkedInThisWeek}
           firstName={firstName}
         />

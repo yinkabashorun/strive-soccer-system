@@ -319,9 +319,16 @@ function fallbackPlan(notes: string, player?: Player, bank?: Drill[]): Generated
     pillars.push(pillars[i % picked.length]);
   }
   const sessions: GeneratedSession[] = pillars.map((pillar) => {
-    const library = bankFor(pillar).filter(
+    const usableLib = bankFor(pillar).filter(
       (d) => !d.needsWall || player?.has_wall === true
     );
+    // Wall-day rule: a session is all-wall or wall-free, never a mix - the
+    // trip to the wall has to pay for a full session. Use whichever pure
+    // side of the pillar has more drills.
+    const wallLib = usableLib.filter((d) => d.needsWall);
+    const dryLib = usableLib.filter((d) => !d.needsWall);
+    const library =
+      wallLib.length > dryLib.length ? wallLib : dryLib.length ? dryLib : usableLib;
     const drills = Array.from({ length: 3 }, (_, d) => {
       const src = library[d % Math.max(1, library.length)];
       return {

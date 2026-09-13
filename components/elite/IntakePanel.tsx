@@ -1,5 +1,6 @@
 import { ClipboardList } from "lucide-react";
 import type { Player } from "@/lib/elite/types";
+import { EnvToggle } from "./EnvToggle";
 
 // Read-only snapshot of what the player told us at intake. Gives the coach
 // the context they need before building a plan.
@@ -12,17 +13,24 @@ export function IntakePanel({ player }: { player: Player }) {
   if (player.dominant_foot) rows.push(["Dominant foot", player.dominant_foot]);
   if (player.parent_name) rows.push(["Parent", player.parent_name]);
   if (player.parent_email) rows.push(["Parent email", player.parent_email]);
-  if (typeof player.has_wall === "boolean")
-    rows.push(["Wall nearby", player.has_wall ? "Yes" : "No"]);
-  if (typeof player.has_goal === "boolean")
-    rows.push(["Goal nearby", player.has_goal ? "Yes" : "No"]);
-
   const hasIntake = rows.length > 0 || selfEntries.length > 0;
 
   return (
     <div className="elite-card p-5">
       <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
         <ClipboardList className="h-3.5 w-3.5" /> Intake
+      </div>
+
+      {/* Coach-editable: flips wall/goal days in the next generated plan */}
+      <div className="mb-3 space-y-2 border-b border-white/6 pb-3 text-sm">
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-white/40">Wall nearby</span>
+          <EnvToggle playerId={player.id} field="has_wall" value={player.has_wall ?? null} />
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-white/40">Goal nearby</span>
+          <EnvToggle playerId={player.id} field="has_goal" value={player.has_goal ?? null} />
+        </div>
       </div>
 
       {!hasIntake ? (

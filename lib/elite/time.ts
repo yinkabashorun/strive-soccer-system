@@ -52,6 +52,18 @@ export function liveWeekNumber(week1Monday: string | null | undefined): number {
   return Math.max(1, weeks + 1);
 }
 
+// THE way to get a player's live week: always derived from the calendar
+// via week1_monday. The stored current_week is only a fallback for players
+// whose program clock was never anchored (no first plan yet, demo data).
+export function liveWeekFor(
+  week1Monday: string | null | undefined,
+  storedWeek: number | null | undefined
+): number {
+  return week1Monday
+    ? liveWeekNumber(week1Monday)
+    : Math.max(1, storedWeek ?? 1);
+}
+
 // Day of the NY training week: 1 = Monday … 7 = Sunday.
 export function nyDayNumber(): number {
   return mondayIndex(nyToday()) + 1;

@@ -24,7 +24,7 @@ import {
   getProgress,
   getWeeklyPlans,
 } from "@/lib/elite/data";
-import { fmtMonday, nextMondayNY } from "@/lib/elite/time";
+import { fmtMonday, liveWeekFor, nextMondayNY } from "@/lib/elite/time";
 import { addCoachNote, sendCoachMessage } from "@/lib/elite/coach-actions";
 import { Avatar } from "@/components/Avatar";
 import { StatTile } from "@/components/elite/StatTile";
@@ -69,10 +69,16 @@ export default async function PlayerProfile({
       getGames(player.id),
     ]);
 
+  // Weeks derive from the calendar: live = where the program clock is
+  // today, contentWeek = what the player is actually training.
+  const live = liveWeekFor(player.week1_monday, player.current_week);
+  const maxBuilt = homework.reduce((m, h) => Math.max(m, h.week), 0);
+  const contentWeek = Math.max(1, Math.min(live, maxBuilt || 1));
+
   // A week approved but not yet unlocked (drops Monday morning VA time).
   const scheduled = plans.find(
     (p) =>
-      p.week > player.current_week &&
+      p.week > contentWeek &&
       p.unlocks_at &&
       new Date(p.unlocks_at).getTime() > Date.now()
   );
@@ -83,7 +89,7 @@ export default async function PlayerProfile({
   }
 
   // this-week session completion
-  const thisWeek = homework.filter((h) => h.week === player.current_week);
+  const thisWeek = homework.filter((h) => h.week === contentWeek);
   const sess = new Map<number, boolean>();
   const sessAll = new Map<number, boolean[]>();
   for (const h of thisWeek) {
@@ -117,7 +123,8 @@ export default async function PlayerProfile({
             </h1>
             <div className="mt-1.5 text-sm text-white/50">
               {player.age ? `Age ${player.age} · ` : ""}
-              {player.position || "Player"} · Week {player.current_week} · Last
+              {player.position || "Player"} · Week {live}
+              {maxBuilt < live ? ` (built through ${maxBuilt || 0})` : ""} · Last
               active {summary.last_active ? relativeDay(summary.last_active) : "-"}
             </div>
           </div>
@@ -186,7 +193,7 @@ export default async function PlayerProfile({
             )}
             <CoachWeekView
               homework={homework}
-              currentWeek={player.current_week}
+              currentWeek={contentWeek}
             />
           </section>
 
@@ -276,7 +283,7 @@ export default async function PlayerProfile({
 
           <DuplicateWeekButton
             playerId={player.id}
-            currentWeek={player.current_week}
+            currentWeek={maxBuilt || contentWeek}
           />
 
           {/* This week's focus */}

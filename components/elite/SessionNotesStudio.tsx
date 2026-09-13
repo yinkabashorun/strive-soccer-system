@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import type { GeneratedPlan } from "@/lib/elite/types";
 import { applyGeneratedPlan } from "@/lib/elite/coach-actions";
+import { DrillVideo } from "./DrillVideo";
 import { cn } from "@/lib/utils";
 
 const EXAMPLE = `Today we worked on scanning before receiving. Body shape needs to be quicker. He's still square-on when the ball arrives. Composure was better under pressure.
@@ -24,7 +25,16 @@ Homework:
 Watch Rodri clips on body orientation
 Practice opening hips before the first touch`;
 
-export function SessionNotesStudio({ playerId }: { playerId: string }) {
+export function SessionNotesStudio({
+  playerId,
+  videos = {},
+}: {
+  playerId: string;
+  // drill title (lowercased) -> demo video URL, from the drill bank; lets
+  // the coach preview exactly what the player will see
+  videos?: Record<string, string>;
+}) {
+  const videoFor = (title: string) => videos[title.trim().toLowerCase()];
   const [notes, setNotes] = useState("");
   const [plan, setPlan] = useState<GeneratedPlan | null>(null);
   const [source, setSource] = useState<"ai" | "fallback" | null>(null);
@@ -276,6 +286,9 @@ export function SessionNotesStudio({ playerId }: { playerId: string }) {
                               <p className="mt-1 text-xs text-white/55">
                                 {d.exercise}
                               </p>
+                              {videoFor(d.title) && (
+                                <DrillVideo src={videoFor(d.title)!} label="Preview" />
+                              )}
                             </>
                           ) : (
                             <>
@@ -345,6 +358,9 @@ export function SessionNotesStudio({ playerId }: { playerId: string }) {
                                   min
                                 </span>
                               </div>
+                              {videoFor(d.title) && (
+                                <DrillVideo src={videoFor(d.title)!} label="Preview" />
+                              )}
                             </>
                           )}
                         </li>

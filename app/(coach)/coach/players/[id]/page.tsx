@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import {
   getCheckins,
+  getDrillBank,
   getFilm,
   getGames,
   getHomework,
@@ -217,7 +218,14 @@ export default async function PlayerProfile({
           {recap && <WeekRecapCard recap={recap} />}
 
           {/* Build next week */}
-          <SessionNotesStudio playerId={player.id} />
+          <SessionNotesStudio
+            playerId={player.id}
+            videos={Object.fromEntries(
+              (await getDrillBank()).drills
+                .filter((d) => d.video_url)
+                .map((d) => [d.title.trim().toLowerCase(), d.video_url as string])
+            )}
+          />
 
           {/* Progress */}
           <section>

@@ -73,6 +73,19 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
 
 ## Business context
 
+- Parent-customer market research (Perplexity Deep Research, Sept 14 2026):
+  research/parent-customer-research-2026-09-14.md. Rigorously sourced, marks
+  supported facts vs anecdotes vs hypotheses. Key corrections to earlier
+  assumptions: the "70% of kids quit by 13" stat is DEBUNKED (traced by USA
+  Today to weak sourcing) - never use it. National coach satisfaction is
+  actually high (77.6% satisfied/very satisfied) - do not position Strive as
+  "your club/coach failed you," position as a trusted complement. Real local
+  cost benchmarks: FVA Union ~$4,245/yr, FC Dulles travel ~$1,550/yr or
+  $75-195/season recreational. Contains a "Copy Gold" section of real public
+  quotes (NOT Strive testimonials, do not imply they are - use as inspiration
+  for original paraphrased copy only) and a feature-to-objection-to-proof
+  table mapped to Strive's actual features. Read before writing any new VSL,
+  ad, or DM script copy.
 - All clients come from Instagram (~230k views/month, posts daily). Trigger words:
   FALL (group), PRIVATE (1:1s), APP (program). Large training-clip library exists.
 - Events arm: monthly elite pickup runs (50+ players, last event 86k views,

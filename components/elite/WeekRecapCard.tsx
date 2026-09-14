@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ClipboardCopy, MessageCircleHeart } from "lucide-react";
+import { Check, ClipboardCopy, MessageCircleHeart, Users } from "lucide-react";
 import type { WeekRecap } from "@/lib/elite/recap";
 import { cn } from "@/lib/utils";
 
@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 // (celebrate a full week, name what got skipped). Tap copy, paste, done.
 export function WeekRecapCard({ recap }: { recap: WeekRecap }) {
   const [copied, setCopied] = useState(false);
+  const [referralCopied, setReferralCopied] = useState(false);
   const all = recap.done === recap.total;
 
   async function copy() {
@@ -16,6 +17,17 @@ export function WeekRecapCard({ recap }: { recap: WeekRecap }) {
       await navigator.clipboard.writeText(recap.text);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard unavailable: the text is selectable below
+    }
+  }
+
+  async function copyReferral() {
+    if (!recap.referralLine) return;
+    try {
+      await navigator.clipboard.writeText(recap.referralLine);
+      setReferralCopied(true);
+      setTimeout(() => setReferralCopied(false), 2000);
     } catch {
       // clipboard unavailable: the text is selectable below
     }
@@ -63,6 +75,34 @@ export function WeekRecapCard({ recap }: { recap: WeekRecap }) {
           </>
         )}
       </button>
+
+      {/* Separate, optional: the referral ask only shows on a full week -
+          the highest-trust moment - and never gets folded into the
+          accountability text above, which stays focused on the week. */}
+      {recap.referralLine && (
+        <div className="mt-3 rounded-2xl border border-white/10 bg-black/20 p-3.5">
+          <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">
+            <Users className="h-3 w-3" /> Optional: ask for a referral
+          </div>
+          <p className="mt-2 select-all text-sm leading-relaxed text-white/70">
+            {recap.referralLine}
+          </p>
+          <button
+            onClick={copyReferral}
+            className="mt-2.5 flex items-center gap-1.5 rounded-lg border border-white/15 px-3 py-1.5 text-xs font-medium text-white/70 hover:border-accent/40 hover:text-accent"
+          >
+            {referralCopied ? (
+              <>
+                <Check className="h-3.5 w-3.5" /> Copied
+              </>
+            ) : (
+              <>
+                <ClipboardCopy className="h-3.5 w-3.5" /> Copy referral ask
+              </>
+            )}
+          </button>
+        </div>
+      )}
     </section>
   );
 }

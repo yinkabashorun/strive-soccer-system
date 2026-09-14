@@ -19,7 +19,13 @@ export type WeekRecap = {
   minutes: number; // minutes of completed work
   missedTitles: string[]; // headline drill of each missed session
   text: string; // the copy-paste parent text
+  referralLine?: string; // only set on a full week - the highest-trust
+  // moment to ask, kept separate from the accountability text on purpose
 };
+
+// $25 default credit, adjust here if the offer changes - keeps the ask
+// consistent everywhere it's generated instead of copy drifting per message.
+const REFERRAL_CREDIT = "$25";
 
 // A session counts as done when every drill in it is checked off - the
 // same rule the player's week view uses.
@@ -60,7 +66,20 @@ export function buildWeekRecap(
 
   const first = player.full_name.split(" ")[0];
   const text = recapText(first, done, total, minutes, missedTitles);
-  return { week, done, total, minutes, missedTitles, text };
+  // Ask for a referral only on a full week - that's when a parent's trust
+  // is highest and the ask lands as a compliment, not a pitch.
+  const referralLine =
+    total > 0 && done === total ? referralText(first) : undefined;
+  return { week, done, total, minutes, missedTitles, text, referralLine };
+}
+
+function referralText(first: string): string {
+  return (
+    `Since ${first} is putting in real work, if you know another family ` +
+    `who'd want this for their kid, send them my way. When they join, ` +
+    `I'll credit your account ${REFERRAL_CREDIT}, no limit on how many. ` +
+    `Just have them mention ${first}'s name.`
+  );
 }
 
 function recapText(

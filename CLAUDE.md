@@ -49,6 +49,13 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
 - Refunds: same-day, gracious, always.
 - Registration = payment. Public scarcity numbers must be real.
 - No em dashes in any player/parent-facing copy or scripts.
+- Referral program (PROPOSED Sept 14, unconfirmed - say "stamp it" to lock):
+  referring family gets $25 account credit, any tier, no limit on referrals,
+  credited once the referred family makes their first payment. No cash
+  payouts, credit only. The app surfaces the ask automatically in the
+  parent weekly recap on a full (4/4) week only - the highest-trust moment,
+  never mixed into the accountability text itself. Track in GHL with a
+  "referred" tag + a "referred_by" text field (not yet added - build this).
 
 ## People
 

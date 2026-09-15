@@ -3,6 +3,26 @@
 Address the user as "Coach Yinka". These are confirmed facts; never invent
 prices, dates, or numbers not listed here. Flag anything unconfirmed.
 
+## Open items (living list, keep this current)
+
+Read this every session. Update it the moment something here gets done or a
+new open item comes up, don't let it go stale. When Coach Yinka asks "where
+are we," this list IS the answer.
+
+- [ ] Waiver form in GHL - real liability gap, top priority
+- [ ] Get Gary's one-pager signed
+- [ ] Announce Strive Elite app publicly - don't wait on Gonz's quote
+- [ ] Stamp Gary's $80-session split (suggested $40/$40)
+- [ ] Stamp referral program $25 credit
+- [ ] Add referred / referred_by fields in GHL
+- [ ] Confirm PWC field permit is actually granted, not just requested
+- [ ] Migrate the 14 Manus-hosted drill videos to Strive's own storage
+- [ ] Sign Teo's Ashburn memo
+- [ ] Decide on a Skool community layer (add-on, not a replacement, see below)
+- [ ] Get Gonz's quote for the announcement, low-pressure follow-up only
+- [ ] Stamp Hybrid ($400->$500) and 1:1 Monthly ($280->$320) raises, announce
+      alongside the ladder once the founding window closes Oct 1
+
 ## Weekly schedule (field time)
 
 | Day | What | Times |
@@ -69,7 +89,8 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
   (U19 Bundesliga), Armenia U16/17 NT, Captain of VDA, 2x Mid-Atlantic
   All-Conference First Team. Split negotiated at $75 sessions (Gary $40 /
   Strive $35); UNCONFIRMED how the $80 raise splits. One-pager unsigned.
-- Assistant coach planned for Friday groups.
+- Gary is the Friday group assistant coach. There is no separate assistant
+  coach hire needed or planned.
 
 ## Business context
 
@@ -104,3 +125,11 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
   webcam kit; phone-as-webcam via Camo preferred for calls.
 - App: thestriveapp.com (this repo). Supabase project qjiloadpfeqxxyfozsje.
   Demo tour: login -> "See the app as a player".
+- Skool: Coach Yinka wants community + is considering moving the course
+  there. RECOMMENDATION (Sept 15): do not move training delivery to Skool,
+  it has no AI personalization, no drill bank, no wall-day logic, no
+  calendar-derived weeks, no recap/referral automation, everything that
+  makes Strive different from a generic app dies if the course moves.
+  If used at all, Skool should be a community add-on layer only (posts,
+  leaderboard, native push notifications), the custom app stays the
+  actual training delivery system. Undecided as of this note.

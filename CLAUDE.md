@@ -18,7 +18,9 @@ are we," this list IS the answer.
 - [ ] Confirm PWC field permit is actually granted, not just requested
 - [ ] Migrate the 14 Manus-hosted drill videos to Strive's own storage
 - [ ] Sign Teo's Ashburn memo
-- [ ] Decide on a Skool community layer (add-on, not a replacement, see below)
+- [ ] Set up Skool community (DECIDED Sept 15): community only, $9/mo Hobby
+      plan, gated to paying members, pinned link to thestriveapp.com for
+      actual training. Skool is not the course, never move training there.
 - [ ] Get Gonz's quote for the announcement, low-pressure follow-up only
 - [ ] Stamp Hybrid ($400->$500) and 1:1 Monthly ($280->$320) raises, announce
       alongside the ladder once the founding window closes Oct 1
@@ -125,11 +127,9 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
   webcam kit; phone-as-webcam via Camo preferred for calls.
 - App: thestriveapp.com (this repo). Supabase project qjiloadpfeqxxyfozsje.
   Demo tour: login -> "See the app as a player".
-- Skool: Coach Yinka wants community + is considering moving the course
-  there. RECOMMENDATION (Sept 15): do not move training delivery to Skool,
-  it has no AI personalization, no drill bank, no wall-day logic, no
-  calendar-derived weeks, no recap/referral automation, everything that
-  makes Strive different from a generic app dies if the course moves.
-  If used at all, Skool should be a community add-on layer only (posts,
-  leaderboard, native push notifications), the custom app stays the
-  actual training delivery system. Undecided as of this note.
+- Skool: DECIDED Sept 15, community layer only, $9/mo Hobby plan (no Skool
+  payments processed, so the 10% transaction fee never applies). Gated to
+  paying members. Pinned post links to thestriveapp.com, the app remains
+  the only place training actually happens, AI plans/drill bank/recaps/
+  referral all stay there. Skool gives community, leaderboard, and native
+  push notifications for free.

@@ -18,9 +18,13 @@ are we," this list IS the answer.
 - [ ] Confirm PWC field permit is actually granted, not just requested
 - [ ] Migrate the 14 Manus-hosted drill videos to Strive's own storage
 - [ ] Sign Teo's Ashburn memo
-- [ ] Set up Skool community (DECIDED Sept 15): community only, $9/mo Hobby
-      plan, gated to paying members, pinned link to thestriveapp.com for
-      actual training. Skool is not the course, never move training there.
+- [ ] Set up Skool community (DECIDED Sept 15, refined Sept 15): community
+      only, $9/mo Hobby plan, pinned link to thestriveapp.com for actual
+      training. Skool is not the course, never move training there. Access
+      is OPEN past current paying members: invite old/lapsed clients back
+      in too, it doubles as a reactivation + marketing/proof engine for
+      prospects. Academy's $400 exclusivity stays in its own perks (private
+      monthly breakdown, cap, priority), not in community access.
 - [ ] Get Gonz's quote for the announcement, low-pressure follow-up only
 - [ ] Stamp Hybrid ($400->$500) and 1:1 Monthly ($280->$320) raises, announce
       alongside the ladder once the founding window closes Oct 1
@@ -128,8 +132,12 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
 - App: thestriveapp.com (this repo). Supabase project qjiloadpfeqxxyfozsje.
   Demo tour: login -> "See the app as a player".
 - Skool: DECIDED Sept 15, community layer only, $9/mo Hobby plan (no Skool
-  payments processed, so the 10% transaction fee never applies). Gated to
-  paying members. Pinned post links to thestriveapp.com, the app remains
-  the only place training actually happens, AI plans/drill bank/recaps/
-  referral all stay there. Skool gives community, leaderboard, and native
-  push notifications for free.
+  payments processed, so the 10% transaction fee never applies). Pinned
+  post links to thestriveapp.com, the app remains the only place training
+  actually happens, AI plans/drill bank/recaps/referral all stay there.
+  Skool gives community, leaderboard, and native push notifications for
+  free. Access is OPEN, not gated to current payers: old/lapsed clients get
+  invited back in specifically so the community doubles as a marketing and
+  reactivation tool, current members seeing/posting real proof is what a
+  prospect sees. Academy's premium feel is protected by its own perks
+  (private breakdown, cap, priority), not by excluding others from Skool.

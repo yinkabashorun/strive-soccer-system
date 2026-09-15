@@ -330,6 +330,7 @@ export const DEMO_HOMEWORK: Homework[] = [
       session: 2,
       completed: true,
       completed_at: daysFromNow(-10),
+      video_url: "/drills/wall-pass-touch-stepover.mp4",
     },
     {
       title: "Stepover at speed",
@@ -358,6 +359,7 @@ export const DEMO_HOMEWORK: Homework[] = [
       session: 3,
       completed: true,
       completed_at: daysFromNow(-9),
+      video_url: "/drills/l-turn-pullback-chop.mp4",
     },
     {
       title: "Outside chop",
@@ -472,6 +474,7 @@ export const DEMO_HOMEWORK: Homework[] = [
       session: 3,
       completed: true,
       completed_at: daysFromNow(-4),
+      video_url: "/drills/push-pull-fake-roll.mp4",
     },
     {
       title: "Roll-chop combo",
@@ -530,6 +533,7 @@ export const DEMO_HOMEWORK: Homework[] = [
       session: 1,
       completed: true,
       completed_at: daysFromNow(-2),
+      video_url: "/drills/wall-pass-touch-stepover.mp4",
     },
     {
       title: "Chop-croqueta chain",
@@ -539,6 +543,7 @@ export const DEMO_HOMEWORK: Homework[] = [
       session: 1,
       completed: true,
       completed_at: daysFromNow(-2),
+      video_url: "/drills/l-turn-pullback-chop.mp4",
     },
     {
       title: "Speed ladder",
@@ -592,6 +597,7 @@ export const DEMO_HOMEWORK: Homework[] = [
       reps: "16 take-ons",
       duration_min: 10,
       session: 3,
+      video_url: "/drills/wall-pass-touch-scissor.mp4",
     },
     {
       title: "Left-exit chains",

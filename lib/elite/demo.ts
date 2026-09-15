@@ -262,28 +262,32 @@ const plyo = (variant: number) =>
       exercise:
         "Pogo hops x20, tuck jumps x10, split-squat jumps x8 each leg. Land soft, explode up.",
       reps: "3 rounds",
-      duration_min: 10,
+      duration_min: 4,
+      video_url: "/drills/plyo-pogo-jumps.mp4",
     },
     {
       title: "Plyo warm-up: Lateral Power",
       exercise:
         "Lateral bounds x10 each side, skater hops x12 each side, squat jumps x12.",
       reps: "3 rounds",
-      duration_min: 10,
+      duration_min: 4,
+      video_url: "/drills/plyo-lateral-hops.mp4",
     },
     {
       title: "Plyo warm-up: Quick Feet",
       exercise:
         "Ankle pogos x30, broad-jump-to-stick x6, single-leg hops x8 each leg.",
       reps: "3 rounds",
-      duration_min: 10,
+      duration_min: 4,
+      video_url: "/drills/plyo-single-leg-step-down-hops.mp4",
     },
     {
       title: "Plyo warm-up: Explosive",
       exercise:
         "Tuck jumps x10, split jumps x10 each leg, step-down-to-jump x6.",
       reps: "3 rounds",
-      duration_min: 10,
+      duration_min: 4,
+      video_url: "/drills/plyo-broad-jumps.mp4",
     },
   ][variant - 1];
 
@@ -603,7 +607,6 @@ export const DEMO_HOMEWORK: Homework[] = [
       reps: "1 clip + 30 reps",
       duration_min: 10,
       session: 4,
-      video_url: "https://www.youtube.com/results?search_query=neymar+1v1+moves",
     },
     {
       title: "Move roulette: final",

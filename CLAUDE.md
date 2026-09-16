@@ -78,8 +78,12 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
   Session at the real rate (1:1 $80 or Group Drop-in $50, no special
   discount) -> book a follow-up call for right after. Choosing a bundle
   instead skips the single-session charge entirely, they just pay the
-  discounted bundle rate. Online -> landing page -> book a call with Coach
-  Yinka, he closes it personally from there. Layup sale exception: a lead
+  discounted bundle rate. Online -> landing page (thestriveapp.com/demo) ->
+  short GHL intake form (same shape as the in-person form) -> team reaches
+  out to get a call booked, Coach Yinka closes it personally from there.
+  No self-serve checkout - the app's signup is invite-code gated and Stripe
+  checkout doesn't provision accounts yet, so payment-first isn't wired up
+  and isn't worth rushing. Layup sale exception: a lead
   already ready to buy skips straight to the registration/payment link,
   never made to wait through the 3 questions; anyone who needs more gets the
   normal flow.

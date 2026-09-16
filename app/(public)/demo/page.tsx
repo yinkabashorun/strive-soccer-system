@@ -8,10 +8,10 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Strive Elite",
-  description: "What happens to your player's game the other five days a week.",
+  description: "Training a lot doesn't help if it's never the thing your player actually needs.",
   openGraph: {
     title: "Strive Elite",
-    description: "What happens to your player's game the other five days a week.",
+    description: "Training a lot doesn't help if it's never the thing your player actually needs.",
     type: "website",
   },
 };
@@ -23,15 +23,15 @@ const BOOKING_URL = "https://calendly.com/strivesoccer100x/strive-elite-walkthro
 // drill bank, that's the paid product. Two ways to close: book the call,
 // or DM "APP" on Instagram for whoever's already warm from a post.
 const STRUCTURE: [string, string][] = [
-  ["4 sessions a week", "Same rhythm every time. A player just shows up and trains."],
-  ["Built around the kid", "Every week is different, based on what they're actually weak at."],
+  ["4 sessions a week, on their own", "Layered on top of regular training. Same rhythm every time, a player just shows up and works."],
+  ["Built around the kid", "Every week targets what they're actually weak at, not what's convenient for 15 kids on one field."],
   ["Every drill on video", "Nobody's guessing what a rep should look like."],
   ["A weekly recap for you", "What got done, what's next. Nothing slips by quietly."],
 ];
 
 const OBJECTIONS: [string, string][] = [
   ["Will they actually do it?", "You get a recap every week. If it's not happening, you'll know immediately, not at the end of the season."],
-  ["We already pay for club.", "This isn't a replacement for your club or coach. It's what fills the other five days, the ones nobody's structuring right now."],
+  ["We already train 3-4 times a week.", "Group training is real work, but it can't target one kid's specific gap with a full team on the field. This is the individual layer on top, built around exactly what your player needs to reach the next level."],
   ["What if we miss a week?", "The plan picks back up the moment you're ready. No makeup schedule to manage, no falling behind."],
 ];
 
@@ -56,14 +56,15 @@ export default async function DemoPage() {
 
       {/* Hook - the real gap, no manufactured urgency, no stats we can't stand behind */}
       <h1 className="mt-5 font-display text-2xl font-bold leading-tight sm:text-3xl">
-        Your player trains with the team once or twice a week.
-        <span className="text-accent"> What happens the other five days</span> is
-        what actually decides how fast they improve.
+        Training three or four times a week
+        <span className="text-accent"> doesn&apos;t help much</span> if
+        it&apos;s never the thing your player actually needs work on.
       </h1>
       <p className="mt-3 text-sm leading-relaxed text-white/55">
-        Most of that time is unstructured, or it doesn&apos;t happen at all.
-        Strive Elite is a real weekly plan, built by a coach, not a library
-        of random workout videos.
+        Team practice is real work, but it&apos;s built for the whole group.
+        Strive Elite is the individual layer on top: a weekly plan built
+        around what your player specifically needs to reach the next level,
+        not what fits 15 kids on one field.
       </p>
 
       {/* Mechanism */}

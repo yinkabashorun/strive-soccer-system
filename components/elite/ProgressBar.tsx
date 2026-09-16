@@ -6,7 +6,7 @@ export function ProgressBar({
   label,
   value,
   prev,
-  color = "#F5C518",
+  color = "#D4AF37",
   className,
 }: {
   label: string;

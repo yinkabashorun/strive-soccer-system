@@ -94,7 +94,7 @@ export async function getViewer(): Promise<Viewer | null> {
                 (user.user_metadata?.full_name as string) ||
                 "Coach",
               email: user.email ?? "",
-              avatar_color: profile?.avatar_color ?? "#F5C518",
+              avatar_color: profile?.avatar_color ?? "#D4AF37",
             },
             { onConflict: "id" }
           );
@@ -117,7 +117,7 @@ export async function getViewer(): Promise<Viewer | null> {
           role,
           full_name: profile?.full_name ?? user.email ?? "Player",
           email: profile?.email ?? user.email ?? "",
-          avatar_color: profile?.avatar_color ?? "#F5C518",
+          avatar_color: profile?.avatar_color ?? "#D4AF37",
         },
         role,
         playerId,

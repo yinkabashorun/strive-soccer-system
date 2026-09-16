@@ -27,7 +27,7 @@ export const DEMO_COACH = {
   full_name: "Coach Yinka",
   email: "coach@strivesoccerfc.com",
   role: "coach" as const,
-  avatar_color: "#F5C518",
+  avatar_color: "#D4AF37",
 };
 
 const now = new Date(); // demo dates stay fresh relative to today
@@ -43,7 +43,7 @@ export const DEMO_PLAYERS: Player[] = [
     profile_id: "u-marcus",
     coach_id: DEMO_COACH.id,
     full_name: "Marcus Bello",
-    avatar_color: "#F5C518",
+    avatar_color: "#D4AF37",
     age: 13,
     position: "Attacking Midfield",
     level: "Advanced",

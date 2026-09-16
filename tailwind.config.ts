@@ -19,11 +19,12 @@ const config: Config = {
           500: "#2a2a2f",
           600: "#3a3a40",
         },
-        // Strive gold — the site's single accent, used sparingly.
+        // Strive gold — the site's single accent, used sparingly. A richer,
+        // more metallic gold than the old flat lemon-yellow (#F5C518).
         accent: {
-          DEFAULT: "#F5C518",
-          soft: "#E3B614",
-          deep: "#B8940F",
+          DEFAULT: "#D4AF37",
+          soft: "#E6C767",
+          deep: "#9C7A24",
         },
         bone: "#F5F4EF",
         muted: "#8a8a92",
@@ -40,7 +41,7 @@ const config: Config = {
         tightest: "-0.04em",
       },
       boxShadow: {
-        glow: "0 0 0 1px rgba(245,197,24,0.15), 0 0 40px -10px rgba(245,197,24,0.35)",
+        glow: "0 0 0 1px rgba(212,175,55,0.15), 0 0 40px -10px rgba(212,175,55,0.35)",
         card: "0 1px 0 0 rgba(255,255,255,0.04) inset, 0 30px 60px -30px rgba(0,0,0,0.8)",
         soft: "0 10px 40px -20px rgba(0,0,0,0.6)",
         lift: "0 20px 50px -25px rgba(0,0,0,0.85)",
@@ -49,7 +50,7 @@ const config: Config = {
         "grid-faint":
           "linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)",
         "radial-spot":
-          "radial-gradient(60% 60% at 50% 0%, rgba(245,197,24,0.10) 0%, rgba(0,0,0,0) 70%)",
+          "radial-gradient(60% 60% at 50% 0%, rgba(212,175,55,0.10) 0%, rgba(0,0,0,0) 70%)",
       },
       borderRadius: {
         "4xl": "2rem",

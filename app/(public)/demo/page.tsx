@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { createServiceClient } from "@/lib/elite/supabase/server";
 import type { Drill } from "@/lib/elite/types";
 import { DrillVideo } from "@/components/elite/DrillVideo";
@@ -16,12 +17,12 @@ export const metadata: Metadata = {
   },
 };
 
-const BOOKING_URL = "https://calendly.com/strivesoccer100x/strive-elite-walkthrough-call";
-
 // This page does the job a VSL usually does: hook, mechanism, proof,
 // objections, offer, close. Structure over inventory - never the whole
-// drill bank, that's the paid product. Two ways to close: book the call,
-// or DM "APP" on Instagram for whoever's already warm from a post.
+// drill bank, that's the paid product. Close is the GHL intake form
+// (matches the in-person path: form first, Carla reaches out to book the
+// call), with DM "APP" as the fast lane for whoever's already warm from a
+// post.
 const STRUCTURE: [string, string][] = [
   ["4 sessions a week, built around you", "Same rhythm every time, layered on top of regular training. You show up, it's already planned, you just train."],
   ["Not built for the group. Built for you.", "Every week targets what YOU actually need work on, not what's convenient for 15 kids on one field."],
@@ -124,18 +125,29 @@ export default async function DemoPage() {
         <p className="mt-1 text-sm text-white/60">
           Starting Oct 1. Join by Sept 30 and lock $199/mo for life.
         </p>
-        <a
-          href={BOOKING_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="btn-accent mt-4 w-full justify-center px-4 py-3 text-sm sm:w-auto sm:px-8"
-        >
-          Book a 15-min call
-        </a>
-        <p className="mt-3 text-xs text-white/40">
-          or comment / DM &ldquo;APP&rdquo; on Instagram
+        <p className="mt-4 text-sm font-semibold text-white">
+          Tell us about your player below. I&apos;ll personally reach out to
+          get your call on the books.
         </p>
       </div>
+
+      <div className="mt-4 overflow-hidden rounded-2xl border border-white/8 bg-white">
+        <iframe
+          src="https://api.leadconnectorhq.com/widget/survey/W14MZotX2vYkpyDPKOY8"
+          style={{ border: "none", width: "100%", display: "block" }}
+          scrolling="no"
+          id="W14MZotX2vYkpyDPKOY8"
+          title="Strive Elite intake"
+          data-cookie-consent="true"
+          data-cookie-consent-provider="auto"
+          className="min-h-[720px]"
+        />
+      </div>
+      <Script src="https://link.msgsndr.com/js/form_embed.js" strategy="afterInteractive" />
+
+      <p className="mt-4 text-center text-xs text-white/40">
+        or comment / DM &ldquo;APP&rdquo; on Instagram
+      </p>
     </div>
   );
 }

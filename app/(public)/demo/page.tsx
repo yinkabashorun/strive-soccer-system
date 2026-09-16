@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { createServiceClient } from "@/lib/elite/supabase/server";
-import { PLYO_PILLAR, PROGRESS_METRICS, type Drill } from "@/lib/elite/types";
+import type { Drill } from "@/lib/elite/types";
 import { DrillVideo } from "@/components/elite/DrillVideo";
 import { Wordmark } from "@/components/elite/Wordmark";
 
@@ -42,20 +42,22 @@ export default async function DemoPage() {
     : { data: null };
   const drills = (data ?? []) as Drill[];
 
-  // One example per pillar, never the full bank. Weak Foot stays out of
-  // this sample. Ball Mastery uses a specific hosted clip instead of
-  // whatever the bank happens to sort first.
-  const pillars = [PLYO_PILLAR, ...PROGRESS_METRICS].filter(
-    (p) => p !== "Weak Foot" && drills.some((d) => d.pillar === p)
-  );
-  type Sample = { id: string; pillar: string; video_url: string };
-  const sample: Sample[] = pillars.flatMap((p) => {
-    if (p === "Ball Mastery") {
-      return [{ id: "ball-mastery-sample", pillar: p, video_url: "/drills/ball-mastery-juggle-catch.mp4" }];
-    }
-    const d = drills.find((d) => d.pillar === p && d.video_url);
-    return d?.video_url ? [{ id: d.id, pillar: d.pillar, video_url: d.video_url }] : [];
-  });
+  // Curated tiles, never the full bank. Each one is either a specific
+  // named drill from the live bank (by title, so it still breaks loudly
+  // if that drill ever gets renamed or deactivated) or a dedicated hosted
+  // clip that isn't a bank entry at all.
+  const byTitle = (title: string) => drills.find((d) => d.title === title)?.video_url;
+  type Sample = { id: string; label: string; video_url: string };
+  const CURATED: [string, string, string | undefined][] = [
+    ["plyo", "Warm-ups", byTitle("Plyo warm-up: Pogo jumps")],
+    ["ball-mastery", "Ball Mastery", "/drills/ball-mastery-juggle-catch.mp4"],
+    ["passing", "Passing", byTitle("Two touch passing")],
+    ["confidence", "Confidence", byTitle("Ronaldinho drill")],
+    ["1v1", "1v1 Skills", byTitle("Neymar Feint")],
+  ];
+  const sample: Sample[] = CURATED.filter(
+    (row): row is [string, string, string] => Boolean(row[2])
+  ).map(([id, label, video_url]) => ({ id, label, video_url }));
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
@@ -93,7 +95,7 @@ export default async function DemoPage() {
       </h2>
       <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
         {sample.map((d) => (
-          <DrillVideo key={d.id} src={d.video_url} label={d.pillar} />
+          <DrillVideo key={d.id} src={d.video_url} label={d.label} />
         ))}
       </div>
       <p className="mt-2.5 text-xs text-white/35">

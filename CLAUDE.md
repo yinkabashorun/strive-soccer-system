@@ -16,7 +16,8 @@ are we," this list IS the answer.
 - [ ] Stamp referral program $25 credit
 - [ ] Add referred / referred_by fields in GHL
 - [ ] Confirm PWC field permit is actually granted, not just requested
-- [ ] Migrate the 14 Manus-hosted drill videos to Strive's own storage
+- [ ] Migrate the remaining 13 Manus-hosted drill videos to Strive's own
+      storage (Neymar Feint done Sept 16, re-trimmed from raw footage)
 - [ ] Sign Teo's Ashburn memo
 - [ ] Set up Skool community (DECIDED Sept 15, refined Sept 15): community
       only, $9/mo Hobby plan, pinned link to thestriveapp.com for actual

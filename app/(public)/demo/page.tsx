@@ -53,7 +53,7 @@ export default async function DemoPage() {
     ["ball-mastery", "Ball Mastery", "/drills/ball-mastery-juggle-catch.mp4"],
     ["passing", "Passing", byTitle("Two touch passing")],
     ["confidence", "Confidence", byTitle("Ronaldinho drill")],
-    ["1v1", "1v1 Skills", byTitle("Neymar Feint")],
+    ["1v1", "1v1 Skills", "/drills/neymar-feint.mp4"],
   ];
   const sample: Sample[] = CURATED.filter(
     (row): row is [string, string, string] => Boolean(row[2])

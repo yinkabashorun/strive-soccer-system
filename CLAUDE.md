@@ -52,7 +52,8 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
   Carla, no month-to-month rollover. Sits under Hybrid (pitch Hybrid first;
   the $120 gap = app + film). Counts against the same scarce 1:1 slots.
 - Duo (2 players, semi-private, same hour): drop-in $120 · 4-pack $440 · 8-pack $800 · Duo Hybrid $650/mo (weekly duo session + both on app). Quoted live Sept 2026.
-- Group drop-in: $45 · Small Group monthly: $148 (groups of 10, assistant coach)
+- Group drop-in: $50 (raised from $45, Sept 2026) · Small Group monthly: $148
+  (groups of 10, assistant coach)
 - App-only (Strive Elite): $249/mo for new members from Oct 1 (stamped Sept 13,
   NOT yet announced publicly - announce before charging). Founding members and
   anyone quoted $199 who joins by Sept 30 keep $199 locked for life.
@@ -70,9 +71,18 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
 - Makeup: miss Friday group -> Sunday 6pm makeup at Gainesville Middle, included,
   1/month per player, same-or-next week, claimed through Carla. Never a free or
   discounted 1:1.
-- Sales: every willing lead gets a call; pitch Hybrid first, downsell App ->
-  Group -> $75 assessment (credits toward joining within a week). Never block
-  ready money: DM-close group buyers instantly.
+- Sales process (stamped Sept 16, replaces the old $75-assessment system):
+  first text qualifies in-person vs online. Both paths then get the same 3
+  questions: current stage/pain point, future goal, then the coach diagnoses
+  the gap out loud. In-person -> GHL booking form -> book an Assessment
+  Session at the real rate (1:1 $80 or Group Drop-in $50, no special
+  discount) -> book a follow-up call for right after. Choosing a bundle
+  instead skips the single-session charge entirely, they just pay the
+  discounted bundle rate. Online -> landing page -> book a call with Coach
+  Yinka, he closes it personally from there. Layup sale exception: a lead
+  already ready to buy skips straight to the registration/payment link,
+  never made to wait through the 3 questions; anyone who needs more gets the
+  normal flow.
 - Refunds: same-day, gracious, always.
 - Registration = payment. Public scarcity numbers must be real.
 - No em dashes in any player/parent-facing copy or scripts.

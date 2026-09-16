@@ -23,10 +23,10 @@ const BOOKING_URL = "https://calendly.com/strivesoccer100x/strive-elite-walkthro
 // drill bank, that's the paid product. Two ways to close: book the call,
 // or DM "APP" on Instagram for whoever's already warm from a post.
 const STRUCTURE: [string, string][] = [
-  ["4 sessions a week, on their own", "Layered on top of regular training. Same rhythm every time, a player just shows up and works."],
-  ["Built around the kid", "Every week targets what they're actually weak at, not what's convenient for 15 kids on one field."],
-  ["Every drill on video", "Nobody's guessing what a rep should look like."],
-  ["A weekly recap for you", "What got done, what's next. Nothing slips by quietly."],
+  ["4 sessions a week, built around you", "Same rhythm every time, layered on top of regular training. You show up, it's already planned, you just train."],
+  ["Not built for the group. Built for you.", "Every week targets what YOU actually need work on, not what's convenient for 15 kids on one field."],
+  ["Every drill, shown to you first", "No guessing what a rep should look like. Watch it, then go do it."],
+  ["A weekly update, just for you", "What got done, what's next. Nothing slips by quietly, ever."],
 ];
 
 const OBJECTIONS: [string, string][] = [

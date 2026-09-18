@@ -90,6 +90,10 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
 - Refunds: same-day, gracious, always.
 - Registration = payment. Public scarcity numbers must be real.
 - No em dashes in any player/parent-facing copy or scripts.
+- Never announce that a testimonial/message is "real" or "verified" (no
+  "real text from...", no authenticity badges/labels). Just show the
+  message. Calling out realness reads as insecure, not premium - not the
+  vibe.
 - Personalization framing: all player/parent/prospect-facing copy (site,
   app, ads, scripts) must read as Coach Yinka personally building and
   reviewing every plan - "I build every plan," "I review every plan,"

@@ -168,6 +168,14 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
   webcam kit; phone-as-webcam via Camo preferred for calls.
 - App: thestriveapp.com (this repo). Supabase project qjiloadpfeqxxyfozsje.
   Demo tour: login -> "See the app as a player".
+- Weekly plan generation is fully automated (shipped Sept 19 2026): a Sunday
+  evening cron builds every active player's week with no coach step, using
+  the player's own homework completion + self-checkin as the "notes" input
+  in place of a coach typing them. Coach Yinka no longer needs to review or
+  approve plans for them to go out. The "I build every plan, I review every
+  plan" copy promise is unchanged per the personalization policy above -
+  this is a backend change only, never say "AI" or "automated" anywhere
+  player/parent-facing.
 - Skool: DECIDED Sept 15, community layer only, $9/mo Hobby plan (no Skool
   payments processed, so the 10% transaction fee never applies). Pinned
   post links to thestriveapp.com, the app remains the only place training

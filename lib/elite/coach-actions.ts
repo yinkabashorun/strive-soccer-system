@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "./supabase/server";
 import { getViewer } from "./session";
 import { sendPlayerEmail } from "./email";
@@ -335,7 +336,23 @@ export async function applyGeneratedPlan(
 ) {
   const viewer = await requireCoach();
   if (!viewer) return { ok: false };
-  const supabase = createClient();
+  return applyGeneratedPlanCore(playerId, rawNotes, plan, viewer.profile.id);
+}
+
+// Shared by the coach's manual "approve & publish" click and the automated
+// weekly cron (lib/elite/auto-plan.ts). The cron has no signed-in coach and
+// no auth cookie, so the cookie-bound client from createClient() would hit
+// these tables as an anonymous user and get quietly blocked by RLS - the
+// cron passes its own service-role client in instead, which bypasses RLS
+// the same way every other admin-context write in this app does.
+export async function applyGeneratedPlanCore(
+  playerId: string,
+  rawNotes: string,
+  plan: GeneratedPlan,
+  coachProfileId: string,
+  client?: SupabaseClient
+) {
+  const supabase = client ?? createClient();
   if (!supabase) return { ok: true }; // demo mode: nothing to persist
 
   const { data: player } = await supabase
@@ -387,7 +404,7 @@ export async function applyGeneratedPlan(
   // 1) record the session
   await supabase.from("elite_sessions").insert({
     player_id: playerId,
-    coach_id: viewer.profile.id,
+    coach_id: coachProfileId,
     focus: plan.weekly_focus,
     raw_notes: rawNotes,
   });

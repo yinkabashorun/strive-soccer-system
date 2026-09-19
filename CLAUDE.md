@@ -30,6 +30,16 @@ are we," this list IS the answer.
 - [ ] Stamp Hybrid ($400->$500) and 1:1 Monthly ($280->$320) raises, announce
       alongside the ladder once the founding window closes Oct 1
 
+## Growth target (stamped Sept 19, Coach Yinka's own call)
+
+By Oct 31 2026: 20+ fully remote on MRR, 35-40 in-person on MRR, 8-10
+hybrid. Pace to get there: +3-4/month remote, +3-4/month hybrid, +6-7/month
+in-person. UNCONFIRMED whether "fully remote" includes Remote Academy
+(hard capped at 15 members) or means App-tier only - if Academy counts
+toward the 20+, that only works with 5+ of them on App ($249), not
+Academy. When Coach Yinka asks about progress toward this, check current
+member counts against this pace.
+
 ## Weekly schedule (field time)
 
 | Day | What | Times |

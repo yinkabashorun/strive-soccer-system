@@ -1,11 +1,13 @@
 // Fully automated weekly plan generation. Coach Yinka no longer writes a
-// note or clicks approve for this to run - a weekly cron (see
+// note or clicks approve for this to run - a Sunday 3pm ET cron (see
 // app/api/elite/cron/weekly-plans) calls runAutoWeeklyPlans() for every
-// active, onboarded player. In place of a coach's typed session notes, the
-// "notes" the AI sees are synthesized from what actually happened: last
-// week's homework completion and the player's own self-checkin. The
-// personalization promise in the copy ("I build every plan, I review every
-// plan") stays as-is per CLAUDE.md - the backend changed, the copy didn't.
+// active, onboarded player, and the new week goes live immediately
+// (publishNow) instead of waiting for the Monday unlock. In place of a
+// coach's typed session notes, the "notes" the AI sees are synthesized from
+// what actually happened: last week's homework completion and the player's
+// own self-checkin. The personalization promise in the copy ("I build every
+// plan, I review every plan") stays as-is per CLAUDE.md - the backend
+// changed, the copy didn't.
 import { createServiceClient } from "./supabase/server";
 import { generatePlanFromNotes } from "./ai-coach";
 import { applyGeneratedPlanCore } from "./coach-actions";
@@ -74,9 +76,11 @@ export async function runAutoWeeklyPlans(): Promise<{ ran: number; results: Resu
         .maybeSingle();
       const maxBuilt = latestBuilt?.week ?? 0;
 
-      // Already has this week or later built (manual edit, or already ran
-      // this cycle) - never overwrite a plan that's ahead of the calendar.
-      if (maxBuilt > liveWeek || (maxBuilt === liveWeek && player.week1_monday)) {
+      // Already built ahead of the live week (manual edit, or this cron
+      // already ran this cycle) - never overwrite it. maxBuilt === liveWeek
+      // is the normal steady state (last week's plan is live and current)
+      // and must NOT skip, or the cron would only ever fire once per player.
+      if (maxBuilt > liveWeek) {
         results.push({ playerId: player.id, name: player.full_name, ok: true, skipped: "already built" });
         continue;
       }
@@ -98,7 +102,9 @@ export async function runAutoWeeklyPlans(): Promise<{ ran: number; results: Resu
 
       const notes = synthesizeNotes(lastHomework ?? [], lastCheckin ?? undefined);
       const { plan } = await generatePlanFromNotes(notes, player, player.coach_memory, bank);
-      const applied = await applyGeneratedPlanCore(player.id, notes, plan, coach.id, admin);
+      const applied = await applyGeneratedPlanCore(player.id, notes, plan, coach.id, admin, {
+        publishNow: true,
+      });
       results.push({ playerId: player.id, name: player.full_name, ok: true, week: applied.week });
     } catch (err) {
       results.push({

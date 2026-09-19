@@ -350,7 +350,8 @@ export async function applyGeneratedPlanCore(
   rawNotes: string,
   plan: GeneratedPlan,
   coachProfileId: string,
-  client?: SupabaseClient
+  client?: SupabaseClient,
+  opts?: { publishNow?: boolean }
 ) {
   const supabase = client ?? createClient();
   if (!supabase) return { ok: true }; // demo mode: nothing to persist
@@ -397,8 +398,15 @@ export async function applyGeneratedPlanCore(
       .limit(1)
       .maybeSingle();
     week = pending?.week ?? liveWeek + 1;
-    unlocksAt = unlockInstant(nextMondayNY());
-    goesLiveNow = false;
+    if (opts?.publishNow) {
+      // Automated weekly cron (lib/elite/auto-plan.ts): the new week goes
+      // live the moment it's built, no Monday hold.
+      unlocksAt = new Date().toISOString();
+      goesLiveNow = true;
+    } else {
+      unlocksAt = unlockInstant(nextMondayNY());
+      goesLiveNow = false;
+    }
   }
 
   // 1) record the session

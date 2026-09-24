@@ -24,7 +24,7 @@ are we," this list IS the answer.
       training. Skool is not the course, never move training there. Access
       is OPEN past current paying members: invite old/lapsed clients back
       in too, it doubles as a reactivation + marketing/proof engine for
-      prospects. Academy's $400 exclusivity stays in its own perks (private
+      prospects. Academy's $500 exclusivity stays in its own perks (private
       monthly breakdown, cap, priority), not in community access.
 - [ ] Get Gonz's quote for the announcement, low-pressure follow-up only
 - [ ] Stamp Hybrid ($400->$500) and 1:1 Monthly ($280->$320) raises, announce
@@ -36,7 +36,7 @@ By Oct 31 2026: 20+ fully remote on MRR, 35-40 in-person on MRR, 8-10
 hybrid. Pace to get there: +3-4/month remote, +3-4/month hybrid, +6-7/month
 in-person. UNCONFIRMED whether "fully remote" includes Remote Academy
 (hard capped at 15 members) or means App-tier only - if Academy counts
-toward the 20+, that only works with 5+ of them on App ($249), not
+toward the 20+, that only works with 5+ of them on App ($300), not
 Academy. When Coach Yinka asks about progress toward this, check current
 member counts against this pace.
 
@@ -64,13 +64,19 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
 - Duo (2 players, semi-private, same hour): drop-in $120 · 4-pack $440 · 8-pack $800 · Duo Hybrid $650/mo (weekly duo session + both on app). Quoted live Sept 2026.
 - Group drop-in: $50 (raised from $45, Sept 2026) · Small Group monthly: $148
   (groups of 10, assistant coach)
-- App-only (Strive Elite): $249/mo for new members from Oct 20 (pushed from
-  Oct 1 on Sept 22 to give the launch push real runway; NOT yet announced
-  publicly - announce before charging). Founding members and anyone quoted
-  $199 who joins by Oct 19 keep $199 locked for life.
-- Remote Academy: $400/mo, HARD CAP 15 members (say the cap publicly). App +
-  weekly Film Room + monthly private film breakdown + weekly parent report.
-  Call-close only; pitch Academy first on remote calls, downsell to App $249.
+- App-only (Strive Elite): $300/mo for new members from Oct 20 (raised from
+  $249 on Sept 24, Coach Yinka's own call - a bigger gap off the $199
+  founding rate reads as a stronger deal and drives founding-window
+  urgency; NOT yet announced publicly - announce before charging).
+  Founding members and anyone quoted $199 who joins by Oct 19 keep $199
+  locked for life.
+- Remote Academy: $500/mo (raised from $400 on Sept 24, alongside the App
+  raise, to keep real separation from App now that App sits at $300 -
+  Academy is hard-capped at 15 seats and eats real coach time, so pricing
+  power belongs there, not on the tier built to scale). HARD CAP 15
+  members (say the cap publicly). App + weekly Film Room + monthly private
+  film breakdown + weekly parent report. Call-close only; pitch Academy
+  first on remote calls, downsell to App $300.
 - Hybrid: $400/mo (PROPOSED raise to $500 alongside ladder, unconfirmed)
 - 1:1 Monthly: PROPOSED raise $280 -> $320 to match $80 rate, unconfirmed
 - September founding window: rate locked for life + first film breakdown free;

@@ -120,7 +120,7 @@ export default async function DemoPage() {
       {/* Offer + close */}
       <div className="mt-9 rounded-2xl border border-accent/30 bg-accent/[0.06] p-5 text-center">
         <div className="font-display text-2xl font-black">
-          $249<span className="text-base font-semibold text-white/60">/mo</span>
+          $300<span className="text-base font-semibold text-white/60">/mo</span>
         </div>
         <p className="mt-1 text-sm text-white/60">
           Starting Oct 20. Join by Oct 19 and lock $199/mo for life.

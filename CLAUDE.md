@@ -64,12 +64,12 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
 - Duo (2 players, semi-private, same hour): drop-in $120 · 4-pack $440 · 8-pack $800 · Duo Hybrid $650/mo (weekly duo session + both on app). Quoted live Sept 2026.
 - Group drop-in: $50 (raised from $45, Sept 2026) · Small Group monthly: $148
   (groups of 10, assistant coach)
-- App-only (Strive Elite): $300/mo for new members from Oct 20 (raised from
-  $249 on Sept 24, Coach Yinka's own call - a bigger gap off the $199
-  founding rate reads as a stronger deal and drives founding-window
-  urgency; NOT yet announced publicly - announce before charging).
-  Founding members and anyone quoted $199 who joins by Oct 19 keep $199
-  locked for life.
+- App-only (Strive Elite): $300/mo for new members from Nov 2 (pushed from
+  Oct 20 on Sept 24 to extend the founding-window runway; raised from $249
+  on Sept 24, Coach Yinka's own call - a bigger gap off the $199 founding
+  rate reads as a stronger deal and drives founding-window urgency; NOT
+  yet announced publicly - announce before charging). Founding members and
+  anyone quoted $199 who joins by Nov 1 keep $199 locked for life.
 - Remote Academy: $500/mo (raised from $400 on Sept 24, alongside the App
   raise, to keep real separation from App now that App sits at $300 -
   Academy is hard-capped at 15 seats and eats real coach time, so pricing
@@ -79,8 +79,9 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
   first on remote calls, downsell to App $300.
 - Hybrid: $400/mo (PROPOSED raise to $500 alongside ladder, unconfirmed)
 - 1:1 Monthly: PROPOSED raise $280 -> $320 to match $80 rate, unconfirmed
-- September founding window: rate locked for life + first film breakdown free;
-  closes Sept 30.
+- Founding window perk: rate locked for life + first film breakdown free;
+  closes Nov 1 (this line was stale at "September... closes Sept 30" -
+  synced here to match the Nov 1 date above, flag if that's not right).
 - Camps: ~$3k profit each, quarterly · Youth pickup: $15 entry, monthly
 
 ## Policies

@@ -76,13 +76,14 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
   from $199 on Sept 24 - at $199 the locked-for-life price was too cheap
   relative to the value delivered, risking real long-term revenue given
   every founding member keeps this rate forever).
-- Remote Academy: $500/mo (raised from $400 on Sept 24, alongside the App
-  raise, to keep real separation from App - Academy is hard-capped at 15
-  seats and eats real coach time, so pricing power belongs there, not on
-  the tier built to scale). HARD CAP 15 members (say the cap publicly).
-  App + weekly Film Room + monthly private film breakdown + weekly parent
-  report. Call-close only; pitch Academy first on remote calls, downsell
-  to App (currently $249 founding rate through Nov 1, $350/mo after).
+- Remote Academy: $600/mo (raised from $500 on Sept 24, same day - hard
+  capped at 15 seats regardless of price, so raising it costs zero volume,
+  and comparable online coaching runs ~$1k/mo with less structure than
+  Academy delivers, so $600 is still a clean ~40% discount to that
+  market). HARD CAP 15 members (say the cap publicly). App + weekly Film
+  Room + monthly private film breakdown + weekly parent report. Call-close
+  only; pitch Academy first on remote calls, downsell to App (currently
+  $249 founding rate through Nov 1, $350/mo after).
 - Hybrid: $400/mo (PROPOSED raise to $500 alongside ladder, unconfirmed)
 - 1:1 Monthly: PROPOSED raise $280 -> $320 to match $80 rate, unconfirmed
 - Founding window perk: rate locked for life + first film breakdown free;

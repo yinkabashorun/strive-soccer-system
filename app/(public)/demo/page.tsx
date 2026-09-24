@@ -120,10 +120,10 @@ export default async function DemoPage() {
       {/* Offer + close */}
       <div className="mt-9 rounded-2xl border border-accent/30 bg-accent/[0.06] p-5 text-center">
         <div className="font-display text-2xl font-black">
-          $300<span className="text-base font-semibold text-white/60">/mo</span>
+          $350<span className="text-base font-semibold text-white/60">/mo</span>
         </div>
         <p className="mt-1 text-sm text-white/60">
-          Starting Nov 2. Join by Nov 1 and lock $199/mo for life.
+          Starting Nov 2. Join by Nov 1 and lock $249/mo for life.
         </p>
         <p className="mt-4 text-sm font-semibold text-white">
           Tell us about your player below. I&apos;ll personally reach out to

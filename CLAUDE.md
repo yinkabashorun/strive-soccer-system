@@ -36,9 +36,11 @@ By Oct 31 2026: 20+ fully remote on MRR, 35-40 in-person on MRR, 8-10
 hybrid. Pace to get there: +3-4/month remote, +3-4/month hybrid, +6-7/month
 in-person. UNCONFIRMED whether "fully remote" includes Remote Academy
 (hard capped at 15 members) or means App-tier only - if Academy counts
-toward the 20+, that only works with 5+ of them on App ($300), not
-Academy. When Coach Yinka asks about progress toward this, check current
-member counts against this pace.
+toward the 20+, that only works with 5+ of them on App ($249 founding
+rate - the Oct 31 deadline falls before the Nov 1 founding window closes,
+so every member counted here is still at $249, not the $350 post-window
+price), not Academy. When Coach Yinka asks about progress toward this,
+check current member counts against this pace.
 
 ## Weekly schedule (field time)
 
@@ -64,19 +66,23 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
 - Duo (2 players, semi-private, same hour): drop-in $120 · 4-pack $440 · 8-pack $800 · Duo Hybrid $650/mo (weekly duo session + both on app). Quoted live Sept 2026.
 - Group drop-in: $50 (raised from $45, Sept 2026) · Small Group monthly: $148
   (groups of 10, assistant coach)
-- App-only (Strive Elite): $300/mo for new members from Nov 2 (pushed from
-  Oct 20 on Sept 24 to extend the founding-window runway; raised from $249
-  on Sept 24, Coach Yinka's own call - a bigger gap off the $199 founding
-  rate reads as a stronger deal and drives founding-window urgency; NOT
+- App-only (Strive Elite): $350/mo for new members from Nov 2 (raised from
+  $300 on Sept 24, Coach Yinka's own call, same day as the founding-rate
+  raise below - lands right at the top real local comp, FVA Union
+  ~$354/mo, so it holds up as a real ongoing price, not just an anchor;
+  pushed from Oct 20 on Sept 24 to extend the founding-window runway; NOT
   yet announced publicly - announce before charging). Founding members and
-  anyone quoted $199 who joins by Nov 1 keep $199 locked for life.
+  anyone quoted $249 who joins by Nov 1 keep $249 locked for life (raised
+  from $199 on Sept 24 - at $199 the locked-for-life price was too cheap
+  relative to the value delivered, risking real long-term revenue given
+  every founding member keeps this rate forever).
 - Remote Academy: $500/mo (raised from $400 on Sept 24, alongside the App
-  raise, to keep real separation from App now that App sits at $300 -
-  Academy is hard-capped at 15 seats and eats real coach time, so pricing
-  power belongs there, not on the tier built to scale). HARD CAP 15
-  members (say the cap publicly). App + weekly Film Room + monthly private
-  film breakdown + weekly parent report. Call-close only; pitch Academy
-  first on remote calls, downsell to App $300.
+  raise, to keep real separation from App - Academy is hard-capped at 15
+  seats and eats real coach time, so pricing power belongs there, not on
+  the tier built to scale). HARD CAP 15 members (say the cap publicly).
+  App + weekly Film Room + monthly private film breakdown + weekly parent
+  report. Call-close only; pitch Academy first on remote calls, downsell
+  to App (currently $249 founding rate through Nov 1, $350/mo after).
 - Hybrid: $400/mo (PROPOSED raise to $500 alongside ladder, unconfirmed)
 - 1:1 Monthly: PROPOSED raise $280 -> $320 to match $80 rate, unconfirmed
 - Founding window perk: rate locked for life + first film breakdown free;

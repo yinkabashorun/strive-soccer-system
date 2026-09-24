@@ -21,8 +21,8 @@ export const metadata: Metadata = {
 // objections, offer, close. Structure over inventory - never the whole
 // drill bank, that's the paid product. Close is the GHL intake form
 // (matches the in-person path: form first, Carla reaches out to book the
-// call), with DM "APP" as the fast lane for whoever's already warm from a
-// post.
+// call), with DM "ELITE" as the fast lane for whoever's already warm from
+// a post.
 const STRUCTURE: [string, string][] = [
   ["4 sessions a week, built around you", "Same rhythm every time, layered on top of regular training. You show up, it's already planned, you just train."],
   ["Not built for the group. Built for you.", "Every week targets what YOU actually need work on, not what's convenient for 15 kids on one field."],
@@ -146,7 +146,7 @@ export default async function DemoPage() {
       <Script src="https://link.msgsndr.com/js/form_embed.js" strategy="afterInteractive" />
 
       <p className="mt-4 text-center text-xs text-white/40">
-        or comment / DM &ldquo;APP&rdquo; on Instagram
+        or comment / DM &ldquo;ELITE&rdquo; on Instagram
       </p>
     </div>
   );

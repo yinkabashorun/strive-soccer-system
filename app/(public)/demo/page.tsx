@@ -123,7 +123,7 @@ export default async function DemoPage() {
           $249<span className="text-base font-semibold text-white/60">/mo</span>
         </div>
         <p className="mt-1 text-sm text-white/60">
-          Starting Oct 1. Join by Sept 30 and lock $199/mo for life.
+          Starting Oct 20. Join by Oct 19 and lock $199/mo for life.
         </p>
         <p className="mt-4 text-sm font-semibold text-white">
           Tell us about your player below. I&apos;ll personally reach out to

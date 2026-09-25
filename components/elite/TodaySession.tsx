@@ -119,7 +119,7 @@ export function TodaySession({
                   <span className="min-w-0 flex-1">
                     <span
                       className={cn(
-                        "flex items-center gap-2 font-semibold",
+                        "flex items-start gap-2 font-semibold",
                         done ? "text-white/45 line-through" : "text-bone"
                       )}
                     >

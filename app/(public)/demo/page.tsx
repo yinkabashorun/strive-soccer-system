@@ -21,8 +21,8 @@ export const metadata: Metadata = {
 // objections, offer, close. Structure over inventory - never the whole
 // drill bank, that's the paid product. Close is the GHL intake form
 // (matches the in-person path: form first, Carla reaches out to book the
-// call), with DM "APP" as the fast lane for whoever's already warm from a
-// post.
+// call), with DM "ELITE" as the fast lane for whoever's already warm from
+// a post.
 const STRUCTURE: [string, string][] = [
   ["4 sessions a week, built around you", "Same rhythm every time, layered on top of regular training. You show up, it's already planned, you just train."],
   ["Not built for the group. Built for you.", "Every week targets what YOU actually need work on, not what's convenient for 15 kids on one field."],
@@ -120,10 +120,10 @@ export default async function DemoPage() {
       {/* Offer + close */}
       <div className="mt-9 rounded-2xl border border-accent/30 bg-accent/[0.06] p-5 text-center">
         <div className="font-display text-2xl font-black">
-          $249<span className="text-base font-semibold text-white/60">/mo</span>
+          $350<span className="text-base font-semibold text-white/60">/mo</span>
         </div>
         <p className="mt-1 text-sm text-white/60">
-          Starting Oct 1. Join by Sept 30 and lock $199/mo for life.
+          Starting Nov 2. Join by Nov 1 and lock $249/mo for life.
         </p>
         <p className="mt-4 text-sm font-semibold text-white">
           Tell us about your player below. I&apos;ll personally reach out to
@@ -146,7 +146,7 @@ export default async function DemoPage() {
       <Script src="https://link.msgsndr.com/js/form_embed.js" strategy="afterInteractive" />
 
       <p className="mt-4 text-center text-xs text-white/40">
-        or comment / DM &ldquo;APP&rdquo; on Instagram
+        or comment / DM &ldquo;ELITE&rdquo; on Instagram
       </p>
     </div>
   );

@@ -49,7 +49,8 @@ export async function runAutoWeeklyPlans(): Promise<{ ran: number; results: Resu
   const { data: coach } = await admin
     .from("elite_profiles")
     .select("id")
-    .eq("role", "coach")
+    .in("role", ["coach", "admin"])
+    .order("role")
     .limit(1)
     .maybeSingle();
   if (!coach?.id) return { ran: 0, results: [] };

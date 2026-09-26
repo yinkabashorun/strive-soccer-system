@@ -16,6 +16,7 @@ export async function POST(req: Request) {
     fullName?: string;
     email?: string;
     phone?: string;
+    playerPhone?: string;
     password?: string;
   };
   try {
@@ -28,6 +29,7 @@ export async function POST(req: Request) {
   const fullName = (body.fullName ?? "").trim();
   const email = (body.email ?? "").trim().toLowerCase();
   const phone = (body.phone ?? "").trim();
+  const playerPhone = (body.playerPhone ?? "").trim();
   const password = body.password ?? "";
 
   if (!code) return NextResponse.json({ error: "An invite code is required." }, { status: 400 });
@@ -105,6 +107,7 @@ export async function POST(req: Request) {
       parent_email: email,
       parent_name: fullName,
       parent_phone: normalizePhone(phone) ?? phone,
+      player_phone: playerPhone ? normalizePhone(playerPhone) ?? playerPhone : null,
       subscription_status: "none",
       current_week: 1,
       today_focus: "Welcome to Strive Elite. Your coach will set your first focus.",

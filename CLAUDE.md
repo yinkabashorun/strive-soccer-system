@@ -34,6 +34,10 @@ are we," this list IS the answer.
       AI-generated app copy (new week, parent weekly report) uses correct
       pronouns instead of guessing (current copy avoids pronouns entirely
       as a stopgap - see voice guide below).
+- [ ] Set up the one GHL workflow for inbound SMS replies (trigger:
+      "Customer Replied" -> Webhook action -> POST {phone, message} to
+      /api/ghl/sms-inbound) - the code side is built and live, this last
+      GHL-side step is still Coach Yinka's to do.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 
@@ -262,6 +266,18 @@ In-person scheduling/logistics is NOT app territory, that all stays on GHL.
   conversations/messages, lib/elite/sms.ts) using GHL_API_KEY, which was
   already set in Vercel for the Social Planner - no separate GHL workflow
   needed. Best-effort/no-op-safe like every other channel here.
+- Players now have their own optional player_phone (026, Sept 26 2026),
+  separate from parent_phone (025) - captured at signup (optional) or
+  added later by the coach from the player's Intake panel. Lets a player
+  text directly instead of only through a parent.
+- Inbound SMS replies land in GHL's Conversations inbox by default (GHL
+  owns the sending number, the app never sees a reply on its own). Built
+  a receiver for it (/api/ghl/sms-inbound) that matches the reply's phone
+  against parent_phone/player_phone and threads it straight into that
+  player's existing chat in the app (shows as "[Parent's first name]
+  (Parent)" or the player's own name), plus pings the coach the same way
+  a normal player message does. Requires ONE GHL workflow on Coach
+  Yinka's side (see open items) - the code is done, that step isn't.
 - Email (new week, coach message, parent weekly report, plus coach-facing
   events) is separate and still UNCONFIRMED/likely dead - it only sends if
   RESEND_API_KEY or a GHL_WEBHOOK_URL* is set in the deploy environment

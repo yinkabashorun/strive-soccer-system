@@ -28,6 +28,7 @@ export function IntakePanel({ player }: { player: Player }) {
         playerId={player.id}
         initialEmail={player.parent_email ?? ""}
         initialPhone={player.parent_phone ?? ""}
+        initialPlayerPhone={player.player_phone ?? ""}
       />
 
       {/* Coach-editable: flips wall/goal days in the next generated plan */}

@@ -35,7 +35,7 @@ export async function buildParentRecap(
     await Promise.all([
       admin
         .from("elite_players")
-        .select("full_name")
+        .select("full_name, parent_name")
         .eq("id", playerId)
         .maybeSingle(),
       admin
@@ -80,13 +80,15 @@ export async function buildParentRecap(
   const streak = computeSummary(rows).current_streak;
 
   const first = player.full_name.split(" ")[0];
+  const parentFirst = (player.parent_name || first || "").trim().split(" ")[0];
+  const greeting = parentFirst ? `Hey ${parentFirst}, ` : "";
   const stats = { playerFirst: first, week, sessionsDone, sessionsTotal, minutes, streak };
 
   // Honest fallback template - used when no API key or the call fails.
   const fallback =
     sessionsDone >= sessionsTotal
-      ? `${first} completed all ${sessionsTotal} sessions this week: ${minutes} minutes of focused work${streak > 1 ? ` and a ${streak}-day streak` : ""}. The new training week is live now.`
-      : `${first} completed ${sessionsDone} of ${sessionsTotal} sessions this week (${minutes} minutes trained). We'll pick the pace back up. The new week is live now.`;
+      ? `${greeting}${first} completed all ${sessionsTotal} sessions this week, ${minutes} minutes of consistent work${streak > 1 ? ` and a ${streak}-day streak` : ""}. Let's keep this pace going.`
+      : `${greeting}${first} completed ${sessionsDone} of ${sessionsTotal} sessions this week, ${minutes} minutes trained. Let's get all ${sessionsTotal} in next week, consistency is what makes it count.`;
 
   if (!process.env.ANTHROPIC_API_KEY) return { ...stats, text: fallback };
 
@@ -94,6 +96,7 @@ export async function buildParentRecap(
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const facts = [
       `Player first name: ${first}`,
+      parentFirst ? `Parent first name: ${parentFirst}` : "",
       `Week ${week} results: completed ${sessionsDone} of ${sessionsTotal} sessions, ${minutes} minutes trained, current streak ${streak} days.`,
       report?.improvement ? `Coach's note on their development: ${report.improvement}` : "",
       report?.next_focus ? `Coming up next: ${report.next_focus}` : "",
@@ -106,15 +109,34 @@ export async function buildParentRecap(
     const res = await client.messages.create({
       model: MODEL,
       max_tokens: 300,
-      system: `You write the weekly parent update for Strive Soccer FC, a premium
-youth soccer development program. Voice: warm, confident, specific, plain
-English. No emoji. No exclamation marks. Never corny.
+      system: `You write the weekly parent text for Strive Elite in Coach
+Yinka's own voice, texting a parent directly. Never mention AI or
+automation.
 
-Rules:
-- 2 to 3 sentences, suitable for a text message.
+Coach Yinka's voice:
+- Open with "Hey [parent first name]," when a parent name is given, else
+  start straight with the player's first name.
+- No sign-off at the end - no name, no "- Coach Yinka." Instead close with
+  a short forward-looking line ("Let's keep him dialed in," "let's keep
+  the momentum going," etc.) - vary the phrasing, don't reuse the same
+  line every week.
+- Full sentences, proper periods, no fragments, no ALL CAPS.
+- No emoji, ever.
+- Exclamation points are rare - at most one, only when genuinely earned
+  (every session done this week). Never use one on an incomplete week.
+- Never use he/she/his/her - repeat the player's first name every time
+  instead. Their gender is not provided, never guess it.
+- These are AT-HOME app sessions - Coach Yinka is NOT physically present,
+  so never write as if he watched live ("great session I saw," "watched
+  you play"). Frame it around consistency, effort, and the programming
+  instead (e.g. "is killing it with the consistency," "this week's
+  sessions were focused on X," "the work this week will help improve X
+  over time").
+- Be honest about an incomplete week: constructive, never guilt-tripping,
+  never shaming the kid. Frame the fix as consistency, not failure.
 - Use ONLY the facts provided. Never invent results, drills, or progress.
-- Be honest about incomplete weeks: constructive, never guilt-tripping.
-- Refer to the player by first name. End by noting the new week is live.
+- 2 to 4 sentences, suitable for a text message. Can run a little longer
+  when there's real substance to say.
 - Plain punctuation only. NEVER use an em dash (\u2014). Periods and commas.
 - Return ONLY the message text, no preamble.`,
       messages: [{ role: "user", content: facts }],

@@ -6,7 +6,7 @@ import { createClient } from "./supabase/server";
 import { getViewer } from "./session";
 import { sendPlayerEmail } from "./email";
 import { sendPushToPlayer } from "./push";
-import { sendPlayerSMS } from "./sms";
+import { normalizePhone, sendPlayerSMS } from "./sms";
 import { liveWeekFor, mondayOfWeekNY, nextMondayNY, unlockInstant } from "./time";
 import { getDrillBank } from "./data";
 import type { FilmReview, GeneratedPlan } from "./types";
@@ -40,6 +40,30 @@ export async function updatePlayerFields(
   const supabase = createClient();
   if (supabase) {
     await supabase.from("elite_players").update(patch).eq("id", playerId);
+    revalidatePath(`/coach/players/${playerId}`);
+  }
+  return { ok: true };
+}
+
+// Coach-side edit of a player's parent contact info (email/phone) - the
+// only way to fix a typo'd or missing number for a player who signed up
+// before phone capture existed, since players can't edit this themselves.
+export async function updatePlayerContact(
+  playerId: string,
+  patch: { parent_email?: string; parent_phone?: string }
+) {
+  if (!(await requireCoach())) return { ok: false };
+  const supabase = createClient();
+  if (supabase) {
+    const update: Record<string, string> = {};
+    if (patch.parent_email !== undefined) {
+      update.parent_email = patch.parent_email.trim();
+    }
+    if (patch.parent_phone !== undefined) {
+      const trimmed = patch.parent_phone.trim();
+      update.parent_phone = trimmed ? normalizePhone(trimmed) ?? trimmed : "";
+    }
+    await supabase.from("elite_players").update(update).eq("id", playerId);
     revalidatePath(`/coach/players/${playerId}`);
   }
   return { ok: true };

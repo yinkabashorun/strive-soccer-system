@@ -32,10 +32,8 @@ are we," this list IS the answer.
 - [ ] Add gender (boy/girl) field to elite_players - required at onboarding
       going forward, coach-editable toggle for existing players. Needed so
       AI-generated app copy (new week, parent weekly report) uses correct
-      pronouns instead of guessing.
-- [ ] Rewrite the new-week and onboarding-incomplete SMS templates plus the
-      parent-weekly-report AI prompt (lib/elite/parent-recap.ts) to match
-      Coach Yinka's voice guide above - drafts pending his approval.
+      pronouns instead of guessing (current copy avoids pronouns entirely
+      as a stopgap - see voice guide below).
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 
@@ -181,6 +179,12 @@ In-person scheduling/logistics is NOT app territory, that all stays on GHL.
   is what builds this."
 - Needs a player gender (boy/girl) field to get pronouns right instead of
   guessing - see open items, not built yet.
+- SHIPPED Sept 26 2026: new_week (coach-actions.ts + unlock.ts) and
+  onboarding_incomplete SMS rewritten to this voice, with a real dashboard
+  link instead of a bare "open the app" line. parent_weekly_report's
+  Claude prompt (lib/elite/parent-recap.ts) rewritten with this full guide
+  - pronoun-free until the gender field exists, "Hey [Parent]," opener,
+  no sign-off, forward-looking close, rare/earned exclamation points.
 
 ## People
 

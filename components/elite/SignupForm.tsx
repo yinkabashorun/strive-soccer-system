@@ -23,6 +23,7 @@ export function SignupForm({
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
+  const [playerPhone, setPlayerPhone] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -40,7 +41,7 @@ export function SignupForm({
     const res = await fetch("/api/elite/auth/redeem", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code, fullName, email, phone, password }),
+      body: JSON.stringify({ code, fullName, email, phone, playerPhone, password }),
     });
     const data = await res.json();
     if (!res.ok) {
@@ -112,6 +113,15 @@ export function SignupForm({
           autoComplete="tel"
         />
         <Input
+          label="Player's own phone (optional, if they have one)"
+          type="tel"
+          value={playerPhone}
+          onChange={setPlayerPhone}
+          placeholder="(703) 555-0100"
+          autoComplete="tel"
+          required={false}
+        />
+        <Input
           label="Password"
           type="password"
           value={password}
@@ -177,6 +187,7 @@ function Input({
   type = "text",
   placeholder,
   autoComplete,
+  required = true,
 }: {
   label: string;
   value: string;
@@ -184,6 +195,7 @@ function Input({
   type?: string;
   placeholder?: string;
   autoComplete?: string;
+  required?: boolean;
 }) {
   return (
     <label className="block">
@@ -192,7 +204,7 @@ function Input({
       </span>
       <input
         type={type}
-        required
+        required={required}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}

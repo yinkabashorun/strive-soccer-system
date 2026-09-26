@@ -52,7 +52,7 @@ export async function updatePlayerFields(
 // before phone capture existed, since players can't edit this themselves.
 export async function updatePlayerContact(
   playerId: string,
-  patch: { parent_email?: string; parent_phone?: string }
+  patch: { parent_email?: string; parent_phone?: string; player_phone?: string }
 ) {
   if (!(await requireCoach())) return { ok: false };
   const supabase = createClient();
@@ -64,6 +64,10 @@ export async function updatePlayerContact(
     if (patch.parent_phone !== undefined) {
       const trimmed = patch.parent_phone.trim();
       update.parent_phone = trimmed ? normalizePhone(trimmed) ?? trimmed : "";
+    }
+    if (patch.player_phone !== undefined) {
+      const trimmed = patch.player_phone.trim();
+      update.player_phone = trimmed ? normalizePhone(trimmed) ?? trimmed : "";
     }
     await supabase.from("elite_players").update(update).eq("id", playerId);
     revalidatePath(`/coach/players/${playerId}`);

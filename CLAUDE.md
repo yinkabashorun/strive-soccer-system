@@ -262,6 +262,19 @@ In-person scheduling/logistics is NOT app territory, that all stays on GHL.
   conversations/messages, lib/elite/sms.ts) using GHL_API_KEY, which was
   already set in Vercel for the Social Planner - no separate GHL workflow
   needed. Best-effort/no-op-safe like every other channel here.
+- Players now have their own optional player_phone (026, Sept 26 2026),
+  separate from parent_phone (025) - captured at signup (optional) or
+  added later by the coach from the player's Intake panel. Lets a player
+  text directly instead of only through a parent.
+- Inbound SMS replies land in GHL's Conversations inbox by default (GHL
+  owns the sending number, the app never sees a reply on its own). Built
+  a receiver for it (/api/ghl/sms-inbound) that matches the reply's phone
+  against parent_phone/player_phone and threads it straight into that
+  player's existing chat in the app (shows as "[Parent's first name]
+  (Parent)" or the player's own name), plus pings the coach the same way
+  a normal player message does. GHL workflow (Customer Replied -> Webhook
+  -> /api/ghl/sms-inbound) built by Coach Yinka Sept 26 2026 - the full
+  inbound loop is now live end to end.
 - Email (new week, coach message, parent weekly report, plus coach-facing
   events) is separate and still UNCONFIRMED/likely dead - it only sends if
   RESEND_API_KEY or a GHL_WEBHOOK_URL* is set in the deploy environment

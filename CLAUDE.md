@@ -29,6 +29,13 @@ are we," this list IS the answer.
 - [ ] Get Gonz's quote for the announcement, low-pressure follow-up only
 - [ ] Stamp Hybrid ($400->$500) and 1:1 Monthly ($280->$320) raises, announce
       alongside the ladder once the founding window closes Oct 1
+- [ ] Add gender (boy/girl) field to elite_players - required at onboarding
+      going forward, coach-editable toggle for existing players. Needed so
+      AI-generated app copy (new week, parent weekly report) uses correct
+      pronouns instead of guessing.
+- [ ] Rewrite the new-week and onboarding-incomplete SMS templates plus the
+      parent-weekly-report AI prompt (lib/elite/parent-recap.ts) to match
+      Coach Yinka's voice guide above - drafts pending his approval.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 
@@ -141,6 +148,40 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
   never mixed into the accountability text itself. Track in GHL with a
   "referred" tag + a "referred_by" text field (not yet added - build this).
 
+## Coach Yinka's voice (app engagement notifications, stamped Sept 26 2026)
+
+Scope: this governs the AI/automated player-parent engagement copy on the
+APP only (new week live, coach messages, weekly parent report,
+onboarding-incomplete nudges) - only when actually necessary, not spammy.
+In-person scheduling/logistics is NOT app territory, that all stays on GHL.
+
+- Greeting varies by situation, not fixed: good news opens with
+  "Hey [Parent name],"; a nudge goes straight into the point, no greeting.
+- No sign-off, ever - no name, no "- Coach Yinka." Instead close with a
+  short forward-looking line ("Let's keep him dialed in," "let's keep the
+  momentum" style) - this is a real recurring habit, not a one-off.
+- Full sentences, proper periods, no fragments, no ALL CAPS. No emojis,
+  ever, in any player/parent text.
+- Exclamation points are rare - only for real, earned excitement (e.g. a
+  fully completed week), never routine.
+- Length flexes: short when there's not much to say, longer when there's
+  real substance.
+- First name only, no nicknames ("champ," "boss," etc. are not his style).
+- More formal/polished with brand-new parents; loosens up over time with
+  long-time ones.
+- Good-news tone: NEVER claims to have watched live - for app/homework
+  weeks Coach Yinka is not physically present, so it's framed as
+  consistency/programming, not eyewitness praise. Real example given:
+  "Marcus is killing it with his consistency! This week's sessions were
+  focused on [X], today's session will help him improve [X] over time.
+  Let's keep him dialed in."
+- Nudge tone: soft and encouraging, names the gap plainly but frames the
+  fix as consistency, never shames the kid. Real example given: "Marcus
+  missed his homework this week. Let's get him back on track, consistency
+  is what builds this."
+- Needs a player gender (boy/girl) field to get pronouns right instead of
+  guessing - see open items, not built yet.
+
 ## People
 
 - Carla: co-founder/girlfriend, runs DMs + booking + follow-up ladder (day 1h/2/3/7).
@@ -211,12 +252,17 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
   NEXT_PUBLIC_VAPID_PUBLIC_KEY + VAPID_PRIVATE_KEY set in the deploy
   environment to actually send - confirm these are set, otherwise it's
   silently a no-op same as email with no RESEND_API_KEY/GHL webhook.
-- Email/SMS notifications (new week, coach message, parent weekly report)
-  have been fully built and wired for a while (lib/elite/email.ts) but
-  ONLY actually send if RESEND_API_KEY or a GHL_WEBHOOK_URL* is set in the
-  deploy environment - UNCONFIRMED whether either is actually configured
-  in production. Worth checking; if neither is set, this whole layer has
-  been silently dead the same way the plan cron was.
+- SMS (new week, coach message, parent weekly report, onboarding-incomplete)
+  is LIVE and confirmed working (Sept 26 2026, real test text delivered).
+  Goes straight through the GHL API (contacts/upsert then
+  conversations/messages, lib/elite/sms.ts) using GHL_API_KEY, which was
+  already set in Vercel for the Social Planner - no separate GHL workflow
+  needed. Best-effort/no-op-safe like every other channel here.
+- Email (new week, coach message, parent weekly report, plus coach-facing
+  events) is separate and still UNCONFIRMED/likely dead - it only sends if
+  RESEND_API_KEY or a GHL_WEBHOOK_URL* is set in the deploy environment
+  (lib/elite/email.ts), and neither was part of the SMS setup above. Worth
+  checking if Coach Yinka wants parent email too.
 - Skool: DECIDED Sept 15, community layer only, $9/mo Hobby plan (no Skool
   payments processed, so the 10% transaction fee never applies). Pinned
   post links to thestriveapp.com, the app remains the only place training

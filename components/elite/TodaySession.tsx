@@ -119,7 +119,7 @@ export function TodaySession({
                   <span className="min-w-0 flex-1">
                     <span
                       className={cn(
-                        "flex items-start gap-2 font-semibold",
+                        "flex flex-wrap items-center gap-2 font-semibold",
                         done ? "text-white/45 line-through" : "text-bone"
                       )}
                     >
@@ -135,12 +135,12 @@ export function TodaySession({
                         {d.exercise}
                       </span>
                     )}
+                    {d.reps && (
+                      <span className="chip mt-2 inline-block whitespace-nowrap">
+                        {d.reps}
+                      </span>
+                    )}
                   </span>
-                  {d.reps && (
-                    <span className="chip shrink-0 whitespace-nowrap">
-                      {d.reps}
-                    </span>
-                  )}
                 </button>
                 {d.video_url && !done && (
                   <div className="pl-[52px]">

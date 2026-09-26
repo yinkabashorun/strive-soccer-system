@@ -49,7 +49,8 @@ export function DeletePlayerButton({
       </button>
       {armed && !pending && (
         <p className="mt-2 text-center text-xs text-red-300/70">
-          Deletes their plans, progress, messages, and film. No undo.
+          Deletes their account, plans, progress, messages, and film -
+          frees up their email for a new invite code. No undo.
         </p>
       )}
     </div>

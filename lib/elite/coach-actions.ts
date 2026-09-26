@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { createClient } from "./supabase/server";
+import { createClient, createServiceClient } from "./supabase/server";
 import { getViewer } from "./session";
 import { sendPlayerEmail } from "./email";
 import { sendPushToPlayer } from "./push";
@@ -97,19 +97,39 @@ export async function setTrainingEnvironment(
   return { ok: true };
 }
 
-// Permanently remove a player and everything attached to them (homework,
-// plans, progress, messages, film, reports - all cascade from the player
-// row). The login account survives; if that person signs in again they
-// simply start at onboarding as a fresh player.
+// Permanently remove a player AND their login account. elite_profiles is
+// FK'd to auth.users(id) on delete cascade, and elite_players (plus every
+// dependent table - homework, plans, progress, messages, film, reports)
+// is FK'd to elite_profiles on delete cascade, so deleting the auth user
+// removes everything in one shot (migration 005).
+//
+// This used to only delete the elite_players row and deliberately leave
+// the login account alive ("sign back in, re-onboard as a fresh player").
+// In practice that meant a deleted family's email stayed permanently
+// registered, so redeeming a NEW invite code with that same email failed
+// with "already exists" - not what "delete" means to a coach or a parent.
 export async function deletePlayer(playerId: string) {
   if (!(await requireCoach())) return { ok: false as const };
   const supabase = createClient();
   if (!supabase) return { ok: true as const };
-  const { error } = await supabase
+
+  const { data: player } = await supabase
     .from("elite_players")
-    .delete()
-    .eq("id", playerId);
-  if (error) return { ok: false as const };
+    .select("profile_id")
+    .eq("id", playerId)
+    .maybeSingle();
+
+  const admin = player?.profile_id ? createServiceClient() : null;
+  if (admin && player?.profile_id) {
+    const { error } = await admin.auth.admin.deleteUser(player.profile_id);
+    if (error) return { ok: false as const };
+  } else {
+    // No linked login account (shouldn't normally happen for a real
+    // invite-redeemed player) - fall back to removing the row directly.
+    const { error } = await supabase.from("elite_players").delete().eq("id", playerId);
+    if (error) return { ok: false as const };
+  }
+
   revalidatePath("/coach");
   return { ok: true as const };
 }

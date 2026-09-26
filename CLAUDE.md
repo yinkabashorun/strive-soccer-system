@@ -36,8 +36,13 @@ are we," this list IS the answer.
       as a stopgap - see voice guide below).
 - [ ] Set up the one GHL workflow for inbound SMS replies (trigger:
       "Customer Replied" -> Webhook action -> POST {phone, message} to
-      /api/ghl/sms-inbound) - the code side is built and live, this last
-      GHL-side step is still Coach Yinka's to do.
+      https://thestriveapp.com/api/ghl/sms-inbound?secret=<value>, body
+      {"phone": "{{contact.phone}}", "message": "{{message.body}}"}).
+      SMS_INBOUND_SECRET is already set in Vercel (Sept 26 2026) - the
+      actual value is NOT recorded here on purpose (never put a live
+      secret in a git-tracked file); Coach Yinka has it from when he
+      created it, or can rotate it in Vercel env vars if lost. Code side
+      is built and live, this last GHL-side step is still his to do.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

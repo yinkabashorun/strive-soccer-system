@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/elite/supabase/server";
 import { sendPlayerEmail } from "@/lib/elite/email";
 import { normalizePhone } from "@/lib/elite/sms";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 
@@ -11,6 +12,18 @@ export const runtime = "nodejs";
 //
 // POST { code, fullName, email, phone, password } -> { ok } | { error }
 export async function POST(req: Request) {
+  // Invite codes are STRIVE-XXXXXX (6 hex chars, ~16.7M combinations) with
+  // no other throttling anywhere - without this, someone could script
+  // guesses against real, unused codes and burn a family's invite before
+  // they ever redeem it themselves. 10 attempts / 10 minutes per IP is
+  // generous for a real typo-prone human, brutal for a guessing script.
+  if (!rateLimit(`redeem:${clientIp(req)}`, 10, 10 * 60_000)) {
+    return NextResponse.json(
+      { error: "Too many attempts. Please wait a few minutes and try again." },
+      { status: 429 }
+    );
+  }
+
   let body: {
     code?: string;
     fullName?: string;

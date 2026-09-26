@@ -160,6 +160,17 @@ export function SignupForm({
           Apply to join
         </a>
       </p>
+      <p className="mt-4 text-center text-[11px] text-white/25">
+        By creating an account you agree to our{" "}
+        <Link href="/terms" className="hover:text-white/50">
+          Terms
+        </Link>{" "}
+        and{" "}
+        <Link href="/privacy" className="hover:text-white/50">
+          Privacy Policy
+        </Link>
+        .
+      </p>
 
       {!configured && (
         <div className="mt-7 border-t border-white/8 pt-6">

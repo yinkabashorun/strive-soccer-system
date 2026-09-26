@@ -34,22 +34,27 @@ are we," this list IS the answer.
       autopilot/sync-contacts/ghl-webhook to fail CLOSED (reject) when
       their secret is unset instead of accepting any caller - see
       business context below, this is a real open security gap.
-- [ ] Check the current real players' (Elias, Keith Mauck jr, Mason
-      Jhaveri, Remi Bashorun) parent_name field on their profiles - a bug
-      just fixed meant it may have defaulted to the player's own name,
-      breaking the "Hey [Parent]," greeting for them specifically.
+- [ ] CHECKED Sept 26 2026 via direct DB query: 3 of 4 real players
+      (Keith Mauck jr, Elias, Mason Jhaveri) already have correct, distinct
+      parent_name values - they weren't hit by the bug above. Only "Remi
+      Bashorun" shows parent_name = the player's own name, and that
+      profile hasn't finished onboarding yet, so it'll self-correct now
+      that the field is required. Nothing further to check here.
+- [ ] BIGGER GAP found in that same check: none of the 3 real client
+      families (Keith Mauck jr, Elias, Mason Jhaveri) have a parent_phone
+      on file at all. The only phone number in the whole table is Coach
+      Yinka's own (+15712856635, from testing). The entire SMS system
+      works, but has never actually reached a real family - add their
+      numbers via each profile's Intake panel.
 - [ ] From the Sept 26 audit, not yet built - Coach Yinka to prioritize:
-      no privacy policy/ToS anywhere despite collecting minors' phone
-      numbers/self-assessments/film links; no rate limiting anywhere
-      (invite codes are ~16.7M combinations and brute-forceable against
-      /api/elite/auth/redeem); no error tracking (Sentry or similar) or
-      custom error/loading pages, so a future silent failure like the
-      parent-report one above has no way to surface short of a parent
-      complaining; the elite-film Storage bucket policy (migration
-      005) is open to any authenticated user with no per-player scoping
-      (currently unused by any real upload flow, but live and insecure by
-      default); the weekly-plans/digest crons will silently shift an hour
-      when DST ends ~Nov 1 2026 (vercel.json is fixed UTC, no TZ support).
+      no error tracking (Sentry or similar) or custom error/loading pages,
+      so a future silent failure like the parent-report one above has no
+      way to surface short of a parent complaining; the elite-film Storage
+      bucket policy (migration 005) is open to any authenticated user with
+      no per-player scoping (currently unused by any real upload flow, but
+      live and insecure by default); the weekly-plans/digest crons will
+      silently shift an hour when DST ends ~Nov 1 2026 (vercel.json is
+      fixed UTC, no TZ support).
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 
@@ -336,6 +341,19 @@ In-person scheduling/logistics is NOT app territory, that all stays on GHL.
   actually set in Vercel, risks silently breaking the weekly-plan cron
   entirely (it would reject Vercel's own real invocation too). Confirm
   those are set first, then flip the same fail-closed fix everywhere.
+- SHIPPED Sept 26 2026 (same audit, the two items with real exposure):
+  real Privacy Policy (/privacy) and Terms of Service (/terms) pages,
+  linked from the signup form footer - drafted honestly, including
+  disclosing that automated tools assist parts of plan generation under
+  Coach Yinka's direction (a privacy policy has different legal
+  obligations than marketing copy, so this deliberately does NOT follow
+  the "never say AI" personalization rule above - that rule still governs
+  all player/parent-facing marketing/app copy). NOT reviewed by a lawyer -
+  flag this to Coach Yinka before relying on it, especially given minors'
+  data (COPPA-adjacent) is involved. Also added basic rate limiting
+  (lib/rate-limit.ts, in-memory/per-instance) on /api/elite/auth/redeem -
+  10 attempts per 10 minutes per IP, since invite codes were previously
+  unthrottled and guessable at scale (~16.7M combinations).
 - Skool: DECIDED Sept 15, community layer only, $9/mo Hobby plan (no Skool
   payments processed, so the 10% transaction fee never applies). Pinned
   post links to thestriveapp.com, the app remains the only place training

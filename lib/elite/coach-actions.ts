@@ -6,6 +6,7 @@ import { createClient } from "./supabase/server";
 import { getViewer } from "./session";
 import { sendPlayerEmail } from "./email";
 import { sendPushToPlayer } from "./push";
+import { sendPlayerSMS } from "./sms";
 import { liveWeekFor, mondayOfWeekNY, nextMondayNY, unlockInstant } from "./time";
 import { getDrillBank } from "./data";
 import type { FilmReview, GeneratedPlan } from "./types";
@@ -119,6 +120,10 @@ export async function sendCoachMessage(playerId: string, body: string) {
       title: "Message from your coach",
       body: body.slice(0, 140),
       url: "/messages",
+    }).catch(() => undefined);
+    await sendPlayerSMS(playerId, {
+      event: "coach_message",
+      message: `${viewer.profile.full_name}: "${body}"`,
     }).catch(() => undefined);
     revalidatePath(`/coach/players/${playerId}`);
   }
@@ -586,6 +591,12 @@ export async function applyGeneratedPlanCore(
         : (first ? `${first}, week ${week} just dropped` : `Week ${week} just dropped`),
       body: plan.weekly_focus || "Your new training week is live.",
       url: "/dashboard",
+    }).catch(() => undefined);
+    await sendPlayerSMS(playerId, {
+      event: "new_week",
+      message: firstWeek
+        ? `${first ? first + "'s" : "Your player's"} first Strive Elite training week is live. This week's focus: ${plan.weekly_focus}. Open the app to start Session 1.`
+        : `${first ? first + "'s" : "Your player's"} week ${week} just dropped. This week's focus: ${plan.weekly_focus}. Open the app to start Session 1.`,
     }).catch(() => undefined);
   }
   // Scheduled weeks stay silent until Monday morning - unlockDueWeeks()

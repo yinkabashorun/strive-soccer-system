@@ -8,6 +8,7 @@
 import { createServiceClient } from "./supabase/server";
 import { sendPlayerEmail } from "./email";
 import { sendPushToPlayer } from "./push";
+import { sendPlayerSMS } from "./sms";
 import { buildParentRecap } from "./parent-recap";
 
 let lastRun = 0;
@@ -70,6 +71,10 @@ export async function unlockDueWeeks(): Promise<void> {
       body: plan.focus || "Your new training week just unlocked.",
       url: "/dashboard",
     }).catch(() => undefined);
+    await sendPlayerSMS(plan.player_id, {
+      event: "new_week",
+      message: `${first ? first + "'s" : "Your player's"} week ${plan.week} just unlocked. This week's focus: ${plan.focus}. Open the app to start Session 1.`,
+    }).catch(() => undefined);
 
     // The weekly parent recap - real numbers from the week that just
     // ended, written by the AI (template fallback), sent alongside the
@@ -81,6 +86,10 @@ export async function unlockDueWeeks(): Promise<void> {
           event: "parent_weekly_report",
           subject: `${recap.playerFirst}'s week ${recap.week} report`,
           body: recap.text,
+        });
+        await sendPlayerSMS(plan.player_id, {
+          event: "parent_weekly_report",
+          message: recap.text,
         });
       }
     } catch {

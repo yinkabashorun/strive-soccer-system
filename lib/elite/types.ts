@@ -37,6 +37,7 @@ export type Player = {
   weaknesses: string[];
   parent_name: string;
   parent_email: string;
+  parent_phone?: string | null; // SMS contact (025), captured at signup + confirmed at intake
   next_session_at: string | null; // ISO
   last_session_at: string | null; // ISO
   joined_at: string;
@@ -51,6 +52,7 @@ export type Player = {
   has_wall?: boolean | null;
   has_goal?: boolean | null;
   onboarded_at?: string | null; // ISO; null = intake not completed yet
+  onboarding_reminder_sent_at?: string | null; // 025: last onboarding-nudge SMS
   week1_monday?: string | null; // NY Monday the program clock started (014)
 };
 

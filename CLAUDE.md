@@ -112,6 +112,12 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
   already ready to buy skips straight to the registration/payment link,
   never made to wait through the 3 questions; anyone who needs more gets the
   normal flow.
+- Invite redemption stamps a new player at subscription_status "none", NOT
+  "active" (fixed Sept 26 - it was auto-granting full paid access to
+  anyone with a code regardless of payment). Onboarding/intake still works
+  at "none"; the app's membership gate shows "reach out to your coach" for
+  anything but that unlocks it. Roster cards already show this at a
+  glance (dim gray dot for "none" vs gold for "active").
 - Refunds: same-day, gracious, always.
 - Registration = payment. Public scarcity numbers must be real.
 - No em dashes in any player/parent-facing copy or scripts.
@@ -183,16 +189,34 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
   webcam kit; phone-as-webcam via Camo preferred for calls.
 - App: thestriveapp.com (this repo). Supabase project qjiloadpfeqxxyfozsje.
   Demo tour: login -> "See the app as a player".
-- Weekly plan generation is fully automated (shipped Sept 19 2026): a cron
-  builds every active player's new week Sunday 3pm ET and it publishes
-  immediately (no Monday hold), using the player's own homework completion +
-  self-checkin as the "notes" input in place of a coach typing them. Coach
-  Yinka no longer needs to review or approve plans for them to go out. Cron
-  fires at a fixed UTC hour with no DST awareness - correct now (EDT), will
-  read as 2pm once DST ends around Nov 1 2026 unless the schedule is bumped
-  an hour. The "I build every plan, I review every plan" copy promise is
+- Weekly plan generation is fully automated (shipped Sept 19 2026, but was a
+  complete silent no-op until fixed Sept 26 - the cron looked up a
+  role='coach' profile to attribute plans to, and the only real account is
+  role='admin', so it matched nobody and quietly did nothing every single
+  run; real players got zero automated plans between Sept 19 and 26,
+  confirmed via direct DB query). Fixed now: a cron builds every active
+  player's new week Sunday 3pm ET and it publishes immediately (no Monday
+  hold), using the player's own homework completion + self-checkin as the
+  "notes" input in place of a coach typing them. Coach Yinka no longer
+  needs to review or approve plans for them to go out. Cron fires at a
+  fixed UTC hour with no DST awareness - correct now (EDT), will read as
+  2pm once DST ends around Nov 1 2026 unless the schedule is bumped an
+  hour. The "I build every plan, I review every plan" copy promise is
   unchanged per the personalization policy above - this is a backend change
   only, never say "AI" or "automated" anywhere player/parent-facing.
+- Real push notifications shipped Sept 26 2026 (Web Push/VAPID, not a
+  native app - no app store needed). Covers new-week-live and coach
+  messages so far; everything before this was in-app only, meaning a
+  player who didn't open the app never found out about anything. Needs
+  NEXT_PUBLIC_VAPID_PUBLIC_KEY + VAPID_PRIVATE_KEY set in the deploy
+  environment to actually send - confirm these are set, otherwise it's
+  silently a no-op same as email with no RESEND_API_KEY/GHL webhook.
+- Email/SMS notifications (new week, coach message, parent weekly report)
+  have been fully built and wired for a while (lib/elite/email.ts) but
+  ONLY actually send if RESEND_API_KEY or a GHL_WEBHOOK_URL* is set in the
+  deploy environment - UNCONFIRMED whether either is actually configured
+  in production. Worth checking; if neither is set, this whole layer has
+  been silently dead the same way the plan cron was.
 - Skool: DECIDED Sept 15, community layer only, $9/mo Hobby plan (no Skool
   payments processed, so the 10% transaction fee never applies). Pinned
   post links to thestriveapp.com, the app remains the only place training

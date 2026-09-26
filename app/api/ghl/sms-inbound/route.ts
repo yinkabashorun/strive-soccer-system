@@ -16,8 +16,12 @@ export const dynamic = "force-dynamic";
 // the setup instructions given alongside this route):
 //   { "phone": "{{contact.phone}}", "message": "{{message.body}}" }
 export async function POST(req: Request) {
+  // Fail CLOSED: an unset secret must reject every caller, not accept
+  // them. This endpoint can inject fake messages into a real player's
+  // chat thread and ping the coach, so "not configured yet" must never
+  // mean "wide open."
   const secret = process.env.SMS_INBOUND_SECRET;
-  if (secret && new URL(req.url).searchParams.get("secret") !== secret) {
+  if (!secret || new URL(req.url).searchParams.get("secret") !== secret) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 

@@ -44,6 +44,10 @@ export function OnboardingForm({ defaultName }: { defaultName: string }) {
       setError("Select Boy or Girl so we get pronouns right in your training updates.");
       return;
     }
+    if (!parentName.trim()) {
+      setError("Enter a parent or guardian name so we know who to text.");
+      return;
+    }
     setSaving(true);
     const self_assessment = Object.fromEntries(
       PROGRESS_METRICS.map((m) => [m, assessment[m]])

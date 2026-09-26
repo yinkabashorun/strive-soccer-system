@@ -29,6 +29,27 @@ are we," this list IS the answer.
 - [ ] Get Gonz's quote for the announcement, low-pressure follow-up only
 - [ ] Stamp Hybrid ($400->$500) and 1:1 Monthly ($280->$320) raises, announce
       alongside the ladder once the founding window closes Oct 1
+- [ ] Confirm CRON_SECRET and GHL_WEBHOOK_SECRET are actually set in
+      Vercel, then flip weekly-plans/digest/onboarding-reminders/
+      autopilot/sync-contacts/ghl-webhook to fail CLOSED (reject) when
+      their secret is unset instead of accepting any caller - see
+      business context below, this is a real open security gap.
+- [ ] Check the current real players' (Elias, Keith Mauck jr, Mason
+      Jhaveri, Remi Bashorun) parent_name field on their profiles - a bug
+      just fixed meant it may have defaulted to the player's own name,
+      breaking the "Hey [Parent]," greeting for them specifically.
+- [ ] From the Sept 26 audit, not yet built - Coach Yinka to prioritize:
+      no privacy policy/ToS anywhere despite collecting minors' phone
+      numbers/self-assessments/film links; no rate limiting anywhere
+      (invite codes are ~16.7M combinations and brute-forceable against
+      /api/elite/auth/redeem); no error tracking (Sentry or similar) or
+      custom error/loading pages, so a future silent failure like the
+      parent-report one above has no way to surface short of a parent
+      complaining; the elite-film Storage bucket policy (migration
+      005) is open to any authenticated user with no per-player scoping
+      (currently unused by any real upload flow, but live and insecure by
+      default); the weekly-plans/digest crons will silently shift an hour
+      when DST ends ~Nov 1 2026 (vercel.json is fixed UTC, no TZ support).
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 
@@ -279,6 +300,42 @@ In-person scheduling/logistics is NOT app territory, that all stays on GHL.
   RESEND_API_KEY or a GHL_WEBHOOK_URL* is set in the deploy environment
   (lib/elite/email.ts), and neither was part of the SMS setup above. Worth
   checking if Coach Yinka wants parent email too.
+- FOUND + FIXED Sept 26 2026 (proactive audit): the parent_weekly_report
+  send (email + SMS) had been completely dead for every player on the
+  automated Sunday cron since the Sept 26 cron fix itself - the cron
+  always takes applyGeneratedPlanCore's publishNow path, which writes the
+  new plan row already notified:true, so unlockDueWeeks() (the ONLY place
+  that called buildParentRecap) never saw it as "due" and never sent it.
+  Silent - no error anywhere, just a real marketed feature (Remote
+  Academy's weekly parent report) going dark the exact day the plan cron
+  itself got fixed. Fixed by calling buildParentRecap directly inside
+  applyGeneratedPlanCore's goesLiveNow branch (coach-actions.ts) instead
+  of relying only on the Monday-unlock path. No independent verification
+  yet that a real recap has gone out since the fix - worth confirming on
+  the next Sunday cron run or a manual publish.
+- FOUND + FIXED Sept 26 2026 (same audit): parent_name was defaulting to
+  the PLAYER's own name at signup (redeem/route.ts set parent_name:
+  fullName, but that field is labeled "Player name" on the signup form),
+  and completeOnboarding() had no guard against a blank onboarding field
+  wiping it to empty (parent_phone already had this guard, parent_name
+  didn't). Net effect: "Hey [Parent]," greetings were addressing players
+  by their own name for anyone who signed up before this fix or skipped
+  the onboarding field. Fixed: signup no longer sets a placeholder
+  parent_name, onboarding's "Parent or guardian name" is now required,
+  and completeOnboarding won't blank a real name with an empty submit.
+  Existing players (the current real 4) should have their parent_name
+  checked/corrected on their profile if it looks wrong.
+- Cron/webhook auth pattern audit finding (Sept 26 2026, NOT yet fixed):
+  every secret check in this codebase (CRON_SECRET on the weekly-plans,
+  digest, onboarding-reminders, autopilot, sync-contacts routes;
+  GHL_WEBHOOK_SECRET on /api/ghl/webhook) fails OPEN if the env var is
+  unset - "if (secret && ...)" instead of "if (!secret || ...)". Fixed
+  this pattern for SMS_INBOUND_SECRET only (confirmed set in Vercel, so
+  safe to flip). The others were deliberately left alone because flipping
+  them blind, without confirming CRON_SECRET/GHL_WEBHOOK_SECRET are
+  actually set in Vercel, risks silently breaking the weekly-plan cron
+  entirely (it would reject Vercel's own real invocation too). Confirm
+  those are set first, then flip the same fail-closed fix everywhere.
 - Skool: DECIDED Sept 15, community layer only, $9/mo Hobby plan (no Skool
   payments processed, so the 10% transaction fee never applies). Pinned
   post links to thestriveapp.com, the app remains the only place training

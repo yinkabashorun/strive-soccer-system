@@ -105,7 +105,12 @@ export async function POST(req: Request) {
       coach_id: invite.created_by,
       full_name: fullName,
       parent_email: email,
-      parent_name: fullName,
+      // NOT parent_name: fullName - fullName here is the PLAYER's name
+      // (that's what this form actually asks for), and parent_name feeds
+      // every "Hey [Parent]," greeting in SMS/email. A wrong placeholder
+      // there is worse than leaving it blank (defaults to '' in the
+      // schema) - real value gets collected at onboarding instead, where
+      // it's now a required field.
       parent_phone: normalizePhone(phone) ?? phone,
       player_phone: playerPhone ? normalizePhone(playerPhone) ?? playerPhone : null,
       subscription_status: "none",

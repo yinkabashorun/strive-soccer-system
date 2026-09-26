@@ -7,6 +7,7 @@
 
 import { createServiceClient } from "./supabase/server";
 import { sendPlayerEmail } from "./email";
+import { sendPushToPlayer } from "./push";
 import { buildParentRecap } from "./parent-recap";
 
 let lastRun = 0;
@@ -63,6 +64,11 @@ export async function unlockDueWeeks(): Promise<void> {
       event: "new_week",
       subject: first ? `Week ${plan.week} is live, ${first}` : `Week ${plan.week} is live`,
       body: `The new training week just unlocked.\n\nThis week's focus: ${plan.focus}\n\nFour sessions, plyo warm-up first, every time. Open the app and start Session 1.`,
+    }).catch(() => undefined);
+    await sendPushToPlayer(plan.player_id, {
+      title: first ? `Week ${plan.week} is live, ${first}` : `Week ${plan.week} is live`,
+      body: plan.focus || "Your new training week just unlocked.",
+      url: "/dashboard",
     }).catch(() => undefined);
 
     // The weekly parent recap - real numbers from the week that just

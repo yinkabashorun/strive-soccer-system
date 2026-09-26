@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { AppNav, type NavItem } from "@/components/elite/AppNav";
 import { Wordmark } from "@/components/elite/Wordmark";
+import { PushOptIn } from "@/components/elite/PushOptIn";
 import { getViewer } from "@/lib/elite/session";
 import { getNotifications, getPlayer } from "@/lib/elite/data";
 import { signOut } from "@/lib/elite/auth-actions";
@@ -71,6 +72,11 @@ export default async function PlayerLayout({
         notifications={notifications}
       />
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-28 pt-5 sm:px-6 lg:pb-12 lg:pt-8">
+        {!viewer.demo && (
+          <div className="mb-4">
+            <PushOptIn />
+          </div>
+        )}
         {children}
       </main>
     </div>

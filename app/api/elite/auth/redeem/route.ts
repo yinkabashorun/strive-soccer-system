@@ -83,7 +83,16 @@ export async function POST(req: Request) {
     email,
   });
 
-  // 4) provision an active player linked to the inviting coach
+  // 4) provision the player linked to the inviting coach. subscription_status
+  // starts at "none", NOT "active" - there is no real payment-to-account
+  // link yet (Stripe checkout doesn't provision accounts), so redemption
+  // alone was silently granting full paid access to anyone with a code
+  // regardless of whether they'd actually paid. The coach flips this to
+  // "active" from the player's profile once payment is confirmed; the
+  // membership gate in app/(player)/layout.tsx shows a clean "reach out to
+  // your coach" screen in the meantime, and onboarding/intake still works
+  // (it's outside that gate) so nothing about the code-redemption flow
+  // itself is blocked.
   const { data: playerRow } = await admin
     .from("elite_players")
     .insert({
@@ -92,7 +101,7 @@ export async function POST(req: Request) {
       full_name: fullName,
       parent_email: email,
       parent_name: fullName,
-      subscription_status: "active",
+      subscription_status: "none",
       current_week: 1,
       today_focus: "Welcome to Strive Elite. Your coach will set your first focus.",
     })

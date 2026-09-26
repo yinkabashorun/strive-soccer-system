@@ -1,9 +1,11 @@
 import { ClipboardList } from "lucide-react";
 import type { Player } from "@/lib/elite/types";
 import { EnvToggle } from "./EnvToggle";
+import { ContactInfoEditor } from "./ContactInfoEditor";
 
-// Read-only snapshot of what the player told us at intake. Gives the coach
-// the context they need before building a plan.
+// Snapshot of what the player told us at intake, plus coach-editable
+// contact info and training environment. Gives the coach the context they
+// need before building a plan.
 export function IntakePanel({ player }: { player: Player }) {
   const self = player.self_assessment ?? {};
   const selfEntries = Object.entries(self);
@@ -12,7 +14,6 @@ export function IntakePanel({ player }: { player: Player }) {
   if (player.club) rows.push(["Club", player.club]);
   if (player.dominant_foot) rows.push(["Dominant foot", player.dominant_foot]);
   if (player.parent_name) rows.push(["Parent", player.parent_name]);
-  if (player.parent_email) rows.push(["Parent email", player.parent_email]);
   const hasIntake = rows.length > 0 || selfEntries.length > 0;
 
   return (
@@ -20,6 +21,14 @@ export function IntakePanel({ player }: { player: Player }) {
       <div className="mb-3 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
         <ClipboardList className="h-3.5 w-3.5" /> Intake
       </div>
+
+      {/* Coach-editable: only way to fix a wrong/missing parent email or
+          phone, e.g. for players who signed up before phone capture existed */}
+      <ContactInfoEditor
+        playerId={player.id}
+        initialEmail={player.parent_email ?? ""}
+        initialPhone={player.parent_phone ?? ""}
+      />
 
       {/* Coach-editable: flips wall/goal days in the next generated plan */}
       <div className="mb-3 space-y-2 border-b border-white/6 pb-3 text-sm">

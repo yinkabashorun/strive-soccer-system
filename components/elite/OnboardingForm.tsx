@@ -24,6 +24,7 @@ export function OnboardingForm({ defaultName }: { defaultName: string }) {
   const [weaknesses, setWeaknesses] = useState("");
   const [parentName, setParentName] = useState("");
   const [parentEmail, setParentEmail] = useState("");
+  const [parentPhone, setParentPhone] = useState("");
   const [hasWall, setHasWall] = useState("No");
   const [hasGoal, setHasGoal] = useState("No");
   const [assessment, setAssessment] = useState<Record<string, number>>(
@@ -53,6 +54,7 @@ export function OnboardingForm({ defaultName }: { defaultName: string }) {
       self_assessment,
       parent_name: parentName,
       parent_email: parentEmail,
+      parent_phone: parentPhone,
       has_wall: hasWall === "Yes",
       has_goal: hasGoal === "Yes",
     });
@@ -192,6 +194,15 @@ export function OnboardingForm({ defaultName }: { defaultName: string }) {
               value={parentEmail}
               onChange={(e) => setParentEmail(e.target.value)}
               placeholder="parent@example.com"
+              className={inputCls}
+            />
+          </Field>
+          <Field label="Parent contact phone (for text updates)" full>
+            <input
+              type="tel"
+              value={parentPhone}
+              onChange={(e) => setParentPhone(e.target.value)}
+              placeholder="(703) 555-0100"
               className={inputCls}
             />
           </Field>

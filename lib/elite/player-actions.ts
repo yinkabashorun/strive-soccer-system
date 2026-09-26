@@ -5,6 +5,7 @@ import { createClient, createServiceClient } from "./supabase/server";
 import { getViewer } from "./session";
 import { maybeAwardAchievements } from "./achievements";
 import { sendCoachEmail } from "./email";
+import { normalizePhone } from "./sms";
 import { liveWeekFor, monthFromWeek } from "./time";
 import type { ProgressMetric } from "./types";
 
@@ -19,6 +20,7 @@ export type OnboardingInput = {
   self_assessment: Partial<Record<ProgressMetric, number>>;
   parent_name: string;
   parent_email: string;
+  parent_phone: string;
   has_wall: boolean;
   has_goal: boolean;
 };
@@ -35,7 +37,7 @@ export async function completeOnboarding(input: OnboardingInput) {
   const admin = createServiceClient();
   if (!admin) return { ok: false as const };
 
-  const update = {
+  const update: Record<string, unknown> = {
     age: input.age || 0,
     position: input.position.trim(),
     level: input.level || "Developing",
@@ -50,6 +52,11 @@ export async function completeOnboarding(input: OnboardingInput) {
     has_goal: input.has_goal,
     onboarded_at: new Date().toISOString(),
   };
+  // Only overwrite the phone captured at signup if they actually entered
+  // one here - an empty field at intake shouldn't wipe a real number.
+  if (input.parent_phone.trim()) {
+    update.parent_phone = normalizePhone(input.parent_phone.trim()) ?? input.parent_phone.trim();
+  }
   const { error } = await admin
     .from("elite_players")
     .update(update)

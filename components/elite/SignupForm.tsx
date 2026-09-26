@@ -22,6 +22,7 @@ export function SignupForm({
   const [code, setCode] = useState(initialCode.toUpperCase());
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -39,7 +40,7 @@ export function SignupForm({
     const res = await fetch("/api/elite/auth/redeem", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code, fullName, email, password }),
+      body: JSON.stringify({ code, fullName, email, phone, password }),
     });
     const data = await res.json();
     if (!res.ok) {
@@ -101,6 +102,14 @@ export function SignupForm({
           onChange={setEmail}
           placeholder="you@example.com"
           autoComplete="email"
+        />
+        <Input
+          label="Parent phone (for text updates)"
+          type="tel"
+          value={phone}
+          onChange={setPhone}
+          placeholder="(703) 555-0100"
+          autoComplete="tel"
         />
         <Input
           label="Password"

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/elite/supabase/server";
 import { sendPlayerEmail } from "@/lib/elite/email";
+import { normalizePhone } from "@/lib/elite/sms";
 
 export const runtime = "nodejs";
 
@@ -8,12 +9,13 @@ export const runtime = "nodejs";
 // Uses the service role so the new user is email-confirmed immediately
 // (no confirmation link) and the invite is validated server-side.
 //
-// POST { code, fullName, email, password } -> { ok } | { error }
+// POST { code, fullName, email, phone, password } -> { ok } | { error }
 export async function POST(req: Request) {
   let body: {
     code?: string;
     fullName?: string;
     email?: string;
+    phone?: string;
     password?: string;
   };
   try {
@@ -25,12 +27,13 @@ export async function POST(req: Request) {
   const code = (body.code ?? "").trim().toUpperCase();
   const fullName = (body.fullName ?? "").trim();
   const email = (body.email ?? "").trim().toLowerCase();
+  const phone = (body.phone ?? "").trim();
   const password = body.password ?? "";
 
   if (!code) return NextResponse.json({ error: "An invite code is required." }, { status: 400 });
-  if (!fullName || !email || password.length < 8) {
+  if (!fullName || !email || !phone || password.length < 8) {
     return NextResponse.json(
-      { error: "Enter your name, email, and a password of at least 8 characters." },
+      { error: "Enter your name, email, phone, and a password of at least 8 characters." },
       { status: 400 }
     );
   }
@@ -101,6 +104,7 @@ export async function POST(req: Request) {
       full_name: fullName,
       parent_email: email,
       parent_name: fullName,
+      parent_phone: normalizePhone(phone) ?? phone,
       subscription_status: "none",
       current_week: 1,
       today_focus: "Welcome to Strive Elite. Your coach will set your first focus.",

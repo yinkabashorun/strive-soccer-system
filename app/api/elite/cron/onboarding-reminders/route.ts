@@ -38,7 +38,7 @@ export async function GET(req: Request) {
     const first = p.full_name?.split(" ")[0] ?? "";
     const sent = await sendPlayerSMS(p.id, {
       event: "onboarding_incomplete",
-      message: `Quick reminder to finish ${first || "your player"}'s Strive Elite profile so your coach can build the first training week. Takes 2 minutes: ${appUrl}/onboarding`,
+      message: `Still need ${first || "your player"}'s Strive Elite profile finished so I can build their first training week. Takes two minutes: ${appUrl}/onboarding. Let's get ${first || "them"} started.`,
     });
     if (sent) {
       await admin

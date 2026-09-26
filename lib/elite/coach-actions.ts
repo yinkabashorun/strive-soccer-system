@@ -11,6 +11,8 @@ import { liveWeekFor, mondayOfWeekNY, nextMondayNY, unlockInstant } from "./time
 import { getDrillBank } from "./data";
 import type { FilmReview, GeneratedPlan } from "./types";
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://thestriveapp.com";
+
 async function requireCoach() {
   const viewer = await getViewer();
   if (!viewer || viewer.role === "player") return null;
@@ -393,7 +395,7 @@ export async function applyGeneratedPlanCore(
 
   const { data: player } = await supabase
     .from("elite_players")
-    .select("current_week, week1_monday, full_name")
+    .select("current_week, week1_monday, full_name, parent_name")
     .eq("id", playerId)
     .maybeSingle();
 
@@ -582,6 +584,7 @@ export async function applyGeneratedPlanCore(
     // to this NY week's Monday) or a catch-up publish for the live week
     // (never re-anchor - the calendar keeps counting).
     const first = player?.full_name?.split(" ")[0] ?? "";
+    const parentFirst = (player?.parent_name || first || "").trim().split(" ")[0];
     await supabase
       .from("elite_players")
       .update({
@@ -616,11 +619,12 @@ export async function applyGeneratedPlanCore(
       body: plan.weekly_focus || "Your new training week is live.",
       url: "/dashboard",
     }).catch(() => undefined);
+    const greeting = parentFirst ? `Hey ${parentFirst}, ` : "";
     await sendPlayerSMS(playerId, {
       event: "new_week",
       message: firstWeek
-        ? `${first ? first + "'s" : "Your player's"} first Strive Elite training week is live. This week's focus: ${plan.weekly_focus}. Open the app to start Session 1.`
-        : `${first ? first + "'s" : "Your player's"} week ${week} just dropped. This week's focus: ${plan.weekly_focus}. Open the app to start Session 1.`,
+        ? `${greeting}${first || "Your player"}'s first Strive Elite training week is officially live. This week is built around ${plan.weekly_focus}. Let's have ${first || "them"} open the app and get after Session 1: ${APP_URL}/dashboard`
+        : `${greeting}${first || "Your player"}'s week ${week} just went live. This week's focus is ${plan.weekly_focus}. Let's have ${first || "them"} open the app and get started on Session 1: ${APP_URL}/dashboard`,
     }).catch(() => undefined);
   }
   // Scheduled weeks stay silent until Monday morning - unlockDueWeeks()

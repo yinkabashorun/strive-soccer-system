@@ -11,6 +11,8 @@ import { sendPushToPlayer } from "./push";
 import { sendPlayerSMS } from "./sms";
 import { buildParentRecap } from "./parent-recap";
 
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://thestriveapp.com";
+
 let lastRun = 0;
 
 export async function unlockDueWeeks(): Promise<void> {
@@ -42,10 +44,12 @@ export async function unlockDueWeeks(): Promise<void> {
 
     const { data: player } = await admin
       .from("elite_players")
-      .select("full_name, current_week")
+      .select("full_name, current_week, parent_name")
       .eq("id", plan.player_id)
       .maybeSingle();
     const first = player?.full_name?.split(" ")[0] ?? "";
+    const parentFirst = (player?.parent_name || first || "").trim().split(" ")[0];
+    const greeting = parentFirst ? `Hey ${parentFirst}, ` : "";
 
     if (!player || plan.week > (player.current_week ?? 0)) {
       await admin
@@ -73,7 +77,7 @@ export async function unlockDueWeeks(): Promise<void> {
     }).catch(() => undefined);
     await sendPlayerSMS(plan.player_id, {
       event: "new_week",
-      message: `${first ? first + "'s" : "Your player's"} week ${plan.week} just unlocked. This week's focus: ${plan.focus}. Open the app to start Session 1.`,
+      message: `${greeting}${first || "Your player"}'s week ${plan.week} just went live. This week's focus is ${plan.focus}. Let's have ${first || "them"} open the app and get started on Session 1: ${APP_URL}/dashboard`,
     }).catch(() => undefined);
 
     // The weekly parent recap - real numbers from the week that just

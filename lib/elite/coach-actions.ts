@@ -9,6 +9,7 @@ import { sendPushToPlayer } from "./push";
 import { normalizePhone, sendPlayerSMS } from "./sms";
 import { liveWeekFor, mondayOfWeekNY, nextMondayNY, unlockInstant } from "./time";
 import { getDrillBank } from "./data";
+import { buildParentRecap } from "./parent-recap";
 import type { FilmReview, GeneratedPlan } from "./types";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://thestriveapp.com";
@@ -630,6 +631,30 @@ export async function applyGeneratedPlanCore(
         ? `${greeting}${first || "Your player"}'s first Strive Elite training week is officially live. This week is built around ${plan.weekly_focus}. Let's have ${first || "them"} open the app and get after Session 1: ${APP_URL}/dashboard`
         : `${greeting}${first || "Your player"}'s week ${week} just went live. This week's focus is ${plan.weekly_focus}. Let's have ${first || "them"} open the app and get started on Session 1: ${APP_URL}/dashboard`,
     }).catch(() => undefined);
+
+    // Parent weekly report for the week that just ended. This path
+    // (goesLiveNow) is what the automated Sunday cron always takes
+    // (auto-plan.ts's publishNow:true), and it writes notified:true up
+    // front - so unlockDueWeeks() in unlock.ts, which is the ONLY other
+    // place that sends this, would never see these plans as "due" and
+    // would never send it. Best-effort; a recap failure never blocks the
+    // week from publishing.
+    try {
+      const recap = await buildParentRecap(playerId, week - 1);
+      if (recap) {
+        await sendPlayerEmail(playerId, {
+          event: "parent_weekly_report",
+          subject: `${recap.playerFirst}'s week ${recap.week} report`,
+          body: recap.text,
+        });
+        await sendPlayerSMS(playerId, {
+          event: "parent_weekly_report",
+          message: recap.text,
+        });
+      }
+    } catch {
+      /* recap is a bonus - the week already published successfully */
+    }
   }
   // Scheduled weeks stay silent until Monday morning - unlockDueWeeks()
   // flips them live and notifies then.

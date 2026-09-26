@@ -48,12 +48,17 @@ export async function completeOnboarding(input: OnboardingInput) {
     goals: input.goals.filter(Boolean).slice(0, 6),
     weaknesses: input.weaknesses.filter(Boolean).slice(0, 6),
     self_assessment: input.self_assessment,
-    parent_name: input.parent_name.trim(),
     parent_email: input.parent_email.trim(),
     has_wall: input.has_wall,
     has_goal: input.has_goal,
     onboarded_at: new Date().toISOString(),
   };
+  // Same non-destructive pattern as parent_phone below: the form requires
+  // this, but never let a stray empty submission wipe a real name already
+  // on file - this field feeds every "Hey [Parent]," greeting in SMS/email.
+  if (input.parent_name.trim()) {
+    update.parent_name = input.parent_name.trim();
+  }
   // Only overwrite the phone captured at signup if they actually entered
   // one here - an empty field at intake shouldn't wipe a real number.
   if (input.parent_phone.trim()) {

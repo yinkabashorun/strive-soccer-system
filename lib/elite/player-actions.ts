@@ -15,6 +15,7 @@ export type OnboardingInput = {
   level: string;
   club: string;
   dominant_foot: string;
+  gender: "boy" | "girl";
   goals: string[];
   weaknesses: string[];
   self_assessment: Partial<Record<ProgressMetric, number>>;
@@ -43,6 +44,7 @@ export async function completeOnboarding(input: OnboardingInput) {
     level: input.level || "Developing",
     club: input.club.trim(),
     dominant_foot: input.dominant_foot,
+    gender: input.gender,
     goals: input.goals.filter(Boolean).slice(0, 6),
     weaknesses: input.weaknesses.filter(Boolean).slice(0, 6),
     self_assessment: input.self_assessment,

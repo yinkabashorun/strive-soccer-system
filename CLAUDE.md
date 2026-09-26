@@ -29,11 +29,6 @@ are we," this list IS the answer.
 - [ ] Get Gonz's quote for the announcement, low-pressure follow-up only
 - [ ] Stamp Hybrid ($400->$500) and 1:1 Monthly ($280->$320) raises, announce
       alongside the ladder once the founding window closes Oct 1
-- [ ] Add gender (boy/girl) field to elite_players - required at onboarding
-      going forward, coach-editable toggle for existing players. Needed so
-      AI-generated app copy (new week, parent weekly report) uses correct
-      pronouns instead of guessing (current copy avoids pronouns entirely
-      as a stopgap - see voice guide below).
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 
@@ -177,14 +172,18 @@ In-person scheduling/logistics is NOT app territory, that all stays on GHL.
   fix as consistency, never shames the kid. Real example given: "Marcus
   missed his homework this week. Let's get him back on track, consistency
   is what builds this."
-- Needs a player gender (boy/girl) field to get pronouns right instead of
-  guessing - see open items, not built yet.
 - SHIPPED Sept 26 2026: new_week (coach-actions.ts + unlock.ts) and
   onboarding_incomplete SMS rewritten to this voice, with a real dashboard
   link instead of a bare "open the app" line. parent_weekly_report's
   Claude prompt (lib/elite/parent-recap.ts) rewritten with this full guide
-  - pronoun-free until the gender field exists, "Hey [Parent]," opener,
-  no sign-off, forward-looking close, rare/earned exclamation points.
+  - "Hey [Parent]," opener, no sign-off, forward-looking close,
+  rare/earned exclamation points.
+- Player gender (boy/girl) field SHIPPED Sept 26 2026 (migration 027) -
+  required at onboarding going forward, coach-editable for existing
+  players from the Intake panel. parent_weekly_report's AI prompt now
+  uses correct he/she pronouns when gender is set, falls back to
+  repeating the player's first name when it isn't (old players who
+  haven't had it added yet).
 
 ## People
 

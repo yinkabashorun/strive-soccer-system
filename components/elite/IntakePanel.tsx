@@ -1,6 +1,7 @@
 import { ClipboardList } from "lucide-react";
 import type { Player } from "@/lib/elite/types";
 import { EnvToggle } from "./EnvToggle";
+import { GenderToggle } from "./GenderToggle";
 import { ContactInfoEditor } from "./ContactInfoEditor";
 
 // Snapshot of what the player told us at intake, plus coach-editable
@@ -31,7 +32,8 @@ export function IntakePanel({ player }: { player: Player }) {
         initialPlayerPhone={player.player_phone ?? ""}
       />
 
-      {/* Coach-editable: flips wall/goal days in the next generated plan */}
+      {/* Coach-editable: flips wall/goal days in the next generated plan,
+          and lets AI copy use correct pronouns once gender is set */}
       <div className="mb-3 space-y-2 border-b border-white/6 pb-3 text-sm">
         <div className="flex items-center justify-between gap-3">
           <span className="text-white/40">Wall nearby</span>
@@ -40,6 +42,10 @@ export function IntakePanel({ player }: { player: Player }) {
         <div className="flex items-center justify-between gap-3">
           <span className="text-white/40">Goal nearby</span>
           <EnvToggle playerId={player.id} field="has_goal" value={player.has_goal ?? null} />
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-white/40">Boy / girl</span>
+          <GenderToggle playerId={player.id} value={player.gender ?? null} />
         </div>
       </div>
 

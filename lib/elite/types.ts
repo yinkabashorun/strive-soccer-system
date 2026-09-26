@@ -39,6 +39,7 @@ export type Player = {
   parent_email: string;
   parent_phone?: string | null; // SMS contact (025), captured at signup + confirmed at intake
   player_phone?: string | null; // player's own phone (026), optional - lets the player text directly and matches inbound replies to the right role
+  gender?: "boy" | "girl" | null; // (027) required at onboarding going forward, coach-editable for existing players - lets AI copy use correct pronouns
   next_session_at: string | null; // ISO
   last_session_at: string | null; // ISO
   joined_at: string;

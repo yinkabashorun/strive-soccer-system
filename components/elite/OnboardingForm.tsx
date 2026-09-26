@@ -9,6 +9,7 @@ import { completeOnboarding } from "@/lib/elite/player-actions";
 const LEVELS = ["Developing", "Competitive", "Advanced", "Elite"];
 const FEET = ["Right", "Left", "Both"];
 const YES_NO = ["Yes", "No"];
+const GENDERS = ["Boy", "Girl"];
 
 export function OnboardingForm({ defaultName }: { defaultName: string }) {
   const router = useRouter();
@@ -20,6 +21,7 @@ export function OnboardingForm({ defaultName }: { defaultName: string }) {
   const [level, setLevel] = useState("Developing");
   const [club, setClub] = useState("");
   const [foot, setFoot] = useState("Right");
+  const [gender, setGender] = useState("");
   const [goals, setGoals] = useState("");
   const [weaknesses, setWeaknesses] = useState("");
   const [parentName, setParentName] = useState("");
@@ -38,6 +40,10 @@ export function OnboardingForm({ defaultName }: { defaultName: string }) {
       setError("Tell us your position so we can tailor your training.");
       return;
     }
+    if (!gender) {
+      setError("Select Boy or Girl so we get pronouns right in your training updates.");
+      return;
+    }
     setSaving(true);
     const self_assessment = Object.fromEntries(
       PROGRESS_METRICS.map((m) => [m, assessment[m]])
@@ -49,6 +55,7 @@ export function OnboardingForm({ defaultName }: { defaultName: string }) {
       level,
       club,
       dominant_foot: foot,
+      gender: gender.toLowerCase() as "boy" | "girl", // Segmented stores the display label ("Boy"/"Girl")
       goals: splitLines(goals),
       weaknesses: splitLines(weaknesses),
       self_assessment,
@@ -101,6 +108,9 @@ export function OnboardingForm({ defaultName }: { defaultName: string }) {
           </Field>
           <Field label="Dominant foot">
             <Segmented options={FEET} value={foot} onChange={setFoot} />
+          </Field>
+          <Field label="Boy or girl">
+            <Segmented options={GENDERS} value={gender} onChange={setGender} />
           </Field>
           <Field label="Level" full>
             <Segmented options={LEVELS} value={level} onChange={setLevel} />

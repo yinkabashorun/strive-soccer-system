@@ -35,7 +35,7 @@ export async function buildParentRecap(
     await Promise.all([
       admin
         .from("elite_players")
-        .select("full_name, parent_name")
+        .select("full_name, parent_name, gender")
         .eq("id", playerId)
         .maybeSingle(),
       admin
@@ -96,6 +96,7 @@ export async function buildParentRecap(
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     const facts = [
       `Player first name: ${first}`,
+      player.gender ? `Player gender: ${player.gender}` : "",
       parentFirst ? `Parent first name: ${parentFirst}` : "",
       `Week ${week} results: completed ${sessionsDone} of ${sessionsTotal} sessions, ${minutes} minutes trained, current streak ${streak} days.`,
       report?.improvement ? `Coach's note on their development: ${report.improvement}` : "",
@@ -124,14 +125,16 @@ Coach Yinka's voice:
 - No emoji, ever.
 - Exclamation points are rare - at most one, only when genuinely earned
   (every session done this week). Never use one on an incomplete week.
-- Never use he/she/his/her - repeat the player's first name every time
-  instead. Their gender is not provided, never guess it.
+- If a player gender is given, use he/him or she/her naturally instead of
+  repeating the first name every sentence. If no gender is given, never
+  guess it - repeat the player's first name instead.
 - These are AT-HOME app sessions - Coach Yinka is NOT physically present,
   so never write as if he watched live ("great session I saw," "watched
   you play"). Frame it around consistency, effort, and the programming
-  instead (e.g. "is killing it with the consistency," "this week's
-  sessions were focused on X," "the work this week will help improve X
-  over time").
+  instead (e.g. "is killing it with his consistency" / "is killing it
+  with her consistency" / pronoun-free "is killing it with the
+  consistency" if no gender given; "this week's sessions were focused on
+  X," "the work this week will help improve X over time").
 - Be honest about an incomplete week: constructive, never guilt-tripping,
   never shaming the kid. Frame the fix as consistency, not failure.
 - Use ONLY the facts provided. Never invent results, drills, or progress.

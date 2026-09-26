@@ -354,7 +354,18 @@ In-person scheduling/logistics is NOT app territory, that all stays on GHL.
   (lib/rate-limit.ts, in-memory/per-instance) on /api/elite/auth/redeem -
   10 attempts per 10 minutes per IP, since invite codes were previously
   unthrottled and guessable at scale (~16.7M combinations).
-- Skool: DECIDED Sept 15, community layer only, $9/mo Hobby plan (no Skool
+- FOUND + FIXED Sept 26 2026 (reported directly by Coach Yinka): deleting a
+  player from the coach dashboard only removed the elite_players row and
+  deliberately left the login account alive (old comment: "sign back in,
+  re-onboard as a fresh player") - so the family's email stayed registered
+  forever, and redeeming a NEW invite code with that same email failed
+  with "already exists." Not what delete means to a coach or a parent.
+  Fixed: deletePlayer now deletes the actual auth.users account, which
+  cascades through elite_profiles -> elite_players -> every dependent
+  table (migration 005's FKs already supported this, the code just wasn't
+  using it). Also found and cleaned up 5 already-orphaned accounts stuck
+  in exactly this state from before the fix (mostly Coach Yinka's own
+  test/family signups - freed their emails via direct DB delete).
   payments processed, so the 10% transaction fee never applies). Pinned
   post links to thestriveapp.com, the app remains the only place training
   actually happens, AI plans/drill bank/recaps/referral all stay there.

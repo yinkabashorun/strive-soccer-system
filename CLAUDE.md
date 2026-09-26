@@ -34,15 +34,6 @@ are we," this list IS the answer.
       AI-generated app copy (new week, parent weekly report) uses correct
       pronouns instead of guessing (current copy avoids pronouns entirely
       as a stopgap - see voice guide below).
-- [ ] Set up the one GHL workflow for inbound SMS replies (trigger:
-      "Customer Replied" -> Webhook action -> POST {phone, message} to
-      https://thestriveapp.com/api/ghl/sms-inbound?secret=<value>, body
-      {"phone": "{{contact.phone}}", "message": "{{message.body}}"}).
-      SMS_INBOUND_SECRET is already set in Vercel (Sept 26 2026) - the
-      actual value is NOT recorded here on purpose (never put a live
-      secret in a git-tracked file); Coach Yinka has it from when he
-      created it, or can rotate it in Vercel env vars if lost. Code side
-      is built and live, this last GHL-side step is still his to do.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 
@@ -281,8 +272,9 @@ In-person scheduling/logistics is NOT app territory, that all stays on GHL.
   against parent_phone/player_phone and threads it straight into that
   player's existing chat in the app (shows as "[Parent's first name]
   (Parent)" or the player's own name), plus pings the coach the same way
-  a normal player message does. Requires ONE GHL workflow on Coach
-  Yinka's side (see open items) - the code is done, that step isn't.
+  a normal player message does. GHL workflow (Customer Replied -> Webhook
+  -> /api/ghl/sms-inbound) built by Coach Yinka Sept 26 2026 - the full
+  inbound loop is now live end to end.
 - Email (new week, coach message, parent weekly report, plus coach-facing
   events) is separate and still UNCONFIRMED/likely dead - it only sends if
   RESEND_API_KEY or a GHL_WEBHOOK_URL* is set in the deploy environment

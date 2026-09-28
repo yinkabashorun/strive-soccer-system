@@ -366,6 +366,20 @@ In-person scheduling/logistics is NOT app territory, that all stays on GHL.
   using it). Also found and cleaned up 5 already-orphaned accounts stuck
   in exactly this state from before the fix (mostly Coach Yinka's own
   test/family signups - freed their emails via direct DB delete).
+- FOUND + FIXED Sept 27 2026 (reported directly by Coach Yinka): the
+  weekly-plan AI (lib/elite/ai-coach.ts) had zero voice guidance on
+  next_week_objectives, unlike parent_update/player_summary which were
+  carefully specified - so it defaulted to robotic performance-metric
+  phrasing ("90% one-touch accuracy at 3 yards"), and parent-recap.ts was
+  feeding that straight into the weekly SMS as "Coming up next: ...",
+  quoting it near-verbatim into a text meant to sound like Coach Yinka.
+  Fixed both ends: next_week_objectives now must be plain coach language,
+  no percentages/measurements/stat-line jargon (ai-coach.ts's schema +
+  rules), and parent-recap.ts no longer feeds next_focus into the recap
+  at all - the forward-looking close is a natural line, not a recitation
+  of next week's technical objectives. Also added an explicit "no stat
+  lines" rule to the recap's own system prompt as a backstop.
+- Skool: DECIDED Sept 15, community layer only, $9/mo Hobby plan (no Skool
   payments processed, so the 10% transaction fee never applies). Pinned
   post links to thestriveapp.com, the app remains the only place training
   actually happens, AI plans/drill bank/recaps/referral all stay there.

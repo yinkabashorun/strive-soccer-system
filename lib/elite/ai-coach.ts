@@ -77,7 +77,7 @@ Return ONLY valid JSON, no prose, matching this shape:
   "parent_update": "2-4 sentences the coach can copy and paste directly into a text message to the parent. First person, the coach's voice ('I saw', 'this week I have him working on'). Refer to the player by first name. No greeting, no sign-off, no app jargon. It must read like a coach texting a parent, not a system summary.",
   "player_summary": "2-3 sentences to the player, second person",
   "progress_updates": [ { "metric": "Scanning", "value": 72 } ],
-  "next_week_objectives": [ "objective 1", "objective 2", "objective 3" ]
+  "next_week_objectives": [ "plain coach language, like 'get more comfortable finishing with the left foot' or 'keep the head up before the first touch', never a percentage, a measurement, or performance-metric jargon like 'X% accuracy at Y yards'. This is what YOU look at to plan next week, not a stat line." ]
 }
 Rules:
 - EXACTLY 4 sessions. EXACTLY 3 skill drills each (no warm-ups; added
@@ -94,7 +94,11 @@ Rules:
   notes with 2-3 key cues. A player should be able to run the drill from
   the card alone: what to set up, what to do, what to feel.
 - progress_updates: only pillars the notes actually touched, value 0-100.
-- next_week_objectives: 2-4 items.
+- next_week_objectives: 2-4 items, plain coach language only. NEVER a
+  percentage, a distance, a measurement, or any performance-metric jargon
+  ("90% one-touch accuracy at 3 yards" is banned - say "get more consistent
+  with his first touch under pressure" instead). Nobody reading this wants
+  a stat line, they want to know what you're working on next.
 - Write like a real coach texting his player: plain punctuation only. NEVER
   use an em dash (\u2014) anywhere. Use periods, commas, or colons instead.`;
 

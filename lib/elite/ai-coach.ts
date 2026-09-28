@@ -99,6 +99,13 @@ Rules:
   ("90% one-touch accuracy at 3 yards" is banned - say "get more consistent
   with his first touch under pressure" instead). Nobody reading this wants
   a stat line, they want to know what you're working on next.
+- parent_update and player_summary: never invent or assume ANYTHING about
+  the player's life that isn't in the coach's notes or the player context
+  given to you - no team situation, no starting spot, no tryouts, no
+  teammates, no rivals, no competition, no assumed goal or motivation
+  beyond what's actually listed. Stick to the training itself: what
+  happened, what's next, how they're doing on the pillars. You don't know
+  anything about their team.
 - Write like a real coach texting his player: plain punctuation only. NEVER
   use an em dash (\u2014) anywhere. Use periods, commas, or colons instead.`;
 

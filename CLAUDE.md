@@ -379,6 +379,18 @@ In-person scheduling/logistics is NOT app territory, that all stays on GHL.
   at all - the forward-looking close is a natural line, not a recitation
   of next week's technical objectives. Also added an explicit "no stat
   lines" rule to the recap's own system prompt as a backstop.
+- FOUND + FIXED Sept 27 2026 (same report, Coach Yinka caught a second
+  issue in the same message): the recap AI had also invented a detail
+  with zero data behind it - "let's keep him locked in and chasing that
+  starting spot." Nothing in the schema tracks team situation, starting
+  spot, tryouts, or player motivation, so that was pure invention, not
+  drawn from any real fact. "Use ONLY the facts provided" had only been
+  scoped to results/drills/progress, not to narrative assumptions like
+  this. Added an explicit rule to BOTH AI prompts (ai-coach.ts's
+  parent_update/player_summary, and parent-recap.ts): never invent or
+  assume anything about the player's team situation, starting spot,
+  tryouts, teammates, rivals, competition, or motivation - stick to the
+  training itself, nothing about their life outside it.
 - Skool: DECIDED Sept 15, community layer only, $9/mo Hobby plan (no Skool
   payments processed, so the 10% transaction fee never applies). Pinned
   post links to thestriveapp.com, the app remains the only place training

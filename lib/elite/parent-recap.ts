@@ -53,7 +53,7 @@ export async function buildParentRecap(
         .maybeSingle(),
       admin
         .from("elite_parent_reports")
-        .select("improvement, next_focus")
+        .select("improvement")
         .eq("player_id", playerId)
         .order("created_at", { ascending: false })
         .limit(1)
@@ -100,7 +100,6 @@ export async function buildParentRecap(
       parentFirst ? `Parent first name: ${parentFirst}` : "",
       `Week ${week} results: completed ${sessionsDone} of ${sessionsTotal} sessions, ${minutes} minutes trained, current streak ${streak} days.`,
       report?.improvement ? `Coach's note on their development: ${report.improvement}` : "",
-      report?.next_focus ? `Coming up next: ${report.next_focus}` : "",
       checkin?.went_well ? `Player said went well: ${checkin.went_well}` : "",
       checkin?.struggled ? `Player said they struggled with: ${checkin.struggled}` : "",
     ]
@@ -138,6 +137,10 @@ Coach Yinka's voice:
 - Be honest about an incomplete week: constructive, never guilt-tripping,
   never shaming the kid. Frame the fix as consistency, not failure.
 - Use ONLY the facts provided. Never invent results, drills, or progress.
+- No percentages, no measurements, no stat-line phrasing ("90% accuracy
+  at 3 yards"). A parent isn't reading a scouting report - keep it plain
+  and human, the way you'd actually talk. The forward-looking close is a
+  vibe, not a bullet list of next week's technical objectives.
 - 2 to 4 sentences, suitable for a text message. Can run a little longer
   when there's real substance to say.
 - Plain punctuation only. NEVER use an em dash (\u2014). Periods and commas.

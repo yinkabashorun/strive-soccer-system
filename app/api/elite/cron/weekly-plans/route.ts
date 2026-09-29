@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import { runAutoWeeklyPlans } from "@/lib/elite/auto-plan";
+import { backfillHomeworkVideos } from "@/lib/elite/data";
+import { createServiceClient } from "@/lib/elite/supabase/server";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -21,5 +23,17 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
   const { ran, results } = await runAutoWeeklyPlans();
-  return NextResponse.json({ ok: true, ran, results });
+
+  // Best-effort: heal any homework stuck without a video because it was
+  // published before its drill had one in the bank. Never blocks the
+  // week's own publish result.
+  let videosFixed = 0;
+  try {
+    const admin = createServiceClient();
+    if (admin) videosFixed = await backfillHomeworkVideos(admin);
+  } catch {
+    /* next run tries again */
+  }
+
+  return NextResponse.json({ ok: true, ran, results, videosFixed });
 }

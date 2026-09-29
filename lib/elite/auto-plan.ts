@@ -62,7 +62,7 @@ export async function runAutoWeeklyPlans(): Promise<{ ran: number; results: Resu
     .in("subscription_status", ["active", "trialing"]);
   const roster = (players as Player[] | null) ?? [];
 
-  const { drills: bank } = await getDrillBank();
+  const { drills: bank } = await getDrillBank({ onlyWithVideo: true });
   const results: Result[] = [];
 
   for (const player of roster) {

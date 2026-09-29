@@ -18,6 +18,21 @@ are we," this list IS the answer.
 - [ ] Confirm PWC field permit is actually granted, not just requested
 - [ ] Migrate the remaining 13 Manus-hosted drill videos to Strive's own
       storage (Neymar Feint done Sept 16, re-trimmed from raw footage)
+- [ ] FOUND + FIXED Sept 29 2026 (reported directly by Coach Yinka, real
+      player screenshot showed zero drill videos): elite_homework.video_url
+      is copied in once at publish time from whatever the bank has THEN -
+      a video added to the bank later never reaches an already-published
+      week on its own. Real impact: this week's homework for actual
+      players (Abdul Rahim confirmed, likely others) had zero videos even
+      though the matching bank drills now have them, since the drill-video
+      migration is ongoing and plans got published before some videos
+      landed. Backfilled 19 already-stuck rows across the app directly via
+      SQL (immediate fix). Also added an auto-heal step
+      (backfillHomeworkVideos in lib/elite/data.ts) to the Sunday
+      weekly-plans cron so this doesn't pile back up silently as more
+      videos get migrated - it fills any null video_url whose title now
+      matches a bank drill with a real video, never touches a row that
+      already has one.
 - [ ] Sign Teo's Ashburn memo
 - [ ] Set up Skool community (DECIDED Sept 15, refined Sept 15): community
       only, $9/mo Hobby plan, pinned link to thestriveapp.com for actual

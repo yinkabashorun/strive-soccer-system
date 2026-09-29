@@ -1,3 +1,4 @@
+import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "./supabase/server";
 import {
   DEMO_ACHIEVEMENTS,
@@ -140,6 +141,44 @@ export async function getDrillBank(): Promise<{ drills: Drill[]; fromDb: boolean
     return { drills: libraryDrills(), fromDb: false };
   }
   return { drills: data as Drill[], fromDb: true };
+}
+
+// Repairs homework published before its drill had a video in the bank yet.
+// video_url is copied onto elite_homework at publish time
+// (applyGeneratedPlanCore), so a video added to the bank afterward never
+// reaches an already-published week on its own - the drill-video migration
+// is ongoing, so this keeps happening as new videos land. Idempotent and
+// safe: only ever fills a null, never touches a row that already has one.
+// Takes a service client since it repairs rows across every player, not
+// just the signed-in viewer's own.
+export async function backfillHomeworkVideos(
+  admin: SupabaseClient
+): Promise<number> {
+  const { data: missing } = await admin
+    .from("elite_homework")
+    .select("id, title")
+    .is("video_url", null);
+  if (!missing || missing.length === 0) return 0;
+
+  const { data: bank } = await admin
+    .from("elite_drills")
+    .select("title, video_url");
+  const videoByTitle = new Map<string, string>();
+  for (const d of bank ?? []) {
+    if (d.video_url) videoByTitle.set(String(d.title).trim().toLowerCase(), d.video_url as string);
+  }
+
+  let fixed = 0;
+  for (const h of missing as { id: string; title: string }[]) {
+    const video_url = videoByTitle.get(h.title.trim().toLowerCase());
+    if (!video_url) continue;
+    const { error } = await admin
+      .from("elite_homework")
+      .update({ video_url })
+      .eq("id", h.id);
+    if (!error) fixed++;
+  }
+  return fixed;
 }
 
 export async function getProgress(playerId: string): Promise<Progress[]> {

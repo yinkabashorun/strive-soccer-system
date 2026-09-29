@@ -8,7 +8,7 @@ import { sendPlayerEmail } from "./email";
 import { sendPushToPlayer } from "./push";
 import { normalizePhone, sendPlayerSMS } from "./sms";
 import { liveWeekFor, mondayOfWeekNY, nextMondayNY, unlockInstant } from "./time";
-import { getDrillBank } from "./data";
+import { getDrillBank, normalizeTitle } from "./data";
 import { buildParentRecap } from "./parent-recap";
 import type { FilmReview, GeneratedPlan } from "./types";
 
@@ -483,31 +483,39 @@ export async function applyGeneratedPlanCore(
   //    plyometric warm-up (already baked into plan.sessions).
   await supabase.from("elite_homework").delete().eq("player_id", playerId).eq("week", week);
 
-  // Each drill carries its demo video from the bank (matched by title,
-  // case-insensitive). Best-effort: no bank, no videos, nothing breaks.
-  const videoByTitle = new Map<string, string>();
+  // Each drill links to its actual bank row by id (matched by normalized
+  // title, once, right now) - not just a copied video_url. The id is what
+  // makes a video added to the bank LATER still find its way here: the
+  // weekly/on-upload backfill re-syncs by that id forever after, with no
+  // title text matching involved at all once this link exists. Best-effort:
+  // no bank, no link, nothing breaks.
+  const byTitle = new Map<string, { id: string; video_url: string | null }>();
   try {
     const { drills: bank } = await getDrillBank();
     for (const b of bank) {
-      if (b.video_url) videoByTitle.set(b.title.trim().toLowerCase(), b.video_url);
+      byTitle.set(normalizeTitle(b.title), { id: b.id, video_url: b.video_url || null });
     }
   } catch {
-    // bank unavailable: publish without videos
+    // bank unavailable: publish without a drill link
   }
 
   const rows = plan.sessions.flatMap((s, si) =>
-    s.drills.map((d, di) => ({
-      player_id: playerId,
-      week,
-      session: si + 1,
-      title: d.title,
-      exercise: d.exercise,
-      reps: d.reps,
-      duration_min: d.minutes ?? 15,
-      notes: d.notes ?? null,
-      video_url: videoByTitle.get(d.title.trim().toLowerCase()) ?? null,
-      sort: di,
-    }))
+    s.drills.map((d, di) => {
+      const match = byTitle.get(normalizeTitle(d.title));
+      return {
+        player_id: playerId,
+        week,
+        session: si + 1,
+        title: d.title,
+        exercise: d.exercise,
+        reps: d.reps,
+        duration_min: d.minutes ?? 15,
+        notes: d.notes ?? null,
+        video_url: match?.video_url ?? null,
+        drill_id: match?.id ?? null,
+        sort: di,
+      };
+    })
   );
   if (rows.length) {
     const { error: hwErr } = await supabase.from("elite_homework").insert(rows);

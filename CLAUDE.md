@@ -18,21 +18,37 @@ are we," this list IS the answer.
 - [ ] Confirm PWC field permit is actually granted, not just requested
 - [ ] Migrate the remaining 13 Manus-hosted drill videos to Strive's own
       storage (Neymar Feint done Sept 16, re-trimmed from raw footage)
-- [ ] FOUND + FIXED Sept 29 2026 (reported directly by Coach Yinka, real
-      player screenshot showed zero drill videos): elite_homework.video_url
-      is copied in once at publish time from whatever the bank has THEN -
-      a video added to the bank later never reaches an already-published
-      week on its own. Real impact: this week's homework for actual
-      players (Abdul Rahim confirmed, likely others) had zero videos even
-      though the matching bank drills now have them, since the drill-video
-      migration is ongoing and plans got published before some videos
-      landed. Backfilled 19 already-stuck rows across the app directly via
-      SQL (immediate fix). Also added an auto-heal step
-      (backfillHomeworkVideos in lib/elite/data.ts) to the Sunday
-      weekly-plans cron so this doesn't pile back up silently as more
-      videos get migrated - it fills any null video_url whose title now
-      matches a bank drill with a real video, never touches a row that
-      already has one.
+- [ ] FOUND + FIXED Sept 29 2026, then made permanent same day (Coach
+      Yinka: "i need never again"): elite_homework.video_url was copied in
+      once at publish time from whatever the bank had THEN - a video added
+      to the bank later never reached an already-published week on its
+      own. Real impact: this week's homework for actual players (Abdul
+      Rahim confirmed, likely others) had zero videos even though the
+      matching bank drills now have them, since the drill-video migration
+      is ongoing and plans got published before some videos landed. First
+      pass backfilled 19 stuck rows via SQL and added an auto-heal step to
+      the Sunday cron matched by drill TITLE TEXT - still fragile, would
+      silently stop working the moment the AI's generated title ever
+      drifted from the bank's. Coach Yinka said that wasn't good enough,
+      so it's now architectural: migration 028 adds elite_homework.drill_id
+      (real FK to elite_drills), set at publish time in coach-actions.ts
+      alongside video_url. backfillHomeworkVideos (lib/elite/data.ts) is
+      now two passes - (1) any row already linked by drill_id gets its
+      video re-synced from that drill by id, no text matching at all, so
+      once linked a row can never drift again; (2) legacy/unlinked rows
+      still get one title-match attempt, and if it hits, that row sets
+      drill_id and graduates onto the permanent id-based path for good.
+      Runs on the Sunday cron AND immediately whenever a coach saves a
+      drill with a video (saveDrill in drill-actions.ts), so a newly
+      uploaded video reaches waiting homework the same minute, not next
+      Sunday. Also ran the full historical backfill directly via SQL:
+      131 of 156 existing homework rows now carry a real drill_id, 79 have
+      a video. The remaining 25 unlinked rows have no bank-title match at
+      all (old/renamed drills, not fixable by matching - would need a
+      coach to manually relink if ever noticed) and the remaining 77
+      no-video rows are linked correctly but the bank genuinely has no
+      video for that drill yet - both will resolve on their own as the
+      Manus video migration continues, no further engineering needed.
 - [ ] Sign Teo's Ashburn memo
 - [ ] Set up Skool community (DECIDED Sept 15, refined Sept 15): community
       only, $9/mo Hobby plan, pinned link to thestriveapp.com for actual

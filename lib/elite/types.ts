@@ -101,6 +101,7 @@ export type Homework = {
   reps: string;
   duration_min?: number; // minutes for this drill (009_player_loop adds the column)
   video_url: string | null;
+  drill_id?: string | null; // (028) stable link to elite_drills - video updates flow through this, not title text
   notes: string | null;
   completed: boolean;
   completed_at: string | null;

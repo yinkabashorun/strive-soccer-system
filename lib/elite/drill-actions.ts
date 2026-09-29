@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "./supabase/server";
 import { getViewer } from "./session";
+import { backfillHomeworkVideos } from "./data";
 import { PLYO_PILLAR, PROGRESS_METRICS } from "./types";
 
 export type DrillInput = {
@@ -76,6 +77,12 @@ export async function saveDrill(input: DrillInput) {
       ok: false as const,
       error: "Couldn't save. Run database migration 020 first.",
     };
+  }
+  // A video just landed on this drill - heal any already-published homework
+  // that's been waiting on it instead of leaving it for the weekly cron.
+  // Best-effort: never blocks the save the coach is actually waiting on.
+  if (row.video_url) {
+    backfillHomeworkVideos(c.supabase).catch(() => undefined);
   }
   revalidatePath("/coach/drills");
   return { ok: true as const };

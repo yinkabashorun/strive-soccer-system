@@ -143,41 +143,88 @@ export async function getDrillBank(): Promise<{ drills: Drill[]; fromDb: boolean
   return { drills: data as Drill[], fromDb: true };
 }
 
-// Repairs homework published before its drill had a video in the bank yet.
-// video_url is copied onto elite_homework at publish time
-// (applyGeneratedPlanCore), so a video added to the bank afterward never
-// reaches an already-published week on its own - the drill-video migration
-// is ongoing, so this keeps happening as new videos land. Idempotent and
-// safe: only ever fills a null, never touches a row that already has one.
-// Takes a service client since it repairs rows across every player, not
-// just the signed-in viewer's own.
+// Shared title normalization for matching a homework row's title to a bank
+// drill's title when there's no drill_id link yet to go on. Trims,
+// lowercases, collapses internal whitespace, and drops trailing
+// punctuation, so minor formatting drift (an extra space, a trailing
+// period) doesn't break the match. Exported so every place that ever
+// needs to fall back to title matching (publish time, backfill) stays in
+// sync with exactly the same rule.
+export function normalizeTitle(s: string): string {
+  return s.trim().toLowerCase().replace(/\s+/g, " ").replace(/[.,!?;:]+$/g, "");
+}
+
+// Repairs homework whose video is missing or whose link to its actual bank
+// drill was never established. Two passes:
+//   1. ID pass (robust, permanent): any row already linked by drill_id just
+//      needs its video_url re-copied from that same drill - immune to the
+//      AI's title text ever drifting, since nothing is matched by text here.
+//   2. Title pass (best-effort, legacy/unlinked rows only): normalized
+//      title match against the bank, same as before drill_id existed. When
+//      this finds a match it sets BOTH video_url and drill_id, so that row
+//      graduates to the robust ID path for every future run.
+// Idempotent and safe either way: only ever fills what's missing, never
+// touches a row that's already fully linked and has a video.
 export async function backfillHomeworkVideos(
   admin: SupabaseClient
 ): Promise<number> {
-  const { data: missing } = await admin
+  let fixed = 0;
+
+  // Pass 1: ID-linked rows, re-synced from their drill's current video.
+  const { data: linked } = await admin
+    .from("elite_homework")
+    .select("id, drill_id, video_url")
+    .not("drill_id", "is", null);
+  const linkedMissing = (
+    (linked ?? []) as { id: string; drill_id: string; video_url: string | null }[]
+  ).filter((h) => !h.video_url);
+  if (linkedMissing.length > 0) {
+    const { data: drills } = await admin
+      .from("elite_drills")
+      .select("id, video_url")
+      .in("id", [...new Set(linkedMissing.map((h) => h.drill_id))]);
+    const videoById = new Map(
+      (drills ?? [])
+        .filter((d) => d.video_url)
+        .map((d) => [d.id as string, d.video_url as string])
+    );
+    for (const h of linkedMissing) {
+      const video_url = videoById.get(h.drill_id);
+      if (!video_url) continue;
+      const { error } = await admin
+        .from("elite_homework")
+        .update({ video_url })
+        .eq("id", h.id);
+      if (!error) fixed++;
+    }
+  }
+
+  // Pass 2: every unlinked row, not just ones currently missing a video -
+  // published before drill_id existed, or the publish-time match failed.
+  // Fall back to normalized title matching and set drill_id when found, so
+  // even a row that already has a video graduates onto the robust id path
+  // and picks up any future update to that drill's video too, not just
+  // today's gap.
+  const { data: unlinked } = await admin
     .from("elite_homework")
     .select("id, title")
-    .is("video_url", null);
-  if (!missing || missing.length === 0) return 0;
-
-  const { data: bank } = await admin
-    .from("elite_drills")
-    .select("title, video_url");
-  const videoByTitle = new Map<string, string>();
-  for (const d of bank ?? []) {
-    if (d.video_url) videoByTitle.set(String(d.title).trim().toLowerCase(), d.video_url as string);
+    .is("drill_id", null);
+  if (unlinked && unlinked.length > 0) {
+    const { data: bank } = await admin.from("elite_drills").select("id, title, video_url");
+    const byTitle = new Map<string, { id: string; video_url: string | null }>();
+    for (const d of bank ?? []) {
+      byTitle.set(normalizeTitle(String(d.title)), { id: d.id as string, video_url: d.video_url as string | null });
+    }
+    for (const h of unlinked as { id: string; title: string }[]) {
+      const match = byTitle.get(normalizeTitle(h.title));
+      if (!match) continue;
+      const update: { drill_id: string; video_url?: string } = { drill_id: match.id };
+      if (match.video_url) update.video_url = match.video_url;
+      const { error } = await admin.from("elite_homework").update(update).eq("id", h.id);
+      if (!error && match.video_url) fixed++;
+    }
   }
 
-  let fixed = 0;
-  for (const h of missing as { id: string; title: string }[]) {
-    const video_url = videoByTitle.get(h.title.trim().toLowerCase());
-    if (!video_url) continue;
-    const { error } = await admin
-      .from("elite_homework")
-      .update({ video_url })
-      .eq("id", h.id);
-    if (!error) fixed++;
-  }
   return fixed;
 }
 

@@ -49,6 +49,24 @@ are we," this list IS the answer.
       no-video rows are linked correctly but the bank genuinely has no
       video for that drill yet - both will resolve on their own as the
       Manus video migration continues, no further engineering needed.
+- [ ] SHIPPED Sept 29 2026 (Coach Yinka: "ONLY ASSIGN DRILLS FROM THE
+      DRILL BANK THAT HAVE VIDEO!"): everything above fixes a video
+      reaching homework AFTER a drill gets assigned - this closes the
+      other side, never assigning a video-less drill to a real player in
+      the first place. getDrillBank() (lib/elite/data.ts) now takes an
+      optional onlyWithVideo flag; both places that actually compose a
+      player's week - the Sunday auto-plan cron (auto-plan.ts) and the
+      coach's manual session-notes AI generator
+      (app/api/elite/ai/session-notes/route.ts) - now call it with
+      onlyWithVideo: true, so a drill a coach just added but hasn't
+      filmed yet can never be drafted into a real plan, whether by the AI
+      or by its deterministic fallback (both draw from the same bank
+      array). The coach's own /coach/drills management page still calls
+      getDrillBank() unfiltered, on purpose - the coach needs to see and
+      edit video-less drills to actually add their videos. Currently a
+      no-op in practice (all 35 active drills already have videos,
+      confirmed via direct DB query the same day), this is purely
+      preventive for the next drill a coach adds before filming it.
 - [ ] Sign Teo's Ashburn memo
 - [ ] Set up Skool community (DECIDED Sept 15, refined Sept 15): community
       only, $9/mo Hobby plan, pinned link to thestriveapp.com for actual

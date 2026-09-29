@@ -127,20 +127,39 @@ export function libraryDrills(): Drill[] {
 
 // The coach's drill bank: every drill the AI may prescribe. Falls back to
 // the built-in library pre-020 (or demo) so generation never has an empty
-// bank.
-export async function getDrillBank(): Promise<{ drills: Drill[]; fromDb: boolean }> {
+// bank. Pass onlyWithVideo when the caller is about to ASSIGN drills to a
+// player (AI generation, the deterministic fallback plan) - it keeps a
+// coach adding a new drill before filming it from ever reaching a real
+// player's homework, without hiding that drill from the coach's own
+// /coach/drills management page (which still needs the full bank).
+export async function getDrillBank(opts?: {
+  onlyWithVideo?: boolean;
+}): Promise<{ drills: Drill[]; fromDb: boolean }> {
   const supabase = createClient();
-  if (!supabase) return { drills: libraryDrills(), fromDb: false };
-  const { data, error } = await supabase
-    .from("elite_drills")
-    .select("*")
-    .eq("active", true)
-    .order("pillar")
-    .order("sort");
-  if (error || !data || data.length === 0) {
-    return { drills: libraryDrills(), fromDb: false };
+  let drills: Drill[];
+  let fromDb: boolean;
+  if (!supabase) {
+    drills = libraryDrills();
+    fromDb = false;
+  } else {
+    const { data, error } = await supabase
+      .from("elite_drills")
+      .select("*")
+      .eq("active", true)
+      .order("pillar")
+      .order("sort");
+    if (error || !data || data.length === 0) {
+      drills = libraryDrills();
+      fromDb = false;
+    } else {
+      drills = data as Drill[];
+      fromDb = true;
+    }
   }
-  return { drills: data as Drill[], fromDb: true };
+  if (opts?.onlyWithVideo) {
+    drills = drills.filter((d) => d.video_url);
+  }
+  return { drills, fromDb };
 }
 
 // Shared title normalization for matching a homework row's title to a bank

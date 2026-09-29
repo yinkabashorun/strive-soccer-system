@@ -43,8 +43,9 @@ export async function POST(req: Request) {
   }
 
   // The coach's drill bank: generation composes strictly from it (falls
-  // back to the built-in library pre-020).
-  const { drills } = await getDrillBank();
+  // back to the built-in library pre-020). Video-having drills only - a
+  // drill added but not yet filmed should never reach a real player.
+  const { drills } = await getDrillBank({ onlyWithVideo: true });
 
   const { plan, source, reason, reasonKind } = await generatePlanFromNotes(
     notes,

@@ -275,6 +275,41 @@ In-person scheduling/logistics is NOT app territory, that all stays on GHL.
 - Gary is the Friday group assistant coach. There is no separate assistant
   coach hire needed or planned.
 
+## Player alumni credentials (confirmed Sept 29 2026, Coach Yinka's own list)
+
+Real, named proof of what Strive coaching has actually produced - use this,
+not vague language like "countless" (that reads as unverifiable marketing
+filler, not proof). Scope as Coach Yinka defined it: NOT for public use (no
+website, no ads, no public IG) - sales calls and the VSL only, since that's
+a materially lower bar than public marketing. Before featuring any one of
+these more prominently or with personal story detail (beyond just naming
+their school/program), a quick heads-up to that family is still worth it
+out of respect, even on a private/gated call or VSL.
+
+~11 D1 college players: Sammie Walker (West Virginia), Drew Goodrich
+(Lafayette), Marko Mihajlovic (College of Charleston; Pipeline ECNL),
+Jason Broome (Harvard), Amanueil Mequaint (George Mason), Damen Burney
+(William & Mary), John Balkey (George Mason; 5A District/Region/All-Met
+POY), Reggie Gainer (Syracuse; also DC United Academy), Lucas Lourenço
+(Longwood), Tomiwa Adewumi (Marquette; made his professional debut),
+Nziza Siibo (Penn State).
+
+~6 pro academy signings: Marco Vita (DC United Academy), Dominic Igot
+(Inter Miami Academy), Ada Karatepe (Galatasaray Academy), Oluwatose
+Adewumi (Sporting Kansas City Academy), Bence Buri (Colorado Rapids
+Academy), Reggie Gainer (DC United Academy, also above).
+
+The headline for the overseas-pathway pitch specifically: Teymour Mohammed
+- Montpellier FC (pro) + Tunisian National Team. A real Strive player who
+did exactly what Gary's course promises to teach - not borrowed
+credibility, an actual outcome. Ada Karatepe (Galatasaray Academy) is the
+next-strongest for that same angle.
+
+Other real honors: Mikey Azzara (First Team All-ECNL), Matthew Carlin (6A
+District POY, Battlefield HS), Ryan Lucero (Regional/District POY), Benji
+Velasquez (3x First Team All-American), Kevin Polanco (ECNL Selection
+Game), Angel Romero (ECNL All-American).
+
 ## Business context
 
 - Parent-customer market research (Perplexity Deep Research, Sept 14 2026):

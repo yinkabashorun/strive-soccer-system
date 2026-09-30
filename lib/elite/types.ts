@@ -21,6 +21,23 @@ export type SubscriptionStatus =
 
 export type PlayerLevel = "Developing" | "Competitive" | "Advanced" | "Elite";
 
+// The two offers (029). Strive Elite is the app; Complete Pathway is the
+// app plus film, the parent report, and weekly 1:1 coaching calls.
+export type MembershipTier = "elite" | "complete";
+
+// A scheduled 1:1 coaching call (elite_coaching_calls, 029). Booking
+// happens on Calendly; this is what the app knows about it, plus the
+// coach's note afterward, which feeds the next weekly plan.
+export type CoachingCall = {
+  id: string;
+  player_id: string;
+  scheduled_at: string; // ISO
+  join_url: string;
+  coach_name: string;
+  notes: string;
+  created_at: string;
+};
+
 export type Player = {
   id: string;
   profile_id: string;
@@ -44,6 +61,10 @@ export type Player = {
   last_session_at: string | null; // ISO
   joined_at: string;
   subscription_status: SubscriptionStatus;
+  // (029) which offer they're on. "elite" = the app only. "complete" adds
+  // Film Room, the monthly breakdown, the weekly parent report, and 1:1
+  // coaching calls. Absent on demo data / pre-029 rows = treated as complete.
+  tier?: MembershipTier | null;
   // Intake + AI memory (012_intake_memory_checkins)
   club?: string;
   dominant_foot?: string;

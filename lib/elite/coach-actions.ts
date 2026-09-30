@@ -144,6 +144,65 @@ export async function addCoachNote(playerId: string, body: string) {
   return { ok: true };
 }
 
+// Coaching calls (029). Booking lives on Calendly; the coach records the
+// call here so the player sees it and so the post-call note can steer the
+// next plan. All best-effort against a pre-029 database.
+export async function addCoachingCall(
+  playerId: string,
+  input: { scheduled_at: string; join_url: string; coach_name: string }
+) {
+  const viewer = await requireCoach();
+  if (!viewer) return { ok: false as const, error: "unauthorized" };
+  const supabase = createClient();
+  if (!supabase) return { ok: true as const };
+  const when = new Date(input.scheduled_at);
+  if (Number.isNaN(when.getTime())) {
+    return { ok: false as const, error: "Pick a date and time for the call." };
+  }
+  const join_url = /^https?:\/\/.+/.test(input.join_url.trim())
+    ? input.join_url.trim().slice(0, 500)
+    : "";
+  const { error } = await supabase.from("elite_coaching_calls").insert({
+    player_id: playerId,
+    scheduled_at: when.toISOString(),
+    join_url,
+    coach_name: input.coach_name.trim().slice(0, 80) || viewer.profile.full_name,
+  });
+  if (error) {
+    return { ok: false as const, error: "Couldn't save. Run database migration 029 first." };
+  }
+  revalidatePath(`/coach/players/${playerId}`);
+  return { ok: true as const };
+}
+
+export async function saveCoachingCallNote(playerId: string, callId: string, notes: string) {
+  if (!(await requireCoach())) return { ok: false as const };
+  const supabase = createClient();
+  if (supabase) {
+    await supabase
+      .from("elite_coaching_calls")
+      .update({ notes: notes.trim().slice(0, 2000) })
+      .eq("id", callId)
+      .eq("player_id", playerId);
+    revalidatePath(`/coach/players/${playerId}`);
+  }
+  return { ok: true as const };
+}
+
+export async function deleteCoachingCall(playerId: string, callId: string) {
+  if (!(await requireCoach())) return { ok: false as const };
+  const supabase = createClient();
+  if (supabase) {
+    await supabase
+      .from("elite_coaching_calls")
+      .delete()
+      .eq("id", callId)
+      .eq("player_id", playerId);
+    revalidatePath(`/coach/players/${playerId}`);
+  }
+  return { ok: true as const };
+}
+
 export async function sendCoachMessage(playerId: string, body: string) {
   const viewer = await requireCoach();
   if (!viewer) return { ok: false };

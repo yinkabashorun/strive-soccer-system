@@ -14,6 +14,7 @@ import { getViewer } from "@/lib/elite/session";
 import {
   getAchievements,
   getCheckins,
+  getCoachingCalls,
   getHomework,
   getMessages,
   getPlayer,
@@ -21,6 +22,7 @@ import {
   getWeeklyPlans,
 } from "@/lib/elite/data";
 import { TodaySession, VictoryLap } from "@/components/elite/TodaySession";
+import { CoachingCallsCard } from "@/components/elite/CoachingCallsCard";
 import { CheckinCard } from "@/components/elite/CheckinCard";
 import { StatTile } from "@/components/elite/StatTile";
 import { fmtMonday, liveWeekFor, nextMondayNY } from "@/lib/elite/time";
@@ -46,7 +48,7 @@ export default async function DashboardPage() {
   const player = await getPlayer(viewer.playerId);
   if (!player) return null;
 
-  const [allHomework, achievements, messages, summary, checkins, plans] =
+  const [allHomework, achievements, messages, summary, checkins, plans, calls] =
     await Promise.all([
       getHomework(player.id),
       getAchievements(player.id),
@@ -54,6 +56,7 @@ export default async function DashboardPage() {
       getPlayerSummary(player.id),
       getCheckins(player.id),
       getWeeklyPlans(player.id),
+      getCoachingCalls(player.id),
     ]);
 
   const firstName = player.full_name.split(" ")[0];
@@ -166,6 +169,12 @@ export default async function DashboardPage() {
           </span>
           <span className="text-accent">→</span>
         </Link>
+      )}
+
+      {/* Weekly 1:1 call - Complete Pathway only (029). Elite never sees
+          this; the demo tour doesn't cover calls. */}
+      {player.tier !== "elite" && !viewer.demo && (
+        <CoachingCallsCard calls={calls} />
       )}
 
       {/* Check-in appears once the week is conquered */}

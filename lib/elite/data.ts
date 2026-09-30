@@ -16,6 +16,7 @@ import {
 import type {
   Achievement,
   Checkin,
+  CoachingCall,
   Game,
   CoachNote,
   Drill,
@@ -283,6 +284,52 @@ export async function getNotes(playerId: string): Promise<CoachNote[]> {
     .eq("player_id", playerId)
     .order("created_at", { ascending: false });
   return (data as CoachNote[] | null) ?? [];
+}
+
+// A player's 1:1 coaching calls (029), newest first. Demo players have
+// none - the tour doesn't cover calls.
+export async function getCoachingCalls(playerId: string): Promise<CoachingCall[]> {
+  const supabase = createClient();
+  if (!supabase || isDemo(playerId)) return [];
+  const { data, error } = await supabase
+    .from("elite_coaching_calls")
+    .select("*")
+    .eq("player_id", playerId)
+    .order("scheduled_at", { ascending: false });
+  if (error) return []; // 029 not applied yet
+  return (data as CoachingCall[] | null) ?? [];
+}
+
+// The coach's notes from the most recent calls, as one block the plan
+// builder can read. What Coach Yinka and Gary said on a Zoom call is the
+// strongest steer a plan can get, so both the Sunday cron and the manual
+// generator feed it in. Empty when there are no noted calls.
+export async function latestCoachingCallNotes(
+  playerId: string,
+  admin?: SupabaseClient,
+  limit = 2
+): Promise<string> {
+  const client = admin ?? createClient();
+  if (!client || isDemo(playerId)) return "";
+  const { data, error } = await client
+    .from("elite_coaching_calls")
+    .select("scheduled_at, coach_name, notes")
+    .eq("player_id", playerId)
+    .neq("notes", "")
+    .order("scheduled_at", { ascending: false })
+    .limit(limit);
+  if (error || !data || data.length === 0) return "";
+  return (data as { scheduled_at: string; coach_name: string; notes: string }[])
+    .map((c) => {
+      const when = new Date(c.scheduled_at).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        timeZone: "America/New_York",
+      });
+      const who = c.coach_name ? ` with ${c.coach_name}` : "";
+      return `${when}${who}: ${c.notes.trim()}`;
+    })
+    .join(" | ");
 }
 
 export async function getMessages(playerId: string): Promise<Message[]> {

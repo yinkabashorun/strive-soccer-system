@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import {
   getCheckins,
+  getCoachingCalls,
   getDrillBank,
   getFilm,
   getGames,
@@ -43,6 +44,8 @@ import { IntakePanel } from "@/components/elite/IntakePanel";
 import { DeletePlayerButton } from "@/components/elite/DeletePlayerButton";
 import { QuickComposer } from "@/components/elite/QuickComposer";
 import { StatusControl } from "@/components/elite/StatusControl";
+import { TierControl } from "@/components/elite/TierControl";
+import { CoachingCallsPanel } from "@/components/elite/CoachingCallsPanel";
 import { DuplicateWeekButton } from "@/components/elite/DuplicateWeekButton";
 import { cn, formatSessionDate, relativeDay, timeAgo } from "@/lib/utils";
 
@@ -55,7 +58,7 @@ export default async function PlayerProfile({
   const player = await getPlayer(params.id);
   if (!player) notFound();
 
-  const [homework, progress, notes, messages, reports, summary, checkins, plans, films, games] =
+  const [homework, progress, notes, messages, reports, summary, checkins, plans, films, games, calls] =
     await Promise.all([
       getHomework(player.id),
       getProgress(player.id),
@@ -67,6 +70,7 @@ export default async function PlayerProfile({
       getWeeklyPlans(player.id),
       getFilm(player.id),
       getGames(player.id),
+      getCoachingCalls(player.id),
     ]);
 
   // Weeks derive from the calendar: live = where the program clock is
@@ -267,10 +271,18 @@ export default async function PlayerProfile({
 
         {/* Side column */}
         <div className="space-y-5 lg:col-span-2">
+          <TierControl playerId={player.id} initial={player.tier ?? "elite"} />
+
           <StatusControl
             playerId={player.id}
             initial={player.subscription_status}
           />
+
+          {/* Weekly 1:1 calls - Complete Pathway only. The post-call note
+              feeds the next plan. */}
+          {player.tier !== "elite" && (
+            <CoachingCallsPanel playerId={player.id} calls={calls} />
+          )}
 
           {/* AI memory note - steers every generated week */}
           <EditableMemory

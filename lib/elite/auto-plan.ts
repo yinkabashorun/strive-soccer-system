@@ -11,7 +11,7 @@
 import { createServiceClient } from "./supabase/server";
 import { generatePlanFromNotes } from "./ai-coach";
 import { applyGeneratedPlanCore } from "./coach-actions";
-import { getDrillBank } from "./data";
+import { getDrillBank, latestCoachingCallNotes } from "./data";
 import { liveWeekFor } from "./time";
 import type { Player } from "./types";
 
@@ -101,7 +101,16 @@ export async function runAutoWeeklyPlans(): Promise<{ ran: number; results: Resu
           .maybeSingle(),
       ]);
 
-      const notes = synthesizeNotes(lastHomework ?? [], lastCheckin ?? undefined);
+      // What the coach said on recent 1:1 calls (Complete Pathway) rides
+      // along as the strongest steer - the cron otherwise only sees the
+      // player's own completion + check-in.
+      const callNotes = await latestCoachingCallNotes(player.id, admin).catch(() => "");
+      const notes = [
+        synthesizeNotes(lastHomework ?? [], lastCheckin ?? undefined),
+        callNotes ? `Coach's notes from recent 1:1 calls (weight heavily): ${callNotes}` : "",
+      ]
+        .filter(Boolean)
+        .join("\n");
       const { plan } = await generatePlanFromNotes(notes, player, player.coach_memory, bank);
       const applied = await applyGeneratedPlanCore(player.id, notes, plan, coach.id, admin, {
         publishNow: true,

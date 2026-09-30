@@ -378,6 +378,14 @@ Game), Angel Romero (ECNL All-American).
   Strive Offers, and Juggling Champion posts this session - keep using it
   for any future player highlight / record / spotlight graphic so the
   series stays visually consistent without re-deriving the theme each time.
+- The real logo file is already in this repo - public/strive-logo-512.png
+  (black ball-with-swoosh + stacked "STRIVE SOCCER" wordmark on white).
+  For a dark-background graphic (the highlight series above, any social
+  post), invert it (CSS filter: invert(1)) to get the white-on-dark
+  version those actually use. Found this Sept 30 2026 after wrongly
+  reaching for an external CDN URL from a different project first - check
+  this repo's own public/ folder before assuming a brand asset needs to
+  come from somewhere else.
 - App: thestriveapp.com (this repo). Supabase project qjiloadpfeqxxyfozsje.
   Demo tour: login -> "See the app as a player".
 - Weekly plan generation is fully automated (shipped Sept 19 2026, but was a

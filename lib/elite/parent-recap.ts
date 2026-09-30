@@ -35,7 +35,7 @@ export async function buildParentRecap(
     await Promise.all([
       admin
         .from("elite_players")
-        .select("full_name, parent_name, gender")
+        .select("full_name, parent_name, gender, tier")
         .eq("id", playerId)
         .maybeSingle(),
       admin
@@ -61,6 +61,11 @@ export async function buildParentRecap(
     ]);
 
   if (!player || !hw || hw.length === 0) return null;
+  // The weekly parent report is a Complete Pathway feature (029). This is
+  // the ONE gate for it - both senders (coach-actions publishNow and
+  // unlock.ts's Monday flip) go through here, so nothing can send it to an
+  // Elite family. Pre-029 rows have no tier and keep the old behavior.
+  if ((player as { tier?: string | null }).tier === "elite") return null;
   const rows = hw as Homework[];
 
   // Sessions = (week, session) groups fully completed; minutes from

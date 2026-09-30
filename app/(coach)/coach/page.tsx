@@ -37,6 +37,11 @@ export default async function CoachDashboard() {
   const week1ByPlayer = Object.fromEntries(
     players.map((p) => [p.id, p.week1_monday ?? null])
   );
+  // Which offer each player is on (029) - the roster RPC predates tiers,
+  // and the full player rows are already loaded here.
+  const tierByPlayer = Object.fromEntries(
+    players.map((p) => [p.id, p.tier ?? null])
+  );
   const day = nyDayNumber(); // 1 Mon .. 7 Sun, same VA week for everyone
   const planInfo: Record<string, { week: number; state: PlanState }> = {};
   for (const r of roster) {
@@ -139,6 +144,14 @@ export default async function CoachDashboard() {
                   {needsCount > 0 && (
                     <span className="rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold text-black">
                       {needsCount} new
+                    </span>
+                  )}
+                  {tierByPlayer[r.player_id] === "complete" && (
+                    <span
+                      title="Complete Pathway"
+                      className="rounded-full border border-accent/40 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-accent"
+                    >
+                      Complete
                     </span>
                   )}
                   <StatusDot status={r.subscription_status} />

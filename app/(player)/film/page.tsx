@@ -40,11 +40,27 @@ export default async function FilmPage() {
         </p>
       </header>
 
-      <FilmTimeline
-        films={films}
-        currentMonth={currentMonth}
-        firstName={firstName}
-      />
+      {player.tier === "elite" ? (
+        // Film review is a Complete Pathway feature (029). Elite is the app
+        // only, so the timeline never renders for them - a clean line
+        // instead of a dead uploader.
+        <div className="elite-card p-6">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
+            Complete Pathway
+          </div>
+          <p className="mt-2 text-white/70">
+            Monthly film review, with Coach breaking down your real footage,
+            is part of Strive Complete Pathway. Message Coach if you want to
+            move up.
+          </p>
+        </div>
+      ) : (
+        <FilmTimeline
+          films={films}
+          currentMonth={currentMonth}
+          firstName={firstName}
+        />
+      )}
 
       {/* Game schedule - Coach shows up to NoVA games */}
       <section className="pt-2">

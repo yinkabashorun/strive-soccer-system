@@ -12,6 +12,7 @@ import {
   getProgress,
   getProgressHistory,
   getWeeklyPlans,
+  latestCoachingCallNotes,
 } from "./data";
 import type { Player } from "./types";
 
@@ -19,12 +20,13 @@ import type { Player } from "./types";
 // is nothing meaningful yet (a brand-new player), so the first plan just
 // leans on the intake.
 export async function buildPlayerMemory(player: Player): Promise<string> {
-  const [homework, progress, history, checkins, plans] = await Promise.all([
+  const [homework, progress, history, checkins, plans, callNotes] = await Promise.all([
     getHomework(player.id),
     getProgress(player.id),
     getProgressHistory(player.id),
     getCheckins(player.id),
     getWeeklyPlans(player.id),
+    latestCoachingCallNotes(player.id),
   ]);
 
   const lines: string[] = [];
@@ -32,6 +34,12 @@ export async function buildPlayerMemory(player: Player): Promise<string> {
   // Coach's freeform memory note - the most important human signal.
   if (player.coach_memory?.trim()) {
     lines.push(`COACH'S NOTE ON THIS PLAYER (weight this heavily): ${player.coach_memory.trim()}`);
+  }
+
+  // What the coach said on the most recent 1:1 calls (Complete Pathway).
+  // Same weight as the memory note: it's the coach talking, not the app.
+  if (callNotes) {
+    lines.push(`FROM THE COACH'S RECENT 1:1 CALLS WITH THIS PLAYER (weight this heavily, most recent first): ${callNotes}`);
   }
 
   // Intake starting line.

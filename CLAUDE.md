@@ -94,6 +94,47 @@ are we," this list IS the answer.
       AI happened to output. Verified against the actual reported string
       plus a focus with no trailing period - both render clean, single
       period, no capitalization break. tsc/lint/build all clean.
+- [ ] Strive Complete Pathway - DECIDED Sept 30 2026, Coach Yinka's own
+      calls, supersedes the Sept 29 "group calls standard / 1:1 upsell"
+      and "Gary builds a course" plan: NO course modules to start. The
+      program is weekly 1:1 Zoom calls where Coach Yinka and Gary give
+      lessons and guidance; group calls come later once there are enough
+      families. Publicly announced Sept 29 at $1,000/mo as the lead offer,
+      Elite ($249 founding) the downsell. Tier boundary, stated plainly:
+      Strive Elite is the APP ONLY (weekly plans, drill videos, chat,
+      progress) - Elite members never had film breakdowns. Film Room,
+      monthly private breakdown, weekly parent report, and the coaching
+      calls are Complete. Gary does NOT get an app login yet - Coach Yinka
+      logs every call note himself for now. Open: Gary's revenue-share %
+      (model decided, number isn't), and Coach Yinka's own weekly Zoom
+      slots for these calls (assessment windows are Wed/Thu 6-9pm, Sat
+      eve, Sun afternoon - coaching calls need their own time).
+- [ ] SHIPPED Sept 30 2026 - Complete Pathway in the app. The app had a
+      single membership tier (StatusControl.tsx: "Active (full access) or
+      not"), so an Elite member could upload film and got the weekly
+      parent report exactly like a Complete member. Migration 029 (applied
+      to production the same day): elite_players.tier (elite | complete,
+      default elite), the 008 privilege guard extended so a player can't
+      flip their own tier, and elite_coaching_calls (scheduled_at,
+      join_url, coach_name, notes) with coach-write / owner-read RLS.
+      Gates: buildParentRecap (parent-recap.ts) returns null for tier
+      'elite' - the ONE gate both senders go through; the player Film tab
+      shows a Complete Pathway line instead of the timeline for Elite.
+      Coach side: TierControl next to the Active/Paused toggle, a
+      CoachingCallsPanel (add a call with date/Zoom link/Coach Yinka or
+      Gary, then a post-call note) shown only for Complete players, and
+      a "Complete" chip on roster cards. Player side: a coaching-call card
+      on the dashboard (next call + Join on Zoom) for Complete only. The
+      post-call note feeds the plan builder in BOTH paths - memory.ts for
+      the coach's manual generator and auto-plan.ts for the Sunday cron -
+      weighted like the coach memory note. Scheduling stays on Calendly.
+      STATE AFTER MIGRATION: all 5 rows (Abdul Rahim, Elias, Mason
+      Jhaveri, plus Coach Yinka's two test profiles) are tier 'elite', so
+      nobody gets film / parent report / calls until Coach Yinka flips
+      them on their player page - correct per his own rule that Elite
+      never had film. ACTION for Coach Yinka: flip any family that is
+      actually on Complete. Gary has no login yet; Coach Yinka logs every
+      call note himself (the coach picker on a call is just a label).
 - [ ] Sign Teo's Ashburn memo
 - [ ] Set up Skool community (DECIDED Sept 15, refined Sept 15): community
       only, $9/mo Hobby plan, pinned link to thestriveapp.com for actual

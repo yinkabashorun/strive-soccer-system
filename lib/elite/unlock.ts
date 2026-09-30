@@ -77,7 +77,7 @@ export async function unlockDueWeeks(): Promise<void> {
     }).catch(() => undefined);
     await sendPlayerSMS(plan.player_id, {
       event: "new_week",
-      message: `${greeting}${first || "Your player"}'s week ${plan.week} just went live. This week's focus is ${plan.focus}. Let's have ${first || "them"} open the app and get started on Session 1: ${APP_URL}/dashboard`,
+      message: `${greeting}${first || "Your player"}'s week ${plan.week} just went live. This week: ${plan.focus} Let's have ${first || "them"} open the app and get started on Session 1: ${APP_URL}/dashboard`,
     }).catch(() => undefined);
 
     // The weekly parent recap - real numbers from the week that just

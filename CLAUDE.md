@@ -368,6 +368,16 @@ Game), Angel Romero (ECNL All-American).
   Aug 27 2026 - Jan 27 2027). Waiver form still to build in GHL.
 - Studio: Strive backdrop + Blue Yeti (talk into side, cardioid) + Heyday light/
   webcam kit; phone-as-webcam via Camo preferred for calls.
+- Player highlight series (social graphics) visual identity - confirmed Sept
+  30 2026 by digging up the actual past "Player Spotlight Cover" artifact
+  (published Sept 14 2026, referenced again in "Strive Soccer Testimonial
+  Cover" Sept 18 2026): near-black #0d0d0d background, white text, Barlow /
+  Barlow Condensed uppercase with tracked letter-spacing on eyebrow labels
+  (roughly 0.1-0.3em), a stacked two-line all-caps headline (that one read
+  "PLAYER" / "SPOTLIGHT"). Same system already used for the Strive Elite,
+  Strive Offers, and Juggling Champion posts this session - keep using it
+  for any future player highlight / record / spotlight graphic so the
+  series stays visually consistent without re-deriving the theme each time.
 - App: thestriveapp.com (this repo). Supabase project qjiloadpfeqxxyfozsje.
   Demo tour: login -> "See the app as a player".
 - Weekly plan generation is fully automated (shipped Sept 19 2026, but was a

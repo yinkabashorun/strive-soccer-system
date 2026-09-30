@@ -374,10 +374,18 @@ Game), Angel Romero (ECNL All-American).
   Cover" Sept 18 2026): near-black #0d0d0d background, white text, Barlow /
   Barlow Condensed uppercase with tracked letter-spacing on eyebrow labels
   (roughly 0.1-0.3em), a stacked two-line all-caps headline (that one read
-  "PLAYER" / "SPOTLIGHT"). Same system already used for the Strive Elite,
-  Strive Offers, and Juggling Champion posts this session - keep using it
-  for any future player highlight / record / spotlight graphic so the
-  series stays visually consistent without re-deriving the theme each time.
+  "PLAYER" / "SPOTLIGHT"). MEASURED Sept 30 2026 off a real Player
+  Highlight post Coach Yinka sent, pixel-sampled, not eyeballed: 9:16
+  story, black letterbox bars (~26% top, ~17% bottom), photo band between;
+  "@STRIVESOCCERFC" top-left in WHITE with a thin muted-gold underline
+  (#c8a858); the real logo (public/strive-logo-512.png, knocked out
+  white-on-transparent) top-right inside a thin dotted ring; bottom-left a
+  small muted-gold tracked eyebrow "STRIVE SOCCER" then the stacked white
+  headline. Gold is ONLY the underline and the eyebrow - never headline or
+  handle text, no accent shapes, no bright yellow. Text on the photo band,
+  never on the black bars. No placeholder text ever on a finished graphic.
+  Earlier posts this session (Strive Elite / Strive Offers) used a brighter
+  gold on text - that was an invention, not brand; fix if reused.
 - The real logo file is already in this repo - public/strive-logo-512.png
   (black ball-with-swoosh + stacked "STRIVE SOCCER" wordmark on white).
   For a dark-background graphic (the highlight series above, any social

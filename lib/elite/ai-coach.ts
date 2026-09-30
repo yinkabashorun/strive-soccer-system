@@ -239,14 +239,31 @@ function buildSessions(
   return out;
 }
 
+// Guarantees a value reads as a complete, standalone sentence - a trailing
+// period, question mark, or exclamation point. weekly_focus is written into
+// SMS/email templates that continue the sentence after it (real bug, Sept
+// 30 2026: "This week is built around Lock in the first touch and force
+// the right foot to earn its keep.." - the AI's own sentence already ended
+// in a period, then the template appended a second one, and the fragment
+// read as a run-on with no clean break). Ending punctuation alone doesn't
+// fix a template that assumes a lowercase noun phrase, but it's the one
+// guarantee sanitize() can make for every consumer at once - the templates
+// themselves were fixed separately to build around a complete sentence
+// instead of continuing it.
+function ensureSentence(s: string): string {
+  const t = s.trim();
+  return /[.!?]$/.test(t) ? t : `${t}.`;
+}
+
 function sanitize(
   plan: Partial<GeneratedPlan>,
   player?: Player,
   plyos?: ReturnType<typeof plyosFrom>
 ): GeneratedPlan {
   const validMetrics = new Set(PROGRESS_METRICS as readonly string[]);
-  const weekly_focus =
-    plan.weekly_focus?.trim() || "Sharpen this week's technical focus";
+  const weekly_focus = ensureSentence(
+    plan.weekly_focus?.trim() || "Sharpen this week's technical focus"
+  );
   return {
     weekly_focus,
     sessions: buildSessions(plan.sessions, weekly_focus, plyos),

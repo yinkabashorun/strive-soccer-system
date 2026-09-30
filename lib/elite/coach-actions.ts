@@ -656,8 +656,8 @@ export async function applyGeneratedPlanCore(
     await sendPlayerSMS(playerId, {
       event: "new_week",
       message: firstWeek
-        ? `${greeting}${first || "Your player"}'s first Strive Elite training week is officially live. This week is built around ${plan.weekly_focus}. Let's have ${first || "them"} open the app and get after Session 1: ${APP_URL}/dashboard`
-        : `${greeting}${first || "Your player"}'s week ${week} just went live. This week's focus is ${plan.weekly_focus}. Let's have ${first || "them"} open the app and get started on Session 1: ${APP_URL}/dashboard`,
+        ? `${greeting}${first || "Your player"}'s first Strive Elite training week is officially live. This week: ${plan.weekly_focus} Let's have ${first || "them"} open the app and get after Session 1: ${APP_URL}/dashboard`
+        : `${greeting}${first || "Your player"}'s week ${week} just went live. This week: ${plan.weekly_focus} Let's have ${first || "them"} open the app and get started on Session 1: ${APP_URL}/dashboard`,
     }).catch(() => undefined);
 
     // Parent weekly report for the week that just ended. This path

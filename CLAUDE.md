@@ -67,6 +67,33 @@ are we," this list IS the answer.
       no-op in practice (all 35 active drills already have videos,
       confirmed via direct DB query the same day), this is purely
       preventive for the next drill a coach adds before filming it.
+- [ ] FOUND + FIXED Sept 30 2026 (reported directly by Coach Yinka via a
+      real screenshot to his own phone - this is a RECURRENCE, he'd
+      already flagged something in this family before and been told it
+      was fixed when it wasn't): the new_week SMS read "This week is
+      built around Lock in the first touch and force the right foot to
+      earn its keep.." - a run-on with a double period and a capital
+      letter mid-sentence. Root cause: ai-coach.ts's schema tells the AI
+      weekly_focus is "one sentence" (a complete, capitalized, own-period
+      sentence), but three SMS templates (coach-actions.ts's two
+      new_week branches, unlock.ts's new_week) spliced it into a
+      lowercase noun-phrase slot - "This week is built around X." /
+      "This week's focus is X." - with their own hardcoded trailing
+      period. Any weekly_focus longer than a short phrase broke this
+      every time, not occasionally - the email templates never had this
+      bug because they already used a colon ("This week's focus: X"),
+      which accepts a full sentence with no grammar clash. Fixed at both
+      the template AND the source, not just the one broken line, since
+      Coach Yinka was explicit that a one-off patch isn't good enough
+      anymore: all three SMS templates now use the same colon
+      construction the emails already used ("This week: X Let's
+      have..."), AND ai-coach.ts's sanitize() now runs every weekly_focus
+      through a new ensureSentence() helper that guarantees trailing
+      punctuation, so any OTHER template written later that continues
+      the sentence starts from a well-formed one instead of whatever the
+      AI happened to output. Verified against the actual reported string
+      plus a focus with no trailing period - both render clean, single
+      period, no capitalization break. tsc/lint/build all clean.
 - [ ] Sign Teo's Ashburn memo
 - [ ] Set up Skool community (DECIDED Sept 15, refined Sept 15): community
       only, $9/mo Hobby plan, pinned link to thestriveapp.com for actual

@@ -407,6 +407,12 @@ Weekly structure:
 - ${METHOD_STRUCTURE.sessionsPerWeek} sessions that week, about ${METHOD_STRUCTURE.minutesPerSession} minutes each.
 - Every session opens with a ${METHOD_STRUCTURE.warmupMinutes}-minute room plyometric warm-up (added automatically).
 - ${METHOD_STRUCTURE.skillDrillsPerSession} focused skill drills per session. Fewer, deeper reps, ${METHOD_STRUCTURE.setting}.
+- DRILL TITLES (strict): every drill's title is copied EXACTLY, character for
+  character, from the drill list below. Never rename, shorten, combine, or
+  invent a drill. If no listed drill fits, pick the closest listed drill and
+  put the adjustment in its notes. A title that is not in the list is
+  replaced by the system before the player sees it, so inventing one only
+  loses your intent.
 
 Equipment rule (strict): assume the player has ONLY ${METHOD_STRUCTURE.assumedEquipment}.
 The player's TRAINING ENVIRONMENT line (in the user message) is a HARD

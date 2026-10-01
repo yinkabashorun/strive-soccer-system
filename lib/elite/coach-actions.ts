@@ -9,6 +9,7 @@ import { sendPushToPlayer } from "./push";
 import { normalizePhone, sendPlayerSMS } from "./sms";
 import { liveWeekFor, mondayOfWeekNY, nextMondayNY, unlockInstant } from "./time";
 import { getDrillBank, normalizeTitle } from "./data";
+import { conformSessionsToBank } from "./bank-conform";
 import { buildParentRecap } from "./parent-recap";
 import type { FilmReview, GeneratedPlan } from "./types";
 
@@ -479,7 +480,7 @@ export async function applyGeneratedPlanCore(
 
   const { data: player } = await supabase
     .from("elite_players")
-    .select("current_week, week1_monday, full_name, parent_name")
+    .select("current_week, week1_monday, full_name, parent_name, has_wall")
     .eq("id", playerId)
     .maybeSingle();
 
@@ -548,9 +549,21 @@ export async function applyGeneratedPlanCore(
   // weekly/on-upload backfill re-syncs by that id forever after, with no
   // title text matching involved at all once this link exists. Best-effort:
   // no bank, no link, nothing breaks.
+  // Publish-time conformance (the second gate, after sanitize()): the plan
+  // may have been edited by hand in the studio since it was generated, so
+  // every drill is matched to a FILMED bank drill or replaced by one right
+  // here, before a single row is written. Only filmed drills exist to the
+  // publish step - an unfilmed drill cannot reach a player.
   const byTitle = new Map<string, { id: string; video_url: string | null }>();
+  let sessionsToPublish = plan.sessions;
   try {
-    const { drills: bank } = await getDrillBank();
+    const { drills: bank } = await getDrillBank({ onlyWithVideo: true });
+    sessionsToPublish = conformSessionsToBank(
+      plan.sessions,
+      bank,
+      player ? { has_wall: (player as { has_wall?: boolean | null }).has_wall ?? null } : null,
+      plan.weekly_focus
+    );
     for (const b of bank) {
       byTitle.set(normalizeTitle(b.title), { id: b.id, video_url: b.video_url || null });
     }
@@ -558,7 +571,7 @@ export async function applyGeneratedPlanCore(
     // bank unavailable: publish without a drill link
   }
 
-  const rows = plan.sessions.flatMap((s, si) =>
+  const rows = sessionsToPublish.flatMap((s, si) =>
     s.drills.map((d, di) => {
       const match = byTitle.get(normalizeTitle(d.title));
       return {

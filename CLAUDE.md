@@ -100,6 +100,27 @@ are we," this list IS the answer.
       1, Elias wk 6, Mason Jhaveri wk 4, Yinka Bash wk 2 - every live week
       now reads 0 unfilmed / 0 unlinked / 0 inactive (Remi's test week was
       already clean). completed flags were left as they were.
+- [ ] DONE Oct 1 2026 (Coach Yinka: "DELETE ALL DRILLS YOU HAVE THAT DONT
+      HAVE VIDEO"): hard-deleted every drill in elite_drills with no
+      video_url - 22 rows, all of them already inactive (Foundations +
+      sole rolls, Weak-foot patterns / push-pulls / rebounds / strikes,
+      Rebound passing / rhythm, Check and turn, Pass turn pass, Driven
+      wall passes, Scan + touch, Number-call scanning, Half-turn receives,
+      Two-gate finish, 1v1 shadow, Clip study, Move of the day, Chain two
+      moves, Juggling record, Quick feet, Acceleration starts, Reaction
+      starts). They are GONE, not paused - if any of these ever get
+      filmed, the coach re-adds them from /coach/drills as new drills. The
+      bank is now 36 drills, every one with a video (35 active, 1 inactive
+      but filmed). The homework FK is on delete set null, so the delete
+      could only affect rows linked to those drills: verified after the
+      fact that all 5 live weeks (Abdul Rahim wk 1, Elias wk 6, Mason
+      Jhaveri wk 4, Yinka Bash wk 2, Remi wk 1) still read 0 unlinked /
+      0 no-video. The 31 unlinked rows left in the whole table are in old,
+      already-finished weeks only - nothing a player is training on. The
+      earlier "20 inactive drills" wording above is obsolete; there are no
+      unfilmed drills in the bank for the AI, the fallback, or a coach to
+      pick anymore, so the onlyWithVideo filter and bank-conform are now
+      pure insurance for the next drill added before it's filmed.
 - [ ] FOUND Oct 1 2026, NOT yet fixed - the Sept 27 Sunday cron did not
       build anyone's new week: on Oct 1 Elias is on wk 6 of a clock on wk
       7, Mason on 4 of 5, Abdul on 1 of 2 (week1_monday math). Players are

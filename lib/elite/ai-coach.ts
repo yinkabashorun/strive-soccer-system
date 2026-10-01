@@ -16,6 +16,7 @@ import {
   type Player,
 } from "./types";
 import { SESSIONS_PER_WEEK, plyoForSession } from "./training";
+import { conformSessionsToBank } from "./bank-conform";
 import { METHOD_PILLARS, methodologyContext } from "./methodology";
 
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-4-8";
@@ -160,7 +161,8 @@ function plyosFrom(bank?: Drill[]) {
 function buildSessions(
   raw: GeneratedSession[] | undefined,
   focus: string,
-  plyos?: ReturnType<typeof plyosFrom>
+  plyos?: ReturnType<typeof plyosFrom>,
+  bankMode = false
 ): GeneratedSession[] {
   const src = Array.isArray(raw) ? raw : [];
   const out: GeneratedSession[] = [];
@@ -225,13 +227,22 @@ function buildSessions(
       // Recorded bank plyos are single exercises (~4 min each), so a session
       // opens with TWO back to back for a real ~8-minute warm-up block. The
       // built-in fallbacks are full circuits, so one of those is enough.
+      // With a bank in play the warm-up comes ONLY from the bank: two
+      // recorded plyos when there are enough, one when there's one, none
+      // when there are none. The built-in library warm-ups exist only for
+      // demo / pre-020 (no bank at all) - they have no video, so they must
+      // never reach a real player.
       drills: [
         ...(plyos && plyos.length >= 2
           ? [
               { ...plyoForSession(spin + 2 * i + 1, plyos) },
               { ...plyoForSession(spin + 2 * i + 2, plyos) },
             ]
-          : [{ ...plyoForSession(spin + i + 1, plyos) }]),
+          : plyos && plyos.length === 1
+            ? [{ ...plyos[0] }]
+            : bankMode
+              ? []
+              : [{ ...plyoForSession(spin + i + 1, plyos) }]),
         ...skills,
       ],
     });
@@ -258,15 +269,25 @@ function ensureSentence(s: string): string {
 function sanitize(
   plan: Partial<GeneratedPlan>,
   player?: Player,
-  plyos?: ReturnType<typeof plyosFrom>
+  bank?: Drill[]
 ): GeneratedPlan {
   const validMetrics = new Set(PROGRESS_METRICS as readonly string[]);
   const weekly_focus = ensureSentence(
     plan.weekly_focus?.trim() || "Sharpen this week's technical focus"
   );
+  const bankMode = Boolean(bank && bank.length > 0);
+  // Build, then CONFORM: after this line every drill in the plan is a bank
+  // drill by exact title, or has been replaced by one. Nothing the AI, the
+  // fallback, or the pads invented survives when a bank exists.
+  const sessions = conformSessionsToBank(
+    buildSessions(plan.sessions, weekly_focus, plyosFrom(bank), bankMode),
+    bank,
+    player,
+    weekly_focus
+  );
   return {
     weekly_focus,
-    sessions: buildSessions(plan.sessions, weekly_focus, plyos),
+    sessions,
     parent_update:
       plan.parent_update?.trim() ||
       `${player?.full_name ?? "Your player"} put in strong work this session and has a clear four-session plan for the week ahead.`,
@@ -388,7 +409,7 @@ function fallbackPlan(notes: string, player?: Player, bank?: Drill[]): Generated
       ],
     },
     player,
-    plyosFrom(bank)
+    bank
   );
 }
 
@@ -471,7 +492,7 @@ export async function generatePlanFromNotes(
             : "The AI responded but the plan could not be read. Generate again; if it repeats, check the Vercel logs for [strive-ai] lines.",
         reasonKind: "parse",
       };
-    return { plan: sanitize(parsed, player, plyosFrom(bank)), source: "ai" };
+    return { plan: sanitize(parsed, player, bank), source: "ai" };
   } catch (err) {
     const msg =
       err instanceof Error ? err.message.slice(0, 200) : "unknown error";

@@ -67,6 +67,49 @@ are we," this list IS the answer.
       no-op in practice (all 35 active drills already have videos,
       confirmed via direct DB query the same day), this is purely
       preventive for the next drill a coach adds before filming it.
+- [ ] RECURRENCE, FOUND + FIXED FOR REAL Oct 1 2026 (Coach Yinka, with a
+      real player's DM: "I only managed to see the Maradona... I see
+      Ronaldinho drill. And that's it" - two filmed drills in a 16-drill
+      week; "I thought this was fixed!"): the Sept 29 fix above
+      constrained what the AI is SHOWN, not what it OUTPUTS. Three ways an
+      unfilmed drill still reached a player: (1) every live week had been
+      generated BEFORE Sept 29 and was never repaired - the no-video rows
+      were the 20 inactive bank drills (Foundations + sole rolls, Weak-foot
+      strikes, Driven wall passes...), linked by id by the backfill but
+      never filmed; (2) the plyo warm-ups "Pogo & Tuck / Lateral Power /
+      Quick Feet / Explosive" are NOT bank drills - they're
+      lib/elite/training.ts PLYO_WARMUPS, a built-in list that became the
+      warm-up whenever bank plyos weren't passed through; (3) nothing ever
+      checked the AI's drill titles against the bank - a paraphrase, a pad
+      like "Apply under pressure"/"Focus block", or a title typed by hand in
+      the studio all published with no video. THE FIX is on the OUTPUT, in
+      one module, lib/elite/bank-conform.ts: conformSessionsToBank() maps
+      every drill to a filmed bank drill by exact-or-clear-fuzzy title
+      (taking the bank's exact title so the id link always hits) or
+      REPLACES it with a filmed bank drill of the right pillar (wall rule
+      respected, no repeats in a session, pillars with no filmed drills -
+      Scanning, Decision Making, Speed - fall to Ball Mastery/Confidence).
+      It runs at TWO gates: ai-coach.ts sanitize() for every generated
+      plan (AI or fallback), and coach-actions.ts applyGeneratedPlanCore
+      at publish time against the video-only bank, so a hand-edited plan
+      can't bypass it. buildSessions no longer prepends a built-in plyo
+      when a bank exists (two bank plyos, one, or none - never a library
+      one), and the methodology prompt now says titles are copied
+      character-for-character. LIVE WEEKS REPAIRED directly via SQL the
+      same day, previewed row by row first: 46 rows across Abdul Rahim wk
+      1, Elias wk 6, Mason Jhaveri wk 4, Yinka Bash wk 2 - every live week
+      now reads 0 unfilmed / 0 unlinked / 0 inactive (Remi's test week was
+      already clean). completed flags were left as they were.
+- [ ] FOUND Oct 1 2026, NOT yet fixed - the Sept 27 Sunday cron did not
+      build anyone's new week: on Oct 1 Elias is on wk 6 of a clock on wk
+      7, Mason on 4 of 5, Abdul on 1 of 2 (week1_monday math). Players are
+      training a stale week. Coach Yinka said Vercel "was at capacity" and
+      he just upgraded it - most likely the cron run failed on that limit.
+      Next cron is Sun Oct 4 3pm ET; a manual publish from each player's
+      studio catches them up today (it takes the catch-up path and goes
+      live immediately). Confirm the Oct 4 run actually built weeks, and
+      consider a coach-facing alert when the cron produces zero plans - a
+      silent no-op is exactly what bit the Sept 19-26 window too.
 - [ ] FOUND + FIXED Sept 30 2026 (reported directly by Coach Yinka via a
       real screenshot to his own phone - this is a RECURRENCE, he'd
       already flagged something in this family before and been told it

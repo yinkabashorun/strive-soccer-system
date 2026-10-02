@@ -30,8 +30,7 @@ import type {
   Progress,
   ProgressPoint,
   RosterRow,
-  WeeklyPlan,
-} from "./types";
+  WeeklyPlan, CronRun } from "./types";
 import { METHOD_PILLARS } from "./methodology";
 
 // Server-side data access for Strive Elite. Reads from Supabase when
@@ -99,6 +98,21 @@ export async function getPlanCoverage(): Promise<Record<string, number>> {
     out[h.player_id] = Math.max(out[h.player_id] ?? 0, h.week ?? 0);
   }
   return out;
+}
+
+// Latest run of a background job (030) - the coach dashboard shows the
+// plan builder's. null in demo mode or before the migration.
+export async function getLatestCronRun(job: string): Promise<CronRun | null> {
+  const supabase = createClient();
+  if (!supabase) return null;
+  const { data } = await supabase
+    .from("elite_cron_runs")
+    .select("*")
+    .eq("job", job)
+    .order("ran_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return (data as CronRun | null) ?? null;
 }
 
 // The built-in Strive method library shaped as Drill rows - what the bank

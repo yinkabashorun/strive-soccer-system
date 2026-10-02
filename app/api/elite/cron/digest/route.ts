@@ -1,12 +1,21 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/elite/supabase/server";
 import { sendCoachDigest } from "@/lib/elite/email";
-import { liveWeekNumber } from "@/lib/elite/time";
+import { liveWeekNumber, nyHour } from "@/lib/elite/time";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
+// Never let Next prerender this at build time: a GET route handler with no
+// dynamic access gets built ONCE and served from cache forever after -
+// which here would mean the cron fires every hour and gets a frozen JSON
+// body back without a single line of this file running. Whether the
+// handler touched request headers used to depend on CRON_SECRET being set,
+// so the route was only dynamic by accident. Now it's dynamic on purpose.
+export const dynamic = "force-dynamic";
 
-// The coach's daily accountability digest (Vercel cron, evenings VA time).
+// The coach's daily accountability digest (Vercel cron, 6pm VA time).
+// Scheduled at BOTH 22:00 and 23:00 UTC and sent only from the one that
+// is 6pm in New York - DST-proof with no schedule flip twice a year.
 // One text: who is owed a training week, what needs a reply, and which
 // players have gone quiet. Sent only when something is actionable - a
 // quiet day sends nothing, so the ping always means "act".
@@ -14,6 +23,9 @@ export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET;
   if (secret && req.headers.get("authorization") !== `Bearer ${secret}`) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+  if (nyHour() !== 18) {
+    return NextResponse.json({ ok: true, sent: false, reason: "not 6pm ET" });
   }
   const admin = createServiceClient();
   if (!admin) return NextResponse.json({ ok: false, reason: "no service client" });

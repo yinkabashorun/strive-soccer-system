@@ -553,21 +553,24 @@ export async function applyGeneratedPlanCore(
   // every drill is matched to a FILMED bank drill or replaced by one right
   // here, before a single row is written. Only filmed drills exist to the
   // publish step - an unfilmed drill cannot reach a player.
+  // No filmed bank, no publish. This used to be a try/catch that fell
+  // through to "publish without a drill link" - which is exactly how a
+  // player gets a week of drills with no videos. Now it throws, the cron
+  // logs it as an error, and the coach gets a text, before any row is
+  // written. (The database refuses such rows too - migration 031.)
   const byTitle = new Map<string, { id: string; video_url: string | null }>();
-  let sessionsToPublish = plan.sessions;
-  try {
-    const { drills: bank } = await getDrillBank({ onlyWithVideo: true });
-    sessionsToPublish = conformSessionsToBank(
-      plan.sessions,
-      bank,
-      player ? { has_wall: (player as { has_wall?: boolean | null }).has_wall ?? null } : null,
-      plan.weekly_focus
-    );
-    for (const b of bank) {
-      byTitle.set(normalizeTitle(b.title), { id: b.id, video_url: b.video_url || null });
-    }
-  } catch {
-    // bank unavailable: publish without a drill link
+  const { drills: bank } = await getDrillBank({ onlyWithVideo: true, client: supabase });
+  if (bank.length === 0) {
+    throw new Error("Refusing to publish: the drill bank has no filmed drills reachable");
+  }
+  const sessionsToPublish = conformSessionsToBank(
+    plan.sessions,
+    bank,
+    player ? { has_wall: (player as { has_wall?: boolean | null }).has_wall ?? null } : null,
+    plan.weekly_focus
+  );
+  for (const b of bank) {
+    byTitle.set(normalizeTitle(b.title), { id: b.id, video_url: b.video_url || null });
   }
 
   const rows = sessionsToPublish.flatMap((s, si) =>

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/elite/supabase/server";
 import { sendCoachDigest } from "@/lib/elite/email";
 import { liveWeekNumber, nyHour } from "@/lib/elite/time";
+import { latestCronRun, PLAN_BUILDER_JOB } from "@/lib/elite/cron-log";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -89,6 +90,18 @@ export async function GET(req: Request) {
   if (toAnswer > 0) lines.push(`${toAnswer} check-in${toAnswer === 1 ? "" : "s"}/message${toAnswer === 1 ? "" : "s"} to answer`);
   if (quiet.length > 0)
     lines.push(`Quiet 5+ days: ${listNames(quiet.map((p) => first(p.full_name)))}`);
+
+  // Watchdog: a second, independent cron checking the plan builder's
+  // heartbeat. If the hourly builder stops firing (Vercel cron off, deploy
+  // broken, route static again), this is what says so - the builder
+  // can't report its own absence.
+  const run = await latestCronRun(PLAN_BUILDER_JOB).catch(() => null);
+  const ageH = run ? (Date.now() - new Date(run.ran_at).getTime()) / 3600e3 : Infinity;
+  if (!run) lines.push("PLAN BUILDER HAS NEVER RUN - check Vercel crons");
+  else if (ageH > 3) lines.push(`PLAN BUILDER SILENT ${Math.round(ageH)}h - check Vercel crons`);
+  else if (run.finished === false && ageH > 0.5) lines.push("PLAN BUILDER last run never finished (crash/timeout)");
+  else if (run.errors?.length || run.issues?.length)
+    lines.push(`Plan builder: ${(run.errors?.length ?? 0) + (run.issues?.length ?? 0)} open problem(s), see /coach`);
 
   if (lines.length === 0) {
     return NextResponse.json({ ok: true, sent: false, reason: "all clear" });

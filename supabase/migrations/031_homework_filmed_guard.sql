@@ -16,6 +16,12 @@
 -- can still link a legacy row (it sets both columns together).
 -- =====================================================================
 
+-- Run log additions (030): the live-week audit result, and whether the
+-- run finished at all (a crash/timeout leaves finished = false).
+alter table public.elite_cron_runs
+  add column if not exists issues jsonb not null default '[]',
+  add column if not exists finished boolean not null default true;
+
 create or replace function public.elite_guard_homework_filmed()
 returns trigger language plpgsql security invoker set search_path = public as $$
 begin

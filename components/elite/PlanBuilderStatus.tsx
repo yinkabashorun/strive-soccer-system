@@ -29,7 +29,9 @@ export function PlanBuilderStatus({
   if (!run) problems.push("The plan builder has never logged a run.");
   else {
     if (stale) problems.push(`No run for ${Math.round(ageMs / 3600e3)} hours. The hourly cron may be down in Vercel.`);
-    if (run.errors.length)
+    if (run.finished === false && ageMs > 30 * 60e3) problems.push("The last run started but never finished (crash or timeout).");
+    for (const i of run.issues ?? []) problems.push(`${i.name}: ${i.issue}.`);
+    if (run.errors?.length)
       problems.push(`Last run had ${run.errors.length} error${run.errors.length === 1 ? "" : "s"}: ${run.errors.map((e) => `${e.name} (${e.error})`).join("; ")}`);
     if (!run.authed && run.trigger === "cron") problems.push("CRON_SECRET is not set in Vercel, so this route accepts any caller.");
   }

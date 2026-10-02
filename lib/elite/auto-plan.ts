@@ -27,7 +27,9 @@ import { generatePlanFromNotes } from "./ai-coach";
 import { applyGeneratedPlanCore } from "./coach-actions";
 import { getDrillBank, latestCoachingCallNotes } from "./data";
 import { isSundayEveNY, liveWeekFor } from "./time";
-import { alertCoach, PLAN_BUILDER_JOB, recordCronRun } from "./cron-log";
+import { alertCoach, latestCronRun, PLAN_BUILDER_JOB, startCronRun, updateCronRun } from "./cron-log";
+import { auditLiveWeeks, type HealthIssue } from "./health";
+import { backfillHomeworkVideos } from "./data";
 import { builderTargetWeek } from "./week-target";
 import type { Player } from "./types";
 
@@ -68,7 +70,9 @@ function synthesizeNotes(
   return parts.join("\n");
 }
 
-export async function runAutoWeeklyPlans(): Promise<PlanBuilderOutcome> {
+export async function runAutoWeeklyPlans(
+  onProgress?: (results: Result[]) => Promise<void> | void
+): Promise<PlanBuilderOutcome> {
   const empty = (reason: string): PlanBuilderOutcome => ({
     ran: 0, built: 0, skipped: 0, errors: [], results: [], reason,
   });
@@ -91,7 +95,10 @@ export async function runAutoWeeklyPlans(): Promise<PlanBuilderOutcome> {
     .in("subscription_status", ["active", "trialing"]);
   const roster = (players as Player[] | null) ?? [];
 
-  const { drills: bank } = await getDrillBank({ onlyWithVideo: true });
+  // Admin read - the drill table is coach-only under RLS and the cron has
+  // no login (this exact line, without the client, built unfilmed weeks
+  // from the starter library for two weeks).
+  const { drills: bank } = await getDrillBank({ onlyWithVideo: true, client: admin });
   const sundayEve = isSundayEveNY();
   const results: Result[] = [];
 
@@ -154,6 +161,7 @@ export async function runAutoWeeklyPlans(): Promise<PlanBuilderOutcome> {
         error: err instanceof Error ? err.message : "unknown error",
       });
     }
+    await onProgress?.(results);
   }
 
   const built = results.filter((r) => r.ok && r.week != null).length;
@@ -162,42 +170,91 @@ export async function runAutoWeeklyPlans(): Promise<PlanBuilderOutcome> {
   return { ran: results.length, built, skipped, errors, results };
 }
 
-// The one entry point both the cron route and the coach's "Build now"
-// button use: run, log the run, and alert the coach when it went wrong.
-export async function runPlanBuilder(opts: {
-  trigger: "cron" | "coach";
-  authed: boolean;
-}): Promise<PlanBuilderOutcome> {
-  const outcome = await runAutoWeeklyPlans();
-  const summaryParts = [
-    outcome.reason ? `did not run: ${outcome.reason}` : "",
-    outcome.built
-      ? `built ${outcome.results.filter((r) => r.ok && r.week != null).map((r) => `${r.name.split(" ")[0]} wk ${(r as { week?: number }).week}`).join(", ")}`
+export type PlanBuilderInput = { trigger: "cron" | "coach"; authed: boolean };
+
+function summarize(o: PlanBuilderOutcome): string {
+  const parts = [
+    o.reason ? `did not run: ${o.reason}` : "",
+    o.built
+      ? `built ${o.results
+          .filter((r) => r.ok && r.week != null)
+          .map((r) => `${r.name.split(" ")[0]} wk ${(r as { week?: number }).week}`)
+          .join(", ")}`
       : "",
-    outcome.skipped ? `${outcome.skipped} already built` : "",
-    outcome.errors.length
-      ? `errors: ${outcome.errors.map((e) => `${e.name.split(" ")[0]} (${e.error})`).join("; ")}`
+    o.skipped ? `${o.skipped} already built` : "",
+    o.errors.length
+      ? `errors: ${o.errors.map((e) => `${e.name.split(" ")[0]} (${e.error})`).join("; ")}`
       : "",
   ].filter(Boolean);
-  const summary = summaryParts.join(" · ") || "nothing to do";
+  return parts.join(" · ") || "nothing to do";
+}
 
-  await recordCronRun({
-    job: PLAN_BUILDER_JOB,
-    trigger: opts.trigger,
-    authed: opts.authed,
+function tally(results: Result[]) {
+  return {
+    built: results.filter((r) => r.ok && r.week != null).length,
+    skipped: results.filter((r) => r.ok && r.skipped).length,
+    errors: results.flatMap((r) => (r.ok ? [] : [{ name: r.name, error: r.error }])),
+  };
+}
+
+// The one entry point both the cron route and the coach's "Build now"
+// button use: log the start, build, heal, audit, log the end, and alert
+// the coach when something is wrong that wasn't wrong last run.
+export async function runPlanBuilder(opts: PlanBuilderInput): Promise<PlanBuilderOutcome & { issues: HealthIssue[] }> {
+  const runId = await startCronRun({ job: PLAN_BUILDER_JOB, ...opts }).catch(() => null);
+  let outcome: PlanBuilderOutcome = { ran: 0, built: 0, skipped: 0, errors: [], results: [] };
+  let issues: HealthIssue[] = [];
+  let crashed: string | null = null;
+  try {
+    outcome = await runAutoWeeklyPlans(async (results) => {
+      const t = tally(results);
+      await updateCronRun(runId, { ...t, summary: `running: ${results.length} done` }).catch(() => undefined);
+    });
+
+    // Heal + audit, independent of the build: videos added to the bank
+    // later reach waiting homework, and every live week is checked
+    // against the rules in lib/elite/health.ts.
+    const admin = createServiceClient();
+    if (admin) {
+      await backfillHomeworkVideos(admin).catch(() => undefined);
+      issues = await auditLiveWeeks(admin).catch((e: unknown) => [
+        { name: "audit", issue: e instanceof Error ? e.message : "audit failed" },
+      ]);
+    }
+  } catch (err) {
+    crashed = err instanceof Error ? err.message : "unknown crash";
+    outcome = { ...outcome, errors: [...outcome.errors, { name: "run", error: crashed }] };
+  }
+
+  const summary = summarize(outcome) + (issues.length ? ` · audit: ${issues.length} issue${issues.length === 1 ? "" : "s"}` : " · audit clean");
+  await updateCronRun(runId, {
     built: outcome.built,
     skipped: outcome.skipped,
     errors: outcome.errors,
+    issues,
     summary,
+    finished: true,
   }).catch(() => undefined);
 
-  // Loud when it matters: a per-player failure, or a run that could not
-  // run at all. A quiet steady-state hour says nothing.
-  const couldNotRun = Boolean(outcome.reason);
-  if (outcome.errors.length > 0 || couldNotRun) {
-    await alertCoach(
-      `Strive plan builder: ${summary}. Open thestriveapp.com/coach and tap Build missing weeks to retry, or the next hourly run will.`
-    );
+  // Alert on anything wrong - but only when it is NEW compared to the
+  // previous run, so a standing problem is one text, not one per hour.
+  const wrongNow = Boolean(outcome.reason) || outcome.errors.length > 0 || issues.length > 0;
+  if (wrongNow) {
+    const prev = await latestCronRun(PLAN_BUILDER_JOB, runId).catch(() => null);
+    const fingerprint = (errs: { name: string; error?: string; issue?: string }[], reason?: string | null) =>
+      JSON.stringify([reason ?? "", ...errs.map((e) => `${e.name}:${e.error ?? e.issue ?? ""}`)].sort());
+    const nowKey = fingerprint([...outcome.errors, ...issues], outcome.reason);
+    const prevKey = prev ? fingerprint([...(prev.errors ?? []), ...(prev.issues ?? [])], prev.summary.startsWith("did not run") ? prev.summary : "") : "";
+    if (nowKey !== prevKey) {
+      const lines = [
+        outcome.reason ? `could not run: ${outcome.reason}` : "",
+        ...outcome.errors.map((e) => `${e.name}: ${e.error}`),
+        ...issues.map((i) => `${i.name}: ${i.issue}`),
+      ].filter(Boolean);
+      await alertCoach(
+        `Strive plan builder needs you. ${lines.join(". ")}. Open thestriveapp.com/coach - the Plan builder card has the detail and a Build missing weeks button.`
+      );
+    }
   }
-  return outcome;
+  return { ...outcome, issues };
 }

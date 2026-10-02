@@ -253,6 +253,40 @@ are we," this list IS the answer.
       ON MONDAY Oct 5: /coach Plan builder card should read "audit clean",
       Sunday Oct 4 3pm+ runs built everyone's wk N+1, Monday 6am unlock
       fired (plan rows notified:true, new_week notifications at ~6am).
+- [ ] DELETED Oct 2 2026 (Coach Yinka: "I told you to delete any drills
+      that do not have a vid attached. This is the root of the problems"
+      - he was right, and the earlier wording "fell back to the starter
+      library" buried it): the app carried a SECOND set of drills, in
+      CODE, not in the database - lib/elite/methodology.ts METHOD_PILLARS
+      had 7 pillars x ~4 "starter library" drills (Foundations + sole
+      rolls, Driven wall passes, Weak-foot strikes, Scan + touch...),
+      lib/elite/training.ts had four PLYO_WARMUPS circuits (Pogo & Tuck,
+      Lateral Power, Quick Feet, Explosive), ai-coach.ts buildSessions
+      invented padding rows ("Apply under pressure", "Perfect the detail",
+      "Focus block"), and data.ts libraryDrills() turned the whole list
+      into fake bank rows whenever the real bank was unreachable or empty.
+      None of it had a video; none of it was in elite_drills, so the Oct 1
+      hard delete could not touch it; and every "fallback" path reached
+      for it - the AI prompt listed it as the drill menu, fallbackPlan
+      composed from it, buildSessions prepended its plyos. Every unfilmed
+      drill a real player ever saw came from this list. ALL OF IT IS
+      DELETED from the code: METHOD_PILLARS is pillar + coaching lens
+      only (type has no drills field); training.ts exports only
+      SESSIONS_PER_WEEK and the Drill shape; getDrillBank returns an
+      empty list when the bank is unreachable; methodologyContext and
+      fallbackPlan THROW EmptyBankError with no filmed skill drills (no
+      bank = no plan, logged + texted, never an invented one); buildSessions
+      adds no padding and no built-in warm-up (two bank plyos, one, or
+      none); thin sessions are filled to three skill drills FROM THE BANK
+      by conformSessionsToBank. GUARDS so it cannot come back: tests/
+      no-library.test.ts (METHOD_PILLARS has no drills, empty bank throws,
+      prompt lists only bank titles, thin sessions fill from bank) and
+      scripts/check-no-library-drills.sh (greps the Elite app for the
+      old identifiers/titles in code, comments ignored) - both run in CI
+      and in the Vercel buildCommand, so a build that reintroduces any
+      built-in drill cannot deploy. Demo mode with no Supabase now shows
+      an empty drill bank instead of fake drills; production demo reads
+      the real bank. Total unit tests: 27.
 - [ ] FOUND + FIXED Sept 30 2026 (reported directly by Coach Yinka via a
       real screenshot to his own phone - this is a RECURRENCE, he'd
       already flagged something in this family before and been told it

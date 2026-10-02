@@ -31,7 +31,6 @@ import type {
   ProgressPoint,
   RosterRow,
   WeeklyPlan, CronRun } from "./types";
-import { METHOD_PILLARS } from "./methodology";
 
 // Server-side data access for Strive Elite. Reads from Supabase when
 // configured, otherwise returns the demo dataset. The UI is identical in
@@ -115,80 +114,34 @@ export async function getLatestCronRun(job: string): Promise<CronRun | null> {
   return (data as CronRun | null) ?? null;
 }
 
-// The built-in Strive method library shaped as Drill rows - what the bank
-// looks like before migration 020 runs (or in demo mode). Read-only.
-export function libraryDrills(): Drill[] {
-  const out: Drill[] = [];
-  let sort = 0;
-  for (const g of METHOD_PILLARS) {
-    for (const d of g.drills) {
-      sort += 10;
-      out.push({
-        id: `lib-${sort}`,
-        pillar: g.pillar,
-        title: d.title,
-        how: d.how,
-        reps: d.reps,
-        minutes: d.minutes,
-        cues: d.cues ?? "",
-        needs_wall: Boolean(d.needsWall),
-        active: true,
-        sort,
-      });
-    }
-  }
-  return out;
-}
-
-// The coach's drill bank: every drill the AI may prescribe. Falls back to
-// the built-in library pre-020 (or demo) so generation never has an empty
-// bank. Pass onlyWithVideo when the caller is about to ASSIGN drills to a
-// player (AI generation, the deterministic fallback plan) - it keeps a
-// coach adding a new drill before filming it from ever reaching a real
-// player's homework, without hiding that drill from the coach's own
-// /coach/drills management page (which still needs the full bank).
-// The bank a plan is built from. Reads with the server's own admin access
-// by default: the drill table is coach-only under RLS, and the hourly
-// plan builder has no login - until Oct 2 2026 it got ZERO rows back,
-// silently fell through to the built-in starter library (no videos), and
-// every cron-built week since Sept 19 carried unfilmed drills because of
-// it. The bank is coach content that players see anyway, so an admin read
-// is safe. onlyWithVideo NEVER returns the library: if the real bank is
-// unreachable or has no filmed drill, the caller gets an empty list and
-// publishing refuses (see applyGeneratedPlanCore) instead of inventing.
+// The bank a plan is built from - the coach's filmed drills in
+// elite_drills, nothing else. Reads with the server's own admin access by
+// default: the drill table is coach-only under RLS and the hourly plan
+// builder has no login (until Oct 2 2026 it got zero rows back and the
+// code silently substituted a built-in, unfilmed starter library; that
+// library is deleted). Unreachable or empty bank = empty list, and every
+// caller that builds a real plan refuses on an empty list.
 export async function getDrillBank(opts?: {
   onlyWithVideo?: boolean;
   client?: SupabaseClient;
 }): Promise<{ drills: Drill[]; fromDb: boolean }> {
   const supabase = opts?.client ?? createServiceClient() ?? createClient();
-  let drills: Drill[];
-  let fromDb: boolean;
-  if (!supabase) {
-    drills = libraryDrills();
-    fromDb = false;
-  } else {
-    const { data, error } = await supabase
-      .from("elite_drills")
-      .select("*")
-      .eq("active", true)
-      .order("pillar")
-      .order("sort");
-    if (error || !data || data.length === 0) {
-      drills = libraryDrills();
-      fromDb = false;
-    } else {
-      drills = data as Drill[];
-      fromDb = true;
-    }
-  }
-  if (opts?.onlyWithVideo) {
-    drills = filmedBankOnly(drills, fromDb);
-  }
-  return { drills, fromDb };
+  if (!supabase) return { drills: [], fromDb: false };
+  const { data, error } = await supabase
+    .from("elite_drills")
+    .select("*")
+    .eq("active", true)
+    .order("pillar")
+    .order("sort");
+  if (error || !data) return { drills: [], fromDb: false };
+  const drills = data as Drill[];
+  return {
+    drills: opts?.onlyWithVideo ? filmedBankOnly(drills, true) : drills,
+    fromDb: true,
+  };
 }
 
-// Pure (unit-tested): the only drills a real plan may be built from. The
-// starter library is never one of them, whatever it contains.
+// Pure (unit-tested): the only drills a real plan may be built from.
 export function filmedBankOnly(drills: Drill[], fromDb: boolean): Drill[] {
   if (!fromDb) return [];
   return drills.filter((d) => Boolean(d.video_url));

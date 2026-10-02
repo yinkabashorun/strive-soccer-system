@@ -1,23 +1,48 @@
 // Fully automated weekly plan generation. Coach Yinka no longer writes a
-// note or clicks approve for this to run - a Sunday 3pm ET cron (see
-// app/api/elite/cron/weekly-plans) calls runAutoWeeklyPlans() for every
-// active, onboarded player, and the new week goes live immediately
-// (publishNow) instead of waiting for the Monday unlock. In place of a
-// coach's typed session notes, the "notes" the AI sees are synthesized from
-// what actually happened: last week's homework completion and the player's
-// own self-checkin. The personalization promise in the copy ("I build every
-// plan, I review every plan") stays as-is per CLAUDE.md - the backend
-// changed, the copy didn't.
+// note or clicks approve for this to run - an hourly cron (see
+// app/api/elite/cron/weekly-plans) calls runPlanBuilder() for every
+// active, onboarded player. In place of a coach's typed session notes,
+// the "notes" the AI sees are synthesized from what actually happened:
+// last week's homework completion and the player's own self-checkin. The
+// personalization promise in the copy ("I build every plan, I review every
+// plan") stays as-is per CLAUDE.md - the backend changed, the copy didn't.
+//
+// WHAT A RUN BUILDS, by day (America/New_York):
+//   Sunday (3pm ET slot only, gated in the route) - the week that starts
+//     tomorrow, for every player, even one whose current week was never
+//     built. Held until Monday 6am ET, then unlocked + announced.
+//   Monday-Saturday, every hour - catch-up only: a player whose LIVE week
+//     has no plan gets it right now. Nothing is pre-built mid-week, so in
+//     the steady state these runs do nothing but prove the cron is alive.
+//   A player with no first week yet gets week 1 on the next run, any day.
+// This is what makes a failed Sunday run self-heal within the hour on
+// Monday instead of leaving players on a stale week for seven days (which
+// is exactly what happened Sept 27-Oct 1 2026).
+//
+// EVERY run leaves a row in elite_cron_runs and the coach dashboard shows
+// the latest one. A run with errors, or one that could not run at all
+// while players are waiting, texts + emails the coach (lib/elite/cron-log).
 import { createServiceClient } from "./supabase/server";
 import { generatePlanFromNotes } from "./ai-coach";
 import { applyGeneratedPlanCore } from "./coach-actions";
 import { getDrillBank, latestCoachingCallNotes } from "./data";
-import { liveWeekFor } from "./time";
+import { isSundayEveNY, liveWeekFor } from "./time";
+import { alertCoach, PLAN_BUILDER_JOB, recordCronRun } from "./cron-log";
 import type { Player } from "./types";
 
 type Result =
   | { playerId: string; name: string; ok: true; skipped?: string; week?: number }
   | { playerId: string; name: string; ok: false; error: string };
+
+export type PlanBuilderOutcome = {
+  ran: number;
+  built: number;
+  skipped: number;
+  errors: { name: string; error: string }[];
+  results: Result[];
+  // Set when the builder could not run at all (no DB, no coach profile).
+  reason?: string;
+};
 
 function synthesizeNotes(
   homework: Array<{ title: string; completed: boolean }>,
@@ -42,9 +67,12 @@ function synthesizeNotes(
   return parts.join("\n");
 }
 
-export async function runAutoWeeklyPlans(): Promise<{ ran: number; results: Result[] }> {
+export async function runAutoWeeklyPlans(): Promise<PlanBuilderOutcome> {
+  const empty = (reason: string): PlanBuilderOutcome => ({
+    ran: 0, built: 0, skipped: 0, errors: [], results: [], reason,
+  });
   const admin = createServiceClient();
-  if (!admin) return { ran: 0, results: [] };
+  if (!admin) return empty("no service client (SUPABASE_SERVICE_ROLE_KEY unset)");
 
   const { data: coach } = await admin
     .from("elite_profiles")
@@ -53,7 +81,7 @@ export async function runAutoWeeklyPlans(): Promise<{ ran: number; results: Resu
     .order("role")
     .limit(1)
     .maybeSingle();
-  if (!coach?.id) return { ran: 0, results: [] };
+  if (!coach?.id) return empty("no coach/admin profile to attribute plans to");
 
   const { data: players } = await admin
     .from("elite_players")
@@ -63,6 +91,7 @@ export async function runAutoWeeklyPlans(): Promise<{ ran: number; results: Resu
   const roster = (players as Player[] | null) ?? [];
 
   const { drills: bank } = await getDrillBank({ onlyWithVideo: true });
+  const sundayEve = isSundayEveNY();
   const results: Result[] = [];
 
   for (const player of roster) {
@@ -77,11 +106,13 @@ export async function runAutoWeeklyPlans(): Promise<{ ran: number; results: Resu
         .maybeSingle();
       const maxBuilt = latestBuilt?.week ?? 0;
 
-      // Already built ahead of the live week (manual edit, or this cron
-      // already ran this cycle) - never overwrite it. maxBuilt === liveWeek
-      // is the normal steady state (last week's plan is live and current)
-      // and must NOT skip, or the cron would only ever fire once per player.
-      if (maxBuilt > liveWeek) {
+      // The week this run is responsible for: on Sunday the one starting
+      // tomorrow, any other day the one the player is living in (week 1
+      // for a player whose clock hasn't started). Built through it
+      // already - nothing to do. applyGeneratedPlanCore applies the same
+      // calendar rule when it picks the week number to write.
+      const target = !player.week1_monday ? 1 : sundayEve ? liveWeek + 1 : liveWeek;
+      if (maxBuilt >= target) {
         results.push({ playerId: player.id, name: player.full_name, ok: true, skipped: "already built" });
         continue;
       }
@@ -112,9 +143,7 @@ export async function runAutoWeeklyPlans(): Promise<{ ran: number; results: Resu
         .filter(Boolean)
         .join("\n");
       const { plan } = await generatePlanFromNotes(notes, player, player.coach_memory, bank);
-      const applied = await applyGeneratedPlanCore(player.id, notes, plan, coach.id, admin, {
-        publishNow: true,
-      });
+      const applied = await applyGeneratedPlanCore(player.id, notes, plan, coach.id, admin);
       results.push({ playerId: player.id, name: player.full_name, ok: true, week: applied.week });
     } catch (err) {
       results.push({
@@ -126,5 +155,48 @@ export async function runAutoWeeklyPlans(): Promise<{ ran: number; results: Resu
     }
   }
 
-  return { ran: results.length, results };
+  const built = results.filter((r) => r.ok && r.week != null).length;
+  const skipped = results.filter((r) => r.ok && r.skipped).length;
+  const errors = results.flatMap((r) => (r.ok ? [] : [{ name: r.name, error: r.error }]));
+  return { ran: results.length, built, skipped, errors, results };
+}
+
+// The one entry point both the cron route and the coach's "Build now"
+// button use: run, log the run, and alert the coach when it went wrong.
+export async function runPlanBuilder(opts: {
+  trigger: "cron" | "coach";
+  authed: boolean;
+}): Promise<PlanBuilderOutcome> {
+  const outcome = await runAutoWeeklyPlans();
+  const summaryParts = [
+    outcome.reason ? `did not run: ${outcome.reason}` : "",
+    outcome.built
+      ? `built ${outcome.results.filter((r) => r.ok && r.week != null).map((r) => `${r.name.split(" ")[0]} wk ${(r as { week?: number }).week}`).join(", ")}`
+      : "",
+    outcome.skipped ? `${outcome.skipped} already built` : "",
+    outcome.errors.length
+      ? `errors: ${outcome.errors.map((e) => `${e.name.split(" ")[0]} (${e.error})`).join("; ")}`
+      : "",
+  ].filter(Boolean);
+  const summary = summaryParts.join(" · ") || "nothing to do";
+
+  await recordCronRun({
+    job: PLAN_BUILDER_JOB,
+    trigger: opts.trigger,
+    authed: opts.authed,
+    built: outcome.built,
+    skipped: outcome.skipped,
+    errors: outcome.errors,
+    summary,
+  }).catch(() => undefined);
+
+  // Loud when it matters: a per-player failure, or a run that could not
+  // run at all. A quiet steady-state hour says nothing.
+  const couldNotRun = Boolean(outcome.reason);
+  if (outcome.errors.length > 0 || couldNotRun) {
+    await alertCoach(
+      `Strive plan builder: ${summary}. Open thestriveapp.com/coach and tap Build missing weeks to retry, or the next hourly run will.`
+    );
+  }
+  return outcome;
 }

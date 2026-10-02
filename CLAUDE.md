@@ -121,16 +121,63 @@ are we," this list IS the answer.
       unfilmed drills in the bank for the AI, the fallback, or a coach to
       pick anymore, so the onlyWithVideo filter and bank-conform are now
       pure insurance for the next drill added before it's filmed.
-- [ ] FOUND Oct 1 2026, NOT yet fixed - the Sept 27 Sunday cron did not
-      build anyone's new week: on Oct 1 Elias is on wk 6 of a clock on wk
-      7, Mason on 4 of 5, Abdul on 1 of 2 (week1_monday math). Players are
-      training a stale week. Coach Yinka said Vercel "was at capacity" and
-      he just upgraded it - most likely the cron run failed on that limit.
-      Next cron is Sun Oct 4 3pm ET; a manual publish from each player's
-      studio catches them up today (it takes the catch-up path and goes
-      live immediately). Confirm the Oct 4 run actually built weeks, and
-      consider a coach-facing alert when the cron produces zero plans - a
-      silent no-op is exactly what bit the Sept 19-26 window too.
+- [ ] FOUND + FIXED FOR REAL Oct 1-2 2026 (Coach Yinka: "Why don't you
+      fix those errors then? Why ask me first, I already told you my
+      standard"): players were training a STALE week - on Oct 1 Elias was
+      on wk 6 of a clock on wk 7, Mason 4 of 5, Abdul 1 of 2. First read
+      was wrong ("the Sept 27 cron didn't run"). It DID run, 3:32pm ET
+      Sept 27, and built Elias wk 6, Mason wk 4, Abdul wk 1, Yinka wk 2.
+      THE REAL BUG was the targeting rule: applyGeneratedPlanCore's
+      catch-up branch ("live week has no plan -> build the live week, go
+      live now") applied on SUNDAYS too, so the Sunday cron "caught up"
+      the week that had hours left and never built the week starting
+      Monday. Anyone ever behind stayed exactly one week behind forever -
+      and Oct 4 would have done the same thing again. Three structural
+      fixes, all shipped: (1) Sunday is the eve of a new week, never a
+      catch-up day - a plan published on a Sunday (cron OR coach studio)
+      always targets next week, held to Monday 6am ET; a first week
+      published on a Sunday anchors week1_monday to NEXT Monday so week 1
+      is never a one-day week (that's how Abdul ended up on "wk 1 of 2").
+      (2) The cron is now HOURLY (vercel.json "0 * * * *") and decides in
+      NY time what to do: Sunday before 3pm nothing; Sunday 3pm+ build
+      every player's next week; Mon-Sat every hour catch-up only (a player
+      whose live week has no plan gets it within the hour; nothing is
+      pre-built mid-week; a player with no first week gets week 1 on the
+      next run, any day). A failed Sunday run now self-heals Monday
+      morning instead of costing seven days. It also runs unlockDueWeeks()
+      every hour, so the Monday 6am unlock + "week N is live" texts no
+      longer depend on someone opening the app. Hourly + NY-hour check
+      also makes it DST-proof (digest likewise: scheduled 22 AND 23 UTC,
+      sends only at 6pm ET). (3) It can never be silent again: migration
+      030 elite_cron_runs logs every run (built / skipped / errors /
+      whether CRON_SECRET matched), a PlanBuilderStatus card at the top of
+      the coach dashboard shows the latest run and goes RED if the last
+      run is >3h old (cron dead), had errors, ran unauthenticated (=
+      CRON_SECRET unset in Vercel - this answers that open item on sight),
+      or any player is training a stale week - with a "Build missing
+      weeks" button that runs the exact same builder on demand
+      (lib/elite/plan-builder-actions.ts). A run with errors, or one that
+      can't run at all, texts Coach Yinka (+15712856635, override with
+      COACH_ALERT_PHONE) and emails via the coach digest channel.
+      SECOND BUG found on the way, worse: all three elite cron routes
+      (weekly-plans, digest, onboarding-reminders) were being prerendered
+      as STATIC by Next (build output "○", a frozen .body file). Their
+      only dynamic access was req.headers.get() inside "if (secret &&
+      ...)", so with CRON_SECRET unset the handler ran ONCE at build time
+      and every cron hit afterwards got the cached JSON back with nothing
+      executing. All three now export dynamic = "force-dynamic" (build
+      output "ƒ", verified). The fact that Sept 27 built plans at runtime
+      is circumstantial evidence CRON_SECRET IS set in Vercel; the
+      dashboard card now says so definitively after the first cron run.
+      CATCH-UP: the first hourly run after this deploys builds Elias wk 7,
+      Mason wk 5, Abdul wk 2 (and the two test profiles) as live weeks,
+      or Coach Yinka taps "Build missing weeks" on /coach to do it this
+      minute. Behaviour change to know: the cron no longer publishes next
+      week on Sunday afternoon with "week N just went live" texts while
+      the app still shows week N-1 until Monday - it holds to Monday 6am
+      and the texts go out when the week is actually visible. Not
+      independently verified yet: the first real hourly run and the first
+      Monday unlock - check the dashboard card Monday Oct 5 morning.
 - [ ] FOUND + FIXED Sept 30 2026 (reported directly by Coach Yinka via a
       real screenshot to his own phone - this is a RECURRENCE, he'd
       already flagged something in this family before and been told it
@@ -214,7 +261,10 @@ are we," this list IS the answer.
       Vercel, then flip weekly-plans/digest/onboarding-reminders/
       autopilot/sync-contacts/ghl-webhook to fail CLOSED (reject) when
       their secret is unset instead of accepting any caller - see
-      business context below, this is a real open security gap.
+      business context below, this is a real open security gap. As of
+      Oct 2 the coach dashboard's Plan builder card says outright whether
+      the last cron run carried a matching CRON_SECRET - if it doesn't
+      warn, CRON_SECRET is set and the flip is safe for the cron routes.
 - [ ] CHECKED Sept 26 2026 via direct DB query: 3 of 4 real players
       (Keith Mauck jr, Elias, Mason Jhaveri) already have correct, distinct
       parent_name values - they weren't hit by the bug above. Only "Remi
@@ -233,9 +283,9 @@ are we," this list IS the answer.
       way to surface short of a parent complaining; the elite-film Storage
       bucket policy (migration 005) is open to any authenticated user with
       no per-player scoping (currently unused by any real upload flow, but
-      live and insecure by default); the weekly-plans/digest crons will
-      silently shift an hour when DST ends ~Nov 1 2026 (vercel.json is
-      fixed UTC, no TZ support).
+      live and insecure by default). (The DST drift on the weekly-plans
+      and digest crons is fixed as of Oct 2 - both decide in NY time now;
+      only onboarding-reminders still shifts an hour, harmless.)
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 
@@ -501,21 +551,21 @@ Game), Angel Romero (ECNL All-American).
   come from somewhere else.
 - App: thestriveapp.com (this repo). Supabase project qjiloadpfeqxxyfozsje.
   Demo tour: login -> "See the app as a player".
-- Weekly plan generation is fully automated (shipped Sept 19 2026, but was a
-  complete silent no-op until fixed Sept 26 - the cron looked up a
-  role='coach' profile to attribute plans to, and the only real account is
-  role='admin', so it matched nobody and quietly did nothing every single
-  run; real players got zero automated plans between Sept 19 and 26,
-  confirmed via direct DB query). Fixed now: a cron builds every active
-  player's new week Sunday 3pm ET and it publishes immediately (no Monday
-  hold), using the player's own homework completion + self-checkin as the
-  "notes" input in place of a coach typing them. Coach Yinka no longer
-  needs to review or approve plans for them to go out. Cron fires at a
-  fixed UTC hour with no DST awareness - correct now (EDT), will read as
-  2pm once DST ends around Nov 1 2026 unless the schedule is bumped an
-  hour. The "I build every plan, I review every plan" copy promise is
-  unchanged per the personalization policy above - this is a backend change
-  only, never say "AI" or "automated" anywhere player/parent-facing.
+- Weekly plan generation is fully automated (shipped Sept 19 2026, silent
+  no-op until Sept 26 - the cron looked up a role='coach' profile and the
+  only real account is role='admin'; then a stale-week bug until Oct 1 -
+  see the open-items entry). CURRENT MODEL (Oct 2 2026): an HOURLY cron
+  (/api/elite/cron/weekly-plans, lib/elite/auto-plan.ts runPlanBuilder)
+  builds every active player's NEXT week on Sunday from 3pm ET, held to
+  Monday 6am ET; Mon-Sat it only catches up a player whose live week has
+  no plan, and gives a brand-new onboarded player week 1 within the hour.
+  Notes input = the player's own homework completion + self-checkin (+
+  Complete Pathway call notes). Coach Yinka never has to approve a plan.
+  Every run is logged (elite_cron_runs) and shown on the coach dashboard;
+  errors text him. The "I build every plan, I review every plan" copy
+  promise is unchanged per the personalization policy above - this is a
+  backend change only, never say "AI" or "automated" anywhere
+  player/parent-facing.
 - Real push notifications shipped Sept 26 2026 (Web Push/VAPID, not a
   native app - no app store needed). Covers new-week-live and coach
   messages so far; everything before this was in-app only, meaning a

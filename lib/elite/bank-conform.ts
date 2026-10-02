@@ -20,6 +20,8 @@
 import type { Drill, GeneratedDrill, GeneratedSession, Player } from "./types";
 import { PLYO_PILLAR } from "./types";
 
+const MIN_SKILLS = 3;
+
 const PILLAR_HINTS: [RegExp, string][] = [
   [/weak.?foot|left foot|right foot|both feet/, "Weak Foot"],
   [/wall|pass|rebound|receiv/, "Passing"],
@@ -171,6 +173,19 @@ export function conformSessionsToBank(
       usedSession.add(sub.title);
       usedWeek.add(sub.title);
       drills.push(fromBank(sub));
+    }
+    // A session is plyo + three skill drills. A thin or empty session is
+    // filled from the filmed bank, same pillar first - never with an
+    // invented padding drill (the old "Apply under pressure" / "Focus
+    // block" rows reached real players with no video).
+    let skillCount = drills.filter((d) => !isPlyoTitle(d.title)).length;
+    while (skillCount < MIN_SKILLS) {
+      const sub = pickSkill(sessionPillar, usedSession);
+      if (usedSession.has(sub.title)) break; // bank exhausted for this session
+      usedSession.add(sub.title);
+      usedWeek.add(sub.title);
+      drills.push(fromBank(sub));
+      skillCount++;
     }
     return { ...s, drills };
   });

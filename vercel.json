@@ -41,5 +41,5 @@
       "maxDuration": 60
     }
   },
-  "buildCommand": "npm run typecheck && npm test && next build && npm run check:crons"
+  "buildCommand": "npm run typecheck && npm test && npm run check:library && next build && npm run check:crons"
 }

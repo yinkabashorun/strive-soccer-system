@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "check:crons": "bash scripts/check-cron-dynamic.sh",
-    "verify": "npm run typecheck && npm run lint && npm test && npm run build && npm run check:crons"
+    "verify": "npm run typecheck && npm run lint && npm test && npm run build && npm run check:crons && npm run check:library",
+    "check:library": "bash scripts/check-no-library-drills.sh"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.30.1",

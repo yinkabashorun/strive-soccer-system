@@ -10,6 +10,7 @@ import { normalizePhone, sendPlayerSMS } from "./sms";
 import { isSundayEveNY, liveWeekFor, mondayOfWeekNY, nextMondayNY, unlockInstant } from "./time";
 import { getDrillBank, normalizeTitle } from "./data";
 import { conformSessionsToBank } from "./bank-conform";
+import { resolveWeekTarget } from "./week-target";
 import { buildParentRecap } from "./parent-recap";
 import type { FilmReview, GeneratedPlan } from "./types";
 
@@ -300,7 +301,7 @@ export async function duplicateWeek(input: {
   // fallback: clone in application code
   const { data: rows } = await supabase
     .from("elite_homework")
-    .select("title, exercise, reps, duration_min, video_url, notes, sort")
+    .select("title, exercise, reps, duration_min, video_url, drill_id, notes, sort")
     .eq("player_id", input.fromPlayerId)
     .eq("week", input.week)
     .order("sort");
@@ -312,9 +313,12 @@ export async function duplicateWeek(input: {
     .eq("player_id", input.toPlayerId)
     .eq("week", input.toWeek);
 
-  await supabase.from("elite_homework").insert(
+  // The database refuses any row without a filmed, linked drill
+  // (migration 031) - cloning an old unfilmed week fails here on purpose.
+  const { error: insErr } = await supabase.from("elite_homework").insert(
     rows.map((r) => ({ ...r, player_id: input.toPlayerId, week: input.toWeek }))
   );
+  if (insErr) return { ok: false as const, cloned: 0, error: insErr.message };
   revalidatePath(`/coach/players/${input.toPlayerId}`);
   return { ok: true as const, cloned: rows.length };
 }
@@ -503,40 +507,28 @@ export async function applyGeneratedPlanCore(
     .maybeSingle();
   const maxBuilt = latestBuilt?.week ?? 0;
   const sundayEve = isSundayEveNY();
-  let week: number;
-  let unlocksAt: string; // ISO
-  let goesLiveNow: boolean;
-  if (firstWeek) {
-    week = 1;
-    unlocksAt = new Date().toISOString();
-    goesLiveNow = true;
-  } else if (maxBuilt < liveWeek && !sundayEve) {
-    // Catch-up publish: the live week has no plan, so this one IS the
-    // live week and the player gets it right now.
-    week = liveWeek;
-    unlocksAt = new Date().toISOString();
-    goesLiveNow = true;
-  } else {
-    // The week that starts Monday. Re-publishing before it unlocks
-    // REPLACES it (edit window); otherwise it's the week after the live
-    // one - on a Sunday that holds even when the live week was never
-    // built, because a week with hours left is not worth a plan. It
-    // unlocks Monday 6am ET (unlockDueWeeks, driven by the hourly cron
-    // and by any app load), which is when the player can actually see it
-    // - so the "week N is live" text lands when it's true.
-    const { data: pending } = await supabase
-      .from("elite_weekly_plans")
-      .select("week")
-      .eq("player_id", playerId)
-      .eq("notified", false)
-      .gt("unlocks_at", new Date().toISOString())
-      .order("week", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    week = pending?.week ?? liveWeek + 1;
-    unlocksAt = unlockInstant(nextMondayNY());
-    goesLiveNow = false;
-  }
+  // Re-publishing before a scheduled week unlocks REPLACES it (edit
+  // window) - look it up so the rule can target it.
+  const { data: pending } = await supabase
+    .from("elite_weekly_plans")
+    .select("week")
+    .eq("player_id", playerId)
+    .eq("notified", false)
+    .gt("unlocks_at", new Date().toISOString())
+    .order("week", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  // The one rule, in lib/elite/week-target.ts (unit-tested).
+  const target = resolveWeekTarget({
+    firstWeek,
+    liveWeek,
+    maxBuilt,
+    sundayEve,
+    pendingWeek: pending?.week ?? null,
+  });
+  const week = target.week;
+  const goesLiveNow = target.goesLiveNow;
+  const unlocksAt = goesLiveNow ? new Date().toISOString() : unlockInstant(nextMondayNY());
 
   // 1) record the session
   await supabase.from("elite_sessions").insert({
@@ -703,7 +695,7 @@ export async function applyGeneratedPlanCore(
       .update({
         current_week: week,
         today_focus: plan.weekly_focus,
-        ...(firstWeek ? { week1_monday: mondayOfWeekNY(sundayEve ? 1 : 0) } : {}),
+        ...(firstWeek ? { week1_monday: mondayOfWeekNY(target.anchorOffsetWeeks) } : {}),
       })
       .eq("id", playerId);
     await supabase.from("elite_notifications").insert({

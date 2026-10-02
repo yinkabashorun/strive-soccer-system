@@ -28,6 +28,7 @@ import { applyGeneratedPlanCore } from "./coach-actions";
 import { getDrillBank, latestCoachingCallNotes } from "./data";
 import { isSundayEveNY, liveWeekFor } from "./time";
 import { alertCoach, PLAN_BUILDER_JOB, recordCronRun } from "./cron-log";
+import { builderTargetWeek } from "./week-target";
 import type { Player } from "./types";
 
 type Result =
@@ -111,7 +112,7 @@ export async function runAutoWeeklyPlans(): Promise<PlanBuilderOutcome> {
       // for a player whose clock hasn't started). Built through it
       // already - nothing to do. applyGeneratedPlanCore applies the same
       // calendar rule when it picks the week number to write.
-      const target = !player.week1_monday ? 1 : sundayEve ? liveWeek + 1 : liveWeek;
+      const target = builderTargetWeek({ hasClock: Boolean(player.week1_monday), liveWeek, sundayEve });
       if (maxBuilt >= target) {
         results.push({ playerId: player.id, name: player.full_name, ok: true, skipped: "already built" });
         continue;

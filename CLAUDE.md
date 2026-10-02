@@ -201,12 +201,22 @@ are we," this list IS the answer.
       (filmedBankOnly, unit-tested). (2) applyGeneratedPlanCore THROWS when
       the filmed bank is empty instead of "publishing without a drill
       link" - a loud failure, logged + texted, before any row is written.
-      (3) Migration 031 (applied to prod Oct 2): a BEFORE INSERT/UPDATE
-      trigger on elite_homework rejects any row without drill_id +
-      video_url - the database itself refuses an unfilmed drill from any
-      code path, present or future; elite_duplicate_week now copies
-      drill_id so clone-week keeps working (cloning an old unfilmed week
-      fails on purpose). (4) Every builder run logs a row at START and
+      (3) Migration 031: a BEFORE INSERT/UPDATE trigger on elite_homework
+      rejects any row without drill_id + video_url - the database itself
+      refuses an unfilmed drill from any code path, present or future.
+      APPLIED TO PROD Oct 2 11:10am ET: the two elite_cron_runs columns,
+      the guard function, and the trigger (verified via pg_trigger). NOT
+      YET APPLIED: the elite_duplicate_week replacement that copies
+      drill_id - that one statement timed out five times through the
+      Supabase MCP (every other statement applied fine; no lock, no
+      stuck session - a tooling limit, not a DB problem). Effect today:
+      the clone-week RPC inserts rows without drill_id, the trigger
+      rejects them, the RPC errors, and duplicateWeek() in
+      coach-actions.ts falls back to its code path, which now carries
+      drill_id - so clone-week WORKS and is guarded either way; cloning
+      an old unfilmed week fails on purpose. TO FINISH: paste the
+      elite_duplicate_week block from supabase/migrations/031 into the
+      Supabase SQL editor (project qjiloadpfeqxxyfozsje), ~10 seconds. (4) Every builder run logs a row at START and
       updates it per player and at the end (elite_cron_runs.finished) - a
       crash or Vercel timeout shows as "started, never finished" instead
       of nothing; that is almost certainly what the 10am run did after
@@ -228,7 +238,18 @@ are we," this list IS the answer.
       typecheck + tests + build + cron check, so a red build CANNOT
       deploy to production, independent of GitHub settings. ONE MANUAL
       STEP for Coach Yinka (one-time, GitHub > Settings > Branches >
-      main): require the "verify" status check before merging. VERIFY
+      main): require the "verify" status check before merging. WHAT HAPPENED Oct 2 after deploy: the 10:02am ET hourly run was
+      still the OLD build (Vercel hadn't finished deploying) - it built
+      Mason wk 5 and Abdul wk 2 from the unfilmed library (13 and 12
+      no-video rows) and did log a row. The 11:00am run was the NEW
+      build: "5 already built · audit: 4 issues" - the audit caught
+      exactly those two weeks (its SMS alert to Coach Yinka should have
+      fired; not independently confirmed). Both weeks repaired via SQL
+      11:15am ET, row by row to filmed bank drills (both players have a
+      wall, so wall drills were allowed): every live week now reads
+      0 no-video / 0 unlinked / 0 inactive for all 5 players. The
+      12:00pm run should read "audit clean" with no new text (alerts
+      fire only when the issue set changes). VERIFY
       ON MONDAY Oct 5: /coach Plan builder card should read "audit clean",
       Sunday Oct 4 3pm+ runs built everyone's wk N+1, Monday 6am unlock
       fired (plan rows notified:true, new_week notifications at ~6am).

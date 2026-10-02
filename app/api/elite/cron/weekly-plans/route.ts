@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { runPlanBuilder } from "@/lib/elite/auto-plan";
-import { backfillHomeworkVideos } from "@/lib/elite/data";
 import { createServiceClient } from "@/lib/elite/supabase/server";
 import { unlockDueWeeks } from "@/lib/elite/unlock";
 import { isSundayEveNY, nyHour } from "@/lib/elite/time";
@@ -27,8 +26,10 @@ export const dynamic = "force-dynamic";
 //                           the cron is alive at all.
 //   Every hour            - unlock Monday-held weeks that are due (so the
 //                           Monday 6am ET unlock + texts no longer depend
-//                           on someone opening the app), then heal any
-//                           homework whose drill got its video later.
+//                           on someone opening the app); then heal any
+//                           homework whose drill got its video later and
+//                           AUDIT every live week (lib/elite/health.ts),
+//                           texting the coach about anything new.
 //
 // Hourly + an NY-hour check makes this DST-proof: no twice-a-year
 // schedule flip, the 3pm Sunday slot is 3pm in Virginia year-round.
@@ -49,15 +50,10 @@ export async function GET(req: Request) {
 
   const outcome = await runPlanBuilder({ trigger: "cron", authed });
 
-  // Best-effort: heal any homework stuck without a video because it was
-  // published before its drill had one in the bank. Never blocks the
-  // week's own publish result.
-  let videosFixed = 0;
+  // Keep the run log to two months. Best-effort.
   try {
     const admin = createServiceClient();
     if (admin) {
-      videosFixed = await backfillHomeworkVideos(admin);
-      // Keep the run log to two months.
       await admin
         .from("elite_cron_runs")
         .delete()
@@ -67,5 +63,5 @@ export async function GET(req: Request) {
     /* next run tries again */
   }
 
-  return NextResponse.json({ ok: true, ...outcome, videosFixed });
+  return NextResponse.json({ ok: true, ...outcome });
 }

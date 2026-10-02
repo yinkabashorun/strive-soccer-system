@@ -7,6 +7,7 @@
 // otherwise a deterministic fallback keeps it fully functional.
 
 import Anthropic from "@anthropic-ai/sdk";
+import { ensureSentence } from "./text";
 import {
   PLYO_PILLAR,
   PROGRESS_METRICS,
@@ -261,11 +262,6 @@ function buildSessions(
 // guarantee sanitize() can make for every consumer at once - the templates
 // themselves were fixed separately to build around a complete sentence
 // instead of continuing it.
-function ensureSentence(s: string): string {
-  const t = s.trim();
-  return /[.!?]$/.test(t) ? t : `${t}.`;
-}
-
 function sanitize(
   plan: Partial<GeneratedPlan>,
   player?: Player,

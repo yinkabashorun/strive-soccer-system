@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { createClient } from "./supabase/server";
+import { createClient, createServiceClient } from "./supabase/server";
 import {
   DEMO_ACHIEVEMENTS,
   DEMO_CHECKINS,
@@ -147,10 +147,20 @@ export function libraryDrills(): Drill[] {
 // coach adding a new drill before filming it from ever reaching a real
 // player's homework, without hiding that drill from the coach's own
 // /coach/drills management page (which still needs the full bank).
+// The bank a plan is built from. Reads with the server's own admin access
+// by default: the drill table is coach-only under RLS, and the hourly
+// plan builder has no login - until Oct 2 2026 it got ZERO rows back,
+// silently fell through to the built-in starter library (no videos), and
+// every cron-built week since Sept 19 carried unfilmed drills because of
+// it. The bank is coach content that players see anyway, so an admin read
+// is safe. onlyWithVideo NEVER returns the library: if the real bank is
+// unreachable or has no filmed drill, the caller gets an empty list and
+// publishing refuses (see applyGeneratedPlanCore) instead of inventing.
 export async function getDrillBank(opts?: {
   onlyWithVideo?: boolean;
+  client?: SupabaseClient;
 }): Promise<{ drills: Drill[]; fromDb: boolean }> {
-  const supabase = createClient();
+  const supabase = opts?.client ?? createServiceClient() ?? createClient();
   let drills: Drill[];
   let fromDb: boolean;
   if (!supabase) {
@@ -172,9 +182,16 @@ export async function getDrillBank(opts?: {
     }
   }
   if (opts?.onlyWithVideo) {
-    drills = drills.filter((d) => d.video_url);
+    drills = filmedBankOnly(drills, fromDb);
   }
   return { drills, fromDb };
+}
+
+// Pure (unit-tested): the only drills a real plan may be built from. The
+// starter library is never one of them, whatever it contains.
+export function filmedBankOnly(drills: Drill[], fromDb: boolean): Drill[] {
+  if (!fromDb) return [];
+  return drills.filter((d) => Boolean(d.video_url));
 }
 
 // Shared title normalization for matching a homework row's title to a bank

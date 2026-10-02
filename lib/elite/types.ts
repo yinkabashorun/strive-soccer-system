@@ -335,5 +335,7 @@ export type CronRun = {
   built: number;
   skipped: number;
   errors: { name: string; error: string }[];
+  issues: { name: string; issue: string }[]; // live-week audit (031)
   summary: string;
+  finished: boolean; // false = started, never completed (crash/timeout)
 };

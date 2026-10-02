@@ -178,6 +178,60 @@ are we," this list IS the answer.
       and the texts go out when the week is actually visible. Not
       independently verified yet: the first real hourly run and the first
       Monday unlock - check the dashboard card Monday Oct 5 morning.
+- [ ] THE ACTUAL ROOT CAUSE, FOUND + FIXED Oct 2 2026 (Coach Yinka: "a
+      system that runs by itself consistently... the app should never
+      regress again. Everything permanent."): the first hourly run of the
+      new builder (10:01am ET Oct 2) built Elias wk 7 with 16 of 16
+      drills UNFILMED and logged no run row. Diagnosis: elite_drills is
+      coach-only under RLS (migration 020) and getDrillBank() read it with
+      the cookie client - the cron has no login, got ZERO rows, and fell
+      through to the built-in starter library (lib/elite/data.ts
+      libraryDrills, no videos). Every cron-built week since Sept 19 was
+      composed from that library; the Sept 29 onlyWithVideo filter and the
+      Oct 1 bank-conform gates were real but had an EMPTY bank to enforce
+      against (onlyWithVideo filtered the library to nothing, conform is a
+      no-op on an empty bank). Manual studio publishes were always fine
+      because the coach is logged in. That is why "I thought this was
+      fixed" kept being true for the studio and false for the cron.
+      Elias wk 7 repaired in place via SQL (16/16 filmed, no-wall drills
+      since has_wall is null). THE SYSTEM NOW, each layer independent of
+      the others so no single future edit can silently undo it:
+      (1) getDrillBank reads with the service client by default and takes
+      an explicit client; onlyWithVideo NEVER returns the library
+      (filmedBankOnly, unit-tested). (2) applyGeneratedPlanCore THROWS when
+      the filmed bank is empty instead of "publishing without a drill
+      link" - a loud failure, logged + texted, before any row is written.
+      (3) Migration 031 (applied to prod Oct 2): a BEFORE INSERT/UPDATE
+      trigger on elite_homework rejects any row without drill_id +
+      video_url - the database itself refuses an unfilmed drill from any
+      code path, present or future; elite_duplicate_week now copies
+      drill_id so clone-week keeps working (cloning an old unfilmed week
+      fails on purpose). (4) Every builder run logs a row at START and
+      updates it per player and at the end (elite_cron_runs.finished) - a
+      crash or Vercel timeout shows as "started, never finished" instead
+      of nothing; that is almost certainly what the 10am run did after
+      Elias (Mason/Abdul/test profiles were never reached, no row).
+      (5) lib/elite/health.ts auditLiveWeeks runs after EVERY build (cron
+      or coach button): every active player has a plan for their live
+      week, every drill in it is linked, filmed, and still active. Issues
+      land on the run row, on the dashboard card in red, and text Coach
+      Yinka - only when the issue set CHANGED vs the previous run, so a
+      standing problem is one text, not one an hour. (6) The daily digest
+      cron is a second, independent watchdog: it adds a line if the
+      builder has never run, has been silent >3h, never finished, or has
+      open problems - the builder cannot report its own absence, this can.
+      (7) CI (.github/workflows/ci.yml, `npm run verify`): typecheck,
+      lint, 23 unit tests (week targeting incl. the Sunday rule, bank
+      conformance, the SMS sentence rule, live-week audit, filmed-bank
+      rule), production build, and a check that no cron route was
+      prerendered static. (8) vercel.json buildCommand runs the same
+      typecheck + tests + build + cron check, so a red build CANNOT
+      deploy to production, independent of GitHub settings. ONE MANUAL
+      STEP for Coach Yinka (one-time, GitHub > Settings > Branches >
+      main): require the "verify" status check before merging. VERIFY
+      ON MONDAY Oct 5: /coach Plan builder card should read "audit clean",
+      Sunday Oct 4 3pm+ runs built everyone's wk N+1, Monday 6am unlock
+      fired (plan rows notified:true, new_week notifications at ~6am).
 - [ ] FOUND + FIXED Sept 30 2026 (reported directly by Coach Yinka via a
       real screenshot to his own phone - this is a RECURRENCE, he'd
       already flagged something in this family before and been told it

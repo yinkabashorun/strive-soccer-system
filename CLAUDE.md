@@ -9,6 +9,15 @@ Read this every session. Update it the moment something here gets done or a
 new open item comes up, don't let it go stale. When Coach Yinka asks "where
 are we," this list IS the answer.
 
+Two lists. OPEN = still to do, short. RECORD = every fix, decision and
+finding, in DATE ORDER (oldest first), each stamped, never edited after
+the fact except to append an outcome. New records go at the END of the
+record with today's date, never mid-list. The git history of this file is
+the audit trail: nothing here can disappear or be reordered without a
+commit.
+
+### OPEN
+
 - [ ] Waiver form in GHL - real liability gap, top priority
 - [ ] Get Gary's one-pager signed
 - [ ] Announce Strive Elite app publicly - don't wait on Gonz's quote
@@ -18,7 +27,50 @@ are we," this list IS the answer.
 - [ ] Confirm PWC field permit is actually granted, not just requested
 - [ ] Migrate the remaining 13 Manus-hosted drill videos to Strive's own
       storage (Neymar Feint done Sept 16, re-trimmed from raw footage)
-- [ ] FOUND + FIXED Sept 29 2026, then made permanent same day (Coach
+- [ ] Sign Teo's Ashburn memo
+- [ ] Set up Skool community (DECIDED Sept 15, refined Sept 15): community
+      only, $9/mo Hobby plan, pinned link to thestriveapp.com for actual
+      training. Skool is not the course, never move training there. Access
+      is OPEN past current paying members: invite old/lapsed clients back
+      in too, it doubles as a reactivation + marketing/proof engine for
+      prospects. Academy's $500 exclusivity stays in its own perks (private
+      monthly breakdown, cap, priority), not in community access.
+- [ ] Get Gonz's quote for the announcement, low-pressure follow-up only
+- [ ] Stamp Hybrid ($400->$500) and 1:1 Monthly ($280->$320) raises, announce
+      alongside the ladder once the founding window closes Oct 1
+- [ ] Confirm CRON_SECRET and GHL_WEBHOOK_SECRET are actually set in
+      Vercel, then flip weekly-plans/digest/onboarding-reminders/
+      autopilot/sync-contacts/ghl-webhook to fail CLOSED (reject) when
+      their secret is unset instead of accepting any caller - see
+      business context below, this is a real open security gap. As of
+      Oct 2 the coach dashboard's Plan builder card says outright whether
+      the last cron run carried a matching CRON_SECRET - if it doesn't
+      warn, CRON_SECRET is set and the flip is safe for the cron routes.
+- [ ] BIGGER GAP found in the Sept 26 parent_name check: none of the 3 real client
+      families (Keith Mauck jr, Elias, Mason Jhaveri) have a parent_phone
+      on file at all. The only phone number in the whole table is Coach
+      Yinka's own (+15712856635, from testing). The entire SMS system
+      works, but has never actually reached a real family - add their
+      numbers via each profile's Intake panel.
+- [ ] From the Sept 26 audit, not yet built - Coach Yinka to prioritize:
+      no error tracking (Sentry or similar) or custom error/loading pages,
+      so a future silent failure like the parent-report one above has no
+      way to surface short of a parent complaining; the elite-film Storage
+      bucket policy (migration 005) is open to any authenticated user with
+      no per-player scoping (currently unused by any real upload flow, but
+      live and insecure by default). (The DST drift on the weekly-plans
+      and digest crons is fixed as of Oct 2 - both decide in NY time now;
+      only onboarding-reminders still shifts an hour, harmless.)
+
+### RECORD (chronological)
+
+- [x] CHECKED Sept 26 2026 via direct DB query: 3 of 4 real players
+      (Keith Mauck jr, Elias, Mason Jhaveri) already have correct, distinct
+      parent_name values - they weren't hit by the bug above. Only "Remi
+      Bashorun" shows parent_name = the player's own name, and that
+      profile hasn't finished onboarding yet, so it'll self-correct now
+      that the field is required. Nothing further to check here.
+- [x] FOUND + FIXED Sept 29 2026, then made permanent same day (Coach
       Yinka: "i need never again"): elite_homework.video_url was copied in
       once at publish time from whatever the bank had THEN - a video added
       to the bank later never reached an already-published week on its
@@ -49,7 +101,7 @@ are we," this list IS the answer.
       no-video rows are linked correctly but the bank genuinely has no
       video for that drill yet - both will resolve on their own as the
       Manus video migration continues, no further engineering needed.
-- [ ] SHIPPED Sept 29 2026 (Coach Yinka: "ONLY ASSIGN DRILLS FROM THE
+- [x] SHIPPED Sept 29 2026 (Coach Yinka: "ONLY ASSIGN DRILLS FROM THE
       DRILL BANK THAT HAVE VIDEO!"): everything above fixes a video
       reaching homework AFTER a drill gets assigned - this closes the
       other side, never assigning a video-less drill to a real player in
@@ -67,7 +119,75 @@ are we," this list IS the answer.
       no-op in practice (all 35 active drills already have videos,
       confirmed via direct DB query the same day), this is purely
       preventive for the next drill a coach adds before filming it.
-- [ ] RECURRENCE, FOUND + FIXED FOR REAL Oct 1 2026 (Coach Yinka, with a
+- [x] FOUND + FIXED Sept 30 2026 (reported directly by Coach Yinka via a
+      real screenshot to his own phone - this is a RECURRENCE, he'd
+      already flagged something in this family before and been told it
+      was fixed when it wasn't): the new_week SMS read "This week is
+      built around Lock in the first touch and force the right foot to
+      earn its keep.." - a run-on with a double period and a capital
+      letter mid-sentence. Root cause: ai-coach.ts's schema tells the AI
+      weekly_focus is "one sentence" (a complete, capitalized, own-period
+      sentence), but three SMS templates (coach-actions.ts's two
+      new_week branches, unlock.ts's new_week) spliced it into a
+      lowercase noun-phrase slot - "This week is built around X." /
+      "This week's focus is X." - with their own hardcoded trailing
+      period. Any weekly_focus longer than a short phrase broke this
+      every time, not occasionally - the email templates never had this
+      bug because they already used a colon ("This week's focus: X"),
+      which accepts a full sentence with no grammar clash. Fixed at both
+      the template AND the source, not just the one broken line, since
+      Coach Yinka was explicit that a one-off patch isn't good enough
+      anymore: all three SMS templates now use the same colon
+      construction the emails already used ("This week: X Let's
+      have..."), AND ai-coach.ts's sanitize() now runs every weekly_focus
+      through a new ensureSentence() helper that guarantees trailing
+      punctuation, so any OTHER template written later that continues
+      the sentence starts from a well-formed one instead of whatever the
+      AI happened to output. Verified against the actual reported string
+      plus a focus with no trailing period - both render clean, single
+      period, no capitalization break. tsc/lint/build all clean.
+- [x] Strive Complete Pathway - DECIDED Sept 30 2026, Coach Yinka's own
+      calls, supersedes the Sept 29 "group calls standard / 1:1 upsell"
+      and "Gary builds a course" plan: NO course modules to start. The
+      program is weekly 1:1 Zoom calls where Coach Yinka and Gary give
+      lessons and guidance; group calls come later once there are enough
+      families. Publicly announced Sept 29 at $1,000/mo as the lead offer,
+      Elite ($249 founding) the downsell. Tier boundary, stated plainly:
+      Strive Elite is the APP ONLY (weekly plans, drill videos, chat,
+      progress) - Elite members never had film breakdowns. Film Room,
+      monthly private breakdown, weekly parent report, and the coaching
+      calls are Complete. Gary does NOT get an app login yet - Coach Yinka
+      logs every call note himself for now. Open: Gary's revenue-share %
+      (model decided, number isn't), and Coach Yinka's own weekly Zoom
+      slots for these calls (assessment windows are Wed/Thu 6-9pm, Sat
+      eve, Sun afternoon - coaching calls need their own time).
+- [x] SHIPPED Sept 30 2026 - Complete Pathway in the app. The app had a
+      single membership tier (StatusControl.tsx: "Active (full access) or
+      not"), so an Elite member could upload film and got the weekly
+      parent report exactly like a Complete member. Migration 029 (applied
+      to production the same day): elite_players.tier (elite | complete,
+      default elite), the 008 privilege guard extended so a player can't
+      flip their own tier, and elite_coaching_calls (scheduled_at,
+      join_url, coach_name, notes) with coach-write / owner-read RLS.
+      Gates: buildParentRecap (parent-recap.ts) returns null for tier
+      'elite' - the ONE gate both senders go through; the player Film tab
+      shows a Complete Pathway line instead of the timeline for Elite.
+      Coach side: TierControl next to the Active/Paused toggle, a
+      CoachingCallsPanel (add a call with date/Zoom link/Coach Yinka or
+      Gary, then a post-call note) shown only for Complete players, and
+      a "Complete" chip on roster cards. Player side: a coaching-call card
+      on the dashboard (next call + Join on Zoom) for Complete only. The
+      post-call note feeds the plan builder in BOTH paths - memory.ts for
+      the coach's manual generator and auto-plan.ts for the Sunday cron -
+      weighted like the coach memory note. Scheduling stays on Calendly.
+      STATE AFTER MIGRATION: all 5 rows (Abdul Rahim, Elias, Mason
+      Jhaveri, plus Coach Yinka's two test profiles) are tier 'elite', so
+      nobody gets film / parent report / calls until Coach Yinka flips
+      them on their player page - correct per his own rule that Elite
+      never had film. ACTION for Coach Yinka: flip any family that is
+      actually on Complete. Gary has no login yet; Coach Yinka logs every
+      call note himself (the coach picker on a call is just a label).
+- [x] RECURRENCE, FOUND + FIXED FOR REAL Oct 1 2026 (Coach Yinka, with a
       real player's DM: "I only managed to see the Maradona... I see
       Ronaldinho drill. And that's it" - two filmed drills in a 16-drill
       week; "I thought this was fixed!"): the Sept 29 fix above
@@ -100,7 +220,7 @@ are we," this list IS the answer.
       1, Elias wk 6, Mason Jhaveri wk 4, Yinka Bash wk 2 - every live week
       now reads 0 unfilmed / 0 unlinked / 0 inactive (Remi's test week was
       already clean). completed flags were left as they were.
-- [ ] DONE Oct 1 2026 (Coach Yinka: "DELETE ALL DRILLS YOU HAVE THAT DONT
+- [x] DONE Oct 1 2026 (Coach Yinka: "DELETE ALL DRILLS YOU HAVE THAT DONT
       HAVE VIDEO"): hard-deleted every drill in elite_drills with no
       video_url - 22 rows, all of them already inactive (Foundations +
       sole rolls, Weak-foot patterns / push-pulls / rebounds / strikes,
@@ -121,7 +241,7 @@ are we," this list IS the answer.
       unfilmed drills in the bank for the AI, the fallback, or a coach to
       pick anymore, so the onlyWithVideo filter and bank-conform are now
       pure insurance for the next drill added before it's filmed.
-- [ ] FOUND + FIXED FOR REAL Oct 1-2 2026 (Coach Yinka: "Why don't you
+- [x] FOUND + FIXED FOR REAL Oct 1-2 2026 (Coach Yinka: "Why don't you
       fix those errors then? Why ask me first, I already told you my
       standard"): players were training a STALE week - on Oct 1 Elias was
       on wk 6 of a clock on wk 7, Mason 4 of 5, Abdul 1 of 2. First read
@@ -178,7 +298,7 @@ are we," this list IS the answer.
       and the texts go out when the week is actually visible. Not
       independently verified yet: the first real hourly run and the first
       Monday unlock - check the dashboard card Monday Oct 5 morning.
-- [ ] THE ACTUAL ROOT CAUSE, FOUND + FIXED Oct 2 2026 (Coach Yinka: "a
+- [x] THE ACTUAL ROOT CAUSE, FOUND + FIXED Oct 2 2026 (Coach Yinka: "a
       system that runs by itself consistently... the app should never
       regress again. Everything permanent."): the first hourly run of the
       new builder (10:01am ET Oct 2) built Elias wk 7 with 16 of 16
@@ -248,7 +368,7 @@ are we," this list IS the answer.
       ON MONDAY Oct 5: /coach Plan builder card should read "audit clean",
       Sunday Oct 4 3pm+ runs built everyone's wk N+1, Monday 6am unlock
       fired (plan rows notified:true, new_week notifications at ~6am).
-- [ ] DELETED Oct 2 2026 (Coach Yinka: "I told you to delete any drills
+- [x] DELETED Oct 2 2026 (Coach Yinka: "I told you to delete any drills
       that do not have a vid attached. This is the root of the problems"
       - he was right, and the earlier wording "fell back to the starter
       library" buried it): the app carried a SECOND set of drills, in
@@ -282,114 +402,6 @@ are we," this list IS the answer.
       built-in drill cannot deploy. Demo mode with no Supabase now shows
       an empty drill bank instead of fake drills; production demo reads
       the real bank. Total unit tests: 27.
-- [ ] FOUND + FIXED Sept 30 2026 (reported directly by Coach Yinka via a
-      real screenshot to his own phone - this is a RECURRENCE, he'd
-      already flagged something in this family before and been told it
-      was fixed when it wasn't): the new_week SMS read "This week is
-      built around Lock in the first touch and force the right foot to
-      earn its keep.." - a run-on with a double period and a capital
-      letter mid-sentence. Root cause: ai-coach.ts's schema tells the AI
-      weekly_focus is "one sentence" (a complete, capitalized, own-period
-      sentence), but three SMS templates (coach-actions.ts's two
-      new_week branches, unlock.ts's new_week) spliced it into a
-      lowercase noun-phrase slot - "This week is built around X." /
-      "This week's focus is X." - with their own hardcoded trailing
-      period. Any weekly_focus longer than a short phrase broke this
-      every time, not occasionally - the email templates never had this
-      bug because they already used a colon ("This week's focus: X"),
-      which accepts a full sentence with no grammar clash. Fixed at both
-      the template AND the source, not just the one broken line, since
-      Coach Yinka was explicit that a one-off patch isn't good enough
-      anymore: all three SMS templates now use the same colon
-      construction the emails already used ("This week: X Let's
-      have..."), AND ai-coach.ts's sanitize() now runs every weekly_focus
-      through a new ensureSentence() helper that guarantees trailing
-      punctuation, so any OTHER template written later that continues
-      the sentence starts from a well-formed one instead of whatever the
-      AI happened to output. Verified against the actual reported string
-      plus a focus with no trailing period - both render clean, single
-      period, no capitalization break. tsc/lint/build all clean.
-- [ ] Strive Complete Pathway - DECIDED Sept 30 2026, Coach Yinka's own
-      calls, supersedes the Sept 29 "group calls standard / 1:1 upsell"
-      and "Gary builds a course" plan: NO course modules to start. The
-      program is weekly 1:1 Zoom calls where Coach Yinka and Gary give
-      lessons and guidance; group calls come later once there are enough
-      families. Publicly announced Sept 29 at $1,000/mo as the lead offer,
-      Elite ($249 founding) the downsell. Tier boundary, stated plainly:
-      Strive Elite is the APP ONLY (weekly plans, drill videos, chat,
-      progress) - Elite members never had film breakdowns. Film Room,
-      monthly private breakdown, weekly parent report, and the coaching
-      calls are Complete. Gary does NOT get an app login yet - Coach Yinka
-      logs every call note himself for now. Open: Gary's revenue-share %
-      (model decided, number isn't), and Coach Yinka's own weekly Zoom
-      slots for these calls (assessment windows are Wed/Thu 6-9pm, Sat
-      eve, Sun afternoon - coaching calls need their own time).
-- [ ] SHIPPED Sept 30 2026 - Complete Pathway in the app. The app had a
-      single membership tier (StatusControl.tsx: "Active (full access) or
-      not"), so an Elite member could upload film and got the weekly
-      parent report exactly like a Complete member. Migration 029 (applied
-      to production the same day): elite_players.tier (elite | complete,
-      default elite), the 008 privilege guard extended so a player can't
-      flip their own tier, and elite_coaching_calls (scheduled_at,
-      join_url, coach_name, notes) with coach-write / owner-read RLS.
-      Gates: buildParentRecap (parent-recap.ts) returns null for tier
-      'elite' - the ONE gate both senders go through; the player Film tab
-      shows a Complete Pathway line instead of the timeline for Elite.
-      Coach side: TierControl next to the Active/Paused toggle, a
-      CoachingCallsPanel (add a call with date/Zoom link/Coach Yinka or
-      Gary, then a post-call note) shown only for Complete players, and
-      a "Complete" chip on roster cards. Player side: a coaching-call card
-      on the dashboard (next call + Join on Zoom) for Complete only. The
-      post-call note feeds the plan builder in BOTH paths - memory.ts for
-      the coach's manual generator and auto-plan.ts for the Sunday cron -
-      weighted like the coach memory note. Scheduling stays on Calendly.
-      STATE AFTER MIGRATION: all 5 rows (Abdul Rahim, Elias, Mason
-      Jhaveri, plus Coach Yinka's two test profiles) are tier 'elite', so
-      nobody gets film / parent report / calls until Coach Yinka flips
-      them on their player page - correct per his own rule that Elite
-      never had film. ACTION for Coach Yinka: flip any family that is
-      actually on Complete. Gary has no login yet; Coach Yinka logs every
-      call note himself (the coach picker on a call is just a label).
-- [ ] Sign Teo's Ashburn memo
-- [ ] Set up Skool community (DECIDED Sept 15, refined Sept 15): community
-      only, $9/mo Hobby plan, pinned link to thestriveapp.com for actual
-      training. Skool is not the course, never move training there. Access
-      is OPEN past current paying members: invite old/lapsed clients back
-      in too, it doubles as a reactivation + marketing/proof engine for
-      prospects. Academy's $500 exclusivity stays in its own perks (private
-      monthly breakdown, cap, priority), not in community access.
-- [ ] Get Gonz's quote for the announcement, low-pressure follow-up only
-- [ ] Stamp Hybrid ($400->$500) and 1:1 Monthly ($280->$320) raises, announce
-      alongside the ladder once the founding window closes Oct 1
-- [ ] Confirm CRON_SECRET and GHL_WEBHOOK_SECRET are actually set in
-      Vercel, then flip weekly-plans/digest/onboarding-reminders/
-      autopilot/sync-contacts/ghl-webhook to fail CLOSED (reject) when
-      their secret is unset instead of accepting any caller - see
-      business context below, this is a real open security gap. As of
-      Oct 2 the coach dashboard's Plan builder card says outright whether
-      the last cron run carried a matching CRON_SECRET - if it doesn't
-      warn, CRON_SECRET is set and the flip is safe for the cron routes.
-- [ ] CHECKED Sept 26 2026 via direct DB query: 3 of 4 real players
-      (Keith Mauck jr, Elias, Mason Jhaveri) already have correct, distinct
-      parent_name values - they weren't hit by the bug above. Only "Remi
-      Bashorun" shows parent_name = the player's own name, and that
-      profile hasn't finished onboarding yet, so it'll self-correct now
-      that the field is required. Nothing further to check here.
-- [ ] BIGGER GAP found in that same check: none of the 3 real client
-      families (Keith Mauck jr, Elias, Mason Jhaveri) have a parent_phone
-      on file at all. The only phone number in the whole table is Coach
-      Yinka's own (+15712856635, from testing). The entire SMS system
-      works, but has never actually reached a real family - add their
-      numbers via each profile's Intake panel.
-- [ ] From the Sept 26 audit, not yet built - Coach Yinka to prioritize:
-      no error tracking (Sentry or similar) or custom error/loading pages,
-      so a future silent failure like the parent-report one above has no
-      way to surface short of a parent complaining; the elite-film Storage
-      bucket policy (migration 005) is open to any authenticated user with
-      no per-player scoping (currently unused by any real upload flow, but
-      live and insecure by default). (The DST drift on the weekly-plans
-      and digest crons is fixed as of Oct 2 - both decide in NY time now;
-      only onboarding-reminders still shifts an hour, harmless.)
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

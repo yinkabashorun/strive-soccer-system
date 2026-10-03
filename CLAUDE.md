@@ -204,19 +204,14 @@ are we," this list IS the answer.
       (3) Migration 031: a BEFORE INSERT/UPDATE trigger on elite_homework
       rejects any row without drill_id + video_url - the database itself
       refuses an unfilmed drill from any code path, present or future.
-      APPLIED TO PROD Oct 2 11:10am ET: the two elite_cron_runs columns,
-      the guard function, and the trigger (verified via pg_trigger). NOT
-      YET APPLIED: the elite_duplicate_week replacement that copies
-      drill_id - that one statement timed out five times through the
-      Supabase MCP (every other statement applied fine; no lock, no
-      stuck session - a tooling limit, not a DB problem). Effect today:
-      the clone-week RPC inserts rows without drill_id, the trigger
-      rejects them, the RPC errors, and duplicateWeek() in
-      coach-actions.ts falls back to its code path, which now carries
-      drill_id - so clone-week WORKS and is guarded either way; cloning
-      an old unfilmed week fails on purpose. TO FINISH: paste the
-      elite_duplicate_week block from supabase/migrations/031 into the
-      Supabase SQL editor (project qjiloadpfeqxxyfozsje), ~10 seconds. (4) Every builder run logs a row at START and
+      FULLY APPLIED TO PROD: the two elite_cron_runs columns, the guard
+      function, and the trigger on Oct 2 11:10am ET via the Supabase MCP;
+      the elite_duplicate_week replacement (copies drill_id so clone-week
+      inserts pass the guard) on Oct 3 ~6pm ET, pasted by Coach Yinka
+      himself from his phone into the Supabase SQL editor after that one
+      statement timed out five times through the MCP. Verified Oct 3:
+      pg_get_functiondef contains drill_id, trigger present, columns
+      present. Nothing left to apply for 031. (4) Every builder run logs a row at START and
       updates it per player and at the end (elite_cron_runs.finished) - a
       crash or Vercel timeout shows as "started, never finished" instead
       of nothing; that is almost certainly what the 10am run did after

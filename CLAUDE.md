@@ -61,6 +61,18 @@ commit.
       live and insecure by default). (The DST drift on the weekly-plans
       and digest crons is fixed as of Oct 2 - both decide in NY time now;
       only onboarding-reminders still shifts an hour, harmless.)
+- [ ] PARKED Oct 3 2026 (Coach Yinka: "no its fine"): injury handling.
+      Today an injury only reaches the plan through free text (coach
+      memory note, player check-in note) - the AI usually steers around
+      it but nothing enforces it; plyo warm-ups are added server-side
+      regardless and bank-conform can swap in any same-pillar drill.
+      Scoped, not built: injury field (area/severity/return date) on the
+      player page, hard builder rules (lower body = no plyos/sprints,
+      rest = no new week), DB guard, auto-lift on return date, player
+      self-flag + coach text, lighter-week parent tone. ~3h core. Pitch
+      language until built: "I adjust every plan around what the player
+      tells me, including injuries" (true via the note), NOT "the app
+      manages injuries".
 
 ### RECORD (chronological)
 

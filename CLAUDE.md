@@ -402,6 +402,15 @@ commit.
       built-in drill cannot deploy. Demo mode with no Supabase now shows
       an empty drill bank instead of fake drills; production demo reads
       the real bank. Total unit tests: 27.
+- [x] FIXED Oct 3 2026 (Coach Yinka: "in the onboarding we ask to put the
+      parent phone number twice"): SignupForm requires the parent phone
+      (saved as parent_phone by the redeem route), then OnboardingForm
+      step 5 asked for it again in an empty field. Now the onboarding page
+      passes the signup phone in (knownParentPhone) and step 5 shows "Text
+      updates go to <number>" with a Change link that reveals the input;
+      the empty field appears only when no phone is on file (pre-Sept-26
+      signups). completeOnboarding was already non-destructive (a blank
+      submit never wipes a real number), so no data path changed.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

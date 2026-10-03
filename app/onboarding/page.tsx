@@ -33,6 +33,8 @@ export default async function OnboardingPage() {
         <div className="mt-8">
           <OnboardingForm
             defaultName={player?.full_name ?? viewer.profile.full_name}
+            // Already collected at signup - never ask for it twice.
+            knownParentPhone={player?.parent_phone ?? ""}
           />
         </div>
       </div>

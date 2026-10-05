@@ -627,6 +627,16 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
   at "none"; the app's membership gate shows "reach out to your coach" for
   anything but that unlocks it. Roster cards already show this at a
   glance (dim gray dot for "none" vs gold for "active").
+- STANDING RULE (Coach Yinka, Oct 5 2026: "I don't want you adding and
+  removing shit without me telling you"): NEVER add, remove, or change a
+  real player's data - homework rows, plans, drills, coach memory notes,
+  status, tier, phone numbers, anything on their record - unless Coach
+  Yinka explicitly tells me to in that conversation. Finding a problem
+  means FLAG IT and propose the exact change; he says go, then it
+  happens. This applies even when an earlier decision seems to cover it
+  and even when it looks like a safety issue (the Oct 5 plyo removal for
+  Tim's back was exactly this mistake). Code fixes and app bugs are
+  different: those he has told me to fix on sight.
 - Refunds: same-day, gracious, always.
 - Registration = payment. Public scarcity numbers must be real.
 - No em dashes in any player/parent-facing copy or scripts.

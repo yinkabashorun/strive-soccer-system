@@ -485,6 +485,14 @@ commit.
       Coach Yinka builds the plans, two resume facts max, no promises).
       Still open before publish: alumni family heads-ups, screen recording
       of a real week, the on-screen price cards for section 6.
+      OUTCOME same day: first draft rejected (Coach Yinka: "It's not built
+      by coach Yinka, it's he and I put our knowledge together... actually
+      move the prospect emotionally"). Rewritten: Gary's own nights
+      training alone, "that's the part nobody coaches", "Coach Yinka and
+      I put everything we know into one place", "he's getting both of
+      us". FRAMING RULE from this: Strive Elite was built by Coach Yinka
+      AND Gary together, say so; never "built by Coach Yinka" alone when
+      Gary is on camera. The no-AI rule is unchanged.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 
@@ -588,6 +596,10 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
   change, the copy promise doesn't. AI/automation language is fine ONLY in
   coach-only tooling (drill bank, session notes studio) that players and
   parents never see.
+  Oct 5 2026 clarification (Coach Yinka): Strive Elite was built by Coach
+  Yinka and Gary together, "we put our knowledge together". In any copy
+  that features Gary, it's "we built this" / "both of us", not "built by
+  Coach Yinka". Still never AI.
 - Referral program (PROPOSED Sept 14, unconfirmed - say "stamp it" to lock):
   referring family gets $25 account credit, any tier, no limit on referrals,
   credited once the referred family makes their first payment. No cash

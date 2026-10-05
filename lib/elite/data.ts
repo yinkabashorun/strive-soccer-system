@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { createClient } from "./supabase/server";
+import { createClient, createServiceClient } from "./supabase/server";
 import {
   DEMO_ACHIEVEMENTS,
   DEMO_CHECKINS,
@@ -30,9 +30,7 @@ import type {
   Progress,
   ProgressPoint,
   RosterRow,
-  WeeklyPlan,
-} from "./types";
-import { METHOD_PILLARS } from "./methodology";
+  WeeklyPlan, CronRun } from "./types";
 
 // Server-side data access for Strive Elite. Reads from Supabase when
 // configured, otherwise returns the demo dataset. The UI is identical in
@@ -101,66 +99,52 @@ export async function getPlanCoverage(): Promise<Record<string, number>> {
   return out;
 }
 
-// The built-in Strive method library shaped as Drill rows - what the bank
-// looks like before migration 020 runs (or in demo mode). Read-only.
-export function libraryDrills(): Drill[] {
-  const out: Drill[] = [];
-  let sort = 0;
-  for (const g of METHOD_PILLARS) {
-    for (const d of g.drills) {
-      sort += 10;
-      out.push({
-        id: `lib-${sort}`,
-        pillar: g.pillar,
-        title: d.title,
-        how: d.how,
-        reps: d.reps,
-        minutes: d.minutes,
-        cues: d.cues ?? "",
-        needs_wall: Boolean(d.needsWall),
-        active: true,
-        sort,
-      });
-    }
-  }
-  return out;
+// Latest run of a background job (030) - the coach dashboard shows the
+// plan builder's. null in demo mode or before the migration.
+export async function getLatestCronRun(job: string): Promise<CronRun | null> {
+  const supabase = createClient();
+  if (!supabase) return null;
+  const { data } = await supabase
+    .from("elite_cron_runs")
+    .select("*")
+    .eq("job", job)
+    .order("ran_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  return (data as CronRun | null) ?? null;
 }
 
-// The coach's drill bank: every drill the AI may prescribe. Falls back to
-// the built-in library pre-020 (or demo) so generation never has an empty
-// bank. Pass onlyWithVideo when the caller is about to ASSIGN drills to a
-// player (AI generation, the deterministic fallback plan) - it keeps a
-// coach adding a new drill before filming it from ever reaching a real
-// player's homework, without hiding that drill from the coach's own
-// /coach/drills management page (which still needs the full bank).
+// The bank a plan is built from - the coach's filmed drills in
+// elite_drills, nothing else. Reads with the server's own admin access by
+// default: the drill table is coach-only under RLS and the hourly plan
+// builder has no login (until Oct 2 2026 it got zero rows back and the
+// code silently substituted a built-in, unfilmed starter library; that
+// library is deleted). Unreachable or empty bank = empty list, and every
+// caller that builds a real plan refuses on an empty list.
 export async function getDrillBank(opts?: {
   onlyWithVideo?: boolean;
+  client?: SupabaseClient;
 }): Promise<{ drills: Drill[]; fromDb: boolean }> {
-  const supabase = createClient();
-  let drills: Drill[];
-  let fromDb: boolean;
-  if (!supabase) {
-    drills = libraryDrills();
-    fromDb = false;
-  } else {
-    const { data, error } = await supabase
-      .from("elite_drills")
-      .select("*")
-      .eq("active", true)
-      .order("pillar")
-      .order("sort");
-    if (error || !data || data.length === 0) {
-      drills = libraryDrills();
-      fromDb = false;
-    } else {
-      drills = data as Drill[];
-      fromDb = true;
-    }
-  }
-  if (opts?.onlyWithVideo) {
-    drills = drills.filter((d) => d.video_url);
-  }
-  return { drills, fromDb };
+  const supabase = opts?.client ?? createServiceClient() ?? createClient();
+  if (!supabase) return { drills: [], fromDb: false };
+  const { data, error } = await supabase
+    .from("elite_drills")
+    .select("*")
+    .eq("active", true)
+    .order("pillar")
+    .order("sort");
+  if (error || !data) return { drills: [], fromDb: false };
+  const drills = data as Drill[];
+  return {
+    drills: opts?.onlyWithVideo ? filmedBankOnly(drills, true) : drills,
+    fromDb: true,
+  };
+}
+
+// Pure (unit-tested): the only drills a real plan may be built from.
+export function filmedBankOnly(drills: Drill[], fromDb: boolean): Drill[] {
+  if (!fromDb) return [];
+  return drills.filter((d) => Boolean(d.video_url));
 }
 
 // Shared title normalization for matching a homework row's title to a bank

@@ -83,3 +83,18 @@ export function fmtMonday(monday: string): string {
 export function monthFromWeek(week: number): number {
   return Math.floor((Math.max(1, week) - 1) / 4) + 1;
 }
+
+// Current hour (0-23) in NY. Lets a cron that fires at a fixed UTC hour
+// decide for itself whether it's the right local hour - which is how the
+// plan builder and digest stay DST-proof with no schedule flip in Nov/Mar.
+export function nyHour(): number {
+  return Number(
+    new Date().toLocaleString("en-US", { timeZone: NY, hour: "numeric", hour12: false })
+  ) % 24;
+}
+
+// Sunday in NY: the eve of a new training week. Anything built today is
+// for the week that starts tomorrow, never for the week ending tonight.
+export function isSundayEveNY(): boolean {
+  return nyDayNumber() === 7;
+}

@@ -7,8 +7,10 @@ import { getViewer } from "./session";
 import { sendPlayerEmail } from "./email";
 import { sendPushToPlayer } from "./push";
 import { normalizePhone, sendPlayerSMS } from "./sms";
-import { liveWeekFor, mondayOfWeekNY, nextMondayNY, unlockInstant } from "./time";
+import { isSundayEveNY, liveWeekFor, mondayOfWeekNY, nextMondayNY, unlockInstant } from "./time";
 import { getDrillBank, normalizeTitle } from "./data";
+import { conformSessionsToBank } from "./bank-conform";
+import { resolveWeekTarget } from "./week-target";
 import { buildParentRecap } from "./parent-recap";
 import type { FilmReview, GeneratedPlan } from "./types";
 
@@ -299,7 +301,7 @@ export async function duplicateWeek(input: {
   // fallback: clone in application code
   const { data: rows } = await supabase
     .from("elite_homework")
-    .select("title, exercise, reps, duration_min, video_url, notes, sort")
+    .select("title, exercise, reps, duration_min, video_url, drill_id, notes, sort")
     .eq("player_id", input.fromPlayerId)
     .eq("week", input.week)
     .order("sort");
@@ -311,9 +313,12 @@ export async function duplicateWeek(input: {
     .eq("player_id", input.toPlayerId)
     .eq("week", input.toWeek);
 
-  await supabase.from("elite_homework").insert(
+  // The database refuses any row without a filmed, linked drill
+  // (migration 031) - cloning an old unfilmed week fails here on purpose.
+  const { error: insErr } = await supabase.from("elite_homework").insert(
     rows.map((r) => ({ ...r, player_id: input.toPlayerId, week: input.toWeek }))
   );
+  if (insErr) return { ok: false as const, cloned: 0, error: insErr.message };
   revalidatePath(`/coach/players/${input.toPlayerId}`);
   return { ok: true as const, cloned: rows.length };
 }
@@ -443,13 +448,22 @@ export async function sendFilmReview(
 // Persist an approved plan across all the tables it touches.
 //
 // Timing model (America/New_York): a player's FIRST week goes live the
-// moment it's published (week1_monday = this NY week's Monday), so
-// onboarding never dead-ends. If the coach is BEHIND (the live calendar
-// week has no plan yet), the new plan lands AS the live week and goes
-// live immediately - missed weeks simply never existed, no holes, no
-// waiting for Monday. Only when the live week is already built does a
-// plan target the NEXT week and unlock Monday morning, so publishing
-// twice in one evening can never fast-forward anyone.
+// moment it's published (week1_monday = this NY week's Monday, or NEXT
+// Monday when published on a Sunday), so onboarding never dead-ends. If
+// the coach is BEHIND (the live calendar week has no plan yet), the new
+// plan lands AS the live week and goes live immediately - missed weeks
+// simply never existed, no holes, no waiting for Monday. Only when the
+// live week is already built does a plan target the NEXT week and unlock
+// Monday morning, so publishing twice in one evening can never
+// fast-forward anyone.
+//
+// SUNDAY IS THE EVE OF A NEW WEEK, never a catch-up day. A plan published
+// on a Sunday always targets the week that starts tomorrow, even if the
+// week ending tonight was never built. Before Oct 1 2026 the catch-up
+// rule applied on Sundays too, so the Sunday cron "caught up" the week
+// that had hours left and never built the next one - every player who was
+// ever behind stayed exactly one week behind, forever (Elias, Mason and
+// Abdul all trained stale weeks because of it).
 export async function applyGeneratedPlan(
   playerId: string,
   rawNotes: string,
@@ -471,15 +485,14 @@ export async function applyGeneratedPlanCore(
   rawNotes: string,
   plan: GeneratedPlan,
   coachProfileId: string,
-  client?: SupabaseClient,
-  opts?: { publishNow?: boolean }
+  client?: SupabaseClient
 ) {
   const supabase = client ?? createClient();
   if (!supabase) return { ok: true }; // demo mode: nothing to persist
 
   const { data: player } = await supabase
     .from("elite_players")
-    .select("current_week, week1_monday, full_name, parent_name")
+    .select("current_week, week1_monday, full_name, parent_name, has_wall")
     .eq("id", playerId)
     .maybeSingle();
 
@@ -493,42 +506,29 @@ export async function applyGeneratedPlanCore(
     .limit(1)
     .maybeSingle();
   const maxBuilt = latestBuilt?.week ?? 0;
-  let week: number;
-  let unlocksAt: string; // ISO
-  let goesLiveNow: boolean;
-  if (firstWeek) {
-    week = 1;
-    unlocksAt = new Date().toISOString();
-    goesLiveNow = true;
-  } else if (maxBuilt < liveWeek) {
-    // Catch-up publish: the live week has no plan, so this one IS the
-    // live week and the player gets it right now.
-    week = liveWeek;
-    unlocksAt = new Date().toISOString();
-    goesLiveNow = true;
-  } else {
-    // Re-publishing before the scheduled week unlocks REPLACES it (edit
-    // window); otherwise target the week after the live one.
-    const { data: pending } = await supabase
-      .from("elite_weekly_plans")
-      .select("week")
-      .eq("player_id", playerId)
-      .eq("notified", false)
-      .gt("unlocks_at", new Date().toISOString())
-      .order("week", { ascending: false })
-      .limit(1)
-      .maybeSingle();
-    week = pending?.week ?? liveWeek + 1;
-    if (opts?.publishNow) {
-      // Automated weekly cron (lib/elite/auto-plan.ts): the new week goes
-      // live the moment it's built, no Monday hold.
-      unlocksAt = new Date().toISOString();
-      goesLiveNow = true;
-    } else {
-      unlocksAt = unlockInstant(nextMondayNY());
-      goesLiveNow = false;
-    }
-  }
+  const sundayEve = isSundayEveNY();
+  // Re-publishing before a scheduled week unlocks REPLACES it (edit
+  // window) - look it up so the rule can target it.
+  const { data: pending } = await supabase
+    .from("elite_weekly_plans")
+    .select("week")
+    .eq("player_id", playerId)
+    .eq("notified", false)
+    .gt("unlocks_at", new Date().toISOString())
+    .order("week", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  // The one rule, in lib/elite/week-target.ts (unit-tested).
+  const target = resolveWeekTarget({
+    firstWeek,
+    liveWeek,
+    maxBuilt,
+    sundayEve,
+    pendingWeek: pending?.week ?? null,
+  });
+  const week = target.week;
+  const goesLiveNow = target.goesLiveNow;
+  const unlocksAt = goesLiveNow ? new Date().toISOString() : unlockInstant(nextMondayNY());
 
   // 1) record the session
   await supabase.from("elite_sessions").insert({
@@ -548,17 +548,32 @@ export async function applyGeneratedPlanCore(
   // weekly/on-upload backfill re-syncs by that id forever after, with no
   // title text matching involved at all once this link exists. Best-effort:
   // no bank, no link, nothing breaks.
+  // Publish-time conformance (the second gate, after sanitize()): the plan
+  // may have been edited by hand in the studio since it was generated, so
+  // every drill is matched to a FILMED bank drill or replaced by one right
+  // here, before a single row is written. Only filmed drills exist to the
+  // publish step - an unfilmed drill cannot reach a player.
+  // No filmed bank, no publish. This used to be a try/catch that fell
+  // through to "publish without a drill link" - which is exactly how a
+  // player gets a week of drills with no videos. Now it throws, the cron
+  // logs it as an error, and the coach gets a text, before any row is
+  // written. (The database refuses such rows too - migration 031.)
   const byTitle = new Map<string, { id: string; video_url: string | null }>();
-  try {
-    const { drills: bank } = await getDrillBank();
-    for (const b of bank) {
-      byTitle.set(normalizeTitle(b.title), { id: b.id, video_url: b.video_url || null });
-    }
-  } catch {
-    // bank unavailable: publish without a drill link
+  const { drills: bank } = await getDrillBank({ onlyWithVideo: true, client: supabase });
+  if (bank.length === 0) {
+    throw new Error("Refusing to publish: the drill bank has no filmed drills reachable");
+  }
+  const sessionsToPublish = conformSessionsToBank(
+    plan.sessions,
+    bank,
+    player ? { has_wall: (player as { has_wall?: boolean | null }).has_wall ?? null } : null,
+    plan.weekly_focus
+  );
+  for (const b of bank) {
+    byTitle.set(normalizeTitle(b.title), { id: b.id, video_url: b.video_url || null });
   }
 
-  const rows = plan.sessions.flatMap((s, si) =>
+  const rows = sessionsToPublish.flatMap((s, si) =>
     s.drills.map((d, di) => {
       const match = byTitle.get(normalizeTitle(d.title));
       return {
@@ -673,7 +688,8 @@ export async function applyGeneratedPlanCore(
 
   if (goesLiveNow) {
     // Live immediately: a player's first week (anchor the program clock
-    // to this NY week's Monday) or a catch-up publish for the live week
+    // to this NY week's Monday - next Monday if today is Sunday, so week
+    // 1 is never a one-day week) or a catch-up publish for the live week
     // (never re-anchor - the calendar keeps counting).
     const first = player?.full_name?.split(" ")[0] ?? "";
     const parentFirst = (player?.parent_name || first || "").trim().split(" ")[0];
@@ -682,7 +698,7 @@ export async function applyGeneratedPlanCore(
       .update({
         current_week: week,
         today_focus: plan.weekly_focus,
-        ...(firstWeek ? { week1_monday: mondayOfWeekNY(0) } : {}),
+        ...(firstWeek ? { week1_monday: mondayOfWeekNY(target.anchorOffsetWeeks) } : {}),
       })
       .eq("id", playerId);
     await supabase.from("elite_notifications").insert({
@@ -720,12 +736,10 @@ export async function applyGeneratedPlanCore(
     }).catch(() => undefined);
 
     // Parent weekly report for the week that just ended. This path
-    // (goesLiveNow) is what the automated Sunday cron always takes
-    // (auto-plan.ts's publishNow:true), and it writes notified:true up
-    // front - so unlockDueWeeks() in unlock.ts, which is the ONLY other
-    // place that sends this, would never see these plans as "due" and
-    // would never send it. Best-effort; a recap failure never blocks the
-    // week from publishing.
+    // (goesLiveNow) writes notified:true up front, so unlockDueWeeks() in
+    // unlock.ts, which sends the same report for Monday-held weeks, never
+    // sees these plans as "due" - the report has to go out from here.
+    // Best-effort; a recap failure never blocks the week from publishing.
     try {
       const recap = await buildParentRecap(playerId, week - 1);
       if (recap) {

@@ -4,9 +4,12 @@ import { getViewer } from "@/lib/elite/session";
 import {
   getCoachInbox,
   getCoachRoster,
+  getLatestCronRun,
   getPlanCoverage,
   getPlayers,
 } from "@/lib/elite/data";
+import { PLAN_BUILDER_JOB } from "@/lib/elite/cron-log";
+import { PlanBuilderStatus } from "@/components/elite/PlanBuilderStatus";
 import { liveWeekNumber, nyDayNumber } from "@/lib/elite/time";
 import { Avatar } from "@/components/Avatar";
 import { StatTile } from "@/components/elite/StatTile";
@@ -24,12 +27,13 @@ export default async function CoachDashboard() {
   const viewer = await getViewer();
 
   // One-call rollup: every player + their loop metrics + what needs a reply.
-  const [roster, inviteCodes, inbox, coverage, players] = await Promise.all([
+  const [roster, inviteCodes, inbox, coverage, players, builderRun] = await Promise.all([
     getCoachRoster(),
     listInviteCodes(),
     getCoachInbox(),
     getPlanCoverage(),
     getPlayers(),
+    getLatestCronRun(PLAN_BUILDER_JOB),
   ]);
 
   // Live week per player from their real start Monday (VA time), falling
@@ -62,6 +66,11 @@ export default async function CoachDashboard() {
   const toBuild = roster.filter(
     (r) => planInfo[r.player_id].state !== "next_ready"
   ).length;
+  // Nothing built for the week they're living in right now - the one
+  // state a player should never be in for more than an hour.
+  const behind = roster
+    .filter((r) => planInfo[r.player_id].state === "no_plan")
+    .map((r) => r.full_name.split(" ")[0]);
 
   const avgHw =
     roster.length > 0
@@ -101,6 +110,8 @@ export default async function CoachDashboard() {
           accent={toAnswer > 0}
         />
       </section>
+
+      {!viewer?.demo && <PlanBuilderStatus run={builderRun} behind={behind} />}
 
       <WeeklyDeposits />
 

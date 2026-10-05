@@ -7,6 +7,7 @@
 // otherwise a deterministic fallback keeps it fully functional.
 
 import Anthropic from "@anthropic-ai/sdk";
+import { ensureSentence } from "./text";
 import {
   PLYO_PILLAR,
   PROGRESS_METRICS,
@@ -15,8 +16,9 @@ import {
   type GeneratedSession,
   type Player,
 } from "./types";
-import { SESSIONS_PER_WEEK, plyoForSession } from "./training";
-import { METHOD_PILLARS, methodologyContext } from "./methodology";
+import { SESSIONS_PER_WEEK } from "./training";
+import { conformSessionsToBank } from "./bank-conform";
+import { EmptyBankError, methodologyContext } from "./methodology";
 
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-4-8";
 
@@ -141,8 +143,8 @@ function clampMin(v: unknown): number {
 }
 
 // The coach's recorded plyo warm-ups (bank pillar "Plyo"), mapped to the
-// homework drill shape. Empty when the bank has none - plyoForSession then
-// falls back to the built-in four.
+// homework drill shape. Empty when the bank has none - then a session has
+// no warm-up row rather than an unfilmed one.
 function plyosFrom(bank?: Drill[]) {
   return (bank ?? [])
     .filter((d) => d.pillar === PLYO_PILLAR)
@@ -190,48 +192,25 @@ function buildSessions(
           notes: d.notes ? String(d.notes) : undefined,
         };
       });
-    if (skills.length === 0) {
-      skills = [
-        {
-          title: "Focus block",
-          exercise: focus,
-          reps: "",
-          minutes: 10,
-          notes: undefined,
-        },
-      ];
-    }
-    // A session is always ~40 minutes: plyo + THREE drills. Pad a thin
-    // session by re-applying its work at game speed, then at full detail.
-    const PADS = [
-      (t: string) =>
-        `Repeat at game speed, tighter space, quicker decisions: ${t.toLowerCase()}`,
-      (t: string) =>
-        `Final block. Slow it down, perfect technique, max focus: ${t.toLowerCase()}`,
-    ];
-    let padIdx = 0;
-    while (skills.length < 3 && padIdx < PADS.length) {
-      skills.push({
-        title: padIdx === 0 ? "Apply under pressure" : "Perfect the detail",
-        exercise: PADS[padIdx](skills[0].title),
-        reps: padIdx === 0 ? "Game speed" : "Slow + perfect",
-        minutes: 10,
-        notes: undefined,
-      });
-      padIdx++;
-    }
+    // Thin or empty sessions are filled from the FILMED bank by
+    // conformSessionsToBank (bank-conform.ts) - never by invented padding
+    // drills ("Apply under pressure", "Focus block"), which used to be
+    // written here and reached real players with no video.
     out.push({
       title: s?.title?.trim() || `Session ${i + 1}`,
       // Recorded bank plyos are single exercises (~4 min each), so a session
-      // opens with TWO back to back for a real ~8-minute warm-up block. The
-      // built-in fallbacks are full circuits, so one of those is enough.
+      // opens with TWO back to back for a real ~8-minute warm-up block when
+      // the bank has enough, one when it has one, none when it has none.
+      // There is no built-in warm-up list anymore.
       drills: [
         ...(plyos && plyos.length >= 2
           ? [
-              { ...plyoForSession(spin + 2 * i + 1, plyos) },
-              { ...plyoForSession(spin + 2 * i + 2, plyos) },
+              { ...plyos[(spin + 2 * i) % plyos.length] },
+              { ...plyos[(spin + 2 * i + 1) % plyos.length] },
             ]
-          : [{ ...plyoForSession(spin + i + 1, plyos) }]),
+          : plyos && plyos.length === 1
+            ? [{ ...plyos[0] }]
+            : []),
         ...skills,
       ],
     });
@@ -250,23 +229,27 @@ function buildSessions(
 // guarantee sanitize() can make for every consumer at once - the templates
 // themselves were fixed separately to build around a complete sentence
 // instead of continuing it.
-function ensureSentence(s: string): string {
-  const t = s.trim();
-  return /[.!?]$/.test(t) ? t : `${t}.`;
-}
-
 function sanitize(
   plan: Partial<GeneratedPlan>,
   player?: Player,
-  plyos?: ReturnType<typeof plyosFrom>
+  bank?: Drill[]
 ): GeneratedPlan {
   const validMetrics = new Set(PROGRESS_METRICS as readonly string[]);
   const weekly_focus = ensureSentence(
     plan.weekly_focus?.trim() || "Sharpen this week's technical focus"
   );
+  // Build, then CONFORM: after this line every drill in the plan is a bank
+  // drill by exact title, or has been replaced by one, and every session
+  // is filled to three skill drills from the bank.
+  const sessions = conformSessionsToBank(
+    buildSessions(plan.sessions, weekly_focus, plyosFrom(bank)),
+    bank,
+    player,
+    weekly_focus
+  );
   return {
     weekly_focus,
-    sessions: buildSessions(plan.sessions, weekly_focus, plyos),
+    sessions,
     parent_update:
       plan.parent_update?.trim() ||
       `${player?.full_name ?? "Your player"} put in strong work this session and has a clear four-session plan for the week ahead.`,
@@ -308,14 +291,12 @@ function fallbackPlan(notes: string, player?: Player, bank?: Drill[]): Generated
   ];
   // One pillar per session, three bank drills each (cycling if short).
   // Wall drills only go to players who told us they have a wall.
-  const bankFor = (pillar: string) => {
-    if (bank && bank.length > 0) {
-      return bank
-        .filter((d) => d.pillar === pillar)
-        .map((d) => ({ title: d.title, how: d.how, reps: d.reps, minutes: d.minutes, cues: d.cues || undefined, needsWall: d.needs_wall }));
-    }
-    return METHOD_PILLARS.find((g) => g.pillar === pillar)?.drills ?? [];
-  };
+  // Filmed bank only. No bank, no plan - same rule as the AI path.
+  if (!bank || !bank.some((d) => d.pillar !== PLYO_PILLAR)) throw new EmptyBankError();
+  const bankFor = (pillar: string) =>
+    bank
+      .filter((d) => d.pillar === pillar)
+      .map((d) => ({ title: d.title, how: d.how, reps: d.reps, minutes: d.minutes, cues: d.cues || undefined, needsWall: d.needs_wall }));
   // A pillar is only schedulable when the bank actually has drills the
   // player can do (wall rules included).
   const usable = (pillar: string) =>
@@ -357,15 +338,9 @@ function fallbackPlan(notes: string, player?: Player, bank?: Drill[]): Generated
     const dryLib = usableLib.filter((d) => !d.needsWall);
     const library =
       wallLib.length > dryLib.length ? wallLib : dryLib.length ? dryLib : usableLib;
-    const drills = Array.from({ length: 3 }, (_, d) => {
-      const src = library[d % Math.max(1, library.length)];
-      return {
-        title: src?.title ?? `${pillar} drill`,
-        exercise: src?.how ?? "Focused reps, full intent",
-        reps: src?.reps ?? "3 x 10",
-        minutes: src?.minutes ?? 10,
-        notes: src?.cues,
-      };
+    const drills = Array.from({ length: Math.min(3, library.length) }, (_, d) => {
+      const src = library[d];
+      return { title: src.title, exercise: src.how, reps: src.reps, minutes: src.minutes, notes: src.cues };
     });
     return { title: `${pillar} day`, drills };
   });
@@ -388,7 +363,7 @@ function fallbackPlan(notes: string, player?: Player, bank?: Drill[]): Generated
       ],
     },
     player,
-    plyosFrom(bank)
+    bank
   );
 }
 
@@ -471,7 +446,7 @@ export async function generatePlanFromNotes(
             : "The AI responded but the plan could not be read. Generate again; if it repeats, check the Vercel logs for [strive-ai] lines.",
         reasonKind: "parse",
       };
-    return { plan: sanitize(parsed, player, plyosFrom(bank)), source: "ai" };
+    return { plan: sanitize(parsed, player, bank), source: "ai" };
   } catch (err) {
     const msg =
       err instanceof Error ? err.message.slice(0, 200) : "unknown error";

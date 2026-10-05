@@ -9,6 +9,15 @@ Read this every session. Update it the moment something here gets done or a
 new open item comes up, don't let it go stale. When Coach Yinka asks "where
 are we," this list IS the answer.
 
+Two lists. OPEN = still to do, short. RECORD = every fix, decision and
+finding, in DATE ORDER (oldest first), each stamped, never edited after
+the fact except to append an outcome. New records go at the END of the
+record with today's date, never mid-list. The git history of this file is
+the audit trail: nothing here can disappear or be reordered without a
+commit.
+
+### OPEN
+
 - [ ] Waiver form in GHL - real liability gap, top priority
 - [ ] Get Gary's one-pager signed
 - [ ] Announce Strive Elite app publicly - don't wait on Gonz's quote
@@ -18,7 +27,62 @@ are we," this list IS the answer.
 - [ ] Confirm PWC field permit is actually granted, not just requested
 - [ ] Migrate the remaining 13 Manus-hosted drill videos to Strive's own
       storage (Neymar Feint done Sept 16, re-trimmed from raw footage)
-- [ ] FOUND + FIXED Sept 29 2026, then made permanent same day (Coach
+- [ ] Sign Teo's Ashburn memo
+- [ ] Set up Skool community (DECIDED Sept 15, refined Sept 15): community
+      only, $9/mo Hobby plan, pinned link to thestriveapp.com for actual
+      training. Skool is not the course, never move training there. Access
+      is OPEN past current paying members: invite old/lapsed clients back
+      in too, it doubles as a reactivation + marketing/proof engine for
+      prospects. Academy's $500 exclusivity stays in its own perks (private
+      monthly breakdown, cap, priority), not in community access.
+- [ ] Get Gonz's quote for the announcement, low-pressure follow-up only
+- [ ] Stamp Hybrid ($400->$500) and 1:1 Monthly ($280->$320) raises, announce
+      alongside the ladder once the founding window closes Oct 1
+- [ ] Confirm CRON_SECRET and GHL_WEBHOOK_SECRET are actually set in
+      Vercel, then flip weekly-plans/digest/onboarding-reminders/
+      autopilot/sync-contacts/ghl-webhook to fail CLOSED (reject) when
+      their secret is unset instead of accepting any caller - see
+      business context below, this is a real open security gap. As of
+      Oct 2 the coach dashboard's Plan builder card says outright whether
+      the last cron run carried a matching CRON_SECRET - if it doesn't
+      warn, CRON_SECRET is set and the flip is safe for the cron routes.
+- [ ] BIGGER GAP found in the Sept 26 parent_name check: none of the 3 real client
+      families (Keith Mauck jr, Elias, Mason Jhaveri) have a parent_phone
+      on file at all. The only phone number in the whole table is Coach
+      Yinka's own (+15712856635, from testing). The entire SMS system
+      works, but has never actually reached a real family - add their
+      numbers via each profile's Intake panel.
+- [ ] From the Sept 26 audit, not yet built - Coach Yinka to prioritize:
+      no error tracking (Sentry or similar) or custom error/loading pages,
+      so a future silent failure like the parent-report one above has no
+      way to surface short of a parent complaining; the elite-film Storage
+      bucket policy (migration 005) is open to any authenticated user with
+      no per-player scoping (currently unused by any real upload flow, but
+      live and insecure by default). (The DST drift on the weekly-plans
+      and digest crons is fixed as of Oct 2 - both decide in NY time now;
+      only onboarding-reminders still shifts an hour, harmless.)
+- [ ] PARKED Oct 3 2026 (Coach Yinka: "no its fine"): injury handling.
+      Today an injury only reaches the plan through free text (coach
+      memory note, player check-in note) - the AI usually steers around
+      it but nothing enforces it; plyo warm-ups are added server-side
+      regardless and bank-conform can swap in any same-pillar drill.
+      Scoped, not built: injury field (area/severity/return date) on the
+      player page, hard builder rules (lower body = no plyos/sprints,
+      rest = no new week), DB guard, auto-lift on return date, player
+      self-flag + coach text, lighter-week parent tone. ~3h core. Pitch
+      language until built: "I adjust every plan around what the player
+      tells me, including injuries" (true via the note), NOT "the app
+      manages injuries".
+
+### RECORD (chronological)
+
+- [x] CHECKED Sept 26 2026 via direct DB query: 3 of 4 real players
+      (Keith Mauck jr, Elias, Mason Jhaveri) already have correct, distinct
+      parent_name values - they weren't hit by the bug above. Only "Remi
+      Bashorun" shows parent_name = the player's own name, and that
+      profile hasn't finished onboarding yet, so it'll self-correct now
+      that the field is required. Nothing further to check here.
+- [x] FOUND + FIXED Sept 29 2026, then made permanent same day (Coach
       Yinka: "i need never again"): elite_homework.video_url was copied in
       once at publish time from whatever the bank had THEN - a video added
       to the bank later never reached an already-published week on its
@@ -49,7 +113,7 @@ are we," this list IS the answer.
       no-video rows are linked correctly but the bank genuinely has no
       video for that drill yet - both will resolve on their own as the
       Manus video migration continues, no further engineering needed.
-- [ ] SHIPPED Sept 29 2026 (Coach Yinka: "ONLY ASSIGN DRILLS FROM THE
+- [x] SHIPPED Sept 29 2026 (Coach Yinka: "ONLY ASSIGN DRILLS FROM THE
       DRILL BANK THAT HAVE VIDEO!"): everything above fixes a video
       reaching homework AFTER a drill gets assigned - this closes the
       other side, never assigning a video-less drill to a real player in
@@ -67,7 +131,7 @@ are we," this list IS the answer.
       no-op in practice (all 35 active drills already have videos,
       confirmed via direct DB query the same day), this is purely
       preventive for the next drill a coach adds before filming it.
-- [ ] FOUND + FIXED Sept 30 2026 (reported directly by Coach Yinka via a
+- [x] FOUND + FIXED Sept 30 2026 (reported directly by Coach Yinka via a
       real screenshot to his own phone - this is a RECURRENCE, he'd
       already flagged something in this family before and been told it
       was fixed when it wasn't): the new_week SMS read "This week is
@@ -94,7 +158,7 @@ are we," this list IS the answer.
       AI happened to output. Verified against the actual reported string
       plus a focus with no trailing period - both render clean, single
       period, no capitalization break. tsc/lint/build all clean.
-- [ ] Strive Complete Pathway - DECIDED Sept 30 2026, Coach Yinka's own
+- [x] Strive Complete Pathway - DECIDED Sept 30 2026, Coach Yinka's own
       calls, supersedes the Sept 29 "group calls standard / 1:1 upsell"
       and "Gary builds a course" plan: NO course modules to start. The
       program is weekly 1:1 Zoom calls where Coach Yinka and Gary give
@@ -109,7 +173,7 @@ are we," this list IS the answer.
       (model decided, number isn't), and Coach Yinka's own weekly Zoom
       slots for these calls (assessment windows are Wed/Thu 6-9pm, Sat
       eve, Sun afternoon - coaching calls need their own time).
-- [ ] SHIPPED Sept 30 2026 - Complete Pathway in the app. The app had a
+- [x] SHIPPED Sept 30 2026 - Complete Pathway in the app. The app had a
       single membership tier (StatusControl.tsx: "Active (full access) or
       not"), so an Elite member could upload film and got the weekly
       parent report exactly like a Complete member. Migration 029 (applied
@@ -135,43 +199,300 @@ are we," this list IS the answer.
       never had film. ACTION for Coach Yinka: flip any family that is
       actually on Complete. Gary has no login yet; Coach Yinka logs every
       call note himself (the coach picker on a call is just a label).
-- [ ] Sign Teo's Ashburn memo
-- [ ] Set up Skool community (DECIDED Sept 15, refined Sept 15): community
-      only, $9/mo Hobby plan, pinned link to thestriveapp.com for actual
-      training. Skool is not the course, never move training there. Access
-      is OPEN past current paying members: invite old/lapsed clients back
-      in too, it doubles as a reactivation + marketing/proof engine for
-      prospects. Academy's $500 exclusivity stays in its own perks (private
-      monthly breakdown, cap, priority), not in community access.
-- [ ] Get Gonz's quote for the announcement, low-pressure follow-up only
-- [ ] Stamp Hybrid ($400->$500) and 1:1 Monthly ($280->$320) raises, announce
-      alongside the ladder once the founding window closes Oct 1
-- [ ] Confirm CRON_SECRET and GHL_WEBHOOK_SECRET are actually set in
-      Vercel, then flip weekly-plans/digest/onboarding-reminders/
-      autopilot/sync-contacts/ghl-webhook to fail CLOSED (reject) when
-      their secret is unset instead of accepting any caller - see
-      business context below, this is a real open security gap.
-- [ ] CHECKED Sept 26 2026 via direct DB query: 3 of 4 real players
-      (Keith Mauck jr, Elias, Mason Jhaveri) already have correct, distinct
-      parent_name values - they weren't hit by the bug above. Only "Remi
-      Bashorun" shows parent_name = the player's own name, and that
-      profile hasn't finished onboarding yet, so it'll self-correct now
-      that the field is required. Nothing further to check here.
-- [ ] BIGGER GAP found in that same check: none of the 3 real client
-      families (Keith Mauck jr, Elias, Mason Jhaveri) have a parent_phone
-      on file at all. The only phone number in the whole table is Coach
-      Yinka's own (+15712856635, from testing). The entire SMS system
-      works, but has never actually reached a real family - add their
-      numbers via each profile's Intake panel.
-- [ ] From the Sept 26 audit, not yet built - Coach Yinka to prioritize:
-      no error tracking (Sentry or similar) or custom error/loading pages,
-      so a future silent failure like the parent-report one above has no
-      way to surface short of a parent complaining; the elite-film Storage
-      bucket policy (migration 005) is open to any authenticated user with
-      no per-player scoping (currently unused by any real upload flow, but
-      live and insecure by default); the weekly-plans/digest crons will
-      silently shift an hour when DST ends ~Nov 1 2026 (vercel.json is
-      fixed UTC, no TZ support).
+- [x] RECURRENCE, FOUND + FIXED FOR REAL Oct 1 2026 (Coach Yinka, with a
+      real player's DM: "I only managed to see the Maradona... I see
+      Ronaldinho drill. And that's it" - two filmed drills in a 16-drill
+      week; "I thought this was fixed!"): the Sept 29 fix above
+      constrained what the AI is SHOWN, not what it OUTPUTS. Three ways an
+      unfilmed drill still reached a player: (1) every live week had been
+      generated BEFORE Sept 29 and was never repaired - the no-video rows
+      were the 20 inactive bank drills (Foundations + sole rolls, Weak-foot
+      strikes, Driven wall passes...), linked by id by the backfill but
+      never filmed; (2) the plyo warm-ups "Pogo & Tuck / Lateral Power /
+      Quick Feet / Explosive" are NOT bank drills - they're
+      lib/elite/training.ts PLYO_WARMUPS, a built-in list that became the
+      warm-up whenever bank plyos weren't passed through; (3) nothing ever
+      checked the AI's drill titles against the bank - a paraphrase, a pad
+      like "Apply under pressure"/"Focus block", or a title typed by hand in
+      the studio all published with no video. THE FIX is on the OUTPUT, in
+      one module, lib/elite/bank-conform.ts: conformSessionsToBank() maps
+      every drill to a filmed bank drill by exact-or-clear-fuzzy title
+      (taking the bank's exact title so the id link always hits) or
+      REPLACES it with a filmed bank drill of the right pillar (wall rule
+      respected, no repeats in a session, pillars with no filmed drills -
+      Scanning, Decision Making, Speed - fall to Ball Mastery/Confidence).
+      It runs at TWO gates: ai-coach.ts sanitize() for every generated
+      plan (AI or fallback), and coach-actions.ts applyGeneratedPlanCore
+      at publish time against the video-only bank, so a hand-edited plan
+      can't bypass it. buildSessions no longer prepends a built-in plyo
+      when a bank exists (two bank plyos, one, or none - never a library
+      one), and the methodology prompt now says titles are copied
+      character-for-character. LIVE WEEKS REPAIRED directly via SQL the
+      same day, previewed row by row first: 46 rows across Abdul Rahim wk
+      1, Elias wk 6, Mason Jhaveri wk 4, Yinka Bash wk 2 - every live week
+      now reads 0 unfilmed / 0 unlinked / 0 inactive (Remi's test week was
+      already clean). completed flags were left as they were.
+- [x] DONE Oct 1 2026 (Coach Yinka: "DELETE ALL DRILLS YOU HAVE THAT DONT
+      HAVE VIDEO"): hard-deleted every drill in elite_drills with no
+      video_url - 22 rows, all of them already inactive (Foundations +
+      sole rolls, Weak-foot patterns / push-pulls / rebounds / strikes,
+      Rebound passing / rhythm, Check and turn, Pass turn pass, Driven
+      wall passes, Scan + touch, Number-call scanning, Half-turn receives,
+      Two-gate finish, 1v1 shadow, Clip study, Move of the day, Chain two
+      moves, Juggling record, Quick feet, Acceleration starts, Reaction
+      starts). They are GONE, not paused - if any of these ever get
+      filmed, the coach re-adds them from /coach/drills as new drills. The
+      bank is now 36 drills, every one with a video (35 active, 1 inactive
+      but filmed). The homework FK is on delete set null, so the delete
+      could only affect rows linked to those drills: verified after the
+      fact that all 5 live weeks (Abdul Rahim wk 1, Elias wk 6, Mason
+      Jhaveri wk 4, Yinka Bash wk 2, Remi wk 1) still read 0 unlinked /
+      0 no-video. The 31 unlinked rows left in the whole table are in old,
+      already-finished weeks only - nothing a player is training on. The
+      earlier "20 inactive drills" wording above is obsolete; there are no
+      unfilmed drills in the bank for the AI, the fallback, or a coach to
+      pick anymore, so the onlyWithVideo filter and bank-conform are now
+      pure insurance for the next drill added before it's filmed.
+- [x] FOUND + FIXED FOR REAL Oct 1-2 2026 (Coach Yinka: "Why don't you
+      fix those errors then? Why ask me first, I already told you my
+      standard"): players were training a STALE week - on Oct 1 Elias was
+      on wk 6 of a clock on wk 7, Mason 4 of 5, Abdul 1 of 2. First read
+      was wrong ("the Sept 27 cron didn't run"). It DID run, 3:32pm ET
+      Sept 27, and built Elias wk 6, Mason wk 4, Abdul wk 1, Yinka wk 2.
+      THE REAL BUG was the targeting rule: applyGeneratedPlanCore's
+      catch-up branch ("live week has no plan -> build the live week, go
+      live now") applied on SUNDAYS too, so the Sunday cron "caught up"
+      the week that had hours left and never built the week starting
+      Monday. Anyone ever behind stayed exactly one week behind forever -
+      and Oct 4 would have done the same thing again. Three structural
+      fixes, all shipped: (1) Sunday is the eve of a new week, never a
+      catch-up day - a plan published on a Sunday (cron OR coach studio)
+      always targets next week, held to Monday 6am ET; a first week
+      published on a Sunday anchors week1_monday to NEXT Monday so week 1
+      is never a one-day week (that's how Abdul ended up on "wk 1 of 2").
+      (2) The cron is now HOURLY (vercel.json "0 * * * *") and decides in
+      NY time what to do: Sunday before 3pm nothing; Sunday 3pm+ build
+      every player's next week; Mon-Sat every hour catch-up only (a player
+      whose live week has no plan gets it within the hour; nothing is
+      pre-built mid-week; a player with no first week gets week 1 on the
+      next run, any day). A failed Sunday run now self-heals Monday
+      morning instead of costing seven days. It also runs unlockDueWeeks()
+      every hour, so the Monday 6am unlock + "week N is live" texts no
+      longer depend on someone opening the app. Hourly + NY-hour check
+      also makes it DST-proof (digest likewise: scheduled 22 AND 23 UTC,
+      sends only at 6pm ET). (3) It can never be silent again: migration
+      030 elite_cron_runs logs every run (built / skipped / errors /
+      whether CRON_SECRET matched), a PlanBuilderStatus card at the top of
+      the coach dashboard shows the latest run and goes RED if the last
+      run is >3h old (cron dead), had errors, ran unauthenticated (=
+      CRON_SECRET unset in Vercel - this answers that open item on sight),
+      or any player is training a stale week - with a "Build missing
+      weeks" button that runs the exact same builder on demand
+      (lib/elite/plan-builder-actions.ts). A run with errors, or one that
+      can't run at all, texts Coach Yinka (+15712856635, override with
+      COACH_ALERT_PHONE) and emails via the coach digest channel.
+      SECOND BUG found on the way, worse: all three elite cron routes
+      (weekly-plans, digest, onboarding-reminders) were being prerendered
+      as STATIC by Next (build output "○", a frozen .body file). Their
+      only dynamic access was req.headers.get() inside "if (secret &&
+      ...)", so with CRON_SECRET unset the handler ran ONCE at build time
+      and every cron hit afterwards got the cached JSON back with nothing
+      executing. All three now export dynamic = "force-dynamic" (build
+      output "ƒ", verified). The fact that Sept 27 built plans at runtime
+      is circumstantial evidence CRON_SECRET IS set in Vercel; the
+      dashboard card now says so definitively after the first cron run.
+      CATCH-UP: the first hourly run after this deploys builds Elias wk 7,
+      Mason wk 5, Abdul wk 2 (and the two test profiles) as live weeks,
+      or Coach Yinka taps "Build missing weeks" on /coach to do it this
+      minute. Behaviour change to know: the cron no longer publishes next
+      week on Sunday afternoon with "week N just went live" texts while
+      the app still shows week N-1 until Monday - it holds to Monday 6am
+      and the texts go out when the week is actually visible. Not
+      independently verified yet: the first real hourly run and the first
+      Monday unlock - check the dashboard card Monday Oct 5 morning.
+- [x] THE ACTUAL ROOT CAUSE, FOUND + FIXED Oct 2 2026 (Coach Yinka: "a
+      system that runs by itself consistently... the app should never
+      regress again. Everything permanent."): the first hourly run of the
+      new builder (10:01am ET Oct 2) built Elias wk 7 with 16 of 16
+      drills UNFILMED and logged no run row. Diagnosis: elite_drills is
+      coach-only under RLS (migration 020) and getDrillBank() read it with
+      the cookie client - the cron has no login, got ZERO rows, and fell
+      through to the built-in starter library (lib/elite/data.ts
+      libraryDrills, no videos). Every cron-built week since Sept 19 was
+      composed from that library; the Sept 29 onlyWithVideo filter and the
+      Oct 1 bank-conform gates were real but had an EMPTY bank to enforce
+      against (onlyWithVideo filtered the library to nothing, conform is a
+      no-op on an empty bank). Manual studio publishes were always fine
+      because the coach is logged in. That is why "I thought this was
+      fixed" kept being true for the studio and false for the cron.
+      Elias wk 7 repaired in place via SQL (16/16 filmed, no-wall drills
+      since has_wall is null). THE SYSTEM NOW, each layer independent of
+      the others so no single future edit can silently undo it:
+      (1) getDrillBank reads with the service client by default and takes
+      an explicit client; onlyWithVideo NEVER returns the library
+      (filmedBankOnly, unit-tested). (2) applyGeneratedPlanCore THROWS when
+      the filmed bank is empty instead of "publishing without a drill
+      link" - a loud failure, logged + texted, before any row is written.
+      (3) Migration 031: a BEFORE INSERT/UPDATE trigger on elite_homework
+      rejects any row without drill_id + video_url - the database itself
+      refuses an unfilmed drill from any code path, present or future.
+      FULLY APPLIED TO PROD: the two elite_cron_runs columns, the guard
+      function, and the trigger on Oct 2 11:10am ET via the Supabase MCP;
+      the elite_duplicate_week replacement (copies drill_id so clone-week
+      inserts pass the guard) on Oct 3 ~6pm ET, pasted by Coach Yinka
+      himself from his phone into the Supabase SQL editor after that one
+      statement timed out five times through the MCP. Verified Oct 3:
+      pg_get_functiondef contains drill_id, trigger present, columns
+      present. Nothing left to apply for 031. (4) Every builder run logs a row at START and
+      updates it per player and at the end (elite_cron_runs.finished) - a
+      crash or Vercel timeout shows as "started, never finished" instead
+      of nothing; that is almost certainly what the 10am run did after
+      Elias (Mason/Abdul/test profiles were never reached, no row).
+      (5) lib/elite/health.ts auditLiveWeeks runs after EVERY build (cron
+      or coach button): every active player has a plan for their live
+      week, every drill in it is linked, filmed, and still active. Issues
+      land on the run row, on the dashboard card in red, and text Coach
+      Yinka - only when the issue set CHANGED vs the previous run, so a
+      standing problem is one text, not one an hour. (6) The daily digest
+      cron is a second, independent watchdog: it adds a line if the
+      builder has never run, has been silent >3h, never finished, or has
+      open problems - the builder cannot report its own absence, this can.
+      (7) CI (.github/workflows/ci.yml, `npm run verify`): typecheck,
+      lint, 23 unit tests (week targeting incl. the Sunday rule, bank
+      conformance, the SMS sentence rule, live-week audit, filmed-bank
+      rule), production build, and a check that no cron route was
+      prerendered static. (8) vercel.json buildCommand runs the same
+      typecheck + tests + build + cron check, so a red build CANNOT
+      deploy to production, independent of GitHub settings. ONE MANUAL
+      STEP for Coach Yinka (one-time, GitHub > Settings > Branches >
+      main): require the "verify" status check before merging. WHAT HAPPENED Oct 2 after deploy: the 10:02am ET hourly run was
+      still the OLD build (Vercel hadn't finished deploying) - it built
+      Mason wk 5 and Abdul wk 2 from the unfilmed library (13 and 12
+      no-video rows) and did log a row. The 11:00am run was the NEW
+      build: "5 already built · audit: 4 issues" - the audit caught
+      exactly those two weeks (its SMS alert to Coach Yinka should have
+      fired; not independently confirmed). Both weeks repaired via SQL
+      11:15am ET, row by row to filmed bank drills (both players have a
+      wall, so wall drills were allowed): every live week now reads
+      0 no-video / 0 unlinked / 0 inactive for all 5 players. The
+      12:00pm run should read "audit clean" with no new text (alerts
+      fire only when the issue set changes). VERIFY
+      ON MONDAY Oct 5: /coach Plan builder card should read "audit clean",
+      Sunday Oct 4 3pm+ runs built everyone's wk N+1, Monday 6am unlock
+      fired (plan rows notified:true, new_week notifications at ~6am).
+- [x] DELETED Oct 2 2026 (Coach Yinka: "I told you to delete any drills
+      that do not have a vid attached. This is the root of the problems"
+      - he was right, and the earlier wording "fell back to the starter
+      library" buried it): the app carried a SECOND set of drills, in
+      CODE, not in the database - lib/elite/methodology.ts METHOD_PILLARS
+      had 7 pillars x ~4 "starter library" drills (Foundations + sole
+      rolls, Driven wall passes, Weak-foot strikes, Scan + touch...),
+      lib/elite/training.ts had four PLYO_WARMUPS circuits (Pogo & Tuck,
+      Lateral Power, Quick Feet, Explosive), ai-coach.ts buildSessions
+      invented padding rows ("Apply under pressure", "Perfect the detail",
+      "Focus block"), and data.ts libraryDrills() turned the whole list
+      into fake bank rows whenever the real bank was unreachable or empty.
+      None of it had a video; none of it was in elite_drills, so the Oct 1
+      hard delete could not touch it; and every "fallback" path reached
+      for it - the AI prompt listed it as the drill menu, fallbackPlan
+      composed from it, buildSessions prepended its plyos. Every unfilmed
+      drill a real player ever saw came from this list. ALL OF IT IS
+      DELETED from the code: METHOD_PILLARS is pillar + coaching lens
+      only (type has no drills field); training.ts exports only
+      SESSIONS_PER_WEEK and the Drill shape; getDrillBank returns an
+      empty list when the bank is unreachable; methodologyContext and
+      fallbackPlan THROW EmptyBankError with no filmed skill drills (no
+      bank = no plan, logged + texted, never an invented one); buildSessions
+      adds no padding and no built-in warm-up (two bank plyos, one, or
+      none); thin sessions are filled to three skill drills FROM THE BANK
+      by conformSessionsToBank. GUARDS so it cannot come back: tests/
+      no-library.test.ts (METHOD_PILLARS has no drills, empty bank throws,
+      prompt lists only bank titles, thin sessions fill from bank) and
+      scripts/check-no-library-drills.sh (greps the Elite app for the
+      old identifiers/titles in code, comments ignored) - both run in CI
+      and in the Vercel buildCommand, so a build that reintroduces any
+      built-in drill cannot deploy. Demo mode with no Supabase now shows
+      an empty drill bank instead of fake drills; production demo reads
+      the real bank. Total unit tests: 27.
+- [x] FIXED Oct 3 2026 (Coach Yinka: "in the onboarding we ask to put the
+      parent phone number twice"): SignupForm requires the parent phone
+      (saved as parent_phone by the redeem route), then OnboardingForm
+      step 5 asked for it again in an empty field. Now the onboarding page
+      passes the signup phone in (knownParentPhone) and step 5 shows "Text
+      updates go to <number>" with a Change link that reveals the input;
+      the empty field appears only when no phone is on file (pre-Sept-26
+      signups). completeOnboarding was already non-destructive (a blank
+      submit never wipes a real number), so no data path changed.
+- [x] DECIDED Oct 4-5 2026 (Coach Yinka): (1) Strive Elite is MONTH TO
+      MONTH, confirmed - "cancel anytime"/"month to month" is safe copy.
+      Stripe product created Oct 4: "Strive Elite", recurring monthly,
+      $249 founding price (default until Nov 2) + $350 standard price.
+      (2) First Strive Elite client closed and paid Oct 4 (Tim; lower
+      back injury, ~50%, wants core/injury-prevention work - see the
+      PARKED injury item; his week 1 should be published from the studio
+      with the plyo rows removed until injury mode exists). (3) PAID ADS
+      RUN A VSL FUNNEL: ad -> thestriveapp.com/demo (VSL + short intake
+      form) -> Carla books the call -> Coach Yinka closes. Coach Yinka
+      will FILM THE VSL BEFORE ANY AD SPEND. VSL is the one place alumni
+      proof may be used (calls + VSL only, never public ads). Structure
+      agreed: who it's for, the three parent fears from the research,
+      "I build every plan" with the app on screen, proof (alumni then
+      founding families), the offer ($249 locked for life by Nov 1, $350
+      after, month to month, same-day refund), one ask (the form). Four to
+      six minutes. Script still to be written. (4) LANDING PAGE: open
+      question whether to rebuild /demo here (recommended: one domain,
+      pixel, GHL form, no Manus dependency) or use the existing Manus
+      landing page "with all our player proof" - if that proof is the
+      alumni list, public use breaks Coach Yinka's own Sept 29 rule;
+      Coach Yinka to send the Manus page/screenshots so the proof can be
+      ported. (5) FIVE STATIC ADS built and delivered (Oct 4-5), sources +
+      finals in marketing/ads/strive-elite-2026-10/: real photos, real
+      bank drills in the app cards with matching progress attribute,
+      proof line ("Founding families are already training on it. Month to
+      month, same-day refund"), ads 1-4 CTA "Watch the video at
+      thestriveapp.com/demo", ad 5 = retargeting offer ad ("$249 a month,
+      locked for life", first public mention of the $350 post-Nov-1
+      price - Coach Yinka saw it and did not object). Known limits: only
+      four drills have local footage (two cone weaves, wall passing,
+      Neymar feint), so ads 2 and 5 both show Neymar Feint until Coach
+      Yinka sends a clip of another move; Manus- and thestriveapp-hosted
+      drill videos are unreachable from this environment.
+- [x] DECIDED Oct 5 2026 (Coach Yinka, via quiz) - PRICING AND SHAPE OF THE
+      TWO OFFERS FOR THE VSL FUNNEL, supersedes the Sept 29 "$1,000/mo"
+      Complete price: STRIVE COMPLETE PATHWAY is a 3-MONTH PROGRAM at
+      $600/mo ($1,800 total) or $1,500 PAID IN FULL. Weekly 1:1 calls with
+      Coach Yinka or Gary + monthly private film breakdown + the app week
+      + weekly parent report; the program IS the calls and film, no
+      separate day-90 deliverable. For 14-18 year olds with a college or
+      academy goal; outcome language is "a clear path and a player ready
+      for the moment", never a roster or scholarship. STRIVE ELITE is app
+      only at $350/mo month to month, founding $249/mo locked for life
+      for anyone who joins by Nov 1 (the VSL says both). Price anchor in
+      the VSL: private sessions math, $80 x 4 a week x 4 weeks = $1,280/mo
+      for sessions alone vs Complete at $600. Guarantee: Coach Yinka said
+      "anytime a full refund is crazy" for a 3-month program - script
+      carries a 14-day full-refund window on Complete, then committed;
+      Elite keeps the same-day refund policy. Alumni named on camera
+      (families to get a heads-up); Gary on camera for ~20s on the
+      overseas path. Remote Academy as a named offer is retired (two
+      offers only, decided Sept 29). FULL SCRIPT WRITTEN:
+      marketing/vsl/strive-complete-vsl-script.md (~8 min, timed, with
+      shot list and the decisions-not-facts list at the bottom).
+- [x] Oct 5 2026 (Coach Yinka: "VSL done"): the VSL is filmed. Gary's part
+      changed from the 20s overseas-path spot in the script to a 30s clip
+      where he introduces himself, explains Strive Elite, and says why it
+      was made - written at marketing/vsl/gary-30s-clip.md (~85 words,
+      Coach Yinka builds the plans, two resume facts max, no promises).
+      Still open before publish: alumni family heads-ups, screen recording
+      of a real week, the on-screen price cards for section 6.
+      OUTCOME same day: first draft rejected (Coach Yinka: "It's not built
+      by coach Yinka, it's he and I put our knowledge together... actually
+      move the prospect emotionally"). Rewritten: Gary's own nights
+      training alone, "that's the part nobody coaches", "Coach Yinka and
+      I put everything we know into one place", "he's getting both of
+      us". FRAMING RULE from this: Strive Elite was built by Coach Yinka
+      AND Gary together, say so; never "built by Coach Yinka" alone when
+      Gary is on camera. The no-AI rule is unchanged.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 
@@ -219,14 +540,13 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
   from $199 on Sept 24 - at $199 the locked-for-life price was too cheap
   relative to the value delivered, risking real long-term revenue given
   every founding member keeps this rate forever).
-- Remote Academy: $600/mo (raised from $500 on Sept 24, same day - hard
-  capped at 15 seats regardless of price, so raising it costs zero volume,
-  and comparable online coaching runs ~$1k/mo with less structure than
-  Academy delivers, so $600 is still a clean ~40% discount to that
-  market). HARD CAP 15 members (say the cap publicly). App + weekly Film
-  Room + monthly private film breakdown + weekly parent report. Call-close
-  only; pitch Academy first on remote calls, downsell to App (currently
-  $249 founding rate through Nov 1, $350/mo after).
+- Strive Complete Pathway (DECIDED Oct 5, replaces Remote Academy as the
+  name and the Sept 29 $1,000/mo figure): 3-month program, $600/mo
+  ($1,800) or $1,500 paid in full. App week + weekly 1:1 call (Coach
+  Yinka or Gary) + monthly private film breakdown + weekly parent report.
+  Call-close only; pitch Complete first, Elite is the downsell. No public
+  seat cap stated (the old Academy cap of 15 is not carried over unless
+  Coach Yinka re-stamps it).
 - Hybrid: $400/mo (PROPOSED raise to $500 alongside ladder, unconfirmed)
 - 1:1 Monthly: PROPOSED raise $280 -> $320 to match $80 rate, unconfirmed
 - Founding window perk: rate locked for life + first film breakdown free;
@@ -276,6 +596,10 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
   change, the copy promise doesn't. AI/automation language is fine ONLY in
   coach-only tooling (drill bank, session notes studio) that players and
   parents never see.
+  Oct 5 2026 clarification (Coach Yinka): Strive Elite was built by Coach
+  Yinka and Gary together, "we put our knowledge together". In any copy
+  that features Gary, it's "we built this" / "both of us", not "built by
+  Coach Yinka". Still never AI.
 - Referral program (PROPOSED Sept 14, unconfirmed - say "stamp it" to lock):
   referring family gets $25 account credit, any tier, no limit on referrals,
   credited once the referred family makes their first payment. No cash
@@ -437,21 +761,21 @@ Game), Angel Romero (ECNL All-American).
   come from somewhere else.
 - App: thestriveapp.com (this repo). Supabase project qjiloadpfeqxxyfozsje.
   Demo tour: login -> "See the app as a player".
-- Weekly plan generation is fully automated (shipped Sept 19 2026, but was a
-  complete silent no-op until fixed Sept 26 - the cron looked up a
-  role='coach' profile to attribute plans to, and the only real account is
-  role='admin', so it matched nobody and quietly did nothing every single
-  run; real players got zero automated plans between Sept 19 and 26,
-  confirmed via direct DB query). Fixed now: a cron builds every active
-  player's new week Sunday 3pm ET and it publishes immediately (no Monday
-  hold), using the player's own homework completion + self-checkin as the
-  "notes" input in place of a coach typing them. Coach Yinka no longer
-  needs to review or approve plans for them to go out. Cron fires at a
-  fixed UTC hour with no DST awareness - correct now (EDT), will read as
-  2pm once DST ends around Nov 1 2026 unless the schedule is bumped an
-  hour. The "I build every plan, I review every plan" copy promise is
-  unchanged per the personalization policy above - this is a backend change
-  only, never say "AI" or "automated" anywhere player/parent-facing.
+- Weekly plan generation is fully automated (shipped Sept 19 2026, silent
+  no-op until Sept 26 - the cron looked up a role='coach' profile and the
+  only real account is role='admin'; then a stale-week bug until Oct 1 -
+  see the open-items entry). CURRENT MODEL (Oct 2 2026): an HOURLY cron
+  (/api/elite/cron/weekly-plans, lib/elite/auto-plan.ts runPlanBuilder)
+  builds every active player's NEXT week on Sunday from 3pm ET, held to
+  Monday 6am ET; Mon-Sat it only catches up a player whose live week has
+  no plan, and gives a brand-new onboarded player week 1 within the hour.
+  Notes input = the player's own homework completion + self-checkin (+
+  Complete Pathway call notes). Coach Yinka never has to approve a plan.
+  Every run is logged (elite_cron_runs) and shown on the coach dashboard;
+  errors text him. The "I build every plan, I review every plan" copy
+  promise is unchanged per the personalization policy above - this is a
+  backend change only, never say "AI" or "automated" anywhere
+  player/parent-facing.
 - Real push notifications shipped Sept 26 2026 (Web Push/VAPID, not a
   native app - no app store needed). Covers new-week-live and coach
   messages so far; everything before this was in-app only, meaning a

@@ -11,10 +11,22 @@ const FEET = ["Right", "Left", "Both"];
 const YES_NO = ["Yes", "No"];
 const GENDERS = ["Boy", "Girl"];
 
-export function OnboardingForm({ defaultName }: { defaultName: string }) {
+export function OnboardingForm({
+  defaultName,
+  knownParentPhone = "",
+}: {
+  defaultName: string;
+  // The parent phone is REQUIRED at signup (SignupForm -> redeem route),
+  // so by the time a family reaches this form we already have it. Show it
+  // as a confirmed line with a "change" link rather than an empty field -
+  // asking for the same number twice reads as sloppy (Coach Yinka, Oct 3
+  // 2026). A blank here means a pre-Sept-26 signup, and then we do ask.
+  knownParentPhone?: string;
+}) {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [editingPhone, setEditingPhone] = useState(false);
 
   const [age, setAge] = useState("");
   const [position, setPosition] = useState("");
@@ -26,7 +38,7 @@ export function OnboardingForm({ defaultName }: { defaultName: string }) {
   const [weaknesses, setWeaknesses] = useState("");
   const [parentName, setParentName] = useState("");
   const [parentEmail, setParentEmail] = useState("");
-  const [parentPhone, setParentPhone] = useState("");
+  const [parentPhone, setParentPhone] = useState(knownParentPhone);
   const [hasWall, setHasWall] = useState("No");
   const [hasGoal, setHasGoal] = useState("No");
   const [assessment, setAssessment] = useState<Record<string, number>>(
@@ -211,15 +223,30 @@ export function OnboardingForm({ defaultName }: { defaultName: string }) {
               className={inputCls}
             />
           </Field>
-          <Field label="Parent contact phone (for text updates)" full>
-            <input
-              type="tel"
-              value={parentPhone}
-              onChange={(e) => setParentPhone(e.target.value)}
-              placeholder="(703) 555-0100"
-              className={inputCls}
-            />
-          </Field>
+          {knownParentPhone && !editingPhone ? (
+            <div className="sm:col-span-2 flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.02] px-4 py-3 text-sm">
+              <span className="text-white/70">
+                Text updates go to <span className="text-bone">{knownParentPhone}</span>
+              </span>
+              <button
+                type="button"
+                onClick={() => setEditingPhone(true)}
+                className="text-xs font-semibold text-accent hover:underline"
+              >
+                Change
+              </button>
+            </div>
+          ) : (
+            <Field label="Parent contact phone (for text updates)" full>
+              <input
+                type="tel"
+                value={parentPhone}
+                onChange={(e) => setParentPhone(e.target.value)}
+                placeholder="(703) 555-0100"
+                className={inputCls}
+              />
+            </Field>
+          )}
         </div>
       </Section>
 

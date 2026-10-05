@@ -3,6 +3,13 @@ import { createServiceClient } from "@/lib/elite/supabase/server";
 import { sendPlayerSMS } from "@/lib/elite/sms";
 
 export const runtime = "nodejs";
+// Never let Next prerender this at build time: a GET route handler with no
+// dynamic access gets built ONCE and served from cache forever after -
+// which here would mean the cron fires every hour and gets a frozen JSON
+// body back without a single line of this file running. Whether the
+// handler touched request headers used to depend on CRON_SECRET being set,
+// so the route was only dynamic by accident. Now it's dynamic on purpose.
+export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 // Nudges families who redeemed an invite code but never finished the

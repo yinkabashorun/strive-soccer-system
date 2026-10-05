@@ -36,23 +36,17 @@ export const METHOD_PRINCIPLES: string[] = [
   "Fewer, deeper reps done with intent beat a long list rushed.",
 ];
 
-// The seven development pillars, each with the coaching lens Strive uses and
-// a starter library of room/yard-friendly drills the AI can draw from.
-// Every drill carries a real prescription: sets x reps, never a bare
-// duration. These are shown to players verbatim when the AI is offline.
-export type PillarDrill = {
-  title: string;
-  how: string; // setup first, then the execution
-  reps: string; // real sets and reps WITH rest where it matters
-  minutes: number; // honest time: work + rest between sets + setup
-  cues?: string; // 2-3 key cues, short and punchy
-  needsWall?: boolean; // only prescribed to players who have a wall (019)
-};
-
+// The seven development pillars and the coaching lens Strive uses for each.
+// THERE IS NO BUILT-IN DRILL LIST. Until Oct 2 2026 this file carried a
+// "starter library" of drills with no videos; whenever the real bank was
+// unreachable the AI, the fallback plan, and the warm-ups all quietly drew
+// from it, and real players got weeks of drills with nothing to watch.
+// Coach Yinka: delete every drill without a video. The ONLY drills in this
+// app are the filmed rows in elite_drills. No bank reachable = no plan
+// (the generator throws, the run logs it, the coach gets a text).
 export type PillarGuide = {
   pillar: ProgressMetric;
   lens: string;
-  drills: PillarDrill[];
 };
 
 // Coach Yinka's 1v1 move library - the named moves every take-on drill
@@ -72,321 +66,60 @@ export const METHOD_PILLARS: PillarGuide[] = [
   {
     pillar: "Ball Mastery",
     lens: "The ball is an extension of the foot. Manipulate, don't kick. Cone work builds the touches; cones or shoes as markers.",
-    drills: [
-      {
-        title: "Inside-outside cone weave",
-        how: "Line of 5 cones a yard apart. Weave through with inside and outside of the foot only, tight touches",
-        reps: "6 x 45 sec on, 45 sec off",
-        minutes: 9,
-        cues: "Small touches, ball close, eyes up between gates",
-      },
-      {
-        title: "La Croqueta cone weave",
-        how: "Line of 5 cones a yard apart. La croqueta at every cone: quick shift foot to foot, glide past. Both directions",
-        reps: "5 x 45 sec on, 45 sec off",
-        minutes: 8,
-        cues: "Quick shift, stay low, accelerate out",
-      },
-      {
-        title: "8-cone freestyle",
-        how: "8 cones scattered in a box. Free dribble, every surface of both feet, one skill move at each cone you pass",
-        reps: "5 x 60 sec on, 45 sec off",
-        minutes: 9,
-        cues: "Never the same move twice, change direction, head up",
-      },
-      {
-        title: "Ronaldinho drill",
-        how: "Ball at your feet, small space. Inside-touch inside-touch between the feet, then a sole roll to reset. Steady rhythm",
-        reps: "4 x 60 sec on, 30 sec off",
-        minutes: 8,
-        cues: "Rhythm over speed, soft touches, eyes up on the last 10",
-      },
-      {
-        title: "Figure-8 dribble",
-        how: "Two cones two yards apart. Tight figure-8 through them, close touches both feet",
-        reps: "6 x 45 sec on, 45 sec off",
-        minutes: 9,
-        cues: "Ball glued to the foot, head up on the straights",
-      },
-      {
-        title: "Foundations + sole rolls",
-        how: "Ball at your feet, small space. Foundations into sole rolls, both feet",
-        reps: "6 x 60 sec on, 40 sec off",
-        minutes: 10,
-        cues: "Eyes up the whole set, quick feet, stay on your toes",
-      },
-    ],
   },
   {
     pillar: "Weak Foot",
     lens: "Two-footed players are twice the problem. Force the weak side.",
-    drills: [
-      {
-        title: "Weak-foot patterns",
-        how: "Line of cones or shoes. Dribble patterns through them, weak foot only",
-        reps: "6 x 45 sec weak foot only, 45 sec off",
-        minutes: 9,
-        cues: "Slow is fine, clean is required, every surface of the foot",
-      },
-      {
-        title: "Weak-foot push-pulls",
-        how: "Ball at your feet, small space. Push-pulls and toe-taps, weak foot only",
-        reps: "4 x 40, rest 30 sec",
-        minutes: 8,
-        cues: "Sole to inside, steady rhythm, eyes up on the last five",
-      },
-      {
-        title: "Weak-foot rebounds",
-        how: "Stand 5 yards from your wall: garage door, brick wall, or fence. Rebound passes, weak side only",
-        reps: "4 x 20, rest 45 sec",
-        minutes: 9,
-        cues: "Cushion the return, firm pass back, ankle locked",
-        needsWall: true,
-      },
-      {
-        title: "Weak-foot strikes",
-        how: "Set a target 10 yards out: a cone, a shoe, a fence post. Strikes with the weak foot, laces only",
-        reps: "4 x 10, collect and reset between sets",
-        minutes: 9,
-        cues: "Plant foot beside the ball, laces, follow through at the target",
-      },
-    ],
   },
   {
     pillar: "Passing",
     lens: "Weight, accuracy, and a scan before every pass. Passing is trained on a wall (garage door, brick wall, fence): the ball must come back. A player with no wall does their passing work in coached sessions, never through watered-down solo substitutes.",
-    drills: [
-      {
-        title: "Rebound passing",
-        how: "Stand 5 yards from your wall: garage door, brick wall, or fence. Firm two-touch passes, both feet",
-        reps: "5 x 20 two-touch, rest 40 sec",
-        minutes: 10,
-        cues: "Scan before the ball arrives, firm pass, first touch out of your feet",
-        needsWall: true,
-      },
-      {
-        title: "Rebound rhythm",
-        how: "Close to the wall, 3 yards. One-touch returns, keep the rally alive",
-        reps: "5 x 45 sec one-touch, 45 sec off",
-        minutes: 8,
-        cues: "On your toes, ankle locked, scan between reps",
-        needsWall: true,
-      },
-      {
-        title: "Pass, turn, pass",
-        how: "5 yards off the wall. Pass with the right, receive on the half-turn, two touches away, pass back with the left. Alternate every rep",
-        reps: "5 x 12, rest 40 sec",
-        minutes: 10,
-        cues: "Scan before the ball comes back, back-foot receive, both feet equal",
-        needsWall: true,
-      },
-      {
-        title: "Driven wall passes",
-        how: "Back up to 15 yards from the wall. Driven passes with pace, control the return before it stops, reset and go again. Both feet",
-        reps: "4 x 10 each foot, rest 40 sec",
-        minutes: 10,
-        cues: "Strike through the ball, kill the return with one touch",
-        needsWall: true,
-      },
-    ],
   },
   {
     pillar: "Scanning",
     lens: "Two shoulder checks before every touch. Make it automatic.",
-    drills: [
-      {
-        title: "Scan + touch",
-        how: "Ball at your feet, open space. Shoulder-check before every touch in a dribble pattern",
-        reps: "5 x 45 sec on, 45 sec off",
-        minutes: 8,
-        cues: "Check both shoulders, say what you saw out loud",
-      },
-      {
-        title: "Check and turn",
-        how: "Box of 4 cones, 5 yards apart. Dribble to the middle, shoulder-check both ways, then exit through a different side every rep",
-        reps: "4 x 10 turns, rest 30 sec",
-        minutes: 8,
-        cues: "Check both shoulders, decide from what you saw, never the same exit twice",
-      },
-      {
-        title: "Half-turn receives",
-        how: "Roll the ball out in front of you. Receive on the half-turn away from imagined pressure, first touch out of your feet into space",
-        reps: "3 x 15, reset after every receive",
-        minutes: 10,
-        cues: "Shoulder-check before the ball arrives, open your hips, touch into space",
-      },
-    ],
   },
   {
     pillar: "Decision Making",
     lens: "Right choice, right time. Read the cue, then act.",
-    drills: [
-      {
-        title: "Two-gate finish",
-        how: "Two gates of cones or shoes, 5 yards apart. Attack the middle, pick one gate late, and explode through it",
-        reps: "5 x 8, walk-back reset each rep",
-        minutes: 10,
-        cues: "Decide late, commit fully, burst through the gate",
-      },
-      {
-        title: "1v1 shadow",
-        how: "One cone as the defender. Dribble at it, commit it with a move, then decide: exit left, exit right, or stop and shield",
-        reps: "4 x 10, rest 40 sec",
-        minutes: 9,
-        cues: "Sell the move, decide on the way in, never the same exit twice",
-      },
-      {
-        title: "Clip study",
-        how: "Pull up a full match or extended highlights of a pro in your position. Watch them off the ball, note three decisions they made early",
-        reps: "10 focused minutes, 3 takeaways written down",
-        minutes: 10,
-        cues: "Watch the player, not the ball, steal one habit tomorrow",
-      },
-    ],
   },
   {
     pillar: "Confidence",
     lens: `Bravery on the ball is trained. Reps remove fear. The Strive 1v1 move library: ${ONE_V_ONE_MOVES.join(", ")}. Every take-on drill names a real move from this list and follows the Strive pattern: the cone is the defender, dribble at it, hit the move right at the cone, explode past.`,
-    drills: [
-      // The 1v1 Moves Series from the Strive course deck: one drill per
-      // named move, all on the same pattern - the cone is the defender.
-      {
-        title: "Neymar Feint",
-        how: "Open space or a single cone as the defender. Dribble forward, stop abruptly, and drop your shoulder in the opposite direction. Explode forward past the defender",
-        reps: "3 x 12 each side, rest 45 sec",
-        minutes: 9,
-        cues: "Sell the fake, drop shoulder, explode out",
-      },
-      {
-        title: "Body Feint",
-        how: "One cone as the defender, 10 yards of run-up. Dribble at the cone, plant and dip your shoulder one way, take the ball the other way with the outside of the opposite foot",
-        reps: "3 x 12 each side, rest 45 sec",
-        minutes: 9,
-        cues: "Dip the shoulder, eyes sell it, cut sharp",
-      },
-      {
-        title: "Maradona",
-        how: "One cone as the defender. Dribble in, stop the ball with one sole, spin 180 over it, drag it away with the other sole and accelerate out",
-        reps: "3 x 12 each side, rest 45 sec",
-        minutes: 9,
-        cues: "Stay low through the spin, body between ball and defender, exit at speed",
-      },
-      {
-        title: "Mbappe Chop",
-        how: "One cone as the defender, attack it with speed. Light hop and chop the ball behind your plant leg with the inside of the foot, cutting across the defender",
-        reps: "3 x 12 each side, rest 45 sec",
-        minutes: 9,
-        cues: "Chop late, cut across his feet, first touch forward",
-      },
-      {
-        title: "La Croqueta",
-        how: "One cone as the defender. Dribble at it and shift the ball from one foot to the other in one quick motion, sliding past the cone",
-        reps: "3 x 12 each side, rest 45 sec",
-        minutes: 9,
-        cues: "One clean shift, tight feet, burst the moment it moves",
-      },
-      {
-        title: "Elastico",
-        how: "One cone as the defender. Push the outside of your foot into the ball, then snap it back inside in one fluid touch and go past",
-        reps: "3 x 12 each side, rest 45 sec",
-        minutes: 9,
-        cues: "One motion, sell the outside push, snap inside late",
-      },
-      {
-        title: "Reverse Elastico",
-        how: "One cone as the defender. Fake inside with the inside of the foot, then snap the ball outside in one motion and accelerate away",
-        reps: "3 x 12 each side, rest 45 sec",
-        minutes: 9,
-        cues: "Sell the inside fake, snap out, go",
-      },
-      {
-        title: "Stepover",
-        how: "One cone as the defender. Circle your foot over and around the ball to sell the cut, then take it the other way with the outside of the opposite foot",
-        reps: "3 x 12 each side, rest 45 sec",
-        minutes: 9,
-        cues: "Big sell, low hips, explode off the fake",
-      },
-      {
-        title: "Chain two moves",
-        how: "Two cones 5 yards apart. Dribble at the first, hit move one, attack the second, hit move two: stepover into the chop, body feint into la croqueta",
-        reps: "4 x 10 full speed, rest 40 sec",
-        minutes: 9,
-        cues: "Defenders stop one move, not two, accelerate between cones",
-      },
-      {
-        title: "1v1 freestyle",
-        how: "One cone as the defender, full run-up. Dribble at it with speed, sell any move from the library right at the cone, explode past",
-        reps: "5 x 8 full speed, walk-back reset",
-        minutes: 10,
-        cues: "No hesitation, no repeats back to back, game speed only",
-      },
-      {
-        title: "Juggling record",
-        how: "Just you and the ball. Beat yesterday's best number, any surface counts",
-        reps: "6 record attempts, rest as needed",
-        minutes: 8,
-        cues: "Soft touches, knees bent, reset calmly after a drop",
-      },
-    ],
   },
   {
     pillar: "Speed",
     lens: "Explosive first steps and quick feet, not just top speed.",
-    drills: [
-      {
-        title: "Quick feet",
-        how: "Any line on the ground. Fast feet over and back, minimal ground contact",
-        reps: "8 x 20 sec on, 40 sec off",
-        minutes: 8,
-        cues: "Think hot floor, stay on the balls of your feet, arms pumping",
-      },
-      {
-        title: "Acceleration starts",
-        how: "Two markers 5 yards apart. Explode from a standstill to the far marker, walk back",
-        reps: "8 sprints, walk back for full recovery",
-        minutes: 10,
-        cues: "Low first step, drive the arms, full recovery every rep",
-      },
-      {
-        title: "Reaction starts",
-        how: "Athletic stance, 10 yards of space. Toss the ball out in front of you and sprint the instant it hits the ground",
-        reps: "6 starts, full recovery between",
-        minutes: 8,
-        cues: "React, don't anticipate, first step forward never up",
-      },
-    ],
   },
 ];
 
 // Builds the methodology block injected into the AI coach's system prompt so
-// every generated plan follows the Strive method. When the coach's drill
-// bank is passed, the AI composes strictly from it; without one it uses the
-// built-in library the same way.
+// every generated plan follows the Strive method. The AI composes STRICTLY
+// from the coach's filmed drill bank passed in. With no skill drills in it
+// there is nothing legitimate to prescribe, so this throws rather than
+// handing the AI anything else - a plan built from invented drills is worse
+// than no plan, and the failure is logged and texted to the coach.
+export class EmptyBankError extends Error {
+  constructor() {
+    super("No filmed skill drills in the drill bank - refusing to build a plan");
+    this.name = "EmptyBankError";
+  }
+}
+
 export function methodologyContext(bank?: Drill[]): string {
   const principles = METHOD_PRINCIPLES.map((p) => `- ${p}`).join("\n");
   const lensFor = (pillar: string) =>
     METHOD_PILLARS.find((g) => g.pillar === pillar)?.lens ?? "";
   const grouped = new Map<string, { title: string; how: string; reps: string; minutes: number; cues: string; wall: boolean }[]>();
-  if (bank && bank.length > 0) {
-    for (const d of bank) {
-      // Plyo warm-ups are prepended server-side; the AI must never see
-      // them as prescribable skill drills.
-      if (d.pillar === PLYO_PILLAR) continue;
-      const list = grouped.get(d.pillar) ?? [];
-      list.push({ title: d.title, how: d.how, reps: d.reps, minutes: d.minutes, cues: d.cues, wall: d.needs_wall });
-      grouped.set(d.pillar, list);
-    }
+  for (const d of bank ?? []) {
+    // Plyo warm-ups are prepended server-side; the AI must never see
+    // them as prescribable skill drills.
+    if (d.pillar === PLYO_PILLAR) continue;
+    const list = grouped.get(d.pillar) ?? [];
+    list.push({ title: d.title, how: d.how, reps: d.reps, minutes: d.minutes, cues: d.cues, wall: d.needs_wall });
+    grouped.set(d.pillar, list);
   }
-  // No bank, or a bank holding only plyo warm-ups: compose from the
-  // built-in library so the AI is never handed an empty bank.
-  if (grouped.size === 0) {
-    for (const g of METHOD_PILLARS) {
-      grouped.set(
-        g.pillar,
-        g.drills.map((d) => ({ title: d.title, how: d.how, reps: d.reps, minutes: d.minutes, cues: d.cues ?? "", wall: Boolean(d.needsWall) }))
-      );
-    }
-  }
+  if (grouped.size === 0) throw new EmptyBankError();
   const pillars = Array.from(grouped.entries())
     .map(
       ([pillar, drills]) =>
@@ -407,6 +140,12 @@ Weekly structure:
 - ${METHOD_STRUCTURE.sessionsPerWeek} sessions that week, about ${METHOD_STRUCTURE.minutesPerSession} minutes each.
 - Every session opens with a ${METHOD_STRUCTURE.warmupMinutes}-minute room plyometric warm-up (added automatically).
 - ${METHOD_STRUCTURE.skillDrillsPerSession} focused skill drills per session. Fewer, deeper reps, ${METHOD_STRUCTURE.setting}.
+- DRILL TITLES (strict): every drill's title is copied EXACTLY, character for
+  character, from the drill list below. Never rename, shorten, combine, or
+  invent a drill. If no listed drill fits, pick the closest listed drill and
+  put the adjustment in its notes. A title that is not in the list is
+  replaced by the system before the player sees it, so inventing one only
+  loses your intent.
 
 Equipment rule (strict): assume the player has ONLY ${METHOD_STRUCTURE.assumedEquipment}.
 The player's TRAINING ENVIRONMENT line (in the user message) is a HARD

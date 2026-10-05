@@ -323,3 +323,19 @@ export type Achievement = {
   icon: string; // lucide icon name
   earned_at: string;
 };
+
+// One run of a background job (030). The coach dashboard shows the latest
+// plan-builder row so a run that did nothing is never invisible.
+export type CronRun = {
+  id: string;
+  job: string;
+  ran_at: string;
+  trigger: "cron" | "coach" | "skipped";
+  authed: boolean;
+  built: number;
+  skipped: number;
+  errors: { name: string; error: string }[];
+  issues: { name: string; issue: string }[]; // live-week audit (031)
+  summary: string;
+  finished: boolean; // false = started, never completed (crash/timeout)
+};

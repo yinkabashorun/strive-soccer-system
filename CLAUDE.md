@@ -528,6 +528,17 @@ commit.
       every future week around it. The injury-mode build stays PARKED;
       the note is the mechanism until then, and bank-conform can still
       place a bank plyo in a future week - check his week 2 next Monday.
+      REVERSED 5:05pm ET same day (Coach Yinka: "Can you put those exact
+      plyos back?"): all 8 plyo rows re-inserted into Tim's week 1 in the
+      exact original sessions and order, copied field for field from the
+      bank (drill_id + current video_url, so they pass the filmed guard),
+      every one with a video. The coach_memory injury note was LEFT IN
+      PLACE (it only shapes future weeks and says "until Coach Yinka
+      clears it"); if the plyos are fine for him, Coach Yinka should
+      edit or clear that note on Tim's player page or the Sunday build
+      will keep steering around plyos. Lesson: removing drills from a
+      live week is the coach's call, not mine, even with an injury on
+      file - flag it, don't do it.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

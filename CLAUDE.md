@@ -423,6 +423,40 @@ commit.
       the empty field appears only when no phone is on file (pre-Sept-26
       signups). completeOnboarding was already non-destructive (a blank
       submit never wipes a real number), so no data path changed.
+- [x] DECIDED Oct 4-5 2026 (Coach Yinka): (1) Strive Elite is MONTH TO
+      MONTH, confirmed - "cancel anytime"/"month to month" is safe copy.
+      Stripe product created Oct 4: "Strive Elite", recurring monthly,
+      $249 founding price (default until Nov 2) + $350 standard price.
+      (2) First Strive Elite client closed and paid Oct 4 (Tim; lower
+      back injury, ~50%, wants core/injury-prevention work - see the
+      PARKED injury item; his week 1 should be published from the studio
+      with the plyo rows removed until injury mode exists). (3) PAID ADS
+      RUN A VSL FUNNEL: ad -> thestriveapp.com/demo (VSL + short intake
+      form) -> Carla books the call -> Coach Yinka closes. Coach Yinka
+      will FILM THE VSL BEFORE ANY AD SPEND. VSL is the one place alumni
+      proof may be used (calls + VSL only, never public ads). Structure
+      agreed: who it's for, the three parent fears from the research,
+      "I build every plan" with the app on screen, proof (alumni then
+      founding families), the offer ($249 locked for life by Nov 1, $350
+      after, month to month, same-day refund), one ask (the form). Four to
+      six minutes. Script still to be written. (4) LANDING PAGE: open
+      question whether to rebuild /demo here (recommended: one domain,
+      pixel, GHL form, no Manus dependency) or use the existing Manus
+      landing page "with all our player proof" - if that proof is the
+      alumni list, public use breaks Coach Yinka's own Sept 29 rule;
+      Coach Yinka to send the Manus page/screenshots so the proof can be
+      ported. (5) FIVE STATIC ADS built and delivered (Oct 4-5), sources +
+      finals in marketing/ads/strive-elite-2026-10/: real photos, real
+      bank drills in the app cards with matching progress attribute,
+      proof line ("Founding families are already training on it. Month to
+      month, same-day refund"), ads 1-4 CTA "Watch the video at
+      thestriveapp.com/demo", ad 5 = retargeting offer ad ("$249 a month,
+      locked for life", first public mention of the $350 post-Nov-1
+      price - Coach Yinka saw it and did not object). Known limits: only
+      four drills have local footage (two cone weaves, wall passing,
+      Neymar feint), so ads 2 and 5 both show Neymar Feint until Coach
+      Yinka sends a clip of another move; Manus- and thestriveapp-hosted
+      drill videos are unreachable from this environment.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

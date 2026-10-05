@@ -457,6 +457,27 @@ commit.
       Neymar feint), so ads 2 and 5 both show Neymar Feint until Coach
       Yinka sends a clip of another move; Manus- and thestriveapp-hosted
       drill videos are unreachable from this environment.
+- [x] DECIDED Oct 5 2026 (Coach Yinka, via quiz) - PRICING AND SHAPE OF THE
+      TWO OFFERS FOR THE VSL FUNNEL, supersedes the Sept 29 "$1,000/mo"
+      Complete price: STRIVE COMPLETE PATHWAY is a 3-MONTH PROGRAM at
+      $600/mo ($1,800 total) or $1,500 PAID IN FULL. Weekly 1:1 calls with
+      Coach Yinka or Gary + monthly private film breakdown + the app week
+      + weekly parent report; the program IS the calls and film, no
+      separate day-90 deliverable. For 14-18 year olds with a college or
+      academy goal; outcome language is "a clear path and a player ready
+      for the moment", never a roster or scholarship. STRIVE ELITE is app
+      only at $350/mo month to month, founding $249/mo locked for life
+      for anyone who joins by Nov 1 (the VSL says both). Price anchor in
+      the VSL: private sessions math, $80 x 4 a week x 4 weeks = $1,280/mo
+      for sessions alone vs Complete at $600. Guarantee: Coach Yinka said
+      "anytime a full refund is crazy" for a 3-month program - script
+      carries a 14-day full-refund window on Complete, then committed;
+      Elite keeps the same-day refund policy. Alumni named on camera
+      (families to get a heads-up); Gary on camera for ~20s on the
+      overseas path. Remote Academy as a named offer is retired (two
+      offers only, decided Sept 29). FULL SCRIPT WRITTEN:
+      marketing/vsl/strive-complete-vsl-script.md (~8 min, timed, with
+      shot list and the decisions-not-facts list at the bottom).
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 
@@ -504,14 +525,13 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
   from $199 on Sept 24 - at $199 the locked-for-life price was too cheap
   relative to the value delivered, risking real long-term revenue given
   every founding member keeps this rate forever).
-- Remote Academy: $600/mo (raised from $500 on Sept 24, same day - hard
-  capped at 15 seats regardless of price, so raising it costs zero volume,
-  and comparable online coaching runs ~$1k/mo with less structure than
-  Academy delivers, so $600 is still a clean ~40% discount to that
-  market). HARD CAP 15 members (say the cap publicly). App + weekly Film
-  Room + monthly private film breakdown + weekly parent report. Call-close
-  only; pitch Academy first on remote calls, downsell to App (currently
-  $249 founding rate through Nov 1, $350/mo after).
+- Strive Complete Pathway (DECIDED Oct 5, replaces Remote Academy as the
+  name and the Sept 29 $1,000/mo figure): 3-month program, $600/mo
+  ($1,800) or $1,500 paid in full. App week + weekly 1:1 call (Coach
+  Yinka or Gary) + monthly private film breakdown + weekly parent report.
+  Call-close only; pitch Complete first, Elite is the downsell. No public
+  seat cap stated (the old Academy cap of 15 is not carried over unless
+  Coach Yinka re-stamps it).
 - Hybrid: $400/mo (PROPOSED raise to $500 alongside ladder, unconfirmed)
 - 1:1 Monthly: PROPOSED raise $280 -> $320 to match $80 rate, unconfirmed
 - Founding window perk: rate locked for life + first film breakdown free;

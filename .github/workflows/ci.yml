@@ -7,7 +7,17 @@ name: CI
 on:
   push:
     branches: ["**"]
+    # Marketing assets and the business-facts file never touch the app.
+    # Skipping them keeps a burst of graphic tweaks from flooding the
+    # runner queue (Oct 5: 14 pushes in 10 min, one run cancelled as a
+    # result, nothing wrong with the code).
+    paths-ignore:
+      - "marketing/**"
+      - "CLAUDE.md"
   pull_request:
+    paths-ignore:
+      - "marketing/**"
+      - "CLAUDE.md"
 
 jobs:
   verify:

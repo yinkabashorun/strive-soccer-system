@@ -511,6 +511,23 @@ commit.
       status active - so no week has been built for him; he needs to
       redeem his invite and be flipped active, then the next hourly run
       gives him week 1.
+      CORRECTION 4:55pm same day (Coach Yinka's screenshot): WRONG, my
+      roster query filtered to status active. Tim Kovalev IS in the
+      roster (onboarded Oct 4 11:05am ET, parent Tatsiana, parent phone
+      on file, has a wall), week 1 built Oct 4 8:37pm ET anchored to
+      Monday Oct 5, 20 drills, 0 unfilmed, new_week text already sent.
+      His subscription_status is "none", so the app's membership gate
+      blocks him until Coach Yinka taps Active on his player page (he
+      paid Oct 4). ALSO his week 1 carried 8 plyo rows (lateral hops,
+      broad jumps, pogo, Bulgarian split jumps, squat jumps, lunge jumps,
+      step-down hops) with a lower back injury at ~50%: deleted all 8
+      via SQL at 4:58pm ET (12 skill drills remain, 3 per session) and
+      set his coach_memory note to "lower back, ~50%, no plyos / jumping
+      / sprints / spine loading until cleared, own pace, add core and
+      injury-prevention where possible" so the Sunday builder steers
+      every future week around it. The injury-mode build stays PARKED;
+      the note is the mechanism until then, and bank-conform can still
+      place a bank plyo in a future week - check his week 2 next Monday.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

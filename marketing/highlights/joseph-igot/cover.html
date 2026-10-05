@@ -4,29 +4,26 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:1080px;height:1920px;background:#0d0d0d;overflow:hidden}
-.frame{position:relative;width:1080px;height:1920px;background:#0d0d0d}
-.band{position:absolute;left:0;top:500px;width:1080px;height:1094px;overflow:hidden;background:#0d0d0d}
-.band img{position:absolute;width:1274px;height:auto;left:-97px;top:-340px;display:block}
-.band .shade{position:absolute;left:0;right:0;bottom:0;height:520px;
-  background:linear-gradient(to top,rgba(13,13,13,.86) 0%,rgba(13,13,13,.55) 45%,rgba(13,13,13,0) 100%)}
-.band .top{position:absolute;left:0;right:0;top:0;height:220px;
-  background:linear-gradient(to bottom,rgba(13,13,13,.5) 0%,rgba(13,13,13,0) 100%)}
-.handle{position:absolute;left:56px;top:552px;font-family:'Barlow';font-weight:600;font-size:30px;
+.frame{position:relative;width:1080px;height:1920px;background:#0d0d0d;overflow:hidden}
+.frame>img{position:absolute;left:0;top:0;width:1080px;height:1920px;object-fit:cover;object-position:50% 40%;display:block}
+.shade{position:absolute;left:0;right:0;bottom:0;height:760px;
+  background:linear-gradient(to top,rgba(13,13,13,.88) 0%,rgba(13,13,13,.55) 45%,rgba(13,13,13,0) 100%)}
+.top{position:absolute;left:0;right:0;top:0;height:320px;
+  background:linear-gradient(to bottom,rgba(13,13,13,.55) 0%,rgba(13,13,13,0) 100%)}
+.handle{position:absolute;left:56px;top:76px;font-family:'Barlow';font-weight:600;font-size:30px;
   letter-spacing:.18em;color:#fff;text-transform:uppercase;padding-bottom:10px;border-bottom:2px solid #c8a858}
-.ring{position:absolute;right:56px;top:532px;width:112px;height:112px;border-radius:50%;
+.ring{position:absolute;right:56px;top:56px;width:112px;height:112px;border-radius:50%;
   border:2px dotted rgba(255,255,255,.75);display:flex;align-items:center;justify-content:center}
 .ring img{width:84px;height:84px;object-fit:contain}
-.eyebrow{position:absolute;left:56px;bottom:630px;font-family:'Barlow';font-weight:600;font-size:28px;
+.eyebrow{position:absolute;left:56px;bottom:362px;font-family:'Barlow';font-weight:600;font-size:28px;
   letter-spacing:.3em;color:#c8a858;text-transform:uppercase}
-.headline{position:absolute;left:52px;bottom:362px;font-family:'Barlow Condensed';font-weight:900;
-  font-size:140px;line-height:.86;color:#fff;text-transform:uppercase;letter-spacing:.01em}
+.headline{position:absolute;left:52px;bottom:96px;font-family:'Barlow Condensed';font-weight:900;
+  font-size:150px;line-height:.86;color:#fff;text-transform:uppercase;letter-spacing:.01em}
 </style></head><body>
 <div class="frame">
-  <div class="band">
-    <img src="photo.jpg" alt="">
-    <div class="top"></div>
-    <div class="shade"></div>
-  </div>
+  <img src="photo.jpg" alt="">
+  <div class="top"></div>
+  <div class="shade"></div>
   <div class="handle">@strivesoccerfc</div>
   <div class="ring"><img src="logo-white.png" alt=""></div>
   <div class="eyebrow">Strive Soccer &nbsp;·&nbsp; Player Highlight</div>

@@ -5,20 +5,22 @@
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:1080px;height:1920px;background:#0d0d0d;overflow:hidden}
 .frame{position:relative;width:1080px;height:1920px;background:#0d0d0d;overflow:hidden}
-.frame>img{position:absolute;left:-110px;top:-355px;width:1300px;height:auto;display:block}
-.shade{position:absolute;left:0;right:0;bottom:0;height:720px;
-  background:linear-gradient(to top,rgba(13,13,13,.92) 0%,rgba(13,13,13,.6) 40%,rgba(13,13,13,0) 100%)}
-.top{position:absolute;left:0;right:0;top:0;height:320px;
-  background:linear-gradient(to bottom,rgba(13,13,13,.55) 0%,rgba(13,13,13,0) 100%)}
+.frame>img{position:absolute;left:-130px;top:-360px;width:1340px;height:auto;display:block}
+.top{position:absolute;left:0;right:0;top:0;height:300px;
+  background:linear-gradient(to bottom,rgba(13,13,13,.6) 0%,rgba(13,13,13,0) 100%)}
+.shade{position:absolute;left:0;right:0;bottom:0;height:640px;
+  background:linear-gradient(to top,#0d0d0d 0%,rgba(13,13,13,.92) 28%,rgba(13,13,13,.5) 62%,rgba(13,13,13,0) 100%)}
 .handle{position:absolute;left:56px;top:76px;font-family:'Barlow';font-weight:600;font-size:30px;
   letter-spacing:.18em;color:#fff;text-transform:uppercase;padding-bottom:10px;border-bottom:2px solid #c8a858}
 .ring{position:absolute;right:56px;top:56px;width:112px;height:112px;border-radius:50%;
   border:2px dotted rgba(255,255,255,.75);display:flex;align-items:center;justify-content:center}
 .ring img{width:84px;height:84px;object-fit:contain}
-.eyebrow{position:absolute;left:56px;bottom:262px;font-family:'Barlow';font-weight:600;font-size:28px;
-  letter-spacing:.3em;color:#c8a858;text-transform:uppercase}
-.headline{position:absolute;left:52px;bottom:110px;font-family:'Barlow Condensed';font-weight:900;
-  font-size:150px;line-height:.86;color:#fff;text-transform:uppercase;letter-spacing:.01em}
+.block{position:absolute;left:0;right:0;bottom:104px;text-align:center}
+.rule{width:56px;height:2px;background:#c8a858;margin:0 auto 26px}
+.eyebrow{font-family:'Barlow';font-weight:600;font-size:26px;letter-spacing:.32em;color:#c8a858;
+  text-transform:uppercase;margin-bottom:18px;padding-left:.32em}
+.headline{font-family:'Barlow Condensed';font-weight:900;font-size:164px;line-height:.9;color:#fff;
+  text-transform:uppercase;letter-spacing:.02em;padding-left:.02em}
 </style></head><body>
 <div class="frame">
   <img src="photo.jpg" alt="">
@@ -26,7 +28,10 @@ html,body{width:1080px;height:1920px;background:#0d0d0d;overflow:hidden}
   <div class="shade"></div>
   <div class="handle">@strivesoccerfc</div>
   <div class="ring"><img src="logo-white.png" alt=""></div>
-  <div class="eyebrow">Strive Soccer &nbsp;·&nbsp; Player Highlight</div>
-  <div class="headline">Joseph Igot</div>
+  <div class="block">
+    <div class="rule"></div>
+    <div class="eyebrow">Strive Soccer &nbsp;·&nbsp; Player Highlight</div>
+    <div class="headline">Joseph Igot</div>
+  </div>
 </div>
 </body></html>

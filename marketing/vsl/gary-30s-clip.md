@@ -1,39 +1,36 @@
 # Gary's 30-second clip for the VSL
 
-Gary to camera, phone is fine, good light, same framing as the rest of the
-VSL (if the VSL is horizontal, film horizontal). One take per paragraph,
-cut between. About 85 words, 30 seconds at a normal talking pace. He
-should say it his own way, the facts just need to stay the facts.
+Gary to camera, phone is fine, good light, same orientation as the VSL.
+About 85 words, 30 seconds. One take per paragraph, cut between. He
+should say it his own way. The one thing that has to land: he and Coach
+Yinka built this together, out of what they both know.
 
 Rules: no em dashes, no "AI" or "automated", no roster or scholarship
-promises. Coach Yinka builds the plans, Gary says so.
+promises.
 
 ---
 
 I'm Coach Gary. I played for Armenia's youth national teams and in the
-under-19 Bundesliga with Fortuna Koln, and I coach with Coach Yinka here
-at Strive.
+under-19 Bundesliga. I know exactly what it took to get there. And most of
+it happened alone, at night, when nobody was watching.
 
-Strive Elite is the app. Every Monday your player gets a new training week
-built by Coach Yinka around him. Four sessions, a video for every drill,
-and you get a text on what he did.
+That's the part nobody coaches. So Coach Yinka and I put everything we
+know into one place. Strive Elite.
 
-We made it because the practices were never the problem. The other six
-days were. Now every one of our players has a plan for them.
+Every week your player opens it, he's getting both of us. Not a generic
+plan. Two coaches who've been where he's trying to go, telling him what's
+next.
 
 ---
 
+## Why it's written this way
+
+The first line earns the right to talk. The second line is the wound:
+the kid is alone with it. The third is the two of them closing that gap.
+The last line is the parent picturing their own son opening the app.
+
 ## If he has five more seconds
 
-Add one line at the end, in his own words: "I've seen what happens when a
-player gets that. It's the difference." Anything in that spirit works.
-
-## Facts he can swap in, all on file
-
-- Armenia U19 national team (UEFA U19 qualifiers)
-- Armenia U16 and U17 national teams
-- SC Fortuna Koln U19 (U19 Bundesliga)
-- Captain of VDA
-- Two-time Mid-Atlantic All-Conference First Team
-
-Pick two at most. More than that sounds like a resume, not a coach.
+One line in his own words about a night he remembers training alone.
+Specific beats polished. "I remember doing cone work in a parking lot in
+the dark" does more than any sentence I can write.

@@ -38,8 +38,8 @@ commit.
 - [ ] Get Gonz's quote for the announcement, low-pressure follow-up only
 - [ ] Stamp Hybrid ($400->$500) and 1:1 Monthly ($280->$320) raises, announce
       alongside the ladder once the founding window closes Oct 1
-- [ ] Confirm CRON_SECRET and GHL_WEBHOOK_SECRET are actually set in
-      Vercel, then flip weekly-plans/digest/onboarding-reminders/
+- [ ] CRON_SECRET CONFIRMED SET Oct 5 (every cron run row authed:true).
+      GHL_WEBHOOK_SECRET still unconfirmed. Flip weekly-plans/digest/onboarding-reminders/
       autopilot/sync-contacts/ghl-webhook to fail CLOSED (reject) when
       their secret is unset instead of accepting any caller - see
       business context below, this is a real open security gap. As of
@@ -493,6 +493,24 @@ commit.
       us". FRAMING RULE from this: Strive Elite was built by Coach Yinka
       AND Gary together, say so; never "built by Coach Yinka" alone when
       Gary is on camera. The no-AI rule is unchanged.
+- [x] VERIFIED Oct 5 2026, 4:50pm ET (the "verify on Monday Oct 5" check
+      from the Oct 1-2 entries, prompted by Coach Yinka asking "is the app
+      cooked" after a GitHub CI email): the hourly builder ran every hour
+      today (11am through 4pm ET rows, all finished, authed:true, 0 errors,
+      "5 already built, audit clean"). Sunday Oct 4 built everyone's next
+      week and the Monday 6am unlock fired: Abdul wk 3, Elias wk 8, Mason
+      wk 6, Yinka wk 3, Remi wk 2, each with 20 drills, 0 unfilmed, plan
+      row notified:true. authed:true on every row CONFIRMS CRON_SECRET IS
+      SET in Vercel, so the fail-closed flip for the cron routes is now
+      safe (GHL_WEBHOOK_SECRET still unconfirmed). The CI email ("All jobs
+      were cancelled") was GitHub's runner queue choking on 14 pushes in
+      10 minutes of cover tweaks, one queued run cancelled, no test or
+      build failed, main green. CI now ignores marketing/** and CLAUDE.md
+      pushes so graphics work can't trigger it. NOTE: Tim (closed and paid
+      Oct 4) is NOT in the active roster yet - no elite_players row at
+      status active - so no week has been built for him; he needs to
+      redeem his invite and be flipped active, then the next hourly run
+      gives him week 1.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

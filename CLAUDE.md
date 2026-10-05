@@ -478,6 +478,13 @@ commit.
       offers only, decided Sept 29). FULL SCRIPT WRITTEN:
       marketing/vsl/strive-complete-vsl-script.md (~8 min, timed, with
       shot list and the decisions-not-facts list at the bottom).
+- [x] Oct 5 2026 (Coach Yinka: "VSL done"): the VSL is filmed. Gary's part
+      changed from the 20s overseas-path spot in the script to a 30s clip
+      where he introduces himself, explains Strive Elite, and says why it
+      was made - written at marketing/vsl/gary-30s-clip.md (~85 words,
+      Coach Yinka builds the plans, two resume facts max, no promises).
+      Still open before publish: alumni family heads-ups, screen recording
+      of a real week, the on-screen price cards for section 6.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

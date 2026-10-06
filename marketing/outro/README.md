@@ -18,3 +18,16 @@ Rebuild (src/):
     -crf 17 -pix_fmt yuv420p -c:a aac -b:a 192k -shortest -movflags +faststart out.mp4
 ffmpeg from `pip install imageio-ffmpeg` (the Playwright one has no x264/aac).
 Frame folders are not committed.
+
+## Site-build outro (6.6 s, 60 fps)
+
+- strive-elite-site-build-vertical-1080x1920.mp4
+- strive-elite-site-build-horizontal-1920x1080.mp4
+
+A phone slides up and the /demo page constructs itself inside it: wordmark,
+gold hairline, headline word by word, the four How-it-works cards sliding
+in, four real drill tiles popping, the $350 / $249 offer block, then the
+phone recedes and the STRIVE ELITE end card lands with thestriveapp.com/demo.
+Source: src/site-build.html (timeline in the CSS comment at the top),
+sound: src/sfx-site.py -> src/site.wav. Render with
+  node render.mjs 1080 1920 60 6.6 sb-v 9333 site-build.html

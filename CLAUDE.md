@@ -681,6 +681,10 @@ commit.
       attention"): three short swishes and silence. Phone rises
       (0.05 s), CTA lands (4.55 s), Strive Elite end card (6.3 s).
       No bed, nothing between. Peak -14 dBFS. Both MP4s re-encoded.
+      END CARD (Coach Yinka: "in the outro, add personalized training"):
+      the end card now reads mark / STRIVE ELITE / gold rule /
+      PERSONALIZED TRAINING (white, condensed, rises in at 6.85 s) /
+      thestriveapp.com/demo. Both MP4s re-rendered.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

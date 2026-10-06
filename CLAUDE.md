@@ -633,6 +633,11 @@ commit.
       inside the phone is scaled up (headline 46px, cards/tiles/CTA
       ~16% larger), scroll reduced so the CTA sits low with no dead
       space. The /demo page itself still has its sub-headline.
+      CTA Oct 6 2026 (Coach Yinka): the outro's button is now DM us
+      "TRAIN" (line above it: "Message us on Instagram and we'll build
+      it."). TRAIN is a new Instagram trigger word alongside FALL /
+      PRIVATE / APP; Carla's DM flow needs a TRAIN reply. The /demo page
+      still closes on the GHL form, unchanged.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 
@@ -868,7 +873,8 @@ Game), Angel Romero (ECNL All-American).
   table mapped to Strive's actual features. Read before writing any new VSL,
   ad, or DM script copy.
 - All clients come from Instagram (~230k views/month, posts daily). Trigger words:
-  FALL (group), PRIVATE (1:1s), APP (program). Large training-clip library exists.
+  FALL (group), PRIVATE (1:1s), APP (program), TRAIN (Strive Elite, from
+  the video outro, added Oct 6 2026 - needs a DM reply set up). Large training-clip library exists.
 - Events arm: monthly elite pickup runs (50+ players, last event 86k views,
   reposted by @yslofficial), cash-prize events, Thanksgiving 11v11 tournament
   planned (~$700 buy-in; prize must be % of entries or sponsor-covered, never

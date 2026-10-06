@@ -563,6 +563,20 @@ commit.
       shown). Ads keep linking to /demo. Sign-in is at /login as before.
       npm run verify green (typecheck, lint, 27 tests, build, cron +
       library checks).
+- [x] SHIPPED Oct 6 2026 (Coach Yinka: "add effects and animations, I
+      want it to construct itself and appear"): the landing page now
+      builds itself in. On load the wordmark rises, a gold hairline draws
+      under it, and the headline assembles word by word (the gold "doesn't
+      help much" included). Everything below enters as it scrolls into
+      view: paragraphs rise and unblur, the How-it-works cards, drill
+      tiles, Fair-questions cards and the offer block scale up from 96%
+      with a stagger, the offer's gold rule draws, the form fades in.
+      Built as components/elite/Reveal.tsx (IntersectionObserver +
+      data-in, CSS in globals.css under "Landing-page entrances") so any
+      future section gets it by wrapping in <Reveal>. Reduced-motion
+      users get plain fades. Verified locally with a built next start +
+      headless screenshots at 0.4s (mid-build) and 3s (settled). lint,
+      typecheck, tests, build green.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

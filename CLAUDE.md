@@ -577,6 +577,15 @@ commit.
       users get plain fades. Verified locally with a built next start +
       headless screenshots at 0.4s (mid-build) and 3s (settled). lint,
       typecheck, tests, build green.
+      REVERSED Oct 6 2026, same hour (Coach Yinka: "of course the strive
+      elite should land on the app... JUST LEAVE IT AS /demo"): the root
+      change was a misread. thestriveapp.com/ is the APP's front door
+      again (signed in -> dashboard, otherwise -> /login), exactly as
+      before. The landing page lives ONLY at thestriveapp.com/demo. The
+      animations, the VSL slot (VSL_YOUTUBE_ID in DemoLanding.tsx) and
+      the "Member sign in" link all stay on /demo. "Put the demo page as
+      the site" meant make the /demo page itself look like a real site,
+      not move it to /.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -28,7 +28,7 @@ const send = (method, params = {}) => new Promise((ok) => { const i = ++id; pend
 
 await send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
 await send("Page.enable");
-await send("Page.navigate", { url: "file://" + resolve("outro.html") });
+await send("Page.navigate", { url: "file://" + resolve(process.argv[8] || "outro.html") });
 await new Promise((r) => setTimeout(r, 800));
 await send("Runtime.evaluate", { expression: "window.ready", awaitPromise: true });
 await new Promise((r) => setTimeout(r, 200));

@@ -586,6 +586,18 @@ commit.
       the "Member sign in" link all stay on /demo. "Put the demo page as
       the site" meant make the /demo page itself look like a real site,
       not move it to /.
+- [x] SHIPPED Oct 6 2026 (Coach Yinka: "do what I requested for the
+      graphic. It should be a smooth video with sound effects"): the
+      site-build outro. 6.6 s, 60 fps, MP4 with synthesized SFX, both
+      orientations, in marketing/outro/: a phone slides up and the /demo
+      page constructs itself on screen (wordmark, hairline, headline word
+      by word, the four cards sliding in, four real drill tiles, the
+      $350 / $249-by-Nov-1 offer block), then the phone recedes and the
+      STRIVE ELITE end card lands with thestriveapp.com/demo. Every cue
+      has a sound (whoosh, ticks, card swooshes, thump, chime). This is
+      what "put the demo page as the site" + "construct itself and
+      appear" meant. The earlier 3.6 s logo-only outro stays as a
+      second option.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

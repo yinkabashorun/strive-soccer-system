@@ -5,9 +5,11 @@ import type { Drill } from "@/lib/elite/types";
 import { DrillVideo } from "@/components/elite/DrillVideo";
 import { Wordmark } from "@/components/elite/Wordmark";
 import { Reveal, RevealWords } from "@/components/elite/Reveal";
+import { VslPlayer } from "@/components/elite/VslPlayer";
 
-// Set this to the unlisted YouTube video id once the VSL is uploaded and the
-// video sits above the fold on both / and /demo. Empty = no video section.
+// Set this to the unlisted YouTube video id once the VSL is uploaded. The
+// player autoplays muted above the headline with a "Tap for sound" layer
+// (components/elite/VslPlayer.tsx). Empty = no video section.
 const VSL_YOUTUBE_ID = "";
 
 // This page does the job a VSL usually does: hook, mechanism, proof,
@@ -78,16 +80,8 @@ export async function DemoLanding() {
       <div className="draw-line mt-3 h-px w-24 bg-accent/80" />
 
       {VSL_YOUTUBE_ID ? (
-        <div className="rise-in mt-6 overflow-hidden rounded-2xl border border-white/8 bg-black" style={{ animationDelay: "250ms" }}>
-          <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
-            <iframe
-              className="absolute inset-0 h-full w-full"
-              src={`https://www.youtube-nocookie.com/embed/${VSL_YOUTUBE_ID}?rel=0&modestbranding=1&playsinline=1`}
-              title="Strive Elite"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          </div>
+        <div className="rise-in mt-6" style={{ animationDelay: "250ms" }}>
+          <VslPlayer videoId={VSL_YOUTUBE_ID} />
         </div>
       ) : null}
 

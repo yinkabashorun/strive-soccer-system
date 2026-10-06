@@ -84,8 +84,6 @@ place(mallet(329.63, 1.1), 0.92, 0.22); place(soft_whoosh(0.55, 500, 1800, 10), 
 # headline: rising mallet arpeggio, one tone every other word, very quiet
 arp = [392.0, 440.0, 493.88, 523.25, 587.33, 659.25, 587.33, 659.25, 739.99, 783.99]
 for i, f in enumerate(arp): place(mallet(f, 0.7, 0.01, 0.15), 1.2 + i * 0.11, 0.075, -0.25 + 0.05 * i)
-# paragraph
-place(mallet(261.63, 1.0), 2.12, 0.12)
 # cards slide in: soft dark whooshes, each a little to the right
 for i, at in enumerate([2.5, 2.7, 2.9, 3.1]): place(soft_whoosh(0.38, 220, 1300, 8), at, 0.16, 0.25 - 0.15 * i)
 # drill tiles: four mallet notes, a gentle chord spelled out

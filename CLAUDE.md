@@ -648,6 +648,14 @@ commit.
       falling one as the phone recedes, a big calm rising one for the
       end card), with a near-silent air bed and peaks at -8 dBFS. CTA
       was already DM us "TRAIN". Both MP4s re-encoded.
+      THEN (Coach Yinka: "take off any piano ass audio, it's ads and
+      too loud, I want Nike type audio, calm satisfying swishes"): the
+      "piano" he heard was the FIRST 3.6 s logo-only outro's chime,
+      whose MP4s were still sitting in marketing/outro/ next to the 9 s
+      ones - deleted so there is exactly one final. The 9 s audio cut
+      down further: eight long soft air swishes (phone, headline, cards
+      as one, tiles as one, CTA, sheen, phone out, end card), zero tonal
+      content, no sub swells, peak -14 dBFS / mean -35 dB.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -620,6 +620,13 @@ commit.
       tiles), dark low-passed whooshes, rounder sub thumps, a felt-piano
       chime on the end card, a short room tail on every cue, peaks held
       near -6 dBFS. Both 9 s MP4s re-encoded with it.
+      HEADLINE CHANGED Oct 6 2026 (Coach Yinka): the hook on /demo AND in
+      the outro is now "Team training 3-4x a week is not close to enough
+      to achieve your goals." with "not close to enough" in gold
+      (replaces "Training three or four times a week doesn't help much
+      if it's never the thing your player actually needs work on."). The
+      page and the video share the line on purpose; change both together.
+      Both 9 s MP4s re-rendered; site lint/typecheck/build green.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

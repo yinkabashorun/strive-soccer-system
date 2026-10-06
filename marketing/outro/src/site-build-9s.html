@@ -104,7 +104,7 @@ body.h .screen{padding:60px 22px 0;zoom:.86}
     <div class="screen"><div class="page">
       <div class="row"><img src="logo.png" alt=""><div class="wm">Strive <span class="gold">Elite</span></div></div>
       <div class="hair"></div>
-      <h1 id="h1">Training three or four times a week doesn't help much if it's never the thing your player actually needs work on.</h1>
+      <h1 id="h1">Team training 3-4x a week is not close to enough to achieve your goals.</h1>
       <p class="lead">Team practice is real work, but it's built for the whole group. Strive Elite is the individual layer on top: a weekly plan built around what your player specifically needs.</p>
       <h2 style="animation-delay:2.4s">How it works</h2>
       <div class="cards">
@@ -141,9 +141,9 @@ body.h .screen{padding:60px 22px 0;zoom:.86}
   document.body.className = innerWidth > innerHeight ? "h" : "v";
   // split the headline into words that build in from 1.0 s, 60 ms apart
   const h = document.getElementById("h1");
-  const gold = new Set(["doesn't", "help", "much"]);
+  const gold = new Set([6, 7, 8, 9]); // "not close to enough"
   h.innerHTML = h.textContent.trim().split(" ").map((w, i) =>
-    `<span class="${gold.has(w) ? "gold" : ""}" style="animation-delay:${(1.2 + i * 0.055).toFixed(2)}s">${w}</span>`).join(" ");
+    `<span class="${gold.has(i) ? "gold" : ""}" style="animation-delay:${(1.2 + i * 0.055).toFixed(2)}s">${w}</span>`).join(" ");
   window.seek = function (t) { document.getAnimations().forEach(a => { a.pause(); a.currentTime = t * 1000; }); return true; };
   window.ready = document.fonts.ready.then(() => true);
 </script>

@@ -68,6 +68,7 @@ export function RevealWords({
   text,
   className,
   accent,
+  accentIndexes,
   startDelay = 0,
   step = 55,
 }: {
@@ -75,6 +76,8 @@ export function RevealWords({
   className?: string;
   // words (exact match, case-insensitive) that should render in the accent color
   accent?: string[];
+  // alternatively, 0-based word positions to render in the accent color
+  accentIndexes?: number[];
   startDelay?: number;
   step?: number;
 }) {
@@ -87,12 +90,13 @@ export function RevealWords({
   }, []);
   const words = text.split(" ");
   const acc = new Set((accent ?? []).map((w) => w.toLowerCase()));
+  const accIdx = new Set(accentIndexes ?? []);
   return (
     <span ref={ref} className={cn("rv-words", className)}>
       {words.map((w, i) => (
         <span
           key={`${w}-${i}`}
-          className={cn("rv-word", acc.has(w.toLowerCase().replace(/[^a-z']/g, "")) && "text-accent")}
+          className={cn("rv-word", (accIdx.has(i) || acc.has(w.toLowerCase().replace(/[^a-z']/g, ""))) && "text-accent")}
           style={{ transitionDelay: `${startDelay + i * step}ms` }}
         >
           {w}

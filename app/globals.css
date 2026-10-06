@@ -125,3 +125,67 @@ select {
 .text-balance {
   text-wrap: balance;
 }
+
+/* Landing-page entrances (components/elite/Reveal.tsx). Elements start
+   hidden and transition in when data-in is set. */
+.rv {
+  opacity: 0;
+  transition-property: opacity, transform, filter, clip-path;
+  transition-duration: 0.7s;
+  transition-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+  will-change: opacity, transform;
+}
+.rv-up {
+  transform: translateY(18px);
+  filter: blur(6px);
+}
+.rv-build {
+  transform: translateY(14px) scale(0.96);
+  filter: blur(4px);
+}
+.rv-line {
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition-duration: 0.9s;
+}
+.rv[data-in] {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+.rv-words .rv-word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.45em);
+  filter: blur(5px);
+  transition: opacity 0.55s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.55s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.55s;
+}
+.rv-words[data-in] .rv-word {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+/* The gold hairline that "draws" under the wordmark on load. */
+.draw-line {
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: draw-line 0.9s cubic-bezier(0.65, 0, 0.2, 1) 0.15s both;
+}
+@keyframes draw-line {
+  to { transform: scaleX(1); }
+}
+.rise-in {
+  animation: rise-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(14px); filter: blur(6px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rv, .rv-up, .rv-build, .rv-line, .rv-words .rv-word {
+    transform: none;
+    filter: none;
+    transition-duration: 0.3s;
+  }
+  .draw-line, .rise-in { animation: none; transform: none; opacity: 1; }
+}

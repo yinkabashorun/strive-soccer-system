@@ -612,6 +612,14 @@ commit.
       retimed with an airy sweep for the sheen. Finals:
       marketing/outro/strive-elite-outro-9s-{vertical,horizontal}.mp4
       (the 5 s MP4s removed, source kept).
+      SOUND REDONE same hour (Coach Yinka: "needs to be more soothing
+      sound effects"): the clicky bed replaced by a warm one in
+      sfx-site-9s.py: a low Em9 pad swelling under the whole thing, soft
+      marimba-style mallet tones instead of noise ticks (a rising
+      arpeggio under the headline, a spelled chord under the drill
+      tiles), dark low-passed whooshes, rounder sub thumps, a felt-piano
+      chime on the end card, a short room tail on every cue, peaks held
+      near -6 dBFS. Both 9 s MP4s re-encoded with it.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

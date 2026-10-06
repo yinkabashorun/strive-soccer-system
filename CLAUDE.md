@@ -656,6 +656,13 @@ commit.
       down further: eight long soft air swishes (phone, headline, cards
       as one, tiles as one, CTA, sheen, phone out, end card), zero tonal
       content, no sub swells, peak -14 dBFS / mean -35 dB.
+      LAYOUT Oct 6 2026 (Coach Yinka: "make the videos bigger and the
+      CTA to DM us TRAIN the biggest"): drill tiles now a 2x2 grid of
+      wide 4:3 tiles with bigger play badges and labels; the CTA block
+      is the largest element on the page (38px headline, full-width
+      pill button with DM US "TRAIN" at 36px Barlow Condensed black);
+      scroll ends with the button in the lower third of the phone. Both
+      MP4s re-rendered.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -19,15 +19,18 @@ Rebuild (src/):
 ffmpeg from `pip install imageio-ffmpeg` (the Playwright one has no x264/aac).
 Frame folders are not committed.
 
-## Site-build outro (6.6 s, 60 fps)
+## Site-build outro (5.0 s, 60 fps) - THE ONE TO USE
 
-- strive-elite-site-build-vertical-1080x1920.mp4
-- strive-elite-site-build-horizontal-1920x1080.mp4
+- strive-elite-outro-5s-vertical-1080x1920.mp4
+- strive-elite-outro-5s-horizontal-1920x1080.mp4
 
 A phone slides up and the /demo page constructs itself inside it: wordmark,
 gold hairline, headline word by word, the four How-it-works cards sliding
-in, four real drill tiles popping, the $350 / $249 offer block, then the
-phone recedes and the STRIVE ELITE end card lands with thestriveapp.com/demo.
-Source: src/site-build.html (timeline in the CSS comment at the top),
-sound: src/sfx-site.py -> src/site.wav. Render with
-  node render.mjs 1080 1920 60 6.6 sb-v 9333 site-build.html
+in, four real drill tiles popping, then a CTA block ("Your player's first
+week is waiting." / "Tell us about your player"), no price. The phone
+recedes and the STRIVE ELITE end card lands with thestriveapp.com/demo.
+Source: src/site-build-5s.html (timeline in the CSS at the top), sound:
+src/sfx-site-5s.py -> src/site-5s.wav. Render with
+  node render.mjs 1080 1920 60 5.0 sb-v 9333 site-build-5s.html
+(src/site-build.html + sfx-site.py are the earlier 6.6 s cut with the
+price block, kept as source only, no final committed.)

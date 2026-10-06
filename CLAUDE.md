@@ -598,6 +598,13 @@ commit.
       what "put the demo page as the site" + "construct itself and
       appear" meant. The earlier 3.6 s logo-only outro stays as a
       second option.
+      REVISED same hour (Coach Yinka: "Max like 5 seconds. Smooth outro.
+      Don't have a price just a cta"): cut to 5.0 s, price block replaced
+      by a CTA block ("Your player's first week is waiting." / "Tell me
+      about your player and I'll build it." / button "Tell us about your
+      player"), all cues retimed, SFX retimed. Finals:
+      marketing/outro/strive-elite-outro-5s-{vertical,horizontal}.mp4.
+      The 6.6 s price version's MP4s were removed; its source stays.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

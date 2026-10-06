@@ -638,6 +638,16 @@ commit.
       it."). TRAIN is a new Instagram trigger word alongside FALL /
       PRIVATE / APP; Carla's DM flow needs a TRAIN reply. The /demo page
       still closes on the GHL form, unchanged.
+      AUDIO REDONE AGAIN Oct 6 2026 (Coach Yinka: "the audio is shit, it
+      should be swooshes... calm swoosh type audio"): sfx-site-9s.py is
+      now swoosh-only. No mallets, no pad, no chime, no clicks. Every
+      cue is a soft low-passed air sweep (long rising one for the phone,
+      one long drift under the headline, four soft right-to-center
+      swooshes for the cards, four tiny ones for the tiles, a rise into a
+      soft sub swell for the CTA, a high quiet sweep for the sheen, a
+      falling one as the phone recedes, a big calm rising one for the
+      end card), with a near-silent air bed and peaks at -8 dBFS. CTA
+      was already DM us "TRAIN". Both MP4s re-encoded.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

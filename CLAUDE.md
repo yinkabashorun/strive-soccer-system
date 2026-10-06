@@ -539,6 +539,15 @@ commit.
       will keep steering around plyos. Lesson: removing drills from a
       live week is the coach's call, not mine, even with an injury on
       file - flag it, don't do it.
+- [x] Oct 6 2026 (Coach Yinka: "the VSL is complete and ELITE"): the
+      Strive Complete Pathway VSL is filmed AND edited, done. Funnel
+      status: ads built (5 statics), VSL done, landing page NOT built -
+      /demo with the VSL embed + GHL intake form + pixel is now the only
+      thing between the funnel and launch (decision still open: rebuild
+      /demo here vs the Manus page; recommended here). Still owed before
+      the page goes live: alumni family heads-ups for the names in
+      section 5, and where the VSL is hosted (unlisted YouTube/Vimeo or a
+      file) so it can be embedded.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

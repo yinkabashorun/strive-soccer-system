@@ -696,6 +696,22 @@ commit.
       live. The VSL is too big to send through chat, so hosting is
       YouTube Unlisted (or Vimeo), Coach Yinka to upload from his phone
       and paste the link. lint/typecheck/build green.
+- [x] Oct 6 2026 (Coach Yinka: "give Manus a prompt and all the video
+      links, everything it will need to recreate our landing page, bc it
+      can take the video"): landing-page DECISION resolved toward Manus
+      hosting the VSL page. Brief written at
+      marketing/landing/manus-brief.md: full copy of /demo verbatim
+      (headline, four cards, five drill tiles with public
+      thestriveapp.com/drills/*.mp4 links, fair questions, $350 / $249
+      offer block, the GHL survey embed W14MZotX2vYkpyDPKOY8, member
+      sign-in and privacy/terms links), brand tokens, fonts, the
+      load/scroll motion spec, autoplay-muted + "Tap for sound" VSL
+      behaviour, a Meta Pixel slot, and the hard rules (no AI words, no
+      em dashes, no proof not supplied, no invented numbers). OPEN once
+      the Manus page exists: the five ads and the outro say
+      thestriveapp.com/demo - either keep /demo as the page (set
+      VSL_YOUTUBE_ID) or redirect /demo to the Manus URL so the printed
+      address still works.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -627,6 +627,12 @@ commit.
       if it's never the thing your player actually needs work on."). The
       page and the video share the line on purpose; change both together.
       Both 9 s MP4s re-rendered; site lint/typecheck/build green.
+      LAYOUT Oct 6 2026 (Coach Yinka: "remove the little text below the
+      headline to allow space to make everything else bigger"): in the
+      OUTRO only, the sub-headline paragraph is gone and the whole page
+      inside the phone is scaled up (headline 46px, cards/tiles/CTA
+      ~16% larger), scroll reduced so the CTA sits low with no dead
+      space. The /demo page itself still has its sub-headline.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

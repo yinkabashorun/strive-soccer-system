@@ -605,6 +605,13 @@ commit.
       player"), all cues retimed, SFX retimed. Finals:
       marketing/outro/strive-elite-outro-5s-{vertical,horizontal}.mp4.
       The 6.6 s price version's MP4s were removed; its source stays.
+      REVISED again same hour (Coach Yinka: "it should be longer... 8-10
+      seconds", "that's great"): 9.0 s cut, same build with room to
+      breathe, plus a slow 3D tilt on the phone, a soft gold glow behind
+      it, and a light sheen sweeping the glass before it recedes; SFX
+      retimed with an airy sweep for the sheen. Finals:
+      marketing/outro/strive-elite-outro-9s-{vertical,horizontal}.mp4
+      (the 5 s MP4s removed, source kept).
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

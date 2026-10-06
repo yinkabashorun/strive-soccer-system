@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Script from "next/script";
 import { createServiceClient } from "@/lib/elite/supabase/server";
 import type { Drill } from "@/lib/elite/types";
@@ -65,8 +66,14 @@ export async function DemoLanding() {
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
       {/* Hero assembles on load: wordmark rises, a gold hairline draws under it,
           then the headline builds word by word. */}
-      <div className="rise-in">
+      <div className="rise-in flex items-center justify-between gap-4">
         <Wordmark href={null} size="lg" />
+        <Link
+          href="/login"
+          className="shrink-0 rounded-full border border-white/15 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wider text-white/80 transition-colors hover:border-white/30 hover:text-white"
+        >
+          Member sign in
+        </Link>
       </div>
       <div className="draw-line mt-3 h-px w-24 bg-accent/80" />
 
@@ -166,6 +173,12 @@ export async function DemoLanding() {
 
       <Reveal as="p" delay={200} className="mt-4 text-center text-xs text-white/40">
         or comment / DM &ldquo;ELITE&rdquo; on Instagram
+      </Reveal>
+      <Reveal as="p" delay={260} className="mt-8 text-center text-xs text-white/35">
+        Already a member?{" "}
+        <Link href="/login" className="text-white/70 underline underline-offset-4 hover:text-white">
+          Sign in to your dashboard
+        </Link>
       </Reveal>
     </div>
   );

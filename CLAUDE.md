@@ -685,6 +685,17 @@ commit.
       the end card now reads mark / STRIVE ELITE / gold rule /
       PERSONALIZED TRAINING (white, condensed, rises in at 6.85 s) /
       thestriveapp.com/demo. Both MP4s re-rendered.
+- [x] BUILT Oct 6 2026 (Coach Yinka: "I want it to auto play though"):
+      the /demo VSL slot now autoplays. components/elite/VslPlayer.tsx
+      uses the YouTube IFrame API: starts muted the instant the page
+      opens (the only autoplay phones and Chrome allow), with a "Tap for
+      sound" layer on top; one tap unmutes, restarts from 0:00, and
+      plays with audio. Falls back to a plain autoplay+mute embed if the
+      API script fails to load. Still gated on VSL_YOUTUBE_ID in
+      DemoLanding.tsx: paste the unlisted YouTube id there and it's
+      live. The VSL is too big to send through chat, so hosting is
+      YouTube Unlisted (or Vimeo), Coach Yinka to upload from his phone
+      and paste the link. lint/typecheck/build green.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

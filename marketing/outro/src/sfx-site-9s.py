@@ -1,4 +1,4 @@
-"""Calm swoosh-only sound bed (Nike-quiet: pure air, no tones, few cues) for site-build-9s.html (9.0 s). Every cue
+"""Three short swishes and silence (phone in, CTA, end card) for site-build-9s.html (9.0 s). Every cue
 is a soft, low-passed air sweep: no clicks, no mallets, no pad, no chime.
 A barely-there air bed keeps the silence from feeling dead. Peaks held
 around -8 dBFS so it never fights a voice."""
@@ -47,28 +47,13 @@ def sub_swell(dur, f=48):
     e = np.sin(np.linspace(0, np.pi, n)) ** 1.5
     return lowpass(np.sin(2 * np.pi * f * x) * e, 120)
 
-# air bed: barely there, dark, fades with the picture
-bed = lowpass(rng.standard_normal(len(t)), 400)
-bed = bed / np.abs(bed).max() * 0.03 * np.clip((t - 0.1) / 1.4, 0, 1) * np.clip((8.9 - t) / 1.0, 0, 1)
-L += bed; R += bed
-
-# Fewer, softer, longer. No tones at all: pure air.
-# 0.00 phone rises: one long low swish, left to right
-pan_sweep(swoosh(1.3, 120, 700, 0.55, 40, 2200), 0.0, 0.5, -0.5, 0.5)
-# 1.15 headline writes itself: one slow drift under the words
-pan_sweep(swoosh(1.5, 350, 1200, 0.55, 40, 2600), 1.12, 0.22, -0.3, 0.3)
-# 2.50 cards: a single longer swish that covers the four slides, right to center
-pan_sweep(swoosh(1.1, 800, 300, 0.4, 40, 2400), 2.45, 0.22, 0.6, 0.0)
-# 3.60 tiles: one light swish stepping left to right
-pan_sweep(swoosh(0.9, 700, 1600, 0.45, 40, 3000), 3.55, 0.14, -0.5, 0.5)
-# 4.70 CTA: a slow rise, no thump
-pan_sweep(swoosh(1.0, 160, 900, 0.6, 40, 2200), 4.5, 0.3, -0.2, 0.2)
-# 5.50 sheen: high whisper across the glass
-pan_sweep(swoosh(1.2, 1400, 2800, 0.5, 40, 4000), 5.45, 0.07, -0.8, 0.8)
-# 6.00 phone recedes: falling swish
-pan_sweep(swoosh(0.9, 1100, 140, 0.35, 40, 2200), 6.0, 0.24, 0.2, -0.2)
-# 6.40 end card: one big slow swish that opens wide, nothing else
-pan_sweep(swoosh(1.7, 160, 1100, 0.6, 50, 2600), 6.3, 0.4, -0.6, 0.6)
+# No bed. Three short swishes only, at the three moments that matter.
+# 0.00 phone rises
+pan_sweep(swoosh(0.7, 160, 900, 0.4, 30, 2400), 0.05, 0.5, -0.4, 0.4)
+# 4.70 the CTA lands
+pan_sweep(swoosh(0.6, 200, 1000, 0.45, 30, 2400), 4.55, 0.45, -0.2, 0.2)
+# 6.40 the Strive Elite end card
+pan_sweep(swoosh(0.8, 180, 1100, 0.45, 30, 2600), 6.3, 0.5, -0.5, 0.5)
 
 mix = np.stack([lowpass(L, 7000), lowpass(R, 7000)], 1)
 mix = mix / np.abs(mix).max() * 0.2   # ~ -14 dBFS peak, Nike-quiet

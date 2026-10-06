@@ -676,6 +676,11 @@ commit.
       on screen; the four drill tiles are now square and fill the width
       in a 2x2 grid; CTA block unchanged and still the biggest. Both
       MP4s re-rendered.
+      AUDIO, FINAL SHAPE (Coach Yinka: "the swooshes are way too
+      constant, should just be 2 or 3 short swooshes to help get
+      attention"): three short swishes and silence. Phone rises
+      (0.05 s), CTA lands (4.55 s), Strive Elite end card (6.3 s).
+      No bed, nothing between. Peak -14 dBFS. Both MP4s re-encoded.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -668,6 +668,14 @@ commit.
       labels 12px, tile labels 13px, CTA headline 28px, CTA line 14px),
       the button grew to 40px so DM US "TRAIN" is the only big text
       in the phone. Both MP4s re-rendered.
+      THEN (Coach Yinka: "instead of those 4 big headlines, reduce it so
+      people actually have time to read, 1 or 2 bullet points, and the
+      vids have more room"): two bullets only ("4 sessions a week, built
+      around your player" / "Every drill shown first, then you go do
+      it"), set a touch larger so they can be read in the time they're
+      on screen; the four drill tiles are now square and fill the width
+      in a 2x2 grid; CTA block unchanged and still the biggest. Both
+      MP4s re-rendered.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

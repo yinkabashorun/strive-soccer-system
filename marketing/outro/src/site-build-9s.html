@@ -46,11 +46,11 @@ h1 span{display:inline-block;opacity:0;transform:translateY(.5em);filter:blur(5p
 p.lead{margin-top:14px;font-size:15.5px;line-height:1.5;color:rgba(255,255,255,.55);animation:rise .6s cubic-bezier(.2,.9,.2,1) 2.1s both}
 h2{margin:22px 0 8px;font-family:'Barlow Condensed';font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5);animation:rise .5s cubic-bezier(.2,.9,.2,1) both}
 .cards{display:grid;gap:8px}
-.card{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);border-radius:16px;padding:11px 14px;animation:slide .55s cubic-bezier(.2,.9,.2,1) both}
-.card b{display:block;font-family:'Barlow Condensed';font-weight:700;font-size:16px;color:#fff}
-.card span{display:block;margin-top:2px;font-size:11.5px;line-height:1.4;color:rgba(255,255,255,.5)}
-.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
-.tile{position:relative;aspect-ratio:4/3;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.14);background:#000;animation:pop .5s cubic-bezier(.2,.9,.2,1) both}
+.card{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);border-radius:16px;padding:13px 16px;animation:slide .55s cubic-bezier(.2,.9,.2,1) both}
+.card b{display:block;font-family:'Barlow Condensed';font-weight:700;font-size:20px;color:#fff}
+.card span{display:block;margin-top:3px;font-size:13px;line-height:1.4;color:rgba(255,255,255,.55)}
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.tile{position:relative;aspect-ratio:1/1;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.14);background:#000;animation:pop .5s cubic-bezier(.2,.9,.2,1) both}
 .tile img{width:100%;height:100%;object-fit:cover;opacity:.9}
 .tile i{position:absolute;left:50%;top:44%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:rgba(0,0,0,.55);border:1.5px solid rgba(255,255,255,.7)}
 .tile i:after{content:"";position:absolute;left:16px;top:12px;border-left:14px solid #fff;border-top:9px solid transparent;border-bottom:9px solid transparent}
@@ -91,9 +91,9 @@ h2{margin:22px 0 8px;font-family:'Barlow Condensed';font-weight:700;font-size:12
 @keyframes glow{0%{opacity:0;transform:scale(.8)}35%{opacity:1}100%{opacity:.6;transform:scale(1.1)}}
 
 /* orientation sizing: the phone fills most of the height in both */
-body.v{--pw:600px;--ph:1270px;--scroll:-260px}
+body.v{--pw:600px;--ph:1270px;--scroll:-215px}
 body.v .screen{zoom:1.16}
-body.h{--pw:470px;--ph:960px;--scroll:-270px}
+body.h{--pw:470px;--ph:960px;--scroll:-300px}
 body.h .screen{padding:60px 22px 0;zoom:.98}
 </style></head><body>
 <div class="stage">
@@ -108,10 +108,8 @@ body.h .screen{padding:60px 22px 0;zoom:.98}
       <h1 id="h1">Team training 3-4x a week is not close to enough to achieve your goals.</h1>
       <h2 style="animation-delay:2.4s">How it works</h2>
       <div class="cards">
-        <div class="card" style="animation-delay:2.5s"><b>4 sessions a week, built around you</b><span>Same rhythm every time, layered on top of regular training.</span></div>
-        <div class="card" style="animation-delay:2.7s"><b>Not built for the group. Built for you.</b><span>Every week targets what YOU actually need work on.</span></div>
-        <div class="card" style="animation-delay:2.9s"><b>Every drill, shown to you first</b><span>No guessing what a rep should look like. Watch it, then go do it.</span></div>
-        <div class="card" style="animation-delay:3.1s"><b>A weekly update, just for you</b><span>What got done, what's next. Nothing slips by quietly.</span></div>
+        <div class="card" style="animation-delay:2.5s"><b>4 sessions a week, built around your player</b><span>Layered on top of team training. Show up, it&#8217;s already planned.</span></div>
+        <div class="card" style="animation-delay:2.8s"><b>Every drill shown first, then you go do it</b><span>A video for every rep. No guessing.</span></div>
       </div>
       <h2 style="animation-delay:3.45s">A taste of it</h2>
       <div class="tiles">

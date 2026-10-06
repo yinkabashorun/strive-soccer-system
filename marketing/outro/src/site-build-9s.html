@@ -39,29 +39,29 @@ html,body{width:100%;height:100%;background:#0d0d0d;overflow:hidden;font-family:
 /* page elements (mirrors /demo) */
 .row{display:flex;align-items:center;gap:12px;animation:pop .5s cubic-bezier(.2,.9,.2,1) 0.9s both}
 .row img{width:40px;height:40px;border-radius:50%}
-.wm{font-family:'Barlow Condensed';font-weight:900;font-size:30px;text-transform:uppercase;color:#fff;letter-spacing:.02em}
+.wm{font-family:'Barlow Condensed';font-weight:900;font-size:26px;text-transform:uppercase;color:#fff;letter-spacing:.02em}
 .hair{height:2px;width:96px;background:#c8a858;margin-top:12px;transform-origin:left;animation:draw .6s cubic-bezier(.65,0,.2,1) 1.05s both}
-h1{margin-top:20px;font-family:'Barlow Condensed';font-weight:800;font-size:46px;line-height:1.08;color:#fff}
+h1{margin-top:18px;font-family:'Barlow Condensed';font-weight:800;font-size:34px;line-height:1.08;color:#fff}
 h1 span{display:inline-block;opacity:0;transform:translateY(.5em);filter:blur(5px);animation:word .45s cubic-bezier(.2,.9,.2,1) both}
 p.lead{margin-top:14px;font-size:15.5px;line-height:1.5;color:rgba(255,255,255,.55);animation:rise .6s cubic-bezier(.2,.9,.2,1) 2.1s both}
-h2{margin:26px 0 10px;font-family:'Barlow Condensed';font-weight:700;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5);animation:rise .5s cubic-bezier(.2,.9,.2,1) both}
+h2{margin:22px 0 8px;font-family:'Barlow Condensed';font-weight:700;font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5);animation:rise .5s cubic-bezier(.2,.9,.2,1) both}
 .cards{display:grid;gap:8px}
-.card{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);border-radius:18px;padding:14px 16px;animation:slide .55s cubic-bezier(.2,.9,.2,1) both}
-.card b{display:block;font-family:'Barlow Condensed';font-weight:700;font-size:19px;color:#fff}
-.card span{display:block;margin-top:3px;font-size:13px;line-height:1.45;color:rgba(255,255,255,.5)}
+.card{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);border-radius:16px;padding:11px 14px;animation:slide .55s cubic-bezier(.2,.9,.2,1) both}
+.card b{display:block;font-family:'Barlow Condensed';font-weight:700;font-size:16px;color:#fff}
+.card span{display:block;margin-top:2px;font-size:11.5px;line-height:1.4;color:rgba(255,255,255,.5)}
 .tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .tile{position:relative;aspect-ratio:4/3;border-radius:14px;overflow:hidden;border:1px solid rgba(255,255,255,.14);background:#000;animation:pop .5s cubic-bezier(.2,.9,.2,1) both}
 .tile img{width:100%;height:100%;object-fit:cover;opacity:.9}
 .tile i{position:absolute;left:50%;top:44%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:rgba(0,0,0,.55);border:1.5px solid rgba(255,255,255,.7)}
 .tile i:after{content:"";position:absolute;left:16px;top:12px;border-left:14px solid #fff;border-top:9px solid transparent;border-bottom:9px solid transparent}
-.tile em{position:absolute;left:12px;bottom:10px;font-style:normal;font-family:'Barlow Condensed';font-weight:700;font-size:16px;letter-spacing:.08em;text-transform:uppercase;color:#fff}
+.tile em{position:absolute;left:12px;bottom:10px;font-style:normal;font-family:'Barlow Condensed';font-weight:700;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#fff}
 .offer{margin-top:30px;border:1.5px solid rgba(200,168,88,.5);background:rgba(200,168,88,.09);border-radius:22px;padding:30px 20px 28px;text-align:center;
   animation:build .6s cubic-bezier(.2,.9,.2,1) 4.7s both}
 .offer .price{font-family:'Barlow Condensed';font-weight:900;font-size:44px;color:#fff;line-height:1}
 .offer .price small{font-size:18px;font-weight:600;color:rgba(255,255,255,.6)}
 .offer .rule{height:2px;width:80px;background:#c8a858;margin:14px auto;transform-origin:left;animation:draw .4s cubic-bezier(.65,0,.2,1) 4.95s both}
-.offer p{font-size:17px;color:rgba(255,255,255,.7);animation:rise .5s cubic-bezier(.2,.9,.2,1) 5.1s both}
-.offer .cta{margin-top:18px;display:block;background:#fff;color:#0d0d0d;font-family:'Barlow Condensed';font-weight:900;font-size:36px;letter-spacing:.04em;text-transform:uppercase;padding:18px 20px;border-radius:999px;line-height:1;animation:pop .5s cubic-bezier(.2,.9,.2,1) 5.3s both}
+.offer p{font-size:14px;color:rgba(255,255,255,.7);animation:rise .5s cubic-bezier(.2,.9,.2,1) 5.1s both}
+.offer .cta{margin-top:16px;display:block;background:#fff;color:#0d0d0d;font-family:'Barlow Condensed';font-weight:900;font-size:40px;letter-spacing:.04em;text-transform:uppercase;padding:18px 20px;border-radius:999px;line-height:1;animation:pop .5s cubic-bezier(.2,.9,.2,1) 5.3s both}
 
 /* end card */
 .end{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;transform:translateY(-10px)}
@@ -91,9 +91,9 @@ h2{margin:26px 0 10px;font-family:'Barlow Condensed';font-weight:700;font-size:1
 @keyframes glow{0%{opacity:0;transform:scale(.8)}35%{opacity:1}100%{opacity:.6;transform:scale(1.1)}}
 
 /* orientation sizing: the phone fills most of the height in both */
-body.v{--pw:600px;--ph:1270px;--scroll:-330px}
+body.v{--pw:600px;--ph:1270px;--scroll:-260px}
 body.v .screen{zoom:1.16}
-body.h{--pw:470px;--ph:960px;--scroll:-410px}
+body.h{--pw:470px;--ph:960px;--scroll:-270px}
 body.h .screen{padding:60px 22px 0;zoom:.98}
 </style></head><body>
 <div class="stage">
@@ -121,7 +121,7 @@ body.h .screen{padding:60px 22px 0;zoom:.98}
         <div class="tile" style="animation-delay:4.2s"><img src="tile-1v1.jpg" alt=""><i></i><em>1v1 Skills</em></div>
       </div>
       <div class="offer">
-        <div class="price" style="font-size:38px;line-height:1.08">Your player&#8217;s first week<br>is waiting.</div>
+        <div class="price" style="font-size:28px;line-height:1.1">Your player&#8217;s first week<br>is waiting.</div>
         <div class="rule"></div>
         <p>Message us on Instagram and we&#8217;ll build it.</p>
         <div class="cta">DM us &ldquo;TRAIN&rdquo;</div>

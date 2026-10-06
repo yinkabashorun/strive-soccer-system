@@ -663,6 +663,11 @@ commit.
       pill button with DM US "TRAIN" at 36px Barlow Condensed black);
       scroll ends with the button in the lower third of the phone. Both
       MP4s re-rendered.
+      THEN (Coach Yinka: "shrink all other words"): every other word
+      on the page shrunk (headline 34px, cards 16/11.5px, section
+      labels 12px, tile labels 13px, CTA headline 28px, CTA line 14px),
+      the button grew to 40px so DM US "TRAIN" is the only big text
+      in the phone. Both MP4s re-rendered.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

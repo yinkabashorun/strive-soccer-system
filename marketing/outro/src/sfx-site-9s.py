@@ -1,4 +1,4 @@
-"""Calm swoosh-only sound bed for site-build-9s.html (9.0 s). Every cue
+"""Calm swoosh-only sound bed (Nike-quiet: pure air, no tones, few cues) for site-build-9s.html (9.0 s). Every cue
 is a soft, low-passed air sweep: no clicks, no mallets, no pad, no chime.
 A barely-there air bed keeps the silence from feeling dead. Peaks held
 around -8 dBFS so it never fights a voice."""
@@ -47,40 +47,31 @@ def sub_swell(dur, f=48):
     e = np.sin(np.linspace(0, np.pi, n)) ** 1.5
     return lowpass(np.sin(2 * np.pi * f * x) * e, 120)
 
-# air bed: very quiet, dark, fades with the picture
-bed = lowpass(rng.standard_normal(len(t)), 500)
-bed = bed / np.abs(bed).max() * 0.045 * np.clip((t - 0.1) / 1.2, 0, 1) * np.clip((8.9 - t) / 1.0, 0, 1)
+# air bed: barely there, dark, fades with the picture
+bed = lowpass(rng.standard_normal(len(t)), 400)
+bed = bed / np.abs(bed).max() * 0.03 * np.clip((t - 0.1) / 1.4, 0, 1) * np.clip((8.9 - t) / 1.0, 0, 1)
 L += bed; R += bed
 
-# 0.00 phone rises: long rising swoosh, left to right, soft sub swell as it settles
-pan_sweep(swoosh(1.1, 140, 900, 0.5), 0.0, 0.55, -0.4, 0.4)
-place(sub_swell(0.8, 46), 0.55, 0.35)
-# 0.90 wordmark + 1.05 hairline: two small airy swooshes
-place(swoosh(0.45, 600, 1600, 0.4), 0.88, 0.16, -0.1)
-pan_sweep(swoosh(0.6, 900, 2200, 0.4), 1.03, 0.14, -0.5, 0.3)
-# 1.20 headline writes itself: one long gentle swoosh under the words, drifting right
-pan_sweep(swoosh(1.3, 500, 1800, 0.5, 30), 1.18, 0.20, -0.3, 0.3)
-# 2.50 cards slide in: four soft swooshes, right to center, each a touch lower
-for i, at in enumerate([2.5, 2.7, 2.9, 3.1]):
-    pan_sweep(swoosh(0.5, 900 - i * 90, 350, 0.3), at, 0.2, 0.55, 0.0)
-# 3.60 drill tiles: four tiny airy swooshes stepping left to right
-for i, at in enumerate([3.6, 3.8, 4.0, 4.2]):
-    place(swoosh(0.32, 1100, 2600, 0.35), at, 0.13, -0.45 + 0.3 * i)
-# 4.70 CTA block: rising swoosh into a soft sub swell; rule and button as two whispers
-pan_sweep(swoosh(0.7, 200, 1200, 0.55), 4.55, 0.3, -0.2, 0.2)
-place(sub_swell(0.9, 50), 4.65, 0.4)
-place(swoosh(0.4, 900, 1800, 0.4), 4.95, 0.1, 0.1); place(swoosh(0.45, 700, 1500, 0.4), 5.3, 0.11, -0.1)
-# 5.50 sheen: long, high, very quiet sweep across
-pan_sweep(swoosh(1.2, 1600, 3200, 0.5, 30, 4500), 5.45, 0.09, -0.8, 0.8)
-# 6.00 phone recedes: falling swoosh
-pan_sweep(swoosh(0.8, 1400, 160, 0.3), 6.0, 0.28, 0.2, -0.2)
-# 6.40 end card: big calm rising swoosh with a sub swell, then two whispers for rule + URL
-pan_sweep(swoosh(1.4, 180, 1400, 0.55, 30), 6.3, 0.42, -0.5, 0.5)
-place(sub_swell(1.2, 44), 6.4, 0.42)
-place(swoosh(0.5, 900, 2000, 0.45), 6.9, 0.1, -0.1); place(swoosh(0.7, 700, 1600, 0.45), 7.05, 0.11, 0.1)
+# Fewer, softer, longer. No tones at all: pure air.
+# 0.00 phone rises: one long low swish, left to right
+pan_sweep(swoosh(1.3, 120, 700, 0.55, 40, 2200), 0.0, 0.5, -0.5, 0.5)
+# 1.15 headline writes itself: one slow drift under the words
+pan_sweep(swoosh(1.5, 350, 1200, 0.55, 40, 2600), 1.12, 0.22, -0.3, 0.3)
+# 2.50 cards: a single longer swish that covers the four slides, right to center
+pan_sweep(swoosh(1.1, 800, 300, 0.4, 40, 2400), 2.45, 0.22, 0.6, 0.0)
+# 3.60 tiles: one light swish stepping left to right
+pan_sweep(swoosh(0.9, 700, 1600, 0.45, 40, 3000), 3.55, 0.14, -0.5, 0.5)
+# 4.70 CTA: a slow rise, no thump
+pan_sweep(swoosh(1.0, 160, 900, 0.6, 40, 2200), 4.5, 0.3, -0.2, 0.2)
+# 5.50 sheen: high whisper across the glass
+pan_sweep(swoosh(1.2, 1400, 2800, 0.5, 40, 4000), 5.45, 0.07, -0.8, 0.8)
+# 6.00 phone recedes: falling swish
+pan_sweep(swoosh(0.9, 1100, 140, 0.35, 40, 2200), 6.0, 0.24, 0.2, -0.2)
+# 6.40 end card: one big slow swish that opens wide, nothing else
+pan_sweep(swoosh(1.7, 160, 1100, 0.6, 50, 2600), 6.3, 0.4, -0.6, 0.6)
 
 mix = np.stack([lowpass(L, 7000), lowpass(R, 7000)], 1)
-mix = mix / np.abs(mix).max() * 0.4   # ~ -8 dBFS peak
+mix = mix / np.abs(mix).max() * 0.2   # ~ -14 dBFS peak, Nike-quiet
 with wave.open(sys.argv[1] if len(sys.argv) > 1 else "site-9s.wav", "wb") as f:
     f.setnchannels(2); f.setsampwidth(2); f.setframerate(SR); f.writeframes((mix * 32767).astype("<i2").tobytes())
 print("wrote", DUR)

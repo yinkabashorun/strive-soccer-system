@@ -94,8 +94,8 @@ export async function DemoLanding() {
       {/* Hook - the real gap, no manufactured urgency, no stats we can't stand behind */}
       <h1 className="mt-5 font-display text-2xl font-bold leading-tight sm:text-3xl">
         <RevealWords
-          text="Training three or four times a week doesn't help much if it's never the thing your player actually needs work on."
-          accent={["doesn't", "help", "much"]}
+          text="Team training 3-4x a week is not close to enough to achieve your goals."
+          accentIndexes={[6, 7, 8, 9]}
           startDelay={350}
         />
       </h1>

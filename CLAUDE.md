@@ -548,6 +548,21 @@ commit.
       the page goes live: alumni family heads-ups for the names in
       section 5, and where the VSL is hosted (unlisted YouTube/Vimeo or a
       file) so it can be embedded.
+- [x] SHIPPED Oct 6 2026 (Coach Yinka: "Put the demo page as the site"):
+      thestriveapp.com/ now IS the Strive Elite landing page. The old root
+      bounced strangers to /login; now a signed-in player or coach still
+      goes straight to their dashboard, everyone else sees the same page
+      /demo serves (hook, how it works, drill tastes from the live bank,
+      fair questions, $350 from Nov 2 / $249 locked by Nov 1, the GHL
+      intake survey W14MZotX2vYkpyDPKOY8 embedded, "DM ELITE" fast lane).
+      Both routes render one shared component,
+      components/elite/DemoLanding.tsx, so copy never drifts between
+      them. VSL SLOT READY: set VSL_YOUTUBE_ID at the top of that file to
+      the unlisted YouTube id and a 16:9 player appears above the hook on
+      both / and /demo (empty string = no video section, nothing fake
+      shown). Ads keep linking to /demo. Sign-in is at /login as before.
+      npm run verify green (typecheck, lint, 27 tests, build, cron +
+      library checks).
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

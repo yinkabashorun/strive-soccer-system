@@ -1,0 +1,54 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Strive Elite outro</title>
+<link rel="stylesheet" href="fonts.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;background:#0d0d0d;overflow:hidden}
+.stage{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,#171717 0%,#0d0d0d 62%);
+  display:flex;align-items:center;justify-content:center;
+  animation:fadeout 0.45s cubic-bezier(.4,0,.6,1) 3.15s both}
+.sweep{position:absolute;top:50%;height:2px;background:#c8a858;margin-top:-1px;
+  animation:sweep 0.75s cubic-bezier(.65,0,.2,1) 0s both;opacity:.9}
+.stack{position:relative;display:flex;flex-direction:column;align-items:center;transform:translateY(-20px)}
+.mark{width:400px;height:auto;display:block;
+  animation:markin 0.6s cubic-bezier(.2,.9,.2,1) 0.42s both, breathe 2.6s ease-in-out 1.0s both}
+.word{margin-top:40px;font-family:'Barlow Condensed';font-weight:900;font-size:min(196px,14vw);line-height:1;
+  color:#fff;text-transform:uppercase;white-space:nowrap;
+  animation:wordin 0.65s cubic-bezier(.2,.9,.2,1) 1.0s both}
+.word b{font-weight:900;color:#c8a858}
+.rule{width:72px;height:2px;background:#c8a858;margin-top:26px;
+  animation:rulein 0.4s cubic-bezier(.2,.9,.2,1) 1.45s both}
+.eyebrow{margin-top:24px;font-family:'Barlow';font-weight:600;font-size:30px;letter-spacing:.32em;
+  padding-left:.32em;color:#c8a858;text-transform:uppercase;white-space:nowrap;
+  animation:eyein 0.5s cubic-bezier(.2,.9,.2,1) 1.72s both}
+.handle{position:absolute;bottom:64px;left:0;right:0;text-align:center;font-family:'Barlow';font-weight:600;
+  font-size:26px;letter-spacing:.18em;color:rgba(255,255,255,.72);text-transform:uppercase;
+  animation:eyein 0.5s cubic-bezier(.2,.9,.2,1) 1.9s both}
+@keyframes sweep{0%{left:0;width:0}50%{left:0;width:100%}100%{left:100%;width:0}}
+@keyframes markin{from{opacity:0;transform:scale(1.5) translateY(26px);filter:blur(10px)}to{opacity:1;transform:scale(1) translateY(0);filter:blur(0)}}
+@keyframes breathe{from{scale:1}to{scale:1.035}}
+@keyframes wordin{from{opacity:0;letter-spacing:.2em;transform:translateY(14px)}to{opacity:1;letter-spacing:.03em;transform:translateY(0)}}
+@keyframes rulein{from{transform:scaleX(0);opacity:0}to{transform:scaleX(1);opacity:1}}
+@keyframes eyein{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeout{from{opacity:1}to{opacity:0}}
+</style></head><body>
+<div class="stage">
+  <div class="sweep"></div>
+  <div class="stack">
+    <img class="mark" src="mark-white.png" alt="">
+    <div class="word">Strive <b>Elite</b></div>
+    <div class="rule"></div>
+    <div class="eyebrow">Weekly at-home training</div>
+  </div>
+  <div class="handle">thestriveapp.com</div>
+</div>
+<script>
+  // Deterministic frame stepping for the renderer: seek(t) freezes every
+  // animation at t seconds so each frame can be screenshotted.
+  window.seek = function (t) {
+    document.getAnimations().forEach(a => { a.pause(); a.currentTime = t * 1000; });
+    return document.fonts.status;
+  };
+  window.ready = document.fonts.ready.then(() => true);
+</script>
+</body></html>

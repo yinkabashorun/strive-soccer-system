@@ -259,6 +259,7 @@ export function SessionNotesStudio({
                   <ul className="space-y-1.5">
                     {s.drills.map((d, di) => {
                       const isPlyo = di === 0;
+                      const isStrength = /^strength(ening)?\b/i.test(d.title.trim());
                       return (
                         <li
                           key={di}
@@ -297,6 +298,11 @@ export function SessionNotesStudio({
                                   layout so it stays readable on a phone:
                                   name, then how, then reps + minutes. */}
                               <div className="flex items-center gap-2">
+                                {isStrength && (
+                                  <span className="shrink-0 rounded bg-accent/90 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-black">
+                                    Finisher
+                                  </span>
+                                )}
                                 <input
                                   value={d.title}
                                   onChange={(e) =>

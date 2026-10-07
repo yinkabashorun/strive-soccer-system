@@ -18,9 +18,28 @@
 // (demo / pre-020) it leaves the plan alone.
 
 import type { Drill, GeneratedDrill, GeneratedSession, Player } from "./types";
-import { PLYO_PILLAR } from "./types";
+import { PLYO_PILLAR, STRENGTH_PILLAR } from "./types";
 
 const MIN_SKILLS = 3;
+
+// Strengthening finishers (bank pillar "Strengthening"): "required" puts
+// exactly one at the end of EVERY session; "optional" keeps the ones the
+// AI placed (capped at one per session, moved last) and adds none.
+export type StrengthMode = "required" | "optional";
+
+// The player needs strengthening work this week when the coach's note,
+// the call notes, or the player's own check-in say so. Deliberately
+// specific: "back" alone would fire on "back on track".
+const STRENGTH_SIGNALS =
+  /injur|rehab|prehab|prevention|\bcore\b|hip flexor|\bhips?\b|lower back|low back|back (pain|issue|problem|injur|strain)|\bstrength(en|ening)?\b|groin|hamstring|\bquads?\b|\bknees?\b|\bankles?\b|physio|physical therap|\bpt\b|cleared to|return(ing)? (from|to play)/i;
+
+export function strengthRequired(text: string | null | undefined): boolean {
+  return STRENGTH_SIGNALS.test(text ?? "");
+}
+
+export function isSkillPillar(pillar: string): boolean {
+  return pillar !== PLYO_PILLAR && pillar !== STRENGTH_PILLAR;
+}
 
 const PILLAR_HINTS: [RegExp, string][] = [
   [/weak.?foot|left foot|right foot|both feet/, "Weak Foot"],
@@ -53,6 +72,13 @@ export function normalizeDrillTitle(s: string): string {
 
 export function isPlyoTitle(title: string): boolean {
   return /^plyo\b|warm.?up/i.test(title.trim());
+}
+
+// Bank strengthening titles carry the "Strength:" prefix (added on save in
+// drill-actions.ts), so the player UI can badge a finisher from its title
+// alone, same as plyos.
+export function isStrengthTitle(title: string): boolean {
+  return /^strength(ening)?\b/i.test(title.trim());
 }
 
 function tokens(s: string): Set<string> {
@@ -109,19 +135,24 @@ export function conformSessionsToBank(
   sessions: GeneratedSession[],
   bank: Drill[] | undefined,
   player?: Pick<Player, "has_wall"> | null,
-  weeklyFocus = ""
+  weeklyFocus = "",
+  strength: StrengthMode = "optional"
 ): GeneratedSession[] {
   if (!bank || bank.length === 0) return sessions;
 
   const canDo = (d: Drill) => !d.needs_wall || player?.has_wall === true;
-  const skillsPool = bank.filter((d) => d.pillar !== PLYO_PILLAR && canDo(d));
+  const skillsPool = bank.filter((d) => isSkillPillar(d.pillar) && canDo(d));
   const plyoPool = bank.filter((d) => d.pillar === PLYO_PILLAR);
+  const strengthPool = bank.filter((d) => d.pillar === STRENGTH_PILLAR);
   if (skillsPool.length === 0) return sessions;
 
   // Titles already placed this week - replacements avoid repeats while the
   // pool allows it.
   const usedWeek = new Set<string>();
   let plyoSpin = 0;
+  let strengthSpin = 0;
+  const isStrengthDrill = (d: GeneratedDrill) =>
+    isStrengthTitle(d.title) || Boolean(matchBankDrill(d.title, strengthPool));
 
   const pickSkill = (pillar: string | null, usedSession: Set<string>): Drill => {
     const order = pillar ? [pillar, ...(PILLAR_FALLBACK[pillar] ?? [])] : [];
@@ -150,7 +181,18 @@ export function conformSessionsToBank(
       mostCommon(matchedPillars) ?? pillarFor(sessionText) ?? null;
 
     const drills: GeneratedDrill[] = [];
+    // Strengthening finishers are handled apart from the skill drills:
+    // matched to the filmed strengthening pool (or replaced from it),
+    // capped at one, and appended LAST after the skill fill below.
+    let finisher: GeneratedDrill | null = null;
     for (const d of s.drills) {
+      if (isStrengthDrill(d)) {
+        if (finisher || strengthPool.length === 0) continue; // one max, never unfilmed
+        const hit = matchBankDrill(d.title, strengthPool);
+        const chosen = hit ?? strengthPool[strengthSpin++ % strengthPool.length];
+        finisher = hit ? { ...fromBank(chosen), ...keepTailoring(d), title: chosen.title } : fromBank(chosen);
+        continue;
+      }
       if (isPlyoTitle(d.title)) {
         if (plyoPool.length === 0) continue; // never an unfilmed warm-up
         const hit = matchBankDrill(d.title, plyoPool);
@@ -187,6 +229,13 @@ export function conformSessionsToBank(
       drills.push(fromBank(sub));
       skillCount++;
     }
+    // Strengthening finisher, last. Required mode guarantees one per
+    // session (rotating through the pool across the week) even when the
+    // AI placed none; optional mode only keeps what the AI placed.
+    if (!finisher && strength === "required" && strengthPool.length > 0) {
+      finisher = fromBank(strengthPool[strengthSpin++ % strengthPool.length]);
+    }
+    if (finisher) drills.push(finisher);
     return { ...s, drills };
   });
 }

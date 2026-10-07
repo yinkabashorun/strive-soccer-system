@@ -18,6 +18,9 @@ const DEFAULT_MIN = 15;
 function isPlyo(title: string): boolean {
   return /plyo|warm-?up/i.test(title);
 }
+function isStrength(title: string): boolean {
+  return /^strength(ening)?\b/i.test(title.trim());
+}
 
 // The player's weekly loop: the current week broken into its four sessions,
 // each starting with a plyometric warm-up (badged). A red "Next up" marks
@@ -175,6 +178,7 @@ function DrillRow({
   onToggle: () => void;
 }) {
   const plyo = isPlyo(hw.title);
+  const strength = isStrength(hw.title);
   return (
     <li
       className={cn(
@@ -208,6 +212,11 @@ function DrillRow({
             {plyo && (
               <span className="rounded-full border border-red-500/40 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-red-300">
                 Plyo warm-up
+              </span>
+            )}
+            {strength && (
+              <span className="rounded-full border border-accent/40 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-accent">
+                Finisher
               </span>
             )}
             <h4

@@ -93,6 +93,7 @@ export function TodaySession({
           {drills.map((d, i) => {
             const done = Boolean(state[d.id]);
             const isPlyo = i === 0;
+            const isStrength = /^strength(ening)?\b/i.test(d.title.trim());
             return (
               <li key={d.id}>
                 <button
@@ -126,6 +127,11 @@ export function TodaySession({
                       {isPlyo && !done && (
                         <span className="rounded bg-red-500/90 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-white">
                           Start here
+                        </span>
+                      )}
+                      {isStrength && !done && (
+                        <span className="rounded bg-accent/90 px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider text-black">
+                          Finisher
                         </span>
                       )}
                       {d.title}

@@ -10,7 +10,9 @@ import { VslPlayer } from "@/components/elite/VslPlayer";
 // Set this to the unlisted YouTube video id once the VSL is uploaded. The
 // player autoplays muted above the headline with a "Tap for sound" layer
 // (components/elite/VslPlayer.tsx). Empty = no video section.
-const VSL_YOUTUBE_ID = "QoYKWmCN5lM";
+// Oct 7: the first upload (QoYKWmCN5lM) is blocked by YouTube over a
+// claimed song. Empty until a clean upload exists, so no broken player shows.
+const VSL_YOUTUBE_ID = "";
 // The upload is a YouTube Short (9:16), so the player is portrait.
 const VSL_PORTRAIT = true;
 

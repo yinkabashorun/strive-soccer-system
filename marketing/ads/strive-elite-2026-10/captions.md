@@ -7,7 +7,7 @@ you". Link in the first and last line. CTA button: Learn more / Watch more.
 ## Ad 1 (Tuesday night)
 Free 5 minute video: thestriveapp.com/demo
 
-Your kid trains hard at practice and still isn't getting better between practices. That's not effort. That's nobody telling him what to work on at home.
+Your player trains hard at practice and still isn't getting better between practices. That's not effort. That's nobody telling him what to work on at home.
 
 I build him a week. Four sessions, a video for every drill, and I see what gets done. Watch me walk through a real player's week, drill by drill.
 

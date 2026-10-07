@@ -747,6 +747,23 @@ commit.
       plays it but Chrome/Android will not - Coach Yinka should open
       /demo in Chrome on a non-Apple device once, and if it's black, ask
       Manus to convert to H.264 MP4 and send the new link.
+- [x] Oct 7 2026 (Coach Yinka: "Change it from your child to your
+      player"): WORDING RULE for all Strive Elite prospect copy - say
+      "your player", never "your child" / "your kid". The /demo page
+      itself never said "your child" (it already reads "your player" in
+      every spot: sub-headline, drill-tile line, fair questions, offer
+      line). The only Strive Elite copy in the repo that said "your kid"
+      was ad 1's caption (marketing/ads/strive-elite-2026-10/captions.md),
+      now "Your player trains hard at practice...". Left alone on purpose:
+      the filmed VSL script's one "your kid" line (already recorded, the
+      file is the record of what was shot), the old course ads in
+      lib/course-ads-data.ts and lib/ai.ts (a retired product), and the
+      privacy policy's "your child's information" (legal wording, not
+      marketing). MOST LIKELY where he saw it: the GHL intake survey
+      embedded on /demo (W14MZotX2vYkpyDPKOY8) - its field labels live in
+      GHL, not in this repo, and GHL is unreachable from this environment
+      so it could not be checked; if a question there reads "your
+      child", change it in GHL > Sites > Surveys.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

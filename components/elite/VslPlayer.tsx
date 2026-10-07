@@ -23,7 +23,8 @@ declare global {
   }
 }
 
-export function VslPlayer({ videoId }: { videoId: string }) {
+// portrait = a 9:16 upload (YouTube Short). Shown at phone width, centered.
+export function VslPlayer({ videoId, portrait = false }: { videoId: string; portrait?: boolean }) {
   const host = useRef<HTMLDivElement | null>(null);
   const player = useRef<YTPlayer | null>(null);
   const [ready, setReady] = useState(false);
@@ -72,8 +73,8 @@ export function VslPlayer({ videoId }: { videoId: string }) {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-white/8 bg-black">
-      <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
+    <div className={portrait ? "relative mx-auto w-full max-w-[420px] overflow-hidden rounded-2xl border border-white/8 bg-black" : "relative overflow-hidden rounded-2xl border border-white/8 bg-black"}>
+      <div className="relative w-full" style={{ paddingTop: portrait ? "177.78%" : "56.25%" }}>
         {failed ? (
           <iframe
             className="absolute inset-0 h-full w-full"

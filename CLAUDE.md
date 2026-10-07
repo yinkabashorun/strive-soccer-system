@@ -712,6 +712,18 @@ commit.
       thestriveapp.com/demo - either keep /demo as the page (set
       VSL_YOUTUBE_ID) or redirect /demo to the Manus URL so the printed
       address still works.
+- [x] LIVE Oct 7 2026: Coach Yinka sent the VSL as a YouTube link
+      (youtube.com/shorts/QoYKWmCN5lM). VSL_YOUTUBE_ID set to QoYKWmCN5lM
+      in DemoLanding.tsx, so thestriveapp.com/demo now opens on the
+      video: autoplay muted, "Tap for sound" overlay, restart with audio
+      on tap. It was uploaded as a SHORT, i.e. vertical 9:16, so
+      VslPlayer got a portrait mode (phone-width, centered) and
+      VSL_PORTRAIT = true. YouTube is unreachable from this environment,
+      so title/length/visibility could not be checked here - Coach
+      Yinka should open /demo on his phone once Vercel finishes and
+      confirm it plays. The Manus route is now moot: one page, our
+      domain, pixel still to be added (send the ID). lint/typecheck/
+      build green.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

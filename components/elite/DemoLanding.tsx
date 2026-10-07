@@ -10,7 +10,9 @@ import { VslPlayer } from "@/components/elite/VslPlayer";
 // Set this to the unlisted YouTube video id once the VSL is uploaded. The
 // player autoplays muted above the headline with a "Tap for sound" layer
 // (components/elite/VslPlayer.tsx). Empty = no video section.
-const VSL_YOUTUBE_ID = "";
+const VSL_YOUTUBE_ID = "QoYKWmCN5lM";
+// The upload is a YouTube Short (9:16), so the player is portrait.
+const VSL_PORTRAIT = true;
 
 // This page does the job a VSL usually does: hook, mechanism, proof,
 // objections, offer, close. Structure over inventory - never the whole
@@ -81,7 +83,7 @@ export async function DemoLanding() {
 
       {VSL_YOUTUBE_ID ? (
         <div className="rise-in mt-6" style={{ animationDelay: "250ms" }}>
-          <VslPlayer videoId={VSL_YOUTUBE_ID} />
+          <VslPlayer videoId={VSL_YOUTUBE_ID} portrait={VSL_PORTRAIT} />
         </div>
       ) : null}
 

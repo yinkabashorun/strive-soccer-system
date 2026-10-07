@@ -724,6 +724,16 @@ commit.
       confirm it plays. The Manus route is now moot: one page, our
       domain, pixel still to be added (send the ID). lint/typecheck/
       build green.
+      BLOCKED same morning: the page showed "Video unavailable". YouTube
+      Studio says the upload is "blocked globally" - a Content ID claim
+      on a song in the VSL, owner chose block. Coach Yinka: "for now
+      just drop the website" - VSL_YOUTUBE_ID set back to "" so /demo
+      shows no player at all instead of a broken one; the page is
+      otherwise unchanged. TO RELAUNCH: in YouTube Studio use "Remove
+      song" / "Replace song" on the claim (or re-export without the
+      track and upload fresh, Unlisted), then put the id back in
+      DemoLanding.tsx. Same rule for every ad video: royalty-free audio
+      or none, Meta mutes/rejects claimed songs.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -6,6 +6,7 @@ import { DrillVideo } from "@/components/elite/DrillVideo";
 import { Wordmark } from "@/components/elite/Wordmark";
 import { Reveal, RevealWords } from "@/components/elite/Reveal";
 import { VslPlayer } from "@/components/elite/VslPlayer";
+import { VslFilePlayer } from "@/components/elite/VslFilePlayer";
 
 // Set this to the unlisted YouTube video id once the VSL is uploaded. The
 // player autoplays muted above the headline with a "Tap for sound" layer
@@ -13,6 +14,9 @@ import { VslPlayer } from "@/components/elite/VslPlayer";
 // Oct 7: the first upload (QoYKWmCN5lM) is blocked by YouTube over a
 // claimed song. Empty until a clean upload exists, so no broken player shows.
 const VSL_YOUTUBE_ID = "";
+// Direct video file (Oct 7 2026: Manus-hosted, sent by Coach Yinka). Takes
+// priority over the YouTube id when set. Autoplays muted with "Tap for sound".
+const VSL_SRC = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663373072550/HEzbBNxdHtaTpMWq.mov";
 // The upload is a YouTube Short (9:16), so the player is portrait.
 const VSL_PORTRAIT = true;
 
@@ -83,7 +87,11 @@ export async function DemoLanding() {
       </div>
       <div className="draw-line mt-3 h-px w-24 bg-accent/80" />
 
-      {VSL_YOUTUBE_ID ? (
+      {VSL_SRC ? (
+        <div className="rise-in mt-6" style={{ animationDelay: "250ms" }}>
+          <VslFilePlayer src={VSL_SRC} />
+        </div>
+      ) : VSL_YOUTUBE_ID ? (
         <div className="rise-in mt-6" style={{ animationDelay: "250ms" }}>
           <VslPlayer videoId={VSL_YOUTUBE_ID} portrait={VSL_PORTRAIT} />
         </div>

@@ -734,6 +734,19 @@ commit.
       track and upload fresh, Unlisted), then put the id back in
       DemoLanding.tsx. Same rule for every ad video: royalty-free audio
       or none, Meta mutes/rejects claimed songs.
+      THEN same morning: Coach Yinka uploaded the VSL to Manus and sent
+      the direct file link (files.manuscdn.com/.../HEzbBNxdHtaTpMWq.mov).
+      New components/elite/VslFilePlayer.tsx plays a direct file: native
+      <video> autoplay muted + playsinline, "Tap for sound" overlay that
+      restarts from 0 with audio and reveals controls, orientation read
+      from the file so vertical = phone-width centered. DemoLanding.tsx
+      now has VSL_SRC (takes priority over VSL_YOUTUBE_ID) set to that
+      link, so /demo opens on the video again. No YouTube, no copyright
+      gate. RISK, unverified from here (manuscdn is blocked in this
+      environment): the file is .mov; if the phone recorded HEVC, iPhone
+      plays it but Chrome/Android will not - Coach Yinka should open
+      /demo in Chrome on a non-Apple device once, and if it's black, ask
+      Manus to convert to H.264 MP4 and send the new link.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -83,7 +83,7 @@ export type Player = {
 // weeks strictly from these; the coach owns them at /coach/drills.
 export type Drill = {
   id: string;
-  pillar: ProgressMetric | typeof PLYO_PILLAR;
+  pillar: ProgressMetric | typeof PLYO_PILLAR | typeof STRENGTH_PILLAR;
   title: string;
   how: string;
   reps: string;
@@ -182,6 +182,16 @@ export type ProgressMetric = (typeof PROGRESS_METRICS)[number];
 // every session opens with one automatically, so the AI never prescribes
 // them as skill drills and players aren't rated on them.
 export const PLYO_PILLAR = "Plyo";
+
+// Drill-bank pillar for strengthening / injury-prevention finishers (core,
+// hips, glutes, groin). Also not a rated metric. A strengthening drill is
+// always the LAST drill of a session, at most one per session, and is
+// REQUIRED in every session when the coach's note or the player's own
+// words mention an injury, rehab, prevention, core, hip or strength work
+// (lib/elite/bank-conform.ts strengthRequired). Otherwise the builder may
+// add one to a couple of sessions a week. Added Oct 7 2026 for the first
+// player training through a lower-back injury.
+export const STRENGTH_PILLAR = "Strengthening";
 
 export type Progress = {
   id: string;

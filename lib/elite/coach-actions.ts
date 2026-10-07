@@ -9,7 +9,7 @@ import { sendPushToPlayer } from "./push";
 import { normalizePhone, sendPlayerSMS } from "./sms";
 import { isSundayEveNY, liveWeekFor, mondayOfWeekNY, nextMondayNY, unlockInstant } from "./time";
 import { getDrillBank, normalizeTitle } from "./data";
-import { conformSessionsToBank } from "./bank-conform";
+import { conformSessionsToBank, strengthRequired } from "./bank-conform";
 import { resolveWeekTarget } from "./week-target";
 import { buildParentRecap } from "./parent-recap";
 import type { FilmReview, GeneratedPlan } from "./types";
@@ -492,7 +492,7 @@ export async function applyGeneratedPlanCore(
 
   const { data: player } = await supabase
     .from("elite_players")
-    .select("current_week, week1_monday, full_name, parent_name, has_wall")
+    .select("current_week, week1_monday, full_name, parent_name, has_wall, coach_memory")
     .eq("id", playerId)
     .maybeSingle();
 
@@ -563,11 +563,21 @@ export async function applyGeneratedPlanCore(
   if (bank.length === 0) {
     throw new Error("Refusing to publish: the drill bank has no filmed drills reachable");
   }
+  // Same strengthening rule as generation: a player whose note (or these
+  // notes) mentions an injury / rehab / core / hip / strength work ends
+  // every session with one filmed finisher, enforced here too so a
+  // hand-edited studio plan can't drop it.
+  const strength = strengthRequired(
+    `${rawNotes}\n${(player as { coach_memory?: string | null } | null)?.coach_memory ?? ""}`
+  )
+    ? "required"
+    : "optional";
   const sessionsToPublish = conformSessionsToBank(
     plan.sessions,
     bank,
     player ? { has_wall: (player as { has_wall?: boolean | null }).has_wall ?? null } : null,
-    plan.weekly_focus
+    plan.weekly_focus,
+    strength
   );
   for (const b of bank) {
     byTitle.set(normalizeTitle(b.title), { id: b.id, video_url: b.video_url || null });

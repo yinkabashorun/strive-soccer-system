@@ -72,7 +72,13 @@ commit.
       self-flag + coach text, lighter-week parent tone. ~3h core. Pitch
       language until built: "I adjust every plan around what the player
       tells me, including injuries" (true via the note), NOT "the app
-      manages injuries".
+      manages injuries". Oct 7: the Strengthening pillar (see RECORD)
+      covers the "add core / prevention work" half of this; the hard
+      no-plyo rule is still only the note.
+- [ ] FILM + ADD the Strengthening finishers at /coach/drills (pillar
+      "Strengthening (session finishers)", bodyweight-only blocks listed
+      in the Oct 7 RECORD entry). The pillar is live but EMPTY; Tim's
+      weeks get a finisher the moment the first filmed one exists.
 
 ### RECORD (chronological)
 
@@ -764,6 +770,50 @@ commit.
       GHL, not in this repo, and GHL is unreachable from this environment
       so it could not be checked; if a question there reads "your
       child", change it in GHL > Sites > Surveys.
+- [x] SHIPPED Oct 7 2026 (Coach Yinka: "Injury prevention stuff core and
+      hip flexors" -> "Yes make a strengthening pillar"): the bank had
+      ZERO core / hip / prevention work (every drill was Ball Mastery,
+      Confidence, Passing, Weak Foot or Plyo), and the only pillars the
+      bank accepted were those plus Plyo, which the builder rotates into
+      EVERY player's warm-ups, so Tim's rehab work had nowhere to live
+      without landing in Abdul's week. New bank pillar "Strengthening"
+      (migration 032, applied to prod the same day; STRENGTH_PILLAR in
+      types.ts). Not a rated metric. Drills saved under it get a
+      "Strength:" title prefix (drill-actions.ts), same pattern as "Plyo
+      warm-up:", so the player app badges them from the title alone. THE
+      RULE, enforced on the output in bank-conform.ts and unit-tested
+      (tests/strength.test.ts, 37 tests total): a strengthening drill is a
+      FINISHER - always the last drill of a session, at most one per
+      session, never counted as one of the three skill drills, filmed
+      only (an empty strengthening pool places nothing, drops whatever
+      the AI wrote). REQUIRED in every session when the coach memory
+      note, the typed/synthesized notes, the call notes or the player's
+      check-in mention injury / rehab / prehab / prevention / core / hip /
+      lower back / strength / groin / hamstring / quad / knee / ankle /
+      physio (strengthRequired(), deliberately specific so "back on
+      track" doesn't fire); otherwise the AI may add one to at most two
+      sessions a week or none. Both gates carry it: ai-coach.ts sanitize()
+      at generation (AI and fallback) and applyGeneratedPlanCore at
+      publish (reads coach_memory off the player row), so a hand-edited
+      studio plan can't drop it. The methodology prompt lists finishers
+      in their own block with these rules (and says "do not invent one"
+      while the bank has none); a required week also gets a hard-rule
+      line in the user message. A bank with only plyos and finishers
+      still throws EmptyBankError (no skill drills = no plan). UI: the
+      /coach/drills form offers "Strengthening (session finishers)";
+      WeekList, TodaySession, CoachWeekView and the studio show a gold
+      "Finisher" badge. Verify green (typecheck, lint, 37 tests, build,
+      cron + library checks). STATE: the pillar is EMPTY until Coach Yinka
+      films and adds the blocks - the bodyweight-only list given the same
+      day (Core A: dead bug, front plank, bird dog, hollow hold; Core B:
+      side plank, hip dips, shoulder taps, bear hold; Hips and glutes:
+      glute bridge, single leg bridge, half-kneeling hip flexor stretch,
+      hip flexor march, 90/90; Legs and groin: reverse lunge knee drive,
+      single leg RDL, lateral lunge, side lying leg raises). Tim's coach
+      memory note already says "lower back ... core and
+      injury-prevention", so his next Sunday build ends every session
+      with a finisher automatically the moment one filmed Strengthening
+      drill exists in the bank. No player data was touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

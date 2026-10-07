@@ -5,6 +5,9 @@ import { cn } from "@/lib/utils";
 function isPlyo(title: string): boolean {
   return /plyo|warm-?up/i.test(title);
 }
+function isStrength(title: string): boolean {
+  return /^strength(ening)?\b/i.test(title.trim());
+}
 
 // Read-only view of a player's current-week plan for the coach: the four
 // sessions and exactly which drills the player has completed. Answers the
@@ -112,6 +115,11 @@ export function CoachWeekView({
                     {isPlyo(h.title) && (
                       <span className="rounded bg-red-500/80 px-1 py-0.5 text-[8px] font-bold uppercase text-white">
                         Plyo
+                      </span>
+                    )}
+                    {isStrength(h.title) && (
+                      <span className="rounded bg-accent/80 px-1 py-0.5 text-[8px] font-bold uppercase text-black">
+                        Finisher
                       </span>
                     )}
                     {h.title}

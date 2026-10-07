@@ -7,7 +7,7 @@
 // docs/METHODOLOGY.md.
 // =====================================================================
 
-import { PLYO_PILLAR, PROGRESS_METRICS, type Drill, type ProgressMetric } from "./types";
+import { PLYO_PILLAR, STRENGTH_PILLAR, PROGRESS_METRICS, type Drill, type ProgressMetric } from "./types";
 import { SESSIONS_PER_WEEK } from "./training";
 
 // The non-negotiable structure of a Strive training week.
@@ -111,10 +111,17 @@ export function methodologyContext(bank?: Drill[]): string {
   const lensFor = (pillar: string) =>
     METHOD_PILLARS.find((g) => g.pillar === pillar)?.lens ?? "";
   const grouped = new Map<string, { title: string; how: string; reps: string; minutes: number; cues: string; wall: boolean }[]>();
+  const finishers: string[] = [];
   for (const d of bank ?? []) {
     // Plyo warm-ups are prepended server-side; the AI must never see
     // them as prescribable skill drills.
     if (d.pillar === PLYO_PILLAR) continue;
+    // Strengthening finishers get their own block with their own rules
+    // below - they are never a skill drill and never fill a pillar day.
+    if (d.pillar === STRENGTH_PILLAR) {
+      finishers.push(`${d.title} (${d.reps} = ~${d.minutes} min): ${d.how}${d.cues ? `. Cues: ${d.cues}` : ""}`);
+      continue;
+    }
     const list = grouped.get(d.pillar) ?? [];
     list.push({ title: d.title, how: d.how, reps: d.reps, minutes: d.minutes, cues: d.cues, wall: d.needs_wall });
     grouped.set(d.pillar, list);
@@ -201,7 +208,29 @@ bank drill covers, pick the closest bank drill and say what to emphasize
 in its notes field.
 
 The bank, by pillar:
-${pillars}`;
+${pillars}
+
+${
+  finishers.length
+    ? `STRENGTHENING FINISHERS (bank pillar "Strengthening", strict): these
+are NOT skill drills and never count toward the 3 skill drills. A
+finisher is always the LAST drill of a session, at most ONE per session,
+title copied exactly like every other drill. When the coach's note, the
+call notes, or the player's own check-in mention an injury, rehab,
+injury prevention, core, hip, back, groin, hamstring or strength work,
+put ONE finisher at the end of EVERY session (the system enforces this
+too), and when the finisher's own setup says what to avoid, keep the
+skill drills and the player summary consistent with it. Otherwise add a
+finisher to at most two sessions that week, where it fits the player,
+or none. When a session has a finisher, size its three skill drills at
+about 8 minutes each so the session still lands near 45 minutes.
+The finishers: ${finishers.join("; ")}.`
+    : `STRENGTHENING: the bank has no strengthening finishers yet. Do not
+invent one. If the notes mention an injury or core/strength work, keep
+every drill from the bank above, steer the selection around the injury
+(no jumping or sprint-style work for a lower-body or back issue goes in
+the player summary and the drill notes), and leave it there.`
+}`;
 }
 
 // Re-export so callers can rely on the canonical metric list too.

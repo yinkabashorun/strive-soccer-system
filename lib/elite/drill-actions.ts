@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "./supabase/server";
 import { getViewer } from "./session";
 import { backfillHomeworkVideos } from "./data";
-import { PLYO_PILLAR, PROGRESS_METRICS } from "./types";
+import { PLYO_PILLAR, PROGRESS_METRICS, STRENGTH_PILLAR } from "./types";
 
 export type DrillInput = {
   id?: string; // present = update, absent = create
@@ -37,14 +37,19 @@ export async function saveDrill(input: DrillInput) {
 
   const pillar =
     input.pillar === PLYO_PILLAR ||
+    input.pillar === STRENGTH_PILLAR ||
     (PROGRESS_METRICS as readonly string[]).includes(input.pillar)
       ? input.pillar
       : "Ball Mastery";
   // Plyo titles get the standard prefix so the player UI badges them as
   // warm-ups ("Plyo warm-up: Pogo & Tuck") without the coach typing it.
+  // Strengthening finishers likewise ("Strength: Core A").
   let title = input.title.trim().slice(0, 120);
   if (pillar === PLYO_PILLAR && title && !/plyo|warm.?up/i.test(title)) {
     title = `Plyo warm-up: ${title}`.slice(0, 120);
+  }
+  if (pillar === STRENGTH_PILLAR && title && !/^strength(ening)?\b/i.test(title)) {
+    title = `Strength: ${title}`.slice(0, 120);
   }
   const row = {
     pillar,

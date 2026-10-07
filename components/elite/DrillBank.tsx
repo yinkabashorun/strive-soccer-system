@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState, useTransition } from "react";
 import { Dumbbell, Loader2, Pencil, Plus, Trash2, Upload, X } from "lucide-react";
-import { PLYO_PILLAR, PROGRESS_METRICS, type Drill } from "@/lib/elite/types";
+import { PLYO_PILLAR, PROGRESS_METRICS, STRENGTH_PILLAR, type Drill } from "@/lib/elite/types";
 import { saveDrill, deleteDrill, type DrillInput } from "@/lib/elite/drill-actions";
 import { createClient } from "@/lib/elite/supabase/client";
 import { DrillVideo } from "./DrillVideo";
@@ -87,6 +87,7 @@ export function DrillBank({
     const m = new Map<string, Drill[]>();
     m.set(PLYO_PILLAR, []);
     for (const p of PROGRESS_METRICS) m.set(p, []);
+    m.set(STRENGTH_PILLAR, []);
     for (const d of initial) m.get(d.pillar)?.push(d);
     return m;
   }, [initial]);
@@ -152,9 +153,13 @@ export function DrillBank({
               onChange={(e) => setEditing({ ...editing, pillar: e.target.value })}
               className={inputCls}
             >
-              {[PLYO_PILLAR, ...PROGRESS_METRICS].map((p) => (
+              {[PLYO_PILLAR, ...PROGRESS_METRICS, STRENGTH_PILLAR].map((p) => (
                 <option key={p} value={p} className="bg-black">
-                  {p === PLYO_PILLAR ? "Plyo (session warm-ups)" : p}
+                  {p === PLYO_PILLAR
+                    ? "Plyo (session warm-ups)"
+                    : p === STRENGTH_PILLAR
+                      ? "Strengthening (session finishers)"
+                      : p}
                 </option>
               ))}
             </select>
@@ -255,7 +260,9 @@ export function DrillBank({
               <span className="text-sm font-normal normal-case text-white/35">
                 {pillar === PLYO_PILLAR
                   ? `${drills.length} warm-ups · every session opens with one, rotated`
-                  : `${drills.length} drills`}
+                  : pillar === STRENGTH_PILLAR
+                    ? `${drills.length} finishers · last drill of a session, every session when a player's note calls for it`
+                    : `${drills.length} drills`}
               </span>
             </h2>
             <div className="space-y-2">

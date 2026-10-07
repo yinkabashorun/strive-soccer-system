@@ -17,7 +17,13 @@ import {
   type Player,
 } from "./types";
 import { SESSIONS_PER_WEEK } from "./training";
-import { conformSessionsToBank } from "./bank-conform";
+import {
+  conformSessionsToBank,
+  isSkillPillar,
+  isStrengthTitle,
+  strengthRequired,
+  type StrengthMode,
+} from "./bank-conform";
 import { EmptyBankError, methodologyContext } from "./methodology";
 
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-4-8";
@@ -50,7 +56,9 @@ session is about 40 MINUTES of work. A plyometric warm-up (~10 minutes) is
 added to every session automatically, so give EXACTLY 3 skill drills per
 session and size their minutes so the warm-up plus your three drills totals
 about 40 minutes (roughly 10 minutes each). Focused drills, done with
-intent. Do NOT include a warm-up; only give the 3 skill drills.
+intent. Do NOT include a warm-up; only give the 3 skill drills, plus at most
+ONE strengthening finisher as the session's last drill when the
+STRENGTHENING FINISHERS rules in the methodology call for it.
 
 Voice:
 - Confident, direct, encouraging. Never corny. No emoji. No exclamation marks.
@@ -83,7 +91,8 @@ Return ONLY valid JSON, no prose, matching this shape:
 }
 Rules:
 - EXACTLY 4 sessions. EXACTLY 3 skill drills each (no warm-ups; added
-  automatically). Each session ~40 minutes total including the ~10-min warm-up.
+  automatically), plus an optional strengthening finisher LAST, per the
+  methodology. Each session ~40 minutes total including the ~10-min warm-up.
 - minutes: an integer per drill (8-15), so the three drills sum to ~30 minutes.
 - TIMING MUST ADD UP. minutes = work time + rest between sets + setup, and the
   reps string must fill that time. 4 x 45 sec of work with 45 sec rests is
@@ -176,9 +185,14 @@ function buildSessions(
     const s = src[i];
     // Three focused skill drills per session (a ~40-minute session with
     // the auto-added ~10-min warm-up).
-    let skills = (s?.drills ?? [])
-      .filter((d) => d && d.title)
+    // Up to three skill drills, plus at most one strengthening finisher
+    // (kept apart so it can never eat a skill slot and always goes last).
+    const listed = (s?.drills ?? []).filter((d) => d && d.title);
+    const finisher = listed.find((d) => isStrengthTitle(String(d.title)));
+    let skills = listed
+      .filter((d) => !isStrengthTitle(String(d.title)))
       .slice(0, 3)
+      .concat(finisher ? [finisher] : [])
       .map((d) => {
         const rawReps = String(d.reps ?? "").trim();
         // The minutes chip already shows duration; a reps value that is
@@ -232,7 +246,8 @@ function buildSessions(
 function sanitize(
   plan: Partial<GeneratedPlan>,
   player?: Player,
-  bank?: Drill[]
+  bank?: Drill[],
+  strength: StrengthMode = "optional"
 ): GeneratedPlan {
   const validMetrics = new Set(PROGRESS_METRICS as readonly string[]);
   const weekly_focus = ensureSentence(
@@ -245,7 +260,8 @@ function sanitize(
     buildSessions(plan.sessions, weekly_focus, plyosFrom(bank)),
     bank,
     player,
-    weekly_focus
+    weekly_focus,
+    strength
   );
   return {
     weekly_focus,
@@ -278,7 +294,12 @@ function titleCase(s: string): string {
 // ONLY to pick which pillars to train. Drills come verbatim from the
 // coach's drill bank (or the built-in library when no bank is passed), so
 // the week is generic but always real.
-function fallbackPlan(notes: string, player?: Player, bank?: Drill[]): GeneratedPlan {
+function fallbackPlan(
+  notes: string,
+  player?: Player,
+  bank?: Drill[],
+  strength: StrengthMode = "optional"
+): GeneratedPlan {
   const haystack = `${notes}\n${(player?.weaknesses ?? []).join("\n")}`.toLowerCase();
   const PILLAR_HINTS: [RegExp, (typeof PROGRESS_METRICS)[number]][] = [
     [/touch|control|mastery|dribbl/, "Ball Mastery"],
@@ -292,7 +313,7 @@ function fallbackPlan(notes: string, player?: Player, bank?: Drill[]): Generated
   // One pillar per session, three bank drills each (cycling if short).
   // Wall drills only go to players who told us they have a wall.
   // Filmed bank only. No bank, no plan - same rule as the AI path.
-  if (!bank || !bank.some((d) => d.pillar !== PLYO_PILLAR)) throw new EmptyBankError();
+  if (!bank || !bank.some((d) => isSkillPillar(d.pillar))) throw new EmptyBankError();
   const bankFor = (pillar: string) =>
     bank
       .filter((d) => d.pillar === pillar)
@@ -363,7 +384,8 @@ function fallbackPlan(notes: string, player?: Player, bank?: Drill[]): Generated
       ],
     },
     player,
-    bank
+    bank,
+    strength
   );
 }
 
@@ -378,10 +400,17 @@ export async function generatePlanFromNotes(
   reason?: string; // human-readable cause shown to the coach
   reasonKind?: "no_key" | "parse" | "api_error"; // drives the banner's advice
 }> {
+  // Strengthening finisher rule for this week: required in every session
+  // when the notes or the player's memory (coach note, call notes,
+  // check-in) say injury / rehab / core / hip / strength; else the AI's
+  // call. Enforced on the output by conformSessionsToBank either way.
+  const strength: StrengthMode = strengthRequired(`${notes}\n${memory ?? ""}\n${player?.coach_memory ?? ""}`)
+    ? "required"
+    : "optional";
   const c = client();
   if (!c)
     return {
-      plan: fallbackPlan(notes, player, bank),
+      plan: fallbackPlan(notes, player, bank, strength),
       source: "fallback",
       reason: "no_key",
       reasonKind: "no_key",
@@ -405,7 +434,11 @@ export async function generatePlanFromNotes(
       ? `Player: ${player.full_name}, age ${player.age}, ${player.position}, level ${player.level}. Current goals: ${player.goals.join("; ") || "n/a"}. Known weaknesses: ${player.weaknesses.join("; ") || "n/a"}.\n${env}`
       : "";
     const memoryBlock = memory?.trim() ? `\n\n${memory.trim()}` : "";
-    const userMsg = `${context}${memoryBlock}\n\nCoach's raw session notes:\n"""\n${notes}\n"""\n\nUsing everything you know about this player above, generate the four-session weekly plan JSON now. Plan around their history, follow-through, trends, and the coach's note.`;
+    const strengthBlock =
+      strength === "required"
+        ? "\n\nSTRENGTHENING THIS WEEK (hard rule): the notes or the coach's memory mention an injury, rehab, core, hip or strength work, so END EVERY SESSION with exactly one strengthening finisher from the bank's finisher list, and keep the skill drills and player summary consistent with whatever the injury rules out."
+        : "";
+    const userMsg = `${context}${memoryBlock}${strengthBlock}\n\nCoach's raw session notes:\n"""\n${notes}\n"""\n\nUsing everything you know about this player above, generate the four-session weekly plan JSON now. Plan around their history, follow-through, trends, and the coach's note.`;
 
     // One attempt at a given output cap, with enough logging that a parse
     // failure is diagnosable from Vercel logs instead of guessed at.
@@ -438,7 +471,7 @@ export async function generatePlanFromNotes(
     }
     if (!parsed)
       return {
-        plan: fallbackPlan(notes, player, bank),
+        plan: fallbackPlan(notes, player, bank, strength),
         source: "fallback",
         reason:
           stop === "max_tokens"
@@ -446,13 +479,13 @@ export async function generatePlanFromNotes(
             : "The AI responded but the plan could not be read. Generate again; if it repeats, check the Vercel logs for [strive-ai] lines.",
         reasonKind: "parse",
       };
-    return { plan: sanitize(parsed, player, bank), source: "ai" };
+    return { plan: sanitize(parsed, player, bank, strength), source: "ai" };
   } catch (err) {
     const msg =
       err instanceof Error ? err.message.slice(0, 200) : "unknown error";
     console.log(`[strive-ai] api error: ${msg}`);
     return {
-      plan: fallbackPlan(notes, player, bank),
+      plan: fallbackPlan(notes, player, bank, strength),
       source: "fallback",
       reason: msg,
       reasonKind: "api_error",

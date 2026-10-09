@@ -814,6 +814,22 @@ commit.
       injury-prevention", so his next Sunday build ends every session
       with a finisher automatically the moment one filmed Strengthening
       drill exists in the bank. No player data was touched.
+- [x] Oct 9 2026 (Coach Yinka: "i need to get the static ads up. send
+      them with all the copy ill need for each creative"): the five
+      finals sent again plus a per-ad upload sheet,
+      marketing/ads/strive-elite-2026-10/ad-copy-sheet.md: campaign
+      setup (Leads objective, /demo URL with utm_content per ad, feed
+      placements only since the creatives are 4:5, cold parent audience
+      for ads 1-4, 30-day /demo visitors + IG engagers for ad 5), and
+      for each ad the on-image line, primary text, headline, description
+      and CTA button. TWO FLAGS carried on the sheet, not resolved here:
+      (1) every creative says "Free 5 min video" but the VSL script ran
+      about 8 minutes - if the final edit is longer than ~5 min, swap to
+      "Free video" (one word in each src/adN.html, re-render) before
+      spend; (2) ad 4's image says "a 13-year-old" - must match the real
+      player whose week the VSL shows, else change to "one of my
+      players". Pixel still not on /demo (no ID yet), so ad 5 cannot
+      target site visitors until it is.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

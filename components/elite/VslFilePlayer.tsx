@@ -2,12 +2,25 @@
 
 import { useEffect, useRef, useState } from "react";
 
-// Autoplaying VSL from a direct video file (mp4/mov on a CDN). Starts muted
-// the instant the page opens (the only autoplay phones allow) with a
-// "Tap for sound" layer on top; one tap restarts from 0:00 with audio and
-// shows normal controls. Orientation is read from the file itself, so a
-// vertical upload gets a phone-width centered frame and a wide one goes
-// full width.
+// Autoplaying VSL from a direct video file (mp4/mov on a CDN).
+//
+// Sound, in order of what the browser allows (Oct 9 2026, Coach Yinka:
+// "make it so they don't have to tap for sound"):
+//   1. Try to start WITH sound. Desktop Chrome/Safari allow this for sites
+//      the person has used before, and some in-app browsers allow it after
+//      the tap that opened the link. If it works, no overlay at all.
+//   2. If the browser refuses (iPhone Safari always does on a fresh load),
+//      start muted so the picture is moving the instant the page opens,
+//      and turn the sound on at the FIRST touch anywhere on the page, not
+//      just on the video. A thumb landing anywhere, a scroll-tap, a tap on
+//      the headline: sound comes on and the video restarts from 0:00.
+//   3. The "Tap for sound" pill stays on the video as the obvious target
+//      until that first touch.
+// There is no way around step 2 on phones: audio needs one user gesture
+// on the page, by browser policy, for every site on the internet.
+//
+// Orientation is read from the file itself, so a vertical upload gets a
+// phone-width centered frame and a wide one goes full width.
 export function VslFilePlayer({ src }: { src: string }) {
   const video = useRef<HTMLVideoElement | null>(null);
   const [unmuted, setUnmuted] = useState(false);
@@ -17,11 +30,52 @@ export function VslFilePlayer({ src }: { src: string }) {
   useEffect(() => {
     const v = video.current;
     if (!v) return;
+    let cancelled = false;
     const onMeta = () => { setPortrait(v.videoHeight > v.videoWidth); setReady(true); };
     v.addEventListener("loadedmetadata", onMeta);
-    v.muted = true;
-    v.play().catch(() => {});
-    return () => v.removeEventListener("loadedmetadata", onMeta);
+
+    const cleanupGesture: (() => void)[] = [];
+    const soundOnFirstTouch = () => {
+      // Any first interaction on the page unlocks audio; restart so they
+      // hear it from the top (a VSL only works from the first line).
+      const on = () => {
+        if (cancelled) return;
+        v.muted = false;
+        v.volume = 1;
+        v.currentTime = 0;
+        v.play().catch(() => {});
+        setUnmuted(true);
+        off();
+      };
+      const off = () => {
+        document.removeEventListener("pointerdown", on, true);
+        document.removeEventListener("touchstart", on, true);
+        document.removeEventListener("keydown", on, true);
+      };
+      document.addEventListener("pointerdown", on, true);
+      document.addEventListener("touchstart", on, true);
+      document.addEventListener("keydown", on, true);
+      cleanupGesture.push(off);
+    };
+
+    // 1. sound first
+    v.muted = false;
+    v.volume = 1;
+    v.play()
+      .then(() => { if (!cancelled) setUnmuted(true); })
+      .catch(() => {
+        // 2. refused: muted now, sound at the first touch anywhere
+        if (cancelled) return;
+        v.muted = true;
+        v.play().catch(() => {});
+        soundOnFirstTouch();
+      });
+
+    return () => {
+      cancelled = true;
+      v.removeEventListener("loadedmetadata", onMeta);
+      for (const off of cleanupGesture) off();
+    };
   }, [src]);
 
   const tapForSound = () => {
@@ -45,7 +99,6 @@ export function VslFilePlayer({ src }: { src: string }) {
         src={src}
         className="block h-auto w-full"
         autoPlay
-        muted
         playsInline
         preload="auto"
         controls={unmuted}

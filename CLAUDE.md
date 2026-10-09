@@ -830,6 +830,22 @@ commit.
       player whose week the VSL shows, else change to "one of my
       players". Pixel still not on /demo (no ID yet), so ad 5 cannot
       target site visitors until it is.
+      SAME DAY: a shareable page of the five creatives + per-ad copy was
+      published at https://claude.ai/artifact/7rrkNMV1UWyVsRtxvhVYtD
+      (private until shared from its Share menu). Common description
+      for all five, Coach Yinka's ask: "Weekly at-home training, built
+      around your player".
+- [x] Oct 9 2026 (Coach Yinka: "make it so they don't have to tap for
+      sound"): VslFilePlayer.tsx now tries to start the VSL WITH sound
+      first; where the browser allows it (desktop, some in-app browsers
+      after the link tap) there is no overlay at all. Where it refuses
+      (iPhone Safari on a fresh load, always), the video starts muted and
+      the FIRST touch anywhere on the page (any tap, any key) turns the
+      sound on and restarts from 0:00, so nobody has to find the button;
+      the "Tap for sound" pill stays as the obvious target until then.
+      Browser policy fact, not a Strive limitation: no site can play
+      audio on a phone before one touch on the page. typecheck + lint
+      green.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

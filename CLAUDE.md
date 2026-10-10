@@ -846,6 +846,27 @@ commit.
       Browser policy fact, not a Strive limitation: no site can play
       audio on a phone before one touch on the page. typecheck + lint
       green.
+- [x] Oct 10 2026 (Coach Yinka, ads going live under ONE ad with five
+      images): one primary text / headline / description for all five,
+      written in WE (Coach Yinka and Coach Gary), adding to what the
+      images already say (bullets, proof line, refund, CTA are on the
+      image; the text carries the hook, who we are, the free video ask,
+      and the $249-by-Nov-1 line so the price image is never orphaned).
+      Headline "Watch a real week, drill by drill"; description "Weekly
+      at-home training, built around your player". FLAGGED, not done:
+      the images still say "by Coach Yinka" (eyebrow) and ad 3 says "I
+      build four sessions a week" - re-render to "we" on his word.
+- [x] Oct 10 2026 (Coach Yinka: "short info about strive elite so manus
+      can make the confirmation page"): brief at
+      marketing/landing/manus-confirmation-brief.md for the post-form
+      thank-you page: headline "You're in. One more step.", Book your
+      call button (BOOK_CALL_URL placeholder, assessment-call windows
+      under it), an empty 16:9 slot for a second VSL later, "what
+      happens on the call", two cards (In person / Strive Elite at home,
+      $350, $249 by Nov 1), footer DM + privacy/terms, Pixel slot firing
+      Lead, brand tokens, and the hard rules (we not I, your player, no
+      AI words, no em dashes, no proof not supplied). Coach Yinka to
+      supply the booking link.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

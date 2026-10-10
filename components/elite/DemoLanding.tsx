@@ -7,6 +7,10 @@ import { Wordmark } from "@/components/elite/Wordmark";
 import { Reveal, RevealWords } from "@/components/elite/Reveal";
 import { VslPlayer } from "@/components/elite/VslPlayer";
 import { VslFilePlayer } from "@/components/elite/VslFilePlayer";
+import { MetaPixel } from "@/components/elite/MetaPixel";
+
+// Meta Pixel for the ad funnel (Coach Yinka, Oct 10 2026). This page only.
+const META_PIXEL_ID = "1655175349021847";
 
 // Set this to the unlisted YouTube video id once the VSL is uploaded. The
 // player autoplays muted above the headline with a "Tap for sound" layer
@@ -74,6 +78,7 @@ export async function DemoLanding() {
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+      <MetaPixel id={META_PIXEL_ID} />
       {/* Hero assembles on load: wordmark rises, a gold hairline draws under it,
           then the headline builds word by word. */}
       <div className="rise-in flex items-center justify-between gap-4">

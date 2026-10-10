@@ -867,6 +867,15 @@ commit.
       Lead, brand tokens, and the hard rules (we not I, your player, no
       AI words, no em dashes, no proof not supplied). Coach Yinka to
       supply the booking link.
+- [x] Oct 10 2026 (Coach Yinka: "strive elite cover photo for the
+      meeting"): 1920x1080 cover at
+      marketing/covers/strive-elite-meeting/strive-elite-cover-1920x1080.png
+      (source cover.html next to it, rendered headless then cropped):
+      brand black, white logo coin, STRIVE ELITE with ELITE in gold, gold
+      rule, PERSONALIZED TRAINING, "Built by Coach Yinka and Coach Gary",
+      @strivesoccerfc with the gold underline bottom-left,
+      thestriveapp.com bottom-right. Fits Zoom, Calendly event cover,
+      Google Meet, and a 16:9 link preview.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

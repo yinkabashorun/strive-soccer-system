@@ -18,8 +18,9 @@ Manager asks for per ad, in the order it asks. Copy and paste.
 - Retargeting audience (ad 5 only): anyone who visited thestriveapp.com/demo
   in the last 30 days, plus Instagram engagers 30 days. Exclude anyone who
   submitted the form.
-- Pixel: not installed on /demo yet. Send the Pixel ID and it goes in the
-  same hour. Ad 5 cannot target site visitors until it is.
+- Pixel: installed on /demo (ID 1655175349021847, Oct 10). PageView on
+  load, Lead on form submit. Build the ad 5 audience from it once it has
+  seen traffic.
 - Rules baked into every creative: no "AI" or "automated", no em dashes,
   no alumni names, no invented numbers. Month to month and same-day refund
   are confirmed. $249 locked for life by Nov 1, $350 after, confirmed.

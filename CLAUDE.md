@@ -876,6 +876,19 @@ commit.
       @strivesoccerfc with the gold underline bottom-left,
       thestriveapp.com bottom-right. Fits Zoom, Calendly event cover,
       Google Meet, and a 16:9 link preview.
+- [x] LIVE Oct 10 2026 (Coach Yinka sent the Meta Pixel ID
+      1655175349021847): components/elite/MetaPixel.tsx, mounted in
+      DemoLanding.tsx (META_PIXEL_ID at the top of that file), so the
+      pixel runs on /demo ONLY - not on the app itself, on purpose
+      (members are minors training, not an ad audience, and the privacy
+      policy doesn't cover ad tracking there). Fires PageView on load
+      and a best-effort Lead when the embedded GHL survey posts a
+      "submit" message from a leadconnector origin; if that message
+      never comes, the Manus confirmation page's own pixel (Lead on
+      PageView, per its brief) catches it. typecheck + lint green. The
+      ad 5 retargeting audience (30-day /demo visitors) can now be
+      built in Meta once the pixel has seen traffic. Also update the
+      ad-copy sheet's "Pixel not installed" line on next touch.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

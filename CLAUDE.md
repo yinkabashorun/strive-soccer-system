@@ -889,6 +889,21 @@ commit.
       ad 5 retargeting audience (30-day /demo visitors) can now be
       built in Meta once the pixel has seen traffic. Also update the
       ad-copy sheet's "Pixel not installed" line on next touch.
+- [x] Oct 11 2026 (Coach Yinka sent two pages of $100M Offers, Step 2
+      "List Problems", with the weight-loss example): the same exercise
+      done for Strive Elite at marketing/offer/strive-elite-problem-list.md.
+      Eight things a family must do in order (decide it's worth trying,
+      sign up and set up at home, make time for four sessions, do the
+      session right alone, keep the kid accountable, know it's working,
+      keep going month after month, turn it into games), each with the
+      four problems in the parent's or player's own words, one per value
+      driver (effort, time, worth it, likelihood). Takeaways for step 3
+      at the bottom: the two biggest fears are "who makes him do it" and
+      "I can't tell if it's working", both already answered by features
+      but not yet in the parent's words; space and equipment is a real
+      unanswered worry on /demo ("a ball, a few cones, a driveway; a wall
+      is a bonus"); nobody is talking to the player about game transfer.
+      Step 3 (solutions list) not started.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

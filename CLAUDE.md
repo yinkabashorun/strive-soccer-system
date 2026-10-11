@@ -904,6 +904,27 @@ commit.
       unanswered worry on /demo ("a ball, a few cones, a driveway; a wall
       is a bonus"); nobody is talking to the player about game transfer.
       Step 3 (solutions list) not started.
+- [x] Oct 11 2026 (Coach Yinka sent Step 3 "Solutions List" plus his own
+      notebook: dream outcome "become the most dominant player on your
+      team in 12 weeks", decreased time "12 weeks dominant, 6 weeks
+      confident", and HIS eight problems: already have team training /
+      already train alone with structure / can't hold my kid accountable
+      / no at-home setup / how do I get feedback / don't want a
+      subscription / if I police it I'm doing the work / what if I miss
+      sessions, is my score ruined): Step 3 done on HIS list at
+      marketing/offer/strive-elite-solutions-list.md, every problem
+      reversed into four "How to ..." lines the book's way. Two findings:
+      (1) nearly every solution already exists in the product, the gap
+      is copy in the parent's words, so step 4 is naming and placing
+      them; (2) three lines promise what the product does NOT do yet and
+      must stay call-only or get built: "the plan knows your team
+      schedule", "a coach's answer the same day", "the plan flexes for a
+      tournament weekend" (it picks back up, it does not reschedule).
+      FLAGGED: "most dominant player on your team in 12 weeks" is a
+      guarantee over things nobody controls; safe public versions
+      offered ("most prepared player on the field", "noticeably better
+      in 6 weeks, a different player in 12"), "dominant" stays call
+      language. Not decided by Coach Yinka yet.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

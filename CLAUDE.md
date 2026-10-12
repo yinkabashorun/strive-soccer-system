@@ -925,6 +925,32 @@ commit.
       offered ("most prepared player on the field", "noticeably better
       in 6 weeks, a different player in 12"), "dominant" stays call
       language. Not decided by Coach Yinka yet.
+- [x] Oct 12 2026, THE OFFER STACK PROJECT ("the most important project
+      we've ever had"): Coach Yinka dictated eleven additions to the
+      Strive Elite offer, each a solution from the problem list, each
+      low effort for him, high value, and a pre-objection handler.
+      Captured verbatim-intent at marketing/offer/offer-stack-intake.md
+      and NOT built yet, by his instruction: (1) training load plans
+      (4x40 = busy-schedule plan, off-season layer, extra work); (2)
+      accountability: weekly mindset/accountability Zooms + Skool
+      community + the app's weekly text kept plain, never AI-like; (3)
+      ball-and-a-few-yards sessions for no-setup players, needs a
+      bundle name; (4) see before you pay: same-day refund promise once
+      week 1 is delivered; (5) drill feedback: text us a video for
+      feedback + a Strive-standard checklist; (6) pay in full at a
+      discount vs cancel-anytime monthly; (7) parent accountability:
+      weekly text + a bi-weekly progress video of the same drill sent to
+      the parent and posted in Skool; (8) breaks: pick up where you left
+      off, progress counts minutes/hours trained, never what was missed;
+      (9) strength / injury prevention / speed programs, all to be
+      filmed properly, "true value" only; (10) day-one gratification:
+      Skool with D1 alumni inside, a player profile post for each new
+      member; (11) weekly film room, three clips per player. FLAGGED in
+      the file: #11 conflicts with the Sept 30 "Elite is app only, film
+      is Complete" boundary and needs a re-decision; #10 needs each
+      alumni's yes; #8 changes what progress means. Process agreed: read
+      back, then one at a time, scope, sharper version, decide, build
+      permanent-grade, record.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -1089,6 +1089,44 @@ commit.
       already links. NOTE: every statement with `$$` or a trigger on
       elite_homework needs to go through execute_sql one at a time with
       lock_timeout set; apply_migration hangs on them.
+- [x] SHIPPED Oct 12 2026, OFFER STACK ITEM 3b, FEW-YARDS TEMPLATE
+      SESSIONS (Coach Yinka: "I want there to be template sessions for if
+      you just have a few yards. I'll hand select the drills for that";
+      decisions "1 yes 2 just skill 3 idk what you mean. 4. Coach
+      drills"): a player on the "a ball and a few yards" setting no
+      longer gets a composed week; their week IS the coach's hand-built
+      sessions, rotated. State found first: 35 active drills, ZERO ticked
+      "works in a few yards", so a few-yards player would have had
+      warm-ups only. Migration 035 APPLIED TO PROD statement by statement
+      (elite_session_templates + elite_session_template_drills, coach-only
+      RLS like the bank; a trigger marks any drill placed in a tight
+      template small_space = true so the drill-level flag Extra Work and
+      the prompt read stays the single truth; elite_homework.template_id
+      records which template a row came from and drives rotation).
+      RULES in bank-conform.ts templateSessions(), unit-tested
+      (tests/templates.test.ts, 11; 73 total): templates replace AI
+      composition entirely for tight-space players at BOTH gates (the
+      branch sits at the top of conformSessionsToBank, so generation,
+      fallback and publish all go through it); a template is SKILL DRILLS
+      ONLY and the system adds the plyo warm-up and any required finisher
+      as for every session; rotation is never-used first then oldest
+      last-used, never the same template twice in a week while enough
+      exist; fewer templates than sessions (4, or 6 Off-Season) = the
+      least recent repeats and the audit flags "only N few-yards sessions
+      built, week repeats one"; a few-yards player with zero templates is
+      flagged "no few-yards sessions built yet" (week composed from
+      ticked drills as before); wall drills a player can't do are dropped
+      and the session filled from the few-yards pool; inactive templates
+      and unfilmed drills never reach a player. The AI is told the
+      sessions are fixed and writes focus / parent text / player summary
+      around them. UI: "Few-yards sessions" editor at the top of
+      /coach/drills (name, pick filmed skill drills in order, reorder,
+      on/off, delete, count shown against what the roster needs, amber
+      line when short). Open-space players are untouched: no template
+      rows exist until Coach Yinka builds one, and they never read the
+      table. STATE: zero templates built; Coach Yinka builds them at
+      /coach/drills. No player data touched. docs/METHODOLOGY.md has a
+      "A ball and a few yards" section.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

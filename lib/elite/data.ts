@@ -1,4 +1,5 @@
 import { nyToday } from "./time";
+import type { TemplateContext, TemplateUsage } from "./bank-conform";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient, createServiceClient } from "./supabase/server";
 import {
@@ -28,6 +29,8 @@ import type {
   ParentReport,
   Player,
   PlayerSummary,
+  SessionTemplate,
+  TrainingSpace,
   Progress,
   ProgressPoint,
   RosterRow,
@@ -233,6 +236,68 @@ export async function backfillHomeworkVideos(
   }
 
   return fixed;
+}
+
+// Few-yards template sessions (035): the coach's hand-built sessions with
+// their drills in order. Admin read by default, like the bank - the hourly
+// builder has no login. Pre-035 or unreachable = empty list, and the
+// normal composition path takes over (the audit flags it).
+export async function getSessionTemplates(opts?: {
+  space?: TrainingSpace;
+  client?: SupabaseClient;
+  includeInactive?: boolean;
+}): Promise<SessionTemplate[]> {
+  const supabase = opts?.client ?? createServiceClient() ?? createClient();
+  if (!supabase) return [];
+  let q = supabase
+    .from("elite_session_templates")
+    .select("id, title, space, sort, active, elite_session_template_drills(sort, elite_drills(*))")
+    .order("sort");
+  if (opts?.space) q = q.eq("space", opts.space);
+  if (!opts?.includeInactive) q = q.eq("active", true);
+  const { data, error } = await q;
+  if (error || !data) return [];
+  type Raw = {
+    id: string;
+    title: string;
+    space: TrainingSpace;
+    sort: number;
+    active: boolean;
+    elite_session_template_drills: { sort: number; elite_drills: Drill | Drill[] | null }[] | null;
+  };
+  return (data as Raw[]).map((t) => ({
+    id: t.id,
+    title: t.title,
+    space: t.space,
+    sort: t.sort,
+    active: t.active,
+    drills: [...(t.elite_session_template_drills ?? [])]
+      .sort((a, b) => a.sort - b.sort)
+      .map((x) => (Array.isArray(x.elite_drills) ? x.elite_drills[0] : x.elite_drills))
+      .filter((d): d is Drill => Boolean(d)),
+  }));
+}
+
+// Everything the two gates need to turn a few-yards player's week into
+// templates: the tight templates plus the last week each one was used by
+// this player (drives least-recently-used rotation). undefined for every
+// player not on the tight setting, so composition is untouched for them.
+export async function loadTemplateContext(
+  player: { id: string; space?: TrainingSpace | null } | null | undefined,
+  client?: SupabaseClient
+): Promise<TemplateContext | undefined> {
+  if (!player || player.space !== "tight") return undefined;
+  const supabase = client ?? createServiceClient() ?? createClient();
+  if (!supabase) return undefined;
+  const [templates, { data: rows }] = await Promise.all([
+    getSessionTemplates({ space: "tight", client: supabase }),
+    supabase.from("elite_homework").select("template_id, week").eq("player_id", player.id).not("template_id", "is", null),
+  ]);
+  const usage: TemplateUsage = {};
+  for (const r of ((rows as { template_id: string; week: number }[] | null) ?? [])) {
+    usage[r.template_id] = Math.max(usage[r.template_id] ?? 0, r.week);
+  }
+  return { templates, usage };
 }
 
 // Breaks from training (034). A player reads their own, the coach reads

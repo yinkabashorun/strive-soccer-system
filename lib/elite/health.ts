@@ -10,6 +10,8 @@
 //   - every drill in that week links a bank drill by id (drill_id)
 //   - every drill in that week has a video
 //   - every linked drill is still active in the bank
+//   - a few-yards player (035) has templates to train from, and the live
+//     week did not have to repeat one
 //
 // Pure rule in auditWeekRows (unit-tested); the DB read wraps it.
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -45,30 +47,59 @@ export function auditWeekRows(
   return out;
 }
 
+// Few-yards invariants (035). Pure, unit-tested. templateCount = active
+// tight templates in the bank; rows = the player's homework.
+export type TemplateRow = { week: number; session: number | null; template_id: string | null };
+
+export function auditTemplateRows(
+  name: string,
+  liveWeek: number,
+  space: string | null | undefined,
+  templateCount: number,
+  rows: TemplateRow[]
+): HealthIssue[] {
+  if (space !== "tight") return [];
+  if (templateCount === 0) {
+    return [{ name, issue: "few-yards player with no few-yards sessions built yet (week composed from ticked drills)" }];
+  }
+  const current = rows.filter((r) => r.week === liveWeek && r.template_id);
+  const bySession = new Map<number, string>();
+  for (const r of current) bySession.set(r.session ?? 1, r.template_id as string);
+  const used = [...bySession.values()];
+  const distinct = new Set(used).size;
+  if (used.length > distinct) {
+    return [{ name, issue: `only ${templateCount} few-yards session${templateCount === 1 ? "" : "s"} built, week ${liveWeek} repeats one (needs ${used.length})` }];
+  }
+  return [];
+}
+
 export async function auditLiveWeeks(admin: SupabaseClient): Promise<HealthIssue[]> {
   const { data: players } = await admin
     .from("elite_players")
-    .select("id, full_name, week1_monday, current_week")
+    .select("id, full_name, week1_monday, current_week, space")
     .not("onboarded_at", "is", null)
     .in("subscription_status", ["active", "trialing"]);
   const everyone =
-    (players as { id: string; full_name: string; week1_monday: string | null; current_week: number }[] | null) ?? [];
+    (players as { id: string; full_name: string; week1_monday: string | null; current_week: number; space?: string | null }[] | null) ?? [];
   if (everyone.length === 0) return [];
   const roster = await withoutPlayersOnBreak(admin, everyone);
   if (roster.length === 0) return [];
 
   const { data: hw } = await admin
     .from("elite_homework")
-    .select("player_id, week, video_url, drill_id, elite_drills(active)")
+    .select("player_id, week, session, video_url, drill_id, template_id, elite_drills(active)")
     .in("player_id", roster.map((p) => p.id));
   type Raw = {
     player_id: string;
     week: number;
+    session: number | null;
     video_url: string | null;
     drill_id: string | null;
+    template_id?: string | null;
     elite_drills: { active: boolean } | { active: boolean }[] | null;
   };
   const byPlayer = new Map<string, WeekRow[]>();
+  const tplByPlayer = new Map<string, TemplateRow[]>();
   for (const r of ((hw as Raw[] | null) ?? [])) {
     const d = Array.isArray(r.elite_drills) ? r.elite_drills[0] : r.elite_drills;
     const list = byPlayer.get(r.player_id) ?? [];
@@ -79,11 +110,26 @@ export async function auditLiveWeeks(admin: SupabaseClient): Promise<HealthIssue
       drill_active: r.drill_id ? (d ? d.active : null) : null,
     });
     byPlayer.set(r.player_id, list);
+    const tl = tplByPlayer.get(r.player_id) ?? [];
+    tl.push({ week: r.week, session: r.session, template_id: r.template_id ?? null });
+    tplByPlayer.set(r.player_id, tl);
+  }
+  // Active few-yards templates in the bank (035); pre-035 = none.
+  let templateCount = 0;
+  if (roster.some((p) => p.space === "tight")) {
+    const { count } = await admin
+      .from("elite_session_templates")
+      .select("id", { count: "exact", head: true })
+      .eq("space", "tight")
+      .eq("active", true);
+    templateCount = count ?? 0;
   }
   const issues: HealthIssue[] = [];
   for (const p of roster) {
     const live = liveWeekFor(p.week1_monday, p.current_week);
-    issues.push(...auditWeekRows(p.full_name.split(" ")[0], live, byPlayer.get(p.id) ?? []));
+    const first = p.full_name.split(" ")[0];
+    issues.push(...auditWeekRows(first, live, byPlayer.get(p.id) ?? []));
+    issues.push(...auditTemplateRows(first, live, p.space, templateCount, tplByPlayer.get(p.id) ?? []));
   }
   return issues;
 }

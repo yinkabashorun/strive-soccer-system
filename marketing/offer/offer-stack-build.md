@@ -216,15 +216,35 @@ parent text. Nothing temporary.
    short), audit line when a tight-space player's week had to repeat a
    template, the no-library check unchanged (templates live in the DB).
 
-### Decisions needed before building
-1. Templates REPLACE AI composition for tight-space players (recommended),
-   or the AI picks among templates?
-2. A template is the whole session, warm-up included, hand-picked
-   (recommended), or skill drills only with the system adding the plyo
-   warm-up as today? Either way a strengthening finisher is still added
-   when the injury rule requires it.
-3. Fewer templates than sessions in a week (under 4, or under 6 for an
-   Off-Season player): repeat the least recent template and flag it on
-   the dashboard (recommended), or hold the week until enough exist?
-4. Build the template editor at /coach/drills (recommended) or its own
-   page?
+### Decisions (Coach Yinka, Oct 12 2026: "1 yes 2 just skill 3 idk what
+### you mean. 4. Coach drills")
+1. Templates REPLACE AI composition for few-yards players.
+2. A template is SKILL DRILLS ONLY; the system adds the plyo warm-up and,
+   when the injury rule requires it, the strengthening finisher.
+3. Explained and defaulted: with fewer templates than sessions in the
+   week the least recently used one repeats and the Plan builder card
+   shows a line until enough exist. He can overrule.
+4. Editor lives at /coach/drills, above the bank.
+
+### SHIPPED Oct 12 2026 (verify green; migration 035 applied to prod)
+- Migration 035: elite_session_templates, elite_session_template_drills
+  (coach-only RLS like the bank), a trigger that marks a placed drill
+  small_space, elite_homework.template_id (drives rotation, history).
+- bank-conform.ts templateSessions() + the tight-space branch at the top
+  of conformSessionsToBank, so BOTH gates (generation and publish) turn a
+  few-yards player's week into templates. Rotation: never used first,
+  then oldest last-used; never twice in a week while enough exist;
+  repeats flagged. Wall drills a player can't do are dropped and the
+  session is filled from the few-yards pool; inactive templates and
+  unfilmed drills never reach a player; no usable template = normal
+  composition (audited).
+- data.ts getSessionTemplates() / loadTemplateContext(); ai-coach passes
+  the context through sanitize and the fallback and tells the AI the
+  sessions are fixed; coach-actions publish loads it itself and writes
+  template_id on every row; auto-plan and the studio route load it.
+- health.ts auditTemplateRows(): "no few-yards sessions built yet" and
+  "only N built, week repeats one", on the dashboard card like every
+  other audit line.
+- /coach/drills: Few-yards sessions editor (name, pick filmed skill
+  drills in order, reorder, on/off, delete, count vs what the roster
+  needs). tests/templates.test.ts (11 tests).

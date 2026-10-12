@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getViewer } from "@/lib/elite/session";
-import { getDrillBank, getPlayer } from "@/lib/elite/data";
+import { getDrillBank, getPlayer, loadTemplateContext } from "@/lib/elite/data";
 import { generatePlanFromNotes } from "@/lib/elite/ai-coach";
 import { buildPlayerMemory } from "@/lib/elite/memory";
 
@@ -46,12 +46,16 @@ export async function POST(req: Request) {
   // back to the built-in library pre-020). Video-having drills only - a
   // drill added but not yet filmed should never reach a real player.
   const { drills } = await getDrillBank({ onlyWithVideo: true });
+  // Few-yards players (035): the studio preview shows the templates the
+  // publish gate will use, not a composed week that would be replaced.
+  const tpl = await loadTemplateContext(player);
 
   const { plan, source, reason, reasonKind } = await generatePlanFromNotes(
     notes,
     player,
     memory,
-    drills
+    drills,
+    tpl
   );
   return NextResponse.json({ plan, source, reason, reasonKind });
 }

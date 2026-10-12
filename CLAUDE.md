@@ -1023,6 +1023,17 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
   and even when it looks like a safety issue (the Oct 5 plyo removal for
   Tim's back was exactly this mistake). Code fixes and app bugs are
   different: those he has told me to fix on sight.
+- STANDING RULE (Coach Yinka, Oct 12 2026: "NO DETAILS MISSED, NOTHING
+  BUILT THAT DOESNT FIT THE SYSTEM PERFECTLY. AND NOTHING TEMPORARY"):
+  every change is permanent-grade or it doesn't ship. Before building,
+  read how the existing system does it and fit into it (same patterns,
+  same gates, same tests, same record); never a one-off patch, a hack,
+  a "for now", or a parallel path. Every change carries its guard
+  (test, DB constraint, CI check) so it can't regress silently. Every
+  detail in a request gets done or gets flagged by name as not done;
+  nothing dropped quietly. Same standard for copy and marketing as for
+  code: real numbers, confirmed facts, the brand rules, nothing
+  invented.
 - Refunds: same-day, gracious, always.
 - Registration = payment. Public scarcity numbers must be real.
 - No em dashes in any player/parent-facing copy or scripts.

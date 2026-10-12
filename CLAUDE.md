@@ -951,6 +951,23 @@ commit.
       alumni's yes; #8 changes what progress means. Process agreed: read
       back, then one at a time, scope, sharper version, decide, build
       permanent-grade, record.
+- [x] DECIDED Oct 12 2026 (Coach Yinka): ONE OFFER ONLY from here. The
+      eleven-item stack above IS Strive Elite, sold at $250/mo until
+      Sep 1, then doubled to $500/mo. He expects a rush when it's
+      announced this month with all the value in it. SUPERSEDES: the
+      Complete Pathway as a separate offer ($600/mo / $1,500 PIF, Oct 5),
+      the $350-from-Nov-2 standard price, and the Nov 1 founding
+      deadline. NOT YET CLARIFIED (asked the same day): $249 vs $250
+      (Stripe product, ads, /demo, outro and the filmed VSL all say
+      $249); whether a member who joins before Sep 1 keeps $250 for life
+      (the current "locked for life" promise) or moves to $500; Sep 1 of
+      2027 assumed; what happens to anyone sold Complete terms. KNOWN
+      COPY DEBT the moment this is confirmed: /demo offer block ($350
+      from Nov 2, $249 locked by Nov 1), ad 5 image and the one primary
+      text ($249 by Nov 1, $350 after), the outro's price-free CTA is
+      fine, the Manus confirmation brief's two cards ($350 / $249 by
+      Nov 1), the VSL section 6 (filmed with $249/$350 and Complete at
+      $600, cannot be edited without a re-cut). Nothing changed yet.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 
@@ -980,6 +997,13 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
 (~1-4pm). 15-min slots, 15-min buffer, max 4/day, 3h notice.
 
 ## Confirmed prices
+
+- DECIDED Oct 12 2026, OVERRIDES the Strive Elite / Complete lines below
+  once clarified: ONE OFFER, Strive Elite with the full eleven-item
+  stack, $250/mo until Sep 1 (2027 assumed), then $500/mo. Open: $249
+  vs $250, locked-for-life for pre-Sep-1 members, Complete retired. See
+  the Oct 12 RECORD entry. Until he answers, the live copy still says
+  $249 by Nov 1 / $350 after and must not be touched piecemeal.
 
 - 1:1 Drop-in: $80 (raised from $75, Sept 2026) · Starter 4 sessions: $280 · Development 8: $520 · Elite Season 12: $720
 - 1:1 Monthly: $280/mo — weekly fixed 1:1 slot, reschedule within the week via

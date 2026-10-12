@@ -104,6 +104,19 @@ export type Drill = {
   demo_by?: string;
 };
 
+// A hand-built session for players with a ball and a few yards (035,
+// elite_session_templates + elite_session_template_drills). drills is the
+// coach's ordered pick of SKILL drills; the plyo warm-up and any required
+// strengthening finisher are added by the system, same as every session.
+export type SessionTemplate = {
+  id: string;
+  title: string;
+  space: TrainingSpace;
+  sort: number;
+  active: boolean;
+  drills: Drill[];
+};
+
 // A player's structured weekly check-in (elite_checkins).
 export type Checkin = {
   id: string;
@@ -132,6 +145,7 @@ export type Homework = {
   video_url: string | null;
   drill_id?: string | null; // (028) stable link to elite_drills - video updates flow through this, not title text
   pillar?: string | null; // (034) the linked drill's pillar, filled by the database from drill_id - powers minutes-by-pillar for the player
+  template_id?: string | null; // (035) the few-yards template this row came from; null for composed rows
   notes: string | null;
   completed: boolean;
   completed_at: string | null;
@@ -339,10 +353,11 @@ export type GeneratedDrill = {
   notes?: string;
 };
 
-// One of the week's four sessions.
+// One of the week's sessions.
 export type GeneratedSession = {
   title: string;
   drills: GeneratedDrill[];
+  template_id?: string; // (035) set when the session IS a few-yards template
 };
 
 // The structured object Claude returns from raw session notes. A week is

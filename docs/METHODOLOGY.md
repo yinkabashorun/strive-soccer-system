@@ -27,6 +27,18 @@ After the warm-up, each session is **exactly three focused skill drills**
 (~10 minutes each), done with intent. The three drills plus the warm-up
 fill the ~40 minutes.
 
+## A ball and a few yards
+
+A player on the few-yards space setting does not get a composed week. Their
+week is the coach's **hand-built few-yards sessions** (`/coach/drills`,
+"Few-yards sessions"), rotated least recently used first and never the same
+one twice in a week while enough exist. Each template is skill drills only;
+the system adds the plyo warm-up and, when a note calls for it, the
+strengthening finisher, exactly as for every session. Placing a drill in a
+template marks it "works in a few yards", so Extra Work for those players
+draws from the same drills. With fewer templates than sessions in the week,
+the least recent one repeats and the live-week audit says so.
+
 ## Progress and breaks
 
 Progress, as the family sees it, is **time trained**: minutes, sessions

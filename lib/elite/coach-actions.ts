@@ -8,7 +8,7 @@ import { sendPlayerEmail } from "./email";
 import { sendPushToPlayer } from "./push";
 import { normalizePhone, sendPlayerSMS } from "./sms";
 import { isSundayEveNY, liveWeekFor, mondayOfWeekNY, nextMondayNY, unlockInstant } from "./time";
-import { getDrillBank, normalizeTitle } from "./data";
+import { getDrillBank, loadTemplateContext, normalizeTitle } from "./data";
 import { conformSessionsToBank, strengthRequired } from "./bank-conform";
 import { sessionsWord, TRAINING_LOADS } from "./training";
 import { resolveWeekTarget } from "./week-target";
@@ -596,12 +596,17 @@ export async function applyGeneratedPlanCore(
     ? "required"
     : "optional";
   const env = player as { has_wall?: boolean | null; space?: TrainingSpace | null } | null;
+  // Few-yards players (035): the publish gate loads the coach's templates
+  // and this player's rotation itself, so a hand-edited studio plan for a
+  // tight-space player still publishes as templates.
+  const tpl = await loadTemplateContext({ id: playerId, space: env?.space ?? null }, supabase);
   const sessionsToPublish = conformSessionsToBank(
     plan.sessions,
     bank,
     env ? { has_wall: env.has_wall ?? null, space: env.space ?? null } : null,
     plan.weekly_focus,
-    strength
+    strength,
+    tpl
   );
   const sessionCount = sessionsToPublish.length;
   const sessionsSaid = sessionsWord(sessionCount);
@@ -624,6 +629,7 @@ export async function applyGeneratedPlanCore(
         notes: d.notes ?? null,
         video_url: match?.video_url ?? null,
         drill_id: match?.id ?? null,
+        template_id: s.template_id ?? null, // (035) drives the few-yards rotation
         sort: di,
       };
     })
@@ -637,7 +643,7 @@ export async function applyGeneratedPlanCore(
       await supabase
         .from("elite_homework")
         .insert(
-          rows.map(({ session: _session, ...r }) => r)
+          rows.map(({ session: _session, template_id: _t, ...r }) => r)
         );
     }
   }

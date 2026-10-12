@@ -25,7 +25,7 @@
 import { createServiceClient } from "./supabase/server";
 import { generatePlanFromNotes } from "./ai-coach";
 import { applyGeneratedPlanCore } from "./coach-actions";
-import { getDrillBank, latestCoachingCallNotes } from "./data";
+import { getDrillBank, latestCoachingCallNotes, loadTemplateContext } from "./data";
 import { isSundayEveNY, liveWeekFor } from "./time";
 import { alertCoach, latestCronRun, PLAN_BUILDER_JOB, startCronRun, updateCronRun } from "./cron-log";
 import { auditLiveWeeks, type HealthIssue } from "./health";
@@ -177,7 +177,9 @@ export async function runAutoWeeklyPlans(
       ]
         .filter(Boolean)
         .join("\n");
-      const { plan } = await generatePlanFromNotes(notes, player, player.coach_memory, bank);
+      // Few-yards players (035): their week is the coach's templates.
+      const tpl = await loadTemplateContext(player, admin);
+      const { plan } = await generatePlanFromNotes(notes, player, player.coach_memory, bank, tpl);
       const applied = await applyGeneratedPlanCore(player.id, notes, plan, coach.id, admin);
       results.push({ playerId: player.id, name: player.full_name, ok: true, week: applied.week });
     } catch (err) {

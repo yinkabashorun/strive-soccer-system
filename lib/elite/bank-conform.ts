@@ -17,7 +17,7 @@
 // time, so a hand-edited plan can't bypass it either. With no bank at all
 // (demo / pre-020) it leaves the plan alone.
 
-import type { Drill, GeneratedDrill, GeneratedSession, Player, TrainingSpace } from "./types";
+import type { Drill, GeneratedDrill, GeneratedSession, Player, SessionTemplate, TrainingSpace } from "./types";
 import { PLYO_PILLAR, STRENGTH_PILLAR } from "./types";
 
 // What the builder knows about where a player trains (019 wall, 033 space).
@@ -174,9 +174,24 @@ export function conformSessionsToBank(
   bank: Drill[] | undefined,
   player?: (Pick<Player, "has_wall"> & { space?: TrainingSpace | null }) | null,
   weeklyFocus = "",
-  strength: StrengthMode = "optional"
+  strength: StrengthMode = "optional",
+  tpl?: TemplateContext | null
 ): GeneratedSession[] {
   if (!bank || bank.length === 0) return sessions;
+
+  // Few-yards players (035): the week IS the coach's hand-built templates,
+  // whatever the AI or the studio wrote. Same gate, both call sites.
+  if (player?.space === "tight" && tpl) {
+    const t = templateSessions({
+      templates: tpl.templates,
+      bank,
+      player,
+      count: sessions.length,
+      usage: tpl.usage,
+      strength,
+    });
+    if (t) return t.sessions;
+  }
 
   const canDo = (d: Drill) => drillFitsPlayer(d, player);
   const skillsPool = bank.filter((d) => isSkillPillar(d.pillar) && canDo(d));
@@ -381,4 +396,96 @@ export function composeExtraSession(opts: {
     title: `Extra: ${EXTRA_SHELVES[shelf].label}`,
     drills: [...warm, ...drills, ...finisher],
   };
+}
+
+// ---------------------------------------------------------------------
+// Few-yards template sessions (offer stack item 3b, Oct 12 2026). Coach
+// Yinka hand-builds sessions for players with a ball and a few yards; a
+// tight-space player's week is those templates, rotated, never AI
+// composition. Decisions: templates replace composition entirely; a
+// template is skill drills only (the system adds the plyo warm-up and any
+// required finisher, exactly as for every other session); when there are
+// fewer templates than sessions in the week, the least recently used one
+// repeats and the audit says so.
+// ---------------------------------------------------------------------
+export type TemplateUsage = Record<string, number>; // template id -> last week it was used
+export type TemplateContext = { templates: SessionTemplate[]; usage: TemplateUsage };
+
+// Templates this player can actually train, each reduced to its usable
+// drills (active, filmed, fits the wall rule), in the coach's order.
+function usableTemplates(templates: SessionTemplate[], env: PlayerEnv | null | undefined): SessionTemplate[] {
+  return templates
+    .filter((t) => t.active)
+    .map((t) => ({
+      ...t,
+      drills: t.drills.filter(
+        (d) => d.active !== false && Boolean(d.video_url) && isSkillPillar(d.pillar) && drillFitsPlayer(d, env)
+      ),
+    }))
+    .filter((t) => t.drills.length > 0)
+    .sort((a, b) => a.sort - b.sort);
+}
+
+// Rotation order: never used first (coach's order), then by the week they
+// were last used, oldest first.
+export function orderTemplatesForPlayer(templates: SessionTemplate[], usage: TemplateUsage): SessionTemplate[] {
+  return [...templates].sort((a, b) => {
+    const ua = usage[a.id];
+    const ub = usage[b.id];
+    if (ua == null && ub == null) return a.sort - b.sort;
+    if (ua == null) return -1;
+    if (ub == null) return 1;
+    return ua - ub || a.sort - b.sort;
+  });
+}
+
+export function templateSessions(opts: {
+  templates: SessionTemplate[];
+  bank: Drill[];
+  player: PlayerEnv | null | undefined;
+  count: number;
+  usage: TemplateUsage;
+  strength: StrengthMode;
+}): { sessions: GeneratedSession[]; repeated: boolean } | null {
+  const { bank, player, count, usage, strength } = opts;
+  const usable = orderTemplatesForPlayer(usableTemplates(opts.templates, player), usage);
+  if (usable.length === 0 || count <= 0) return null;
+
+  const plyoPool = bank.filter((d) => d.pillar === PLYO_PILLAR && d.video_url);
+  const strengthPool = bank.filter((d) => d.pillar === STRENGTH_PILLAR && d.video_url);
+  const skillsPool = bank.filter((d) => isSkillPillar(d.pillar) && drillFitsPlayer(d, player));
+  const usedWeek = new Set<string>();
+  const sessions: GeneratedSession[] = [];
+  for (let i = 0; i < count; i++) {
+    const t = usable[i % usable.length];
+    const usedSession = new Set<string>();
+    const drills: GeneratedDrill[] = [];
+    if (plyoPool.length) {
+      const warm = plyoPool[i % plyoPool.length];
+      usedSession.add(warm.title);
+      drills.push(fromBank(warm));
+    }
+    for (const d of t.drills) {
+      if (usedSession.has(d.title)) continue;
+      usedSession.add(d.title);
+      usedWeek.add(d.title);
+      drills.push(fromBank(d));
+    }
+    // A short template (a drill lost its video, or needs a wall this
+    // player lacks) is filled from the few-yards pool, never left thin.
+    let skillCount = t.drills.length;
+    while (skillCount < MIN_SKILLS && skillsPool.length) {
+      const sub = pickSkillFrom(skillsPool, t.drills[0]?.pillar ?? null, usedWeek, usedSession);
+      if (usedSession.has(sub.title)) break;
+      usedSession.add(sub.title);
+      usedWeek.add(sub.title);
+      drills.push(fromBank(sub));
+      skillCount++;
+    }
+    if (strength === "required" && strengthPool.length) {
+      drills.push(fromBank(strengthPool[i % strengthPool.length]));
+    }
+    sessions.push({ title: t.title, drills, template_id: t.id });
+  }
+  return { sessions, repeated: usable.length < count };
 }

@@ -19,6 +19,7 @@ import {
 import { sessionsFor, sessionsWord } from "./training";
 import {
   conformSessionsToBank,
+  type TemplateContext,
   isSkillPillar,
   isStrengthTitle,
   strengthRequired,
@@ -249,7 +250,8 @@ function sanitize(
   plan: Partial<GeneratedPlan>,
   player?: Player,
   bank?: Drill[],
-  strength: StrengthMode = "optional"
+  strength: StrengthMode = "optional",
+  tpl?: TemplateContext
 ): GeneratedPlan {
   const validMetrics = new Set(PROGRESS_METRICS as readonly string[]);
   const weekly_focus = ensureSentence(
@@ -264,7 +266,8 @@ function sanitize(
     bank,
     player,
     weekly_focus,
-    strength
+    strength,
+    tpl
   );
   return {
     weekly_focus,
@@ -301,7 +304,8 @@ function fallbackPlan(
   notes: string,
   player?: Player,
   bank?: Drill[],
-  strength: StrengthMode = "optional"
+  strength: StrengthMode = "optional",
+  tpl?: TemplateContext
 ): GeneratedPlan {
   const haystack = `${notes}\n${(player?.weaknesses ?? []).join("\n")}`.toLowerCase();
   const PILLAR_HINTS: [RegExp, (typeof PROGRESS_METRICS)[number]][] = [
@@ -389,7 +393,8 @@ function fallbackPlan(
     },
     player,
     bank,
-    strength
+    strength,
+    tpl
   );
 }
 
@@ -397,7 +402,8 @@ export async function generatePlanFromNotes(
   notes: string,
   player?: Player,
   memory?: string,
-  bank?: Drill[] // the coach's drill bank; composition is restricted to it
+  bank?: Drill[], // the coach's drill bank; composition is restricted to it
+  tpl?: TemplateContext // (035) few-yards templates + usage; set only for a tight-space player
 ): Promise<{
   plan: GeneratedPlan;
   source: "ai" | "fallback";
@@ -414,7 +420,7 @@ export async function generatePlanFromNotes(
   const c = client();
   if (!c)
     return {
-      plan: fallbackPlan(notes, player, bank, strength),
+      plan: fallbackPlan(notes, player, bank, strength, tpl),
       source: "fallback",
       reason: "no_key",
       reasonKind: "no_key",
@@ -443,11 +449,21 @@ export async function generatePlanFromNotes(
       ? `Player: ${player.full_name}, age ${player.age}, ${player.position}, level ${player.level}. Current goals: ${player.goals.join("; ") || "n/a"}. Known weaknesses: ${player.weaknesses.join("; ") || "n/a"}.\n${env}`
       : "";
     const memoryBlock = memory?.trim() ? `\n\n${memory.trim()}` : "";
+    // Few-yards players (035): the sessions are the coach's templates and
+    // will replace whatever is generated; the AI's job is the focus, the
+    // parent text and the player summary around them.
+    const templateBlock =
+      player?.space === "tight" && tpl && tpl.templates.length
+        ? `\n\nFEW-YARDS SESSIONS (hard rule): this player's sessions are the coach's hand-built few-yards templates and will be used as written: ${tpl.templates
+            .filter((t) => t.active)
+            .map((t) => `"${t.title}" (${t.drills.map((d) => d.title).join(", ")})`)
+            .join("; ")}. Write the weekly focus, parent update and player summary around these drills. Still output the sessions field in the schema shape.`
+        : "";
     const strengthBlock =
       strength === "required"
         ? "\n\nSTRENGTHENING THIS WEEK (hard rule): the notes or the coach's memory mention an injury, rehab, core, hip or strength work, so END EVERY SESSION with exactly one strengthening finisher from the bank's finisher list, and keep the skill drills and player summary consistent with whatever the injury rules out."
         : "";
-    const userMsg = `${context}${memoryBlock}${strengthBlock}\n\nCoach's raw session notes:\n"""\n${notes}\n"""\n\nUsing everything you know about this player above, generate the ${sessionsWord(n)}-session weekly plan JSON now. Plan around their history, follow-through, trends, and the coach's note.`;
+    const userMsg = `${context}${memoryBlock}${templateBlock}${strengthBlock}\n\nCoach's raw session notes:\n"""\n${notes}\n"""\n\nUsing everything you know about this player above, generate the ${sessionsWord(n)}-session weekly plan JSON now. Plan around their history, follow-through, trends, and the coach's note.`;
 
     // One attempt at a given output cap, with enough logging that a parse
     // failure is diagnosable from Vercel logs instead of guessed at.
@@ -480,7 +496,7 @@ export async function generatePlanFromNotes(
     }
     if (!parsed)
       return {
-        plan: fallbackPlan(notes, player, bank, strength),
+        plan: fallbackPlan(notes, player, bank, strength, tpl),
         source: "fallback",
         reason:
           stop === "max_tokens"
@@ -488,13 +504,13 @@ export async function generatePlanFromNotes(
             : "The AI responded but the plan could not be read. Generate again; if it repeats, check the Vercel logs for [strive-ai] lines.",
         reasonKind: "parse",
       };
-    return { plan: sanitize(parsed, player, bank, strength), source: "ai" };
+    return { plan: sanitize(parsed, player, bank, strength, tpl), source: "ai" };
   } catch (err) {
     const msg =
       err instanceof Error ? err.message.slice(0, 200) : "unknown error";
     console.log(`[strive-ai] api error: ${msg}`);
     return {
-      plan: fallbackPlan(notes, player, bank, strength),
+      plan: fallbackPlan(notes, player, bank, strength, tpl),
       source: "fallback",
       reason: msg,
       reasonKind: "api_error",

@@ -23,9 +23,12 @@ import {
   getPlayer,
   getPlayerSummary,
   getProgress,
+  getTrainingBreaks,
   getWeeklyPlans,
 } from "@/lib/elite/data";
-import { fmtMonday, liveWeekFor, nextMondayNY } from "@/lib/elite/time";
+import { fmtMonday, liveWeekFor, nextMondayNY, nyToday } from "@/lib/elite/time";
+import { currentBreak, fmtBreakDate } from "@/lib/elite/breaks";
+import { BreakControl } from "@/components/elite/BreakControl";
 import { addCoachNote, sendCoachMessage } from "@/lib/elite/coach-actions";
 import { Avatar } from "@/components/Avatar";
 import { StatTile } from "@/components/elite/StatTile";
@@ -58,7 +61,7 @@ export default async function PlayerProfile({
   const player = await getPlayer(params.id);
   if (!player) notFound();
 
-  const [homework, progress, notes, messages, reports, summary, checkins, plans, films, games, calls] =
+  const [homework, progress, notes, messages, reports, summary, checkins, plans, films, games, calls, breaks] =
     await Promise.all([
       getHomework(player.id),
       getProgress(player.id),
@@ -71,7 +74,10 @@ export default async function PlayerProfile({
       getFilm(player.id),
       getGames(player.id),
       getCoachingCalls(player.id),
+      getTrainingBreaks(player.id),
     ]);
+  const today = nyToday();
+  const onBreak = currentBreak(breaks, today);
 
   // Weeks derive from the calendar: live = where the program clock is
   // today, contentWeek = what the player is actually training.
@@ -188,6 +194,13 @@ export default async function PlayerProfile({
             <h2 className="mb-3 flex items-center gap-2 font-display text-xl font-bold uppercase tracking-tight">
               <CalendarClock className="h-4 w-4 text-accent" /> This week
             </h2>
+            {onBreak && (
+              <div className="mb-3 rounded-2xl border border-white/12 bg-white/[0.03] px-4 py-3 text-sm text-white/70">
+                On a break until {fmtBreakDate(onBreak.until)}. Nothing is built or
+                sent until then; on return the clock moves so they resume the week
+                they left.
+              </div>
+            )}
             {scheduled && (
               <div className="mb-3 rounded-2xl border border-accent/25 bg-accent/[0.05] px-4 py-3 text-sm text-white/75">
                 Week {scheduled.week} is approved and scheduled. Unlocks{" "}
@@ -277,6 +290,9 @@ export default async function PlayerProfile({
             playerId={player.id}
             initial={player.subscription_status}
           />
+
+          {/* Break from training (034): set, move, or end a return date */}
+          <BreakControl playerId={player.id} breaks={breaks} today={today} />
 
           {/* Weekly 1:1 calls - Complete Pathway only. The post-call note
               feeds the next plan. */}

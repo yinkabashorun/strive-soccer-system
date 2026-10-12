@@ -1038,6 +1038,57 @@ commit.
       drills work in a few yards at /coach/drills; until he does, a
       tight-space player gets only plyos and finishers plus whatever is
       ticked - the audit will show a thin week).
+- [x] SHIPPED Oct 12 2026, OFFER STACK ITEM 8 (Coach Yinka: "Go"):
+      progress counts time trained and a break never costs anything.
+      Migration 034 APPLIED TO PROD (statement by statement; the one-shot
+      apply and the trigger statement timed out through the MCP the same
+      way 031's clone-week function did, so each piece went in alone with
+      lock_timeout 8s and was verified after): elite_homework.pillar
+      filled by a BEFORE INSERT/UPDATE trigger from drill_id (players
+      can't read elite_drills under RLS, and minutes-by-pillar is a
+      player-facing number) - backfill filled 433 of 433 linked rows, 0
+      left; elite_training_breaks (player_id, since, until, note,
+      created_by player|coach, resumed_at) with coach-all / owner-read
+      RLS, history never deleted. CODE: lib/elite/time-trained.ts is the
+      one pure calculator (minutes, sessions, weeks, minutes by pillar,
+      fmtDuration "4h 20m") using computeSummary's own rules so the
+      coach's and the family's numbers never disagree; lib/elite/breaks.ts
+      currentBreak()/resumeAnchor() pure + settleBreaks(): when a break
+      ends, week1_monday moves LATER by whole weeks (never backwards) so
+      the player resumes the week they left if it still has work, else
+      the next one; on a Sunday the next week starts tomorrow so the
+      Sunday rule can't leave it unbuilt. Settled once per break
+      (resumed_at) from the hourly builder and from the family opening
+      the dashboard (breaks-server.ts). EVERY automatic process respects
+      a break through the same rows: builder skips ("on a break until
+      X" in the run summary), auditLiveWeeks skips (withoutPlayersOnBreak
+      in health.ts), unlockDueWeeks holds the Monday unlock + texts until
+      return, buildParentRecap returns null, digest leaves them out of
+      "to build" and "quiet". Membership gate untouched. PLAYER UI:
+      dashboard header pill is time trained (no streak flame), strip is
+      Time trained / Sessions done / Weeks trained (homework % gone from
+      every player view), VictoryLap shows this week + all time, BreakCard
+      (hero when on a break with "I'm back early"; otherwise a one-line
+      "Taking a break?" date picker, max 90 days), progress page leads
+      with TimeTrainedPanel and keeps the pillar ratings as "Coach's
+      rating" (kept on purpose: the ads and /demo show the development
+      score). Parent recap drops the streak from facts and fallback.
+      Achievements: "7-Day Streak" replaced by "10 Sessions" (earned
+      badges stay). COACH UI: BreakControl on the player page (set/move/
+      end, history), an "On a break until X" chip on roster cards instead
+      of the red stale-week chip, Plan builder card never counts a
+      resting player as behind, a break line above This week. Coach-only
+      streak/homework % on the roster and player page unchanged (his
+      accountability view). Server actions in break-actions.ts (service
+      client after ownership/coach check, same as Extra Work).
+      tests/time-trained.test.ts + tests/breaks.test.ts (16 tests: totals,
+      gap takes nothing away, extras count, no pct/streak keys,
+      resumeAnchor rules incl. Sunday and never-backwards). 62 tests
+      total. docs/METHODOLOGY.md has a Progress and breaks section. No
+      player data touched beyond the pillar fill from the drill each row
+      already links. NOTE: every statement with `$$` or a trigger on
+      elite_homework needs to go through execute_sql one at a time with
+      lock_timeout set; apply_migration hangs on them.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

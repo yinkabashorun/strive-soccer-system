@@ -18,15 +18,19 @@ import {
   getHomework,
   getMessages,
   getPlayer,
-  getPlayerSummary,
+  getTrainingBreaks,
   getWeeklyPlans,
 } from "@/lib/elite/data";
 import { TodaySession, VictoryLap } from "@/components/elite/TodaySession";
 import { ExtraWork } from "@/components/elite/ExtraWork";
+import { BreakCard } from "@/components/elite/BreakCard";
+import { currentBreak } from "@/lib/elite/breaks";
+import { settleBreaksForPlayer } from "@/lib/elite/breaks-server";
+import { fmtDuration, timeTrained, weekMinutes } from "@/lib/elite/time-trained";
 import { CoachingCallsCard } from "@/components/elite/CoachingCallsCard";
 import { CheckinCard } from "@/components/elite/CheckinCard";
 import { StatTile } from "@/components/elite/StatTile";
-import { fmtMonday, liveWeekFor, nextMondayNY } from "@/lib/elite/time";
+import { fmtMonday, liveWeekFor, nextMondayNY, nyToday } from "@/lib/elite/time";
 import { greeting, timeAgo } from "@/lib/utils";
 import { TourGuide } from "@/components/elite/TourGuide";
 
@@ -49,18 +53,29 @@ export default async function DashboardPage() {
   const player = await getPlayer(viewer.playerId);
   if (!player) return null;
 
-  const [allHomework, achievements, messages, summary, checkins, plans, calls] =
+  // A break that ended since the last visit (034): move the program clock
+  // first, so everything below reads the week they come back to.
+  if (!viewer.demo) {
+    const { week1Monday } = await settleBreaksForPlayer(player);
+    player.week1_monday = week1Monday;
+  }
+
+  const [allHomework, achievements, messages, checkins, plans, calls, breaks] =
     await Promise.all([
       getHomework(player.id),
       getAchievements(player.id),
       getMessages(player.id),
-      getPlayerSummary(player.id),
       getCheckins(player.id),
       getWeeklyPlans(player.id),
       getCoachingCalls(player.id),
+      getTrainingBreaks(player.id),
     ]);
 
   const firstName = player.full_name.split(" ")[0];
+  const today = nyToday();
+  const onBreak = currentBreak(breaks, today);
+  // Progress is time trained (034): what was done, never what was missed.
+  const time = timeTrained(allHomework);
 
   // Weeks are DERIVED from the calendar, never a stored counter: the live
   // week comes from week1_monday (flips Monday automatically), and the
@@ -106,7 +121,8 @@ export default async function DashboardPage() {
     <div className="space-y-5">
       {viewer.demo && <TourGuide page="home" />}
 
-      {/* Header - name + streak, nothing else */}
+      {/* Header - name + time trained, nothing else (034: no streak, no
+          percentage, nothing that counts what was missed) */}
       <header className="flex items-end justify-between gap-4 animate-fade-up">
         <div>
           <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
@@ -116,26 +132,28 @@ export default async function DashboardPage() {
             {greeting()}, {firstName}
           </h1>
         </div>
-        {summary.current_streak > 0 && (
+        {time.minutes > 0 && (
           <div className="flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/[0.07] px-3.5 py-2">
             <Flame className="h-4 w-4 text-accent" />
             <span className="font-display text-xl font-black text-accent">
-              {summary.current_streak}
+              {fmtDuration(time.minutes)}
             </span>
             <span className="text-[10px] uppercase tracking-wider text-white/50">
-              day{summary.current_streak === 1 ? "" : "s"}
+              trained
             </span>
           </div>
         )}
       </header>
 
-      {/* THE thing: today's session (or the victory lap) */}
-      {weekDone ? (
+      {/* THE thing: today's session (or the victory lap, or the break) */}
+      {onBreak ? (
+        <BreakCard current={onBreak} firstName={firstName} today={today} />
+      ) : weekDone ? (
         <VictoryLap
           week={contentWeek}
           firstName={firstName}
-          minutes={summary.training_minutes}
-          streak={summary.current_streak}
+          minutes={weekMinutes(allHomework, contentWeek)}
+          totalMinutes={time.minutes}
           nextWeekLine={nextWeekLine}
           totalSessions={sessions.length}
         />
@@ -203,25 +221,19 @@ export default async function DashboardPage() {
         />
       )}
 
-      {/* Compact truth strip */}
+      {/* Compact truth strip: time trained, sessions, weeks (034) */}
       {homework.length > 0 && (
         <section className="grid grid-cols-3 gap-3">
-          <StatTile
-            label="Sessions"
-            value={summary.sessions_completed}
-            sub="Completed"
-          />
-          <StatTile
-            label="Homework"
-            value={`${summary.homework_pct}%`}
-            sub="Completion"
-          />
-          <StatTile
-            label="Minutes"
-            value={summary.training_minutes}
-            sub="Trained"
-          />
+          <StatTile label="Time" value={fmtDuration(time.minutes)} sub="Trained" />
+          <StatTile label="Sessions" value={time.sessions} sub="Done" />
+          <StatTile label="Weeks" value={time.weeks} sub="Trained" />
         </section>
+      )}
+
+      {/* A break is a date, not a penalty (034). Only the quiet one-liner
+          here; on a break the card above is the hero. */}
+      {!onBreak && !viewer.demo && (
+        <BreakCard current={null} firstName={firstName} today={today} />
       )}
 
       {/* Coach's latest word */}

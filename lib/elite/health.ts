@@ -5,13 +5,16 @@
 // data itself, not from a parent's DM.
 //
 //   - every active, onboarded player has a plan for the week they are in
+//     (a player on a break, 034, is left out: nothing is built for them
+//     on purpose, so "no plan" would be a false alarm)
 //   - every drill in that week links a bank drill by id (drill_id)
 //   - every drill in that week has a video
 //   - every linked drill is still active in the bank
 //
 // Pure rule in auditWeekRows (unit-tested); the DB read wraps it.
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { liveWeekFor } from "./time";
+import { liveWeekFor, nyToday } from "./time";
+import { isOnBreak } from "./breaks";
 
 export type HealthIssue = { name: string; issue: string };
 
@@ -48,8 +51,10 @@ export async function auditLiveWeeks(admin: SupabaseClient): Promise<HealthIssue
     .select("id, full_name, week1_monday, current_week")
     .not("onboarded_at", "is", null)
     .in("subscription_status", ["active", "trialing"]);
-  const roster =
+  const everyone =
     (players as { id: string; full_name: string; week1_monday: string | null; current_week: number }[] | null) ?? [];
+  if (everyone.length === 0) return [];
+  const roster = await withoutPlayersOnBreak(admin, everyone);
   if (roster.length === 0) return [];
 
   const { data: hw } = await admin
@@ -81,4 +86,26 @@ export async function auditLiveWeeks(admin: SupabaseClient): Promise<HealthIssue
     issues.push(...auditWeekRows(p.full_name.split(" ")[0], live, byPlayer.get(p.id) ?? []));
   }
   return issues;
+}
+
+// Drop every player who is on a break today (034). Shared by the audit
+// and anything else that must leave a resting player alone.
+export async function withoutPlayersOnBreak<T extends { id: string }>(
+  admin: SupabaseClient,
+  players: T[],
+  today: string = nyToday()
+): Promise<T[]> {
+  if (players.length === 0) return players;
+  const { data, error } = await admin
+    .from("elite_training_breaks")
+    .select("player_id, since, until")
+    .in("player_id", players.map((p) => p.id))
+    .lte("since", today)
+    .gte("until", today);
+  if (error || !data) return players; // pre-034: nobody is on a break
+  const byPlayer = new Map<string, { since: string; until: string }[]>();
+  for (const b of data as { player_id: string; since: string; until: string }[]) {
+    byPlayer.set(b.player_id, [...(byPlayer.get(b.player_id) ?? []), b]);
+  }
+  return players.filter((p) => !isOnBreak(byPlayer.get(p.id) ?? [], today));
 }

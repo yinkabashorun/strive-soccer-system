@@ -3,6 +3,7 @@ import { createServiceClient } from "@/lib/elite/supabase/server";
 import { sendCoachDigest } from "@/lib/elite/email";
 import { liveWeekNumber, nyHour } from "@/lib/elite/time";
 import { latestCronRun, PLAN_BUILDER_JOB } from "@/lib/elite/cron-log";
+import { withoutPlayersOnBreak } from "@/lib/elite/health";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -49,8 +50,10 @@ export async function GET(req: Request) {
     ]);
 
   type Row = { id: string; full_name: string; week1_monday: string | null; current_week: number; subscription_status: string };
-  const roster = ((players as Row[] | null) ?? []).filter(
-    (p) => p.subscription_status !== "canceled"
+  // A player on a break (034) is owed nothing and is not "quiet".
+  const roster = await withoutPlayersOnBreak(
+    admin,
+    ((players as Row[] | null) ?? []).filter((p) => p.subscription_status !== "canceled")
   );
   const hw = (homework as { player_id: string; week: number; completed: boolean; completed_at: string | null }[] | null) ?? [];
 

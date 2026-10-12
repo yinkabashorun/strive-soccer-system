@@ -31,7 +31,9 @@ import { alertCoach, latestCronRun, PLAN_BUILDER_JOB, startCronRun, updateCronRu
 import { auditLiveWeeks, type HealthIssue } from "./health";
 import { backfillHomeworkVideos } from "./data";
 import { builderTargetWeek } from "./week-target";
-import type { Player } from "./types";
+import { fmtBreakDate, settleBreaks } from "./breaks";
+import { nyToday } from "./time";
+import type { Player, TrainingBreak } from "./types";
 
 type Result =
   | { playerId: string; name: string; ok: true; skipped?: string; week?: number }
@@ -102,8 +104,33 @@ export async function runAutoWeeklyPlans(
   const sundayEve = isSundayEveNY();
   const results: Result[] = [];
 
+  // Breaks (034): one read for the roster. A player on a break is skipped
+  // outright; a player whose break just ended has their program clock
+  // settled first, so the week built below is the week they left.
+  const today = nyToday();
+  const { data: breakRows } = roster.length
+    ? await admin
+        .from("elite_training_breaks")
+        .select("player_id, since, until, resumed_at")
+        .in("player_id", roster.map((p) => p.id))
+    : { data: [] };
+  const breaksByPlayer = new Map<string, Pick<TrainingBreak, "since" | "until" | "resumed_at">[]>();
+  for (const b of ((breakRows as Pick<TrainingBreak, "player_id" | "since" | "until" | "resumed_at">[] | null) ?? [])) {
+    breaksByPlayer.set(b.player_id, [...(breaksByPlayer.get(b.player_id) ?? []), b]);
+  }
+
   for (const player of roster) {
     try {
+      const breaks = breaksByPlayer.get(player.id) ?? [];
+      const onBreak = breaks.find((b) => b.since <= today && today <= b.until);
+      if (onBreak) {
+        results.push({ playerId: player.id, name: player.full_name, ok: true, skipped: `on a break until ${fmtBreakDate(onBreak.until)}` });
+        continue;
+      }
+      if (breaks.some((b) => !b.resumed_at && b.until < today)) {
+        const { week1Monday } = await settleBreaks(admin, player, today);
+        player.week1_monday = week1Monday;
+      }
       const liveWeek = liveWeekFor(player.week1_monday, player.current_week);
       const { data: latestBuilt } = await admin
         .from("elite_homework")
@@ -181,7 +208,15 @@ function summarize(o: PlanBuilderOutcome): string {
           .map((r) => `${r.name.split(" ")[0]} wk ${(r as { week?: number }).week}`)
           .join(", ")}`
       : "",
-    o.skipped ? `${o.skipped} already built` : "",
+    o.results.some((r) => r.ok && r.skipped === "already built")
+      ? `${o.results.filter((r) => r.ok && r.skipped === "already built").length} already built`
+      : "",
+    o.results.some((r) => r.ok && r.skipped?.startsWith("on a break"))
+      ? `on a break: ${o.results
+          .filter((r) => r.ok && r.skipped?.startsWith("on a break"))
+          .map((r) => r.name.split(" ")[0])
+          .join(", ")}`
+      : "",
     o.errors.length
       ? `errors: ${o.errors.map((e) => `${e.name.split(" ")[0]} (${e.error})`).join("; ")}`
       : "",

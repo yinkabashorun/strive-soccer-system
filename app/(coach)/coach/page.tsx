@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, CalendarPlus, Clock, Flame, Users } from "lucide-react";
+import { ArrowUpRight, CalendarOff, CalendarPlus, Clock, Flame, Users } from "lucide-react";
 import { getViewer } from "@/lib/elite/session";
 import {
   getCoachInbox,
@@ -7,10 +7,12 @@ import {
   getLatestCronRun,
   getPlanCoverage,
   getPlayers,
+  getUpcomingBreaks,
 } from "@/lib/elite/data";
+import { currentBreak, fmtBreakDate } from "@/lib/elite/breaks";
 import { PLAN_BUILDER_JOB } from "@/lib/elite/cron-log";
 import { PlanBuilderStatus } from "@/components/elite/PlanBuilderStatus";
-import { liveWeekNumber, nyDayNumber } from "@/lib/elite/time";
+import { liveWeekNumber, nyDayNumber, nyToday } from "@/lib/elite/time";
 import { Avatar } from "@/components/Avatar";
 import { StatTile } from "@/components/elite/StatTile";
 import { InvitePanel } from "@/components/elite/InvitePanel";
@@ -27,14 +29,23 @@ export default async function CoachDashboard() {
   const viewer = await getViewer();
 
   // One-call rollup: every player + their loop metrics + what needs a reply.
-  const [roster, inviteCodes, inbox, coverage, players, builderRun] = await Promise.all([
+  const [roster, inviteCodes, inbox, coverage, players, builderRun, breaks] = await Promise.all([
     getCoachRoster(),
     listInviteCodes(),
     getCoachInbox(),
     getPlanCoverage(),
     getPlayers(),
     getLatestCronRun(PLAN_BUILDER_JOB),
+    getUpcomingBreaks(),
   ]);
+  // Who is on a break today (034): badged on the card, never counted as
+  // behind - nothing is built for them on purpose.
+  const today = nyToday();
+  const breakByPlayer: Record<string, string> = {};
+  for (const p of players) {
+    const b = currentBreak(breaks.filter((x) => x.player_id === p.id), today);
+    if (b) breakByPlayer[p.id] = b.until;
+  }
 
   // Live week per player from their real start Monday (VA time), falling
   // back to the stored week counter for pre-014 rows.
@@ -64,12 +75,13 @@ export default async function CoachDashboard() {
     );
   });
   const toBuild = roster.filter(
-    (r) => planInfo[r.player_id].state !== "next_ready"
+    (r) => planInfo[r.player_id].state !== "next_ready" && !breakByPlayer[r.player_id]
   ).length;
   // Nothing built for the week they're living in right now - the one
-  // state a player should never be in for more than an hour.
+  // state a player should never be in for more than an hour (a player on
+  // a break is the exception: nothing is built for them until they're back).
   const behind = roster
-    .filter((r) => planInfo[r.player_id].state === "no_plan")
+    .filter((r) => planInfo[r.player_id].state === "no_plan" && !breakByPlayer[r.player_id])
     .map((r) => r.full_name.split(" ")[0]);
 
   const avgHw =
@@ -169,7 +181,14 @@ export default async function CoachDashboard() {
                 </div>
 
                 <div className="mt-3">
-                  <PlanChip state={plan.state} week={plan.week} />
+                  {breakByPlayer[r.player_id] ? (
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/[0.06] px-2.5 py-1 text-[11px] font-bold text-white/60">
+                      <CalendarOff className="h-3 w-3" /> On a break until{" "}
+                      {fmtBreakDate(breakByPlayer[r.player_id])}
+                    </span>
+                  ) : (
+                    <PlanChip state={plan.state} week={plan.week} />
+                  )}
                 </div>
 
                 <div className="mt-3 grid grid-cols-3 gap-2 text-center">

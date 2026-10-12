@@ -171,3 +171,60 @@ parent text. Nothing temporary.
 ### Not in this item
 - A "vacation plan" (lighter week while away). A break is a stop.
 - Any change to the page copy (phase C).
+
+## Item 3b: Few-yards template sessions (Coach Yinka, Oct 12 2026:
+## "I want there to be template sessions for if you just have a few
+## yards. I'll hand select the drills for that")
+
+### Where it stands today
+- A player on the "A ball and a few yards" setting gets a week composed
+  the normal way, filtered to drills ticked "Works in a few yards".
+  Zero drills are ticked (checked Oct 12: 35 active drills, 0 ticked;
+  16 skill drills need no wall), so a tight-space player today would get
+  warm-ups only and the audit would flag a thin week.
+
+### What it is to the family
+- A player with a ball and a few yards gets real, complete sessions that
+  Coach Yinka built by hand for exactly that space. Same app, same week
+  shape, every drill filmed, nothing improvised.
+
+### How it fits the system (proposal)
+1. elite_session_templates (migration 035): id, title, space ('tight'
+   now; 'open' possible later), sort, active, created_at; plus
+   elite_session_template_drills (template_id, drill_id FK to
+   elite_drills, sort). Coach-only RLS like elite_drills. A template is
+   an ordered list of FILMED bank drills, chosen by hand.
+2. Placing a drill in a tight template marks it "Works in a few yards"
+   (small_space = true), so the drill-level flag stays the single truth
+   Extra Work and the prompt already read. No second flag.
+3. The week for a tight-space player is TEMPLATES, not AI composition:
+   conformSessionsToBank gets a template branch at BOTH gates
+   (generation and publish), so whatever the AI or the studio wrote is
+   replaced by N template sessions (N from the player's load). Rotation:
+   least recently assigned to this player first, never the same template
+   twice in a week while enough exist. The AI still writes the weekly
+   focus, parent text and player summary from the sessions actually
+   chosen. The 031 guard and the pillar trigger apply unchanged.
+4. Extra Work for a tight-space player draws from template drills (the
+   small_space flag already does this once rule 2 is in).
+5. Coach UI: a "Few-yards sessions" section at /coach/drills: new
+   template, name it, pick drills from the filmed bank in order, reorder,
+   deactivate. Count shown against what the roster needs (4 In-Season, 6
+   Off-Season).
+6. Guards: unit tests (tight player gets only template drills, rotation,
+   never twice in a week, falls back to repeats only when templates are
+   short), audit line when a tight-space player's week had to repeat a
+   template, the no-library check unchanged (templates live in the DB).
+
+### Decisions needed before building
+1. Templates REPLACE AI composition for tight-space players (recommended),
+   or the AI picks among templates?
+2. A template is the whole session, warm-up included, hand-picked
+   (recommended), or skill drills only with the system adding the plyo
+   warm-up as today? Either way a strengthening finisher is still added
+   when the injury rule requires it.
+3. Fewer templates than sessions in a week (under 4, or under 6 for an
+   Off-Season player): repeat the least recent template and flag it on
+   the dashboard (recommended), or hold the week until enough exist?
+4. Build the template editor at /coach/drills (recommended) or its own
+   page?

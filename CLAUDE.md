@@ -968,6 +968,34 @@ commit.
       fine, the Manus confirmation brief's two cards ($350 / $249 by
       Nov 1), the VSL section 6 (filmed with $249/$350 and Complete at
       $600, cannot be edited without a re-cut). Nothing changed yet.
+      CLARIFIED same day (Coach Yinka: "1. 249  2. life  3. no the one
+      that is a few weeks away  4. no"): $249 stays; locked for life
+      stays; the deadline is the existing Nov 1 2026, not Sep 1; $500
+      from Nov 2; nobody on Complete terms. The $500 copy pass (page
+      offer block, ad 5 re-render, captions, ad sheet, both Manus
+      briefs) was built, merged, then REVERTED on main within minutes
+      on his "wait, dont change yet". It is parked complete on branch
+      price-500-hold and goes live with the phase C page rewrite, not
+      before. Live copy still says $350 from Nov 2 on purpose until
+      then. Stripe's $350 standard price still needs replacing with
+      $500 before Nov 2 (Coach Yinka's side). The filmed VSL still says
+      $350 and Complete at $600; section 6 needs a trim or caption.
+- [x] AGREED Oct 12 2026 (Coach Yinka: "yes lets do it", after the
+      grand-slam read: the offer is one, proof is thin until the
+      progress videos exist, delivery breaks past ~100 members unless
+      every live piece is a capped group format, the courses are not
+      announced until filmed): launch plan at
+      marketing/offer/launch-plan.md (phase A app this week: load plans
+      + space + Extra Work, time-trained progress, feedback checklist +
+      send-a-clip; phase B community and live formats; phase C offer
+      surface, $500 merge, VSL trim, "we" ads, courses as they land).
+      Build designs live in marketing/offer/offer-stack-build.md, one
+      section per item, approved before code. Item 1 design written
+      (migration 033: training_load in_season|off_season, space
+      open|tight, elite_drills.small_space, elite_homework.is_extra;
+      sessionsFor(load) replaces the constant; Extra Work composes from
+      the bank through conform + the 031 guard). Awaiting his four
+      decisions on item 1.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 
@@ -998,12 +1026,13 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
 
 ## Confirmed prices
 
-- DECIDED Oct 12 2026, OVERRIDES the Strive Elite / Complete lines below
-  once clarified: ONE OFFER, Strive Elite with the full eleven-item
-  stack, $250/mo until Sep 1 (2027 assumed), then $500/mo. Open: $249
-  vs $250, locked-for-life for pre-Sep-1 members, Complete retired. See
-  the Oct 12 RECORD entry. Until he answers, the live copy still says
-  $249 by Nov 1 / $350 after and must not be touched piecemeal.
+- DECIDED + CLARIFIED Oct 12 2026, OVERRIDES the Strive Elite / Complete
+  lines below: ONE OFFER. Strive Elite with the full eleven-item stack.
+  $249/mo, LOCKED FOR LIFE for anyone who joins by Nov 1 2026. $500/mo
+  from Nov 2 (replaces $350). Complete Pathway as a separate offer is
+  RETIRED; nobody was ever sold Complete terms. The $500 copy is parked
+  on branch price-500-hold until the phase C page rewrite; live copy
+  still reads $350 until then, on Coach Yinka's "don't change yet".
 
 - 1:1 Drop-in: $80 (raised from $75, Sept 2026) · Starter 4 sessions: $280 · Development 8: $520 · Elite Season 12: $720
 - 1:1 Monthly: $280/mo — weekly fixed 1:1 slot, reschedule within the week via

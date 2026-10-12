@@ -16,7 +16,7 @@ import {
   type GeneratedSession,
   type Player,
 } from "./types";
-import { SESSIONS_PER_WEEK } from "./training";
+import { sessionsFor, sessionsWord } from "./training";
 import {
   conformSessionsToBank,
   isSkillPillar,
@@ -42,16 +42,16 @@ function client() {
 
 // The system prompt is built per call so it always carries the coach's
 // CURRENT drill bank (the AI composes strictly from it).
-const buildSystem = (bank?: Drill[]) => `You are the head of player development for Strive Soccer FC, a
+const buildSystem = (bank: Drill[] | undefined, n: number) => `You are the head of player development for Strive Soccer FC, a
 premium youth soccer program.
 
-${methodologyContext(bank)}
+${methodologyContext(bank, { sessionsPerWeek: n })}
 
 A coach gives you raw notes from a 1-on-1 session. You turn them into a
 structured WEEKLY at-home plan the player follows on their own, plus a warm,
 clear update for the parent. Every plan MUST follow the Strive methodology above.
 
-The week is FOUR sessions (the player trains four times that week). Each
+The week is ${sessionsWord(n).toUpperCase()} sessions (the player trains ${sessionsWord(n)} times that week). Each
 session is about 40 MINUTES of work. A plyometric warm-up (~10 minutes) is
 added to every session automatically, so give EXACTLY 3 skill drills per
 session and size their minutes so the warm-up plus your three drills totals
@@ -90,7 +90,7 @@ Return ONLY valid JSON, no prose, matching this shape:
   "next_week_objectives": [ "plain coach language, like 'get more comfortable finishing with the left foot' or 'keep the head up before the first touch', never a percentage, a measurement, or performance-metric jargon like 'X% accuracy at Y yards'. This is what YOU look at to plan next week, not a stat line." ]
 }
 Rules:
-- EXACTLY 4 sessions. EXACTLY 3 skill drills each (no warm-ups; added
+- EXACTLY ${n} sessions. EXACTLY 3 skill drills each (no warm-ups; added
   automatically), plus an optional strengthening finisher LAST, per the
   methodology. Each session ~40 minutes total including the ~10-min warm-up.
 - minutes: an integer per drill (8-15), so the three drills sum to ~30 minutes.
@@ -166,22 +166,24 @@ function plyosFrom(bank?: Drill[]) {
     }));
 }
 
-// Normalizes to EXACTLY four sessions and prepends the plyometric warm-up to
-// each one - the plyo-first rule holds no matter what the AI returned.
+// Normalizes to EXACTLY the player's session count (four In-Season, six
+// Off-Season) and prepends the plyometric warm-up to each one - the
+// plyo-first rule holds no matter what the AI returned.
 function buildSessions(
   raw: GeneratedSession[] | undefined,
   focus: string,
-  plyos?: ReturnType<typeof plyosFrom>
+  plyos: ReturnType<typeof plyosFrom> | undefined,
+  count: number
 ): GeneratedSession[] {
   const src = Array.isArray(raw) ? raw : [];
   const out: GeneratedSession[] = [];
   // With more recorded warm-ups than sessions, start the rotation at a
   // different point each week so all of them get used over time.
   const spin =
-    plyos && plyos.length > SESSIONS_PER_WEEK
+    plyos && plyos.length > count
       ? Math.floor(Math.random() * plyos.length)
       : 0;
-  for (let i = 0; i < SESSIONS_PER_WEEK; i++) {
+  for (let i = 0; i < count; i++) {
     const s = src[i];
     // Three focused skill drills per session (a ~40-minute session with
     // the auto-added ~10-min warm-up).
@@ -256,8 +258,9 @@ function sanitize(
   // Build, then CONFORM: after this line every drill in the plan is a bank
   // drill by exact title, or has been replaced by one, and every session
   // is filled to three skill drills from the bank.
+  const n = sessionsFor(player?.training_load);
   const sessions = conformSessionsToBank(
-    buildSessions(plan.sessions, weekly_focus, plyosFrom(bank)),
+    buildSessions(plan.sessions, weekly_focus, plyosFrom(bank), n),
     bank,
     player,
     weekly_focus,
@@ -268,10 +271,10 @@ function sanitize(
     sessions,
     parent_update:
       plan.parent_update?.trim() ||
-      `${player?.full_name ?? "Your player"} put in strong work this session and has a clear four-session plan for the week ahead.`,
+      `${player?.full_name ?? "Your player"} put in strong work this session and has a clear ${sessionsWord(n)}-session plan for the week ahead.`,
     player_summary:
       plan.player_summary?.trim() ||
-      "Great session. Hit all four sessions this week, start each one with your plyometrics, and you'll feel the difference.",
+      `Great session. Hit all ${sessionsWord(n)} sessions this week, start each one with your plyometrics, and you'll feel the difference.`,
     progress_updates: (plan.progress_updates ?? [])
       .filter((p) => p && validMetrics.has(p.metric))
       .map((p) => ({
@@ -323,6 +326,7 @@ function fallbackPlan(
   const usable = (pillar: string) =>
     bankFor(pillar).some((d) => !d.needsWall || player?.has_wall === true);
 
+  const n = sessionsFor(player?.training_load);
   const picked: (typeof PROGRESS_METRICS)[number][] = [];
   for (const [re, pillar] of PILLAR_HINTS) {
     // Passing is wall-only: a player with no wall trains it in coached
@@ -339,13 +343,13 @@ function fallbackPlan(
     "Weak Foot",
     "Speed",
   ] as const) {
-    if (picked.length >= SESSIONS_PER_WEEK) break;
+    if (picked.length >= n) break;
     if (!picked.includes(fill) && usable(fill)) picked.push(fill);
   }
-  const pillars = picked.slice(0, SESSIONS_PER_WEEK);
+  const pillars = picked.slice(0, n);
   // A thin bank can leave fewer usable pillars than sessions: repeat real
   // pillar days rather than padding the week with filler.
-  for (let i = 0; pillars.length > 0 && pillars.length < SESSIONS_PER_WEEK; i++) {
+  for (let i = 0; pillars.length > 0 && pillars.length < n; i++) {
     pillars.push(pillars[i % picked.length]);
   }
   const sessions: GeneratedSession[] = pillars.map((pillar) => {
@@ -373,12 +377,12 @@ function fallbackPlan(
     {
       weekly_focus: focus,
       sessions,
-      parent_update: `I've built ${player?.full_name?.split(" ")[0] ?? "your player"}'s full training week: four at-home sessions built on ${names.join(", ")}, each opening with a plyometric warm-up. It's all in the app, and I'll be watching what gets completed.`,
+      parent_update: `I've built ${player?.full_name?.split(" ")[0] ?? "your player"}'s full training week: ${sessionsWord(n)} at-home sessions built on ${names.join(", ")}, each opening with a plyometric warm-up. It's all in the app, and I'll be watching what gets completed.`,
       player_summary:
-        "Four sessions this week. Start each one with your plyometrics and attack every rep.",
+        `${sessionsWord(n)[0].toUpperCase()}${sessionsWord(n).slice(1)} sessions this week. Start each one with your plyometrics and attack every rep.`,
       progress_updates: [],
       next_week_objectives: [
-        "Complete all four sessions",
+        `Complete all ${sessionsWord(n)} sessions`,
         `Sharpen ${names[0]}`,
         "Start every session with the plyo warm-up",
       ],
@@ -419,8 +423,13 @@ export async function generatePlanFromNotes(
   try {
     // What this player can actually train with. Unknown (pre-019 intake)
     // is treated as having neither, so drills always make sense.
+    const n = sessionsFor(player?.training_load);
     const env = player
       ? `TRAINING ENVIRONMENT (hard constraint): ${
+          player.space === "tight"
+            ? "TIGHT SPACE: a ball and a few yards, nothing else. ONLY drills marked [small space] in the bank. No wall, no long cone layouts. "
+            : ""
+        }${
           player.has_wall
             ? "HAS a wall to pass against (garage door, brick wall, or fence). Rebound and wall-passing drills are allowed."
             : "NO wall available. NEVER prescribe rebound, wall-pass, or wall-return drills of any kind. Passing cannot be trained properly solo without a wall, so do NOT build passing-focused drills or sessions for this player. Train other pillars; their passing work happens in coached sessions."
@@ -438,7 +447,7 @@ export async function generatePlanFromNotes(
       strength === "required"
         ? "\n\nSTRENGTHENING THIS WEEK (hard rule): the notes or the coach's memory mention an injury, rehab, core, hip or strength work, so END EVERY SESSION with exactly one strengthening finisher from the bank's finisher list, and keep the skill drills and player summary consistent with whatever the injury rules out."
         : "";
-    const userMsg = `${context}${memoryBlock}${strengthBlock}\n\nCoach's raw session notes:\n"""\n${notes}\n"""\n\nUsing everything you know about this player above, generate the four-session weekly plan JSON now. Plan around their history, follow-through, trends, and the coach's note.`;
+    const userMsg = `${context}${memoryBlock}${strengthBlock}\n\nCoach's raw session notes:\n"""\n${notes}\n"""\n\nUsing everything you know about this player above, generate the ${sessionsWord(n)}-session weekly plan JSON now. Plan around their history, follow-through, trends, and the coach's note.`;
 
     // One attempt at a given output cap, with enough logging that a parse
     // failure is diagnosable from Vercel logs instead of guessed at.
@@ -446,7 +455,7 @@ export async function generatePlanFromNotes(
       const res = await c.messages.create({
         model: MODEL,
         max_tokens: maxTokens,
-        system: buildSystem(bank),
+        system: buildSystem(bank, n),
         messages: [{ role: "user", content: userMsg }],
       });
       const text = res.content

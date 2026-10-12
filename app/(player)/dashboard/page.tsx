@@ -22,6 +22,7 @@ import {
   getWeeklyPlans,
 } from "@/lib/elite/data";
 import { TodaySession, VictoryLap } from "@/components/elite/TodaySession";
+import { ExtraWork } from "@/components/elite/ExtraWork";
 import { CoachingCallsCard } from "@/components/elite/CoachingCallsCard";
 import { CheckinCard } from "@/components/elite/CheckinCard";
 import { StatTile } from "@/components/elite/StatTile";
@@ -136,6 +137,7 @@ export default async function DashboardPage() {
           minutes={summary.training_minutes}
           streak={summary.current_streak}
           nextWeekLine={nextWeekLine}
+          totalSessions={sessions.length}
         />
       ) : current ? (
         <TodaySession
@@ -143,6 +145,7 @@ export default async function DashboardPage() {
           totalSessions={sessions.length || 4}
           drills={current.list}
           firstName={firstName}
+          extra={current.list.some((h) => h.is_extra)}
         />
       ) : (
         <section className="elite-card p-6 text-center">
@@ -169,6 +172,20 @@ export default async function DashboardPage() {
           </span>
           <span className="text-accent">→</span>
         </Link>
+      )}
+
+      {/* Extra Work (033): add a session from the bank, never a repeat.
+          Only once the week exists; one open extra at a time (enforced
+          server-side). */}
+      {sessions.length > 0 && (
+        <ExtraWork
+          hasWall={player.has_wall === true}
+          blocked={
+            sessions.some((s) => s.list.some((h) => h.is_extra) && s.list.some((h) => !h.completed))
+              ? "Finish the extra session you already added, then grab another."
+              : null
+          }
+        />
       )}
 
       {/* Weekly 1:1 call - Complete Pathway only (029). Elite never sees

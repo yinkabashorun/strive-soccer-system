@@ -74,6 +74,10 @@ export type Player = {
   // null/undefined = never asked; the AI treats that as "no wall, no goal".
   has_wall?: boolean | null;
   has_goal?: boolean | null;
+  // Offer stack item 1 (033). Absent on demo / pre-033 rows = in_season,
+  // open: exactly today's four-session week with no space filtering.
+  training_load?: TrainingLoad | null;
+  space?: TrainingSpace | null;
   onboarded_at?: string | null; // ISO; null = intake not completed yet
   onboarding_reminder_sent_at?: string | null; // 025: last onboarding-nudge SMS
   week1_monday?: string | null; // NY Monday the program clock started (014)
@@ -90,6 +94,9 @@ export type Drill = {
   minutes: number;
   cues: string;
   needs_wall: boolean;
+  // 033: coach-ticked "works in a few yards" - the only drills a player
+  // on the tight space setting is given. Absent/false = open space only.
+  small_space?: boolean;
   active: boolean;
   sort: number;
   // 021: demo video + credit ("" = none)
@@ -116,7 +123,8 @@ export type Homework = {
   id: string;
   player_id: string;
   week: number;
-  session?: number; // 1..4 - which of the week's four sessions (010 adds the column)
+  session?: number; // 1..N - which of the week's sessions (010 adds the column; N is the player's load, 033)
+  is_extra?: boolean; // 033: an Extra Work session the player added on top of the plan
   title: string;
   exercise: string;
   reps: string;
@@ -177,6 +185,14 @@ export const PROGRESS_METRICS = [
 ] as const;
 
 export type ProgressMetric = (typeof PROGRESS_METRICS)[number];
+
+// Offer stack item 1 (033): how much a player trains and where.
+//   in_season  = 4 sessions x 40 min, layered on 3-4 team practices (default)
+//   off_season = 6 sessions x 40 min, for the player with more in the tank
+//   open       = yard, driveway, park or garage (default)
+//   tight      = a ball and a few yards: only small_space bank drills
+export type TrainingLoad = "in_season" | "off_season";
+export type TrainingSpace = "open" | "tight";
 
 // Drill-bank pillar for plyometric warm-ups. Not a tracked progress metric:
 // every session opens with one automatically, so the AI never prescribes

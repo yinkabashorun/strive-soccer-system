@@ -1,6 +1,7 @@
 import { ClipboardList } from "lucide-react";
 import type { Player } from "@/lib/elite/types";
 import { EnvToggle } from "./EnvToggle";
+import { LoadToggle, SpaceToggle } from "./PlanToggle";
 import { GenderToggle } from "./GenderToggle";
 import { ContactInfoEditor } from "./ContactInfoEditor";
 
@@ -42,6 +43,14 @@ export function IntakePanel({ player }: { player: Player }) {
         <div className="flex items-center justify-between gap-3">
           <span className="text-white/40">Goal nearby</span>
           <EnvToggle playerId={player.id} field="has_goal" value={player.has_goal ?? null} />
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-white/40">Training plan</span>
+          <LoadToggle playerId={player.id} value={player.training_load} />
+        </div>
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-white/40">Space</span>
+          <SpaceToggle playerId={player.id} value={player.space} />
         </div>
         <div className="flex items-center justify-between gap-3">
           <span className="text-white/40">Boy / girl</span>

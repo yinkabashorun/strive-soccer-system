@@ -996,6 +996,48 @@ commit.
       sessionsFor(load) replaces the constant; Extra Work composes from
       the bank through conform + the 031 guard). Awaiting his four
       decisions on item 1.
+- [x] SHIPPED Oct 12 2026, OFFER STACK ITEM 1 (Coach Yinka: "oh no yes I
+      like it" on 6 x 40; "make sure it doesn't disrupt players... extra
+      work is structured... never a drill the player has already done...
+      ball mastery, wall work, and 1:1 skills"): migration 033 APPLIED
+      TO PROD (elite_players.training_load in_season|off_season default
+      in_season, elite_players.space open|tight default open,
+      elite_drills.small_space default false, elite_homework.is_extra
+      default false) - every default reproduces today's week exactly;
+      all six players verified in_season/open after applying; tonight's
+      Sunday build and Monday's unlock untouched. CODE: training.ts
+      TRAINING_LOADS + sessionsFor()/sessionsWord() replace the
+      hard-coded four everywhere (buildSessions, fallbackPlan, the
+      prompt's "N sessions", publish copy, unlock copy reads the count
+      off the stored plan, studio label, week list, victory lap);
+      bank-conform drillFitsPlayer() adds the tight-space rule (skill
+      drills must be small_space; plyos and finishers always fit) next
+      to the wall rule, used by conformSessionsToBank at both gates;
+      methodology prompt marks [small space] and carries the TIGHT SPACE
+      constraint; onboarding asks space ("Yard, driveway, park or
+      garage" / "A ball and a few yards") and load ("3 to 4 times a week
+      or more" / "Less than that, or off season"); coach Intake panel
+      has LoadToggle + SpaceToggle (setTrainingPlan); /coach/drills has
+      a "Works in a few yards" tick per drill. EXTRA WORK:
+      composeExtraSession() in bank-conform (plyo warm-up + 3 skill
+      drills from one shelf + finisher when required; passes: shelf
+      never-done, then any pillar never-done, then least-recently-done
+      shelf only when everything is done; wall and space rules apply),
+      addExtraSession server action (service client after ownership
+      check, only into the week being trained, one open extra at a time,
+      rows carry drill_id + video_url so the 031 guard applies,
+      is_extra:true, session = next number), ExtraWork card on the
+      dashboard with the three shelves (Wall Work hidden without a
+      wall), "Extra session" labels in TodaySession and WeekList, extras
+      count toward completion and the parent text. Signup email no
+      longer says "four sessions a week". tests/load.test.ts (9 tests:
+      defaults, prompt count, space filter, never-done passes, wall
+      shelf, filmed-only). docs/METHODOLOGY.md updated. 46 tests total.
+      NOT in this item: time-trained progress (item 8), names (Hormozi
+      pass), the small_space ticks themselves (Coach Yinka marks which
+      drills work in a few yards at /coach/drills; until he does, a
+      tight-space player gets only plyos and finishers plus whatever is
+      ticked - the audit will show a thin week).
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

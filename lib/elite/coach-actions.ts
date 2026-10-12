@@ -10,9 +10,10 @@ import { normalizePhone, sendPlayerSMS } from "./sms";
 import { isSundayEveNY, liveWeekFor, mondayOfWeekNY, nextMondayNY, unlockInstant } from "./time";
 import { getDrillBank, normalizeTitle } from "./data";
 import { conformSessionsToBank, strengthRequired } from "./bank-conform";
+import { sessionsWord, TRAINING_LOADS } from "./training";
 import { resolveWeekTarget } from "./week-target";
 import { buildParentRecap } from "./parent-recap";
-import type { FilmReview, GeneratedPlan } from "./types";
+import type { FilmReview, GeneratedPlan, TrainingLoad, TrainingSpace } from "./types";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://thestriveapp.com";
 
@@ -93,6 +94,28 @@ export async function setTrainingEnvironment(
       .update(patch)
       .eq("id", playerId);
     // pre-019 (columns missing): nothing to update, surface quietly
+    if (error) return { ok: false };
+    revalidatePath(`/coach/players/${playerId}`);
+  }
+  return { ok: true };
+}
+
+// Coach-side switch for a player's training load (In-Season 4 / Off-
+// Season 6) and space (open / tight). The family picks both at onboarding;
+// this is the override. The next generated plan reads the new values;
+// the week already built is left exactly as it is.
+export async function setTrainingPlan(
+  playerId: string,
+  patch: { training_load?: TrainingLoad; space?: TrainingSpace }
+) {
+  if (!(await requireCoach())) return { ok: false };
+  const update: Record<string, string> = {};
+  if (patch.training_load && patch.training_load in TRAINING_LOADS) update.training_load = patch.training_load;
+  if (patch.space === "open" || patch.space === "tight") update.space = patch.space;
+  if (!Object.keys(update).length) return { ok: false };
+  const supabase = createClient();
+  if (supabase) {
+    const { error } = await supabase.from("elite_players").update(update).eq("id", playerId);
     if (error) return { ok: false };
     revalidatePath(`/coach/players/${playerId}`);
   }
@@ -492,7 +515,7 @@ export async function applyGeneratedPlanCore(
 
   const { data: player } = await supabase
     .from("elite_players")
-    .select("current_week, week1_monday, full_name, parent_name, has_wall, coach_memory")
+    .select("current_week, week1_monday, full_name, parent_name, has_wall, space, training_load, coach_memory")
     .eq("id", playerId)
     .maybeSingle();
 
@@ -538,7 +561,7 @@ export async function applyGeneratedPlanCore(
     raw_notes: rawNotes,
   });
 
-  // 2) replace this week's homework - four sessions, each starting with a
+  // 2) replace this week's homework - the player's sessions (four or six), each starting with a
   //    plyometric warm-up (already baked into plan.sessions).
   await supabase.from("elite_homework").delete().eq("player_id", playerId).eq("week", week);
 
@@ -572,13 +595,17 @@ export async function applyGeneratedPlanCore(
   )
     ? "required"
     : "optional";
+  const env = player as { has_wall?: boolean | null; space?: TrainingSpace | null } | null;
   const sessionsToPublish = conformSessionsToBank(
     plan.sessions,
     bank,
-    player ? { has_wall: (player as { has_wall?: boolean | null }).has_wall ?? null } : null,
+    env ? { has_wall: env.has_wall ?? null, space: env.space ?? null } : null,
     plan.weekly_focus,
     strength
   );
+  const sessionCount = sessionsToPublish.length;
+  const sessionsSaid = sessionsWord(sessionCount);
+  const SessionsSaid = sessionsSaid[0].toUpperCase() + sessionsSaid.slice(1);
   for (const b of bank) {
     byTitle.set(normalizeTitle(b.title), { id: b.id, video_url: b.video_url || null });
   }
@@ -654,7 +681,7 @@ export async function applyGeneratedPlanCore(
       );
   }
 
-  // 4) weekly plan (stores the four-session structure + unlock schedule).
+  // 4) weekly plan (stores the session structure + unlock schedule).
   //    Replace any prior draft for the same week so re-publishing edits.
   await supabase
     .from("elite_weekly_plans")
@@ -686,7 +713,7 @@ export async function applyGeneratedPlanCore(
     player_id: playerId,
     summary: plan.player_summary,
     improvement: plan.parent_update,
-    homework: `Four at-home sessions this week, each opening with a plyometric warm-up. Focus: ${plan.weekly_focus}`,
+    homework: `${SessionsSaid} at-home sessions this week, each opening with a plyometric warm-up. Focus: ${plan.weekly_focus}`,
     next_focus: plan.next_week_objectives.join("; "),
   });
 
@@ -727,8 +754,8 @@ export async function applyGeneratedPlanCore(
           ? `${first}, week ${week} just dropped`
           : `Week ${week} just dropped`,
       body: firstWeek
-        ? `Your Strive Elite training starts now.\n\nThis week's focus: ${plan.weekly_focus}\n\nFour sessions, each opening with your plyometric warm-up. Open the app and start Session 1.`
-        : `Your new training week is live.\n\nThis week's focus: ${plan.weekly_focus}\n\nFour sessions, plyo warm-up first. Open the app and start Session 1.`,
+        ? `Your Strive Elite training starts now.\n\nThis week's focus: ${plan.weekly_focus}\n\n${SessionsSaid} sessions, each opening with your plyometric warm-up. Open the app and start Session 1.`
+        : `Your new training week is live.\n\nThis week's focus: ${plan.weekly_focus}\n\n${SessionsSaid} sessions, plyo warm-up first. Open the app and start Session 1.`,
     }).catch(() => undefined);
     await sendPushToPlayer(playerId, {
       title: firstWeek

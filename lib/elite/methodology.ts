@@ -106,11 +106,15 @@ export class EmptyBankError extends Error {
   }
 }
 
-export function methodologyContext(bank?: Drill[]): string {
+export function methodologyContext(
+  bank?: Drill[],
+  opts?: { sessionsPerWeek?: number }
+): string {
+  const sessionsPerWeek = opts?.sessionsPerWeek ?? METHOD_STRUCTURE.sessionsPerWeek;
   const principles = METHOD_PRINCIPLES.map((p) => `- ${p}`).join("\n");
   const lensFor = (pillar: string) =>
     METHOD_PILLARS.find((g) => g.pillar === pillar)?.lens ?? "";
-  const grouped = new Map<string, { title: string; how: string; reps: string; minutes: number; cues: string; wall: boolean }[]>();
+  const grouped = new Map<string, { title: string; how: string; reps: string; minutes: number; cues: string; wall: boolean; small: boolean }[]>();
   const finishers: string[] = [];
   for (const d of bank ?? []) {
     // Plyo warm-ups are prepended server-side; the AI must never see
@@ -123,7 +127,7 @@ export function methodologyContext(bank?: Drill[]): string {
       continue;
     }
     const list = grouped.get(d.pillar) ?? [];
-    list.push({ title: d.title, how: d.how, reps: d.reps, minutes: d.minutes, cues: d.cues, wall: d.needs_wall });
+    list.push({ title: d.title, how: d.how, reps: d.reps, minutes: d.minutes, cues: d.cues, wall: d.needs_wall, small: Boolean(d.small_space) });
     grouped.set(d.pillar, list);
   }
   if (grouped.size === 0) throw new EmptyBankError();
@@ -133,7 +137,7 @@ export function methodologyContext(bank?: Drill[]): string {
         `- ${pillar}: ${lensFor(pillar)} Drills: ${drills
           .map(
             (d) =>
-              `${d.title}${d.wall ? " [wall]" : ""} (${d.reps} = ~${d.minutes} min): ${d.how}${d.cues ? `. Cues: ${d.cues}` : ""}`
+              `${d.title}${d.wall ? " [wall]" : ""}${d.small ? " [small space]" : ""} (${d.reps} = ~${d.minutes} min): ${d.how}${d.cues ? `. Cues: ${d.cues}` : ""}`
           )
           .join("; ")}.`
     )
@@ -144,7 +148,7 @@ Principles:
 ${principles}
 
 Weekly structure:
-- ${METHOD_STRUCTURE.sessionsPerWeek} sessions that week, about ${METHOD_STRUCTURE.minutesPerSession} minutes each.
+- ${sessionsPerWeek} sessions that week, about ${METHOD_STRUCTURE.minutesPerSession} minutes each.
 - Every session opens with a ${METHOD_STRUCTURE.warmupMinutes}-minute room plyometric warm-up (added automatically).
 - ${METHOD_STRUCTURE.skillDrillsPerSession} focused skill drills per session. Fewer, deeper reps, ${METHOD_STRUCTURE.setting}.
 - DRILL TITLES (strict): every drill's title is copied EXACTLY, character for
@@ -157,7 +161,9 @@ Weekly structure:
 Equipment rule (strict): assume the player has ONLY ${METHOD_STRUCTURE.assumedEquipment}.
 The player's TRAINING ENVIRONMENT line (in the user message) is a HARD
 constraint. Wall drills (marked "wall" below) ONLY for players who HAVE a
-wall; a goal only for players who HAVE a goal. Passing drills are wall
+wall; a goal only for players who HAVE a goal. A player on a TIGHT SPACE
+(a ball and a few yards) gets ONLY drills marked "small space" below;
+the system replaces anything else before they see it. Passing drills are wall
 drills, full stop: a player with no wall gets NO passing-focused drills or
 sessions (their passing work happens in coached sessions); give them other
 pillars instead. NEVER

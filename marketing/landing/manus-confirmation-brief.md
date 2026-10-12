@@ -22,7 +22,7 @@ run by Coach Yinka and Coach Gary. Two ways to train with us:
   week in the app, four sessions of about 40 minutes, a video for every
   drill, progress tracking, and a weekly text to the parent. Built by
   Coach Yinka and Coach Gary around what that player specifically needs
-  to reach the next level. $500 a month, month to month. Anyone who
+  to reach the next level. $350 a month, month to month. Anyone who
   joins by Nov 1 locks in $249 a month for life. Same-day refund if it's
   not for them.
 
@@ -68,7 +68,7 @@ Two cards, side by side on tablet and up, stacked on phones:
 2. **Strive Elite, at home**
    A new week every Monday in the app. Four sessions, a video for every
    drill, and a text to you every week. Built by both of us around what
-   your player specifically needs. $500 a month. Join by Nov 1 and lock
+   your player specifically needs. $350 a month. Join by Nov 1 and lock
    in $249 a month for life.
 
 ### Second button (outlined, white border)

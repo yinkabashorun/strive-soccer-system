@@ -968,23 +968,6 @@ commit.
       fine, the Manus confirmation brief's two cards ($350 / $249 by
       Nov 1), the VSL section 6 (filmed with $249/$350 and Complete at
       $600, cannot be edited without a re-cut). Nothing changed yet.
-      CLARIFIED same day (Coach Yinka: "1. 249  2. life  3. no the one
-      that is a few weeks away  4. no"): $249 stays; locked for life
-      stays; the deadline is the existing Nov 1 2026, not Sep 1; $500
-      from Nov 2; nobody on Complete terms. SHIPPED same hour, every
-      $350 is now $500 in one pass: /demo offer block (DemoLanding.tsx),
-      ad 5 image re-rendered (src/ad5.html + final PNG), captions.md,
-      ad-copy-sheet.md (primary text + description "Join by Nov 1. $500
-      after."), both Manus briefs, and the shared creatives page
-      (artifact 7rrkNMV1UWyVsRtxvhVYtD republished). typecheck + lint
-      green. STILL OPEN from this: (a) the filmed VSL says $350 after
-      Nov 1 and Complete at $600, which the page under it now
-      contradicts; needs a trim of section 6 or a re-cut before the
-      rush; (b) Stripe's $350 standard price must become $500 before
-      Nov 2 (Coach Yinka's side); (c) the Oct 10 one-ad primary text
-      that was given in chat said "$350 after", use the sheet's version
-      now; (d) the ad images still say "by Coach Yinka" / ad 3 "I build",
-      the "we" re-render is still waiting on his word.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 
@@ -1015,15 +998,12 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
 
 ## Confirmed prices
 
-- DECIDED + CLARIFIED Oct 12 2026, OVERRIDES the Strive Elite / Complete
-  lines below: ONE OFFER. Strive Elite with the full eleven-item stack.
-  $249/mo, LOCKED FOR LIFE for anyone who joins by Nov 1 2026. $500/mo
-  for anyone who joins from Nov 2 (replaces the $350 figure). Complete
-  Pathway as a separate offer is RETIRED; nobody was ever sold Complete
-  terms, nothing to unwind. Stripe product unchanged ($249 founding
-  price stays; the $350 standard price needs replacing with $500 before
-  Nov 2, Coach Yinka's side). All live copy now says $500 (see the
-  Oct 12 RECORD entry).
+- DECIDED Oct 12 2026, OVERRIDES the Strive Elite / Complete lines below
+  once clarified: ONE OFFER, Strive Elite with the full eleven-item
+  stack, $250/mo until Sep 1 (2027 assumed), then $500/mo. Open: $249
+  vs $250, locked-for-life for pre-Sep-1 members, Complete retired. See
+  the Oct 12 RECORD entry. Until he answers, the live copy still says
+  $249 by Nov 1 / $350 after and must not be touched piecemeal.
 
 - 1:1 Drop-in: $80 (raised from $75, Sept 2026) · Starter 4 sessions: $280 · Development 8: $520 · Elite Season 12: $720
 - 1:1 Monthly: $280/mo — weekly fixed 1:1 slot, reschedule within the week via

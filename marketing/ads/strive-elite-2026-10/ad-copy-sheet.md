@@ -23,7 +23,7 @@ Manager asks for per ad, in the order it asks. Copy and paste.
   seen traffic.
 - Rules baked into every creative: no "AI" or "automated", no em dashes,
   no alumni names, no invented numbers. Month to month and same-day refund
-  are confirmed. $249 locked for life by Nov 1, $500 after, confirmed Oct 12.
+  are confirmed. $249 locked for life by Nov 1, $350 after, confirmed.
 
 ## Ad 1: Tuesday night
 
@@ -104,19 +104,19 @@ CTA button: Learn more
 ## Ad 5: Retargeting, the offer
 
 File: `final/strive-elite-ad-5.png`
-On the image: "$249 a month. Locked for life." plus the Nov 1 / $500 line.
+On the image: "$249 a month. Locked for life." plus the Nov 1 / $350 line.
 Runs ONLY to the retargeting audience above.
 
 Primary text:
 ```
 You watched the video. Here's the rest.
 
-Strive Elite is $249 a month, locked for life if you join by Nov 1. $500 a month after that. Month to month, same-day refund if it's not for you.
+Strive Elite is $249 a month, locked for life if you join by Nov 1. $350 a month after that. Month to month, same-day refund if it's not for you.
 
 Founding families are already training on it. Lock in your rate: thestriveapp.com/demo
 ```
 Headline: `$249 a month, locked for life`
-Description: `Join by Nov 1. $500 after.`
+Description: `Join by Nov 1. $350 after.`
 CTA button: Learn more
 
 ## Two things to confirm before these go live

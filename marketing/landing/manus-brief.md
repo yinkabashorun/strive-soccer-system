@@ -115,7 +115,7 @@ Three cards, one column:
 
 ### Offer block
 A card with a gold 30% border and a faint gold fill, centered text:
-- Large: **$500** then smaller "/mo"
+- Large: **$350** then smaller "/mo"
 - Line: "Starting Nov 2. Join by Nov 1 and lock $249/mo for life."
 - Bold line: "Tell us about your player below. I'll personally reach out
   to get your call on the books."

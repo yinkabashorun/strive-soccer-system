@@ -156,7 +156,7 @@ export async function DemoLanding() {
       {/* Offer + close */}
       <Reveal variant="build" className="mt-9 rounded-2xl border border-accent/30 bg-accent/[0.06] p-5 text-center">
         <div className="font-display text-2xl font-black">
-          $500<span className="text-base font-semibold text-white/60">/mo</span>
+          $350<span className="text-base font-semibold text-white/60">/mo</span>
         </div>
         <Reveal variant="line" delay={250} className="mx-auto mt-2 h-px w-16 bg-accent/70" />
         <Reveal as="p" delay={300} className="mt-2 text-sm text-white/60">

@@ -1,18 +1,23 @@
 import { BarChart3, StickyNote } from "lucide-react";
 import { getViewer } from "@/lib/elite/session";
-import { getNotes, getPlayer, getProgress } from "@/lib/elite/data";
+import { getHomework, getNotes, getPlayer, getProgress } from "@/lib/elite/data";
 import { ProgressPanel } from "@/components/elite/ProgressPanel";
+import { TimeTrainedPanel } from "@/components/elite/TimeTrainedPanel";
+import { timeTrained } from "@/lib/elite/time-trained";
 import { timeAgo } from "@/lib/utils";
 import { TourGuide } from "@/components/elite/TourGuide";
 
 export default async function ProgressPage() {
   const viewer = await getViewer();
   if (!viewer?.playerId) return null;
-  const [player, progress, notes] = await Promise.all([
+  const [player, progress, notes, homework] = await Promise.all([
     getPlayer(viewer.playerId),
     getProgress(viewer.playerId),
     getNotes(viewer.playerId),
+    getHomework(viewer.playerId),
   ]);
+  // Progress is time trained (034): what was done, never what was missed.
+  const time = timeTrained(homework);
 
   return (
     <div className="space-y-6">
@@ -26,11 +31,21 @@ export default async function ProgressPage() {
           <BarChart3 className="h-7 w-7 text-accent" /> Progress
         </h1>
         <p className="mt-2 text-white/50">
-          Seven pillars, tracked over time. Green means you&apos;re trending up.
+          Every minute you train counts, and it only ever adds up. A break never
+          takes anything away.
         </p>
       </header>
 
-      <ProgressPanel progress={progress} />
+      <TimeTrainedPanel time={time} />
+
+      {/* The coach's rating of the seven pillars, kept under its own name.
+          Green means trending up. */}
+      <section>
+        <h2 className="mb-3 font-display text-xl font-bold uppercase tracking-tight">
+          Coach&apos;s rating
+        </h2>
+        <ProgressPanel progress={progress} />
+      </section>
 
       {/* Goals */}
       {player && player.goals.length > 0 && (

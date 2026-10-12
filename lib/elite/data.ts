@@ -1,3 +1,4 @@
+import { nyToday } from "./time";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient, createServiceClient } from "./supabase/server";
 import {
@@ -30,7 +31,9 @@ import type {
   Progress,
   ProgressPoint,
   RosterRow,
-  WeeklyPlan, CronRun } from "./types";
+  WeeklyPlan, CronRun,
+  TrainingBreak,
+} from "./types";
 
 // Server-side data access for Strive Elite. Reads from Supabase when
 // configured, otherwise returns the demo dataset. The UI is identical in
@@ -230,6 +233,35 @@ export async function backfillHomeworkVideos(
   }
 
   return fixed;
+}
+
+// Breaks from training (034). A player reads their own, the coach reads
+// everyone's. Demo mode has none. Newest first.
+export async function getTrainingBreaks(playerId: string): Promise<TrainingBreak[]> {
+  const supabase = createClient();
+  if (!supabase || isDemo(playerId)) return [];
+  const { data, error } = await supabase
+    .from("elite_training_breaks")
+    .select("*")
+    .eq("player_id", playerId)
+    .order("until", { ascending: false });
+  if (error) return []; // pre-034
+  return (data as TrainingBreak[] | null) ?? [];
+}
+
+// Every break that is current or still ahead, across the roster - the
+// coach dashboard reads this once to badge cards and keep a player on a
+// break out of the "behind" list.
+export async function getUpcomingBreaks(): Promise<TrainingBreak[]> {
+  const supabase = createClient();
+  if (!supabase) return [];
+  const { data, error } = await supabase
+    .from("elite_training_breaks")
+    .select("*")
+    .gte("until", nyToday())
+    .order("since", { ascending: true });
+  if (error) return [];
+  return (data as TrainingBreak[] | null) ?? [];
 }
 
 export async function getProgress(playerId: string): Promise<Progress[]> {

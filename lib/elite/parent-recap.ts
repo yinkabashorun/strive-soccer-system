@@ -2,15 +2,15 @@
 //
 // When a player's new week unlocks (Monday morning VA time), we assemble
 // the TRUE numbers from the week that just ended - sessions completed,
-// minutes, streak, the coach's parent note, the player's own check-in -
+// minutes, the coach's parent note, the player's own check-in -
 // and have Claude turn them into 2–3 warm, specific sentences for the
 // parent. No AI available → a clean stats template sends instead. Facts
 // only; the model never invents results.
 
 import Anthropic from "@anthropic-ai/sdk";
 import { createServiceClient } from "./supabase/server";
-import { computeSummary } from "./data";
-import type { Homework } from "./types";
+import { isOnBreak } from "./breaks";
+import type { Homework, TrainingBreak } from "./types";
 
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-4-8";
 
@@ -20,7 +20,6 @@ export type ParentRecap = {
   sessionsDone: number;
   sessionsTotal: number;
   minutes: number;
-  streak: number;
   text: string; // the sentences that go to the parent
 };
 
@@ -31,7 +30,7 @@ export async function buildParentRecap(
   const admin = createServiceClient();
   if (!admin || week < 1) return null;
 
-  const [{ data: player }, { data: hw }, { data: checkin }, { data: report }] =
+  const [{ data: player }, { data: hw }, { data: checkin }, { data: report }, { data: breaks }] =
     await Promise.all([
       admin
         .from("elite_players")
@@ -58,9 +57,12 @@ export async function buildParentRecap(
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle(),
+      admin.from("elite_training_breaks").select("since, until").eq("player_id", playerId),
     ]);
 
   if (!player || !hw || hw.length === 0) return null;
+  // No texts of any kind while the family is on a break (034).
+  if (isOnBreak((breaks as Pick<TrainingBreak, "since" | "until">[] | null) ?? [])) return null;
   // The weekly parent report is a Complete Pathway feature (029). This is
   // the ONE gate for it - both senders (coach-actions publishNow and
   // unlock.ts's Monday flip) go through here, so nothing can send it to an
@@ -69,7 +71,8 @@ export async function buildParentRecap(
   const rows = hw as Homework[];
 
   // Sessions = (week, session) groups fully completed; minutes from
-  // completed drills. Streak via the shared pure calculator.
+  // completed drills. No streak anywhere a parent reads (034): progress
+  // is time trained, and a gap is never counted against the player.
   const bySession = new Map<number, boolean[]>();
   for (const h of rows) {
     const s = h.session ?? 1;
@@ -82,17 +85,16 @@ export async function buildParentRecap(
   const minutes = rows
     .filter((h) => h.completed)
     .reduce((s, h) => s + (h.duration_min ?? 15), 0);
-  const streak = computeSummary(rows).current_streak;
 
   const first = player.full_name.split(" ")[0];
   const parentFirst = (player.parent_name || first || "").trim().split(" ")[0];
   const greeting = parentFirst ? `Hey ${parentFirst}, ` : "";
-  const stats = { playerFirst: first, week, sessionsDone, sessionsTotal, minutes, streak };
+  const stats = { playerFirst: first, week, sessionsDone, sessionsTotal, minutes };
 
   // Honest fallback template - used when no API key or the call fails.
   const fallback =
     sessionsDone >= sessionsTotal
-      ? `${greeting}${first} completed all ${sessionsTotal} sessions this week, ${minutes} minutes of consistent work${streak > 1 ? ` and a ${streak}-day streak` : ""}. Let's keep this pace going.`
+      ? `${greeting}${first} completed all ${sessionsTotal} sessions this week, ${minutes} minutes of consistent work. Let's keep this pace going.`
       : `${greeting}${first} completed ${sessionsDone} of ${sessionsTotal} sessions this week, ${minutes} minutes trained. Let's get all ${sessionsTotal} in next week, consistency is what makes it count.`;
 
   if (!process.env.ANTHROPIC_API_KEY) return { ...stats, text: fallback };
@@ -103,7 +105,7 @@ export async function buildParentRecap(
       `Player first name: ${first}`,
       player.gender ? `Player gender: ${player.gender}` : "",
       parentFirst ? `Parent first name: ${parentFirst}` : "",
-      `Week ${week} results: completed ${sessionsDone} of ${sessionsTotal} sessions, ${minutes} minutes trained, current streak ${streak} days.`,
+      `Week ${week} results: completed ${sessionsDone} of ${sessionsTotal} sessions, ${minutes} minutes trained.`,
       report?.improvement ? `Coach's note on their development: ${report.improvement}` : "",
       checkin?.went_well ? `Player said went well: ${checkin.went_well}` : "",
       checkin?.struggled ? `Player said they struggled with: ${checkin.struggled}` : "",

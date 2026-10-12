@@ -6,6 +6,7 @@ import { DrillVideo } from "./DrillVideo";
 import type { Homework } from "@/lib/elite/types";
 import { toggleHomework } from "@/lib/elite/player-actions";
 import { sessionsWord } from "@/lib/elite/training";
+import { fmtDuration } from "@/lib/elite/time-trained";
 import { cn } from "@/lib/utils";
 
 // The heart of the player experience: ONE session on screen - the plyo
@@ -171,14 +172,14 @@ export function VictoryLap({
   week,
   firstName,
   minutes,
-  streak,
+  totalMinutes,
   nextWeekLine,
   totalSessions = 4,
 }: {
   week: number;
   firstName: string;
-  minutes: number;
-  streak: number;
+  minutes: number; // this week's completed minutes
+  totalMinutes: number; // all time (034: progress is time trained, never a streak)
   nextWeekLine: string;
   totalSessions?: number; // four In-Season, six Off-Season, plus any extras
 }) {
@@ -194,12 +195,12 @@ export function VictoryLap({
         </p>
         <div className="mt-4 flex flex-wrap gap-5 text-sm">
           <Stat label="Sessions" value={`${totalSessions}/${totalSessions}`} />
-          <Stat label="Minutes" value={String(minutes)} />
-          <Stat label="Streak" value={`${streak}d`} />
+          <Stat label="This week" value={fmtDuration(minutes)} />
+          <Stat label="All time" value={fmtDuration(totalMinutes)} />
         </div>
         <p className="mt-4 text-sm leading-relaxed text-white/65">
-          Victory lap: rerun your favorite session or get free plyo reps in.
-          It keeps the streak alive.
+          Victory lap: rerun your favorite session or add Extra Work below.
+          Every minute goes on your total.
         </p>
         <p className="mt-2 text-sm font-medium text-white/80">{nextWeekLine}</p>
       </div>

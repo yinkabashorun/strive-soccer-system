@@ -11,6 +11,7 @@ import { sendPushToPlayer } from "./push";
 import { sendPlayerSMS } from "./sms";
 import { buildParentRecap } from "./parent-recap";
 import { SESSIONS_PER_WEEK, sessionsWord } from "./training";
+import { withoutPlayersOnBreak } from "./health";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://thestriveapp.com";
 
@@ -33,7 +34,15 @@ export async function unlockDueWeeks(): Promise<void> {
     .limit(50);
   if (!due || due.length === 0) return;
 
-  for (const plan of due) {
+  // A player on a break (034) keeps their unlock, and its texts, until
+  // they are back: the plan row stays notified:false and is picked up by
+  // the first run after the break ends.
+  const resting = new Set(
+    (await withoutPlayersOnBreak(admin, due.map((p) => ({ id: p.player_id as string })))).map((p) => p.id)
+  );
+  const ready = due.filter((p) => resting.has(p.player_id as string));
+
+  for (const plan of ready) {
     // Claim first so concurrent requests can't double-notify.
     const { data: claimed } = await admin
       .from("elite_weekly_plans")

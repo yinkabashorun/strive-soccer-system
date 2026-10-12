@@ -27,6 +27,16 @@ After the warm-up, each session is **exactly three focused skill drills**
 (~10 minutes each), done with intent. The three drills plus the warm-up
 fill the ~40 minutes.
 
+## Progress and breaks
+
+Progress, as the family sees it, is **time trained**: minutes, sessions
+done, weeks trained, and minutes by pillar. Nothing on the player's side
+shows a completion percentage or a streak, and a gap of any length takes
+nothing away. The coach's rating of the seven pillars stays as its own
+block. A **break** is a date range the family or the coach sets: nothing is
+built or sent until the return date, and on return the program clock moves
+so the player resumes the week they left (`lib/elite/breaks.ts`).
+
 ## The principles
 
 1. **Creative, intelligent football over robotic drills.**

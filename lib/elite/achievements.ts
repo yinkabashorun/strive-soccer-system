@@ -1,6 +1,8 @@
 // Achievement engine. Every badge here is earned from data the app
-// actually tracks — completions, streaks, minutes. Nothing subjective,
-// nothing the system can't prove. Awarding runs best-effort after a drill
+// actually tracks — completions, sessions, minutes. Nothing subjective,
+// nothing the system can't prove, and nothing a break can take away
+// (034: the old 7-Day Streak badge was the one rule that punished a gap;
+// it is gone, badges already earned stay). Awarding runs best-effort after a drill
 // is completed and inserts via the service client (players have no write
 // access to elite_achievements).
 
@@ -59,10 +61,10 @@ const RULES: Rule[] = [
     earned: (hw) => hasConsecutiveRun(completedWeeks(hw), 3),
   },
   {
-    title: "7-Day Streak",
-    detail: "Trained seven days in a row",
+    title: "10 Sessions",
+    detail: "Ten full sessions in the bank",
     icon: "Flame",
-    earned: (_hw, s) => s.current_streak >= 7,
+    earned: (_hw, s) => s.sessions_completed >= 10,
   },
   {
     title: "500 Minutes",

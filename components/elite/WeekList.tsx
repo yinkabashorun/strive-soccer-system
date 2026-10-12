@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import type { Homework } from "@/lib/elite/types";
 import { toggleHomework } from "@/lib/elite/player-actions";
+import { sessionsWord } from "@/lib/elite/training";
 import { DrillVideo } from "./DrillVideo";
 import { cn } from "@/lib/utils";
 
@@ -22,7 +23,8 @@ function isStrength(title: string): boolean {
   return /^strength(ening)?\b/i.test(title.trim());
 }
 
-// The player's weekly loop: the current week broken into its four sessions,
+// The player's weekly loop: the current week broken into its sessions (four
+// In-Season, six Off-Season, plus any Extra Work the player added),
 // each starting with a plyometric warm-up (badged). A red "Next up" marks
 // the first incomplete drill. Earlier weeks collapse. When the whole week is
 // done, the player is told the next week drops at the weekend - no false
@@ -121,7 +123,7 @@ export function WeekList({
               Week complete
             </div>
             <p className="mt-1 text-sm text-white/60">
-              All four sessions done. Real work. Rest and recover; your coach
+              All {sessionsWord(sessions.length)} sessions done. Real work. Rest and recover; your coach
               drops next week&apos;s plan over the weekend.
             </p>
           </div>
@@ -137,7 +139,7 @@ export function WeekList({
                 <span className="grid h-6 w-6 place-items-center rounded-lg bg-accent/15 text-accent">
                   {s.session}
                 </span>
-                Session {s.session}
+                {s.list.some((h) => h.is_extra) ? "Extra session" : `Session ${s.session}`}
               </span>
               <span className="text-xs text-white/40">
                 {done}/{s.list.length}

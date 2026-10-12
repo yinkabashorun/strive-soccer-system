@@ -5,6 +5,7 @@ import { Check, Flame } from "lucide-react";
 import { DrillVideo } from "./DrillVideo";
 import type { Homework } from "@/lib/elite/types";
 import { toggleHomework } from "@/lib/elite/player-actions";
+import { sessionsWord } from "@/lib/elite/training";
 import { cn } from "@/lib/utils";
 
 // The heart of the player experience: ONE session on screen - the plyo
@@ -15,11 +16,13 @@ export function TodaySession({
   totalSessions,
   drills,
   firstName,
+  extra = false,
 }: {
   session: number;
   totalSessions: number;
   drills: Homework[];
   firstName: string;
+  extra?: boolean; // 033: an Extra Work session the player added
 }) {
   const [state, setState] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(drills.map((d) => [d.id, d.completed]))
@@ -57,7 +60,7 @@ export function TodaySession({
       {/* header */}
       <div className="flex items-center justify-between">
         <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">
-          Today · Session {session} of {totalSessions}
+          {extra ? `Today · Extra session` : `Today · Session ${session} of ${totalSessions}`}
         </div>
         <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
           {doneCount}/{drills.length} done
@@ -162,20 +165,22 @@ export function TodaySession({
   );
 }
 
-// Shown when all four sessions are done: the week is conquered - stats,
-// a bonus option, and when the next week drops. No false "new week" alert.
+// Shown when every session is done: the week is conquered - stats, a
+// bonus option, and when the next week drops. No false "new week" alert.
 export function VictoryLap({
   week,
   firstName,
   minutes,
   streak,
   nextWeekLine,
+  totalSessions = 4,
 }: {
   week: number;
   firstName: string;
   minutes: number;
   streak: number;
   nextWeekLine: string;
+  totalSessions?: number; // four In-Season, six Off-Season, plus any extras
 }) {
   return (
     <section className="relative overflow-hidden rounded-3xl border border-accent/35 bg-gradient-to-br from-accent/[0.10] to-transparent p-6">
@@ -185,10 +190,10 @@ export function VictoryLap({
           Week {week} complete
         </div>
         <p className="mt-1.5 font-display text-3xl font-black uppercase leading-none">
-          All four sessions, {firstName}.
+          All {sessionsWord(totalSessions)} sessions, {firstName}.
         </p>
         <div className="mt-4 flex flex-wrap gap-5 text-sm">
-          <Stat label="Sessions" value="4/4" />
+          <Stat label="Sessions" value={`${totalSessions}/${totalSessions}`} />
           <Stat label="Minutes" value={String(minutes)} />
           <Stat label="Streak" value={`${streak}d`} />
         </div>

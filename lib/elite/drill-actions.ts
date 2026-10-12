@@ -15,6 +15,7 @@ export type DrillInput = {
   minutes: number;
   cues: string;
   needs_wall: boolean;
+  small_space: boolean; // 033: works in a few yards
   video_url: string;
   demo_by: string;
 };
@@ -59,6 +60,7 @@ export async function saveDrill(input: DrillInput) {
     minutes: Math.max(3, Math.min(30, Math.round(input.minutes) || 10)),
     cues: input.cues.trim().slice(0, 240),
     needs_wall: Boolean(input.needs_wall),
+    small_space: Boolean(input.small_space),
     video_url: /^https?:\/\/.+/.test(input.video_url.trim())
       ? input.video_url.trim().slice(0, 500)
       : "",
@@ -72,8 +74,9 @@ export async function saveDrill(input: DrillInput) {
       : c.supabase.from("elite_drills").insert(r);
   let { error } = await write(row);
   if (error) {
-    // pre-021 (no video columns): save the rest so editing never blocks
-    const { video_url: _v, demo_by: _d, ...legacy } = row;
+    // pre-021 / pre-033 (no video or small_space columns): save the rest
+    // so editing never blocks
+    const { video_url: _v, demo_by: _d, small_space: _s, ...legacy } = row;
     ({ error } = await write(legacy));
   }
   if (error) {

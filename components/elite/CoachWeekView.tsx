@@ -26,7 +26,7 @@ export function CoachWeekView({
       <div className="elite-card p-6 text-sm text-white/45">
         No plan built for week {currentWeek} yet. Use{" "}
         <span className="text-bone">AI Session Notes</span> below to generate
-        this week&apos;s four sessions.
+        this week&apos;s sessions.
       </div>
     );
   }

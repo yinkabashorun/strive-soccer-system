@@ -17,8 +17,23 @@
 // time, so a hand-edited plan can't bypass it either. With no bank at all
 // (demo / pre-020) it leaves the plan alone.
 
-import type { Drill, GeneratedDrill, GeneratedSession, Player } from "./types";
+import type { Drill, GeneratedDrill, GeneratedSession, Player, TrainingSpace } from "./types";
 import { PLYO_PILLAR, STRENGTH_PILLAR } from "./types";
+
+// What the builder knows about where a player trains (019 wall, 033 space).
+export type PlayerEnv = { has_wall?: boolean | null; space?: TrainingSpace | null };
+
+// Can this player do this bank drill where they train? Wall drills need a
+// wall (019). On the tight space setting ("a ball and a few yards", 033)
+// only drills the coach ticked as small_space are allowed. Plyo warm-ups
+// and strengthening finishers are room work by definition and are never
+// space-filtered. Open space (the default, every pre-033 player) filters
+// nothing beyond the wall rule, so today's weeks are unchanged.
+export function drillFitsPlayer(d: Drill, env?: PlayerEnv | null): boolean {
+  if (d.needs_wall && env?.has_wall !== true) return false;
+  if (env?.space === "tight" && isSkillPillar(d.pillar) && !d.small_space) return false;
+  return true;
+}
 
 const MIN_SKILLS = 3;
 
@@ -131,16 +146,39 @@ function fromBank(d: Drill): GeneratedDrill {
   };
 }
 
+// Pick a skill drill for a pillar from a pool, avoiding what's already
+// used this week, then this session, then anything. Fallback pillars when
+// the pillar has nothing filmed the player can do.
+function pickSkillFrom(
+  skillsPool: Drill[],
+  pillar: string | null,
+  usedWeek: Set<string>,
+  usedSession: Set<string>
+): Drill {
+  const order = pillar ? [pillar, ...(PILLAR_FALLBACK[pillar] ?? [])] : [];
+  const tiers: Drill[][] = [
+    ...order.map((p) => skillsPool.filter((d) => d.pillar === p)),
+    skillsPool,
+  ];
+  for (const avoid of [usedWeek, usedSession, new Set<string>()]) {
+    for (const tier of tiers) {
+      const open = tier.filter((d) => !avoid.has(d.title) && !usedSession.has(d.title));
+      if (open.length) return open[0];
+    }
+  }
+  return skillsPool[0];
+}
+
 export function conformSessionsToBank(
   sessions: GeneratedSession[],
   bank: Drill[] | undefined,
-  player?: Pick<Player, "has_wall"> | null,
+  player?: (Pick<Player, "has_wall"> & { space?: TrainingSpace | null }) | null,
   weeklyFocus = "",
   strength: StrengthMode = "optional"
 ): GeneratedSession[] {
   if (!bank || bank.length === 0) return sessions;
 
-  const canDo = (d: Drill) => !d.needs_wall || player?.has_wall === true;
+  const canDo = (d: Drill) => drillFitsPlayer(d, player);
   const skillsPool = bank.filter((d) => isSkillPillar(d.pillar) && canDo(d));
   const plyoPool = bank.filter((d) => d.pillar === PLYO_PILLAR);
   const strengthPool = bank.filter((d) => d.pillar === STRENGTH_PILLAR);
@@ -154,20 +192,8 @@ export function conformSessionsToBank(
   const isStrengthDrill = (d: GeneratedDrill) =>
     isStrengthTitle(d.title) || Boolean(matchBankDrill(d.title, strengthPool));
 
-  const pickSkill = (pillar: string | null, usedSession: Set<string>): Drill => {
-    const order = pillar ? [pillar, ...(PILLAR_FALLBACK[pillar] ?? [])] : [];
-    const tiers: Drill[][] = [
-      ...order.map((p) => skillsPool.filter((d) => d.pillar === p)),
-      skillsPool,
-    ];
-    for (const avoid of [usedWeek, usedSession, new Set<string>()]) {
-      for (const tier of tiers) {
-        const open = tier.filter((d) => !avoid.has(d.title) && !usedSession.has(d.title));
-        if (open.length) return open[0];
-      }
-    }
-    return skillsPool[0];
-  };
+  const pickSkill = (pillar: string | null, usedSession: Set<string>): Drill =>
+    pickSkillFrom(skillsPool, pillar, usedWeek, usedSession);
 
   return sessions.map((s) => {
     const usedSession = new Set<string>();
@@ -256,4 +282,103 @@ function mostCommon<T extends string>(xs: T[]): T | null {
   const counts = new Map<T, number>();
   for (const x of xs) counts.set(x, (counts.get(x) ?? 0) + 1);
   return [...counts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+}
+
+// ---------------------------------------------------------------------
+// Extra Work (offer stack item 1, Oct 12 2026): "I've got more today."
+// A structured session the player adds on top of the plan: one plyo
+// warm-up plus three skill drills from one shelf, NEVER a drill the
+// player has already done (any week), then never one from this week,
+// then the least recently done. Same filmed bank, same wall and space
+// rules, same guard at the database. Returns null when the shelf has no
+// drill this player can do (e.g. Wall Work with no wall).
+// ---------------------------------------------------------------------
+export type ExtraShelf = "ball_mastery" | "wall_work" | "one_v_one";
+
+export const EXTRA_SHELVES: Record<ExtraShelf, { label: string; blurb: string }> = {
+  ball_mastery: { label: "Ball Mastery", blurb: "Touches, cones, control. Any space." },
+  wall_work: { label: "Wall Work", blurb: "Passing and weak foot against a wall." },
+  one_v_one: { label: "1v1 Skills", blurb: "Moves, feints, beating a defender." },
+};
+
+export const EXTRA_SKILL_DRILLS = 3;
+
+function shelfPool(skillsPool: Drill[], shelf: ExtraShelf): Drill[] {
+  if (shelf === "wall_work") return skillsPool.filter((d) => d.needs_wall);
+  if (shelf === "one_v_one") return skillsPool.filter((d) => d.pillar === "Confidence");
+  return skillsPool.filter((d) => d.pillar === "Ball Mastery");
+}
+
+// Rank within a pool for Extra Work: not in this week's plan first, then
+// by how long ago it was done (doneTitles is most-recent-first, so a
+// larger index = older = better). Whether a drill has been done at all is
+// decided OUTSIDE this ranking, in passes, because "never a drill the
+// player has already done" is a hard rule, not a preference.
+function rankForExtra(pool: Drill[], doneTitles: string[], weekTitles: Set<string>): Drill[] {
+  const doneIdx = new Map<string, number>();
+  doneTitles.forEach((t, i) => {
+    const k = normalizeDrillTitle(t);
+    if (!doneIdx.has(k)) doneIdx.set(k, i);
+  });
+  const score = (d: Drill) => {
+    const k = normalizeDrillTitle(d.title);
+    const recency = doneIdx.has(k) ? 1_000_000 - (doneIdx.get(k) ?? 0) : 0;
+    return recency + (weekTitles.has(k) ? 2_000_000 : 0);
+  };
+  return [...pool].sort((a, b) => score(a) - score(b) || a.sort - b.sort);
+}
+
+export function composeExtraSession(opts: {
+  bank: Drill[];
+  player?: PlayerEnv | null;
+  shelf: ExtraShelf;
+  doneTitles: string[]; // every title the player has completed, most recent first
+  weekTitles: string[]; // every title in the current week's plan
+  strength?: StrengthMode;
+}): GeneratedSession | null {
+  const { bank, player, shelf, doneTitles, weekTitles, strength = "optional" } = opts;
+  const fits = (d: Drill) => drillFitsPlayer(d, player);
+  const skillsPool = bank.filter((d) => isSkillPillar(d.pillar) && fits(d));
+  const weekSet = new Set(weekTitles.map(normalizeDrillTitle));
+
+  const done = new Set(doneTitles.map(normalizeDrillTitle));
+  const isDone = (d: Drill) => done.has(normalizeDrillTitle(d.title));
+  const shelfDrills = shelfPool(skillsPool, shelf);
+  if (shelfDrills.length === 0) return null;
+
+  const drills: GeneratedDrill[] = [];
+  const used = new Set<string>();
+  const take = (pool: Drill[]) => {
+    for (const d of rankForExtra(pool, doneTitles, weekSet)) {
+      if (drills.length >= EXTRA_SKILL_DRILLS) return;
+      if (used.has(d.title)) continue;
+      used.add(d.title);
+      drills.push(fromBank(d));
+    }
+  };
+  // Pass 1: the shelf, never-done drills only.
+  take(shelfDrills.filter((d) => !isDone(d)));
+  // Pass 2: the nearest pillars, still never-done - a thin shelf is topped
+  // up with new work before ANY repeat is considered.
+  take(skillsPool.filter((d) => !isDone(d)));
+  // Pass 3: only when the player has done every drill they can do, the
+  // shelf's least recently done ones, so the session still exists.
+  take(shelfDrills);
+  if (drills.length === 0) return null;
+
+  // Warm-up first: a filmed bank plyo, preferring one not in this week.
+  const plyos = rankForExtra(bank.filter((d) => d.pillar === PLYO_PILLAR), [], weekSet);
+  const warm = plyos[0] ? [fromBank(plyos[0])] : [];
+
+  // Finisher last when the player's note requires strengthening.
+  const strengthPool = bank.filter((d) => d.pillar === STRENGTH_PILLAR);
+  const finisher =
+    strength === "required" && strengthPool.length
+      ? [fromBank(rankForExtra(strengthPool, doneTitles, weekSet)[0])]
+      : [];
+
+  return {
+    title: `Extra: ${EXTRA_SHELVES[shelf].label}`,
+    drills: [...warm, ...drills, ...finisher],
+  };
 }

@@ -9,6 +9,9 @@ import { completeOnboarding } from "@/lib/elite/player-actions";
 const LEVELS = ["Developing", "Competitive", "Advanced", "Elite"];
 const FEET = ["Right", "Left", "Both"];
 const YES_NO = ["Yes", "No"];
+// 033: training space and load, picked by the family, coach can override.
+const SPACE_OPTIONS = ["Yard, driveway, park or garage", "A ball and a few yards"];
+const LOAD_OPTIONS = ["3 to 4 times a week or more", "Less than that, or off season"];
 const GENDERS = ["Boy", "Girl"];
 
 export function OnboardingForm({
@@ -41,6 +44,8 @@ export function OnboardingForm({
   const [parentPhone, setParentPhone] = useState(knownParentPhone);
   const [hasWall, setHasWall] = useState("No");
   const [hasGoal, setHasGoal] = useState("No");
+  const [load, setLoad] = useState(LOAD_OPTIONS[0]);
+  const [space, setSpace] = useState(SPACE_OPTIONS[0]);
   const [assessment, setAssessment] = useState<Record<string, number>>(
     Object.fromEntries(PROGRESS_METRICS.map((m) => [m, 50]))
   );
@@ -80,6 +85,8 @@ export function OnboardingForm({
       parent_phone: parentPhone,
       has_wall: hasWall === "Yes",
       has_goal: hasGoal === "Yes",
+      training_load: load === LOAD_OPTIONS[1] ? "off_season" : "in_season",
+      space: space === SPACE_OPTIONS[1] ? "tight" : "open",
     });
     if (!res.ok) {
       setError("Something went wrong saving your profile. Please try again.");
@@ -199,6 +206,22 @@ export function OnboardingForm({
           </Field>
           <Field label="Goal you can shoot at nearby?">
             <Segmented options={YES_NO} value={hasGoal} onChange={setHasGoal} />
+          </Field>
+        </div>
+        <div className="mt-4 grid gap-4">
+          <Field label="Where will you train most days?">
+            <Segmented options={SPACE_OPTIONS} value={space} onChange={setSpace} />
+            <p className="mt-1.5 text-xs text-white/40">
+              A ball and a few yards is enough. Pick that and every drill you get fits the space.
+            </p>
+          </Field>
+          <Field label="How much are you training with a team right now?">
+            <Segmented options={LOAD_OPTIONS} value={load} onChange={setLoad} />
+            <p className="mt-1.5 text-xs text-white/40">
+              {load === LOAD_OPTIONS[1]
+                ? "Off-Season plan: 6 sessions a week, about 40 minutes each."
+                : "In-Season plan: 4 sessions a week, about 40 minutes each, on top of team practice."}
+            </p>
           </Field>
         </div>
       </Section>

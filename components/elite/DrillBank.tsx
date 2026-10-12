@@ -24,6 +24,7 @@ const EMPTY: DrillInput = {
   minutes: 10,
   cues: "",
   needs_wall: false,
+  small_space: false,
   video_url: "",
   demo_by: "",
 };
@@ -198,6 +199,15 @@ export function DrillBank({
               />
               Needs a wall
             </label>
+            <label className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-sm text-white/70">
+              <input
+                type="checkbox"
+                checked={editing.small_space}
+                onChange={(e) => setEditing({ ...editing, small_space: e.target.checked })}
+                className="h-4 w-4 accent-accent"
+              />
+              Works in a few yards (tight space players get only these)
+            </label>
           </div>
           <input
             value={editing.cues}
@@ -281,6 +291,11 @@ export function DrillBank({
                           wall
                         </span>
                       )}
+                      {d.small_space && (
+                        <span className="rounded-full border border-accent/30 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-accent/80">
+                          few yards
+                        </span>
+                      )}
                       {!d.video_url && (
                         <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/25">
                           no video
@@ -305,6 +320,7 @@ export function DrillBank({
                           minutes: d.minutes,
                           cues: d.cues,
                           needs_wall: d.needs_wall,
+                          small_space: Boolean(d.small_space),
                           video_url: d.video_url ?? "",
                           demo_by: d.demo_by ?? "",
                         })

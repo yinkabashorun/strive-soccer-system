@@ -10,6 +10,7 @@ import { sendPlayerEmail } from "./email";
 import { sendPushToPlayer } from "./push";
 import { sendPlayerSMS } from "./sms";
 import { buildParentRecap } from "./parent-recap";
+import { SESSIONS_PER_WEEK, sessionsWord } from "./training";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://thestriveapp.com";
 
@@ -26,7 +27,7 @@ export async function unlockDueWeeks(): Promise<void> {
 
   const { data: due } = await admin
     .from("elite_weekly_plans")
-    .select("id, player_id, week, focus")
+    .select("id, player_id, week, focus, homework")
     .eq("notified", false)
     .lte("unlocks_at", new Date().toISOString())
     .limit(50);
@@ -50,6 +51,10 @@ export async function unlockDueWeeks(): Promise<void> {
     const first = player?.full_name?.split(" ")[0] ?? "";
     const parentFirst = (player?.parent_name || first || "").trim().split(" ")[0];
     const greeting = parentFirst ? `Hey ${parentFirst}, ` : "";
+    // The plan row stores the sessions it was built with (four or six).
+    const built = Array.isArray(plan.homework) ? plan.homework.length : 0;
+    const w = sessionsWord(built || SESSIONS_PER_WEEK);
+    const sessionsSaid = w[0].toUpperCase() + w.slice(1);
 
     if (!player || plan.week > (player.current_week ?? 0)) {
       await admin
@@ -68,7 +73,7 @@ export async function unlockDueWeeks(): Promise<void> {
     await sendPlayerEmail(plan.player_id, {
       event: "new_week",
       subject: first ? `Week ${plan.week} is live, ${first}` : `Week ${plan.week} is live`,
-      body: `The new training week just unlocked.\n\nThis week's focus: ${plan.focus}\n\nFour sessions, plyo warm-up first, every time. Open the app and start Session 1.`,
+      body: `The new training week just unlocked.\n\nThis week's focus: ${plan.focus}\n\n${sessionsSaid} sessions, plyo warm-up first, every time. Open the app and start Session 1.`,
     }).catch(() => undefined);
     await sendPushToPlayer(plan.player_id, {
       title: first ? `Week ${plan.week} is live, ${first}` : `Week ${plan.week} is live`,

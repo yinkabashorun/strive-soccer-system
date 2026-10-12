@@ -157,7 +157,7 @@ export async function POST(req: Request) {
     await sendPlayerEmail(playerRow.id, {
       event: "player_signed_up",
       subject: "Welcome to Strive Elite",
-      body: `${fullName} is officially in the Strive Elite program.\n\nNext step: open the app and complete the quick player profile. Your coach uses it to build the first training week. Four sessions a week, every one starting with an explosive plyometric warm-up. Let's get to work.`,
+      body: `${fullName} is officially in the Strive Elite program.\n\nNext step: open the app and complete the quick player profile. Your coach uses it to build the first training week. A new week every Monday, every session starting with an explosive plyometric warm-up. Let's get to work.`,
     }).catch(() => undefined);
   }
 

@@ -53,15 +53,29 @@ parent text. Nothing temporary.
 6. Progress: extras count toward time trained (item 8 lands the time
    model; until then they count like any session).
 
-### Decisions for Coach Yinka
-- Off-Season = 6 x 40 (my recommendation: same session shape, more
-  days, never longer sessions). Under-13 cap at 5? Your call as the
-  coach.
-- Who sets load: family at onboarding, coach can override. Agree?
-- Extra Work: on-demand from the bank only for now; coach-authored sets
-  later if wanted. Agree?
-- Load switch: manual only (no calendar). Agree?
+### Decisions (Coach Yinka, Oct 12 2026: "oh no yes I like it", plus
+### "just make sure it doesn't disrupt players... extra work is structured
+### and makes sense and is never a drill the player has already done.
+### maybe they can choose between ball mastery, wall work, and 1:1 skills")
+- Off-Season = 6 x 40. No under-13 cap given, none built.
+- Family picks at onboarding, coach overrides on the player page.
+- Extra Work: on demand from the bank. Three shelves: Ball Mastery,
+  Wall Work (only shown with a wall on the profile), 1v1 Skills
+  (Confidence pillar). Structured like a real session: one plyo
+  warm-up, three skill drills, a strengthening finisher when the note
+  requires one. HARD RULE: never a drill the player has already
+  completed, any week; then never one from this week; then, only when
+  every drill they can do is done, the least recently done. One open
+  extra at a time.
+- Load switch: manual only.
+- Zero disruption: every default (in_season, open, small_space false,
+  is_extra false) reproduces today's week exactly; all six current
+  players verified in_season / open after the migration; tonight's
+  Sunday build and tomorrow's unlock are untouched.
 - Name for the ball-and-a-few-yards mode: later, Hormozi pass.
+
+### SHIPPED Oct 12 2026 (verify green: typecheck, lint, 46 tests, build,
+### cron + library checks; migration 033 applied to prod)
 
 ### Not in this item
 - The time-trained progress model (item 8).

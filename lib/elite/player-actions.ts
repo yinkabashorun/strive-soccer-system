@@ -7,7 +7,8 @@ import { maybeAwardAchievements } from "./achievements";
 import { sendCoachEmail } from "./email";
 import { normalizePhone } from "./sms";
 import { liveWeekFor, monthFromWeek } from "./time";
-import type { ProgressMetric } from "./types";
+import type { ProgressMetric, TrainingLoad, TrainingSpace } from "./types";
+import { TRAINING_LOADS } from "./training";
 
 export type OnboardingInput = {
   age: number;
@@ -24,6 +25,8 @@ export type OnboardingInput = {
   parent_phone: string;
   has_wall: boolean;
   has_goal: boolean;
+  training_load: TrainingLoad; // 033
+  space: TrainingSpace; // 033
 };
 
 // Complete a player's intake. Players cannot UPDATE their own elite_players
@@ -51,6 +54,8 @@ export async function completeOnboarding(input: OnboardingInput) {
     parent_email: input.parent_email.trim(),
     has_wall: input.has_wall,
     has_goal: input.has_goal,
+    training_load: input.training_load in TRAINING_LOADS ? input.training_load : "in_season",
+    space: input.space === "tight" ? "tight" : "open",
     onboarded_at: new Date().toISOString(),
   };
   // Same non-destructive pattern as parent_phone below: the form requires
@@ -69,9 +74,9 @@ export async function completeOnboarding(input: OnboardingInput) {
     .update(update)
     .eq("id", viewer.playerId);
   if (error) {
-    // pre-019 (no has_wall/has_goal columns): save the rest so onboarding
-    // never blocks on a pending migration
-    const { has_wall: _w, has_goal: _g, ...legacy } = update;
+    // pre-019 / pre-033 (environment or load columns missing): save the
+    // rest so onboarding never blocks on a pending migration
+    const { has_wall: _w, has_goal: _g, training_load: _l, space: _s, ...legacy } = update;
     await admin.from("elite_players").update(legacy).eq("id", viewer.playerId);
   }
 

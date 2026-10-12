@@ -237,8 +237,8 @@ export function SessionNotesStudio({
             <p className="text-lg font-medium text-bone">{plan.weekly_focus}</p>
           </Block>
 
-          {/* Four sessions - a fully editable draft until published */}
-          <Block icon={Check} title="The week · 4 sessions · tap to edit">
+          {/* The week's sessions (four or six by load) - a fully editable draft until published */}
+          <Block icon={Check} title={`The week · ${plan.sessions.length} sessions · tap to edit`}>
             <div className="space-y-3">
               {plan.sessions.map((s, si) => (
                 <div

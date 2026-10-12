@@ -10,7 +10,9 @@ coaches** — this doc explains the "why" behind it.
 
 ## The week
 
-Every player's week is **four training sessions**, roughly **40 minutes each**,
+Every player's week is **four training sessions** on the In-Season plan or
+**six** on the Off-Season plan (the family picks at onboarding, the coach can
+override), roughly **40 minutes each**,
 built to be done **at home — in a room or a yard**. No pitch, no partner, no
 equipment beyond **a ball and a small space** — a wall, goal, rebounder, or
 partner is only ever prescribed if the coach's notes say the player has one.
@@ -69,8 +71,9 @@ When a coach types raw session notes, the AI plan generator:
 
 1. Reads the methodology above as its system prompt (from
    `methodologyContext()`).
-2. Turns the notes into a four-session week, two skill drills per session,
-   drawing from the pillar drill libraries and adapting to the player.
+2. Turns the notes into the player's week (four or six sessions by load),
+   three skill drills per session, drawing only from the coach's filmed
+   drill bank and adapting to the player (wall, space, injury note).
 3. The system then **guarantees** the plyometric warm-up on the front of every
    session server-side, so the plyo-first rule holds no matter what the notes
    or the AI return.
@@ -78,3 +81,17 @@ When a coach types raw session notes, the AI plan generator:
 Because the methodology is stored in one file, tightening the philosophy,
 adding a drill, or changing the weekly structure changes every future plan the
 system produces.
+
+## Extra Work (Oct 2026)
+
+A player can add an Extra Work session any day: one plyo warm-up plus three
+skill drills from one shelf (Ball Mastery, Wall Work, 1v1 Skills), composed
+from the filmed bank, never a drill they have already completed, then never
+one from the current week, then the least recently done. One open extra at
+a time. Same wall and space rules, same filmed-only guard at the database.
+
+## Space (Oct 2026)
+
+"A ball and a few yards" is a player setting. On it, only bank drills the
+coach ticked as **small space** are ever assigned; plyo warm-ups and
+strengthening finishers are room work and always fit.

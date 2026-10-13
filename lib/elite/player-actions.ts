@@ -7,7 +7,10 @@ import { maybeAwardAchievements } from "./achievements";
 import { sendCoachEmail } from "./email";
 import { normalizePhone } from "./sms";
 import { liveWeekFor, monthFromWeek } from "./time";
-import { ownsClipPath } from "./clips";
+import { CLIP_BUCKET, ownsClipPath, ownsProgressPath } from "./clips";
+import { getBenchmark, getHomework, getProgressVideos } from "./data";
+import { previousProgressVideo, progressVideoDue } from "./progress-video";
+import { sendPlayerSMS } from "./sms";
 import type { ProgressMetric, TrainingLoad, TrainingSpace } from "./types";
 import { TRAINING_LOADS } from "./training";
 
@@ -312,6 +315,89 @@ export async function sendClip(input: { homeworkId: string; path: string }) {
   revalidatePath("/homework");
   revalidatePath("/messages");
   revalidatePath(`/coach/players/${viewer.playerId}`);
+  return { ok: true as const };
+}
+
+// Bi-weekly progress video (offer stack item 7, Oct 13 2026): the player
+// filmed their benchmark drill for this progress week and uploaded it
+// into progress/<player_id>/<week>/ (storage RLS, 037). Records the row,
+// texts the parent the link (plus the one from two weeks ago when it
+// exists) in Coach Yinka's voice, pings the coach. One per week, by the
+// database's unique constraint.
+export async function submitProgressVideo(input: { path: string; week: number; shareOk: boolean }) {
+  const viewer = await getViewer();
+  if (!viewer?.playerId) return { ok: false as const, error: "Sign in first." };
+  if (viewer.demo) return { ok: true as const };
+  const supabase = createClient();
+  if (!supabase) return { ok: true as const };
+
+  const { data: player } = await supabase
+    .from("elite_players")
+    .select("id, full_name, parent_name, current_week, week1_monday, benchmark_drill_id")
+    .eq("id", viewer.playerId)
+    .maybeSingle();
+  if (!player) return { ok: false as const, error: "Player not found." };
+  const homework = await getHomework(player.id);
+  const live = liveWeekFor(player.week1_monday, player.current_week);
+  const maxBuilt = homework.reduce((m, h) => Math.max(m, h.week), 0);
+  const week = Math.max(1, Math.min(live, maxBuilt || 1));
+  if (input.week !== week) return { ok: false as const, error: "That week has moved on. Refresh and film again." };
+  if (!ownsProgressPath(input.path, player.id, week)) return { ok: false as const, error: "That clip isn't yours." };
+
+  const existing = await getProgressVideos(player.id);
+  if (!progressVideoDue(week, existing)) {
+    return { ok: false as const, error: "This week's progress video is already in, or it isn't a progress week." };
+  }
+  const bench = await getBenchmark(player, homework);
+  if (!bench) return { ok: false as const, error: "Finish a skill drill first so there's a drill to film." };
+
+  const { error } = await supabase.from("elite_progress_videos").insert({
+    player_id: player.id,
+    week,
+    drill_id: bench.drill_id,
+    drill_title: bench.title,
+    clip_path: input.path,
+    share_ok: Boolean(input.shareOk),
+  });
+  if (error) return { ok: false as const, error: "Couldn't save the video. Try again." };
+
+  // Parent text with 30-day links, signed by the service client (the
+  // parent has no login; the player's account is the family's).
+  const admin = createServiceClient();
+  const first = player.full_name.split(" ")[0];
+  const parentFirst = (player.parent_name || "").trim().split(" ")[0];
+  if (admin) {
+    const prev = previousProgressVideo(week, existing);
+    const paths = [input.path, ...(prev ? [prev.clip_path] : [])];
+    const { data: signed } = await admin.storage.from(CLIP_BUCKET).createSignedUrls(paths, 60 * 60 * 24 * 30);
+    const urlFor = new Map((signed ?? []).map((x) => [x.path, x.signedUrl]));
+    const nowUrl = urlFor.get(input.path);
+    const prevUrl = prev ? urlFor.get(prev.clip_path) : undefined;
+    if (nowUrl) {
+      const greeting = parentFirst ? `Hey ${parentFirst}, ` : "";
+      const message =
+        `${greeting}${first} just filmed the week ${week} progress clip of ${bench.title}, the same drill every two weeks so you can see the work adding up: ${nowUrl}` +
+        (prevUrl ? ` Two weeks ago: ${prevUrl}` : "") +
+        ` Let's keep ${first} dialed in.`;
+      const sent = await sendPlayerSMS(player.id, { event: "progress_video", message }).catch(() => false);
+      if (sent) {
+        await admin
+          .from("elite_progress_videos")
+          .update({ parent_sent_at: new Date().toISOString() })
+          .eq("player_id", player.id)
+          .eq("week", week);
+      }
+    }
+  }
+
+  await sendCoachEmail(player.id, {
+    event: "progress_video",
+    subject: `${player.full_name} filmed the week ${week} progress video`,
+    body: `${player.full_name} filmed ${bench.title} for week ${week}.${input.shareOk ? " The family said it's OK to share in the community." : " Not cleared for the community."} Open their profile to watch it.`,
+  }).catch(() => undefined);
+
+  revalidatePath("/dashboard");
+  revalidatePath(`/coach/players/${player.id}`);
   return { ok: true as const };
 }
 

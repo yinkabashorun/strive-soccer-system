@@ -92,6 +92,11 @@ export function isPlyoTitle(title: string): boolean {
 // Bank strengthening titles carry the "Strength:" prefix (added on save in
 // drill-actions.ts), so the player UI can badge a finisher from its title
 // alone, same as plyos.
+// A skill drill, by title: not a warm-up, not a finisher.
+export function isSkillTitle(title: string): boolean {
+  return !isPlyoTitle(title) && !isStrengthTitle(title);
+}
+
 export function isStrengthTitle(title: string): boolean {
   return /^strength(ening)?\b/i.test(title.trim());
 }

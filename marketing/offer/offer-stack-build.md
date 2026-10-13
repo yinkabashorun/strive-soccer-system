@@ -284,3 +284,44 @@ parent text. Nothing temporary.
 - Who answers and the response window stay open (intake file). Today it
   is Coach Yinka in the thread, like every message.
 - The checklist half is parked (Oct 13).
+
+## Item 7: Bi-weekly progress video (Coach Yinka, Oct 13 2026: "Go")
+
+### What it is to the family
+- Every second week (weeks 2, 4, 6...) the app asks the player to film
+  ONE drill, the same one every time. The parent gets the link by text
+  in Coach Yinka's voice, with the clip from two weeks ago next to it,
+  so the change is theirs to see. The family ticks whether the clip may
+  be shared in the Strive community; the coach posts it only on a yes.
+
+### How it fits the system
+1. Migration 037: elite_players.benchmark_drill_id (coach's pick) and
+   elite_progress_videos (one row per player per week by unique
+   constraint: drill, clip path, share_ok, parent_sent_at, posted_at).
+   Coach full access; family reads and inserts its own. The 036 storage
+   ownership function now also accepts progress/<player_id>/<week>/...
+2. The benchmark: the coach's pick on the player page; until set, the
+   first SKILL drill the player ever completed (pure, unit-tested;
+   history never changes so it stays the same drill).
+3. Cadence: isProgressVideoWeek (even weeks from 2), due once per week,
+   never while on a break, never before the week exists. Pure, tested.
+4. Upload: the same browser-to-bucket helper as Send a clip (036), path
+   progress/<player_id>/<week>/<ts>.<ext>; submitProgressVideo verifies
+   the path, the week and that it is due, writes the row, texts the
+   parent (30-day signed links, event progress_video, no sign-off,
+   forward-looking close, no exclamation), emails the coach.
+5. Player UI: a gold Progress video card on the home screen during a
+   due week: the drill, its demo, the clip from two weeks ago, the
+   community consent tick (unchecked by default), Film it and send.
+6. Coach UI: Progress videos panel on the player page: benchmark picker
+   (filmed skill drills), every clip by week with OK to share / Private
+   and Parent texted / not, Download, Mark posted to the community
+   (allowed only when share_ok; posting to Skool is by hand).
+7. Guards: storage RLS, unique (player, week), the action's week / path
+   / due checks, tests/progress-video.test.ts.
+
+### Decisions (defaults, Coach Yinka can overrule)
+- One benchmark drill per player, coach-set, app fallback as above.
+- Consent is per clip, asked at upload, unchecked by default. Nothing
+  is posted without it.
+- Posting to Skool stays manual (no API); the panel tracks it.

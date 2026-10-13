@@ -17,13 +17,17 @@ import {
   getCoachingCalls,
   getHomework,
   getMessages,
+  getBenchmark,
   getPlayer,
+  getProgressVideos,
   getTrainingBreaks,
   getWeeklyPlans,
 } from "@/lib/elite/data";
 import { TodaySession, VictoryLap } from "@/components/elite/TodaySession";
 import { ExtraWork } from "@/components/elite/ExtraWork";
 import { BreakCard } from "@/components/elite/BreakCard";
+import { ProgressVideoCard } from "@/components/elite/ProgressVideoCard";
+import { previousProgressVideo, progressVideoDue } from "@/lib/elite/progress-video";
 import { currentBreak } from "@/lib/elite/breaks";
 import { settleBreaksForPlayer } from "@/lib/elite/breaks-server";
 import { fmtDuration, timeTrained, weekMinutes } from "@/lib/elite/time-trained";
@@ -60,7 +64,7 @@ export default async function DashboardPage() {
     player.week1_monday = week1Monday;
   }
 
-  const [allHomework, achievements, messages, checkins, plans, calls, breaks] =
+  const [allHomework, achievements, messages, checkins, plans, calls, breaks, progressVideos] =
     await Promise.all([
       getHomework(player.id),
       getAchievements(player.id),
@@ -69,6 +73,7 @@ export default async function DashboardPage() {
       getWeeklyPlans(player.id),
       getCoachingCalls(player.id),
       getTrainingBreaks(player.id),
+      getProgressVideos(player.id),
     ]);
 
   const firstName = player.full_name.split(" ")[0];
@@ -116,6 +121,13 @@ export default async function DashboardPage() {
 
   const latestMessage = messages[0];
   const checkedInThisWeek = checkins.some((c) => c.week === contentWeek);
+
+  // Bi-weekly progress video (037): every second week, the same drill.
+  // Needs a drill to film (the coach's pick or the first skill drill ever
+  // completed) and a week that exists; never while on a break.
+  const videoDue = !onBreak && thisWeek.length > 0 && progressVideoDue(contentWeek, progressVideos);
+  const benchmark = videoDue ? await getBenchmark(player, allHomework) : null;
+  const previousVideo = previousProgressVideo(contentWeek, progressVideos);
 
   return (
     <div className="space-y-5">
@@ -191,6 +203,18 @@ export default async function DashboardPage() {
           </span>
           <span className="text-accent">→</span>
         </Link>
+      )}
+
+      {/* Progress video (037): asked once per even week, same drill */}
+      {videoDue && benchmark && !viewer.demo && (
+        <ProgressVideoCard
+          playerId={player.id}
+          week={contentWeek}
+          firstName={firstName}
+          parentFirst={(player.parent_name || "").trim().split(" ")[0]}
+          benchmark={{ title: benchmark.title, video_url: benchmark.video_url }}
+          previousUrl={previousVideo?.clip_url ?? null}
+        />
       )}
 
       {/* Extra Work (033): add a session from the bank, never a repeat.

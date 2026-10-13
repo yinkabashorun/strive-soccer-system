@@ -122,6 +122,41 @@ export async function setTrainingPlan(
   return { ok: true };
 }
 
+// Bi-weekly progress video (037): the one drill this player films every
+// second week. null = the app falls back to the first skill drill they
+// ever completed. Coach-only, like every elite_players write.
+export async function setBenchmarkDrill(playerId: string, drillId: string | null) {
+  if (!(await requireCoach())) return { ok: false };
+  const supabase = createClient();
+  if (supabase) {
+    const { error } = await supabase
+      .from("elite_players")
+      .update({ benchmark_drill_id: drillId || null })
+      .eq("id", playerId);
+    if (error) return { ok: false };
+    revalidatePath(`/coach/players/${playerId}`);
+  }
+  return { ok: true };
+}
+
+// The coach posted this progress video in the community (manual: no
+// Skool API). Only allowed when the family said yes (share_ok).
+export async function markProgressVideoPosted(playerId: string, videoId: string, posted: boolean) {
+  if (!(await requireCoach())) return { ok: false };
+  const supabase = createClient();
+  if (supabase) {
+    const { error } = await supabase
+      .from("elite_progress_videos")
+      .update({ posted_at: posted ? new Date().toISOString() : null })
+      .eq("id", videoId)
+      .eq("player_id", playerId)
+      .eq("share_ok", true);
+    if (error) return { ok: false };
+    revalidatePath(`/coach/players/${playerId}`);
+  }
+  return { ok: true };
+}
+
 // Permanently remove a player AND their login account. elite_profiles is
 // FK'd to auth.users(id) on delete cascade, and elite_players (plus every
 // dependent table - homework, plans, progress, messages, film, reports)

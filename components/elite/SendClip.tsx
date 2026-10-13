@@ -2,9 +2,9 @@
 
 import { useRef, useState, useTransition } from "react";
 import { Check, Loader2, Video } from "lucide-react";
-import { createClient } from "@/lib/elite/supabase/client";
 import { sendClip } from "@/lib/elite/player-actions";
-import { CLIP_BUCKET, clipExtension, clipPath, MAX_CLIP_MB } from "@/lib/elite/clips";
+import { clipExtension, clipPath } from "@/lib/elite/clips";
+import { uploadClip } from "@/lib/elite/clip-upload";
 import { cn } from "@/lib/utils";
 
 // "Send a clip" on a drill card (offer stack item 5): the player films
@@ -29,24 +29,11 @@ export function SendClip({
 
   async function onFile(file: File) {
     setError(null);
-    if (file.size > MAX_CLIP_MB * 1024 * 1024) {
-      setError(`That clip is over ${MAX_CLIP_MB}MB. Film a shorter one.`);
-      setState("error");
-      return;
-    }
-    const supabase = createClient();
-    if (!supabase) {
-      setError("Clips send from the live app.");
-      setState("error");
-      return;
-    }
     setState("uploading");
     const path = clipPath(playerId, homeworkId, clipExtension(file.name, file.type));
-    const { error: upErr } = await supabase.storage
-      .from(CLIP_BUCKET)
-      .upload(path, file, { contentType: file.type || "video/mp4", cacheControl: "3600" });
-    if (upErr) {
-      setError("Upload didn't go through. Check your connection and try again.");
+    const up = await uploadClip(file, path);
+    if (!up.ok) {
+      setError(up.error);
       setState("error");
       return;
     }

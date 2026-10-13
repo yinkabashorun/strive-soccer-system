@@ -1155,6 +1155,45 @@ commit.
       TodaySession take playerId. 76 tests, verify green. Open, from
       the intake: who answers clips and the response-time promise (today
       Coach Yinka, like every message).
+- [x] SHIPPED Oct 13 2026, OFFER STACK ITEM 7, BI-WEEKLY PROGRESS VIDEO
+      (Coach Yinka: "Go"): every second week (weeks 2, 4, 6...) the
+      player films the SAME drill; the parent gets the link by text in
+      Coach Yinka's voice with the clip from two weeks ago beside it;
+      the coach can post it in the community only when the family ticked
+      yes. Migration 037 APPLIED TO PROD statement by statement and
+      verified: elite_players.benchmark_drill_id (coach's pick, FK to
+      elite_drills), elite_progress_videos (one row per player per week
+      by unique constraint: drill, clip path, share_ok, parent_sent_at,
+      posted_at; coach all / owner read + insert RLS), and the 036
+      storage ownership function now also accepts
+      progress/<player_id>/<week>/... RULES, pure and unit-tested
+      (tests/progress-video.test.ts, 6; 82 total): cadence is even weeks
+      from 2, due once per week, never while on a break, never before
+      the week exists; the benchmark is the coach's pick (Progress
+      videos panel on the player page, filmed skill drills) and until
+      set the FIRST SKILL DRILL THE PLAYER EVER COMPLETED (history never
+      changes, so it stays the same drill). submitProgressVideo
+      (player-actions.ts, cookie client) verifies the path, the week and
+      that it is due, writes the row, texts the parent with 30-day
+      signed links (event progress_video: "Hey <Parent>, <First> just
+      filmed the week N progress clip of <drill>, the same drill every
+      two weeks so you can see the work adding up: <link> Two weeks ago:
+      <link> Let's keep <First> dialed in." - no sign-off, no
+      exclamation), stamps parent_sent_at only when the text went, and
+      emails the coach. Upload shares the Send-a-clip browser helper
+      (lib/elite/clip-upload.ts, 150MB cap). PLAYER UI: a gold "Week N
+      progress video" card on the home screen during a due week (drill
+      name, its demo, the clip from two weeks ago, the community consent
+      tick UNCHECKED by default, Film it and send; "Sent" state names the
+      parent). COACH UI: Progress videos panel on the player page
+      (benchmark picker, every clip by week, OK to share / Private,
+      Parent texted / not, Download, Mark posted to the community -
+      allowed only on share_ok; posting to Skool is by hand, no API).
+      Consent is per clip; nothing is posted without it. Defaults Coach
+      Yinka can overrule: one benchmark per player; even weeks; consent
+      unchecked. Open from the intake: none left for this item. No
+      player data touched. docs/METHODOLOGY.md has a Progress video
+      section.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

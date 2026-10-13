@@ -7,6 +7,7 @@ import { maybeAwardAchievements } from "./achievements";
 import { sendCoachEmail } from "./email";
 import { normalizePhone } from "./sms";
 import { liveWeekFor, monthFromWeek } from "./time";
+import { ownsClipPath } from "./clips";
 import type { ProgressMetric, TrainingLoad, TrainingSpace } from "./types";
 import { TRAINING_LOADS } from "./training";
 
@@ -265,6 +266,53 @@ export async function sendPlayerMessage(body: string) {
     revalidatePath("/messages");
   }
   return { ok: true };
+}
+
+// Send a clip (offer stack item 5, Oct 13 2026): the player filmed a drill
+// and uploaded it from the browser into their own folder of the private
+// elite-film bucket (storage RLS, migration 036). This records it as a
+// message in their chat with the coach and pings the coach. Same cookie
+// client and same insert policy as sendPlayerMessage.
+export async function sendClip(input: { homeworkId: string; path: string }) {
+  const viewer = await getViewer();
+  if (!viewer?.playerId) return { ok: false as const, error: "Sign in first." };
+  if (viewer.demo) return { ok: true as const };
+  if (!ownsClipPath(input.path, viewer.playerId)) {
+    return { ok: false as const, error: "That clip isn't yours." };
+  }
+  const supabase = createClient();
+  if (!supabase) return { ok: true as const };
+
+  const { data: hw } = await supabase
+    .from("elite_homework")
+    .select("id, title")
+    .eq("id", input.homeworkId)
+    .eq("player_id", viewer.playerId)
+    .maybeSingle();
+  if (!hw) return { ok: false as const, error: "That drill isn't on your plan." };
+  const title = String(hw.title);
+
+  const { error } = await supabase.from("elite_messages").insert({
+    player_id: viewer.playerId,
+    from_role: "player",
+    from_name: viewer.profile.full_name,
+    body: `Sent a clip of ${title}.`,
+    clip_path: input.path,
+    clip_label: title,
+  });
+  if (error) return { ok: false as const, error: "Couldn't send the clip. Try again." };
+
+  await sendCoachEmail(viewer.playerId, {
+    event: "player_clip",
+    subject: `${viewer.profile.full_name} sent a clip: ${title}`,
+    body: `${viewer.profile.full_name} sent a clip of ${title} for feedback. Open their profile and reply in the thread.`,
+  }).catch(() => undefined);
+
+  revalidatePath("/dashboard");
+  revalidatePath("/homework");
+  revalidatePath("/messages");
+  revalidatePath(`/coach/players/${viewer.playerId}`);
+  return { ok: true as const };
 }
 
 export type CheckinInput = {

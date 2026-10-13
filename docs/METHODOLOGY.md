@@ -39,6 +39,12 @@ template marks it "works in a few yards", so Extra Work for those players
 draws from the same drills. With fewer templates than sessions in the week,
 the least recent one repeats and the live-week audit says so.
 
+## Send a clip
+
+Every skill drill card has **Send a clip**: the player films themselves doing
+the drill, it lands in their chat with the coach (private storage, their own
+folder only), and the coach answers by text in the same thread.
+
 ## Progress and breaks
 
 Progress, as the family sees it, is **time trained**: minutes, sessions

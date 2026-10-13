@@ -12,6 +12,7 @@ import type { Homework } from "@/lib/elite/types";
 import { toggleHomework } from "@/lib/elite/player-actions";
 import { sessionsWord } from "@/lib/elite/training";
 import { DrillVideo } from "./DrillVideo";
+import { SendClip } from "./SendClip";
 import { cn } from "@/lib/utils";
 
 const DEFAULT_MIN = 15;
@@ -33,10 +34,12 @@ export function WeekList({
   items,
   currentWeek,
   showPast = true,
+  playerId,
 }: {
   items: Homework[];
   currentWeek: number;
   showPast?: boolean;
+  playerId?: string; // set on the player's own view: enables Send a clip (036)
 }) {
   const [state, setState] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(items.map((h) => [h.id, h.completed]))
@@ -153,6 +156,7 @@ export function WeekList({
                   done={state[h.id]}
                   nextUp={h.id === nextUpId}
                   onToggle={() => toggle(h.id)}
+                  playerId={playerId}
                 />
               ))}
             </ul>
@@ -173,11 +177,13 @@ function DrillRow({
   done,
   nextUp,
   onToggle,
+  playerId,
 }: {
   hw: Homework;
   done: boolean;
   nextUp: boolean;
   onToggle: () => void;
+  playerId?: string;
 }) {
   const plyo = isPlyo(hw.title);
   const strength = isStrength(hw.title);
@@ -248,6 +254,10 @@ function DrillRow({
           </p>
         )}
         {hw.video_url && <DrillVideo src={hw.video_url} />}
+        {/* Send a clip (036): skill drills only, the player's own view */}
+        {playerId && !plyo && !strength && (
+          <SendClip playerId={playerId} homeworkId={hw.id} title={hw.title} />
+        )}
       </div>
     </li>
   );

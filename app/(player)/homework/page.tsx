@@ -35,7 +35,7 @@ export default async function HomeworkPage() {
         </p>
       </header>
 
-      <WeekList items={homework} currentWeek={contentWeek} />
+      <WeekList items={homework} currentWeek={contentWeek} playerId={viewer.playerId} />
     </div>
   );
 }

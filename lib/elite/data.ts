@@ -1,4 +1,5 @@
 import { nyToday } from "./time";
+import { CLIP_BUCKET } from "./clips";
 import type { TemplateContext, TemplateUsage } from "./bank-conform";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient, createServiceClient } from "./supabase/server";
@@ -424,7 +425,17 @@ export async function getMessages(playerId: string): Promise<Message[]> {
     .select("*")
     .eq("player_id", playerId)
     .order("created_at", { ascending: false });
-  return (data as Message[] | null) ?? [];
+  const rows = (data as Message[] | null) ?? [];
+  // Clips (036) live in a private bucket: sign each path for an hour, for
+  // whoever is reading (the family sees its own, the coach sees all -
+  // storage RLS decides, the app never widens it).
+  const paths = rows.map((m) => m.clip_path).filter((p): p is string => Boolean(p));
+  if (paths.length) {
+    const { data: signed } = await supabase.storage.from(CLIP_BUCKET).createSignedUrls(paths, 3600);
+    const urlFor = new Map((signed ?? []).map((s) => [s.path, s.signedUrl]));
+    for (const m of rows) if (m.clip_path) m.clip_url = urlFor.get(m.clip_path) ?? null;
+  }
+  return rows;
 }
 
 export async function getAchievements(playerId: string): Promise<Achievement[]> {

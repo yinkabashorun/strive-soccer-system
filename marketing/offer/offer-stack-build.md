@@ -248,3 +248,39 @@ parent text. Nothing temporary.
 - /coach/drills: Few-yards sessions editor (name, pick filmed skill
   drills in order, reorder, on/off, delete, count vs what the roster
   needs). tests/templates.test.ts (11 tests).
+
+## Item 5, first half: Send a clip (Coach Yinka, Oct 13 2026: "Set it up";
+## the Strive-standard checklist half is parked)
+
+### What it is to the family
+- On any skill drill, "Send a clip". The player films themselves doing
+  it, it lands in their chat with the coach, and the coach answers by
+  text in the same thread. The drill it shows is labelled on the
+  message. Nothing to install, nothing to text to a number.
+
+### How it fits the system
+1. Storage: the elite-film bucket (005) was readable and writable by
+   any signed-in user, open since Sept 26. Migration 036 scopes it: a
+   family writes to and reads from clips/<player_id>/... only
+   (elite_owns_clip_path, database-side), the coach reads everything,
+   the bucket stays private and the app serves clips through one-hour
+   signed URLs. Same path convention in lib/elite/clips.ts, unit-tested.
+2. Messages: elite_messages gets clip_path and clip_label. A clip is an
+   ordinary player message: same RLS, same unread count on the coach
+   dashboard, same reply, same thread on both sides. The thread renders
+   the video inside the bubble.
+3. Upload: straight from the phone into the bucket (browser client,
+   RLS-gated, same as the coach's drill uploads), 150MB cap, then the
+   sendClip server action verifies the path is the player's own and the
+   drill is on their plan, writes the message, and emails the coach
+   (event player_clip, same channel as a chat message).
+4. Player UI: a "Send a clip" button under every skill drill on Today's
+   session and the week list (not warm-ups, not finishers); states
+   Sending / Clip sent. Copy never says AI.
+5. Guards: storage RLS (the database refuses a write outside the
+   family's own folder), ownsClipPath in the action, tests/clips.test.ts.
+
+### Decisions
+- Who answers and the response window stay open (intake file). Today it
+  is Coach Yinka in the thread, like every message.
+- The checklist half is parked (Oct 13).

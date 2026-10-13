@@ -86,6 +86,21 @@ export function MessageThread({
                   </div>
                 )}
                 {m.body}
+                {/* A clip (036): the video itself, in the bubble */}
+                {m.clip_url && (
+                  <video
+                    src={m.clip_url}
+                    controls
+                    playsInline
+                    preload="metadata"
+                    className="mt-2 aspect-[4/5] w-full max-w-[240px] rounded-xl bg-black object-cover"
+                  />
+                )}
+                {m.clip_path && !m.clip_url && (
+                  <div className={cn("mt-1 text-xs", mine ? "text-black/60" : "text-white/40")}>
+                    Clip unavailable right now.
+                  </div>
+                )}
               </div>
             </div>
           );

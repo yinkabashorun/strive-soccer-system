@@ -320,6 +320,11 @@ export type Message = {
   body: string;
   created_at: string;
   read: boolean;
+  // Send a clip (036): the storage object and the drill it shows. clip_url
+  // is derived at read time (a short-lived signed URL), never stored.
+  clip_path?: string | null;
+  clip_label?: string;
+  clip_url?: string | null;
 };
 
 export type WeeklyPlan = {

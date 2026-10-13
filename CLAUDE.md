@@ -55,10 +55,9 @@ commit.
 - [ ] From the Sept 26 audit, not yet built - Coach Yinka to prioritize:
       no error tracking (Sentry or similar) or custom error/loading pages,
       so a future silent failure like the parent-report one above has no
-      way to surface short of a parent complaining; the elite-film Storage
-      bucket policy (migration 005) is open to any authenticated user with
-      no per-player scoping (currently unused by any real upload flow, but
-      live and insecure by default). (The DST drift on the weekly-plans
+      way to surface short of a parent complaining. (The elite-film
+      bucket policy gap is CLOSED Oct 13 2026 by migration 036, see
+      RECORD.) (The DST drift on the weekly-plans
       and digest crons is fixed as of Oct 2 - both decide in NY time now;
       only onboarding-reminders still shifts an hour, harmless.)
 - [ ] PARKED Oct 3 2026 (Coach Yinka: "no its fine"): injury handling.
@@ -1127,6 +1126,35 @@ commit.
       table. STATE: zero templates built; Coach Yinka builds them at
       /coach/drills. No player data touched. docs/METHODOLOGY.md has a
       "A ball and a few yards" section.
+- [x] SHIPPED Oct 13 2026, OFFER STACK ITEM 5 FIRST HALF, SEND A CLIP
+      (Coach Yinka: "Set it up"; the Strive-standard checklist half is
+      PARKED on his "Do the checklist later" - open question kept in the
+      launch plan: one universal list, per-drill cues, or both). Every
+      skill drill card on Today's session and the week list has "Send a
+      clip": the player films the drill, it uploads from the phone
+      straight into the private elite-film bucket under their own folder
+      (clips/<player_id>/<homework_id>/<ts>.<ext>), lands in their chat
+      with the coach as an ordinary player message with the video in the
+      bubble and the drill name on it, and the coach replies in the same
+      thread (unread count on the dashboard, email ping, same as any
+      message). THIS ALSO CLOSES the Sept 26 audit gap: the elite-film
+      bucket was readable and writable by ANY signed-in user; migration
+      036 scopes it to the family's own folder (elite_owns_clip_path,
+      database-side) with the coach reading everything, bucket private,
+      one-hour signed URLs at read time (getMessages). Migration 036
+      APPLIED TO PROD: the function via execute_sql; the two storage
+      policies via ALTER POLICY (every statement containing DROP hangs
+      through this MCP connection, lock_timeout or not - ALTER POLICY in
+      place works; same lesson as 034/035, now stated plainly); the two
+      elite_messages columns (clip_path, clip_label). CODE:
+      lib/elite/clips.ts (path convention + ownsClipPath, unit-tested),
+      sendClip in player-actions.ts (cookie client, verifies the path is
+      the player's own and the drill is on their plan, event
+      player_clip), SendClip.tsx (150MB cap, Sending / Clip sent states,
+      copy never says AI), MessageThread renders the clip, WeekList and
+      TodaySession take playerId. 76 tests, verify green. Open, from
+      the intake: who answers clips and the response-time promise (today
+      Coach Yinka, like every message).
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

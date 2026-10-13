@@ -164,6 +164,7 @@ export default async function DashboardPage() {
           drills={current.list}
           firstName={firstName}
           extra={current.list.some((h) => h.is_extra)}
+          playerId={player.id}
         />
       ) : (
         <section className="elite-card p-6 text-center">

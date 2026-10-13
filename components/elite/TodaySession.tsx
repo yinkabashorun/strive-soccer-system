@@ -3,6 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import { Check, Flame } from "lucide-react";
 import { DrillVideo } from "./DrillVideo";
+import { SendClip } from "./SendClip";
 import type { Homework } from "@/lib/elite/types";
 import { toggleHomework } from "@/lib/elite/player-actions";
 import { sessionsWord } from "@/lib/elite/training";
@@ -18,12 +19,14 @@ export function TodaySession({
   drills,
   firstName,
   extra = false,
+  playerId,
 }: {
   session: number;
   totalSessions: number;
   drills: Homework[];
   firstName: string;
   extra?: boolean; // 033: an Extra Work session the player added
+  playerId?: string; // enables Send a clip (036) on skill drills
 }) {
   const [state, setState] = useState<Record<string, boolean>>(() =>
     Object.fromEntries(drills.map((d) => [d.id, d.completed]))
@@ -156,6 +159,10 @@ export function TodaySession({
                   <div className="pl-[52px]">
                     <DrillVideo src={d.video_url} />
                   </div>
+                )}
+                {/* Send a clip (036): skill drills, the player's own view */}
+                {playerId && !isPlyo && !isStrength && (
+                  <SendClip playerId={playerId} homeworkId={d.id} title={d.title} compact />
                 )}
               </li>
             );

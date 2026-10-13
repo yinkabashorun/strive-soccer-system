@@ -17,9 +17,11 @@ Each item: what ships, what it needs from Coach Yinka, what gates it.
    builder reads a per-player load and space; Extra Work composes from
    the bank on demand. Design: offer-stack-build.md, item 1.
 2. Progress counts time trained; breaks never cost anything (item 8).
-3. Feedback: the Strive-standard checklist on every drill, "Send a clip"
-   from the drill card into the player's chat (item 5). Needs the
-   elite-film bucket policy fixed first (open since Sept 26).
+3. Feedback (item 5): "Send a clip" from the drill card into the
+   player's chat. Needs the elite-film bucket policy fixed first (open
+   since Sept 26). The Strive-standard checklist half is PARKED (Coach
+   Yinka, Oct 13 2026: "Do the checklist later"); open question kept:
+   one universal list, per-drill cues, or both.
 
 ### Phase B: community and live formats (next week)
 4. Skool: set up, D1 invites with each one's yes, welcome flow, member

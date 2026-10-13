@@ -1194,6 +1194,26 @@ commit.
       unchecked. Open from the intake: none left for this item. No
       player data touched. docs/METHODOLOGY.md has a Progress video
       section.
+- [x] DONE Oct 13 2026, 3:04pm ET (Coach Yinka: "Set the break on Tim
+      until Nov 1", after Tatsiana's text: PT and doctor hold, reset to
+      Nov 1): one elite_training_breaks row for Tim Kovalev, since Oct 13,
+      until Nov 1, created_by coach, note "PT and doctor hold, back Nov 1
+      (Tatsiana, Oct 13)". While it runs: no new weeks, no Monday unlock,
+      no texts, no audit alarm, his card reads "On a break until Sun,
+      Nov 1". He is back MONDAY Nov 2 (the break includes Nov 1 on
+      purpose: a Sunday return with an unfinished week would anchor the
+      clock a week early). STATE at the time: weeks 1 AND 2 built (wk 2
+      from the Sunday Oct 11 build), 0 drills done, status active.
+      FLAG, not done: on return the resume rule lands him on WEEK 2 (the
+      week he was in, it still has work), not week 1. Tatsiana asked for
+      a reset to week 1, and both built weeks predate the PT guidance
+      (8 plyo rows in wk 1). Proposal for when the PT sends what is
+      allowed: rebuild weeks 1 and 2 from the studio around it and anchor
+      week1_monday to Nov 2, on Coach Yinka's word. Billing: Coach Yinka
+      pauses collection in Stripe until Nov 1 (October's $249 becomes
+      the first month, next charge Dec 1); the app does not touch money.
+      Reply text sent to Tatsiana in his voice (pause, no double charge,
+      core/hip work being added, send the PT's rules).
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -25,8 +25,6 @@ commit.
 - [ ] Stamp referral program $25 credit
 - [ ] Add referred / referred_by fields in GHL
 - [ ] Confirm PWC field permit is actually granted, not just requested
-- [ ] Migrate the remaining 13 Manus-hosted drill videos to Strive's own
-      storage (Neymar Feint done Sept 16, re-trimmed from raw footage)
 - [ ] Sign Teo's Ashburn memo
 - [ ] Set up Skool community (DECIDED Sept 15, refined Sept 15): community
       only, $9/mo Hobby plan, pinned link to thestriveapp.com for actual
@@ -74,10 +72,15 @@ commit.
       manages injuries". Oct 7: the Strengthening pillar (see RECORD)
       covers the "add core / prevention work" half of this; the hard
       no-plyo rule is still only the note.
-- [ ] FILM + ADD the Strengthening finishers at /coach/drills (pillar
-      "Strengthening (session finishers)", bodyweight-only blocks listed
-      in the Oct 7 RECORD entry). The pillar is live but EMPTY; Tim's
-      weeks get a finisher the moment the first filmed one exists.
+- [ ] Strengthening finishers: 13 filmed and IN THE BANK Oct 13 (see
+      RECORD). Still unfilmed from the Oct 7 list: dead bug, side plank,
+      shoulder taps, bear hold, glute bridge, half-kneeling hip flexor
+      stretch, hip flexor march, 90/90, reverse lunge knee drive,
+      lateral lunge, side lying leg raises. Plus the other 22 drills on
+      the Manus filming list (Weak Foot no-wall, Scanning, Decision
+      Making, Speed, few-yards, Passing no-wall).
+- [ ] Migrate Manus-hosted drill videos to Strive's own storage: the
+      original 13 plus the 13 strengthening clips added Oct 13 (26).
 
 ### RECORD (chronological)
 
@@ -1214,6 +1217,26 @@ commit.
       the first month, next charge Dec 1); the app does not touch money.
       Reply text sent to Tatsiana in his voice (pause, no double charge,
       core/hip work being added, send the PT's rules).
+- [x] ADDED TO THE BANK Oct 13 2026 (Coach Yinka sent the Manus link
+      sheet, 13 filmed Strengthening finishers, his first filming run):
+      Mountain climbers, Front plank, Bird dog, Wall sit (needs_wall
+      true), Hollow hold, Split squat, Six inches, V-ups, Single leg
+      bridge, Toe-touch crunch, Single leg RDL, Long-lever hamstring
+      bridge, Hip dips. All pillar Strengthening, "Strength:" prefix, 5
+      min, active, Manus-hosted direct MP4 links (manuscdn is
+      unreachable from this environment, so the links were not played
+      here). Cleaned before insert: one row came as pillar "Injury
+      Prevention" (not an allowed pillar, set to Strengthening); em
+      dashes and "x" symbols in reps/cues replaced; Mountain climbers'
+      "how" was filming direction, rewritten as a player instruction;
+      four rows (Six inches, V-ups, Toe-touch crunch, Long-lever
+      hamstring bridge) came with Coach Yinka's rough notes and no reps,
+      written up plainly with 3 x 20 sec / 3 x 10 / 3 x 12 schemes
+      matching the others - FLAG: edit those four at /coach/drills if
+      the reps aren't what he coaches. The Strengthening pillar is no
+      longer empty: the required-finisher rule now places real work,
+      and Tim's rebuilt weeks (on return Nov 2) end every session with
+      one. Bank: 48 active drills.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

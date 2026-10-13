@@ -29,10 +29,50 @@ per drill I filmed, in this exact column order:
 title, pillar, how, reps, minutes, cues, needs_wall, small_space,
 video_url.
 Use the title, pillar, how, reps, minutes and cues from the list below,
-word for word. needs_wall is true or false as written. small_space is
+word for word; for NEW drills use the text you proposed and I approved. needs_wall is true or false as written. small_space is
 true for every drill in the FEW YARDS section and for any other drill I
 tell you works in a few yards. video_url is the direct link. Nothing in
 the sheet may be invented; if I skipped a drill, leave it out.
+
+PART 4: be creative too. You are not limited to my list. Between drills,
+or whenever a pillar feels thin, propose NEW drills or new ways to do a
+listed drill (a progression, a harder version, a two-foot version, a
+timed version, a game-like version). Use the context block below so
+every idea fits the Strive method. Propose one idea at a time in the
+same five-line format, marked "NEW:" at the start. I say "film it" and
+you treat it like any other drill (wait for the video, link it, add it
+to the sheet with every column filled in and the title you proposed), or
+"skip" and you drop it. Aim for at least one NEW idea per pillar. Never
+invent a drill that needs another person, a goal, a rebounder, or more
+than a ball, a few cones and (optionally) a wall.
+
+CONTEXT: what a Strive Elite drill is. Strive Elite is at-home training
+for youth soccer players, mostly 10 to 17, built by Coach Yinka and
+Coach Gary. A player trains alone, in a yard, a driveway, a park, a
+garage, or a room. Every drill is fully solo and needs at most a ball, a
+few cones (shoes work) and sometimes a wall. A session is a plyo
+warm-up plus three skill drills of about 8 to 10 minutes each, plus a
+strengthening finisher when a player is managing an injury. Drills are
+filmed once and shown in the app with reps and cues, so every drill must
+be explainable in two sentences and demonstrable in under a minute.
+The pillars and what each one is for:
+- Ball Mastery: touches, control, both feet, close dribbling, cone work.
+- Weak Foot: the same work, non-dominant foot only.
+- Passing: weight, accuracy, first touch off a return; needs a wall
+  unless it is a self-serve drill (pass, follow, collect).
+- Scanning: shoulder checks before the touch, receiving on the half turn,
+  knowing where space is before the ball arrives.
+- Decision Making: pick late, commit fully; gates, exits, calls, options.
+- Confidence: 1v1 moves at a cone at speed (feints, chops, elasticos).
+- Speed: first step, change of direction, reaction, with and without
+  the ball, short distances.
+- Plyo: room warm-ups, jumps and hops, 4 to 5 minutes, already covered.
+- Strengthening: bodyweight core, hips, glutes, groin; finishers.
+A good Strive drill has one clear focus, a rep scheme a kid can follow
+alone, cues a parent could read out, and gets harder by speed, by weak
+foot, or by adding a scan or a decision, never by adding equipment.
+Players with "a ball and a few yards" need drills that work in a
+one-yard box; mark those small_space true.
 
 Filming rules for every clip: phone horizontal or vertical is fine, keep
 it the same for the whole session. Me in full frame, ball visible the
@@ -97,5 +137,6 @@ Every title starts with "Strength: ". needs_wall false. minutes 5.
 38. Pass and follow through a gate | Ball on the ground, a cone gate 8 yards away. Pass through the gate with the inside, jog after it, collect, turn, pass back through. Both feet. | reps: 4 x 10 each foot | cues: Ankle locked, follow through at the gate, first touch out of your feet
 39. Driven pass to a target | A cone 15 yards out. Driven pass with pace at the cone, collect your own ball, reset. Both feet. | reps: 4 x 8 each foot | cues: Strike through the ball, plant foot beside it, head over the ball
 
-That is the full list, 39 drills. Start with drill 1 the moment I say
-"ready". One drill per message. No extra commentary.
+That is the full list, 39 drills, plus your NEW ideas along the way.
+Start with drill 1 the moment I say "ready". One drill per message. No
+extra commentary.

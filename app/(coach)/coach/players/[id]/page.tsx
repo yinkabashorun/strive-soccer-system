@@ -23,9 +23,12 @@ import {
   getPlayer,
   getPlayerSummary,
   getProgress,
+  getProgressVideos,
   getTrainingBreaks,
   getWeeklyPlans,
 } from "@/lib/elite/data";
+import { fallbackBenchmark } from "@/lib/elite/progress-video";
+import { ProgressVideosPanel } from "@/components/elite/ProgressVideosPanel";
 import { fmtMonday, liveWeekFor, nextMondayNY, nyToday } from "@/lib/elite/time";
 import { currentBreak, fmtBreakDate } from "@/lib/elite/breaks";
 import { BreakControl } from "@/components/elite/BreakControl";
@@ -61,7 +64,7 @@ export default async function PlayerProfile({
   const player = await getPlayer(params.id);
   if (!player) notFound();
 
-  const [homework, progress, notes, messages, reports, summary, checkins, plans, films, games, calls, breaks] =
+  const [homework, progress, notes, messages, reports, summary, checkins, plans, films, games, calls, breaks, progressVideos, bankForStudio] =
     await Promise.all([
       getHomework(player.id),
       getProgress(player.id),
@@ -75,6 +78,8 @@ export default async function PlayerProfile({
       getGames(player.id),
       getCoachingCalls(player.id),
       getTrainingBreaks(player.id),
+      getProgressVideos(player.id),
+      getDrillBank(),
     ]);
   const today = nyToday();
   const onBreak = currentBreak(breaks, today);
@@ -245,10 +250,21 @@ export default async function PlayerProfile({
           <SessionNotesStudio
             playerId={player.id}
             videos={Object.fromEntries(
-              (await getDrillBank()).drills
+              bankForStudio.drills
                 .filter((d) => d.video_url)
                 .map((d) => [d.title.trim().toLowerCase(), d.video_url as string])
             )}
+          />
+
+          {/* Bi-weekly progress videos (037): the same drill every second
+              week, the parent texted, posted to the community on the
+              family's yes */}
+          <ProgressVideosPanel
+            playerId={player.id}
+            videos={progressVideos}
+            benchmarkDrillId={player.benchmark_drill_id ?? null}
+            fallbackTitle={fallbackBenchmark(homework)?.title ?? null}
+            bank={bankForStudio.drills}
           />
 
           {/* Progress */}

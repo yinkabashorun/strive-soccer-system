@@ -78,6 +78,9 @@ export type Player = {
   // open: exactly today's four-session week with no space filtering.
   training_load?: TrainingLoad | null;
   space?: TrainingSpace | null;
+  // Bi-weekly progress video (037): the one drill filmed every second
+  // week. null = the app uses the first skill drill they ever completed.
+  benchmark_drill_id?: string | null;
   onboarded_at?: string | null; // ISO; null = intake not completed yet
   onboarding_reminder_sent_at?: string | null; // 025: last onboarding-nudge SMS
   week1_monday?: string | null; // NY Monday the program clock started (014)
@@ -150,6 +153,22 @@ export type Homework = {
   completed: boolean;
   completed_at: string | null;
   sort: number;
+};
+
+// One progress video (elite_progress_videos, 037): the same drill filmed
+// every second week. clip_url is a short-lived signed URL at read time.
+export type ProgressVideo = {
+  id: string;
+  player_id: string;
+  week: number;
+  drill_id: string | null;
+  drill_title: string;
+  clip_path: string;
+  share_ok: boolean;
+  parent_sent_at: string | null;
+  posted_at: string | null;
+  created_at: string;
+  clip_url?: string | null;
 };
 
 // One break from training (elite_training_breaks, 034). since/until are

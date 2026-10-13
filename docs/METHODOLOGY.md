@@ -45,6 +45,13 @@ Every skill drill card has **Send a clip**: the player films themselves doing
 the drill, it lands in their chat with the coach (private storage, their own
 folder only), and the coach answers by text in the same thread.
 
+## Progress video
+
+Every second week the player films **the same drill** (the coach's pick, or
+the first skill drill they ever completed). The parent gets the link by text
+with the clip from two weeks ago beside it. The family says per clip whether
+it may be shared in the Strive community; nothing is posted without that.
+
 ## Progress and breaks
 
 Progress, as the family sees it, is **time trained**: minutes, sessions

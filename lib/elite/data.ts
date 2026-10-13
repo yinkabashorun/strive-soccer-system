@@ -1,5 +1,6 @@
 import { nyToday } from "./time";
 import { CLIP_BUCKET } from "./clips";
+import { fallbackBenchmark, type Benchmark } from "./progress-video";
 import type { TemplateContext, TemplateUsage } from "./bank-conform";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient, createServiceClient } from "./supabase/server";
@@ -30,6 +31,7 @@ import type {
   ParentReport,
   Player,
   PlayerSummary,
+  ProgressVideo,
   SessionTemplate,
   TrainingSpace,
   Progress,
@@ -299,6 +301,51 @@ export async function loadTemplateContext(
     usage[r.template_id] = Math.max(usage[r.template_id] ?? 0, r.week);
   }
   return { templates, usage };
+}
+
+// Bi-weekly progress videos (037): newest first, each with a one-hour
+// signed URL for whoever is reading (storage RLS decides).
+export async function getProgressVideos(playerId: string, client?: SupabaseClient): Promise<ProgressVideo[]> {
+  const supabase = client ?? createClient();
+  if (!supabase || isDemo(playerId)) return [];
+  const { data, error } = await supabase
+    .from("elite_progress_videos")
+    .select("*")
+    .eq("player_id", playerId)
+    .order("week", { ascending: false });
+  if (error || !data) return []; // pre-037
+  const rows = data as ProgressVideo[];
+  if (rows.length) {
+    const { data: signed } = await supabase.storage
+      .from(CLIP_BUCKET)
+      .createSignedUrls(rows.map((r) => r.clip_path), 3600);
+    const urlFor = new Map((signed ?? []).map((x) => [x.path, x.signedUrl]));
+    for (const r of rows) r.clip_url = urlFor.get(r.clip_path) ?? null;
+  }
+  return rows;
+}
+
+// The drill a player films every second week: the coach's pick when set
+// (read with the service client - players cannot read elite_drills),
+// otherwise the first skill drill they ever completed.
+export async function getBenchmark(
+  player: Pick<Player, "id" | "benchmark_drill_id">,
+  homework: Homework[]
+): Promise<Benchmark | null> {
+  if (player.benchmark_drill_id && !isDemo(player.id)) {
+    const admin = createServiceClient();
+    if (admin) {
+      const { data } = await admin
+        .from("elite_drills")
+        .select("id, title, video_url")
+        .eq("id", player.benchmark_drill_id)
+        .maybeSingle();
+      if (data) {
+        return { drill_id: data.id as string, title: String(data.title), video_url: (data.video_url as string) || null };
+      }
+    }
+  }
+  return fallbackBenchmark(homework);
 }
 
 // Breaks from training (034). A player reads their own, the coach reads

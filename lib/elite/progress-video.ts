@@ -5,10 +5,20 @@
 import type { Homework, ProgressVideo } from "./types";
 import { isSkillTitle } from "./bank-conform";
 
-// Even weeks from week 2 on: 2, 4, 6... The first one lands after two
-// full weeks of training, so there is already something to compare.
+// The one drill everybody films unless the coach picks another for a
+// player (Coach Yinka, Oct 14 2026: "the same drill... freestyle
+// dribbling drill"). Looked up in the bank by title; must be filmed.
+export const DEFAULT_BENCHMARK_TITLE = "8-cone freestyle";
+
+// Week 1 (the first clip, filmed on day one so there is a starting
+// point), then every second week: 2, 4, 6... Two weeks after the first
+// clip the family watches the two side by side.
 export function isProgressVideoWeek(week: number): boolean {
-  return week >= 2 && week % 2 === 0;
+  return week === 1 || (week >= 2 && week % 2 === 0);
+}
+
+export function isFirstClipWeek(week: number): boolean {
+  return week === 1;
 }
 
 // Due this week: it is a progress week and no video exists for it yet.

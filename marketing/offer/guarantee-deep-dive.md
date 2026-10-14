@@ -219,3 +219,23 @@ and come back later and you come back at whatever the price is then."
 Say the numbers and I write the final copy for /demo, the ad sheet, the
 confirmation brief, and the VSL card, and I scope the guarantee tracker
 as the next app item.
+
+## DECIDED Oct 14 2026 (Coach Yinka), supersedes the three-layer
+## recommendation above
+
+The 2-Week Proof Guarantee, his shape: "Film your player doing the
+freestyle dribbling drill on day one. Do every session for two weeks.
+Film the same drill again. If you watch the two clips back to back and
+don't see him getting better, you get your money back."
+
+- Same drill for everyone: 8-cone freestyle (the bank's freestyle
+  dribbling drill). The coach can pick a different one per player.
+- The guarantee is NOT in the app. No tracker, no refund language,
+  nothing a player sees. It lives in the sales conversation and, in
+  phase C, on the page. The app only does the clips, cleanly: a first
+  clip on day one ("Your first clip"), then the same drill every second
+  week ("Week N clip"), the parent texted each time with the previous
+  clip for comparison.
+- Still his to stamp before the copy is written: the work condition
+  (8 of 8 or 7 of 8 sessions in the first two weeks), the claim window,
+  and that the payout is the first month's $249.

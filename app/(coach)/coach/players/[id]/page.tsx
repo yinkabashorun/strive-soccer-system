@@ -22,12 +22,12 @@ import {
   getParentReports,
   getPlayer,
   getPlayerSummary,
+  getBenchmark,
   getProgress,
   getProgressVideos,
   getTrainingBreaks,
   getWeeklyPlans,
 } from "@/lib/elite/data";
-import { fallbackBenchmark } from "@/lib/elite/progress-video";
 import { ProgressVideosPanel } from "@/components/elite/ProgressVideosPanel";
 import { fmtMonday, liveWeekFor, nextMondayNY, nyToday } from "@/lib/elite/time";
 import { currentBreak, fmtBreakDate } from "@/lib/elite/breaks";
@@ -83,6 +83,10 @@ export default async function PlayerProfile({
     ]);
   const today = nyToday();
   const onBreak = currentBreak(breaks, today);
+  // The drill this player films on day one and every second week (037):
+  // the coach's pick, else the bank default, else the first skill drill
+  // they completed.
+  const benchmark = await getBenchmark(player, homework);
 
   // Weeks derive from the calendar: live = where the program clock is
   // today, contentWeek = what the player is actually training.
@@ -263,7 +267,7 @@ export default async function PlayerProfile({
             playerId={player.id}
             videos={progressVideos}
             benchmarkDrillId={player.benchmark_drill_id ?? null}
-            fallbackTitle={fallbackBenchmark(homework)?.title ?? null}
+            fallbackTitle={player.benchmark_drill_id ? null : benchmark?.title ?? null}
             bank={bankForStudio.drills}
           />
 

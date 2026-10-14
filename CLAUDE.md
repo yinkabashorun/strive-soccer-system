@@ -1237,6 +1237,34 @@ commit.
       longer empty: the required-finisher rule now places real work,
       and Tim's rebuilt weeks (on return Nov 2) end every session with
       one. Bank: 48 active drills.
+- [x] DECIDED Oct 14 2026 (Coach Yinka, after the guarantee deep dive at
+      marketing/offer/guarantee-deep-dive.md - every Hormozi variation
+      scored, my three-layer stack and then a month-to-month version
+      both rejected: "Those don't work or make sense with our offer"):
+      THE 2-WEEK PROOF GUARANTEE, his shape: film the freestyle dribbling
+      drill on day one, do every session for two weeks, film it again;
+      if the parent watches the two clips back to back and doesn't see
+      improvement, money back. RULES he set: the same drill for everyone
+      (8-cone freestyle); the refund is NOT part of the app and players
+      never see it, the two-week clip is just a clean sign of improvement,
+      "implemented cleanly and not tacky at all". STILL TO STAMP before
+      any copy: the work condition (8 of 8 or 7 of 8), the claim window,
+      and that the payout is the first month's $249. Copy goes live with
+      phase C, not before; the standing same-day refund rule is unchanged
+      until then.
+- [x] SHIPPED Oct 14 2026 (the app side of the above): the progress
+      video now asks for a FIRST CLIP in week 1, before the first
+      session ("Your first clip" / "Film my first clip"), then the same
+      drill every second week ("Week N clip"); isProgressVideoWeek is
+      week 1 or even weeks, unit-tested. Default benchmark for everyone
+      is 8-cone freestyle (DEFAULT_BENCHMARK_TITLE, looked up filmed and
+      active in the bank), coach override per player unchanged, fallback
+      to the first completed skill drill only if that drill is ever
+      unfilmed. Parent text for the first clip says the same drill gets
+      filmed again in two weeks to watch side by side; later texts link
+      the previous clip as "Last time". No refund language anywhere in
+      the app, by his instruction. Coach panel reads "Default: 8-cone
+      freestyle". Tim's week 1 on Nov 2 opens with the first-clip card.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

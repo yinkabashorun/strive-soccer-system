@@ -1284,6 +1284,28 @@ commit.
       (/demo headline + not-for block, ad primary text + Meta audience,
       Carla's first text adds club and level, GHL survey check). Goes
       live with phase C, nothing changed on the page.
+      CORRECTED same hour (Coach Yinka: "I meant name"): the ask was
+      NAMING, Hormozi's MAGIC step, and the aim above is its "announce
+      the avatar" part, so it stands. Names proposed at
+      marketing/offer/strive-elite-names.md: headline "The Next Level
+      Program" ("Strive Elite: The 12-Week Next Level Program for Club
+      Players" on the page; alternatives The Club Player's Week, and
+      The Tryout-Ready 12 Weeks as call-only since no tryout dates are
+      confirmed); Founding stays the reason-why on the price line, not
+      in the name; stack names: The In-Season Plan / The Off-Season
+      Six, Extra Work (unchanged), Driveway Sessions (the few-yards
+      bundle name he asked for), The Week One Promise, Send a Clip
+      (unchanged), The Season Pass (needs term + price), Side by Side
+      (public name for the progress clips, app wording unchanged),
+      Time Trained / Pick Up Where You Left Off, The Finisher (live) /
+      Strive Strong / Strive Speed (as they land), The Locker Room +
+      Day One Post, The Monday Call (day/host open), Film Friday (name
+      only, boundary conflict open), The 2-Week Proof Guarantee.
+      Containers ruled out: Academy, Pathway, Course, App, Challenge.
+      Research note: comparable at-home programs found (TeamSnap's MLS
+      NEXT at-home training, app libraries) are generic video
+      libraries with no coach, so the name carries "a week built by a
+      coach". NOT stamped; goes live with phase C.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

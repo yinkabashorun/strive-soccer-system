@@ -26,13 +26,17 @@ commit.
 - [ ] Add referred / referred_by fields in GHL
 - [ ] Confirm PWC field permit is actually granted, not just requested
 - [ ] Sign Teo's Ashburn memo
-- [ ] Set up Skool community (DECIDED Sept 15, refined Sept 15): community
-      only, $9/mo Hobby plan, pinned link to thestriveapp.com for actual
-      training. Skool is not the course, never move training there. Access
-      is OPEN past current paying members: invite old/lapsed clients back
-      in too, it doubles as a reactivation + marketing/proof engine for
-      prospects. Academy's $500 exclusivity stays in its own perks (private
-      monthly breakdown, cap, priority), not in community access.
+- [ ] Skool community: BUILT Oct 14 2026 (see RECORD), skool.com/
+      strive-elite-7254, Hobby trial ends Oct 28 2026 with Apple Pay on
+      file. Left for Coach Yinka: (1) keep Hobby ($9/mo) or go Pro
+      ($99/mo) for the custom URL skool.com/strive-elite, before Oct 28;
+      (2) the Monday Call day, time and Zoom link, then the calendar
+      event; (3) a cover image or clip in the About page gallery (Skool's
+      checklist shows it incomplete until then); (4) invites: current
+      families first, then old/lapsed clients (Sept 15 rule: access is
+      OPEN, the community doubles as reactivation and proof), and the D1
+      alumni only with each one's yes. Skool is never the training
+      (Sept 15 rule, unchanged).
 - [ ] Get Gonz's quote for the announcement, low-pressure follow-up only
 - [ ] Stamp Hybrid ($400->$500) and 1:1 Monthly ($280->$320) raises, announce
       alongside the ladder once the founding window closes Oct 1
@@ -1328,6 +1332,34 @@ commit.
       a small change). Clip feedback stays in the app only. Skool's
       minimum member age could not be confirmed from here; the parent
       holds the account either way.
+- [x] BUILT Oct 14 2026, THE SKOOL COMMUNITY (Coach Yinka created the
+      group himself, then handed the setup to the Claude Chrome
+      extension working from marketing/community/skool/
+      skool-setup-prompt.md, with this session answering its questions):
+      skool.com/strive-elite-7254 (About: /about). Hobby plan on the 14
+      day trial, ends Oct 28 2026, Apple Pay ending 6154 on file, plan
+      and card untouched. Name Strive Elite (Coach Yinka's call, over
+      the proposed "The Locker Room"). Icon: white mark + STRIVE ELITE
+      wordmark on brand black (skool-icon-1024.png, rendered from
+      icon.html with the cover fonts); cover: the meeting cover at
+      Skool's 1084x576 (skool-cover-1084x576.png); both also published
+      at https://claude.ai/artifact/MHc815FtZuVBGdMWxNrYqh so the
+      extension could fetch them. Settings: Private, Growth Boost OFF
+      (delisted from discovery), Free, membership questions ON (player
+      name / age and club / your name and relation, text boxes, no
+      required toggle exists), instant approval OFF, 133-char group
+      description, About page three paragraphs word for word, rules
+      "Real names. No screenshots." / "Members only. No selling." /
+      "Your own player's clips only" / "Others' teams are off limits"
+      (30-char cap, the three Skool defaults replaced), categories
+      General / Clips / Calls / Wins, "Start here" post pinned in
+      General with no member email, classroom empty, notifications
+      default, onboarding video plugin left On (Skool default). SKIPPED:
+      calendar (no call details yet). Owner display name stays Yinka
+      Bashorun (Skool allows one real-name change only). Custom URL
+      strive-elite needs Pro ($99/mo); slug stays strive-elite-7254 on
+      Hobby. Nobody invited, no email sent. Open decisions in the OPEN
+      item above.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

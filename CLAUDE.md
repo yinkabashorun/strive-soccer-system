@@ -1265,6 +1265,25 @@ commit.
       the previous clip as "Last time". No refund language anywhere in
       the app, by his instruction. Coach panel reads "Default: 8-cone
       freestyle". Tim's week 1 on Nov 2 opens with the first-clip card.
+- [x] PROPOSED Oct 14 2026 (Coach Yinka: "We need to aim the offer
+      better"): the aim, written at marketing/offer/strive-elite-aim.md
+      from who actually bought (every real elite_players row: all boys
+      12 to 15, all already on a competitive club team, two of them MLS
+      NEXT, every goal "the next level up", weak foot / first touch in
+      three of five) against the Sept 14 research segments. Proposed
+      aim sentence: "Strive Elite is for the 12 to 15 year old already
+      on a competitive club team who wants to make the next level, and
+      for the parent who can see the weak foot and the first touch not
+      moving between practices." Says who it is NOT for (under 12 or
+      undecided, won't train alone, 16 to 18 on a college clock = call
+      only). Rejected the "benched/stalled" aim (reads as "your club
+      failed you", none of the buyers is benched) and the college-track
+      aim (that was Complete, retired). NOT stamped: age band, boys vs
+      both, not-for lines on the page or call only, the public
+      dream-outcome line. Copy debt once stamped is listed in the file
+      (/demo headline + not-for block, ad primary text + Meta audience,
+      Carla's first text adds club and level, GHL survey check). Goes
+      live with phase C, nothing changed on the page.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

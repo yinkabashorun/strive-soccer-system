@@ -376,9 +376,11 @@ export async function submitProgressVideo(input: { path: string; week: number; s
     if (nowUrl) {
       const greeting = parentFirst ? `Hey ${parentFirst}, ` : "";
       const message =
-        `${greeting}${first} just filmed the week ${week} progress clip of ${bench.title}, the same drill every two weeks so you can see the work adding up: ${nowUrl}` +
-        (prevUrl ? ` Two weeks ago: ${prevUrl}` : "") +
-        ` Let's keep ${first} dialed in.`;
+        week === 1
+          ? `${greeting}${first} just filmed his first clip of ${bench.title}: ${nowUrl} He films the same drill again in two weeks, so you can watch the two side by side and see the change for yourself. Let's get ${first} going.`
+          : `${greeting}${first} just filmed the week ${week} clip of ${bench.title}, the same drill as before so you can see the work adding up: ${nowUrl}` +
+            (prevUrl ? ` Last time: ${prevUrl}` : "") +
+            ` Let's keep ${first} dialed in.`;
       const sent = await sendPlayerSMS(player.id, { event: "progress_video", message }).catch(() => false);
       if (sent) {
         await admin

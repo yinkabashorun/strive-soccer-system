@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { ownsProgressPath, progressPath } from "@/lib/elite/clips";
 import {
+  DEFAULT_BENCHMARK_TITLE,
   fallbackBenchmark,
+  isFirstClipWeek,
   isProgressVideoWeek,
   previousProgressVideo,
   progressVideoDue,
@@ -12,8 +14,13 @@ import type { Homework } from "@/lib/elite/types";
 const P = "8f0a3b4c-1d2e-4f5a-9b6c-7d8e9f0a1b2c";
 
 describe("progress video cadence", () => {
-  it("is every second week from week 2", () => {
-    expect([1, 2, 3, 4, 5, 6].map(isProgressVideoWeek)).toEqual([false, true, false, true, false, true]);
+  it("is the first clip in week 1, then every second week", () => {
+    expect([1, 2, 3, 4, 5, 6].map(isProgressVideoWeek)).toEqual([true, true, false, true, false, true]);
+    expect(isFirstClipWeek(1)).toBe(true);
+    expect(isFirstClipWeek(2)).toBe(false);
+  });
+  it("the default drill is the freestyle dribbling drill", () => {
+    expect(DEFAULT_BENCHMARK_TITLE).toBe("8-cone freestyle");
   });
   it("is due once per progress week", () => {
     expect(progressVideoDue(4, [{ week: 2 }])).toBe(true);
@@ -22,7 +29,8 @@ describe("progress video cadence", () => {
   });
   it("finds the previous one for the two-weeks-ago line", () => {
     expect(previousProgressVideo(6, [{ week: 2 }, { week: 4 }])?.week).toBe(4);
-    expect(previousProgressVideo(2, [])).toBeNull();
+    expect(previousProgressVideo(2, [{ week: 1 }])?.week).toBe(1);
+    expect(previousProgressVideo(1, [])).toBeNull();
   });
 });
 

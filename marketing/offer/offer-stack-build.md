@@ -325,3 +325,15 @@ parent text. Nothing temporary.
 - Consent is per clip, asked at upload, unchecked by default. Nothing
   is posted without it.
 - Posting to Skool stays manual (no API); the panel tracks it.
+
+### Item 7, REVISED Oct 14 2026 (Coach Yinka): the first clip is filmed
+### on day one
+- Cadence is now week 1 (first clip, before the first session) then
+  every second week (2, 4, 6...). Two weeks after the first clip the
+  family watches the two side by side.
+- Default drill for everyone: 8-cone freestyle, the coach can override
+  per player. Fallback if that drill is ever unfilmed or inactive: the
+  first skill drill the player completed.
+- The 2-Week Proof Guarantee (guarantee-deep-dive.md) is built on these
+  two clips but is NOT in the app: no tracker, no refund wording, nothing
+  a player sees. Player copy is "Your first clip" / "Week N clip" only.

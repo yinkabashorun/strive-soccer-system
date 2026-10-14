@@ -25,8 +25,6 @@ commit.
 - [ ] Stamp referral program $25 credit
 - [ ] Add referred / referred_by fields in GHL
 - [ ] Confirm PWC field permit is actually granted, not just requested
-- [ ] Migrate the remaining 13 Manus-hosted drill videos to Strive's own
-      storage (Neymar Feint done Sept 16, re-trimmed from raw footage)
 - [ ] Sign Teo's Ashburn memo
 - [ ] Set up Skool community (DECIDED Sept 15, refined Sept 15): community
       only, $9/mo Hobby plan, pinned link to thestriveapp.com for actual
@@ -74,10 +72,15 @@ commit.
       manages injuries". Oct 7: the Strengthening pillar (see RECORD)
       covers the "add core / prevention work" half of this; the hard
       no-plyo rule is still only the note.
-- [ ] FILM + ADD the Strengthening finishers at /coach/drills (pillar
-      "Strengthening (session finishers)", bodyweight-only blocks listed
-      in the Oct 7 RECORD entry). The pillar is live but EMPTY; Tim's
-      weeks get a finisher the moment the first filmed one exists.
+- [ ] Strengthening finishers: 13 filmed and IN THE BANK Oct 13 (see
+      RECORD). Still unfilmed from the Oct 7 list: dead bug, side plank,
+      shoulder taps, bear hold, glute bridge, half-kneeling hip flexor
+      stretch, hip flexor march, 90/90, reverse lunge knee drive,
+      lateral lunge, side lying leg raises. Plus the other 22 drills on
+      the Manus filming list (Weak Foot no-wall, Scanning, Decision
+      Making, Speed, few-yards, Passing no-wall).
+- [ ] Migrate Manus-hosted drill videos to Strive's own storage: the
+      original 13 plus the 13 strengthening clips added Oct 13 (26).
 
 ### RECORD (chronological)
 
@@ -1194,6 +1197,74 @@ commit.
       unchecked. Open from the intake: none left for this item. No
       player data touched. docs/METHODOLOGY.md has a Progress video
       section.
+- [x] DONE Oct 13 2026, 3:04pm ET (Coach Yinka: "Set the break on Tim
+      until Nov 1", after Tatsiana's text: PT and doctor hold, reset to
+      Nov 1): one elite_training_breaks row for Tim Kovalev, since Oct 13,
+      until Nov 1, created_by coach, note "PT and doctor hold, back Nov 1
+      (Tatsiana, Oct 13)". While it runs: no new weeks, no Monday unlock,
+      no texts, no audit alarm, his card reads "On a break until Sun,
+      Nov 1". He is back MONDAY Nov 2 (the break includes Nov 1 on
+      purpose: a Sunday return with an unfinished week would anchor the
+      clock a week early). STATE at the time: weeks 1 AND 2 built (wk 2
+      from the Sunday Oct 11 build), 0 drills done, status active.
+      FLAG, not done: on return the resume rule lands him on WEEK 2 (the
+      week he was in, it still has work), not week 1. Tatsiana asked for
+      a reset to week 1, and both built weeks predate the PT guidance
+      (8 plyo rows in wk 1). Proposal for when the PT sends what is
+      allowed: rebuild weeks 1 and 2 from the studio around it and anchor
+      week1_monday to Nov 2, on Coach Yinka's word. Billing: Coach Yinka
+      pauses collection in Stripe until Nov 1 (October's $249 becomes
+      the first month, next charge Dec 1); the app does not touch money.
+      Reply text sent to Tatsiana in his voice (pause, no double charge,
+      core/hip work being added, send the PT's rules).
+- [x] ADDED TO THE BANK Oct 13 2026 (Coach Yinka sent the Manus link
+      sheet, 13 filmed Strengthening finishers, his first filming run):
+      Mountain climbers, Front plank, Bird dog, Wall sit (needs_wall
+      true), Hollow hold, Split squat, Six inches, V-ups, Single leg
+      bridge, Toe-touch crunch, Single leg RDL, Long-lever hamstring
+      bridge, Hip dips. All pillar Strengthening, "Strength:" prefix, 5
+      min, active, Manus-hosted direct MP4 links (manuscdn is
+      unreachable from this environment, so the links were not played
+      here). Cleaned before insert: one row came as pillar "Injury
+      Prevention" (not an allowed pillar, set to Strengthening); em
+      dashes and "x" symbols in reps/cues replaced; Mountain climbers'
+      "how" was filming direction, rewritten as a player instruction;
+      four rows (Six inches, V-ups, Toe-touch crunch, Long-lever
+      hamstring bridge) came with Coach Yinka's rough notes and no reps,
+      written up plainly with 3 x 20 sec / 3 x 10 / 3 x 12 schemes
+      matching the others - FLAG: edit those four at /coach/drills if
+      the reps aren't what he coaches. The Strengthening pillar is no
+      longer empty: the required-finisher rule now places real work,
+      and Tim's rebuilt weeks (on return Nov 2) end every session with
+      one. Bank: 48 active drills.
+- [x] DECIDED Oct 14 2026 (Coach Yinka, after the guarantee deep dive at
+      marketing/offer/guarantee-deep-dive.md - every Hormozi variation
+      scored, my three-layer stack and then a month-to-month version
+      both rejected: "Those don't work or make sense with our offer"):
+      THE 2-WEEK PROOF GUARANTEE, his shape: film the freestyle dribbling
+      drill on day one, do every session for two weeks, film it again;
+      if the parent watches the two clips back to back and doesn't see
+      improvement, money back. RULES he set: the same drill for everyone
+      (8-cone freestyle); the refund is NOT part of the app and players
+      never see it, the two-week clip is just a clean sign of improvement,
+      "implemented cleanly and not tacky at all". STILL TO STAMP before
+      any copy: the work condition (8 of 8 or 7 of 8), the claim window,
+      and that the payout is the first month's $249. Copy goes live with
+      phase C, not before; the standing same-day refund rule is unchanged
+      until then.
+- [x] SHIPPED Oct 14 2026 (the app side of the above): the progress
+      video now asks for a FIRST CLIP in week 1, before the first
+      session ("Your first clip" / "Film my first clip"), then the same
+      drill every second week ("Week N clip"); isProgressVideoWeek is
+      week 1 or even weeks, unit-tested. Default benchmark for everyone
+      is 8-cone freestyle (DEFAULT_BENCHMARK_TITLE, looked up filmed and
+      active in the bank), coach override per player unchanged, fallback
+      to the first completed skill drill only if that drill is ever
+      unfilmed. Parent text for the first clip says the same drill gets
+      filmed again in two weeks to watch side by side; later texts link
+      the previous clip as "Last time". No refund language anywhere in
+      the app, by his instruction. Coach panel reads "Default: 8-cone
+      freestyle". Tim's week 1 on Nov 2 opens with the first-clip card.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

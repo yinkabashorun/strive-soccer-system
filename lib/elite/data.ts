@@ -1,6 +1,6 @@
 import { nyToday } from "./time";
 import { CLIP_BUCKET } from "./clips";
-import { fallbackBenchmark, type Benchmark } from "./progress-video";
+import { DEFAULT_BENCHMARK_TITLE, fallbackBenchmark, type Benchmark } from "./progress-video";
 import type { TemplateContext, TemplateUsage } from "./bank-conform";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient, createServiceClient } from "./supabase/server";
@@ -325,23 +325,38 @@ export async function getProgressVideos(playerId: string, client?: SupabaseClien
   return rows;
 }
 
-// The drill a player films every second week: the coach's pick when set
-// (read with the service client - players cannot read elite_drills),
-// otherwise the first skill drill they ever completed.
+// The drill a player films on day one and every second week: the
+// coach's pick when set, else the bank's default (8-cone freestyle, the
+// same drill for everyone so clips compare across players too), else
+// the first skill drill they ever completed. Read with the service
+// client: players cannot read elite_drills.
 export async function getBenchmark(
   player: Pick<Player, "id" | "benchmark_drill_id">,
   homework: Homework[]
 ): Promise<Benchmark | null> {
-  if (player.benchmark_drill_id && !isDemo(player.id)) {
+  if (!isDemo(player.id)) {
     const admin = createServiceClient();
     if (admin) {
-      const { data } = await admin
+      if (player.benchmark_drill_id) {
+        const { data } = await admin
+          .from("elite_drills")
+          .select("id, title, video_url")
+          .eq("id", player.benchmark_drill_id)
+          .maybeSingle();
+        if (data) {
+          return { drill_id: data.id as string, title: String(data.title), video_url: (data.video_url as string) || null };
+        }
+      }
+      const { data: def } = await admin
         .from("elite_drills")
         .select("id, title, video_url")
-        .eq("id", player.benchmark_drill_id)
+        .eq("active", true)
+        .ilike("title", DEFAULT_BENCHMARK_TITLE)
+        .neq("video_url", "")
+        .limit(1)
         .maybeSingle();
-      if (data) {
-        return { drill_id: data.id as string, title: String(data.title), video_url: (data.video_url as string) || null };
+      if (def) {
+        return { drill_id: def.id as string, title: String(def.title), video_url: (def.video_url as string) || null };
       }
     }
   }

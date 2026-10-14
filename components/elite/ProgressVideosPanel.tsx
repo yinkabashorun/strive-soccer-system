@@ -39,7 +39,7 @@ export function ProgressVideosPanel({
       </div>
 
       <label className="block text-xs text-white/45">
-        Benchmark drill, filmed every second week
+        Benchmark drill, filmed on day one and every second week
         <select
           value={pick}
           onChange={(e) => {
@@ -53,7 +53,7 @@ export function ProgressVideosPanel({
           className="mt-1 w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-bone outline-none focus:border-accent/50"
         >
           <option value="">
-            {fallbackTitle ? `App's pick: ${fallbackTitle} (first skill drill completed)` : "App's pick: first skill drill they complete"}
+            {fallbackTitle ? `Default: ${fallbackTitle}` : "Default: 8-cone freestyle"}
           </option>
           {skills.map((d) => (
             <option key={d.id} value={d.id}>
@@ -65,7 +65,7 @@ export function ProgressVideosPanel({
 
       {videos.length === 0 ? (
         <p className="mt-4 text-sm text-white/40">
-          No progress videos yet. The app asks for one every second week (weeks 2, 4, 6...).
+          No clips yet. The app asks for the first one on day one, then the same drill every second week.
         </p>
       ) : (
         <div className="mt-4 space-y-4">

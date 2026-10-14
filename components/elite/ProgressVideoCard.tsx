@@ -58,7 +58,7 @@ export function ProgressVideoCard({
   return (
     <section className="rounded-3xl border border-accent/30 bg-accent/[0.05] p-5 sm:p-6">
       <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-accent">
-        <Video className="h-3.5 w-3.5" /> Week {week} progress video
+        <Video className="h-3.5 w-3.5" /> {week === 1 ? "Your first clip" : `Week ${week} clip`}
       </div>
       {state === "sent" ? (
         <>
@@ -67,7 +67,7 @@ export function ProgressVideoCard({
           </p>
           <p className="mt-2 text-sm text-white/65">
             {parentFirst ? `${parentFirst} gets the link by text.` : "Your family gets the link by text."} Same
-            drill again in two weeks.
+            drill again in two weeks, then you watch them side by side.
           </p>
         </>
       ) : (
@@ -76,8 +76,9 @@ export function ProgressVideoCard({
             Film {benchmark.title}
           </p>
           <p className="mt-2 text-sm leading-relaxed text-white/65">
-            The same drill every two weeks, so you and your family can see the work
-            adding up. One clip, phone propped up, full speed.
+            {week === 1
+              ? "Film this once, today, before you train. In two weeks you film it again and watch the two side by side. One clip, phone propped up, full speed."
+              : "The same drill every two weeks, so you and your family can see the work adding up. One clip, phone propped up, full speed."}
           </p>
           {benchmark.video_url && <DrillVideo src={benchmark.video_url} label="Watch the demo" />}
           {previousUrl && (
@@ -121,7 +122,7 @@ export function ProgressVideoCard({
             className="btn-accent mt-4 inline-flex items-center gap-2 px-5 py-3 disabled:opacity-60"
           >
             {state === "uploading" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-            {state === "uploading" ? "Sending…" : "Film it and send"}
+            {state === "uploading" ? "Sending…" : week === 1 ? "Film my first clip" : "Film it and send"}
           </button>
           {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
         </>

@@ -1306,6 +1306,28 @@ commit.
       NEXT at-home training, app libraries) are generic video
       libraries with no coach, so the name carries "a week built by a
       coach". NOT stamped; goes live with phase C.
+- [x] ADVISED Oct 14 2026 (Coach Yinka: "for our add ons what's the
+      best platform? Skool discord group me. Like for the courses
+      too"): Skool for the community, the call calendar and the
+      announcements (one parent login, classroom + calendar +
+      leaderboard + push, both 2026 plans carry every feature with
+      unlimited members, Hobby $9/mo vs Pro $99/mo differ only in the
+      fee on payments taken through Skool, which we take none of;
+      UNCONFIRMED: Hobby may be one admin seat only, matters if Carla
+      or Gary need admin). Discord and GroupMe rejected: no classroom,
+      no calendar, no parent presence, moderation burden with minors,
+      not the brand. COURSES (Strive Strong, Strive Speed) live in the
+      APP, not Skool classroom: a course outside the bank is a parallel
+      path with no filmed guard, no time trained, no Send a clip, no
+      progress; the few-yards template primitive (coach-built ordered
+      sessions) is the base for a "program" (named, ordered sessions
+      from bank drills), Skool only gets the announcement and the link.
+      The Sept 15 rule stands: Skool is never the training. Live calls
+      on Zoom, scheduled in the Skool calendar, join link also in the
+      app (the Complete coaching-call card can carry a group call with
+      a small change). Clip feedback stays in the app only. Skool's
+      minimum member age could not be confirmed from here; the parent
+      holds the account either way.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -34,9 +34,10 @@ HARD RULES
   them.
 
 ASK FIRST (ask these in one message, wait for my answers, then start)
-1. Group name. Default: The Locker Room. Confirm or give another.
-2. The URL slug. Default: strive (so the link is skool.com/strive). If
-   taken, tell me what is available and let me pick.
+1. Group name: Strive Elite. Confirm, or give another.
+2. The URL slug. Default: strive-elite (so the link is
+   skool.com/strive-elite). If taken, try strive, then tell me what is
+   available and let me pick.
 3. Plan: the Hobby plan ($9 a month) unless I say otherwise. Tell me
    before the billing step and wait.
 4. Who else gets admin or moderator: nobody for now unless I name
@@ -60,7 +61,7 @@ SETUP, IN ORDER
 
 4. About page / description. Paste this, exactly:
 
-Strive players train at home with a week built around them, every
+Strive Elite players train at home with a week built around them, every
 Monday, by Coach Yinka and Coach Gary. The training lives in the app at
 thestriveapp.com. This is where the players and their families meet.
 
@@ -91,7 +92,7 @@ Membership is free for current and former Strive families.
 8. Pinned welcome post. Create a post in General titled
    "Start here" with this body, exactly, then pin it:
 
-Welcome to Strive. Everything you train is in the app:
+Welcome to Strive Elite. Everything you train is in the app:
 thestriveapp.com. Sign in there every Monday for the new week.
 
 Here, three things. Post your clips in Clips so we can see the work.
@@ -105,7 +106,7 @@ Questions about your player's plan go to us in the app chat, not here.
    weekday I gave you, if it is not Monday), Eastern time, with the Zoom
    link as the location, and this description, exactly:
 
-Weekly call for Strive players and parents. Bring one thing from this
+Weekly call for Strive Elite players and parents. Bring one thing from this
 week's training. Link above.
 
 10. Classroom. Leave it empty. If the site created a sample course or

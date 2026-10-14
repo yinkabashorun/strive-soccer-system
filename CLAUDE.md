@@ -31,8 +31,8 @@ commit.
       file. Left for Coach Yinka: (1) keep Hobby ($9/mo) or go Pro
       ($99/mo) for the custom URL skool.com/strive-elite, before Oct 28;
       (2) the Monday Call day, time and Zoom link, then the calendar
-      event; (3) a cover image or clip in the About page gallery (Skool's
-      checklist shows it incomplete until then); (4) invites: current
+      event; (3) DONE same day on his "go": the 1920x1080 cover is in
+      the About page gallery, Skool counts the page complete; (4) invites: current
       families first, then old/lapsed clients (Sept 15 rule: access is
       OPEN, the community doubles as reactivation and proof), and the D1
       alumni only with each one's yes. Skool is never the training

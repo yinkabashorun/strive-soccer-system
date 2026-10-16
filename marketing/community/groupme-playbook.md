@@ -36,4 +36,4 @@ In the group: "[name] is in."
 
 ## In the group
 
-Reply to every win. Events get announced here first. Never sell.
+Reply to every win. We set the culture by posting our own wins and advice for the players.

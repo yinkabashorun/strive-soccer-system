@@ -32,9 +32,16 @@ commit.
       from Oct 28 unless cancelled in Skool settings. Nobody was invited.
 - [ ] Community on GROUPME (DECIDED Oct 16 2026, replaces the Instagram
       chat decided an hour earlier): one GroupMe group "Strive Elite",
-      players and parents together, Coach Yinka adds by phone number
-      (admin-only adds, share link off), under-13s in via the parent's
-      number. Add the 18 ready members. PURPOSE, his words: "simply just
+      CREATED Oct 16 (group id 118204159, wordmark icon, description
+      "Strive's most ambitious players, in one place, pushing each
+      other."). A share link exists and was sent to this session; the
+      playbook adds by phone number, so turn Share off in the group
+      settings unless he wants the link for the pickup players. Players
+      and parents together, under-13s in via the parent's number. Add
+      the 18 ready members using marketing/community/
+      strive-elite-groupme-playbook.docx (two tracks: pickup players,
+      parents and old clients; no link in the pitch, hand everyone
+      their first post). PURPOSE, his words: "simply just
       for player wins and motivation and some events in the future".
       Not clips, not questions, not training talk; clips and questions
       stay in the app chat. Wins also on the Instagram feed / stories.

@@ -26,17 +26,21 @@ commit.
 - [ ] Add referred / referred_by fields in GHL
 - [ ] Confirm PWC field permit is actually granted, not just requested
 - [ ] Sign Teo's Ashburn memo
-- [ ] Skool community: BUILT Oct 14 2026 (see RECORD), skool.com/
-      strive-elite-7254, Hobby trial ends Oct 28 2026 with Apple Pay on
-      file. Left for Coach Yinka: (1) keep Hobby ($9/mo) or go Pro
-      ($99/mo) for the custom URL skool.com/strive-elite, before Oct 28;
-      (2) the Monday Call day, time and Zoom link, then the calendar
-      event; (3) DONE same day on his "go": the 1920x1080 cover is in
-      the About page gallery, Skool counts the page complete; (4) invites: current
-      families first, then old/lapsed clients (Sept 15 rule: access is
-      OPEN, the community doubles as reactivation and proof), and the D1
-      alumni only with each one's yes. Skool is never the training
-      (Sept 15 rule, unchanged).
+- [ ] CANCEL THE SKOOL TRIAL before Oct 28 2026 (Coach Yinka dropped
+      Skool Oct 16, see RECORD): skool.com/strive-elite-7254 is on the
+      Hobby trial with Apple Pay ending 6154 on file and will charge $9/mo
+      from Oct 28 unless cancelled in Skool settings. Nobody was invited.
+- [ ] Community on INSTAGRAM (DECIDED Oct 16 2026): create the "Strive
+      Elite" Instagram group chat (players only, 13+), add the 18 ready
+      members, post wins on the main feed / stories (Broadcast channel
+      optional). Parents stay on app + GHL texts. Calls: GHL calendar +
+      Zoom + SMS reminders (day/time still open). Courses (strength,
+      speed, injury prevention, heading): member-only pages on
+      thestriveapp.com built from bank drills, coach hand-picks who
+      sees each (to scope). PARKED on his "forget about the tick for
+      now": the app's progress-clip consent tick still says "Strive
+      community"; reword to Instagram before any player clip is posted
+      publicly.
 - [ ] Get Gonz's quote for the announcement, low-pressure follow-up only
 - [ ] Stamp Hybrid ($400->$500) and 1:1 Monthly ($280->$320) raises, announce
       alongside the ladder once the founding window closes Oct 1
@@ -1360,6 +1364,36 @@ commit.
       strive-elite needs Pro ($99/mo); slug stays strive-elite-7254 on
       Hobby. Nobody invited, no email sent. Open decisions in the OPEN
       item above.
+      OUTCOME Oct 14: on Coach Yinka's "go" the 1920x1080 cover went
+      into the About gallery and Skool counted the page complete. Cover
+      revised the same day on his word: the white logo coin removed
+      ("looks retarded"), then the mark removed entirely ("just have it
+      as strive elite"), then "Personalized training" removed; the
+      cover is now the STRIVE ELITE wordmark, gold rule, "Built by Coach
+      Yinka and Coach Gary", handle and site (cover.html source fixed,
+      1920x1080 and 1084x576 re-rendered, artifact updated). Invite
+      texts written (marketing/community/skool/invite-texts.md), never
+      sent.
+- [x] DECIDED Oct 16 2026 (Coach Yinka: "im not going to use skool, just
+      either discord or group me or instagram for the community... we
+      can get this going and get players on Insta much faster"),
+      SUPERSEDES the Sept 15 Skool decision and the Oct 14 build: the
+      community is an INSTAGRAM group chat "Strive Elite", players only
+      (Instagram is 13+, so Mason at 12 stays on parent texts), clips
+      and questions in the thread, Coach Yinka answers there; wins and
+      marketing on the main feed and stories (Broadcast channel
+      optional); parents stay on the app and GHL texts; calls on GHL
+      (calendar + Zoom + SMS reminders); courses as one-time builds
+      hosted on thestriveapp.com as member-only pages from bank drills
+      with the coach hand-picking who sees each (not PDF, not a second
+      site: a PDF can't play video, gets forwarded, can't be updated).
+      The Skool group stays dormant until the trial is cancelled (OPEN
+      item). Instagram group chat cap is 250; revisit structure near
+      that. The progress-clip consent tick wording is PARKED on his
+      "forget about the tick for now". Stack items 2 and 10 (D1 alumni
+      inside a private room, day-one profile post) now live on
+      Instagram terms: alumni only with each one's yes, profile post is
+      the existing Player Highlight format.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

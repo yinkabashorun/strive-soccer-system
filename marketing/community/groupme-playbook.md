@@ -1,49 +1,33 @@
-# Strive Elite GroupMe: getting the right people in, framed to post
+# Strive Elite GroupMe
 
-Written Oct 16 2026. Two tracks. One rule over both: nobody gets a link.
-They get invited, by name, by you. Three invites a day, max.
+No links. Text by name. Three a day.
 
-## Track 1: pickup players (high school, high level)
+## Pickup players
 
-The frame: a small group of the guys who take it seriously. They are
-chosen, not recruited.
+Text 1:
+"[First], putting together a small group of the guys from pickup who
+actually take this seriously. You're on it. Strive Elite. Wins,
+motivation, events first. Good if I add you?"
 
-All over text. No in-person step.
-1. Text 1, by name, no link:
-   "[First], putting together a small group of the guys from pickup who
-   actually take this seriously. You're on it. Strive Elite. Wins,
-   motivation, and you hear about events first. Good if I add you?"
-2. On his yes, add him. In the group, one line: "[First] is in."
-3. Text 2, within 24 hours, private, hand him his first post:
-   "Post that [goal / move from last pickup] in the group. Let's see it."
-   He posts because you told him what to post, not because he decided to.
-4. No reply to text 1 means nothing more. No follow-up, no link. The
-   guys who answer are the group.
+Yes = add him. In the group: "[First] is in."
 
-Never say: community, join, link, "check it out", "let me know if you're
-interested". Never a group text to several of them at once.
+Text 2, next day:
+"Post that [goal / move from last pickup] in the group."
 
-## Track 2: parents and old clients (younger players)
+No reply = leave it.
 
-The frame: our most ambitious players and their families, and I want
-your player around them.
+## Parents and old clients
 
-1. One text to the parent, personal, something real about the kid:
-   "Hey [Parent], [First] is one of the players I want around this
-   group. Strive Elite GroupMe, our most ambitious players and their
-   families. Wins, motivation, events first. Good if I add you both?"
-2. On yes, add both. In the group, one line: "[First] is in."
-3. Within the week, give the parent the first post:
-   "Send me one thing [First] did well this week and I'll put it up,
-   or post it yourself, either works."
+Text 1:
+"Hey [Parent], [First] is one of the players I want around this group.
+Strive Elite GroupMe, our most ambitious players and their families.
+Wins, motivation, events first. Good if I add you both?"
 
-Never a link, never a mass text, never "join my community".
+Yes = add both. In the group: "[First] is in."
 
-## Keeping it alive (the part only you can do)
+Text 2, that week:
+"Send me one thing [First] did well this week and I'll put it up."
 
-- Every win gets a reply from you within the hour. Short. "That's it."
-- The first two weeks you seed it: one win or one line every two days.
-- Events are announced here first, before Instagram, every time. Make
-  it true and say it.
-- Nothing is ever sold in the group. Not once.
-- When the group goes quiet, pick one player and hand him a post.
+## In the group
+
+Reply to every win. Events get announced here first. Never sell.

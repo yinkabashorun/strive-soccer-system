@@ -34,9 +34,11 @@ commit.
       chat decided an hour earlier): one GroupMe group "Strive Elite",
       players and parents together, Coach Yinka adds by phone number
       (admin-only adds, share link off), under-13s in via the parent's
-      number. Add the 18 ready members. Wins on the Instagram feed /
-      stories. Calls: GHL calendar + Zoom + SMS reminders (day/time
-      still open). Courses (strength, speed, injury prevention,
+      number. Add the 18 ready members. PURPOSE, his words: "simply just
+      for player wins and motivation and some events in the future".
+      Not clips, not questions, not training talk; clips and questions
+      stay in the app chat. Wins also on the Instagram feed / stories.
+      Calls: GHL calendar + Zoom + SMS reminders (day/time still open). Courses (strength, speed, injury prevention,
       heading): member-only pages on thestriveapp.com built from bank
       drills, coach hand-picks who sees each (to scope). PARKED on his
       "forget about the tick for now": the app's progress-clip consent
@@ -1405,6 +1407,12 @@ commit.
       Invite texts rewritten for GroupMe
       (marketing/community/groupme-invite-texts.md); the Instagram
       versions stay in the repo as the record.
+      CORRECTED same hour (Coach Yinka: "this is simply just for player
+      wins and motivation and some events in the future"): I had scoped
+      the GroupMe as the clips-and-questions room. It is not. It is
+      wins, motivation and event announcements only. Clips and
+      questions stay in the app chat with the coach. Invite texts
+      rewritten to say exactly that.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -1420,6 +1420,22 @@ commit.
       wins, motivation and event announcements only. Clips and
       questions stay in the app chat with the coach. Invite texts
       rewritten to say exactly that.
+- [x] FOUND Oct 16 2026 (Coach Yinka: "we have literally so many
+      already filmed that we can use to put a quick course together"):
+      he is right. Bank is 48 active drills, ZERO ticked small_space,
+      yet about 30 work in a few yards: Ronaldinho drill, L turn
+      pullback chop, Push pull fake roll roll across, Figure-8 dribble,
+      all 8 Confidence moves, all 7 plyos, all 13 strength finishers.
+      Proposed tick list sent, awaiting his "go" (bank data, his
+      coaching call). Courses assemblable today with no filming:
+      Driveway Sessions (few-yards editor at /coach/drills already
+      exists), Strive Strong (13 finishers as a progression), The Moves
+      (8 moves + 1v1 freestyle). HIS DIRECTION for the course model:
+      film a bunch of drills, then assign certain ones to certain
+      courses. Build to scope: "program" = name + ordered sessions
+      from bank drills + coach picks which players see it + member
+      page on thestriveapp.com; the few-yards template primitive is
+      the base. Recommended order: Driveway Sessions, then Strong.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

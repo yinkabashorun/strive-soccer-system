@@ -11,7 +11,7 @@ motivation, events first. Good if I add you?"
 
 Yes = add him. In the group: "[First] is in."
 
-Text 2, next day:
+Text 2, right after he says yes:
 "Post that [goal / move from last pickup] in the group."
 
 No reply = leave it.
@@ -25,7 +25,7 @@ Wins, motivation, events first. Good if I add you both?"
 
 Yes = add both. In the group: "[First] is in."
 
-Text 2, that week:
+Text 2, right after they say yes:
 "Send me one thing [First] did well this week and I'll put it up."
 
 ## In the group

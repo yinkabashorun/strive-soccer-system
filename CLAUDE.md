@@ -30,17 +30,18 @@ commit.
       Skool Oct 16, see RECORD): skool.com/strive-elite-7254 is on the
       Hobby trial with Apple Pay ending 6154 on file and will charge $9/mo
       from Oct 28 unless cancelled in Skool settings. Nobody was invited.
-- [ ] Community on INSTAGRAM (DECIDED Oct 16 2026): create the "Strive
-      Elite" Instagram group chat (players only, 13+), add the 18 ready
-      members, post wins on the main feed / stories (Broadcast channel
-      optional). Parents stay on app + GHL texts. Calls: GHL calendar +
-      Zoom + SMS reminders (day/time still open). Courses (strength,
-      speed, injury prevention, heading): member-only pages on
-      thestriveapp.com built from bank drills, coach hand-picks who
-      sees each (to scope). PARKED on his "forget about the tick for
-      now": the app's progress-clip consent tick still says "Strive
-      community"; reword to Instagram before any player clip is posted
-      publicly.
+- [ ] Community on GROUPME (DECIDED Oct 16 2026, replaces the Instagram
+      chat decided an hour earlier): one GroupMe group "Strive Elite",
+      players and parents together, Coach Yinka adds by phone number
+      (admin-only adds, share link off), under-13s in via the parent's
+      number. Add the 18 ready members. Wins on the Instagram feed /
+      stories. Calls: GHL calendar + Zoom + SMS reminders (day/time
+      still open). Courses (strength, speed, injury prevention,
+      heading): member-only pages on thestriveapp.com built from bank
+      drills, coach hand-picks who sees each (to scope). PARKED on his
+      "forget about the tick for now": the app's progress-clip consent
+      tick still says "Strive community"; reword before any player clip
+      is posted on Instagram.
 - [ ] Get Gonz's quote for the announcement, low-pressure follow-up only
 - [ ] Stamp Hybrid ($400->$500) and 1:1 Monthly ($280->$320) raises, announce
       alongside the ladder once the founding window closes Oct 1
@@ -1394,6 +1395,16 @@ commit.
       inside a private room, day-one profile post) now live on
       Instagram terms: alumni only with each one's yes, profile post is
       the existing Player Highlight format.
+      CHANGED same day (Coach Yinka: "fuk school Im making a group me"):
+      the room is a GROUPME group "Strive Elite", not an Instagram chat.
+      Players and parents in one group, added by phone number (no app
+      needed, messages arrive as texts), admin-only adds and share link
+      off so the join link can't be forwarded; under-13s in through the
+      parent's number (GroupMe's own age rule is unconfirmed from here).
+      Wins on Instagram, calls on GHL, courses in the app unchanged.
+      Invite texts rewritten for GroupMe
+      (marketing/community/groupme-invite-texts.md); the Instagram
+      versions stay in the repo as the record.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

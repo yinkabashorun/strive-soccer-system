@@ -1436,6 +1436,16 @@ commit.
       from bank drills + coach picks which players see it + member
       page on thestriveapp.com; the few-yards template primitive is
       the base. Recommended order: Driveway Sessions, then Strong.
+      DONE same day (Coach Yinka: "yes"): small_space = true on 31
+      drills via SQL (4 in-place Ball Mastery, all 8 Confidence moves +
+      1v1 freestyle, all 7 plyos, 12 of 13 strength finishers; Wall sit
+      left off because it needs a wall; cone weaves, 8-cone freestyle
+      and every wall drill left off). Effect: a few-yards player now
+      composes a real week (12 skill drills to draw from) instead of
+      warm-ups only. No live player is on the few-yards setting today
+      (all six are open space), so nothing changed for anyone live.
+      "The Moves" was only my working name for the 8 Confidence moves
+      + 1v1 freestyle as a course; his to rename.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

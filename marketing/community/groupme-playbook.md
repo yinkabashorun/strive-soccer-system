@@ -1,32 +1,38 @@
 # Strive Elite GroupMe
 
-No links. Text by name. Three a day.
+Text by name. Three a day. [name] = the player's first name.
+
+Link: https://groupme.com/join_group/118204159/WpHP7wRN
 
 ## Pickup players
 
 Text 1:
-"[First], putting together a small group of the guys from pickup who
+"[name], putting together a small group of the guys from pickup who
 actually take this seriously. You're on it. Strive Elite. Wins,
-motivation, events first. Good if I add you?"
+motivation, events first. You in?"
 
-Yes = add him. In the group: "[First] is in."
+Yes:
+"Download the GroupMe app real quick and tap this:
+https://groupme.com/join_group/118204159/WpHP7wRN
+Then post that [goal / move from last pickup] in there."
 
-Text 2, right after he says yes:
-"Post that [goal / move from last pickup] in the group."
+In the group: "[name] is in."
 
 No reply = leave it.
 
 ## Parents and old clients
 
 Text 1:
-"Hey [Parent], [First] is one of the players I want around this group.
+"Hey [parent], [name] is one of the players I want around this group.
 Strive Elite GroupMe, our most ambitious players and their families.
-Wins, motivation, events first. Good if I add you both?"
+Wins, motivation, events first. You both in?"
 
-Yes = add both. In the group: "[First] is in."
+Yes:
+"Download the GroupMe app real quick and tap this:
+https://groupme.com/join_group/118204159/WpHP7wRN
+Send me one thing [name] did well this week and I'll put it up."
 
-Text 2, right after they say yes:
-"Send me one thing [First] did well this week and I'll put it up."
+In the group: "[name] is in."
 
 ## In the group
 

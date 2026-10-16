@@ -34,9 +34,9 @@ commit.
       chat decided an hour earlier): one GroupMe group "Strive Elite",
       CREATED Oct 16 (group id 118204159, wordmark icon, description
       "Strive's most ambitious players, in one place, pushing each
-      other."). A share link exists and was sent to this session; the
-      playbook adds by phone number, so turn Share off in the group
-      settings unless he wants the link for the pickup players. Players
+      other."). Invites go by text with the share link
+      (groupme.com/join_group/118204159/WpHP7wRN) and a "download the
+      GroupMe app real quick" line, Coach Yinka's call Oct 16. Players
       and parents together, under-13s in via the parent's number. Add
       the 18 ready members using marketing/community/
       strive-elite-groupme-playbook.docx (two tracks: pickup players,

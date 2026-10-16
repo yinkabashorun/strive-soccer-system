@@ -8,17 +8,17 @@ They get invited, by name, by you. Three invites a day, max.
 The frame: a small group of the guys who take it seriously. They are
 chosen, not recruited.
 
-1. At pickup, in person, one line, by name:
-   "I'm putting together a small group of the guys who actually take
-   this seriously. You're on it. I'll text you tonight."
-2. That night, one text, no link:
-   "[First], the group I mentioned. Strive Elite. Wins, motivation, and
-   you hear about events first. Adding you now, you'll get a GroupMe
-   text."
-3. Add him. In the group, one line: "[First] is in."
-4. Within 24 hours, hand him his first post. Text him privately:
-   "Post that [goal / move / win from pickup] in the group."
+All over text. No in-person step.
+1. Text 1, by name, no link:
+   "[First], putting together a small group of the guys from pickup who
+   actually take this seriously. You're on it. Strive Elite. Wins,
+   motivation, and you hear about events first. Good if I add you?"
+2. On his yes, add him. In the group, one line: "[First] is in."
+3. Text 2, within 24 hours, private, hand him his first post:
+   "Post that [goal / move from last pickup] in the group. Let's see it."
    He posts because you told him what to post, not because he decided to.
+4. No reply to text 1 means nothing more. No follow-up, no link. The
+   guys who answer are the group.
 
 Never say: community, join, link, "check it out", "let me know if you're
 interested". Never a group text to several of them at once.

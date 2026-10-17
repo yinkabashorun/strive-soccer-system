@@ -1446,6 +1446,17 @@ commit.
       (all six are open space), so nothing changed for anyone live.
       "The Moves" was only my working name for the 8 Confidence moves
       + 1v1 freestyle as a course; his to rename.
+- [x] ADDED TO THE BANK Oct 17 2026 (second filming run, sent one drill
+      at a time with direct Manus MP4 links, 14 clips saved on Manus'
+      side so far): "Freestyle dribbling with head up" (pillar Scanning,
+      sort 610, open space) and "Juggling and scanning" (Scanning, sort
+      620, few yards). Scanning was a pillar with ZERO filmed drills
+      until now, so the builder no longer falls back to Ball Mastery for
+      it. how / reps / cues written plainly by me from the titles (4 x
+      45 sec on, 30 off, 8 min) - FLAG: edit at /coach/drills if the
+      reps aren't what he coaches. Links not played from here (manuscdn
+      unreachable). Bank: 50 active. The other 12 clips arrive as he
+      sends them.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

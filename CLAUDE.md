@@ -1457,6 +1457,15 @@ commit.
       reps aren't what he coaches. Links not played from here (manuscdn
       unreachable). Bank: 50 active. The other 12 clips arrive as he
       sends them.
+- [x] CHECKED Oct 19 2026 (Coach Yinka's screenshot: Bryan, a returning
+      player, texted "It says invalid invite code"): NOT a bug. Bryan's
+      code STRIVE-7FDB7D was redeemed at 2:20pm ET, he finished
+      onboarding at 2:28pm, status active, has a wall, open space,
+      Off-Season load, week 1 built and anchored to Monday Oct 19 with
+      30 rows (6 sessions). The error is the sign-up page rejecting a
+      one-use code entered a second time; he needs /login with his
+      email and the password he set. Reply text given to Coach Yinka.
+      No data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

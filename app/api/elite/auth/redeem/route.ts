@@ -68,9 +68,17 @@ export async function POST(req: Request) {
     .eq("code", code)
     .maybeSingle();
 
-  if (!invite || invite.used_by) {
+  if (!invite) {
+    return NextResponse.json({ error: "That invite code isn't valid. Check it against the text your coach sent." }, { status: 400 });
+  }
+  if (invite.used_by) {
+    // A used code means the account already exists: say so, and the form
+    // shows a sign-in link (reason "used"). See lib/elite/invite-link.ts.
     return NextResponse.json(
-      { error: "That invite code is invalid or has already been used." },
+      {
+        error: "That invite code already created an account. Sign in instead.",
+        reason: "used",
+      },
       { status: 400 }
     );
   }

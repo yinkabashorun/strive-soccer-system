@@ -6,11 +6,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Loader2, Lock, Mail } from "lucide-react";
 import { createClient } from "@/lib/elite/supabase/client";
 import { enterDemoPlayer, enterDemoCoach } from "@/lib/elite/auth-actions";
+import { INVITE_USED_MESSAGE, INVITE_USED_NOTICE } from "@/lib/elite/invite-link";
 
 export function LoginForm({ configured }: { configured: boolean }) {
   const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next");
+  // A used invite link lands here with a plain explanation, not an error.
+  const notice = params.get("notice") === INVITE_USED_NOTICE ? INVITE_USED_MESSAGE : null;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -54,6 +57,11 @@ export function LoginForm({ configured }: { configured: boolean }) {
       <p className="mt-1.5 text-sm text-white/50">
         Sign in to your Strive Elite account.
       </p>
+      {notice && (
+        <p className="mt-4 rounded-xl border border-accent/30 bg-accent/[0.06] px-4 py-3 text-sm text-bone">
+          {notice}
+        </p>
+      )}
 
       <form onSubmit={onSubmit} className="mt-7 space-y-4">
         <label className="block">

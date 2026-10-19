@@ -27,10 +27,12 @@ export function SignupForm({
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [codeUsed, setCodeUsed] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setCodeUsed(false);
     if (!configured) {
       setError("Sign-up isn't configured yet. Try a demo account below.");
       return;
@@ -46,6 +48,7 @@ export function SignupForm({
     const data = await res.json();
     if (!res.ok) {
       setError(data.error || "Something went wrong. Please try again.");
+      setCodeUsed(data.reason === "used");
       setLoading(false);
       return;
     }
@@ -130,7 +133,19 @@ export function SignupForm({
           autoComplete="new-password"
         />
 
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && (
+          <p className="text-sm text-red-400">
+            {error}
+            {codeUsed && (
+              <>
+                {" "}
+                <Link href="/login" className="font-semibold text-accent underline-offset-2 hover:underline">
+                  Sign in
+                </Link>
+              </>
+            )}
+          </p>
+        )}
 
         <button
           type="submit"

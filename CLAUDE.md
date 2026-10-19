@@ -1466,6 +1466,23 @@ commit.
       one-use code entered a second time; he needs /login with his
       email and the password he set. Reply text given to Coach Yinka.
       No data touched.
+      THEN (Coach Yinka: "He alr signed up but when I put his week and
+      made him active this happens"): the real cause is the app, not
+      Bryan. Invites go out as a LINK (/signup?code=..., InvitePanel)
+      that prefills the code, and a family taps that link again later
+      (it sits in the text thread). Second tap = sign-up form with a
+      used code = "invalid invite code", with no path to sign-in.
+      FIXED, permanent: lib/elite/invite-link.ts inviteLanding() (pure,
+      unit-tested, tests/invite-link.test.ts, 5 tests): a signed-in
+      player who opens /signup goes to /dashboard, staff to /coach, a
+      used code with no session goes to /login?notice=invite_used where
+      LoginForm shows "That invite link already created your account.
+      Sign in below with your email and the password you set." in a
+      gold box, not an error; only a fresh code shows the form. A demo
+      session is ignored so a prospect can still sign up. The redeem
+      route now returns a distinct message + reason "used" for a used
+      code and SignupForm renders a Sign in link beside it. Verify green
+      (typecheck, lint, 88 tests, build, cron + library checks).
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

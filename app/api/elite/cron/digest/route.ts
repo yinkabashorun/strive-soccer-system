@@ -4,6 +4,7 @@ import { sendCoachDigest } from "@/lib/elite/email";
 import { liveWeekNumber, nyHour } from "@/lib/elite/time";
 import { latestCronRun, PLAN_BUILDER_JOB } from "@/lib/elite/cron-log";
 import { withoutPlayersOnBreak } from "@/lib/elite/health";
+import { countAppErrorsSince } from "@/lib/elite/app-errors-server";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -105,6 +106,12 @@ export async function GET(req: Request) {
   else if (run.finished === false && ageH > 0.5) lines.push("PLAN BUILDER last run never finished (crash/timeout)");
   else if (run.errors?.length || run.issues?.length)
     lines.push(`Plan builder: ${(run.errors?.length ?? 0) + (run.issues?.length ?? 0)} open problem(s), see /coach`);
+
+  // Error pages seen in the last 24h (039) - the recorder cannot report
+  // its own rows any other way than this line and the dashboard card.
+  const appErrors = await countAppErrorsSince(admin, new Date(Date.now() - 864e5).toISOString());
+  if (appErrors > 0)
+    lines.push(`${appErrors} app error${appErrors === 1 ? "" : "s"} in the last 24h, see /coach`);
 
   if (lines.length === 0) {
     return NextResponse.json({ ok: true, sent: false, reason: "all clear" });

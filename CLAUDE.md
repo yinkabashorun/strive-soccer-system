@@ -68,10 +68,14 @@ commit.
       Yinka's own (+15712856635, from testing). The entire SMS system
       works, but has never actually reached a real family - add their
       numbers via each profile's Intake panel.
-- [ ] From the Sept 26 audit, not yet built - Coach Yinka to prioritize:
-      no error tracking (Sentry or similar) or custom error/loading pages,
-      so a future silent failure like the parent-report one above has no
-      way to surface short of a parent complaining. (The elite-film
+- [ ] From the Sept 26 audit: error tracking is now BUILT IN-HOUSE (Oct
+      20 2026, migration 039, see RECORD): every error page anyone sees
+      is recorded with route, side, digest and message, shown on the
+      /coach App errors card and in the 6pm digest. Still not built:
+      Sentry (needs an account and DSN from Coach Yinka, optional now),
+      custom loading pages, and a text to Coach Yinka per error (left
+      out on purpose, noise). NEXT TIME an error page shows: open /coach,
+      the card names the route and the reference. (The elite-film
       bucket policy gap is CLOSED Oct 13 2026 by migration 036, see
       RECORD.) (The DST drift on the weekly-plans
       and digest crons is fixed as of Oct 2 - both decide in NY time now;
@@ -1483,6 +1487,63 @@ commit.
       route now returns a distinct message + reason "used" for a used
       code and SignupForm renders a Sign in link beside it. Verify green
       (typecheck, lint, 88 tests, build, cron + library checks).
+- [x] INVESTIGATED Oct 20 2026 (Coach Yinka: "Immediately after I
+      uploaded his week I got sent to an error page But then I checked
+      and it was live"): Bryan's week 1 was published from the studio
+      Oct 19 at 6:30:28pm ET. Every write landed in 1.5 seconds (session
+      row, 30 homework rows in 6 sessions, 0 unfilmed, 7 progress rows +
+      history, weekly plan notified:true, parent report, player row,
+      new_week notification), the first-week text went to Bayron
+      (+17038629531), the page re-rendered inside the same request with
+      every query 200, and the coach reloaded the page 7 seconds later
+      with the week live. Nothing anywhere recorded what threw between
+      the render finishing and the reload: no error boundary, no Sentry,
+      no Vercel log reachable from here, no Postgres error, no deploy in
+      flight (the day's merges to main were 6:59pm and 7:04pm ET, after
+      the publish). Deployment skew, a timeout and every DB write are
+      ruled out; what is left is a client-side failure while the browser
+      applied the action's response, most likely a dropped connection on
+      the phone mid-response. Not recoverable after the fact, and that
+      is exactly the Sept 26 audit's "no error tracking" gap. Bryan is
+      in: password reset at 2:51pm ET, successful sign-ins at 6:34pm
+      (four minutes after his first-week text), 8:31pm, 8:57pm and
+      9:12pm ET. No player data touched.
+      FOUND ON THE WAY, FIXED (migration 038, applied to prod): the
+      Strive OS leads table never had the interest column that the
+      /leads pages read and the GHL webhook writes, so EVERY GHL
+      contact.created / contact.updated webhook since at least Oct 13
+      (Mirna Chavez, Samrawit Shibeshi, Bayron) failed with "Could not
+      find the 'interest' column", answered 500, and GHL retried each
+      one four or five times (ghl_sync_log). Every text the app sends
+      upserts the GHL contact, so every new_week / progress / report
+      text was triggering this. One nullable column added; the daily
+      sync-contacts cron never wrote interest, which is why the bulk
+      sync kept working while the live webhook did not.
+      BUILT, so this can never go unrecorded again (migration 039,
+      applied to prod statement by statement, create policy without the
+      drop, as 034-036): elite_app_errors (occurred_at, side
+      client|server, route path only, digest, message, stack for client
+      errors, viewer_role, player_id, user_agent; coach-read RLS,
+      service-role write). app/error.tsx is the one error page for the
+      whole app (calm copy in the house voice, Try again, Back to the
+      app, "Reference <digest>" for a server error) and
+      app/global-error.tsx the root-layout fallback; both post to the
+      new public, rate-limited /api/elite/errors through
+      lib/elite/report-error.ts (one report per error instance). The
+      route validates and caps the body (lib/elite/app-errors.ts
+      parseErrorReport: side derived from the digest, never from the
+      body; query strings stripped so a reset token can never be
+      stored), takes role and player from the session cookie only, and
+      never fails the visitor. /coach shows an App errors card next to
+      the Plan builder card (red when the last 24h had one, last 5 with
+      time, side, route, who, reference, message); the 6pm digest adds
+      "N app errors in the last 24h, see /coach". tests/app-errors.test.ts
+      (10 tests: route cleaning, client vs server reports, caps, body
+      validation, 24h/7d summary). Verify green (typecheck, lint, 98
+      tests, build, cron + library checks); the route smoke-tested on a
+      local next start (400 on junk, 200 on a report). NOT built, on
+      purpose: a text per error (noise; the digest and the card are the
+      channel), Sentry (needs Coach Yinka's account), loading pages.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -19,6 +19,18 @@ commit.
 ### OPEN
 
 - [ ] Waiver form in GHL - real liability gap, top priority
+- [ ] SUPABASE AUTH URLS, TOP PRIORITY, BLOCKS EVERY PASSWORD RESET
+      (found Oct 20 2026, Bryan locked out since Oct 19, see RECORD):
+      in Supabase Dashboard > Authentication > URL Configuration set
+      Site URL to https://thestriveapp.com (it is still
+      https://strive-soccer-system.vercel.app) and add
+      https://thestriveapp.com/** to Redirect URLs. Until then every
+      reset email points at the old Vercel domain and dies. Then, same
+      screen area, Authentication > Email Templates > Reset password:
+      make the link {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash
+      }}&type=recovery&next=/reset so the link works from Gmail or any
+      mail app (route shipped Oct 20). After both: tell Bryan to tap
+      Forgot your password once more.
 - [ ] Get Gary's one-pager signed
 - [ ] Announce Strive Elite app publicly - don't wait on Gonz's quote
 - [ ] Stamp Gary's $80-session split (suggested $40/$40)
@@ -1544,6 +1556,42 @@ commit.
       local next start (400 on junk, 200 on a report). NOT built, on
       purpose: a text per error (noise; the digest and the card are the
       channel), Sentry (needs Coach Yinka's account), loading pages.
+- [x] CORRECTION + ROOT CAUSE Oct 20 2026 (Coach Yinka: "He can't see
+      it?"): the entry above is WRONG where it says Bryan signed in at
+      6:34pm, 8:31pm, 8:57pm and 9:12pm. Those 200s were CORS preflight
+      requests, not sign-ins. Every password attempt from Bryan's phone
+      from 2:50pm Oct 19 to 9:12pm ET (18 of them, Supabase auth log:
+      invalid_credentials each time) FAILED. He has not been inside the
+      app since onboarding at 2:28pm; the week is live and he cannot
+      reach it. WHY, from the logs: at 2:51pm he tapped Forgot your
+      password on thestriveapp.com and the app asked Supabase to send
+      him back to https://thestriveapp.com/auth/callback?next=/reset
+      (correct). The email Supabase sent carried
+      redirect_to=https://strive-soccer-system.vercel.app instead:
+      Supabase rewrites a redirect that is not on the project's auth
+      Redirect URLs allow list to the Site URL, and the Site URL is
+      still the old Vercel domain. He opened the link from Gmail (its
+      in-app browser), landed on the old domain's root with a one-time
+      code and nothing to exchange it, the code died, and his old
+      password never worked again from either domain. So EVERY password
+      reset for every family has been broken since the move to
+      thestriveapp.com; Bryan is the first to need one. No player data
+      touched; auth.users is not reachable through the MCP and setting
+      a password for him is Coach Yinka's call, not mine. FIX, Coach
+      Yinka's side (OPEN item at the top): Site URL + Redirect URLs in
+      the Supabase dashboard, then the Reset password email template.
+      SHIPPED, code side, so a reset link cannot die like this again:
+      lib/elite/auth-links.ts (pure, tests/auth-links.test.ts, 9 tests)
+      with two independent guards: (1) authCodeLanding: a code that
+      lands on the app's root (where a Site-URL-rewritten link arrives)
+      is handed to /auth/callback bound for /reset instead of dropped
+      (app/page.tsx); (2) confirmTarget + app/auth/confirm/route.ts:
+      the token_hash flow, verified server-side with verifyOtp, no
+      browser cookie needed, so the link works from Gmail or any mail
+      app once the email template points at it; destinations are
+      same-site only. ForgotForm, ResetForm and the callback's failure
+      message now say to open the link on the same phone and browser
+      (true for the PKCE flow until the template changes).
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

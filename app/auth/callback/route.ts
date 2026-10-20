@@ -33,7 +33,7 @@ export async function GET(request: Request) {
 
   return NextResponse.redirect(
     `${origin}/login?error=${encodeURIComponent(
-      "We couldn't complete sign-in. Please try again."
+      "We couldn't complete sign-in from that link. Request a fresh one from Forgot your password and open it on the same phone and browser."
     )}`
   );
 }

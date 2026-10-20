@@ -45,8 +45,8 @@ export function ForgotForm({ configured }: { configured: boolean }) {
         </h1>
         <p className="mt-2 text-sm text-white/55">
           If an account exists for <span className="text-white/80">{email}</span>,
-          a reset link is on its way. Open it on this device and set your new
-          password.
+          a reset link is on its way. Open it on this same phone, in this same
+          browser, and set your new password.
         </p>
         <Link href="/login" className="btn mt-6 inline-flex px-6 py-3">
           Back to sign in

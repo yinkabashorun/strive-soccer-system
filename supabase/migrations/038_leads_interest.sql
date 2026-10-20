@@ -1,0 +1,16 @@
+-- =====================================================================
+-- leads.interest - the GHL webhook has been failing on every contact
+-- =====================================================================
+-- The Strive OS leads table was created outside these migrations and
+-- never had the interest column that app/(app)/leads reads
+-- (lib/types.ts Lead.interest) and that app/api/ghl/webhook writes on
+-- every contact.created / contact.updated event. Found Oct 20 2026 in
+-- ghl_sync_log: every webhook since at least Oct 13 failed with
+-- "Could not find the 'interest' column of 'leads' in the schema cache",
+-- the route answered 500, and GHL retried each one four or five times.
+-- The daily sync-contacts cron never writes interest, which is why the
+-- bulk sync kept working while the live webhook did not.
+--
+-- One nullable column, no backfill: existing leads simply show no
+-- interest until GHL next sends the contact.
+alter table public.leads add column if not exists interest text;

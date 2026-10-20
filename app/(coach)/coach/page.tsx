@@ -7,11 +7,13 @@ import {
   getLatestCronRun,
   getPlanCoverage,
   getPlayers,
+  getRecentAppErrors,
   getUpcomingBreaks,
 } from "@/lib/elite/data";
 import { currentBreak, fmtBreakDate } from "@/lib/elite/breaks";
 import { PLAN_BUILDER_JOB } from "@/lib/elite/cron-log";
 import { PlanBuilderStatus } from "@/components/elite/PlanBuilderStatus";
+import { AppErrorsCard } from "@/components/elite/AppErrorsCard";
 import { liveWeekNumber, nyDayNumber, nyToday } from "@/lib/elite/time";
 import { Avatar } from "@/components/Avatar";
 import { StatTile } from "@/components/elite/StatTile";
@@ -29,7 +31,7 @@ export default async function CoachDashboard() {
   const viewer = await getViewer();
 
   // One-call rollup: every player + their loop metrics + what needs a reply.
-  const [roster, inviteCodes, inbox, coverage, players, builderRun, breaks] = await Promise.all([
+  const [roster, inviteCodes, inbox, coverage, players, builderRun, breaks, appErrors] = await Promise.all([
     getCoachRoster(),
     listInviteCodes(),
     getCoachInbox(),
@@ -37,6 +39,7 @@ export default async function CoachDashboard() {
     getPlayers(),
     getLatestCronRun(PLAN_BUILDER_JOB),
     getUpcomingBreaks(),
+    getRecentAppErrors(),
   ]);
   // Who is on a break today (034): badged on the card, never counted as
   // behind - nothing is built for them on purpose.
@@ -124,6 +127,9 @@ export default async function CoachDashboard() {
       </section>
 
       {!viewer?.demo && <PlanBuilderStatus run={builderRun} behind={behind} />}
+
+      {/* Every error page anyone saw this week (039), next to the builder. */}
+      {!viewer?.demo && <AppErrorsCard errors={appErrors} />}
 
       <WeeklyDeposits />
 

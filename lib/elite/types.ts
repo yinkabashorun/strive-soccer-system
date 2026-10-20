@@ -420,3 +420,18 @@ export type CronRun = {
   summary: string;
   finished: boolean; // false = started, never completed (crash/timeout)
 };
+
+// One error page somebody saw (039). Written by /api/elite/errors from
+// the error boundaries; the coach dashboard shows the last 7 days.
+export type AppError = {
+  id: string;
+  occurred_at: string;
+  side: "client" | "server";
+  route: string;
+  digest: string | null; // Next's digest for a server error
+  message: string;
+  stack: string | null; // client errors only
+  viewer_role: Role | null;
+  player_id: string | null;
+  user_agent: string | null;
+};

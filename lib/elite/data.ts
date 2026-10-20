@@ -4,6 +4,7 @@ import { DEFAULT_BENCHMARK_TITLE, fallbackBenchmark, type Benchmark } from "./pr
 import type { TemplateContext, TemplateUsage } from "./bank-conform";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient, createServiceClient } from "./supabase/server";
+import { recentAppErrors } from "./app-errors-server";
 import {
   DEMO_ACHIEVEMENTS,
   DEMO_CHECKINS,
@@ -37,7 +38,7 @@ import type {
   Progress,
   ProgressPoint,
   RosterRow,
-  WeeklyPlan, CronRun,
+  WeeklyPlan, CronRun, AppError,
   TrainingBreak,
 } from "./types";
 
@@ -121,6 +122,16 @@ export async function getLatestCronRun(job: string): Promise<CronRun | null> {
     .limit(1)
     .maybeSingle();
   return (data as CronRun | null) ?? null;
+}
+
+// Error pages seen in the last 7 days (039) for the coach dashboard's
+// App errors card. Reads under the coach's own session (RLS: coach read);
+// empty in demo mode or before the migration.
+export async function getRecentAppErrors(limit = 20): Promise<AppError[]> {
+  const supabase = createClient();
+  if (!supabase) return [];
+  const since = new Date(Date.now() - 7 * 864e5).toISOString();
+  return recentAppErrors(supabase, since, limit);
 }
 
 // The bank a plan is built from - the coach's filmed drills in

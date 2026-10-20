@@ -69,8 +69,8 @@ export function ResetForm() {
           That link has expired
         </h1>
         <p className="mt-2 text-sm text-white/55">
-          Reset links are single-use. Request a fresh one and open it right
-          away.
+          Reset links are single-use. Request a fresh one, then open it on
+          the same phone and in the same browser you asked from.
         </p>
         <Link href="/forgot" className="btn-accent mt-6 inline-flex px-6 py-3">
           Send a new link

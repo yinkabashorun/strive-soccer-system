@@ -1592,6 +1592,17 @@ commit.
       same-site only. ForgotForm, ResetForm and the callback's failure
       message now say to open the link on the same phone and browser
       (true for the PKCE flow until the template changes).
+      DONE Oct 20 2026, 11:33pm ET (Coach Yinka, after Bryan's "It
+      still doesn't work" screenshot: "Let's make him a password"): a
+      temporary password was set directly on Bryan's auth.users row
+      (bcrypt via pgcrypto, the same hash shape Supabase checks) and
+      verified against the stored hash. The password itself was given
+      to Coach Yinka in chat only, never written here or anywhere in
+      the repo; Bryan changes it in the app once he is in. This is the
+      ONLY player auth change ever made by hand, on his explicit word.
+      The Supabase URL settings (OPEN item at the top) are still
+      unfixed, so the self-serve reset stays broken for everyone until
+      Coach Yinka changes them.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -1603,6 +1603,31 @@ commit.
       The Supabase URL settings (OPEN item at the top) are still
       unfixed, so the self-serve reset stays broken for everyone until
       Coach Yinka changes them.
+      THEN same night (Coach Yinka: "Simple. Soccer. Make it soccer"):
+      the temporary password was replaced with the one he chose,
+      verified against the hash. The app's own password form requires
+      8 characters, so if Bryan ever changes it himself he needs a
+      longer one; signing in with the short one works.
+- [x] ADDED TO THE BANK Oct 21 2026 (Coach Yinka sent three .mov clips
+      in chat: "First add these drills to Ball mastery"), the first
+      drills hosted on Strive's own domain since Oct 1: "2 touch ball
+      mastery variation 1" (sort 230), "2 touch ball mastery variation
+      2" (240), "L turn, roll, touch" (250), all Ball Mastery, few
+      yards, no wall, 5 min, "3 x 1 min, rest 30 sec" like the other
+      in-place patterns. Phone clips were HEVC 10-bit HLG, rotated
+      portrait; converted here to H.264 720x1280 with HDR to SDR tone
+      mapping (zscale + hable) so colors are right in every browser,
+      trimmed to the action (0.2s off the front, the wind-down off the
+      back of clips 1 and 3; motion runs continuously otherwise),
+      capped at 3.5 Mb/s: 8.0 MB / 4.0 MB / 7.1 MB in public/drills/
+      (two-touch-ball-mastery-v1.mp4, two-touch-ball-mastery-v2.mp4,
+      l-turn-roll-touch.mp4), served at thestriveapp.com/drills/...
+      once Vercel deploys the merge. how / reps / cues written by me
+      from the footage - FLAG: edit at /coach/drills if the reps or
+      wording aren't what he coaches. Bank: 53 active. The recipe
+      (ffmpeg from imageio-ffmpeg, tone map, crf 27, maxrate 3500k,
+      faststart) is the standard for every clip sent through chat from
+      here, including the Keep It Up juggling ladder to come.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

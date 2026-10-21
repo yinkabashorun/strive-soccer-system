@@ -1628,6 +1628,27 @@ commit.
       (ffmpeg from imageio-ffmpeg, tone map, crf 27, maxrate 3500k,
       faststart) is the standard for every clip sent through chat from
       here, including the Keep It Up juggling ladder to come.
+- [x] ADDED TO THE BANK Oct 21 2026, WEAK FOOT (Coach Yinka sent three
+      clips: "These are for weak foot ball mastery", the 13 s one is
+      tap pull push, the 10 s one outside pull inside pull, the third
+      is weak foot juggling in two variations to cut into two drills,
+      "Give short neat names"): the Weak Foot pillar had ONLY wall
+      drills until now (four "Wall pass, touch, ..." rows, sorts
+      300-330), so a player without a wall never got a weak foot
+      drill; these four are the no-wall half from the Oct 7 filming
+      list. Titles, Coach Yinka to rename if he wants: "Weak foot tap,
+      pull, push" (sort 100), "Weak foot outside pull, inside pull"
+      (110), "Weak foot pop and settle" (120, the pop-up-and-control
+      half, 0.0 to 7.6 s of the clip, cut before he bends to pick the
+      ball up), "Weak foot pop and juggle" (130, 11.6 s to the end,
+      from the ball back at his feet through the juggling run). All
+      few yards, no wall, 5 min; reps "3 x 1 min, rest 30 sec" except
+      pop and settle at "3 x 10 reps, rest 30 sec" - FLAG: edit at
+      /coach/drills if not what he coaches. Same encode recipe as the
+      Ball Mastery three; files in public/drills/ (weak-foot-tap-pull-
+      push.mp4 5.3 MB, weak-foot-outside-pull-inside-pull.mp4 4.4 MB,
+      weak-foot-pop-and-settle.mp4, weak-foot-pop-and-juggle.mp4).
+      Bank: 57 active.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -72,7 +72,7 @@ export function AutopilotPanel() {
       const res = await fetch("/api/cron/autopilot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ count: 14, waitForVideos: true }),
+        body: JSON.stringify({ count: 14 }),
       });
       const data = await res.json();
       if (!data.ok) setError(data.error || "Autopilot failed.");

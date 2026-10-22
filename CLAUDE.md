@@ -115,6 +115,16 @@ commit.
       Making, Speed, few-yards, Passing no-wall).
 - [ ] Migrate Manus-hosted drill videos to Strive's own storage: the
       original 13 plus the 13 strengthening clips added Oct 13 (26).
+- [ ] KEEP IT UP, THE JUGGLING LADDER (built Oct 22 2026, see RECORD):
+      preview at https://claude.ai/artifact/EZzXQaiXEkfhSW3SU6fCUj,
+      course at marketing/courses/keep-it-up/course.md. Waiting on
+      Coach Yinka: (1) approve or change the order, names and copy;
+      (2) stamp the pass marks (all proposals); (3) film Level 10,
+      feet + thighs + head in one run, ~10 s, so the name can carry
+      "10-Level"; (4) flip Active at /coach/drills on any of the 15
+      "Juggling:" bank drills he wants the weekly builder to use (all
+      inserted OFF). Still unbuilt: the member-only course page (the
+      "program" primitive from the Oct 14/16 decisions).
 
 ### RECORD (chronological)
 
@@ -1649,6 +1659,44 @@ commit.
       push.mp4 5.3 MB, weak-foot-outside-pull-inside-pull.mp4 4.4 MB,
       weak-foot-pop-and-settle.mp4, weak-foot-pop-and-juggle.mp4).
       Bank: 57 active.
+- [x] BUILT Oct 22 2026, KEEP IT UP, THE JUGGLING LADDER (Coach Yinka
+      sent twelve clips over Oct 22, then: "you will have to determine
+      order based on what they are doing. Some are beginner and
+      advanced then I think header some just have advanced ... keep
+      these and all the drills in the drill bank for content in the
+      future ... be clinical"): every clip read frame by frame (feet-
+      only sheets at 6 and 10 fps, 10 fps sheets at every cut), the
+      three two-variation takes split at the last catch, the single
+      clips paired by skill. NINE levels, not ten: 1 First Touch (drop,
+      touch, catch / drop, high touch, catch), 2 Two Touches (right
+      then left / weak foot both), 3 Keep It Up (both feet, knee height
+      / low and tight, never above the knee), 4 Height (waist / head),
+      5 Thigh (drop, thigh, catch / drop, foot, thigh, catch), 6 Thigh
+      Control (foot, thigh, thigh, catch / thighs only), 7 Thighs High,
+      8 Feet and Thighs, 9 Head (7 to 9 advanced only). Level 10
+      "Everything" (feet, thighs, head in one run) is NOT filmed; the
+      subtitle reads "The Juggling Ladder" until it is. Calls I made
+      and he can overrule, all written in course.md: clip 1's second
+      half is a spare take of clip 2's second half (same drill, clip 2
+      is the demo); clip 9 is right foot, clip 11 left foot, named
+      "weak foot"; clip 10's end pop cut (waist-height drill); clip 4
+      split at the surface change (its 4.3 s first half is the shortest
+      demo). Pass marks proposed (10 in a row for catch drills, 20 /
+      10 / 15 / 30 for the continuous ones). Fifteen segments encoded
+      with the Oct 21 recipe into public/drills/juggling-*.mp4 (4.3 to
+      9.7 s, 35 MB total; SDR path for the three bt709 clips, tone map
+      for the nine HLG clips). BANK: 15 rows inserted, pillar Ball
+      Mastery, titles "Juggling: ...", sorts 300 to 440, few yards, no
+      wall, 5 min, how/reps/cues written by me, ALL INACTIVE on purpose
+      so the Sunday builder does not start drafting juggling into live
+      weeks until he flips the ones he wants at /coach/drills (bank: 57
+      active, 72 total). Course copy in Coach Yinka's voice (player-
+      facing "you", "I", no AI, no em dashes) and the ladder on one
+      preview page, marketing/courses/keep-it-up/preview.html,
+      published private at https://claude.ai/artifact/EZzXQaiXEkfhSW3SU6fCUj
+      with every clip playing in place. The course has no home in the
+      app yet (program primitive unbuilt); the bank rows are the
+      permanent record. No player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

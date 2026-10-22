@@ -58,20 +58,126 @@ step up, with a visible reset between them. Split at the reset.
 - Slight exposure shift vs clips 1 and 2 (brighter, cooler); fine, same
   field, same shirt.
 
-## Proposed ladder so far (easiest to hardest)
+## Clips 4 to 12: IMG_6032 to IMG_6041 (sent as one batch, Oct 22)
 
+Same player, same white shirt, yellow-and-blue ball, bright day, goals
+in the background. These are the HEVC 10-bit HLG rotated-portrait
+phone files (same as the Oct 21 Weak Foot clips, which were IMG_6042
+to 6045 from the same shoot), so they get the tone-map encode. Clips 1
+to 3 (IMG_7292, 7293, the CapCut export) are a later shoot with the
+orange ball; both shoots cut together fine, the framing matches.
+
+### Clip 4: IMG_6032 (9.65 s)
+- 0 to ~4.3 s: continuous foot juggling with the ball sent to HEAD
+  height every touch, both feet, drifting a step. No catch.
+- ~4.3 to 9.65 s: continuous mix of FOOT and THIGH, ball at waist to
+  chest, hands out for balance. No catch.
+- Working names: "Keep it up high, both feet" / "Feet and thighs,
+  keep it up". Split ~4.3 s (motion jumps from 7 to 13).
+- Difficulty: both halves are advanced rungs, the second more than the
+  first (two surfaces, no reset).
+
+### Clip 5: IMG_6033 (9.4 s)
+- ONE drill repeated: drop, ONE foot touch, then TWO thigh touches
+  (knee up twice), catch. Standing. Catches at ~2.4 s, ~4.7 s, ~8.5 s.
+- Working name: "Drop, thigh, thigh, catch".
+- Difficulty: one rung above clip 3 (foot, thigh, catch): a second
+  thigh means the first thigh has to be clean.
+
+### Clip 6: IMG_6034 (7.4 s)
+- ONE drill: continuous THIGH juggling, both thighs, ball waist to
+  chest, no catch, no feet. Short clip, all usable.
+- Working name: "Thighs only, keep it up".
+- Difficulty: the continuous thigh rung, after the thigh-catch rungs.
+
+### Clip 7: IMG_6035 (15.3 s)
+- 0 to ~8.5 s: drop, ONE thigh, catch. Repeat. The gentlest thigh rung.
+- ~9 to 15.3 s: continuous thigh juggling with the ball sent HIGH (head
+  height) on every touch, alternating thighs, hands at the sides.
+- Working names: "Drop, thigh, catch" / "Thighs high, keep it up".
+  Split ~8.7 s (the last catch; motion dips to 8 at 5 to 6 s then he
+  resets and goes continuous).
+- Difficulty: 7a sits BEFORE clip 3 (one thigh with a catch is easier
+  than foot-to-thigh); 7b sits after clip 6.
+
+### Clip 8: IMG_6036 (5.6 s)
+- ONE drill: continuous HEADERS, ball kept up with the forehead,
+  standing, hands up. Short, all usable.
+- Working name: "Head it up".
+- Difficulty: top-end rung (new surface, hardest to control).
+
+### Clip 9: IMG_6037 (8.1 s)
+- ONE drill: ball in hands, drop, ONE foot touch sent HIGH (ball to
+  head height), catch. Repeat (catches ~3.3 s, ~6.3 s). Side-on to the
+  camera; the near (right) leg does the touch.
+- Working name: "Drop, one high touch, catch".
+- Difficulty: between clip 1a (one touch, low) and the continuous
+  rungs: same one touch, but the player has to control height.
+- FLAG: could instead be the RIGHT-FOOT-ONLY version of clip 1a, with
+  clip 11 as the left-foot version (see below). Coach Yinka to say.
+
+### Clip 10: IMG_6038 (11.1 s)
+- Continuous foot juggling at waist to chest height, both feet,
+  drifting, then at ~9.5 s one touch popped to head height and the
+  run continues. No catch.
+- Working name: "Keep it up at waist height, both feet".
+- Difficulty: between clip 1b/2b (low) and clip 4a (head height).
+- FLAG: the single high pop near the end may be the point of the drill
+  ("juggle, pop one high, settle it, keep going"); if so the name
+  changes. Coach Yinka to say.
+
+### Clip 11: IMG_6040 (10.1 s)
+- ONE drill: ball in hands, drop, TWO foot touches, catch. Repeat
+  (catches ~2.0 s, ~3.9 s, ~5.8 s, ~8.5 s). Side-on; the touches look
+  like the FAR (left) leg.
+- Working name: "Drop, two touches, catch" (same as clip 2a) or, if
+  the leg read is right, "Left foot, two touches, catch".
+- FLAG: same pattern as clip 2a. Either a left-foot pairing with clip
+  9, a second take, or a different count I cannot see at this rate.
+  Coach Yinka to say.
+
+### Clip 12: IMG_6041 (17.0 s)
+- Continuous low foot juggling, both feet alternating, ball at shin to
+  knee height, standing, 17 s unbroken. No catch. Camera orbits.
+- Working name: "Keep it up low, both feet".
+- FLAG: same drill as clip 1b and clip 2b. Three takes of one rung
+  means two are spare (or one is "right foot only", one "left foot
+  only", one "both"; could not confirm the foot pattern at this rate).
+  Coach Yinka to say.
+
+## Proposed ladder so far (easiest to hardest), all 12 clips
+
+Catch rungs (the ball is reset by hand every rep):
 1. Drop, touch, catch (clip 1a)
-2. Drop, two touches, catch (clip 2a)
-3. Drop, foot, thigh, catch (clip 3)
-4. Keep it up low, both feet (clip 1b)
-5. Alternate feet, knee height (clip 2b) [if distinct from 4]
+2. Drop, one high touch, catch (clip 9) [or right-foot pairing]
+3. Drop, two touches, catch (clip 2a) [clip 11 is the same or the
+   left-foot pairing]
+4. Drop, thigh, catch (clip 7a)
+5. Drop, foot, thigh, catch (clip 3)
+6. Drop, thigh, thigh, catch (clip 5)
 
-Reasoning: the catch rungs come before any continuous rung, because a
-catch resets the ball for the next rep and lets a beginner feel one
-clean touch at a time. Adding the thigh (clip 3) while the catch is
-still there is easier than taking the catch away (clips 1b and 2b).
-Coach Yinka may well put continuous feet before the thigh; his call at
-the preview.
+Keep-it-up rungs (no hands):
+7. Keep it up low, both feet (clip 1b; clips 2b and 12 are takes of
+   the same or its left/right variants)
+8. Keep it up at waist height, both feet (clip 10)
+9. Thighs only, keep it up (clip 6)
+10. Keep it up high, both feet (clip 4a)
+11. Thighs high, keep it up (clip 7b)
+12. Feet and thighs, keep it up (clip 4b)
+13. Head it up (clip 8)
+
+That is 13 to 16 distinct rungs depending on how the flagged clips
+resolve; the course was named for 10 levels, so either some rungs pair
+up as beginner/advanced inside one level (which is how the takes were
+filmed) or the subtitle takes the real number. Decide at the preview.
+
+Open questions for Coach Yinka (all from the footage, none assumed):
+- Clips 9 and 11: right foot / left foot versions of 1a and 2a, or
+  separate rungs (high touch, two touches)?
+- Clips 1b, 2b, 12: one drill with three takes, or left / right /
+  both?
+- Clip 10: is the high pop near the end the drill, or incidental?
+- Clip 4: one drill (feet to thighs as it goes) or two?
 
 Pass marks: to be proposed once the whole set is in; Coach Yinka sets
 the real numbers.

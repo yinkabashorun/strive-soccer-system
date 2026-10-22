@@ -181,3 +181,19 @@ Open questions for Coach Yinka (all from the footage, none assumed):
 
 Pass marks: to be proposed once the whole set is in; Coach Yinka sets
 the real numbers.
+
+## DECIDED Oct 22 2026 (Coach Yinka: "you will have to determine order
+## based on what they are doing ... be clinical")
+
+The open questions above were answered from the footage, not asked:
+feet-only contact sheets at 6 and 10 fps and 10 fps sheets around every
+cut point (scratchpad feet/ and cuts/). Final ladder, cuts, names and
+copy are in course.md next to this file. Corrections to the first read:
+clip 1 splits at 6.55 s (not 8.0), clip 2 at 3.5 s (the third rep flows
+into continuous juggling with no catch; 2a is 0 to 4.9 s ending on the
+ball rising after touch two), clip 7 at 6.25 s (not 8.7; the last catch
+is at 5.8 s). Clip 1's second half is a spare take of the same drill as
+clip 2's second half and was not encoded. Fifteen segments encoded with
+the Oct 21 recipe (SDR path for the three bt709 clips, tone map for the
+nine HLG clips) into public/drills/juggling-*.mp4, 4.3 to 9.7 s each,
+35 MB total.

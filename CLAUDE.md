@@ -117,8 +117,12 @@ commit.
       original 13 plus the 13 strengthening clips added Oct 13 (26).
 - [ ] KEEP IT UP, THE JUGGLING LADDER (built Oct 22 2026, see RECORD):
       preview at https://claude.ai/artifact/EZzXQaiXEkfhSW3SU6fCUj,
-      course at marketing/courses/keep-it-up/course.md. Waiting on
-      Coach Yinka: (1) approve or change the order, names and copy;
+      course at marketing/courses/keep-it-up/course.md. ORDER IS WRONG
+      (Coach Yinka, Oct 22 after seeing it: "you chopped it ... I'll
+      explain the order to you later"): keep every cut as it is, every
+      segment is its own drill and file, so re-sorting is renaming and
+      re-numbering, no re-encoding. Waiting on
+      Coach Yinka: (1) his order, then names and copy follow it;
       (2) stamp the pass marks (all proposals); (3) film Level 10,
       feet + thighs + head in one run, ~10 s, so the name can carry
       "10-Level"; (4) flip Active at /coach/drills on any of the 15

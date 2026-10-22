@@ -44,12 +44,34 @@ step up, with a visible reset between them. Split at the reset.
 - Split point: ~6.3 s (last catch, then he drops it and keeps going).
   Trim: start 0.2 s, end 14.0 s.
 
+## Clip 3: copy_B0E10048...mov (9.6 s), Coach Yinka: "This is 3"
+
+- ONE drill, repeated four times, no second variation: ball in hands,
+  drop, ONE foot touch (right), then THIGH (knee comes up, ball pops to
+  chest height), catch. Repeat. Standing in one spot.
+  Difficulty: first new surface. The foot sets the ball up for the
+  thigh, so it is foot-to-thigh timing, with the catch still there as
+  the safety net.
+- The file was exported from CapCut: content runs 0.0 to ~7.6 s, then a
+  black CapCut outro card to 9.6 s. Cut the tail. Trim: 0.0 to 7.5 s.
+- Working name: "Drop, foot, thigh, catch".
+- Slight exposure shift vs clips 1 and 2 (brighter, cooler); fine, same
+  field, same shirt.
+
 ## Proposed ladder so far (easiest to hardest)
 
 1. Drop, touch, catch (clip 1a)
 2. Drop, two touches, catch (clip 2a)
-3. Keep it up low, both feet (clip 1b)
-4. Alternate feet, knee height (clip 2b) [if distinct from 3]
+3. Drop, foot, thigh, catch (clip 3)
+4. Keep it up low, both feet (clip 1b)
+5. Alternate feet, knee height (clip 2b) [if distinct from 4]
+
+Reasoning: the catch rungs come before any continuous rung, because a
+catch resets the ball for the next rep and lets a beginner feel one
+clean touch at a time. Adding the thigh (clip 3) while the catch is
+still there is easier than taking the catch away (clips 1b and 2b).
+Coach Yinka may well put continuous feet before the thigh; his call at
+the preview.
 
 Pass marks: to be proposed once the whole set is in; Coach Yinka sets
 the real numbers.

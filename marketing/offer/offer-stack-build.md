@@ -441,7 +441,13 @@ parent text. Nothing temporary.
    the Vercel buildCommand run them.
 
 ### Still his, before code
-- Tiers for the 14 juggling rows (proposal above).
+- DECIDED Oct 23 (Coach Yinka: "Just give the beginner ones to the
+  beginners and advanced to the advanced"): a course drill's tier IS
+  its tag. Every "catch" drill (tagged Beginner) is tier 1, every
+  "keep it up" drill (tagged Advanced) is tier 2. Tier 3 (ECNL / MLS
+  Next) gets no juggling drills in the week, matching his "juggling
+  drills will mostly be for beginners / intermediate". The Courses
+  tab itself still shows everyone everything.
 - League for the 7 existing players, from their club text: Elias "VSA
   N1 premier red", Bryan "VSA u15", Abdul "Virginia phoenix elite fc",
   Mason "St. James MLS Next U13", Tim "PPA MLS NEXT AD", Remi "VDA",

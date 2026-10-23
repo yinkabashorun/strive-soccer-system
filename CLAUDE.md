@@ -124,9 +124,11 @@ commit.
       Item 9: Courses tab as a library for everyone, player tier from
       league + age as a backend-only formula with his override, drill
       tiers in the bank, tier rule at both gates, overload on his
-      word). Waiting on Coach Yinka before code: tiers for the 14
-      juggling rows, a league for the 7 existing players, drop the
-      onboarding self-pick or keep it, the beginner pass number; also
+      word). Tiers DECIDED Oct 23 ("beginner ones to the beginners,
+      advanced to the advanced": catch drills tier 1, keep it up
+      drills tier 2, none for tier 3). Waiting on Coach Yinka before
+      code: a league for the 7 existing players, drop the onboarding
+      self-pick or keep it, the beginner pass number; also
       (1) any cue he coaches differently;
       (2) stamp the pass marks (all proposals); (3) film Level 10,
       feet + thighs + head in one run, ~10 s, so the name can carry

@@ -1800,6 +1800,12 @@ commit.
       juggling-one-touch-keep-it-up.mp4, bank sort 305, inactive like
       the rest. Fourteen drills, every level now a catch and a keep it
       up except Head. Preview republished at the same link.
+      THEN (Coach Yinka: "only keep the pass a certain amount of
+      juggles for the beginners"): pass marks stay on BEGINNER drills
+      only (10 in a row, still proposals); removed from every
+      Advanced tile, the Level 6 Intermediate and Head. How it works
+      rule 2 now "pass the catch version, then work the keep it up
+      version, then move up".
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

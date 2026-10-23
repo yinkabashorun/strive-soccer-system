@@ -13,15 +13,15 @@ Level 5 right as it was; Level 6 advanced is NOT thighs only, it is
 beginner though and put it next to 6 beginner as 6 advanced as the
 final"; head stays.
 
-| Level | Name | Beginner | Advanced | Final |
+| Level | Name | Beginner | Intermediate | Advanced |
 |---|---|---|---|---|
 | 1 | One touch | One touch, catch (clip 1 first half) | | |
-| 2 | Two touches each foot | Two touches each foot, catch (clip 2 first half) | Two touches each foot, keep it up (clip 2 second half) | |
-| 3 | One, two | One, two, catch (clip 11) | One, two, keep it up (clip 12) | |
-| 4 | Laces, inside | Laces, inside, catch (clip 9) | Laces, inside, keep it up (clip 10) | |
-| 5 | Thigh | Drop, thigh, catch (clip 7 first half) | Thighs high, keep it up (clip 7 second half) | |
-| 6 | Thighs, laces | Thighs, laces, catch (clip 5) | Thighs, laces, keep it up (clip 6) | Laces, thigh, catch (clip 3, my name from the footage) |
-| 7 | Head | | Head it up (clip 8) | |
+| 2 | Two touches each foot | Two touches each foot, catch (clip 2 first half) | | Two touches each foot, keep it up (clip 2 second half) |
+| 3 | One, two | One, two, catch (clip 11) | | One, two, keep it up (clip 12) |
+| 4 | Laces, inside | Laces, inside, catch (clip 9) | | Laces, inside, keep it up (clip 10) |
+| 5 | Thigh | Drop, thigh, catch (clip 7 first half) | | Thighs high, keep it up (clip 7 second half) |
+| 6 | Thighs, laces | Thighs, laces, catch (clip 5) | Laces, thigh, catch (clip 3, my name from the footage; Coach Yinka: "6 final is beginner for 6 advanced", so it sits between) | Thighs, laces, keep it up (clip 6) |
+| 7 | Head | | | Head it up (clip 8) |
 
 Seven levels, thirteen drills. Clip 4 (both halves) is out of the
 ladder; its file is deleted from public/drills and its bank row gone

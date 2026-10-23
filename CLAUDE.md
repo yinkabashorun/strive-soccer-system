@@ -1806,6 +1806,11 @@ commit.
       Advanced tile, the Level 6 Intermediate and Head. How it works
       rule 2 now "pass the catch version, then work the keep it up
       version, then move up".
+      THEN (Coach Yinka: "6 intermediate is also beginner just another
+      variation so switch to beginner"): Level 6 has TWO Beginner
+      drills (thighs, laces, catch; laces, thigh, catch) and one
+      Advanced; the second beginner carries a pass mark again. No
+      "Intermediate" tag anywhere.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

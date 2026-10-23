@@ -337,3 +337,115 @@ parent text. Nothing temporary.
 - The 2-Week Proof Guarantee (guarantee-deep-dive.md) is built on these
   two clips but is NOT in the app: no tracker, no refund wording, nothing
   a player sees. Player copy is "Your first clip" / "Week N clip" only.
+
+## Item 9, first course: Keep It Up, the Courses tab, and the player
+## tier formula (Coach Yinka, Oct 23 2026, via quiz)
+
+### Where it stands today
+- Keep It Up is 14 filmed bank drills ("Juggling: ..." under Ball
+  Mastery, sorts 300 to 410, all INACTIVE), a preview page, and the
+  copy rule from his Oct 23 pass. It has no home in the app.
+- Onboarding already captures age, position, club (free text),
+  dominant foot and a self-picked level (Developing / Competitive /
+  Advanced / Elite). The self-pick is unreliable (Remi 13 "Elite",
+  Abdul at Virginia Phoenix Elite "Developing"). Only the AI prompt
+  reads it, as one line.
+- No drill in the bank says who it is for. The builder cannot tell a
+  beginner's week from an Elite player's beyond the wall and space
+  flags.
+
+### His decisions (quiz answers, Oct 23 2026)
+1. League options in the app = the GHL survey's four: REC, Travel,
+   ECNL RL / MLS Next 2, ECNL / MLS Next.
+2. "The league itself is the level." No separate level words.
+3. The player's tier comes from league and age automatically, Coach
+   Yinka overrides. 7 to 10 year olds drop one.
+4. "They never need to see their league band at all, it's just our
+   backend formula."
+5. Courses get THEIR OWN TAB in the app. The tab is a LIBRARY: nothing
+   tracked there. Everyone sees it.
+6. The course drills live in the bank, and the formula decides which
+   players are "at such a low level where they need the juggling
+   drills" in their WEEK. Younger / beginner players get them.
+7. Progressive overload: the band rises on his word. A beginner's week
+   draws from beginner drills; when he moves the player up on the
+   Intake panel, the next week draws from the next tier. He advances
+   players, never the app.
+
+### What it is to the family
+- A Courses tab next to Week, Progress, Film and Messages. Open it and
+  Keep It Up is there: seven levels, every drill video, the cue, the
+  pass mark on the beginners. Watch, go train, nothing to tick. More
+  courses appear as they are filmed.
+- Nothing about leagues or tiers anywhere on their screens. The week
+  just fits them better.
+
+### How it fits the system
+1. Migration 040, elite_players: `league` text check in
+   ('rec','travel','ecnl_rl','ecnl'), nullable (existing players);
+   `tier_override` smallint 1..3 nullable. The self-picked `level`
+   column stays for the record but the onboarding step that asks it is
+   REPLACED by the league pick ("Which league does your player play
+   in?", the four GHL options, same words). The privilege guard (008)
+   extended: a player can set league at onboarding, never tier_override.
+2. lib/elite/tier.ts, pure, unit-tested: playerTier({league, age,
+   tier_override}) = override if set, else rec/travel -> 1, ecnl_rl ->
+   2, ecnl -> 3, minus 1 when age is 7 to 10 (floor 1); null league ->
+   null (no filtering, today's behaviour, so nothing changes for a
+   player until Coach Yinka sets a league). Tier words in coach-only
+   UI: 1 Beginner, 2 Intermediate, 3 Advanced. Never rendered in the
+   player app, never in any text or email.
+3. Migration 040, elite_drills: `tier` smallint 1..3 nullable. Null =
+   for everyone (every drill today). Set at /coach/drills next to the
+   few-yards tick ("Who is it for: everyone / beginner / intermediate /
+   advanced"). The Keep It Up rows get tiers on his word (proposal:
+   Levels 1 to 4 tier 1, Levels 5 to 7 tier 2) and are flipped ACTIVE
+   so the builder can use them.
+4. bank-conform drillFitsPlayer gains the tier rule next to wall and
+   space: a drill with a tier fits only a player of that tier; an
+   untiered drill fits everyone; a player with no tier gets everything
+   (unchanged). Used at BOTH gates (generation and publish), so no
+   hand-edited plan can give an ECNL player beginner juggling or a REC
+   player an untiered-but-advanced pattern he later tiers. The
+   methodology prompt marks tiered drills ([beginner]) and carries the
+   player's tier as a line the AI sees and the family never does.
+   Thin tier pools are audited like thin few-yards pools: "only N
+   beginner drills in the bank" on the dashboard card, never an
+   invented drill.
+5. Progressive overload = the tier rule plus his hand: the Intake panel
+   shows "Tier: Beginner (Travel, age 12, formula)" with an override
+   select; changing it takes effect at the next build (Sunday, or
+   "Build missing weeks"). Week history keeps the tier it was built
+   under (no column needed: the rows are the record).
+6. Courses, library only. Migration 040: elite_courses (id, slug, name,
+   subtitle, intro, active, sort) and elite_course_steps (course_id,
+   level_no, level_name, tag 'beginner'|'advanced', drill_id FK ->
+   elite_drills on delete restrict, cue, pass_mark text nullable, sort).
+   Coach-only write RLS like the bank; read for any signed-in member.
+   The step's video, title and reps come FROM the drill row by id (one
+   source; rename a drill, the course follows). Coach editor at
+   /coach/drills, "Courses" above the few-yards editor: name, levels,
+   pick filmed bank drills, tag, cue, pass mark, reorder, on/off. Keep
+   It Up is seeded by migration from the 14 rows exactly as the
+   preview page reads today.
+7. Player tab: app/(player)/courses (list) and /courses/[slug] (the
+   ladder: level cards, drill tiles with the bank video, tag, title, one
+   cue, pass mark on beginners only; the preview page's layout in the
+   app's components, dark, Barlow). AppNav gets "Courses". No ticks, no
+   time trained, no Send a clip on these tiles (his "library only").
+   Demo mode shows the real courses like it shows the real bank.
+8. Guards: tests for the tier formula (every league x age band,
+   override wins, null league = null), the tier rule in bank-conform at
+   both gates, the course route rendering from bank rows only, and the
+   031 trigger unchanged (course steps never write homework). CI and
+   the Vercel buildCommand run them.
+
+### Still his, before code
+- Tiers for the 14 juggling rows (proposal above).
+- League for the 7 existing players, from their club text: Elias "VSA
+  N1 premier red", Bryan "VSA u15", Abdul "Virginia phoenix elite fc",
+  Mason "St. James MLS Next U13", Tim "PPA MLS NEXT AD", Remi "VDA",
+  Yinka "Nova Fc". Until set, their weeks do not change.
+- Whether the onboarding self-pick (Developing / Competitive / Advanced
+  / Elite) is removed outright (proposed) or kept as a second question.
+- The pass-mark number for beginners (10 in a row is mine).

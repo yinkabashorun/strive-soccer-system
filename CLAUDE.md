@@ -118,10 +118,16 @@ commit.
 - [ ] KEEP IT UP, THE JUGGLING LADDER (built Oct 22 2026, see RECORD):
       preview at https://claude.ai/artifact/EZzXQaiXEkfhSW3SU6fCUj,
       course at marketing/courses/keep-it-up/course.md. SORTED AND
-      NAMED Oct 23 on his corrections (see RECORD): 7 levels, 13
-      drills, his naming pattern, bank titles and files match. Waiting
-      on Coach Yinka: (1) confirm the Level 6 Final's name ("Laces,
-      thigh, catch", mine) and any cue he coaches differently;
+      NAMED Oct 23 on his corrections (see RECORD): 7 levels, 14
+      drills, his naming pattern, bank titles and files match. BUILD
+      DESIGN WRITTEN Oct 23 (marketing/offer/offer-stack-build.md,
+      Item 9: Courses tab as a library for everyone, player tier from
+      league + age as a backend-only formula with his override, drill
+      tiers in the bank, tier rule at both gates, overload on his
+      word). Waiting on Coach Yinka before code: tiers for the 14
+      juggling rows, a league for the 7 existing players, drop the
+      onboarding self-pick or keep it, the beginner pass number; also
+      (1) any cue he coaches differently;
       (2) stamp the pass marks (all proposals); (3) film Level 10,
       feet + thighs + head in one run, ~10 s, so the name can carry
       "10-Level"; (4) flip Active at /coach/drills on any of the 15

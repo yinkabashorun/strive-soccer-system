@@ -1,6 +1,39 @@
 # Keep It Up, The Juggling Ladder
 
-## RE-SORTED Oct 23 2026 on Coach Yinka's pairings (supersedes the
+## NAMED Oct 23 2026 on Coach Yinka's corrections (CURRENT; supersedes
+## both sections below)
+
+His rule, from the one level I named right: the pattern, then "catch"
+for the beginner and "keep it up" for the advanced ("two touches each
+foot, catch" / "two touches each foot, keep it up"). His corrections:
+Level 3 is NOT weak foot, it is "one, two" (one touch right foot, two
+touches weak foot); Level 4 is NOT height, it is "laces, inside";
+Level 5 right as it was; Level 6 advanced is NOT thighs only, it is
+"thighs, laces" (catch / keep it up); old Level 7 removed, then "keep 7
+beginner though and put it next to 6 beginner as 6 advanced as the
+final"; head stays.
+
+| Level | Name | Beginner | Advanced | Final |
+|---|---|---|---|---|
+| 1 | One touch | One touch, catch (clip 1 first half) | | |
+| 2 | Two touches each foot | Two touches each foot, catch (clip 2 first half) | Two touches each foot, keep it up (clip 2 second half) | |
+| 3 | One, two | One, two, catch (clip 11) | One, two, keep it up (clip 12) | |
+| 4 | Laces, inside | Laces, inside, catch (clip 9) | Laces, inside, keep it up (clip 10) | |
+| 5 | Thigh | Drop, thigh, catch (clip 7 first half) | Thighs high, keep it up (clip 7 second half) | |
+| 6 | Thighs, laces | Thighs, laces, catch (clip 5) | Thighs, laces, keep it up (clip 6) | Laces, thigh, catch (clip 3, my name from the footage) |
+| 7 | Head | | Head it up (clip 8) | |
+
+Seven levels, thirteen drills. Clip 4 (both halves) is out of the
+ladder; its file is deleted from public/drills and its bank row gone
+(the Oct 22 originals stay in the uploads folder if ever wanted). Bank
+titles are exactly the drill names above with the "Juggling:" prefix,
+sorts 300 to 410, files renamed to match
+(thestriveapp.com/drills/juggling-<name>.mp4), how / cues rewritten to
+his patterns for Levels 3, 4 and 6, all still inactive. Still his:
+pass marks (proposals), the name of the Level 6 Final, any cue he
+does not coach that way.
+
+## RE-SORTED Oct 23 2026 on Coach Yinka's pairings (superseded above) (supersedes the
 ## ladder below; names still pending, his: "I will help you name them
 ## after you sort them out")
 

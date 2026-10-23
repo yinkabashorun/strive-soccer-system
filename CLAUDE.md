@@ -117,13 +117,11 @@ commit.
       original 13 plus the 13 strengthening clips added Oct 13 (26).
 - [ ] KEEP IT UP, THE JUGGLING LADDER (built Oct 22 2026, see RECORD):
       preview at https://claude.ai/artifact/EZzXQaiXEkfhSW3SU6fCUj,
-      course at marketing/courses/keep-it-up/course.md. RE-SORTED Oct
-      23 on his pairings (see RECORD): 8 levels, take pairings kept,
-      clip 4 whole, head alone. Waiting on
-      Coach Yinka: (1) NAMES for the 8 levels and 14 drills (his: "I
-      will help you name them after you sort them out"), then the
-      bank titles, page and copy follow; the level ORDER is my read
-      of his pairings, the three thigh levels can move;
+      course at marketing/courses/keep-it-up/course.md. SORTED AND
+      NAMED Oct 23 on his corrections (see RECORD): 7 levels, 13
+      drills, his naming pattern, bank titles and files match. Waiting
+      on Coach Yinka: (1) confirm the Level 6 Final's name ("Laces,
+      thigh, catch", mine) and any cue he coaches differently;
       (2) stamp the pass marks (all proposals); (3) film Level 10,
       feet + thighs + head in one run, ~10 s, so the name can carry
       "10-Level"; (4) flip Active at /coach/drills on any of the 15
@@ -1726,6 +1724,30 @@ commit.
       WORKING NAMES, marked so on the page; he names them next. The
       level order (easiest to hardest) is my read of his pairings; he
       did not state it. Preview republished at the same link.
+      NAMED Oct 23 2026 (Coach Yinka: Level 2 was named right, "two
+      touches each foot, catch" / "two touches each foot, keep it up",
+      and "pretty much every other drill follows the same principle";
+      Level 3 "it's not weak foot ... it's one, two", one touch right
+      foot, two touches weak foot, catch then keep it up; Level 4
+      "it's not height, it's laces inside, catch ... and keep it up";
+      Level 5 right; Level 6 advanced "is not thighs only, it's
+      thighs, laces, catch, or thighs, laces, keep it up"; "remove
+      number 7 completely ... keep 8"; then "keep 7 beginner though
+      and put it next to 6 beginner as 6 advanced as the final"):
+      SEVEN levels, THIRTEEN drills, every drill named <pattern>,
+      catch / <pattern>, keep it up. 1 One touch (catch only); 2 Two
+      touches each foot; 3 One, two; 4 Laces, inside; 5 Thigh (drop,
+      thigh, catch / thighs high, keep it up, unchanged); 6 Thighs,
+      laces, with clip 3 as a third step, "Final", named by me "Laces,
+      thigh, catch" from the footage; 7 Head it up. Clip 4 is OUT
+      (file deleted, bank row deleted). My Oct 22 reads of clips 9, 10,
+      11, 12, 5 and 6 (high touch, waist height, left foot, low
+      juggling, foot thigh thigh, thighs only) were WRONG; his patterns
+      replace them in the bank's how / cues. Bank: 13 "Juggling:" rows
+      retitled to the exact drill names, sorts 300 to 410, files
+      renamed to match (juggling-one-touch-catch.mp4 and so on), still
+      inactive. Preview republished at the same link. Still his: the
+      Level 6 Final name, cues, pass marks, flipping rows active.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

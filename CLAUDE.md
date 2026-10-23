@@ -1786,6 +1786,13 @@ commit.
       Level 2 reverted to foot-neutral wording; the bank's how / cues
       stay descriptive because the app's drill card is a different
       surface than the course page (not ruled on by him).
+      THEN (Coach Yinka: "i didnt say remove the cues, bring the cues
+      back"): one cue per drill restored on every tile, in his
+      corrected wording (Level 4 Beginner "the laces pop it up, the
+      inside brings it to your chest"; Level 6 Intermediate "the laces
+      touch is not soft, it gets the ball to chest level, the thigh is
+      the softer touch, it controls it"). Final shape of a drill tile:
+      tag, title, one cue, pass mark. Nothing that restates the title.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -1738,7 +1738,9 @@ commit.
       catch / <pattern>, keep it up. 1 One touch (catch only); 2 Two
       touches each foot; 3 One, two; 4 Laces, inside; 5 Thigh (drop,
       thigh, catch / thighs high, keep it up, unchanged); 6 Thighs,
-      laces, with clip 3 as a third step, "Final", named by me "Laces,
+      laces, with clip 3 as the MIDDLE step (his "6 final is beginner
+      for 6 advanced duhh": beginner, then clip 3, then keep it up;
+      tagged Intermediate on the page, sort 395), named by me "Laces,
       thigh, catch" from the footage; 7 Head it up. Clip 4 is OUT
       (file deleted, bank row deleted). My Oct 22 reads of clips 9, 10,
       11, 12, 5 and 6 (high touch, waist height, left foot, low

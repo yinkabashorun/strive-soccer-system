@@ -1769,6 +1769,23 @@ commit.
       Advanced. Bank how / cues updated to the same words for the nine
       drills in Levels 2, 3, 4 and 6; rows still inactive. Preview
       republished at the same link.
+      CORRECTED minutes later (Coach Yinka: "woah woah woah for the
+      weak foot stuff i only meant for the one two. please remove all
+      the other bs that is just literally repeating the title. i do not
+      want more words i want focused neat words. the video does most
+      explaining. only speak when helpful"): THE COPY RULE FOR THIS
+      COURSE AND EVERY COURSE PAGE: the video explains, words only
+      where they add something the video does not show; never a
+      sentence that restates the title; strong foot / weak foot only
+      where the pattern is about the feet (Level 3, shown as a strip).
+      Page stripped to tag, title, pass mark, plus three lines total
+      (Level 1 contact cue, Level 4 Beginner "the inside brings it to
+      your chest", Level 6 Intermediate "the laces touch gets it to
+      chest level, the thigh controls it"). Level subtitles and the
+      long How it works gone; four short rules remain. Bank rows for
+      Level 2 reverted to foot-neutral wording; the bank's how / cues
+      stay descriptive because the app's drill card is a different
+      surface than the course page (not ruled on by him).
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

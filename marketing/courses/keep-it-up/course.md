@@ -23,6 +23,17 @@ final"; head stays.
 | 6 | Thighs, laces | Thighs, laces, catch (clip 5) | Laces, thigh, catch (clip 3, my name from the footage; Coach Yinka: "6 final is beginner for 6 advanced", so it sits between) | Thighs, laces, keep it up (clip 6) |
 | 7 | Head | | | Head it up (clip 8) |
 
+COPY RULE from Coach Yinka's Oct 23 pass (applies to every drill in
+this course and the next): name the surface and the foot; strong foot
+/ weak foot, never right / left; say where the ball goes (chest level
+for the catch); call a touch soft or firm only when it is; no vague
+lines. The preview page shows each pattern as a step strip (weak foot
+in gold) above the words. His corrections of my first copy: Level 3
+right/left/left -> strong/weak/weak; Level 4 Beginner the inside
+brings it TO CHEST; Level 6 Intermediate the laces touch is FIRM, to
+chest level, the thigh controls it and is the softer touch; Level 7
+"hardest surface" removed. The page is the current copy of record.
+
 Seven levels, thirteen drills. Clip 4 (both halves) is out of the
 ladder; its file is deleted from public/drills and its bank row gone
 (the Oct 22 originals stay in the uploads folder if ever wanted). Bank

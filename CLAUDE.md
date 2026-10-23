@@ -117,12 +117,13 @@ commit.
       original 13 plus the 13 strengthening clips added Oct 13 (26).
 - [ ] KEEP IT UP, THE JUGGLING LADDER (built Oct 22 2026, see RECORD):
       preview at https://claude.ai/artifact/EZzXQaiXEkfhSW3SU6fCUj,
-      course at marketing/courses/keep-it-up/course.md. ORDER IS WRONG
-      (Coach Yinka, Oct 22 after seeing it: "you chopped it ... I'll
-      explain the order to you later"): keep every cut as it is, every
-      segment is its own drill and file, so re-sorting is renaming and
-      re-numbering, no re-encoding. Waiting on
-      Coach Yinka: (1) his order, then names and copy follow it;
+      course at marketing/courses/keep-it-up/course.md. RE-SORTED Oct
+      23 on his pairings (see RECORD): 8 levels, take pairings kept,
+      clip 4 whole, head alone. Waiting on
+      Coach Yinka: (1) NAMES for the 8 levels and 14 drills (his: "I
+      will help you name them after you sort them out"), then the
+      bank titles, page and copy follow; the level ORDER is my read
+      of his pairings, the three thigh levels can move;
       (2) stamp the pass marks (all proposals); (3) film Level 10,
       feet + thighs + head in one run, ~10 s, so the name can carry
       "10-Level"; (4) flip Active at /coach/drills on any of the 15
@@ -1701,6 +1702,30 @@ commit.
       with every clip playing in place. The course has no home in the
       app yet (program primitive unbuilt); the bank rows are the
       permanent record. No player data touched.
+      REJECTED same night (Coach Yinka: "you chopped it ... I'll
+      explain the order to you later"), then RE-SORTED Oct 23 2026 on
+      his pairings, given against the Oct 22 preview's numbering ("1
+      advanced is the beginner for 4 beginner. 2 beginner is the start
+      for 3 beginner it is working 2 touches on each foot juggling. 2
+      advanced is the beginner for 3 advanced. 5 advanced is the
+      beginner for 4 advanced. 5 beginner is the beginner for 7
+      advanced. you can remove 8 and keep 9 alone"): EIGHT levels, the
+      take pairings he filmed hold and my cross-pairings are gone. 1
+      One touch (drop, touch, catch; beginner only, "for players
+      learning normal 1 touch juggling"); 2 Two touches each foot
+      (clip 2 first half -> second half); 3 Weak foot (clip 11 -> clip
+      12); 4 Height (clip 9 -> clip 10); 5 Thigh (clip 7 first half ->
+      second half); 6 Thigh control (clip 5 -> 6, unchanged); 7 Feet
+      and thighs (clip 3 -> clip 4); 8 Head (clip 8, alone). Clip 4:
+      "remove 8" removed its second half; both halves were one drill,
+      so its demo is now the WHOLE 9.7 s take (re-encoded,
+      juggling-feet-and-thighs.mp4) and the 4.3 s head-height file is
+      deleted from public/drills with its bank row ("Juggling: head
+      height"). Bank: 14 "Juggling:" rows re-sorted 300 to 430 in the
+      new order, still inactive. Level names and drill names are
+      WORKING NAMES, marked so on the page; he names them next. The
+      level order (easiest to hardest) is my read of his pairings; he
+      did not state it. Preview republished at the same link.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -1,5 +1,41 @@
 # Keep It Up, The Juggling Ladder
 
+## RE-SORTED Oct 23 2026 on Coach Yinka's pairings (supersedes the
+## ladder below; names still pending, his: "I will help you name them
+## after you sort them out")
+
+His words, against the Oct 22 preview's numbering: "1 beginner is just
+for players learning how to do normal 1 touch juggling. 1 advanced is
+the beginner for 4 beginner. 2 beginner is the start for 3 beginner it
+is working 2 touches on each foot juggling. 2 advanced is the beginner
+for 3 advanced. 5 advanced is the beginner for 4 advanced. 5 beginner
+is the beginner for 7 advanced. you can remove 8 and keep 9 alone."
+
+| Level | Working name | Beginner | Advanced |
+|---|---|---|---|
+| 1 | One touch | Drop, touch, catch (clip 1 first half) | none, beginner only |
+| 2 | Two touches each foot | Two touches each foot, catch (clip 2 first half) | Two touches each foot, keep it up (clip 2 second half) |
+| 3 | Weak foot | Weak foot, two touches, catch (clip 11) | Low and tight, keep it up (clip 12) |
+| 4 | Height | Drop, high touch, catch (clip 9) | Waist height, keep it up (clip 10) |
+| 5 | Thigh | Drop, thigh, catch (clip 7 first half) | Thighs high, keep it up (clip 7 second half) |
+| 6 | Thigh control | Drop, foot, thigh, thigh, catch (clip 5) | Thighs only, keep it up (clip 6) |
+| 7 | Feet and thighs | Drop, foot, thigh, catch (clip 3) | Feet and thighs, keep it up (clip 4, whole take) |
+| 8 | Head | advanced only: Head it up (clip 8) | |
+
+Eight levels. The take pairings he filmed (clips 2 and 7) hold; my
+Oct 22 cross-pairings are gone. Clip 4: "remove 8" removed its second
+half; both halves were one drill, so its demo is the whole 9.7 s take
+(juggling-feet-and-thighs.mp4 re-encoded 0 to 9.65 s) and the 4.3 s
+head-height file and bank row are deleted. Level order is my read of
+easiest to hardest from his pairings; the three thigh levels can move.
+Bank: 14 rows, sorts 300 to 430 in this order, still inactive. Two
+descriptions are mine from the footage and his words replace them:
+Level 3 Beginner (reads as the left foot doing both touches) and Level
+3 Advanced (reads as low juggling below the knee). Pass marks still
+proposals. The Oct 22 text below is the record of the first sort.
+
+---
+
 Status: PROPOSED Oct 22 2026, built from Coach Yinka's twelve clips.
 Order, names, cues and pass marks are my calls from the footage (Coach
 Yinka: "you will have to determine order based on what they are doing

@@ -197,3 +197,13 @@ clip 2's second half and was not encoded. Fifteen segments encoded with
 the Oct 21 recipe (SDR path for the three bt709 clips, tone map for the
 nine HLG clips) into public/drills/juggling-*.mp4, 4.3 to 9.7 s each,
 35 MB total.
+
+## RE-SORTED Oct 23 2026 (Coach Yinka's pairings, see course.md top)
+
+The Oct 22 ladder was rejected ("you chopped it"). His pairings keep
+the take pairings as filmed (clip 2 halves together, clip 7 halves
+together) and pair the singles his way: 11 -> 12, 9 -> 10, 3 -> 4, 5 ->
+6, clip 1 first half alone, header alone. Clip 4 is one drill, not
+two: re-encoded whole (0 to 9.65 s) as juggling-feet-and-thighs.mp4;
+juggling-keep-it-up-head-height.mp4 deleted. Clip 1's second half
+stays a spare take. Fourteen files now.

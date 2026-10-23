@@ -61,6 +61,11 @@
     font-family: var(--display); font-weight: 700; text-transform: uppercase;
     font-size: 30px; line-height: 1; margin: 0; letter-spacing: 0.02em;
   }
+  .pending {
+    font-family: var(--display); font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.12em; font-size: 11px; color: var(--muted);
+    border: 1px solid var(--line); border-radius: 999px; padding: 3px 9px;
+  }
   .building { color: var(--muted); margin: 0; font-size: 15px; flex-basis: 100%; }
   .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
   .tile { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 14px; align-items: start; }
@@ -81,8 +86,6 @@
   .pass { font-weight: 600; }
   .pass b { color: var(--gold); font-weight: 600; }
   .src { color: var(--muted); font-size: 12px; margin-top: 6px; }
-  .tofilm { border-style: dashed; }
-  .tofilm .num { color: var(--muted); }
   .notes { margin-top: 56px; padding-top: 22px; border-top: 1px solid var(--gold); }
   .notes h2 {
     font-family: var(--display); font-weight: 700; text-transform: uppercase;
@@ -100,7 +103,6 @@
     .tile { grid-template-columns: 110px minmax(0, 1fr); }
     .tile video { width: 110px; }
   }
-  @media (prefers-reduced-motion: reduce) { video { animation: none; } }
 </style>
 
 <div class="wrap">
@@ -110,14 +112,14 @@
   <div class="rule"></div>
 
   <div class="lede">
-    <p>Juggling is the fastest way to a better first touch. Every level on this ladder is one small thing done cleanly, filmed so you can see exactly what passing looks like. Nine levels, easiest to hardest. Every level has a pass mark. You hit the mark, you move up.</p>
+    <p>Juggling is the fastest way to a better first touch. Every level on this ladder is one small thing done cleanly, filmed so you can see exactly what passing looks like. Eight levels, easiest to hardest. Every level has a pass mark. You hit the mark, you move up.</p>
   </div>
 
   <div class="how">
     <div class="eyebrow white">How it works</div>
     <ol>
       <li>Start at Level 1, even if you can already juggle. The early levels are where the clean contact gets built.</li>
-      <li>Every level has a Beginner drill and an Advanced drill. Pass the Beginner, then the Advanced, then move up. From Level 7 the drills are advanced only.</li>
+      <li>Most levels have a Beginner drill and an Advanced drill. Pass the Beginner, then the Advanced, then move up.</li>
       <li>A pass mark is in a row, with no drops. If you drop it, that attempt is over and the count starts again.</li>
       <li>Five minutes a day is enough. Juggling pays you back for every day, not for one long day.</li>
       <li>Film the day you pass a level. In two months you will want to see where you started.</li>
@@ -127,161 +129,160 @@
   <div class="ladder">
 
     <section class="level">
-      <div class="level-head"><span class="num">1</span><h2>First Touch</h2>
-        <p class="building">What you are building: one clean contact with the laces, ball coming straight back up.</p></div>
+      <div class="level-head"><span class="num">1</span><h2>One touch</h2><span class="pending">working name</span>
+        <p class="building">Normal one-touch juggling, for players learning it. Beginner only.</p></div>
       <div class="tiles">
         <div class="tile">
           <video muted loop playsinline preload="metadata" src="v/juggling-drop-touch-catch.mp4"></video>
           <div><div class="tag">Beginner</div><h3>Drop, touch, catch</h3>
-            <p>Ball in your hands. Drop it, one touch with your strong foot, catch it at your chest. Repeat.</p>
+            <p>Ball in your hands. Drop it, one touch, catch it at your chest. Repeat.</p>
             <p class="cue">Cue: toe up, ankle locked, hit the middle of the ball.</p>
-            <p class="pass">Pass: <b>10 in a row</b>, caught at your chest without reaching.</p></div>
-        </div>
-        <div class="tile">
-          <video muted loop playsinline preload="metadata" src="v/juggling-drop-high-touch-catch.mp4"></video>
-          <div><div class="tag">Advanced</div><h3>Drop, high touch, catch</h3>
-            <p>Same drill, but the one touch goes above your head and you catch it on the way down.</p>
-            <p class="cue">Cue: same contact, more leg, eyes on the ball the whole way.</p>
-            <p class="pass">Pass: <b>10 in a row</b>.</p></div>
+            <p class="pass">Pass: <b>10 in a row</b>, caught at your chest without reaching.</p>
+            <p class="src">Clip 1, first half</p></div>
         </div>
       </div>
     </section>
 
     <section class="level">
-      <div class="level-head"><span class="num">2</span><h2>Two Touches</h2>
-        <p class="building">What you are building: the second foot meeting a ball the first foot set.</p></div>
+      <div class="level-head"><span class="num">2</span><h2>Two touches each foot</h2><span class="pending">working name</span>
+        <p class="building">Two touches on each foot, with a catch first, then without stopping.</p></div>
       <div class="tiles">
         <div class="tile">
           <video muted loop playsinline preload="metadata" src="v/juggling-drop-two-touches-catch.mp4"></video>
-          <div><div class="tag">Beginner</div><h3>Drop, two touches, catch</h3>
-            <p>Drop it, right foot, left foot, catch. Repeat.</p>
+          <div><div class="tag">Beginner</div><h3>Two touches each foot, catch</h3>
+            <p>Drop it, two touches, catch. Repeat, working both feet.</p>
             <p class="cue">Cue: the first touch is small, the second one sets up the catch.</p>
-            <p class="pass">Pass: <b>10 in a row</b>.</p></div>
+            <p class="pass">Pass: <b>10 in a row</b>.</p>
+            <p class="src">Clip 2, first half</p></div>
         </div>
         <div class="tile">
-          <video muted loop playsinline preload="metadata" src="v/juggling-left-foot-two-touches-catch.mp4"></video>
-          <div><div class="tag">Advanced</div><h3>Weak foot, two touches, catch</h3>
-            <p>Both touches with your weaker foot, then catch.</p>
-            <p class="cue">Cue: slow down, the weak foot needs a second longer.</p>
-            <p class="pass">Pass: <b>10 in a row</b>.</p></div>
+          <video muted loop playsinline preload="metadata" src="v/juggling-keep-it-up-both-feet.mp4"></video>
+          <div><div class="tag">Advanced</div><h3>Two touches each foot, keep it up</h3>
+            <p>Same pattern with no catch. Two on the right, two on the left, keep it going.</p>
+            <p class="cue">Cue: small touches, stay on the balls of your feet.</p>
+            <p class="pass">Pass: <b>20 touches</b> without a drop.</p>
+            <p class="src">Clip 2, second half</p></div>
         </div>
       </div>
     </section>
 
     <section class="level">
-      <div class="level-head"><span class="num">3</span><h2>Keep It Up</h2>
-        <p class="building">What you are building: rhythm with no reset.</p></div>
+      <div class="level-head"><span class="num">3</span><h2>Weak foot</h2><span class="pending">working name</span>
+        <p class="building">The same two-touch pattern on the weaker foot, with a catch first, then without stopping.</p></div>
       <div class="tiles">
         <div class="tile">
-          <video muted loop playsinline preload="metadata" src="v/juggling-keep-it-up-both-feet.mp4"></video>
-          <div><div class="tag">Beginner</div><h3>Keep it up, both feet</h3>
-            <p>Drop it and keep it going, both feet, ball around your knees, standing in one spot.</p>
-            <p class="cue">Cue: small touches, stay on the balls of your feet.</p>
-            <p class="pass">Pass: <b>20 touches</b> without a drop.</p></div>
+          <video muted loop playsinline preload="metadata" src="v/juggling-left-foot-two-touches-catch.mp4"></video>
+          <div><div class="tag">Beginner</div><h3>Weak foot, two touches, catch</h3>
+            <p>Drop it, two touches with your weaker foot, catch. Repeat.</p>
+            <p class="cue">Cue: slow down, the weak foot needs a second longer.</p>
+            <p class="pass">Pass: <b>10 in a row</b>.</p>
+            <p class="src">Clip 11</p></div>
         </div>
         <div class="tile">
           <video muted loop playsinline preload="metadata" src="v/juggling-low-and-tight.mp4"></video>
-          <div><div class="tag">Advanced</div><h3>Low and tight</h3>
+          <div><div class="tag">Advanced</div><h3>Low and tight, keep it up</h3>
             <p>Keep it up with the ball never above your knee.</p>
             <p class="cue">Cue: quick feet, quiet touches, do not let it climb.</p>
-            <p class="pass">Pass: <b>20 touches</b> without a drop.</p></div>
+            <p class="pass">Pass: <b>20 touches</b> without a drop.</p>
+            <p class="src">Clip 12</p></div>
         </div>
       </div>
     </section>
 
     <section class="level">
-      <div class="level-head"><span class="num">4</span><h2>Height</h2>
-        <p class="building">What you are building: control of how hard you hit it.</p></div>
+      <div class="level-head"><span class="num">4</span><h2>Height</h2><span class="pending">working name</span>
+        <p class="building">One touch sent high and caught, then juggling at height without stopping.</p></div>
       <div class="tiles">
         <div class="tile">
-          <video muted loop playsinline preload="metadata" src="v/juggling-keep-it-up-waist-height.mp4"></video>
-          <div><div class="tag">Beginner</div><h3>Waist height</h3>
-            <p>Keep it up with every touch reaching your waist, both feet.</p>
-            <p class="cue">Cue: same contact every time, let it drop, do not chase it.</p>
-            <p class="pass">Pass: <b>20 touches</b> without a drop.</p></div>
+          <video muted loop playsinline preload="metadata" src="v/juggling-drop-high-touch-catch.mp4"></video>
+          <div><div class="tag">Beginner</div><h3>Drop, high touch, catch</h3>
+            <p>Drop it, one touch sent above your head, catch it on the way down. Repeat.</p>
+            <p class="cue">Cue: same contact, more leg, eyes on the ball the whole way.</p>
+            <p class="pass">Pass: <b>10 in a row</b>.</p>
+            <p class="src">Clip 9</p></div>
         </div>
         <div class="tile">
-          <video muted loop playsinline preload="metadata" src="v/juggling-keep-it-up-head-height.mp4"></video>
-          <div><div class="tag">Advanced</div><h3>Head height</h3>
-            <p>Keep it up with every touch reaching your head, standing still.</p>
-            <p class="cue">Cue: lock the ankle, strike through the ball, wait for it.</p>
-            <p class="pass">Pass: <b>10 touches</b> without a drop.</p></div>
+          <video muted loop playsinline preload="metadata" src="v/juggling-keep-it-up-waist-height.mp4"></video>
+          <div><div class="tag">Advanced</div><h3>Waist height, keep it up</h3>
+            <p>Keep it up with every touch reaching your waist, both feet.</p>
+            <p class="cue">Cue: same contact every time, let it drop, do not chase it.</p>
+            <p class="pass">Pass: <b>20 touches</b> without a drop.</p>
+            <p class="src">Clip 10</p></div>
         </div>
       </div>
     </section>
 
     <section class="level">
-      <div class="level-head"><span class="num">5</span><h2>Thigh</h2>
-        <p class="building">What you are building: a second surface.</p></div>
+      <div class="level-head"><span class="num">5</span><h2>Thigh</h2><span class="pending">working name</span>
+        <p class="building">The thigh as a surface: one thigh and a catch, then thighs sent high without stopping.</p></div>
       <div class="tiles">
         <div class="tile">
           <video muted loop playsinline preload="metadata" src="v/juggling-drop-thigh-catch.mp4"></video>
           <div><div class="tag">Beginner</div><h3>Drop, thigh, catch</h3>
             <p>Drop it onto your thigh, let it pop up, catch. Repeat.</p>
             <p class="cue">Cue: knee up, thigh flat like a table, ball lands on the middle.</p>
-            <p class="pass">Pass: <b>10 in a row</b>.</p></div>
+            <p class="pass">Pass: <b>10 in a row</b>.</p>
+            <p class="src">Clip 7, first half</p></div>
         </div>
         <div class="tile">
-          <video muted loop playsinline preload="metadata" src="v/juggling-drop-foot-thigh-catch.mp4"></video>
-          <div><div class="tag">Advanced</div><h3>Drop, foot, thigh, catch</h3>
-            <p>Drop it, one foot touch up to your thigh, thigh, catch.</p>
-            <p class="cue">Cue: the foot touch is soft, it only needs to reach the thigh.</p>
-            <p class="pass">Pass: <b>10 in a row</b>.</p></div>
+          <video muted loop playsinline preload="metadata" src="v/juggling-thighs-high.mp4"></video>
+          <div><div class="tag">Advanced</div><h3>Thighs high, keep it up</h3>
+            <p>Keep it up on your thighs with every touch sent to head height.</p>
+            <p class="cue">Cue: drive the knee, catch it on the flat of the thigh, wait for it to come down.</p>
+            <p class="pass">Pass: <b>15</b> without a drop.</p>
+            <p class="src">Clip 7, second half</p></div>
         </div>
       </div>
     </section>
 
     <section class="level">
-      <div class="level-head"><span class="num">6</span><h2>Thigh Control</h2>
-        <p class="building">What you are building: the thigh as a surface you trust.</p></div>
+      <div class="level-head"><span class="num">6</span><h2>Thigh control</h2><span class="pending">working name</span>
+        <p class="building">Two thigh touches with a catch, then thighs only without stopping.</p></div>
       <div class="tiles">
         <div class="tile">
           <video muted loop playsinline preload="metadata" src="v/juggling-drop-foot-thigh-thigh-catch.mp4"></video>
           <div><div class="tag">Beginner</div><h3>Drop, foot, thigh, thigh, catch</h3>
-            <p>Drop it, foot, thigh, thigh, catch.</p>
+            <p>Drop it, foot, thigh, thigh, catch. Repeat.</p>
             <p class="cue">Cue: the first thigh has to be clean or the second one never comes.</p>
-            <p class="pass">Pass: <b>10 in a row</b>.</p></div>
+            <p class="pass">Pass: <b>10 in a row</b>.</p>
+            <p class="src">Clip 5</p></div>
         </div>
         <div class="tile">
           <video muted loop playsinline preload="metadata" src="v/juggling-thighs-only.mp4"></video>
           <div><div class="tag">Advanced</div><h3>Thighs only, keep it up</h3>
             <p>Keep it up on your thighs only, both legs, no feet.</p>
             <p class="cue">Cue: stay tall, bring the knee to the ball, do not lean back.</p>
-            <p class="pass">Pass: <b>20 thigh touches</b> without a drop.</p></div>
+            <p class="pass">Pass: <b>20 thigh touches</b> without a drop.</p>
+            <p class="src">Clip 6</p></div>
         </div>
       </div>
     </section>
 
     <section class="level">
-      <div class="level-head"><span class="num">7</span><h2>Thighs High</h2>
-        <p class="building">Advanced only. Height on the thigh.</p></div>
+      <div class="level-head"><span class="num">7</span><h2>Feet and thighs</h2><span class="pending">working name</span>
+        <p class="building">Foot to thigh with a catch, then feet and thighs together without stopping.</p></div>
       <div class="tiles">
         <div class="tile">
-          <video muted loop playsinline preload="metadata" src="v/juggling-thighs-high.mp4"></video>
-          <div><div class="tag">Advanced</div><h3>Thighs high, keep it up</h3>
-            <p>Keep it up on your thighs with every touch sent to head height.</p>
-            <p class="cue">Cue: drive the knee, catch it on the flat of the thigh, wait for it to come down.</p>
-            <p class="pass">Pass: <b>15</b> without a drop.</p></div>
+          <video muted loop playsinline preload="metadata" src="v/juggling-drop-foot-thigh-catch.mp4"></video>
+          <div><div class="tag">Beginner</div><h3>Drop, foot, thigh, catch</h3>
+            <p>Drop it, one foot touch up to your thigh, thigh, catch. Repeat.</p>
+            <p class="cue">Cue: the foot touch is soft, it only needs to reach the thigh.</p>
+            <p class="pass">Pass: <b>10 in a row</b>.</p>
+            <p class="src">Clip 3</p></div>
         </div>
-      </div>
-    </section>
-
-    <section class="level">
-      <div class="level-head"><span class="num">8</span><h2>Feet and Thighs</h2>
-        <p class="building">Advanced only. Switching surface without stopping.</p></div>
-      <div class="tiles">
         <div class="tile">
           <video muted loop playsinline preload="metadata" src="v/juggling-feet-and-thighs.mp4"></video>
           <div><div class="tag">Advanced</div><h3>Feet and thighs, keep it up</h3>
-            <p>Keep it up switching between feet and thighs without stopping.</p>
+            <p>Keep it up with feet and thighs, no catch. The foot sets it up, the thigh keeps it going, back to the foot.</p>
             <p class="cue">Cue: let the height tell you the surface, low is feet, high is thighs.</p>
-            <p class="pass">Pass: <b>30 touches</b> without a drop, switching surface at least five times.</p></div>
+            <p class="pass">Pass: <b>30 touches</b> without a drop.</p>
+            <p class="src">Clip 4, whole take</p></div>
         </div>
       </div>
     </section>
 
     <section class="level">
-      <div class="level-head"><span class="num">9</span><h2>Head</h2>
+      <div class="level-head"><span class="num">8</span><h2>Head</h2><span class="pending">working name</span>
         <p class="building">Advanced only. The hardest surface.</p></div>
       <div class="tiles">
         <div class="tile">
@@ -289,53 +290,31 @@
           <div><div class="tag">Advanced</div><h3>Head it up</h3>
             <p>Keep it up with your forehead.</p>
             <p class="cue">Cue: eyes open, forehead not the top of the head, knees soft.</p>
-            <p class="pass">Pass: <b>10 headers</b> without a drop.</p></div>
+            <p class="pass">Pass: <b>10 headers</b> without a drop.</p>
+            <p class="src">Clip 8</p></div>
         </div>
       </div>
-    </section>
-
-    <section class="level tofilm">
-      <div class="level-head"><span class="num">10</span><h2>Everything</h2>
-        <p class="building">Not filmed yet. Feet, thighs and head in one run. One clip of about ten seconds makes this the 10-Level Juggling Ladder.</p></div>
     </section>
 
   </div>
 
   <div class="notes">
     <div class="eyebrow">Preview notes for Coach Yinka, not part of the course</div>
-    <h2>Decisions made from the footage</h2>
+    <h2>Sorted on your pairings, Oct 23</h2>
     <ol>
-      <li>Every take that held a beginner and an advanced half (clips 1, 2 and 7) was split at the last catch. The single-drill clips from the second shoot were paired by skill, not by file order.</li>
-      <li>Clip 1's second half and clip 2's second half are the same drill (keep it up, both feet, knee height). Clip 2's take is the demo because it starts from a drop out of the hands and runs longer. Clip 1's half is a spare take, not in the bank.</li>
-      <li>Clip 9 is the right foot and clip 11 is the left foot, read from which leg lifts while he stands side-on. Clip 11 is named "Weak foot" so it reads right for a left-footed player.</li>
-      <li>Clip 10 ends with one touch popped to head height; the demo is cut just before it and the drill is waist height. If that pop was the point, say so and it becomes "juggle, pop one high, settle" with the clip re-cut.</li>
-      <li>Clip 4 is two drills, split where the surface changes. Its first half (head height) is the shortest demo on the ladder at 4.3 seconds.</li>
-      <li>Nine levels from twelve clips. Level 10 is one more clip. The subtitle reads "The Juggling Ladder" until it exists.</li>
-      <li>Pass marks are proposals. Change any number and the page and the bank rows follow.</li>
-      <li>All fifteen drills are in the drill bank under Ball Mastery with the "Juggling:" prefix, filmed, few yards, no wall, switched OFF so the weekly builder does not draft them into live weeks until you turn on the ones you want at /coach/drills.</li>
+      <li>Every pairing is yours: clip 1 first half alone; clip 2 first half into clip 2 second half; clip 11 into clip 12; clip 9 into clip 10; clip 7 first half into clip 7 second half; clip 5 into clip 6 (unchanged); clip 3 into clip 4; header alone.</li>
+      <li>Clip 4: you said remove its second half. Its two halves were the same drill, so the Advanced of Level 7 is now the whole take, 9.7 seconds, instead of the 4.3 second first half. If you meant the first half only, say so and it goes back.</li>
+      <li>Order of the levels is my read of easiest to hardest from your pairings. The three thigh levels (5, 6, 7) can go in any order you want.</li>
+      <li>Every level name and drill name is a working name. You name them next; the bank rows and this page follow.</li>
+      <li>Two drills I describe from the footage and you know better: Level 3 Beginner reads as the left foot doing both touches, and Level 3 Advanced reads as low juggling, ball below the knee. Your words replace mine.</li>
+      <li>Pass marks are still proposals.</li>
+      <li>Fourteen drills in the bank under Ball Mastery with the "Juggling:" prefix, switched OFF until you turn on the ones you want at /coach/drills.</li>
     </ol>
-    <div class="scroll">
-      <table>
-        <tr><th>Clip</th><th>File</th><th>Used as</th><th>Cut</th></tr>
-        <tr><td>1</td><td>IMG_7292</td><td>L1 Beginner / spare take</td><td>0.2 to 6.55 s / 6.55 s to end (spare)</td></tr>
-        <tr><td>2</td><td>IMG_7293</td><td>L2 Beginner / L3 Beginner</td><td>0 to 4.9 s / 3.5 to 12.5 s</td></tr>
-        <tr><td>3</td><td>CapCut export</td><td>L5 Advanced</td><td>0 to 7.5 s, CapCut outro removed</td></tr>
-        <tr><td>4</td><td>IMG_6032</td><td>L4 Advanced / L8</td><td>0 to 4.3 s / 4.3 s to end</td></tr>
-        <tr><td>5</td><td>IMG_6033</td><td>L6 Beginner</td><td>0 to 8.9 s</td></tr>
-        <tr><td>6</td><td>IMG_6034</td><td>L6 Advanced</td><td>whole clip</td></tr>
-        <tr><td>7</td><td>IMG_6035</td><td>L5 Beginner / L7</td><td>0 to 6.25 s / 6.25 s to end</td></tr>
-        <tr><td>8</td><td>IMG_6036</td><td>L9</td><td>whole clip</td></tr>
-        <tr><td>9</td><td>IMG_6037</td><td>L1 Advanced</td><td>whole clip</td></tr>
-        <tr><td>10</td><td>IMG_6038</td><td>L4 Beginner</td><td>0 to 9.5 s, end pop removed</td></tr>
-        <tr><td>11</td><td>IMG_6040</td><td>L2 Advanced</td><td>0 to 9.7 s</td></tr>
-        <tr><td>12</td><td>IMG_6041</td><td>L3 Advanced</td><td>first 8.5 s of 17</td></tr>
-      </table>
-    </div>
   </div>
 </div>
 
 <script>
-  // Play each demo only while it is on screen so fifteen clips do not all
+  // Play each demo only while it is on screen so fourteen clips do not all
   // decode at once on a phone.
   (function () {
     var vids = Array.prototype.slice.call(document.querySelectorAll("video"));

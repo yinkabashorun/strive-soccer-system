@@ -1793,6 +1793,13 @@ commit.
       touch is not soft, it gets the ball to chest level, the thigh is
       the softer touch, it controls it"). Final shape of a drill tile:
       tag, title, one cue, pass mark. Nothing that restates the title.
+      ADDED Oct 23 2026 (Coach Yinka sent IMG_6031, "Put this as one
+      advanced"): Level 1 now has its keep it up. "Juggling: one touch,
+      keep it up", clip whole (8.4 s, continuous one-touch juggling,
+      both feet), same encode recipe, public/drills/
+      juggling-one-touch-keep-it-up.mp4, bank sort 305, inactive like
+      the rest. Fourteen drills, every level now a catch and a keep it
+      up except Head. Preview republished at the same link.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

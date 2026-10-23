@@ -15,7 +15,7 @@ final"; head stays.
 
 | Level | Name | Beginner | Intermediate | Advanced |
 |---|---|---|---|---|
-| 1 | One touch | One touch, catch (clip 1 first half) | | |
+| 1 | One touch | One touch, catch (clip 1 first half) | | One touch, keep it up (clip 13, IMG_6031, sent Oct 23: "Put this as one advanced") |
 | 2 | Two touches each foot | Two touches each foot, catch (clip 2 first half) | | Two touches each foot, keep it up (clip 2 second half) |
 | 3 | One, two | One, two, catch (clip 11) | | One, two, keep it up (clip 12) |
 | 4 | Laces, inside | Laces, inside, catch (clip 9) | | Laces, inside, keep it up (clip 10) |

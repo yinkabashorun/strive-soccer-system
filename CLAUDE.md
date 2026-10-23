@@ -1750,6 +1750,25 @@ commit.
       renamed to match (juggling-one-touch-catch.mp4 and so on), still
       inactive. Preview republished at the same link. Still his: the
       Level 6 Final name, cues, pass marks, flipping rows active.
+      COPY PASS same day (Coach Yinka: "bear with me. I'm gonna help
+      you with the copy ... understand my logic and then do a deep
+      dive and fix the copy in the way I like it"). HIS LOGIC, now
+      the rule for every drill description: name the surface and the
+      foot, STRONG FOOT / WEAK FOOT never right / left ("we're
+      assuming that they're left foot"), say where the ball goes (to
+      chest level for the catch), only call a touch soft or firm when
+      it is, no vague lines. His corrections: Level 3 "right, left,
+      left" is "strong foot, weak foot, weak foot", shown in an easier
+      way (now a step strip of chips above every drill, weak foot in
+      gold, plus rule 3 in How it works); Level 4 Beginner "inside
+      brings it to chest, not inside brings it back"; Level 6
+      Intermediate "the laces touch is not soft at all, it gets it to
+      your chest level, and then your thigh controls it, the thigh
+      touch is a bit softer"; Level 7 "the hardest surface" removed.
+      Approved as they were: 1 Beginner, 2 Beginner and Advanced, 5
+      Advanced. Bank how / cues updated to the same words for the nine
+      drills in Levels 2, 3, 4 and 6; rows still inactive. Preview
+      republished at the same link.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

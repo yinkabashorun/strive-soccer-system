@@ -207,3 +207,16 @@ together) and pair the singles his way: 11 -> 12, 9 -> 10, 3 -> 4, 5 ->
 two: re-encoded whole (0 to 9.65 s) as juggling-feet-and-thighs.mp4;
 juggling-keep-it-up-head-height.mp4 deleted. Clip 1's second half
 stays a spare take. Fourteen files now.
+
+## NAMED Oct 23 2026 (Coach Yinka's corrections, see course.md top)
+
+Clip 4 out entirely (juggling-feet-and-thighs.mp4 deleted). Files
+renamed to the final drill names: one-touch-catch, two-touches-each-
+foot-catch / keep-it-up, one-two-catch / keep-it-up (clips 11, 12),
+laces-inside-catch / keep-it-up (clips 9, 10), drop-thigh-catch and
+thighs-high (clip 7, unchanged), thighs-laces-catch / keep-it-up
+(clips 5, 6), laces-thigh-catch (clip 3), head-it-up. Thirteen files.
+Lesson for the next course: my frame reads of WHICH surface touched
+the ball (laces vs inside, thigh vs foot, right vs left) were wrong
+on six clips; the cut points were right on all of them. Next time,
+ask for the pattern name per clip up front and read only for cuts.

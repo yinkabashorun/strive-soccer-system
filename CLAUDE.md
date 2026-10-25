@@ -146,10 +146,15 @@ commit.
       pillar + needs_goal, migration 041; (3) weak foot and strength
       assembled from filmed drills once he orders them; (4) agility and
       shooting as clips land, recruiting when he and Gary write the
-      outline. His before step 1: confirm library only still stands.
-      Filming rule from Keep It Up: every clip arrives with its pattern
-      name and beginner / advanced tag. Announce each course only when
-      it is in the app (Oct 12 launch rule).
+      outline. SIXTH, added Oct 25: a NUTRITION bundle, a lesson
+      course like recruiting (general food guidance for a training
+      day, match day, hydration; no calorie targets, supplements or
+      weight goals; a not-medical-advice line, and the privacy / terms
+      may need the same sentence). His before step 1: confirm library
+      only still stands. Filming rule from Keep It Up: every clip
+      arrives with its pattern name and beginner / advanced tag.
+      Announce each course only when it is in the app (Oct 12 launch
+      rule).
 
 ### RECORD (chronological)
 
@@ -1928,6 +1933,21 @@ commit.
       as opt_in slot drills. The Sept 30 "no course modules to start"
       is superseded (that was Complete; this is Elite content). Nothing
       built; no player data touched.
+      THEN same hour (Coach Yinka: "after we add the nutrition bundle
+      too, where on earth would this leave us?"): Nutrition is the
+      SIXTH course, a lesson course, scoped in offer-stack-build.md
+      with two flags (guidance to minors kept general, no calories /
+      supplements / weight goals, not-medical-advice line; privacy and
+      terms may need the sentence). The read given: the stack is now a
+      full development system in four blocks (training, skill courses,
+      body, career, plus accountability and the guarantee), $500 holds
+      and $249 locked for life is the founding hook, but on Nov 1 only
+      what is in the app is announced: today that is the week, Extra
+      Work, Send a clip, Side by Side, time trained, breaks, finishers
+      and Keep It Up in the slot; two courses (weak foot, strength) can
+      be live with zero filming once he orders them, four need his
+      filming or writing. The constraint is his hours this week, so
+      phase C decisions come before any course work.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

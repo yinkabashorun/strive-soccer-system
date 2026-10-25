@@ -557,3 +557,18 @@ guessed.
    is written.
 Decision needed from him before step 1: confirm library only (no ticks,
 no time trained, no Send a clip on course tiles) still stands.
+
+### Added Oct 25 2026 (Coach Yinka: "after we add the nutrition bundle
+### too"): a sixth course, Nutrition
+A LESSON course like recruiting: pages, not drills (what to eat on a
+training day, match day, the night before, hydration, what a 13 year
+old's plate looks like, what to skip). Fits the same tables with kind
+= lesson. Two flags before it is written: (1) nutrition guidance to
+minors is a different exposure than a drill video; keep it to general
+food guidance a coach can stand behind, no calorie targets, no
+supplements, no weight goals, and a plain line that a doctor or
+dietitian decides anything medical; (2) the privacy policy and terms
+may need a sentence saying the course is general guidance, not medical
+advice (lawyer not yet involved, see Sept 26). Where it lands in his
+order: sixth, after recruiting. Announced only when written and in the
+app, like every course.

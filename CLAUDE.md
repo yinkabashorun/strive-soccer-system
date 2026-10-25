@@ -2011,6 +2011,24 @@ commit.
       never on /demo. Risk named: $500 for a remote product with no
       Side by Side proof yet may stall after Nov 1; the lever then is
       proof and the stack, not the price. Nothing changed anywhere.
+- [x] THE PATH TO $10K A MONTH, written Oct 25 2026 (Coach Yinka: "What
+      is the path to 10k a month?"): $10k is about 30 app members at
+      the confirmed prices (20 founding at $249 = $4,980 plus 10 at
+      $500 = $5,000), fewer with Hybrid or in-person on top; today 5
+      real families. At Carla's own target of 4 calls booked a week
+      and every other call closing, that is 2 new families a week, so
+      30 members lands around the end of January. The sequence: (1)
+      this week, announce and get the page live, founding families at
+      $249, fix the Supabase auth URLs BEFORE the rush (every password
+      reset is dead) and add the three missing parent phones; (2)
+      November at $500, the proof engine runs on its own (first clip on
+      join, Side by Side two weeks later, posted with consent), every
+      local call sold app-first; (3) December and January, winter is
+      the online season, weak foot and strength courses live from
+      filmed drills, the rest as clips land, courses as the reason to
+      stay. Risks named: unannounced is the only real blocker; the
+      recap text still gated to Complete; no proof for three weeks
+      after the first signups. Nothing changed; advice only.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

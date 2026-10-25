@@ -134,6 +134,22 @@ commit.
       23 quiz: a library every member sees, nothing tracked; the
       league / tier formula from that quiz is DROPPED, superseded by
       the switch).
+- [ ] THE COURSE ROADMAP (Coach Yinka, Oct 25 2026, his order):
+      shooting, full weak foot, strength, agility, recruiting (CV,
+      highlight tape, how to reach out). Scoped, not built, in
+      marketing/offer/offer-stack-build.md "Item 9, the course
+      roadmap". Bank today: shooting 0 (no pillar, no needs_goal flag),
+      weak foot 8, strength 13, agility 0 (Speed pillar empty),
+      recruiting is lessons not drills. Proposed order: (1) course
+      tables + coach editor + Courses tab seeded with Keep It Up, one
+      primitive for drill courses and lesson courses; (2) Shooting
+      pillar + needs_goal, migration 041; (3) weak foot and strength
+      assembled from filmed drills once he orders them; (4) agility and
+      shooting as clips land, recruiting when he and Gary write the
+      outline. His before step 1: confirm library only still stands.
+      Filming rule from Keep It Up: every clip arrives with its pattern
+      name and beginner / advanced tag. Announce each course only when
+      it is in the app (Oct 12 launch rule).
 
 ### RECORD (chronological)
 
@@ -1896,6 +1912,22 @@ commit.
       tests total, verify green. NOT changed: the player UI shows a
       course drill with no badge (plyos and finishers have one); no
       player data touched; 0 players offered anything.
+- [x] DECIDED Oct 25 2026 (Coach Yinka, after the offer status read:
+      phase A done, phase B half, phase C not started with Nov 1 a week
+      out and six decisions owed): "We are going to Make a shooting
+      course, & full weak foot course, then strength course, then
+      agility course, then recruiting course like making a csv /
+      highlight tape and how to reach out". Five courses in that order,
+      stack item 9. Scoped the same day (OPEN item above and
+      offer-stack-build.md): two kinds of course on one primitive, drill
+      courses whose steps are bank drills by id and a lesson course
+      (recruiting) whose steps are pages; a course never changes a
+      drill's opt_in, so weak foot and strength drills stay in weeks as
+      they are today. Shooting needs a pillar and a needs_goal drill
+      flag before a single clip can be banked; agility goes under Speed
+      as opt_in slot drills. The Sept 30 "no course modules to start"
+      is superseded (that was Complete; this is Elite content). Nothing
+      built; no player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

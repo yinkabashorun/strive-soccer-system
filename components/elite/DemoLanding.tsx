@@ -24,24 +24,47 @@ const VSL_SRC = "https://files.manuscdn.com/user_upload_by_module/session_file/3
 // The upload is a YouTube Short (9:16), so the player is portrait.
 const VSL_PORTRAIT = true;
 
-// This page does the job a VSL usually does: hook, mechanism, proof,
-// objections, offer, close. Structure over inventory - never the whole
-// drill bank, that's the paid product. Close is the GHL intake form
-// (matches the in-person path: form first, Carla reaches out to book the
-// call), with DM "ELITE" as the fast lane for whoever's already warm from
-// a post. Every section builds itself in as it scrolls into view
+// This page does the job a VSL usually does: hook, mechanism, what's in
+// it, proof, objections, offer, close. Structure over inventory - never
+// the whole drill bank, that's the paid product. Close is the GHL intake
+// form (matches the in-person path: form first, Carla reaches out to book
+// the call), with DM "ELITE" as the fast lane for whoever's already warm
+// from a post. Every section builds itself in as it scrolls into view
 // (components/elite/Reveal.tsx), the hero assembles on load.
+//
+// Phase C rewrite (Oct 25 2026): the page now lists the offer stack, and
+// ONLY the parts that are live in the app today. Nothing on calls, the
+// guarantee, pay in full or courses until each one exists (Coach Yinka's
+// Oct 12 launch rule: announce what is real). Prices: $500 from Nov 2,
+// $249 locked for life by Nov 1 (decided Oct 12). Copy rules: "your
+// player", never "AI", no em dashes, "we" wherever Gary is in the picture
+// (he is in the VSL above), Coach Yinka builds every week.
 const STRUCTURE: [string, string][] = [
-  ["4 sessions a week, built around you", "Same rhythm every time, layered on top of regular training. You show up, it's already planned, you just train."],
-  ["Not built for the group. Built for you.", "Every week targets what YOU actually need work on, not what's convenient for 15 kids on one field."],
-  ["Every drill, shown to you first", "No guessing what a rep should look like. Watch it, then go do it."],
-  ["A weekly update, just for you", "What got done, what's next. Nothing slips by quietly, ever."],
+  ["A new week every Monday", "Built by Coach Yinka around your player. Four sessions in season, six in the off-season, about 40 minutes each. You open the app, it's already planned, you just train."],
+  ["Not built for the group. Built for your player.", "Every week targets what your player actually needs work on, not what fits 15 kids on one field."],
+  ["Every drill, shown first", "No guessing what a rep should look like. Watch it, then go do it."],
+  ["You see the work adding up", "A text when the week goes live, and the same drill filmed every two weeks so you can watch the change yourself."],
+];
+
+// The stack, named. Each line is a feature that exists in the app right
+// now; a bonus that is not built yet does not go on this page.
+const STACK: [string, string][] = [
+  ["The week", "Four sessions in season, six in the off-season. Every drill on video, in the order your player should do them."],
+  ["Extra Work", "Got more in the tank today? Add a structured session straight from the drill bank. Never a drill your player has already done."],
+  ["Send a Clip", "Film any drill and send it from the card. Coach Yinka watches it and replies in the app."],
+  ["Side by Side", "The same drill filmed in week 1, then every two weeks. You get both clips by text and watch the work add up."],
+  ["Pick up where you left off", "Miss a week, take a break, come back. The plan waits for you. Progress counts time trained, never what was missed."],
+  ["Strength finishers", "Core and injury-prevention work closes the session when your player needs it."],
+  ["Keep It Up", "The juggling ladder, seven levels. Added to the week when it's the right next step for your player."],
+  ["Any space", "A yard, a driveway, a park, or a ball and a few yards. The week fits the space you have."],
 ];
 
 const OBJECTIONS: [string, string][] = [
-  ["Will they actually do it?", "You get a recap every week. If it's not happening, you'll know immediately, not at the end of the season."],
-  ["We already train 3-4 times a week.", "Group training is real work, but it can't target one kid's specific gap with a full team on the field. This is the individual layer on top, built around exactly what your player needs to reach the next level."],
+  ["Will they actually do it?", "You get a text the moment each week goes live and the progress clips every two weeks. If it's not happening, you'll know now, not at the end of the season."],
+  ["We already train 3-4 times a week.", "Team training is real work, but it can't target one player's specific gap with a full team on the field. This is the individual layer on top, built around exactly what your player needs to reach the next level."],
+  ["What do we need at home?", "A ball, a few cones, and some space. A wall is a bonus, not a requirement."],
   ["What if we miss a week?", "The plan picks back up the moment you're ready. No makeup schedule to manage, no falling behind."],
+  ["Do we have to commit?", "Month to month. Cancel anytime. Same-day refund if it's not for you."],
 ];
 
 function SectionTitle({ children, delay = 0 }: { children: string; delay?: number }) {
@@ -112,9 +135,10 @@ export async function DemoLanding() {
       </h1>
       <Reveal as="p" delay={120} className="mt-3 text-sm leading-relaxed text-white/55">
         Team practice is real work, but it&apos;s built for the whole group.
-        Strive Elite is the individual layer on top: a weekly plan built
+        Strive Elite is the individual layer on top: a training week built
         around what your player specifically needs to reach the next level,
-        not what fits 15 kids on one field.
+        done at home around team practice. Coach Yinka and Coach Gary built
+        it together. Coach Yinka builds every week.
       </Reveal>
 
       {/* Mechanism */}
@@ -142,6 +166,20 @@ export async function DemoLanding() {
         player actually trains from.
       </Reveal>
 
+      {/* The stack */}
+      <SectionTitle>What&apos;s in it</SectionTitle>
+      <div className="grid gap-2 sm:grid-cols-2">
+        {STACK.map(([title, body], i) => (
+          <Reveal key={title} variant="build" delay={i * 70} className="rounded-2xl border border-accent/15 bg-accent/[0.03] p-4">
+            <div className="font-display text-sm font-bold">{title}</div>
+            <p className="mt-1 text-xs leading-relaxed text-white/50">{body}</p>
+          </Reveal>
+        ))}
+      </div>
+      <Reveal as="p" delay={160} className="mt-2.5 text-xs text-white/35">
+        All of it is included. Nothing here is an add-on.
+      </Reveal>
+
       {/* Objections */}
       <SectionTitle>Fair questions</SectionTitle>
       <div className="space-y-2">
@@ -156,11 +194,14 @@ export async function DemoLanding() {
       {/* Offer + close */}
       <Reveal variant="build" className="mt-9 rounded-2xl border border-accent/30 bg-accent/[0.06] p-5 text-center">
         <div className="font-display text-2xl font-black">
-          $350<span className="text-base font-semibold text-white/60">/mo</span>
+          $500<span className="text-base font-semibold text-white/60">/mo</span>
         </div>
         <Reveal variant="line" delay={250} className="mx-auto mt-2 h-px w-16 bg-accent/70" />
         <Reveal as="p" delay={300} className="mt-2 text-sm text-white/60">
-          Starting Nov 2. Join by Nov 1 and lock $249/mo for life.
+          From Nov 2. Join by Nov 1 and lock $249/mo for life.
+        </Reveal>
+        <Reveal as="p" delay={360} className="mt-1 text-xs text-white/45">
+          Month to month. Same-day refund if it&apos;s not for you.
         </Reveal>
         <Reveal as="p" delay={420} className="mt-4 text-sm font-semibold text-white">
           Tell us about your player below. I&apos;ll personally reach out to

@@ -1956,6 +1956,29 @@ commit.
       every text; the framing is the disclaimer, a guide and never a
       plan or a prescription. The not-medical-advice line still goes
       on the course itself.
+- [x] ASKED Oct 25 2026 (Coach Yinka: "Is it worth it to take the risk
+      and shut down in person training in the winter and push them all
+      towards online? ... giving the in person option makes them 1.
+      value online less, 2. I post low quality content bc I just show
+      the kids training"): ADVISED NO to a shutdown, YES to app-first.
+      Facts behind it: the app has 5 real families and has never been
+      announced; in-person is where today's revenue sits (his own target
+      is 35 to 40 in-person, 8 to 10 hybrid); Gary's income, Teo's 30%
+      of Ashburn gross, the PWC permit to Jan 27 and the insurance all
+      hang on in-person; every alumni proof point came from field
+      coaching; the field is where the clips come from (ads already
+      short on footage, Oct 4). Proposed instead: (1) the app becomes
+      the floor of every product, no in-person without Strive Elite, so
+      in-person reads as Elite plus field time and can never make the
+      app look like the lesser option; (2) a winter footprint, Friday
+      groups + Sunday drop-ins (what the permit covers), no new weekday
+      1:1s unless hybrid; (3) top-funnel content is a decision made now,
+      not a result of closing the field; (4) a threshold, not a date:
+      when the app alone carries the $10k, in-person becomes optional
+      and the spring call is made on numbers. Both of his claims
+      (families value online less; content is low because of in-person)
+      are UNCONFIRMED by any buyer or number in the record. Decision is
+      his; nothing changed.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

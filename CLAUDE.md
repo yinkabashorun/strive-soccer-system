@@ -2029,6 +2029,38 @@ commit.
       stay. Risks named: unannounced is the only real blocker; the
       recap text still gated to Complete; no proof for three weeks
       after the first signups. Nothing changed; advice only.
+- [x] LIVE Oct 25 2026, PHASE C PAGE (Coach Yinka: "Yes" to "You read
+      one page and one caption", then "Okay get started on your list"):
+      thestriveapp.com/demo rewritten around the live stack. New
+      "What's in it" block (The week, Extra Work, Send a Clip, Side by
+      Side, Pick up where you left off, Strength finishers, Keep It Up,
+      Any space), two new fair questions (what you need at home, do we
+      have to commit), offer block $500/mo from Nov 2, $249 locked for
+      life by Nov 1, month to month, same-day refund. Nothing on calls,
+      the guarantee, pay in full or courses (announce only what is
+      real). Headline and VSL unchanged; "Coach Yinka and Coach Gary
+      built it together. Coach Yinka builds every week." The page
+      promises the Monday text and the progress clips, NOT a weekly
+      recap, because buildParentRecap still returns null for tier
+      elite (flagged to him; one line flips it). Same commit: the $500
+      line on ad 5 (re-rendered), the ad copy sheet, captions and both
+      Manus briefs; branch price-500-hold is superseded by this and can
+      be deleted. Announcement drafted at marketing/announcement/
+      strive-elite-announcement.md (main post, Oct 31 last call, three
+      story lines, Carla's ELITE reply) and shown with the page copy at
+      https://claude.ai/artifact/GYJAY93Zp5PSMdSebryDE6. Still his:
+      post it; replace Stripe's $350 standard price with $500 before
+      Nov 2; the filmed VSL still says $350 and Complete at $600.
+- [x] DONE Oct 25 2026 (Coach Yinka: "remove all audio from vids Make
+      them on mute"): the audio track stripped from all 43 of the 45
+      drill clips in public/drills/ that had one (ffmpeg -an, picture
+      copied, no re-encode, faststart kept); the two without audio
+      untouched. DrillVideo.tsx (the landing tiles and the app's drill
+      player) was already muted + playsInline, so the 26 Manus-hosted
+      clips play silent too. Left WITH sound on purpose: the VSL, the
+      outro MP4s (their swishes are deliberate), and families' own
+      clips in the chat and the progress panel. Rule from here: every
+      drill clip is encoded with -an.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -1979,6 +1979,22 @@ commit.
       (families value online less; content is low because of in-person)
       are UNCONFIRMED by any buyer or number in the record. Decision is
       his; nothing changed.
+      DIRECTION same hour (Coach Yinka: "I like .1"): APP-FIRST. Every
+      recurring product includes Strive Elite; the app is the floor,
+      field time is the add-on. NOT STAMPED: no new price is confirmed.
+      What it does to the ladder, laid out for him to stamp: 1:1 Monthly
+      ($280) dissolves into Hybrid (it is Hybrid once the app is in it);
+      Small Group monthly ($148) needs a new number with the app in it;
+      Hybrid at $400 prices the app at $120 next to the $280 1:1 Monthly,
+      so the proposed $500 Hybrid is the floor of consistency ($280 +
+      $249 = $529); from Nov 2 at $500 for the app alone, Hybrid has to
+      sit above that or the app is the lesser option again. Drop-ins
+      ($80 / $50) stay as the assessment-session entry with no app.
+      Packs (4 / 8 / 12) open: include a month of Elite or stay pure.
+      Existing families keep what they pay (founding rule). Teo's 30% of
+      Ashburn gross already includes app; Gary's split is per session
+      and unchanged. Nothing changes on any page or in Stripe until he
+      stamps the numbers.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

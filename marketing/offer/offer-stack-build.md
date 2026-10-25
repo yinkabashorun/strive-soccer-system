@@ -341,6 +341,23 @@ parent text. Nothing temporary.
 ## Item 9, first course: Keep It Up, the Courses tab, and the player
 ## tier formula (Coach Yinka, Oct 23 2026, via quiz)
 
+### SUPERSEDED Oct 23 2026, SHIPPED Oct 24 (Coach Yinka: "Actually ...
+### Just make it an option for me to toggle to offer juggling drills
+### then select the ones you can choose from for the player")
+No leagues, no tiers, no formula. Migration 040: elite_drills.opt_in
+(a course drill, never in a week on its own), elite_players.
+offer_opt_in + opt_in_drill_ids (the coach's switch and picks; the 008
+privilege guard extended so a player cannot set them; a deleted drill
+is pruned from every player's picks by trigger). One rule in
+bank-conform.ts, drillFitsPlayer + offeredBank, read by the AI menu,
+the fallback, the publish gate, Extra Work and the few-yards templates.
+Coach UI: OfferedDrillsPanel on the player page under Intake (switch
+"Offered in the week" / "Not offered", then a tick per course drill);
+/coach/drills has a "Course drill" tick and badge. The 14 Keep It Up
+rows are opt_in + active. tests/opt-in.test.ts (12). Everything below
+this line is the earlier design and is kept as the record of what was
+considered; the Courses tab as a library for everyone is still open.
+
 ### Where it stands today
 - Keep It Up is 14 filmed bank drills ("Juggling: ..." under Ball
   Mastery, sorts 300 to 410, all INACTIVE), a preview page, and the

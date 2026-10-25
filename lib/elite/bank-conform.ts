@@ -20,8 +20,14 @@
 import type { Drill, GeneratedDrill, GeneratedSession, Player, SessionTemplate, TrainingSpace } from "./types";
 import { PLYO_PILLAR, STRENGTH_PILLAR } from "./types";
 
-// What the builder knows about where a player trains (019 wall, 033 space).
-export type PlayerEnv = { has_wall?: boolean | null; space?: TrainingSpace | null };
+// What the builder knows about where a player trains (019 wall, 033 space)
+// and which course drills the coach has offered them (040).
+export type PlayerEnv = {
+  has_wall?: boolean | null;
+  space?: TrainingSpace | null;
+  offer_opt_in?: boolean | null;
+  opt_in_drill_ids?: string[] | null;
+};
 
 // Can this player do this bank drill where they train? Wall drills need a
 // wall (019). On the tight space setting ("a ball and a few yards", 033)
@@ -29,10 +35,26 @@ export type PlayerEnv = { has_wall?: boolean | null; space?: TrainingSpace | nul
 // and strengthening finishers are room work by definition and are never
 // space-filtered. Open space (the default, every pre-033 player) filters
 // nothing beyond the wall rule, so today's weeks are unchanged.
+// An opt-in course drill (040) fits only a player the coach switched on
+// AND ticked that exact drill for; for everyone else it does not exist.
 export function drillFitsPlayer(d: Drill, env?: PlayerEnv | null): boolean {
   if (d.needs_wall && env?.has_wall !== true) return false;
   if (env?.space === "tight" && isSkillPillar(d.pillar) && !d.small_space) return false;
+  if (d.opt_in && !isOffered(d, env)) return false;
   return true;
+}
+
+export function isOffered(d: Drill, env?: PlayerEnv | null): boolean {
+  return env?.offer_opt_in === true && (env.opt_in_drill_ids ?? []).includes(d.id);
+}
+
+// The bank as this player may see it: every ordinary drill, plus only the
+// opt-in course drills the coach offered them. Applied before the AI is
+// shown the menu, before the fallback composes, at the publish gate and
+// in Extra Work, so an unoffered course drill is never on the menu, never
+// matched by title, never placed.
+export function offeredBank(bank: Drill[], env?: PlayerEnv | null): Drill[] {
+  return bank.filter((d) => !d.opt_in || isOffered(d, env));
 }
 
 const MIN_SKILLS = 3;
@@ -177,7 +199,7 @@ function pickSkillFrom(
 export function conformSessionsToBank(
   sessions: GeneratedSession[],
   bank: Drill[] | undefined,
-  player?: (Pick<Player, "has_wall"> & { space?: TrainingSpace | null }) | null,
+  player?: PlayerEnv | null,
   weeklyFocus = "",
   strength: StrengthMode = "optional",
   tpl?: TemplateContext | null

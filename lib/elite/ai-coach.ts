@@ -22,6 +22,7 @@ import {
   type TemplateContext,
   isSkillPillar,
   isStrengthTitle,
+  offeredBank,
   strengthRequired,
   type StrengthMode,
 } from "./bank-conform";
@@ -410,6 +411,10 @@ export async function generatePlanFromNotes(
   reason?: string; // human-readable cause shown to the coach
   reasonKind?: "no_key" | "parse" | "api_error"; // drives the banner's advice
 }> {
+  // Course drills (040): an opt-in drill is on this player's menu only if
+  // the coach offered it to them. Filtered here, once, so the prompt, the
+  // fallback and sanitize() all compose from the same bank.
+  bank = bank ? offeredBank(bank, player) : bank;
   // Strengthening finisher rule for this week: required in every session
   // when the notes or the player's memory (coach note, call notes,
   // check-in) say injury / rehab / core / hip / strength; else the AI's

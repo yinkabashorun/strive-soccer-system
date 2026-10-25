@@ -130,3 +130,16 @@ a time. Same wall and space rules, same filmed-only guard at the database.
 "A ball and a few yards" is a player setting. On it, only bank drills the
 coach ticked as **small space** are ever assigned; plyo warm-ups and
 strengthening finishers are room work and always fit.
+
+## Course drills, offered per player (Oct 2026)
+
+A bank drill can be marked a course drill (`opt_in`). It never enters a
+week on its own. On the player page the coach switches the player on
+("Offered in the week") and ticks which course drills the next week may
+use for them. The rule lives in one place, `drillFitsPlayer` and
+`offeredBank` in lib/elite/bank-conform.ts, and every path reads it:
+the AI's drill menu, the deterministic fallback, the publish gate (so a
+hand-edited studio plan naming an unoffered course drill gets a
+replacement, not a link), Extra Work and the few-yards templates. Off
+keeps the picks; nothing changes in the week already built. The first
+course drills are the fourteen Keep It Up juggling rows.

@@ -81,6 +81,11 @@ export type Player = {
   // Bi-weekly progress video (037): the one drill filmed every second
   // week. null = the app uses the first skill drill they ever completed.
   benchmark_drill_id?: string | null;
+  // Course drills offered per player (040): the coach switches the player
+  // on and ticks which opt-in bank drills the builder may use for them.
+  // Absent / false / empty = none, exactly today's week.
+  offer_opt_in?: boolean | null;
+  opt_in_drill_ids?: string[] | null;
   onboarded_at?: string | null; // ISO; null = intake not completed yet
   onboarding_reminder_sent_at?: string | null; // 025: last onboarding-nudge SMS
   week1_monday?: string | null; // NY Monday the program clock started (014)
@@ -100,6 +105,9 @@ export type Drill = {
   // 033: coach-ticked "works in a few yards" - the only drills a player
   // on the tight space setting is given. Absent/false = open space only.
   small_space?: boolean;
+  // 040: a course drill. Never enters a week on its own; only when the
+  // coach offers it to that player (Player.offer_opt_in + opt_in_drill_ids).
+  opt_in?: boolean;
   active: boolean;
   sort: number;
   // 021: demo video + credit ("" = none)

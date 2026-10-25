@@ -572,3 +572,7 @@ may need a sentence saying the course is general guidance, not medical
 advice (lawyer not yet involved, see Sept 26). Where it lands in his
 order: sixth, after recruiting. Announced only when written and in the
 app, like every course.
+NAMED Oct 25 2026 (Coach Yinka: "frame it as a 'general nutrition
+guide'"): the course is called the General Nutrition Guide, and every
+mention of it (page, app tab, texts) carries "general" in the name. The
+framing IS the disclaimer: a guide, not a plan, not a prescription.

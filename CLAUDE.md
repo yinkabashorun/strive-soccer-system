@@ -150,7 +150,9 @@ commit.
       course like recruiting (general food guidance for a training
       day, match day, hydration; no calorie targets, supplements or
       weight goals; a not-medical-advice line, and the privacy / terms
-      may need the same sentence). His before step 1: confirm library
+      may need the same sentence). NAMED Oct 25 (Coach Yinka): the
+      "General Nutrition Guide", "general" in the name everywhere it
+      appears, a guide not a plan. His before step 1: confirm library
       only still stands. Filming rule from Keep It Up: every clip
       arrives with its pattern name and beginner / advanced tag.
       Announce each course only when it is in the app (Oct 12 launch
@@ -1948,6 +1950,12 @@ commit.
       be live with zero filming once he orders them, four need his
       filming or writing. The constraint is his hours this week, so
       phase C decisions come before any course work.
+      NAMED same hour (Coach Yinka: "frame it as a 'general nutrition
+      guide'"): the sixth course is the General Nutrition Guide. The
+      word "general" stays in the name on the page, in the app and in
+      every text; the framing is the disclaimer, a guide and never a
+      plan or a prescription. The not-medical-advice line still goes
+      on the course itself.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

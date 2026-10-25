@@ -120,6 +120,10 @@ export function methodologyContext(
     // Plyo warm-ups are prepended server-side; the AI must never see
     // them as prescribable skill drills.
     if (d.pillar === PLYO_PILLAR) continue;
+    // Course drills (040) are placed by the system in the slot after the
+    // warm-up, for the players the coach offered them to; the AI never
+    // sees them as prescribable skill drills.
+    if (d.opt_in) continue;
     // Strengthening finishers get their own block with their own rules
     // below - they are never a skill drill and never fill a pillar day.
     if (d.pillar === STRENGTH_PILLAR) {

@@ -143,3 +143,17 @@ hand-edited studio plan naming an unoffered course drill gets a
 replacement, not a link), Extra Work and the few-yards templates. Off
 keeps the picks; nothing changes in the week already built. The first
 course drills are the fourteen Keep It Up juggling rows.
+
+Where they go (Oct 24 2026, Coach Yinka: "when you add them add them
+after plyometrics with the warm up. Keep all other drills"): a course
+drill is a slot, not a skill drill. Every session reads plyo warm-up,
+then one offered course drill, then the three skill drills, then any
+finisher. The slot rotates through the ticked drills in bank order (the
+ladder, easiest first) across the sessions of the week and wraps when
+fewer are ticked than there are sessions. Course drills never count
+toward the three skill drills, are never on the AI's menu (the system
+places them, like plyos and finishers), never go in an Extra Work shelf
+or a few-yards template, and a course drill the AI or the studio writes
+as a skill drill is routed to the slot (offered) or dropped (not
+offered) with the session filled back to three skill drills. One per
+session is the default, `COURSE_SLOTS_PER_SESSION` in bank-conform.ts.

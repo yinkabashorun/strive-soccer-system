@@ -4,7 +4,10 @@ import {
   conformSessionsToBank,
   drillFitsPlayer,
   isOffered,
+  isSkillTitle,
   offeredBank,
+  skillBank,
+  templateSessions,
 } from "@/lib/elite/bank-conform";
 import { methodologyContext } from "@/lib/elite/methodology";
 import type { Drill, GeneratedSession } from "@/lib/elite/types";
@@ -29,8 +32,8 @@ function drill(partial: Partial<Drill> & { title: string; pillar: string }): Dri
   } as Drill;
 }
 
-const juggleCatch = drill({ title: "Juggling: one touch, catch", pillar: "Ball Mastery", opt_in: true, small_space: true });
-const juggleKeep = drill({ title: "Juggling: one touch, keep it up", pillar: "Ball Mastery", opt_in: true, small_space: true });
+const juggleCatch = drill({ title: "Juggling: one touch, catch", pillar: "Ball Mastery", opt_in: true, small_space: true, sort: 300 });
+const juggleKeep = drill({ title: "Juggling: one touch, keep it up", pillar: "Ball Mastery", opt_in: true, small_space: true, sort: 305 });
 const bank: Drill[] = [
   drill({ title: "Figure-8 dribble", pillar: "Ball Mastery", small_space: true }),
   drill({ title: "Inside-outside cone weave", pillar: "Ball Mastery" }),
@@ -82,54 +85,128 @@ describe("offeredBank", () => {
     expect(titles).toContain(juggleCatch.title);
     expect(titles).not.toContain(juggleKeep.title);
   });
-  it("the AI's menu never lists an unoffered course drill", () => {
+  it("the AI's menu never lists a course drill, offered or not; the system places them", () => {
     const ctx = methodologyContext(offeredBank(bank, nobody));
     expect(ctx).not.toContain("Juggling:");
     const ctx2 = methodologyContext(offeredBank(bank, offeredCatch));
-    expect(ctx2).toContain(juggleCatch.title);
-    expect(ctx2).not.toContain(juggleKeep.title);
+    expect(ctx2).not.toContain("Juggling:");
+    expect(ctx2).toContain("Figure-8 dribble");
+  });
+  it("skillBank is the menu: no plyos, no finishers, no course drills", () => {
+    const titles = skillBank(bank).map((d) => d.title);
+    expect(titles).not.toContain(juggleCatch.title);
+    expect(titles).not.toContain("Plyo warm-up: Pogo jumps");
+    expect(titles).toContain("Figure-8 dribble");
   });
 });
 
+// Coach Yinka, Oct 24 2026: "when you add them add them after plyometrics
+// with the warm up. Keep all other drills." The offered course drills are a
+// slot right after the plyo warm-up; the three skill drills stay.
 describe("the gates", () => {
   const planNamingJuggling: GeneratedSession[] = [
     {
       title: "Session 1",
       drills: [
+        { title: "Plyo warm-up: Pogo jumps", exercise: "x", reps: "x" },
         { title: juggleCatch.title, exercise: "x", reps: "x" },
         { title: "Figure-8 dribble", exercise: "x", reps: "x" },
         { title: "Neymar Feint", exercise: "x", reps: "x" },
       ],
     },
   ];
-  it("a plan naming a course drill for a player not offered it gets a replacement", () => {
+  const skillsOf = (s: GeneratedSession) => s.drills.filter((d) => isSkillTitle(d.title) && !d.title.startsWith("Juggling:"));
+  it("a plan naming a course drill for a player not offered it gets a replacement and still has three skill drills", () => {
     const out = conformSessionsToBank(planNamingJuggling, offeredBank(bank, nobody), nobody, "Focus.", "optional");
     const titles = out.flatMap((s) => s.drills.map((d) => d.title));
     expect(titles).not.toContain(juggleCatch.title);
     expect(titles.filter((t) => t.startsWith("Juggling:"))).toHaveLength(0);
+    expect(skillsOf(out[0])).toHaveLength(3);
   });
-  it("the same plan keeps the drill for a player it was offered to", () => {
+  it("for a player it was offered to, the course drill sits right after the warm-up and the three skill drills stay", () => {
     const out = conformSessionsToBank(planNamingJuggling, offeredBank(bank, offeredCatch), offeredCatch, "Focus.", "optional");
-    const titles = out.flatMap((s) => s.drills.map((d) => d.title));
-    expect(titles).toContain(juggleCatch.title);
+    const titles = out[0].drills.map((d) => d.title);
+    expect(titles[0]).toBe("Plyo warm-up: Pogo jumps");
+    expect(titles[1]).toBe(juggleCatch.title);
+    expect(titles.slice(2)).toEqual(["Figure-8 dribble", "Neymar Feint", expect.stringMatching(/^(?!Juggling:|Plyo)/)]);
+    expect(skillsOf(out[0])).toHaveLength(3);
+    expect(titles.filter((t) => t.startsWith("Juggling:"))).toHaveLength(1);
+  });
+  it("the slot is filled even when the AI never wrote a course drill, and a written one is never kept as a skill drill", () => {
+    const plain: GeneratedSession[] = [
+      { title: "Session 1", drills: [{ title: "Figure-8 dribble", exercise: "x", reps: "x" }] },
+    ];
+    const out = conformSessionsToBank(plain, offeredBank(bank, offeredCatch), offeredCatch, "Focus.", "optional");
+    const titles = out[0].drills.map((d) => d.title);
+    expect(titles[0]).toBe(juggleCatch.title); // no plyo written, so the slot leads
+    expect(skillsOf(out[0])).toHaveLength(3);
+    expect(titles.filter((t) => t.startsWith("Juggling:"))).toHaveLength(1);
+  });
+  it("rotates through the ticked drills in ladder order across the week, one per session", () => {
+    const both = { ...nobody, offer_opt_in: true, opt_in_drill_ids: [juggleKeep.id, juggleCatch.id] };
+    const week: GeneratedSession[] = [1, 2, 3, 4].map((n) => ({
+      title: `Session ${n}`,
+      drills: [
+        { title: "Plyo warm-up: Pogo jumps", exercise: "x", reps: "x" },
+        { title: "Figure-8 dribble", exercise: "x", reps: "x" },
+      ],
+    }));
+    const out = conformSessionsToBank(week, offeredBank(bank, both), both, "Focus.", "optional");
+    const slot = out.map((s) => s.drills[1].title);
+    // juggleCatch sorts 300, juggleKeep 305: catch first, then keep it up, then round again.
+    expect(slot).toEqual([juggleCatch.title, juggleKeep.title, juggleCatch.title, juggleKeep.title]);
+    for (const s of out) {
+      expect(s.drills[0].title).toBe("Plyo warm-up: Pogo jumps");
+      expect(skillsOf(s)).toHaveLength(3);
+      expect(s.drills.filter((d) => d.title.startsWith("Juggling:"))).toHaveLength(1);
+    }
+  });
+  it("a required finisher still closes the session, after the skill drills", () => {
+    const withCore = [...bank, drill({ title: "Strength: Front plank", pillar: "Strengthening" })];
+    const out = conformSessionsToBank(planNamingJuggling, offeredBank(withCore, offeredCatch), offeredCatch, "Focus.", "required");
+    const titles = out[0].drills.map((d) => d.title);
+    expect(titles[0]).toBe("Plyo warm-up: Pogo jumps");
+    expect(titles[1]).toBe(juggleCatch.title);
+    expect(titles[titles.length - 1]).toBe("Strength: Front plank");
+    expect(skillsOf(out[0])).toHaveLength(3);
+  });
+  it("a few-yards template week gets the same slot after the warm-up", () => {
+    const tightOffered = { has_wall: false, space: "tight" as const, offer_opt_in: true, opt_in_drill_ids: [juggleCatch.id] };
+    const template = {
+      id: "t1",
+      title: "Few yards: touches",
+      space: "tight" as const,
+      sort: 1,
+      active: true,
+      drills: [bank[0], bank[2], bank[3]],
+    };
+    const t = templateSessions({ templates: [template], bank, player: tightOffered, count: 2, usage: {}, strength: "optional" })!;
+    for (const s of t.sessions) {
+      const titles = s.drills.map((d) => d.title);
+      expect(titles[0]).toBe("Plyo warm-up: Pogo jumps");
+      expect(titles[1]).toBe(juggleCatch.title);
+      expect(titles.slice(2)).toEqual(["Figure-8 dribble", "Ronaldinho drill", "Neymar Feint"]);
+    }
   });
   it("even an unfiltered bank cannot place a course drill through the fits rule", () => {
     const out = conformSessionsToBank(planNamingJuggling, bank, nobody, "Focus.", "optional");
     const titles = out.flatMap((s) => s.drills.map((d) => d.title));
     expect(titles.filter((t) => t.startsWith("Juggling:"))).toHaveLength(0);
   });
-  it("Extra Work never reaches for an unoffered course drill", () => {
-    for (let i = 0; i < 20; i++) {
-      const s = composeExtraSession({
-        bank,
-        player: nobody,
-        shelf: "ball_mastery",
-        doneTitles: [],
-        weekTitles: [],
-        strength: "optional",
-      });
-      const titles = (s?.drills ?? []).map((d) => d.title);
-      expect(titles.filter((t) => t.startsWith("Juggling:"))).toHaveLength(0);
+  it("Extra Work never includes a course drill, offered or not", () => {
+    for (const player of [nobody, offeredCatch]) {
+      for (let i = 0; i < 10; i++) {
+        const s = composeExtraSession({
+          bank,
+          player,
+          shelf: "ball_mastery",
+          doneTitles: [],
+          weekTitles: [],
+          strength: "optional",
+        });
+        const titles = (s?.drills ?? []).map((d) => d.title);
+        expect(titles.filter((t) => t.startsWith("Juggling:"))).toHaveLength(0);
+      }
     }
   });
 });

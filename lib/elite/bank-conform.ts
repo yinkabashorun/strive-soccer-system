@@ -57,6 +57,34 @@ export function offeredBank(bank: Drill[], env?: PlayerEnv | null): Drill[] {
   return bank.filter((d) => !d.opt_in || isOffered(d, env));
 }
 
+// Course drills are a SLOT, not skill drills (Coach Yinka, Oct 24 2026:
+// "when you add them add them after plyometrics with the warm up. Keep
+// all other drills"). In every session the offered course drills sit
+// right after the plyo warm-up, before the three skill drills, and never
+// count toward those three. One per session, rotating through the ticked
+// drills in bank order (the ladder, easiest first) across the week; the
+// system places them like plyos and finishers, so they are never on the
+// AI's menu and a title the AI or the studio writes for one is routed to
+// the slot, never matched as a skill drill.
+export const COURSE_SLOTS_PER_SESSION = 1;
+
+export function isCourseDrill(d: Drill): boolean {
+  return Boolean(d.opt_in);
+}
+
+// The offered course drills for this player, in ladder order.
+export function coursePoolFor(bank: Drill[], env?: PlayerEnv | null): Drill[] {
+  return bank
+    .filter((d) => isCourseDrill(d) && drillFitsPlayer(d, env))
+    .sort((a, b) => a.sort - b.sort || a.title.localeCompare(b.title));
+}
+
+// The skill drills the AI may compose from and the builder may fill with:
+// never a plyo, never a finisher, never a course drill.
+export function skillBank(bank: Drill[]): Drill[] {
+  return bank.filter((d) => isSkillPillar(d.pillar) && !isCourseDrill(d));
+}
+
 const MIN_SKILLS = 3;
 
 // Strengthening finishers (bank pillar "Strengthening"): "required" puts
@@ -221,9 +249,16 @@ export function conformSessionsToBank(
   }
 
   const canDo = (d: Drill) => drillFitsPlayer(d, player);
-  const skillsPool = bank.filter((d) => isSkillPillar(d.pillar) && canDo(d));
+  const skillsPool = skillBank(bank).filter(canDo);
   const plyoPool = bank.filter((d) => d.pillar === PLYO_PILLAR);
   const strengthPool = bank.filter((d) => d.pillar === STRENGTH_PILLAR);
+  // Course drills (040): the ones offered to this player fill the slot
+  // after the warm-up; EVERY course drill in the bank, offered or not, is
+  // recognised by title so one the AI or the studio wrote is never kept
+  // as a skill drill (offered: the slot already places it; unoffered: it
+  // does not exist for this player).
+  const coursePool = coursePoolFor(bank, player);
+  const courseTitles = bank.filter(isCourseDrill);
   if (skillsPool.length === 0) return sessions;
 
   // Titles already placed this week - replacements avoid repeats while the
@@ -231,8 +266,11 @@ export function conformSessionsToBank(
   const usedWeek = new Set<string>();
   let plyoSpin = 0;
   let strengthSpin = 0;
+  let courseSpin = 0;
   const isStrengthDrill = (d: GeneratedDrill) =>
     isStrengthTitle(d.title) || Boolean(matchBankDrill(d.title, strengthPool));
+  const isCourseTitle = (d: GeneratedDrill) =>
+    courseTitles.length > 0 && Boolean(matchBankDrill(d.title, courseTitles));
 
   const pickSkill = (pillar: string | null, usedSession: Set<string>): Drill =>
     pickSkillFrom(skillsPool, pillar, usedWeek, usedSession);
@@ -248,7 +286,11 @@ export function conformSessionsToBank(
     const sessionPillar =
       mostCommon(matchedPillars) ?? pillarFor(sessionText) ?? null;
 
-    const drills: GeneratedDrill[] = [];
+    // A session reads warm-up, course slot, skill drills, finisher. The
+    // four parts are collected apart so each rule holds whatever order
+    // the AI or the studio wrote them in.
+    const warm: GeneratedDrill[] = [];
+    const skills: GeneratedDrill[] = [];
     // Strengthening finishers are handled apart from the skill drills:
     // matched to the filmed strengthening pool (or replaced from it),
     // capped at one, and appended LAST after the skill fill below.
@@ -267,35 +309,46 @@ export function conformSessionsToBank(
         const chosen = hit ?? plyoPool[plyoSpin++ % plyoPool.length];
         if (usedSession.has(chosen.title)) continue;
         usedSession.add(chosen.title);
-        drills.push(hit ? { ...fromBank(chosen), ...keepTailoring(d) } : fromBank(chosen));
+        warm.push(hit ? { ...fromBank(chosen), ...keepTailoring(d) } : fromBank(chosen));
         continue;
       }
+      // A course drill written as a skill drill: the slot below places the
+      // offered ones; an unoffered one does not exist for this player.
+      if (isCourseTitle(d)) continue;
       const hit = matchBankDrill(d.title, skillsPool);
       if (hit && !usedSession.has(hit.title)) {
         usedSession.add(hit.title);
         usedWeek.add(hit.title);
         // Canonical title (the id link is by title), the AI's tailoring kept.
-        drills.push({ ...fromBank(hit), ...keepTailoring(d), title: hit.title });
+        skills.push({ ...fromBank(hit), ...keepTailoring(d), title: hit.title });
         continue;
       }
       const pillar = hit ? hit.pillar : pillarFor(d.title) ?? sessionPillar;
       const sub = pickSkill(pillar, usedSession);
       usedSession.add(sub.title);
       usedWeek.add(sub.title);
-      drills.push(fromBank(sub));
+      skills.push(fromBank(sub));
     }
     // A session is plyo + three skill drills. A thin or empty session is
     // filled from the filmed bank, same pillar first - never with an
     // invented padding drill (the old "Apply under pressure" / "Focus
-    // block" rows reached real players with no video).
-    let skillCount = drills.filter((d) => !isPlyoTitle(d.title)).length;
-    while (skillCount < MIN_SKILLS) {
+    // block" rows reached real players with no video). Course drills are
+    // not skill drills and never count here.
+    while (skills.length < MIN_SKILLS) {
       const sub = pickSkill(sessionPillar, usedSession);
       if (usedSession.has(sub.title)) break; // bank exhausted for this session
       usedSession.add(sub.title);
       usedWeek.add(sub.title);
-      drills.push(fromBank(sub));
-      skillCount++;
+      skills.push(fromBank(sub));
+    }
+    // Course slot, right after the warm-up: the offered course drills in
+    // ladder order, rotating across the sessions of the week.
+    const course: GeneratedDrill[] = [];
+    for (let i = 0; i < COURSE_SLOTS_PER_SESSION && i < coursePool.length; i++) {
+      const pick = coursePool[courseSpin++ % coursePool.length];
+      if (usedSession.has(pick.title)) continue;
+      usedSession.add(pick.title);
+      course.push(fromBank(pick));
     }
     // Strengthening finisher, last. Required mode guarantees one per
     // session (rotating through the pool across the week) even when the
@@ -303,6 +356,7 @@ export function conformSessionsToBank(
     if (!finisher && strength === "required" && strengthPool.length > 0) {
       finisher = fromBank(strengthPool[strengthSpin++ % strengthPool.length]);
     }
+    const drills = [...warm, ...course, ...skills];
     if (finisher) drills.push(finisher);
     return { ...s, drills };
   });
@@ -380,7 +434,9 @@ export function composeExtraSession(opts: {
 }): GeneratedSession | null {
   const { bank, player, shelf, doneTitles, weekTitles, strength = "optional" } = opts;
   const fits = (d: Drill) => drillFitsPlayer(d, player);
-  const skillsPool = bank.filter((d) => isSkillPillar(d.pillar) && fits(d));
+  // Skill drills only: course drills belong to the week's warm-up slot,
+  // never to an Extra Work shelf.
+  const skillsPool = skillBank(bank).filter(fits);
   const weekSet = new Set(weekTitles.map(normalizeDrillTitle));
 
   const done = new Set(doneTitles.map(normalizeDrillTitle));
@@ -446,7 +502,12 @@ function usableTemplates(templates: SessionTemplate[], env: PlayerEnv | null | u
     .map((t) => ({
       ...t,
       drills: t.drills.filter(
-        (d) => d.active !== false && Boolean(d.video_url) && isSkillPillar(d.pillar) && drillFitsPlayer(d, env)
+        (d) =>
+          d.active !== false &&
+          Boolean(d.video_url) &&
+          isSkillPillar(d.pillar) &&
+          !isCourseDrill(d) &&
+          drillFitsPlayer(d, env)
       ),
     }))
     .filter((t) => t.drills.length > 0)
@@ -480,7 +541,11 @@ export function templateSessions(opts: {
 
   const plyoPool = bank.filter((d) => d.pillar === PLYO_PILLAR && d.video_url);
   const strengthPool = bank.filter((d) => d.pillar === STRENGTH_PILLAR && d.video_url);
-  const skillsPool = bank.filter((d) => isSkillPillar(d.pillar) && drillFitsPlayer(d, player));
+  const skillsPool = skillBank(bank).filter((d) => drillFitsPlayer(d, player));
+  // Course slot (040): same rule as every other session, right after the
+  // warm-up, never counted as one of the template's skill drills.
+  const coursePool = coursePoolFor(bank, player).filter((d) => d.video_url);
+  let courseSpin = 0;
   const usedWeek = new Set<string>();
   const sessions: GeneratedSession[] = [];
   for (let i = 0; i < count; i++) {
@@ -491,6 +556,12 @@ export function templateSessions(opts: {
       const warm = plyoPool[i % plyoPool.length];
       usedSession.add(warm.title);
       drills.push(fromBank(warm));
+    }
+    for (let c = 0; c < COURSE_SLOTS_PER_SESSION && c < coursePool.length; c++) {
+      const pick = coursePool[courseSpin++ % coursePool.length];
+      if (usedSession.has(pick.title)) continue;
+      usedSession.add(pick.title);
+      drills.push(fromBank(pick));
     }
     for (const d of t.drills) {
       if (usedSession.has(d.title)) continue;

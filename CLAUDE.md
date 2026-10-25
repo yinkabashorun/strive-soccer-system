@@ -122,8 +122,11 @@ commit.
       drills, his naming pattern, bank titles and files match. IN THE
       WEEK Oct 24 (see RECORD): the 14 juggling rows are ACTIVE course
       drills (opt_in); on any player's page, switch "Offered in the
-      week" on and tick the drills, and the next build may use them.
+      week" on and tick the drills, and the next build places ONE per
+      session right after the plyo warm-up, rotating through the ticks
+      in ladder order; the three skill drills stay (Oct 25, see RECORD).
       Nobody is offered anything yet; Coach Yinka does that per player.
+      DEFAULT he can change: one course drill per session.
       Still his: (1) any cue he coaches differently; (2) the beginner
       pass number (10 in a row is mine); (3) film Level 10, feet +
       thighs + head in one run, ~10 s, so the name can carry
@@ -1866,6 +1869,33 @@ commit.
       Verify green (typecheck, lint, 117 tests, build, cron + library
       checks). docs/METHODOLOGY.md has a "Course drills, offered per
       player" section. No player data touched.
+- [x] SHIPPED Oct 25 2026, COURSE DRILLS AS A WARM-UP SLOT (Coach Yinka,
+      Oct 24: "when you add them add them after plyometrics woth the
+      warm up. Keep all other drills"): an offered course drill is a
+      SLOT, never a skill drill. Every session now reads plyo warm-up,
+      then one offered course drill, then the three skill drills, then
+      any finisher. conformSessionsToBank (bank-conform.ts) collects the
+      four parts apart so the order holds whatever the AI or the studio
+      wrote: skillBank() is the skill pool (no plyos, no finishers, no
+      course drills), coursePoolFor() is the player's offered course
+      drills in bank sort order (the ladder, easiest first), the slot
+      rotates through them across the sessions of the week and wraps
+      when fewer are ticked than sessions, and a course drill the AI or
+      the studio wrote as a skill drill is routed to the slot (offered)
+      or dropped (not offered) with the session filled back to three
+      skill drills from the bank. Course drills are off the AI's menu
+      entirely (methodologyContext skips opt_in like plyos), out of the
+      fallback's pillar days, out of Extra Work shelves and out of the
+      few-yards template editor and the template path (which gets the
+      same slot after its warm-up). Both gates carry it, since both call
+      conformSessionsToBank. COURSE_SLOTS_PER_SESSION = 1 is the default
+      he can change. tests/opt-in.test.ts grew to 17 (placement after
+      the warm-up, three skills kept, slot filled when the AI wrote
+      none, ladder rotation across four sessions, finisher still last,
+      template week gets the slot, Extra Work never includes one); 122
+      tests total, verify green. NOT changed: the player UI shows a
+      course drill with no badge (plyos and finishers have one); no
+      player data touched; 0 players offered anything.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -20,9 +20,9 @@ import { sessionsFor, sessionsWord } from "./training";
 import {
   conformSessionsToBank,
   type TemplateContext,
-  isSkillPillar,
   isStrengthTitle,
   offeredBank,
+  skillBank,
   strengthRequired,
   type StrengthMode,
 } from "./bank-conform";
@@ -321,9 +321,11 @@ function fallbackPlan(
   // One pillar per session, three bank drills each (cycling if short).
   // Wall drills only go to players who told us they have a wall.
   // Filmed bank only. No bank, no plan - same rule as the AI path.
-  if (!bank || !bank.some((d) => isSkillPillar(d.pillar))) throw new EmptyBankError();
+  // Course drills (040) are never skill drills: the slot after the warm-up
+  // places the offered ones in conformSessionsToBank, not the pillar days.
+  if (!bank || skillBank(bank).length === 0) throw new EmptyBankError();
   const bankFor = (pillar: string) =>
-    bank
+    skillBank(bank)
       .filter((d) => d.pillar === pillar)
       .map((d) => ({ title: d.title, how: d.how, reps: d.reps, minutes: d.minutes, cues: d.cues || undefined, needsWall: d.needs_wall }));
   // A pillar is only schedulable when the bank actually has drills the

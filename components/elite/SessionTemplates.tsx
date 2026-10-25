@@ -33,11 +33,18 @@ export function SessionTemplates({
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
-  // Only filmed skill drills can go in a template.
+  // Only filmed skill drills can go in a template. Course drills (040) are
+  // not skill drills: they fill the slot after the warm-up for the players
+  // the coach offers them to, in every session, templates included.
   const pickable = useMemo(
     () =>
       bank.filter(
-        (d) => d.active !== false && Boolean(d.video_url) && d.pillar !== PLYO_PILLAR && d.pillar !== STRENGTH_PILLAR
+        (d) =>
+          d.active !== false &&
+          Boolean(d.video_url) &&
+          d.pillar !== PLYO_PILLAR &&
+          d.pillar !== STRENGTH_PILLAR &&
+          !d.opt_in
       ),
     [bank]
   );

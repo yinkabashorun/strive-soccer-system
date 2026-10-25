@@ -1995,6 +1995,22 @@ commit.
       Ashburn gross already includes app; Gary's split is per session
       and unchanged. Nothing changes on any page or in Stripe until he
       stamps the numbers.
+- [x] PROPOSED Oct 25 2026 (Coach Yinka: "Give your ideas on pricing"),
+      ALL UNSTAMPED, my numbers derived from his confirmed rates: keep
+      $500 as the Elite list price from Nov 2 and never bring $249 back
+      (the lock is only worth something if the price behind it is real);
+      the only way under $500 is pay in full, 12 months for the price
+      of 10 ($4,990 at list, $2,490 founding) or 3 months for $1,350;
+      app-first ladder as Elite + field time, Hybrid = Elite + $250
+      ($750 list, $499 founding), group monthly = Elite + $125 ($625
+      list, $374 founding) OR keep Small Group $148 as the one no-app
+      entry product (the honest tension: group families are the
+      price-sensitive ones); second player in a family on Elite at half
+      ($250 list, $125 founding), which also replaces Duo Hybrid's $650
+      math; drop-ins unchanged; the in-person ladder stays call-only,
+      never on /demo. Risk named: $500 for a remote product with no
+      Side by Side proof yet may stall after Nov 1; the lever then is
+      proof and the stack, not the price. Nothing changed anywhere.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

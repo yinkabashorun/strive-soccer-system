@@ -35,6 +35,6 @@ If you've ever wondered what your player should actually be doing between practi
 ## Ad 5 (Retargeting, the offer)
 You watched the video. Here's the rest.
 
-Strive Elite is $249 a month, locked for life if you join by Nov 1. $350 a month after that. Month to month, same-day refund if it's not for you.
+Strive Elite is $249 a month, locked for life if you join by Nov 1. $500 a month after that. Month to month, same-day refund if it's not for you.
 
 Founding families are already training on it. Lock in your rate: thestriveapp.com/demo

@@ -1995,6 +1995,72 @@ commit.
       Ashburn gross already includes app; Gary's split is per session
       and unchanged. Nothing changes on any page or in Stripe until he
       stamps the numbers.
+- [x] PROPOSED Oct 25 2026 (Coach Yinka: "Give your ideas on pricing"),
+      ALL UNSTAMPED, my numbers derived from his confirmed rates: keep
+      $500 as the Elite list price from Nov 2 and never bring $249 back
+      (the lock is only worth something if the price behind it is real);
+      the only way under $500 is pay in full, 12 months for the price
+      of 10 ($4,990 at list, $2,490 founding) or 3 months for $1,350;
+      app-first ladder as Elite + field time, Hybrid = Elite + $250
+      ($750 list, $499 founding), group monthly = Elite + $125 ($625
+      list, $374 founding) OR keep Small Group $148 as the one no-app
+      entry product (the honest tension: group families are the
+      price-sensitive ones); second player in a family on Elite at half
+      ($250 list, $125 founding), which also replaces Duo Hybrid's $650
+      math; drop-ins unchanged; the in-person ladder stays call-only,
+      never on /demo. Risk named: $500 for a remote product with no
+      Side by Side proof yet may stall after Nov 1; the lever then is
+      proof and the stack, not the price. Nothing changed anywhere.
+- [x] THE PATH TO $10K A MONTH, written Oct 25 2026 (Coach Yinka: "What
+      is the path to 10k a month?"): $10k is about 30 app members at
+      the confirmed prices (20 founding at $249 = $4,980 plus 10 at
+      $500 = $5,000), fewer with Hybrid or in-person on top; today 5
+      real families. At Carla's own target of 4 calls booked a week
+      and every other call closing, that is 2 new families a week, so
+      30 members lands around the end of January. The sequence: (1)
+      this week, announce and get the page live, founding families at
+      $249, fix the Supabase auth URLs BEFORE the rush (every password
+      reset is dead) and add the three missing parent phones; (2)
+      November at $500, the proof engine runs on its own (first clip on
+      join, Side by Side two weeks later, posted with consent), every
+      local call sold app-first; (3) December and January, winter is
+      the online season, weak foot and strength courses live from
+      filmed drills, the rest as clips land, courses as the reason to
+      stay. Risks named: unannounced is the only real blocker; the
+      recap text still gated to Complete; no proof for three weeks
+      after the first signups. Nothing changed; advice only.
+- [x] LIVE Oct 25 2026, PHASE C PAGE (Coach Yinka: "Yes" to "You read
+      one page and one caption", then "Okay get started on your list"):
+      thestriveapp.com/demo rewritten around the live stack. New
+      "What's in it" block (The week, Extra Work, Send a Clip, Side by
+      Side, Pick up where you left off, Strength finishers, Keep It Up,
+      Any space), two new fair questions (what you need at home, do we
+      have to commit), offer block $500/mo from Nov 2, $249 locked for
+      life by Nov 1, month to month, same-day refund. Nothing on calls,
+      the guarantee, pay in full or courses (announce only what is
+      real). Headline and VSL unchanged; "Coach Yinka and Coach Gary
+      built it together. Coach Yinka builds every week." The page
+      promises the Monday text and the progress clips, NOT a weekly
+      recap, because buildParentRecap still returns null for tier
+      elite (flagged to him; one line flips it). Same commit: the $500
+      line on ad 5 (re-rendered), the ad copy sheet, captions and both
+      Manus briefs; branch price-500-hold is superseded by this and can
+      be deleted. Announcement drafted at marketing/announcement/
+      strive-elite-announcement.md (main post, Oct 31 last call, three
+      story lines, Carla's ELITE reply) and shown with the page copy at
+      https://claude.ai/artifact/GYJAY93Zp5PSMdSebryDE6. Still his:
+      post it; replace Stripe's $350 standard price with $500 before
+      Nov 2; the filmed VSL still says $350 and Complete at $600.
+- [x] DONE Oct 25 2026 (Coach Yinka: "remove all audio from vids Make
+      them on mute"): the audio track stripped from all 43 of the 45
+      drill clips in public/drills/ that had one (ffmpeg -an, picture
+      copied, no re-encode, faststart kept); the two without audio
+      untouched. DrillVideo.tsx (the landing tiles and the app's drill
+      player) was already muted + playsInline, so the 26 Manus-hosted
+      clips play silent too. Left WITH sound on purpose: the VSL, the
+      outro MP4s (their swishes are deliberate), and families' own
+      clips in the chat and the progress panel. Rule from here: every
+      drill clip is encoded with -an.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

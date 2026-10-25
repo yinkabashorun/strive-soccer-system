@@ -9,7 +9,7 @@ import { sendPushToPlayer } from "./push";
 import { normalizePhone, sendPlayerSMS } from "./sms";
 import { isSundayEveNY, liveWeekFor, mondayOfWeekNY, nextMondayNY, unlockInstant } from "./time";
 import { getDrillBank, loadTemplateContext, normalizeTitle } from "./data";
-import { conformSessionsToBank, strengthRequired } from "./bank-conform";
+import { conformSessionsToBank, offeredBank, strengthRequired } from "./bank-conform";
 import { sessionsWord, TRAINING_LOADS } from "./training";
 import { resolveWeekTarget } from "./week-target";
 import { buildParentRecap } from "./parent-recap";
@@ -119,6 +119,42 @@ export async function setTrainingPlan(
     if (error) return { ok: false };
     revalidatePath(`/coach/players/${playerId}`);
   }
+  return { ok: true };
+}
+
+// The player columns the publish gate reads for the fits rules (019 wall,
+// 033 space, 040 offered course drills).
+type PlayerEnvRow = {
+  has_wall?: boolean | null;
+  space?: TrainingSpace | null;
+  offer_opt_in?: boolean | null;
+  opt_in_drill_ids?: string[] | null;
+};
+
+// Course drills offered per player (040). The coach switches the player
+// on and ticks which opt-in bank drills the builder may use for them.
+// Takes effect on the next generated plan; the week already built is
+// left as it is. Only real opt-in drills are ever stored. Coach-only.
+export async function setOfferedDrills(
+  playerId: string,
+  patch: { offer_opt_in?: boolean; opt_in_drill_ids?: string[] }
+) {
+  if (!(await requireCoach())) return { ok: false };
+  const supabase = createClient();
+  if (!supabase) return { ok: true };
+  const update: { offer_opt_in?: boolean; opt_in_drill_ids?: string[] } = {};
+  if (typeof patch.offer_opt_in === "boolean") update.offer_opt_in = patch.offer_opt_in;
+  if (Array.isArray(patch.opt_in_drill_ids)) {
+    const wanted = Array.from(new Set(patch.opt_in_drill_ids.filter((s) => typeof s === "string"))).slice(0, 200);
+    const { data } = wanted.length
+      ? await supabase.from("elite_drills").select("id").eq("opt_in", true).in("id", wanted)
+      : { data: [] as { id: string }[] };
+    update.opt_in_drill_ids = ((data as { id: string }[] | null) ?? []).map((r) => r.id);
+  }
+  if (!Object.keys(update).length) return { ok: false };
+  const { error } = await supabase.from("elite_players").update(update).eq("id", playerId);
+  if (error) return { ok: false };
+  revalidatePath(`/coach/players/${playerId}`);
   return { ok: true };
 }
 
@@ -550,7 +586,7 @@ export async function applyGeneratedPlanCore(
 
   const { data: player } = await supabase
     .from("elite_players")
-    .select("current_week, week1_monday, full_name, parent_name, has_wall, space, training_load, coach_memory")
+    .select("current_week, week1_monday, full_name, parent_name, has_wall, space, training_load, coach_memory, offer_opt_in, opt_in_drill_ids")
     .eq("id", playerId)
     .maybeSingle();
 
@@ -617,10 +653,14 @@ export async function applyGeneratedPlanCore(
   // logs it as an error, and the coach gets a text, before any row is
   // written. (The database refuses such rows too - migration 031.)
   const byTitle = new Map<string, { id: string; video_url: string | null }>();
-  const { drills: bank } = await getDrillBank({ onlyWithVideo: true, client: supabase });
-  if (bank.length === 0) {
+  const { drills: wholeBank } = await getDrillBank({ onlyWithVideo: true, client: supabase });
+  if (wholeBank.length === 0) {
     throw new Error("Refusing to publish: the drill bank has no filmed drills reachable");
   }
+  // Course drills (040): an opt-in drill the coach has not offered this
+  // player is not in the bank as far as this publish is concerned, so a
+  // hand-edited studio plan naming it gets a replacement, not a link.
+  const bank = offeredBank(wholeBank, player as PlayerEnvRow | null);
   // Same strengthening rule as generation: a player whose note (or these
   // notes) mentions an injury / rehab / core / hip / strength work ends
   // every session with one filmed finisher, enforced here too so a
@@ -630,7 +670,7 @@ export async function applyGeneratedPlanCore(
   )
     ? "required"
     : "optional";
-  const env = player as { has_wall?: boolean | null; space?: TrainingSpace | null } | null;
+  const env = player as PlayerEnvRow | null;
   // Few-yards players (035): the publish gate loads the coach's templates
   // and this player's rotation itself, so a hand-edited studio plan for a
   // tight-space player still publishes as templates.
@@ -638,7 +678,14 @@ export async function applyGeneratedPlanCore(
   const sessionsToPublish = conformSessionsToBank(
     plan.sessions,
     bank,
-    env ? { has_wall: env.has_wall ?? null, space: env.space ?? null } : null,
+    env
+      ? {
+          has_wall: env.has_wall ?? null,
+          space: env.space ?? null,
+          offer_opt_in: env.offer_opt_in ?? null,
+          opt_in_drill_ids: env.opt_in_drill_ids ?? null,
+        }
+      : null,
     plan.weekly_focus,
     strength,
     tpl

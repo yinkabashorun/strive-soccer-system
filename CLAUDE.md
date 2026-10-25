@@ -119,23 +119,18 @@ commit.
       preview at https://claude.ai/artifact/EZzXQaiXEkfhSW3SU6fCUj,
       course at marketing/courses/keep-it-up/course.md. SORTED AND
       NAMED Oct 23 on his corrections (see RECORD): 7 levels, 14
-      drills, his naming pattern, bank titles and files match. BUILD
-      DESIGN WRITTEN Oct 23 (marketing/offer/offer-stack-build.md,
-      Item 9: Courses tab as a library for everyone, player tier from
-      league + age as a backend-only formula with his override, drill
-      tiers in the bank, tier rule at both gates, overload on his
-      word). Tiers DECIDED Oct 23 ("beginner ones to the beginners,
-      advanced to the advanced": catch drills tier 1, keep it up
-      drills tier 2, none for tier 3). Waiting on Coach Yinka before
-      code: a league for the 7 existing players, drop the onboarding
-      self-pick or keep it, the beginner pass number; also
-      (1) any cue he coaches differently;
-      (2) stamp the pass marks (all proposals); (3) film Level 10,
-      feet + thighs + head in one run, ~10 s, so the name can carry
-      "10-Level"; (4) flip Active at /coach/drills on any of the 15
-      "Juggling:" bank drills he wants the weekly builder to use (all
-      inserted OFF). Still unbuilt: the member-only course page (the
-      "program" primitive from the Oct 14/16 decisions).
+      drills, his naming pattern, bank titles and files match. IN THE
+      WEEK Oct 24 (see RECORD): the 14 juggling rows are ACTIVE course
+      drills (opt_in); on any player's page, switch "Offered in the
+      week" on and tick the drills, and the next build may use them.
+      Nobody is offered anything yet; Coach Yinka does that per player.
+      Still his: (1) any cue he coaches differently; (2) the beginner
+      pass number (10 in a row is mine); (3) film Level 10, feet +
+      thighs + head in one run, ~10 s, so the name can carry
+      "10-Level". Still unbuilt: the Courses tab in the app (his Oct
+      23 quiz: a library every member sees, nothing tracked; the
+      league / tier formula from that quiz is DROPPED, superseded by
+      the switch).
 
 ### RECORD (chronological)
 
@@ -1819,6 +1814,58 @@ commit.
       drills (thighs, laces, catch; laces, thigh, catch) and one
       Advanced; the second beginner carries a pass mark again. No
       "Intermediate" tag anywhere.
+      BRAINSTORM Oct 23 2026 (Coach Yinka: "lets brainstorm how we can
+      build this in a way where we can easily integrate it into the
+      drill bank and it fits the format of the assigned personalized
+      training"): quiz answers were league list = the GHL four, "the
+      league itself is the level", auto from league + age with his
+      override, "they never need to see their league band at all its
+      just our backend formula", Courses tab = library only, everyone
+      sees it, "beginner ones to the beginners and advanced to the
+      advanced". Design written as Item 9 in offer-stack-build.md.
+      THEN SUPERSEDED the same night (Coach Yinka: "Actually ... Just
+      make it an option for me to toggle to offer juggling drills then
+      select the ones you can choose from for the player"): no
+      leagues, no tiers, no formula. The Item 9 section carries the
+      superseded note; the quiz answers stay there as the record.
+- [x] SHIPPED Oct 24 2026, COURSE DRILLS OFFERED PER PLAYER (Coach
+      Yinka, Oct 23: "Just make it an option for me to toggle to offer
+      juggling drills then select the ones you can choose from for the
+      player"): migration 040 APPLIED TO PROD statement by statement
+      (verified: columns present, prune trigger present, guard function
+      contains opt_in_drill_ids): elite_drills.opt_in (a course drill,
+      never in a week on its own), elite_players.offer_opt_in +
+      opt_in_drill_ids uuid[] (the coach's switch and picks), the 008
+      privilege guard extended so a player cannot set either, and an
+      after-delete trigger on elite_drills that removes a deleted
+      drill's id from every player's picks. Every default reproduces
+      today's week: no player is offered anything until Coach Yinka
+      acts. THE RULE, in one place, bank-conform.ts: drillFitsPlayer
+      refuses an opt-in drill unless the player is switched on AND
+      that exact id is ticked; offeredBank() strips unoffered course
+      drills from the bank before the AI is shown the menu
+      (generatePlanFromNotes), before the fallback composes, at the
+      publish gate (applyGeneratedPlanCore reads offer_opt_in and
+      opt_in_drill_ids off the player row, so a hand-edited studio
+      plan naming an unoffered course drill gets a replacement, not a
+      link), in Extra Work and in the few-yards templates. COACH UI:
+      OfferedDrillsPanel on the player page under Intake ("Juggling
+      drills" while every course drill is a juggling row, "Course
+      drills" otherwise): a switch "Offered in the week" / "Not
+      offered" and a tick per course drill; off keeps the picks, the
+      next build ignores them; takes effect on the next generated
+      week, never the week already built. /coach/drills: "Course drill
+      (only in a week when you offer it to that player)" tick on the
+      drill form and a "course" badge in the list. setOfferedDrills
+      (coach-actions.ts) stores only ids that are real opt-in drills.
+      DATA: the 14 "Juggling:" rows set opt_in = true AND active =
+      true (bank: 71 active, 14 of them course drills, 0 players
+      offered). tests/opt-in.test.ts, 12 tests: the fits rule in every
+      state, offeredBank, the AI menu never lists an unoffered course
+      drill, both gates replace one, Extra Work never reaches for one.
+      Verify green (typecheck, lint, 117 tests, build, cron + library
+      checks). docs/METHODOLOGY.md has a "Course drills, offered per
+      player" section. No player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

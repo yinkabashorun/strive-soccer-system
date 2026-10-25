@@ -86,7 +86,12 @@ export async function addExtraSession(shelf: ExtraShelf) {
 
   const session = composeExtraSession({
     bank,
-    player: { has_wall: player.has_wall ?? null, space: player.space ?? null },
+    player: {
+      has_wall: player.has_wall ?? null,
+      space: player.space ?? null,
+      offer_opt_in: player.offer_opt_in ?? null,
+      opt_in_drill_ids: player.opt_in_drill_ids ?? null,
+    },
     shelf,
     doneTitles,
     weekTitles,

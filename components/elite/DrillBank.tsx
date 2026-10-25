@@ -25,6 +25,7 @@ const EMPTY: DrillInput = {
   cues: "",
   needs_wall: false,
   small_space: false,
+  opt_in: false,
   video_url: "",
   demo_by: "",
 };
@@ -208,6 +209,15 @@ export function DrillBank({
               />
               Works in a few yards (tight space players get only these)
             </label>
+            <label className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-sm text-white/70">
+              <input
+                type="checkbox"
+                checked={editing.opt_in}
+                onChange={(e) => setEditing({ ...editing, opt_in: e.target.checked })}
+                className="h-4 w-4 accent-accent"
+              />
+              Course drill (only in a week when you offer it to that player)
+            </label>
           </div>
           <input
             value={editing.cues}
@@ -296,6 +306,11 @@ export function DrillBank({
                           few yards
                         </span>
                       )}
+                      {d.opt_in && (
+                        <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/45">
+                          course
+                        </span>
+                      )}
                       {!d.video_url && (
                         <span className="rounded-full border border-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/25">
                           no video
@@ -321,6 +336,7 @@ export function DrillBank({
                           cues: d.cues,
                           needs_wall: d.needs_wall,
                           small_space: Boolean(d.small_space),
+                          opt_in: Boolean(d.opt_in),
                           video_url: d.video_url ?? "",
                           demo_by: d.demo_by ?? "",
                         })

@@ -47,6 +47,7 @@ import { CoachFilmPanel } from "@/components/elite/CoachFilmPanel";
 import { CoachGamesPanel } from "@/components/elite/CoachGamesPanel";
 import { MessageThread } from "@/components/elite/MessageThread";
 import { IntakePanel } from "@/components/elite/IntakePanel";
+import { OfferedDrillsPanel } from "@/components/elite/OfferedDrillsPanel";
 import { DeletePlayerButton } from "@/components/elite/DeletePlayerButton";
 import { QuickComposer } from "@/components/elite/QuickComposer";
 import { StatusControl } from "@/components/elite/StatusControl";
@@ -328,6 +329,14 @@ export default async function PlayerProfile({
 
           {/* Intake snapshot */}
           <IntakePanel player={player} />
+
+          {/* Course drills offered to this player (040): switch, then tick */}
+          <OfferedDrillsPanel
+            playerId={player.id}
+            drills={bankForStudio.drills.filter((d) => d.opt_in)}
+            initialOffer={player.offer_opt_in === true}
+            initialIds={player.opt_in_drill_ids ?? []}
+          />
 
           <DuplicateWeekButton
             playerId={player.id}

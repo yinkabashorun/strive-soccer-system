@@ -472,3 +472,88 @@ considered; the Courses tab as a library for everyone is still open.
 - Whether the onboarding self-pick (Developing / Competitive / Advanced
   / Elite) is removed outright (proposed) or kept as a second question.
 - The pass-mark number for beginners (10 in a row is mine).
+
+## Item 9, the course roadmap (Coach Yinka, Oct 25 2026: "We are going
+## to Make a shooting course, & full weak foot course, then strength
+## course, then agility course, then recruiting course like making a
+## csv / highlight tape and how to reach out")
+
+Five courses in his order. Nothing built yet; this is the scope and what
+each one needs. The Oct 12 launch rule holds: a course is announced only
+when it is filmed and in the app, never as an "included" claim before.
+
+### Where it stands today (the bank, from the record)
+| Course | Filmed in the bank today | Pillar | Fits the slot? |
+|---|---|---|---|
+| Shooting | 0 drills. No Shooting pillar exists; drills have no "needs a goal" flag (players have has_goal since 019) | needs a new pillar | yes, once the pillar exists |
+| Weak foot | 8 (4 wall, sorts 300 to 330; 4 no-wall, sorts 100 to 130) | Weak Foot, a rated metric | these are skill drills already in weeks; the course is the ladder, not a slot |
+| Strength | 13 finishers; 11 from the Oct 7 list unfilmed | Strengthening | already finishers in weeks; the course is the progression |
+| Agility | 0. Speed pillar has zero drills; 7 plyos are the nearest | Speed | yes, after the plyos, which is where agility belongs |
+| Recruiting | nothing, and it is not drills: CV, highlight tape, reaching out | none | no. Lessons, not bank rows |
+
+### Two kinds of course, one primitive
+1. A DRILL course (shooting, weak foot, strength, agility, Keep It Up):
+   ordered steps, each step a bank drill by id. The video, title and
+   reps come from the drill row (rename a drill, the course follows).
+   Whether a step's drill also enters the WEEK is a separate setting on
+   the drill, not the course: opt_in drills go in the slot after the
+   warm-up for players the coach offers them to (040); ordinary drills
+   (weak foot, finishers) are already in weeks through the pillar rules.
+   Putting a weak foot drill in a course must never pull it out of the
+   builder, so the course never changes opt_in.
+2. A LESSON course (recruiting): ordered steps, each step a page with a
+   title, body in Coach Yinka's and Gary's voice, an optional video and
+   an optional download (the CV template). No bank row, no homework
+   row, nothing tracked; the 031 guard is never touched because a
+   lesson never writes homework.
+Both live in the same tables so the Courses tab is one screen:
+elite_courses (slug, name, subtitle, intro, kind drill|lesson, active,
+sort) and elite_course_steps (course_id, level_no, level_name, tag
+beginner|advanced|null, drill_id nullable FK on delete restrict, title,
+body, video_url, download_url, cue, pass_mark, sort). A step is EITHER a
+drill_id OR a lesson body, enforced by a check constraint. Coach-only
+write RLS like the bank; read for any signed-in member. Coach editor at
+/coach/drills; player tab app/(player)/courses and /courses/[slug],
+library only (his Oct 23 call), everyone sees every active course.
+
+### What each course needs before it exists
+- Shooting: migration 041 adds the Shooting pillar (the 032 pattern) and
+  elite_drills.needs_goal; drillFitsPlayer gains the goal rule next to
+  the wall rule (no goal on the player = never a goal drill) so the
+  prompt's "strikes go at a cone" line is enforced on the output, not
+  advised. Then his clips. The Shooting pillar is NOT a rated metric
+  unless he says so (the seven pillars are fixed in the app).
+- Weak foot: the 8 filmed drills ordered into a ladder by him, plus
+  whatever he films to fill it (the Oct 7 list had the no-wall half;
+  shipped Oct 21). Nothing to build beyond the course tables.
+- Strength: 13 finishers ordered into a progression by him, plus the 11
+  unfilmed. Nothing to build beyond the course tables.
+- Agility: his clips, saved under Speed with opt_in on, offered per
+  player like juggling. The slot after the plyos is exactly where they
+  land. Nothing new to build beyond the course tables.
+- Recruiting: the outline from him and Gary (what goes in a soccer CV,
+  the highlight tape rules, the outreach message, who to send it to,
+  when). Gary's overseas path is the natural second half. Alumni names
+  in a member-only course are a lower bar than public, but each family
+  still gets a heads-up before being named (Sept 29 rule). This
+  supersedes the Sept 30 "no course modules to start" for Complete,
+  since Complete is retired and this is Elite content.
+
+### Lesson from Keep It Up, applied to every filming run
+Send each clip with its pattern name and its tag (beginner / advanced)
+in the same message. I read clips only for cut points, never to name
+the pattern; the Oct 22 sort was wrong on six of twelve clips because I
+guessed.
+
+### Build order (proposed)
+1. The course tables, the coach editor and the Courses tab, seeded with
+   Keep It Up as the preview page reads today. One build, every course
+   after it is data.
+2. Shooting pillar + needs_goal (migration 041) so his first shooting
+   clips have a home in the bank the day they arrive.
+3. Weak foot and Strength assembled from filmed drills the moment he
+   orders them: two courses live with zero new filming.
+4. Agility and Shooting as the clips land. Recruiting when the outline
+   is written.
+Decision needed from him before step 1: confirm library only (no ticks,
+no time trained, no Send a clip on course tiles) still stands.

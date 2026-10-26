@@ -146,7 +146,10 @@ commit.
       Shooting pillar + needs_goal, migration 042, shooting clips can
       be banked the day they arrive; (3) DONE Oct 26, Weak Foot and
       Strength live on the Courses tab from filmed drills (his quiz
-      answers, see RECORD); (4) agility and
+      answers, see RECORD); Oct 26 later: four plyos added to Strength
+      as Level 5 Power, the SPEED course created with the other three
+      plyos as Level 1 Bounce, sprint levels to be added at
+      /coach/drills as his sprint clips land; (4) agility and
       shooting as clips land, recruiting when he and Gary write the
       outline. SIXTH, added Oct 25: a NUTRITION bundle, a lesson
       course like recruiting (general food guidance for a training
@@ -2190,6 +2193,25 @@ commit.
       these levels at /coach/drills as they arrive. Three courses on
       the tab: Keep It Up, Weak Foot, Strength. No player's week
       changed: a course never touches the builder.
+- [x] LIVE Oct 26 2026 (Coach Yinka: "add certain plyos to strength and
+      certain plyos to a speed course we will make. We will take sprint
+      vids"): migration 044 applied to prod and verified. The seven
+      filmed plyos split by what they train, MY coaching read, any step
+      moves in the editor: STRENGTH gained Level 5 "Power" with the
+      loaded, single-leg and deep jumps (Squat jumps, Alternating lunge
+      jumps, Bulgarian split jumps, Single leg step down hops); the
+      SPEED course exists, slug speed, subtitle "Explosive first steps
+      and quick feet." (his Speed pillar lens), intro "Land soft, leave
+      fast." / "Full rest between sets. Speed is never tired work.",
+      Level 1 "Bounce" with the elastic, reactive, horizontal work (Pogo
+      jumps, Lateral hops over object, Broad jumps), ACTIVE so it is on
+      the tab now. Sprint levels get added at /coach/drills as the
+      clips land (pattern name + tag per clip, the Keep It Up rule; a
+      sprint drill saved under the Speed pillar is a skill drill the
+      builder may use, the prompt still says Speed has no drill days so
+      tick it as a course drill if it should stay slot-only). A plyo in
+      a course is unchanged in the week: still a rotated warm-up. Four
+      courses on the tab. No player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

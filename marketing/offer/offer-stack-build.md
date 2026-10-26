@@ -552,8 +552,9 @@ guessed.
 2. SHIPPED Oct 26 2026: Shooting pillar + needs_goal (migration 042),
    so his first shooting clips have a home in the bank the day they
    arrive.
-3. Weak foot and Strength assembled from filmed drills the moment he
-   orders them: two courses live with zero new filming.
+3. LIVE Oct 26 2026 (quiz: four levels / "Weak Foot"; his circuits /
+   "Strength"): Weak Foot and Strength on the Courses tab from filmed
+   drills, migration 043. Zero new filming.
 4. Agility and Shooting as the clips land. Recruiting when the outline
    is written.
 Decision needed from him before step 1: confirm library only (no ticks,

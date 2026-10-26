@@ -157,3 +157,27 @@ or a few-yards template, and a course drill the AI or the studio writes
 as a skill drill is routed to the slot (offered) or dropped (not
 offered) with the session filled back to three skill drills. One per
 session is the default, `COURSE_SLOTS_PER_SESSION` in bank-conform.ts.
+
+## Courses, the library tab (Oct 2026)
+
+A course is a named ladder of steps grouped into levels, shown to every
+member on the Courses tab (Coach Yinka, Oct 23 2026: "a library,
+nothing tracked"). Two kinds on one primitive (migration 041,
+`elite_courses` + `elite_course_steps`): a DRILL course's steps are bank
+drills by id, so the video, the bank title and the reps follow the
+drill (rename or re-film a drill and the course updates); a LESSON
+course's steps are pages (title, body, optional video and download) for
+recruiting and the General Nutrition Guide. One step is one or the
+other, enforced by a check constraint. A drill in a course cannot be
+hard-deleted from the bank (on delete restrict); a paused or unfilmed
+drill step is hidden from the tab, never shown broken. A course never
+changes anyone's week: whether a drill enters a week is the drill's own
+course tick plus the player's picks (040), untouched by the course.
+Rules in `lib/elite/courses.ts` (levels, the drill's own name shown
+without the bank's label prefix, step shape, what members see),
+unit-tested. Coach editor at /coach/drills ("Courses" above the
+few-yards sessions): name, subtitle, intro lines, kind, steps with
+level, tag, cue, pass mark, up/down, on/off. Player pages /courses and
+/courses/[slug]. Keep It Up is seeded by the migration exactly as the
+preview page read on Oct 25 2026: seven levels, fourteen drills, pass
+marks on the beginner drills only.

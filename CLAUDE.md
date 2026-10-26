@@ -130,17 +130,17 @@ commit.
       Still his: (1) any cue he coaches differently; (2) the beginner
       pass number (10 in a row is mine); (3) film Level 10, feet +
       thighs + head in one run, ~10 s, so the name can carry
-      "10-Level". Still unbuilt: the Courses tab in the app (his Oct
-      23 quiz: a library every member sees, nothing tracked; the
-      league / tier formula from that quiz is DROPPED, superseded by
-      the switch).
+      "10-Level". The Courses tab is BUILT Oct 26 (see RECORD): Keep
+      It Up is live at /courses/keep-it-up for every member, library
+      only, nothing tracked; the league / tier formula from the Oct 23
+      quiz is DROPPED, superseded by the switch.
 - [ ] THE COURSE ROADMAP (Coach Yinka, Oct 25 2026, his order):
       shooting, full weak foot, strength, agility, recruiting (CV,
       highlight tape, how to reach out). Scoped, not built, in
       marketing/offer/offer-stack-build.md "Item 9, the course
       roadmap". Bank today: shooting 0 (no pillar, no needs_goal flag),
       weak foot 8, strength 13, agility 0 (Speed pillar empty),
-      recruiting is lessons not drills. Proposed order: (1) course
+      recruiting is lessons not drills. Order: (1) DONE Oct 26, course
       tables + coach editor + Courses tab seeded with Keep It Up, one
       primitive for drill courses and lesson courses; (2) Shooting
       pillar + needs_goal, migration 041; (3) weak foot and strength
@@ -152,8 +152,9 @@ commit.
       weight goals; a not-medical-advice line, and the privacy / terms
       may need the same sentence). NAMED Oct 25 (Coach Yinka): the
       "General Nutrition Guide", "general" in the name everywhere it
-      appears, a guide not a plan. His before step 1: confirm library
-      only still stands. Filming rule from Keep It Up: every clip
+      appears, a guide not a plan. Library only stands (built that way
+      on his "get started on your list"). Filming rule from Keep It
+      Up: every clip
       arrives with its pattern name and beginner / advanced tag.
       Announce each course only when it is in the app (Oct 12 launch
       rule).
@@ -2061,6 +2062,41 @@ commit.
       outro MP4s (their swishes are deliberate), and families' own
       clips in the chat and the progress panel. Rule from here: every
       drill clip is encoded with -an.
+- [x] SHIPPED Oct 26 2026, THE COURSES TAB (Coach Yinka, Oct 25: "Okay
+      get started on your list"; step 1 of the course roadmap):
+      migration 041 APPLIED TO PROD in three statements (tables + index
+      + RLS enable; four policies; the seed DO block), verified after:
+      elite_courses (slug, name, subtitle, intro, kind drill|lesson,
+      active, sort) and elite_course_steps (level_no, level_name, tag
+      beginner|advanced, drill_id FK on delete restrict OR title + body
+      + video_url + download_url, cue, pass_mark, sort; a check
+      constraint makes a step a drill or a lesson, never both).
+      Coach-only writes, any signed-in member reads active courses;
+      pages read with the service client because players cannot read
+      elite_drills under RLS. ONE PRIMITIVE for drill courses (steps
+      are bank rows by id, the video follows the drill) and lesson
+      courses (recruiting, the General Nutrition Guide). A course never
+      changes a drill's opt_in or anyone's week. CODE: lib/elite/
+      courses.ts (pure, unit-tested: levels, the drill's own name shown
+      without the bank's label prefix, step shape, what members see:
+      active courses with at least one filmed active drill or a written
+      lesson), getCourses/getCourse in data.ts, course-actions.ts
+      (save/on-off/delete course, save/remove/move step, cookie client
+      + elite_is_coach like the templates), CourseEditor on
+      /coach/drills above the few-yards editor, player pages /courses
+      (list) and /courses/[slug] (levels, tiles with the drill video via
+      DrillVideo, tag, title, one cue, pass mark on beginner steps,
+      lesson paragraphs, download link), "Courses" in the player nav
+      (BookOpen). SEEDED: Keep It Up, slug keep-it-up, ACTIVE, seven
+      levels, fourteen drills, Coach Yinka's names and cues from the
+      preview page, "10 in a row" on the beginner drills only (his pass
+      number still a proposal), four intro rules; the seed refuses a
+      partial ladder. tests/courses.test.ts (9); 131 tests total;
+      typecheck, lint, build, cron + library checks green. Every member
+      sees Keep It Up on the Courses tab from this deploy. NOT in this
+      build: shooting pillar + needs_goal (step 2), course content for
+      the other five (his ordering, filming or writing). No player data
+      touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

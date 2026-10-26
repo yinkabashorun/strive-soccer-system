@@ -128,6 +128,40 @@ export type SessionTemplate = {
   drills: Drill[];
 };
 
+// Courses (041, Oct 26 2026): a named ladder of steps grouped into levels,
+// shown to every member on the Courses tab as a library (nothing
+// tracked). A drill course's steps are bank drills by id; a lesson
+// course's steps are pages. One step is one or the other, never both.
+export type CourseKind = "drill" | "lesson";
+export type CourseTag = "beginner" | "advanced";
+export type CourseStep = {
+  id: string;
+  course_id: string;
+  level_no: number;
+  level_name: string | null;
+  tag: CourseTag | null;
+  drill_id: string | null;
+  drill?: Drill | null; // joined bank row for a drill step
+  title: string | null; // lesson steps
+  body: string | null;
+  video_url: string | null;
+  download_url: string | null;
+  cue: string | null;
+  pass_mark: string | null;
+  sort: number;
+};
+export type Course = {
+  id: string;
+  slug: string;
+  name: string;
+  subtitle: string | null;
+  intro: string | null;
+  kind: CourseKind;
+  active: boolean;
+  sort: number;
+  steps: CourseStep[];
+};
+
 // A player's structured weekly check-in (elite_checkins).
 export type Checkin = {
   id: string;

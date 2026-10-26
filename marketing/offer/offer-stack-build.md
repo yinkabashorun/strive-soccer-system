@@ -546,9 +546,9 @@ the pattern; the Oct 22 sort was wrong on six of twelve clips because I
 guessed.
 
 ### Build order (proposed)
-1. The course tables, the coach editor and the Courses tab, seeded with
-   Keep It Up as the preview page reads today. One build, every course
-   after it is data.
+1. SHIPPED Oct 26 2026: the course tables (migration 041), the coach
+   editor on /coach/drills and the Courses tab, seeded with Keep It Up
+   as the preview page read on Oct 25. Every course after it is data.
 2. Shooting pillar + needs_goal (migration 041) so his first shooting
    clips have a home in the bank the day they arrive.
 3. Weak foot and Strength assembled from filmed drills the moment he

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
+  BookOpen,
   Clipboard,
   Dumbbell,
   Film,
@@ -24,6 +25,7 @@ export type NavItem = { href: string; label: string; icon: string };
 
 const ICONS: Record<string, LucideIcon> = {
   Home,
+  BookOpen,
   Clipboard,
   BarChart3,
   Dumbbell,

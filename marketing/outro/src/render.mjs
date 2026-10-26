@@ -2,8 +2,14 @@
 // protocol (Node 22 has a global WebSocket, so no driver needed).
 // usage: node render.mjs <width> <height> <fps> <seconds> <outDir>
 import { spawn } from "node:child_process";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
+
+// Chrome: CHROME env first, then the Playwright installs this has run on. Fails loudly, never a blank render.
+const CHROME = [process.env.CHROME,
+  "/opt/pw-browsers/chromium", "/opt/pw-browsers/chromium-1243/chrome-linux64/chrome",
+  "/opt/pw-browsers/chromium-1194/chrome-linux/chrome"].find((p) => p && existsSync(p));
+if (!CHROME) { console.error("no Chrome found; set CHROME=/path/to/chrome"); process.exit(1); }
 
 const [w, h, fps, secs, outDir] = [
   Number(process.argv[2] || 1080), Number(process.argv[3] || 1920),
@@ -12,7 +18,7 @@ const [w, h, fps, secs, outDir] = [
 ];
 mkdirSync(outDir, { recursive: true });
 const port = Number(process.argv[7] || 9333);
-const chrome = spawn("/opt/pw-browsers/chromium-1194/chrome-linux/chrome", [
+const chrome = spawn(CHROME, [
   "--headless=new", "--no-sandbox", "--disable-gpu", "--hide-scrollbars",
   `--remote-debugging-port=${port}`, `--window-size=${w},${h}`, "about:blank",
 ], { stdio: ["ignore", "ignore", "pipe"] });

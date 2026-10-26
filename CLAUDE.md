@@ -2061,6 +2061,26 @@ commit.
       outro MP4s (their swishes are deliberate), and families' own
       clips in the chat and the progress panel. Rule from here: every
       drill clip is encoded with -an.
+- [x] RE-CUT Oct 26 2026 (Coach Yinka: "update the strive elite outro
+      with our new offer and new photos for the two photos that are the
+      same"): the 9 s outro now carries the phase C offer. The price-free
+      CTA block (Oct 6) is replaced by the offer block: $249/mo, gold
+      rule, "Locked for life if you join by Nov 1. $500/mo from Nov 2.",
+      button DM us "ELITE" (was "TRAIN"; ELITE is the trigger word on
+      /demo and in the Oct 25 announcement, so the three now match -
+      Coach Yinka to confirm, TRAIN is one word and a re-render if not).
+      Card 1 now mirrors the live page: "A new week every Monday, built
+      around your player" / "Four sessions in season, six in the
+      off-season" (was "4 sessions a week"). The two tiles that were the
+      same turf cone-weave scene (Ball Mastery and Confidence) are
+      replaced: Ball Mastery is a frame of ball-mastery-juggle-catch.mp4
+      (the page's own Ball Mastery clip), and the Confidence tile became
+      KEEP IT UP with a frame of juggling-thighs-high.mp4, so the four
+      tiles are four scenes (grass, brick wall, goals, gym). Headline,
+      end card and the three-swish audio unchanged. render.mjs now finds
+      Chrome from CHROME or the Playwright install it has run on (the
+      hard-coded 1194 path moved). Both MP4s re-rendered and sent;
+      README has the full render + encode recipe.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

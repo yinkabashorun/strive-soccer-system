@@ -2,19 +2,18 @@
 <html><head><meta charset="utf-8"><title>Strive Elite site-build outro (9s)</title>
 <link rel="stylesheet" href="fonts.css">
 <style>
-/* Timeline (seconds)
-   0.00 phone slides up and settles          (whoosh)
-   0.70 wordmark pops, hairline draws        (tick, sweep)
-   1.00 headline builds word by word         (soft type ticks)
-   1.80 paragraph fades
-   2.05 four cards slide in, staggered       (four short swooshes)
-   2.90 four drill tiles pop, staggered      (four ticks)
-   3.55 price block scales in                (thump)
-   1.90 -> 3.80 the page scrolls up inside the phone while it builds
-   4.00 phone recedes and fades
-   4.35 end card: mark + STRIVE ELITE        (chime)
-   4.75 thestriveapp.com/demo                (tick)
-   6.15 fade to black, ends 6.60 */
+/* Timeline (seconds), 9.0 s cut
+   0.00 phone slides up and settles          (swish 1)
+   0.90 wordmark pops, hairline draws
+   1.20 headline builds word by word
+   2.40 "How it works" label, two cards slide in (2.5, 2.8)
+   2.40 -> 4.80 the page scrolls up inside the phone while it builds
+   3.45 "A taste of it", four drill tiles pop (3.6, 3.8, 4.0, 4.2)
+   4.70 offer block: $249/mo, gold rule, Nov 1 line, DM us "ELITE" (swish 2 at 4.70)
+   5.50 sheen sweeps the glass
+   6.00 phone recedes and fades
+   6.40 end card: mark, STRIVE ELITE, rule, PERSONALIZED TRAINING, thestriveapp.com/demo (swish 3)
+   8.50 fade to black, ends 9.00 */
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{width:100%;height:100%;background:#0d0d0d;overflow:hidden;font-family:'Barlow',sans-serif}
 .stage{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,#171717 0%,#0d0d0d 62%);
@@ -60,7 +59,7 @@ h2{margin:22px 0 8px;font-family:'Barlow Condensed';font-weight:700;font-size:12
 .offer .price{font-family:'Barlow Condensed';font-weight:900;font-size:44px;color:#fff;line-height:1}
 .offer .price small{font-size:18px;font-weight:600;color:rgba(255,255,255,.6)}
 .offer .rule{height:2px;width:80px;background:#c8a858;margin:14px auto;transform-origin:left;animation:draw .4s cubic-bezier(.65,0,.2,1) 4.95s both}
-.offer p{font-size:14px;color:rgba(255,255,255,.7);animation:rise .5s cubic-bezier(.2,.9,.2,1) 5.1s both}
+.offer p{font-size:15px;line-height:1.4;color:rgba(255,255,255,.75);animation:rise .5s cubic-bezier(.2,.9,.2,1) 5.1s both}
 .offer .cta{margin-top:16px;display:block;background:#fff;color:#0d0d0d;font-family:'Barlow Condensed';font-weight:900;font-size:40px;letter-spacing:.04em;text-transform:uppercase;padding:18px 20px;border-radius:999px;line-height:1;animation:pop .5s cubic-bezier(.2,.9,.2,1) 5.3s both}
 
 /* end card */
@@ -110,21 +109,21 @@ body.h .screen{padding:60px 22px 0;zoom:.98}
       <h1 id="h1">Team training 3-4x a week is not close to enough to achieve your goals.</h1>
       <h2 style="animation-delay:2.4s">How it works</h2>
       <div class="cards">
-        <div class="card" style="animation-delay:2.5s"><b>4 sessions a week, built around your player</b><span>Layered on top of team training. Show up, it&#8217;s already planned.</span></div>
+        <div class="card" style="animation-delay:2.5s"><b>A new week every Monday, built around your player</b><span>Four sessions in season, six in the off-season. Open the app, it&#8217;s already planned.</span></div>
         <div class="card" style="animation-delay:2.8s"><b>Every drill shown first, then you go do it</b><span>A video for every rep. No guessing.</span></div>
       </div>
       <h2 style="animation-delay:3.45s">A taste of it</h2>
       <div class="tiles">
         <div class="tile" style="animation-delay:3.6s"><img src="tile-ball-mastery.jpg" alt=""><i></i><em>Ball Mastery</em></div>
         <div class="tile" style="animation-delay:3.8s"><img src="tile-passing.jpg" alt=""><i></i><em>Passing</em></div>
-        <div class="tile" style="animation-delay:4.0s"><img src="tile-confidence.jpg" alt=""><i></i><em>Confidence</em></div>
+        <div class="tile" style="animation-delay:4.0s"><img src="tile-keep-it-up.jpg" alt=""><i></i><em>Keep It Up</em></div>
         <div class="tile" style="animation-delay:4.2s"><img src="tile-1v1.jpg" alt=""><i></i><em>1v1 Skills</em></div>
       </div>
       <div class="offer">
-        <div class="price" style="font-size:28px;line-height:1.1">Your player&#8217;s first week<br>is waiting.</div>
+        <div class="price">$249<small>/mo</small></div>
         <div class="rule"></div>
-        <p>Message us on Instagram and we&#8217;ll build it.</p>
-        <div class="cta">DM us &ldquo;TRAIN&rdquo;</div>
+        <p>Locked for life if you join by Nov 1.<br>$500/mo from Nov 2.</p>
+        <div class="cta">DM us &ldquo;ELITE&rdquo;</div>
       </div>
     </div></div>
   </div>

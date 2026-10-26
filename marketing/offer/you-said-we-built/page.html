@@ -1,0 +1,127 @@
+<!doctype html><meta charset="utf-8">
+<title>You said. We built. (Strive Elite value section mock)</title>
+<link rel="stylesheet" href="../../covers/strive-elite-meeting/fonts.css">
+<style>
+/* A mock of ONE device for showing the stack: the parent's line first, big,
+   in their own words; the answer small and plain; the feature name as a gold
+   tag. Then the week as a strip, then the ladder. 1080 wide, phone column. */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;background:#0d0d0d}
+body{font-family:'Barlow',sans-serif;color:#fff;padding:120px 84px 140px;position:relative}
+.gold{color:#c8a858}
+.eyebrow{font-family:'Barlow Condensed';font-weight:800;font-size:26px;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+h1{font-family:'Barlow Condensed';font-weight:900;font-size:112px;line-height:.95;text-transform:uppercase;margin-top:22px;letter-spacing:.01em}
+.rule{width:120px;height:3px;background:#c8a858;margin:40px 0 0}
+.lede{margin-top:40px;font-size:30px;line-height:1.45;color:rgba(255,255,255,.55);max-width:820px}
+
+.pairs{margin-top:110px}
+.pair{padding:70px 0;border-top:1px solid rgba(255,255,255,.1)}
+.pair:last-child{border-bottom:1px solid rgba(255,255,255,.1)}
+.said{font-family:'Barlow Condensed';font-weight:800;font-size:76px;line-height:1.02;letter-spacing:.005em;color:#fff}
+.said:before{content:"\201C";color:rgba(255,255,255,.3)}
+.said:after{content:"\201D";color:rgba(255,255,255,.3)}
+.built{margin-top:30px;font-size:31px;line-height:1.45;color:rgba(255,255,255,.62);max-width:860px}
+.tag{display:inline-block;margin-top:30px;font-family:'Barlow Condensed';font-weight:800;font-size:24px;letter-spacing:.26em;text-transform:uppercase;color:#c8a858;padding-left:.26em}
+.tag:before{content:"";display:inline-block;width:28px;height:2px;background:#c8a858;vertical-align:middle;margin-right:18px}
+
+.week{margin-top:140px}
+.week .eyebrow{color:rgba(255,255,255,.45)}
+.week h2{font-family:'Barlow Condensed';font-weight:900;font-size:84px;line-height:1;text-transform:uppercase;margin-top:18px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;margin-top:54px}
+.col{display:grid;gap:10px}
+.day{font-family:'Barlow Condensed';font-weight:800;font-size:22px;letter-spacing:.22em;text-transform:uppercase;color:rgba(255,255,255,.45);text-align:center;margin-bottom:6px}
+.blk{border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:16px 10px;text-align:center;font-family:'Barlow Condensed';font-weight:800;font-size:21px;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.8);background:rgba(255,255,255,.03)}
+.blk.skill{background:#fff;color:#0d0d0d;border-color:#fff}
+.blk.course{border-color:rgba(200,168,88,.7);color:#c8a858;background:rgba(200,168,88,.08)}
+.blk.fin{color:rgba(255,255,255,.5);border-style:dashed}
+.cap{margin-top:40px;font-size:29px;line-height:1.45;color:rgba(255,255,255,.55)}
+.cap b{color:#fff;font-weight:600}
+
+.ladder{margin-top:140px}
+.ladder h2{font-family:'Barlow Condensed';font-weight:900;font-size:84px;line-height:1;text-transform:uppercase;margin-top:18px}
+.rungs{margin-top:54px;display:grid;gap:14px}
+.rung{display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:30px 34px}
+.rung .n{font-family:'Barlow Condensed';font-weight:800;font-size:40px;letter-spacing:.04em;text-transform:uppercase}
+.rung .s{font-family:'Barlow Condensed';font-weight:800;font-size:22px;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,.45)}
+.rung.live{border-color:rgba(200,168,88,.7);background:rgba(200,168,88,.07)}
+.rung.live .n{color:#fff}
+.rung.live .s{color:#c8a858}
+.rung.dim{border-style:dashed;opacity:.42}
+.rung.dim .n{color:rgba(255,255,255,.7)}
+
+.close{margin-top:140px;text-align:center}
+.close .line{font-family:'Barlow Condensed';font-weight:900;font-size:72px;line-height:1;text-transform:uppercase}
+.close .line b{color:#c8a858;font-weight:900}
+.close .sub{margin-top:26px;font-size:30px;color:rgba(255,255,255,.55)}
+.handle{position:absolute;left:84px;bottom:56px;font-weight:700;font-size:24px;letter-spacing:.18em;text-transform:uppercase;color:#fff}
+.handle:after{content:"";display:block;height:2px;width:100%;background:#c8a858;margin-top:8px}
+.url{position:absolute;right:84px;bottom:56px;font-weight:600;font-size:24px;letter-spacing:.04em;color:rgba(255,255,255,.55)}
+</style>
+
+<div class="eyebrow">Strive Elite</div>
+<h1>You said.<br>We <span class="gold">built.</span></h1>
+<div class="rule"></div>
+<p class="lede">We asked parents what gets in the way of training at home. Every answer below is a parent's own words. Every reply is something that is in the app today.</p>
+
+<div class="pairs">
+  <div class="pair">
+    <div class="said">We already train three or four times a week.</div>
+    <div class="built">Team practice is built for fifteen players on one field. This is built for one. A new week every Monday, around what your player specifically needs.</div>
+    <div class="tag">The week</div>
+  </div>
+  <div class="pair">
+    <div class="said">I can't stand over every session.</div>
+    <div class="built">A text the moment the week goes live. The same drill filmed every two weeks, both clips sent to you. You'll know, without asking.</div>
+    <div class="tag">Side by Side</div>
+  </div>
+  <div class="pair">
+    <div class="said">Who's checking the form?</div>
+    <div class="built">Every drill is shown first. Film any drill, send it from the card. Coach Yinka watches it and replies in the app.</div>
+    <div class="tag">Send a Clip</div>
+  </div>
+  <div class="pair">
+    <div class="said">We don't have a yard.</div>
+    <div class="built">A ball and a few yards. A wall is a bonus, never a requirement. The week fits the space you told us you have.</div>
+    <div class="tag">Any space</div>
+  </div>
+  <div class="pair">
+    <div class="said">What happens when we miss a week?</div>
+    <div class="built">The plan waits. Progress counts time trained, never what was missed. No makeup schedule, no falling behind.</div>
+    <div class="tag">Pick up where you left off</div>
+  </div>
+  <div class="pair">
+    <div class="said">Not another subscription.</div>
+    <div class="built">Month to month. Cancel anytime. Same-day refund if it's not for you.</div>
+    <div class="tag">Month to month</div>
+  </div>
+</div>
+
+<div class="week">
+  <div class="eyebrow">What a session looks like</div>
+  <h2>Built, not <span class="gold">assigned.</span></h2>
+  <div class="grid">
+    <div class="col"><div class="day">Session 1</div><div class="blk">Warm-up</div><div class="blk course">Keep It Up</div><div class="blk skill">Drill</div><div class="blk skill">Drill</div><div class="blk skill">Drill</div><div class="blk fin">Finisher</div></div>
+    <div class="col"><div class="day">Session 2</div><div class="blk">Warm-up</div><div class="blk course">Keep It Up</div><div class="blk skill">Drill</div><div class="blk skill">Drill</div><div class="blk skill">Drill</div><div class="blk fin">Finisher</div></div>
+    <div class="col"><div class="day">Session 3</div><div class="blk">Warm-up</div><div class="blk course">Keep It Up</div><div class="blk skill">Drill</div><div class="blk skill">Drill</div><div class="blk skill">Drill</div><div class="blk fin">Finisher</div></div>
+    <div class="col"><div class="day">Session 4</div><div class="blk">Warm-up</div><div class="blk course">Keep It Up</div><div class="blk skill">Drill</div><div class="blk skill">Drill</div><div class="blk skill">Drill</div><div class="blk fin">Finisher</div></div>
+  </div>
+  <p class="cap"><b>Four sessions in season, six in the off-season, about 40 minutes each.</b> Warm-up, the juggling ladder when it's the right next step, three drills built for your player, a strength finisher when they need it. Got more in the tank? Extra Work adds a session, never a drill they've already done.</p>
+</div>
+
+<div class="ladder">
+  <div class="eyebrow">Courses</div>
+  <h2>One live. <span class="gold">More as they're filmed.</span></h2>
+  <div class="rungs">
+    <div class="rung live"><div class="n">Keep It Up</div><div class="s">7 levels · in the week</div></div>
+    <div class="rung dim"><div class="n">Next course</div><div class="s">When it's in the app</div></div>
+    <div class="rung dim"><div class="n">Next course</div><div class="s">When it's in the app</div></div>
+    <div class="rung dim"><div class="n">Next course</div><div class="s">When it's in the app</div></div>
+  </div>
+</div>
+
+<div class="close">
+  <div class="line">$249/mo, <b>locked for life.</b></div>
+  <div class="sub">Join by Nov 1. $500/mo from Nov 2. DM "ELITE".</div>
+</div>
+<div class="handle">@strivesoccerfc</div>
+<div class="url">thestriveapp.com/demo</div>

@@ -2062,6 +2062,48 @@ commit.
       outro MP4s (their swishes are deliberate), and families' own
       clips in the chat and the progress panel. Rule from here: every
       drill clip is encoded with -an.
+- [x] RE-CUT Oct 26 2026 (Coach Yinka: "update the strive elite outro
+      with our new offer and new photos for the two photos that are the
+      same"): the 9 s outro now carries the phase C offer. The price-free
+      CTA block (Oct 6) is replaced by the offer block: $249/mo, gold
+      rule, "Locked for life if you join by Nov 1. $500/mo from Nov 2.",
+      button DM us "ELITE" (was "TRAIN"; ELITE is the trigger word on
+      /demo and in the Oct 25 announcement, so the three now match -
+      Coach Yinka to confirm, TRAIN is one word and a re-render if not).
+      Card 1 now mirrors the live page: "A new week every Monday, built
+      around your player" / "Four sessions in season, six in the
+      off-season" (was "4 sessions a week"). The two tiles that were the
+      same turf cone-weave scene (Ball Mastery and Confidence) are
+      replaced: Ball Mastery is a frame of ball-mastery-juggle-catch.mp4
+      (the page's own Ball Mastery clip), and the Confidence tile became
+      KEEP IT UP with a frame of juggling-thighs-high.mp4, so the four
+      tiles are four scenes (grass, brick wall, goals, gym). Headline,
+      end card and the three-swish audio unchanged. render.mjs now finds
+      Chrome from CHROME or the Playwright install it has run on (the
+      hard-coded 1194 path moved). Both MP4s re-rendered and sent;
+      README has the full render + encode recipe.
+- [x] PROPOSED Oct 26 2026 (Coach Yinka: "think how can we truly display
+      all of the new added value ... people read it and feel seen"): one
+      device, "YOU SAID. WE BUILT." The parent's objection is the
+      headline, big, in quotes, in their own words (from his Oct 11
+      eight problems); the answer is small and plain; the feature name
+      is a gold tag last. Six pairs (The week, Side by Side, Send a
+      Clip, Any space, Pick up where you left off, Month to month), then
+      the session as a strip (warm-up, Keep It Up slot, three drills,
+      finisher) with the 4-in-season / 6-off-season line, then the
+      course ladder with Keep It Up lit and unnamed dim rungs ("when
+      it's in the app", nothing named, per his Oct 12 rule), then the
+      $249 line. Mock rendered at marketing/offer/you-said-we-built/
+      (page.html, render.mjs, you-said-we-built-1080.png). Nothing on
+      the page or in the app changed. One asset, three uses proposed:
+      a /demo section, a six-slide carousel, six story frames.
+      THEN (Coach Yinka: "Show me"): rendered as a nine-slide 4:5
+      carousel, 1080x1350: cover (YOU SAID. WE BUILT.), six pair slides
+      (the parent's line top, the answer and gold tag bottom), the
+      session strip, the $249 locked-for-life close with DM "ELITE".
+      Source carousel.html + render-carousel.mjs (?slide=N), finals in
+      marketing/offer/you-said-we-built/slides/01-09.png, preview sheet
+      carousel-preview.png. Sent, not posted; nothing on /demo changed.
 - [x] SHIPPED Oct 26 2026, THE COURSES TAB (Coach Yinka, Oct 25: "Okay
       get started on your list"; step 1 of the course roadmap):
       migration 041 APPLIED TO PROD in three statements (tables + index

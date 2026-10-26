@@ -153,7 +153,11 @@ commit.
       shooting as clips land; RECRUITING DRAFTED Oct 26 as templates
       and rules of thumb (his direction), seeded SWITCHED OFF, awaiting
       his read at https://claude.ai/artifact/Ce3tE517A9B6cKBCeeNHL9, one tap
-      to On at /coach/drills. SIXTH, added Oct 25: a NUTRITION bundle, a lesson
+      to On at /coach/drills.
+      COLLEGE and ACADEMY drafted Oct 26 the same way (his "We need a
+      college course and a academy course"), seeded SWITCHED OFF, his
+      read at https://claude.ai/artifact/BrbkPqVFzpaYBZnhyijbGM; the
+      General Nutrition Guide is the last lesson course still unwritten. SIXTH, added Oct 25: a NUTRITION bundle, a lesson
       course like recruiting (general food guidance for a training
       day, match day, hydration; no calorie targets, supplements or
       weight goals; a not-medical-advice line, and the privacy / terms
@@ -2240,6 +2244,33 @@ commit.
       are what the player fills in. Review page at
       https://claude.ai/artifact/Ce3tE517A9B6cKBCeeNHL9. Nothing on the tab until
       his yes.
+- [x] DRAFTED Oct 26 2026, COLLEGE AND ACADEMY (Coach Yinka: "We need a
+      college course and a academy course"): two lesson courses in the
+      Recruiting shape, migration 046 applied to prod SWITCHED OFF.
+      Recruiting stays the shared kit both point to. COLLEGE, slug
+      college, "The college route, step by step.", seven pages: The
+      levels (D1, D2, D3, NAIA, junior college; D3 gives no athletic
+      money; juco is two years then a transfer); What a college coach
+      checks (grades, position need, tape then full game, the club
+      coach's phone call, speed and size; register with the NCAA
+      Eligibility Center for D1 or D2); By grade (9 to 12, NO contact-
+      rule dates, "ask us for the current rules"); Twenty across three
+      levels (the five questions per school); Camps and showcases (ID
+      camps only where a coach replied, the money test); What to ask a
+      coach; Money, plainly (partial athletic money, academic money
+      often bigger, offer in writing, cost of attendance). ACADEMY,
+      slug academy, "MLS NEXT, ECNL and the pro clubs.", six pages:
+      Games, not inboxes (the ladder in his GHL's own four rungs);
+      Email to a director (birth year not grade, parent copied under
+      18); On the day; How the MLS academies work (fed by the clubs
+      below, no numbers, ask what the family pays); The academy rules;
+      Before you chase overseas (FIFA restricts under-18 international
+      moves, never pay up front, "ask us"). WRITTEN BY ME from
+      recruiting craft; facts kept to the stable ones named above; no
+      alumni; never a roster, scholarship or academy place promised.
+      Review page https://claude.ai/artifact/BrbkPqVFzpaYBZnhyijbGM.
+      Gary's own overseas page still needs his voice. Nothing on the
+      tab until his yes; seven courses in the table, four on the tab.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -2081,6 +2081,21 @@ commit.
       Chrome from CHROME or the Playwright install it has run on (the
       hard-coded 1194 path moved). Both MP4s re-rendered and sent;
       README has the full render + encode recipe.
+- [x] PROPOSED Oct 26 2026 (Coach Yinka: "think how can we truly display
+      all of the new added value ... people read it and feel seen"): one
+      device, "YOU SAID. WE BUILT." The parent's objection is the
+      headline, big, in quotes, in their own words (from his Oct 11
+      eight problems); the answer is small and plain; the feature name
+      is a gold tag last. Six pairs (The week, Side by Side, Send a
+      Clip, Any space, Pick up where you left off, Month to month), then
+      the session as a strip (warm-up, Keep It Up slot, three drills,
+      finisher) with the 4-in-season / 6-off-season line, then the
+      course ladder with Keep It Up lit and unnamed dim rungs ("when
+      it's in the app", nothing named, per his Oct 12 rule), then the
+      $249 line. Mock rendered at marketing/offer/you-said-we-built/
+      (page.html, render.mjs, you-said-we-built-1080.png). Nothing on
+      the page or in the app changed. One asset, three uses proposed:
+      a /demo section, a six-slide carousel, six story frames.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

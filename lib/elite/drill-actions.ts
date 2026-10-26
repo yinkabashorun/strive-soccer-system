@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "./supabase/server";
 import { getViewer } from "./session";
 import { backfillHomeworkVideos } from "./data";
-import { PLYO_PILLAR, PROGRESS_METRICS, STRENGTH_PILLAR } from "./types";
+import { PLYO_PILLAR, PROGRESS_METRICS, SHOOTING_PILLAR, STRENGTH_PILLAR } from "./types";
 
 export type DrillInput = {
   id?: string; // present = update, absent = create
@@ -15,6 +15,7 @@ export type DrillInput = {
   minutes: number;
   cues: string;
   needs_wall: boolean;
+  needs_goal: boolean; // 042: needs a goal to shoot at
   small_space: boolean; // 033: works in a few yards
   opt_in: boolean; // 040: course drill, only when the coach offers it to a player
   video_url: string;
@@ -40,6 +41,7 @@ export async function saveDrill(input: DrillInput) {
   const pillar =
     input.pillar === PLYO_PILLAR ||
     input.pillar === STRENGTH_PILLAR ||
+    input.pillar === SHOOTING_PILLAR ||
     (PROGRESS_METRICS as readonly string[]).includes(input.pillar)
       ? input.pillar
       : "Ball Mastery";
@@ -61,6 +63,7 @@ export async function saveDrill(input: DrillInput) {
     minutes: Math.max(3, Math.min(30, Math.round(input.minutes) || 10)),
     cues: input.cues.trim().slice(0, 240),
     needs_wall: Boolean(input.needs_wall),
+    needs_goal: Boolean(input.needs_goal),
     small_space: Boolean(input.small_space),
     opt_in: Boolean(input.opt_in),
     video_url: /^https?:\/\/.+/.test(input.video_url.trim())
@@ -78,7 +81,7 @@ export async function saveDrill(input: DrillInput) {
   if (error) {
     // pre-021 / pre-033 (no video or small_space columns): save the rest
     // so editing never blocks
-    const { video_url: _v, demo_by: _d, small_space: _s, opt_in: _o, ...legacy } = row;
+    const { video_url: _v, demo_by: _d, small_space: _s, opt_in: _o, needs_goal: _g, ...legacy } = row;
     ({ error } = await write(legacy));
   }
   if (error) {

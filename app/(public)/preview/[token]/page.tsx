@@ -127,6 +127,11 @@ export default async function CoachPreviewPage({
                         wall
                       </span>
                     )}
+                    {d.needs_goal && (
+                      <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/45">
+                        goal
+                      </span>
+                    )}
                   </div>
                   <p className="mt-1 text-sm leading-snug text-white/55">{d.how}</p>
                   {d.cues && (

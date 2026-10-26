@@ -327,11 +327,13 @@ function fallbackPlan(
   const bankFor = (pillar: string) =>
     skillBank(bank)
       .filter((d) => d.pillar === pillar)
-      .map((d) => ({ title: d.title, how: d.how, reps: d.reps, minutes: d.minutes, cues: d.cues || undefined, needsWall: d.needs_wall }));
+      .map((d) => ({ title: d.title, how: d.how, reps: d.reps, minutes: d.minutes, cues: d.cues || undefined, needsWall: d.needs_wall, needsGoal: Boolean(d.needs_goal) }));
+  // Wall and goal rules (019 / 042): the same two gates bank-conform applies.
+  const canDo = (d: { needsWall: boolean; needsGoal: boolean }) =>
+    (!d.needsWall || player?.has_wall === true) && (!d.needsGoal || player?.has_goal === true);
   // A pillar is only schedulable when the bank actually has drills the
-  // player can do (wall rules included).
-  const usable = (pillar: string) =>
-    bankFor(pillar).some((d) => !d.needsWall || player?.has_wall === true);
+  // player can do (wall and goal rules included).
+  const usable = (pillar: string) => bankFor(pillar).some(canDo);
 
   const n = sessionsFor(player?.training_load);
   const picked: (typeof PROGRESS_METRICS)[number][] = [];
@@ -360,9 +362,7 @@ function fallbackPlan(
     pillars.push(pillars[i % picked.length]);
   }
   const sessions: GeneratedSession[] = pillars.map((pillar) => {
-    const usableLib = bankFor(pillar).filter(
-      (d) => !d.needsWall || player?.has_wall === true
-    );
+    const usableLib = bankFor(pillar).filter(canDo);
     // Wall-day rule: a session is all-wall or wall-free, never a mix - the
     // trip to the wall has to pay for a full session. Use whichever pure
     // side of the pillar has more drills.

@@ -95,13 +95,16 @@ export type Player = {
 // weeks strictly from these; the coach owns them at /coach/drills.
 export type Drill = {
   id: string;
-  pillar: ProgressMetric | typeof PLYO_PILLAR | typeof STRENGTH_PILLAR;
+  pillar: ProgressMetric | typeof PLYO_PILLAR | typeof STRENGTH_PILLAR | typeof SHOOTING_PILLAR;
   title: string;
   how: string;
   reps: string;
   minutes: number;
   cues: string;
   needs_wall: boolean;
+  // 042: needs a goal to shoot at. Fits only a player whose profile says
+  // they have one (has_goal), the same rule as needs_wall / has_wall.
+  needs_goal?: boolean;
   // 033: coach-ticked "works in a few yards" - the only drills a player
   // on the tight space setting is given. Absent/false = open space only.
   small_space?: boolean;
@@ -299,6 +302,14 @@ export const PLYO_PILLAR = "Plyo";
 // add one to a couple of sessions a week. Added Oct 7 2026 for the first
 // player training through a lower-back injury.
 export const STRENGTH_PILLAR = "Strengthening";
+
+// Drill-bank pillar for shooting and finishing work (042, Oct 26 2026,
+// the first course on Coach Yinka's roadmap). Not a rated metric. A
+// Shooting drill is a skill drill for the builder; one flagged
+// needs_goal fits only a player with a goal (bank-conform.ts
+// drillFitsPlayer). Whether it is a course drill (slot only, offered per
+// player) is the drill's own opt_in tick.
+export const SHOOTING_PILLAR = "Shooting";
 
 export type Progress = {
   id: string;

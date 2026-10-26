@@ -24,6 +24,7 @@ import { PLYO_PILLAR, STRENGTH_PILLAR } from "./types";
 // and which course drills the coach has offered them (040).
 export type PlayerEnv = {
   has_wall?: boolean | null;
+  has_goal?: boolean | null;
   space?: TrainingSpace | null;
   offer_opt_in?: boolean | null;
   opt_in_drill_ids?: string[] | null;
@@ -39,6 +40,8 @@ export type PlayerEnv = {
 // AND ticked that exact drill for; for everyone else it does not exist.
 export function drillFitsPlayer(d: Drill, env?: PlayerEnv | null): boolean {
   if (d.needs_wall && env?.has_wall !== true) return false;
+  // 042: a drill that needs a goal fits only a player who has one.
+  if (d.needs_goal && env?.has_goal !== true) return false;
   if (env?.space === "tight" && isSkillPillar(d.pillar) && !d.small_space) return false;
   if (d.opt_in && !isOffered(d, env)) return false;
   return true;
@@ -107,6 +110,7 @@ export function isSkillPillar(pillar: string): boolean {
 }
 
 const PILLAR_HINTS: [RegExp, string][] = [
+  [/shoot|striking|strike|volley|finishing/, "Shooting"],
   [/weak.?foot|left foot|right foot|both feet/, "Weak Foot"],
   [/wall|pass|rebound|receiv/, "Passing"],
   [/scan|head up|shoulder|awareness|turn/, "Scanning"],
@@ -118,6 +122,7 @@ const PILLAR_HINTS: [RegExp, string][] = [
 
 // A pillar with no filmed drills falls through to one that has them.
 const PILLAR_FALLBACK: Record<string, string[]> = {
+  Shooting: ["Confidence", "Ball Mastery"],
   Scanning: ["Ball Mastery", "Confidence"],
   "Decision Making": ["Confidence", "Ball Mastery"],
   Speed: ["Ball Mastery", "Confidence"],

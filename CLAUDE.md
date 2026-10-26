@@ -142,8 +142,9 @@ commit.
       weak foot 8, strength 13, agility 0 (Speed pillar empty),
       recruiting is lessons not drills. Order: (1) DONE Oct 26, course
       tables + coach editor + Courses tab seeded with Keep It Up, one
-      primitive for drill courses and lesson courses; (2) Shooting
-      pillar + needs_goal, migration 041; (3) weak foot and strength
+      primitive for drill courses and lesson courses; (2) DONE Oct 26,
+      Shooting pillar + needs_goal, migration 042, shooting clips can
+      be banked the day they arrive; (3) weak foot and strength
       assembled from filmed drills once he orders them; (4) agility and
       shooting as clips land, recruiting when he and Gary write the
       outline. SIXTH, added Oct 25: a NUTRITION bundle, a lesson
@@ -2139,6 +2140,32 @@ commit.
       build: shooting pillar + needs_goal (step 2), course content for
       the other five (his ordering, filming or writing). No player data
       touched.
+- [x] SHIPPED Oct 26 2026, THE SHOOTING PILLAR (step 2 of the course
+      roadmap): migration 042 APPLIED TO PROD in one call (lock_timeout
+      8s; the DROP CONSTRAINT went through this time) and verified:
+      elite_drills.needs_goal boolean default false, and "Shooting"
+      added to the pillar check the way 032 added Strengthening. NOT a
+      rated metric. A Shooting drill is a skill drill for the builder;
+      one ticked "Needs a goal" fits only a player whose profile says
+      has_goal (drillFitsPlayer in bank-conform.ts, next to the wall
+      rule, so both gates, Extra Work and the templates all carry it;
+      the publish gate now selects has_goal off the player row; the
+      fallback plan's canDo applies wall and goal together). The
+      prompt lists Shooting under its own lens (SHOOTING_LENS in
+      methodology.ts: pick the corner before the touch, strike through,
+      land balanced; [goal] drills only for players with a goal, the
+      rest strike at a cone or a fence line) and marks [goal] like
+      [wall]. PILLAR_HINTS routes shoot / strike / volley / finishing
+      to Shooting ahead of Decision Making's "finish"; fallback pillars
+      Confidence then Ball Mastery. /coach/drills: "Shooting" in the
+      pillar picker, a "Needs a goal" tick, a goal badge (also on the
+      few-yards editor and the public week preview). Whether a shooting
+      drill is a course drill (slot only) is its own course tick,
+      unchanged. tests/shooting.test.ts (5: the goal rule incl. unknown
+      = no goal, cone drills fit everyone, skill pillar, prompt marks
+      and rule line, both gates replace a goal drill for a no-goal
+      player); 136 tests total, verify green. Bank: zero shooting
+      drills until he films; nothing changes for any player.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

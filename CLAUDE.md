@@ -150,8 +150,10 @@ commit.
       as Level 5 Power, the SPEED course created with the other three
       plyos as Level 1 Bounce, sprint levels to be added at
       /coach/drills as his sprint clips land; (4) agility and
-      shooting as clips land, recruiting when he and Gary write the
-      outline. SIXTH, added Oct 25: a NUTRITION bundle, a lesson
+      shooting as clips land; RECRUITING DRAFTED Oct 26 as templates
+      and rules of thumb (his direction), seeded SWITCHED OFF, awaiting
+      his read at https://claude.ai/artifact/Ce3tE517A9B6cKBCeeNHL9, one tap
+      to On at /coach/drills. SIXTH, added Oct 25: a NUTRITION bundle, a lesson
       course like recruiting (general food guidance for a training
       day, match day, hydration; no calorie targets, supplements or
       weight goals; a not-medical-advice line, and the privacy / terms
@@ -2212,6 +2214,32 @@ commit.
       tick it as a course drill if it should stay slot-only). A plyo in
       a course is unchanged in the week: still a rotated warm-up. Four
       courses on the tab. No player data touched.
+- [x] DRAFTED Oct 26 2026, THE RECRUITING COURSE (Coach Yinka: "what
+      they need is templates, like how to build a CV, or how to email
+      colleges, templates for before games, after games, follow ups,
+      rules of thumb"; and "Could you make it without videos?" Yes):
+      a LESSON course, nine pages, no video, migration 045 applied to
+      prod SWITCHED OFF so nobody sees it until he reads it and taps
+      On at /coach/drills. Slug recruiting, name "Recruiting", subtitle
+      "Templates and rules of thumb.", three intro lines. Levels: 1 The
+      soccer CV (the one-page template with bracket fields and five
+      rules); 2 Emails (five templates: the first email to a coach,
+      before a game or showcase with a week-out and a morning-of
+      version, after a game they watched, the follow-up when nobody
+      replies, after an ID camp or a visit, each with its rules of
+      thumb); 3 The tape (what goes in, what stays out, the full game,
+      hosting); 4 Rules of thumb (the player does the work, the list of
+      twenty across three levels, timing, what coaches actually check,
+      social media, the tracker, "what we never promise": a clear path
+      and a player ready for the moment, never a roster or a
+      scholarship) and The tracker (columns + rules). WRITTEN BY ME
+      from recruiting craft, not from his or Gary's words; no
+      recruiting-rule dates anywhere (those change by level and year
+      and are his to add); no alumni named. Gary's overseas path is
+      NOT in it, on purpose: that page needs his voice. The brackets
+      are what the player fills in. Review page at
+      https://claude.ai/artifact/Ce3tE517A9B6cKBCeeNHL9. Nothing on the tab until
+      his yes.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

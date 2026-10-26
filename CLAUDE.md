@@ -144,8 +144,9 @@ commit.
       tables + coach editor + Courses tab seeded with Keep It Up, one
       primitive for drill courses and lesson courses; (2) DONE Oct 26,
       Shooting pillar + needs_goal, migration 042, shooting clips can
-      be banked the day they arrive; (3) weak foot and strength
-      assembled from filmed drills once he orders them; (4) agility and
+      be banked the day they arrive; (3) DONE Oct 26, Weak Foot and
+      Strength live on the Courses tab from filmed drills (his quiz
+      answers, see RECORD); (4) agility and
       shooting as clips land, recruiting when he and Gary write the
       outline. SIXTH, added Oct 25: a NUTRITION bundle, a lesson
       course like recruiting (general food guidance for a training
@@ -2166,6 +2167,29 @@ commit.
       and rule line, both gates replace a goal drill for a no-goal
       player); 136 tests total, verify green. Bank: zero shooting
       drills until he films; nothing changes for any player.
+- [x] LIVE Oct 26 2026, WEAK FOOT AND STRENGTH COURSES (Coach Yinka:
+      "Brainstorm the weak foot order and strength order then give me a
+      quiz and you can build it"; quiz answers: four levels, "Weak
+      Foot", his Oct 7 circuits, "Strength"): migration 043 (two
+      idempotent seed blocks, each refuses a partial course) applied to
+      prod and verified. WEAK FOOT, slug weak-foot, subtitle "Both
+      feet, no excuses.", three intro lines, four levels: 1 Touches
+      (tap pull push Beginner, outside pull inside pull Advanced); 2
+      Off the ground (pop and settle Beginner, pop and juggle
+      Advanced); 3 Wall moves (stepover, scissor, both Advanced); 4
+      Wall turns (behind the leg, L turn, both Advanced). STRENGTH,
+      slug strength, subtitle "Core, hips, legs. The finishers.", two
+      intro lines, four levels in his circuits, no tags: Core A (Front
+      plank, Bird dog, Hollow hold, Six inches); Core B (Hip dips,
+      Mountain climbers, V-ups, Toe-touch crunch); Hips and glutes
+      (Single leg bridge, Long-lever hamstring bridge); Legs and groin
+      (Split squat, Single leg RDL, Wall sit). No pass marks (no
+      numbers given); no tile cues (the video explains; the bank cards
+      keep theirs). Zero new filming; every step is a bank row by id,
+      so the 11 unfilmed strength moves from the Oct 7 list slot into
+      these levels at /coach/drills as they arrive. Three courses on
+      the tab: Keep It Up, Weak Foot, Strength. No player's week
+      changed: a course never touches the builder.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

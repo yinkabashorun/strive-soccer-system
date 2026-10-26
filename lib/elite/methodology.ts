@@ -7,7 +7,12 @@
 // docs/METHODOLOGY.md.
 // =====================================================================
 
-import { PLYO_PILLAR, STRENGTH_PILLAR, PROGRESS_METRICS, type Drill, type ProgressMetric } from "./types";
+import { PLYO_PILLAR, SHOOTING_PILLAR, STRENGTH_PILLAR, PROGRESS_METRICS, type Drill, type ProgressMetric } from "./types";
+
+// The Shooting pillar (042) is not a rated metric, so it sits outside
+// METHOD_PILLARS; this is its coaching lens for the prompt.
+export const SHOOTING_LENS =
+  "Finish like it matters. Pick the corner before the touch, strike through the ball, land balanced. A drill marked [goal] needs a real goal and goes only to a player who has one; every other shooting drill strikes at a target like a cone or a fence line.";
 import { SESSIONS_PER_WEEK } from "./training";
 
 // The non-negotiable structure of a Strive training week.
@@ -113,8 +118,8 @@ export function methodologyContext(
   const sessionsPerWeek = opts?.sessionsPerWeek ?? METHOD_STRUCTURE.sessionsPerWeek;
   const principles = METHOD_PRINCIPLES.map((p) => `- ${p}`).join("\n");
   const lensFor = (pillar: string) =>
-    METHOD_PILLARS.find((g) => g.pillar === pillar)?.lens ?? "";
-  const grouped = new Map<string, { title: string; how: string; reps: string; minutes: number; cues: string; wall: boolean; small: boolean }[]>();
+    pillar === SHOOTING_PILLAR ? SHOOTING_LENS : METHOD_PILLARS.find((g) => g.pillar === pillar)?.lens ?? "";
+  const grouped = new Map<string, { title: string; how: string; reps: string; minutes: number; cues: string; wall: boolean; goal: boolean; small: boolean }[]>();
   const finishers: string[] = [];
   for (const d of bank ?? []) {
     // Plyo warm-ups are prepended server-side; the AI must never see
@@ -131,7 +136,7 @@ export function methodologyContext(
       continue;
     }
     const list = grouped.get(d.pillar) ?? [];
-    list.push({ title: d.title, how: d.how, reps: d.reps, minutes: d.minutes, cues: d.cues, wall: d.needs_wall, small: Boolean(d.small_space) });
+    list.push({ title: d.title, how: d.how, reps: d.reps, minutes: d.minutes, cues: d.cues, wall: d.needs_wall, goal: Boolean(d.needs_goal), small: Boolean(d.small_space) });
     grouped.set(d.pillar, list);
   }
   if (grouped.size === 0) throw new EmptyBankError();
@@ -141,7 +146,7 @@ export function methodologyContext(
         `- ${pillar}: ${lensFor(pillar)} Drills: ${drills
           .map(
             (d) =>
-              `${d.title}${d.wall ? " [wall]" : ""}${d.small ? " [small space]" : ""} (${d.reps} = ~${d.minutes} min): ${d.how}${d.cues ? `. Cues: ${d.cues}` : ""}`
+              `${d.title}${d.wall ? " [wall]" : ""}${d.goal ? " [goal]" : ""}${d.small ? " [small space]" : ""} (${d.reps} = ~${d.minutes} min): ${d.how}${d.cues ? `. Cues: ${d.cues}` : ""}`
           )
           .join("; ")}.`
     )
@@ -165,7 +170,8 @@ Weekly structure:
 Equipment rule (strict): assume the player has ONLY ${METHOD_STRUCTURE.assumedEquipment}.
 The player's TRAINING ENVIRONMENT line (in the user message) is a HARD
 constraint. Wall drills (marked "wall" below) ONLY for players who HAVE a
-wall; a goal only for players who HAVE a goal. A player on a TIGHT SPACE
+wall; drills marked "goal" ONLY for players who HAVE a goal (the system
+replaces one given to anyone else). A player on a TIGHT SPACE
 (a ball and a few yards) gets ONLY drills marked "small space" below;
 the system replaces anything else before they see it. Passing drills are wall
 drills, full stop: a player with no wall gets NO passing-focused drills or

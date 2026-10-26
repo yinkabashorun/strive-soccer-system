@@ -173,6 +173,7 @@ export function SessionTemplates({
                     <span className="truncate text-white/80">{d.title}</span>
                     <span className="flex shrink-0 items-center gap-1.5 text-[10px] uppercase tracking-wider text-white/35">
                       {d.needs_wall && <span className="rounded-full border border-white/15 px-1.5">wall</span>}
+                      {d.needs_goal && <span className="rounded-full border border-white/15 px-1.5">goal</span>}
                       {d.pillar}
                     </span>
                   </button>

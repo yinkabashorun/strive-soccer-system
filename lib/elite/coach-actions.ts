@@ -129,6 +129,7 @@ type PlayerEnvRow = {
   space?: TrainingSpace | null;
   offer_opt_in?: boolean | null;
   opt_in_drill_ids?: string[] | null;
+  has_goal?: boolean | null;
 };
 
 // Course drills offered per player (040). The coach switches the player
@@ -586,7 +587,7 @@ export async function applyGeneratedPlanCore(
 
   const { data: player } = await supabase
     .from("elite_players")
-    .select("current_week, week1_monday, full_name, parent_name, has_wall, space, training_load, coach_memory, offer_opt_in, opt_in_drill_ids")
+    .select("current_week, week1_monday, full_name, parent_name, has_wall, has_goal, space, training_load, coach_memory, offer_opt_in, opt_in_drill_ids")
     .eq("id", playerId)
     .maybeSingle();
 
@@ -681,6 +682,7 @@ export async function applyGeneratedPlanCore(
     env
       ? {
           has_wall: env.has_wall ?? null,
+          has_goal: env.has_goal ?? null,
           space: env.space ?? null,
           offer_opt_in: env.offer_opt_in ?? null,
           opt_in_drill_ids: env.opt_in_drill_ids ?? null,

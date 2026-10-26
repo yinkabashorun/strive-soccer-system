@@ -158,6 +158,19 @@ as a skill drill is routed to the slot (offered) or dropped (not
 offered) with the session filled back to three skill drills. One per
 session is the default, `COURSE_SLOTS_PER_SESSION` in bank-conform.ts.
 
+## The Shooting pillar and the goal rule (Oct 2026)
+
+"Shooting" is a bank pillar (migration 042), the first course on Coach
+Yinka's roadmap. It is not a rated metric. A Shooting drill is a skill
+drill for the builder; a drill ticked "Needs a goal" fits only a player
+whose profile says they have one (`drillFitsPlayer` in bank-conform.ts,
+the same gate as needs_wall / has_wall, applied at both gates, in Extra
+Work and in the templates). The prompt marks such drills [goal] and
+tells the AI they go only to players with a goal; the output gate
+replaces one given to anyone else. Whether a shooting drill is a course
+drill (slot only, offered per player) is the drill's own course tick,
+unchanged.
+
 ## Courses, the library tab (Oct 2026)
 
 A course is a named ladder of steps grouped into levels, shown to every

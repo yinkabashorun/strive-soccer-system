@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useState, useTransition } from "react";
 import { Dumbbell, Loader2, Pencil, Plus, Trash2, Upload, X } from "lucide-react";
-import { PLYO_PILLAR, PROGRESS_METRICS, STRENGTH_PILLAR, type Drill } from "@/lib/elite/types";
+import { PLYO_PILLAR, PROGRESS_METRICS, SHOOTING_PILLAR, STRENGTH_PILLAR, type Drill } from "@/lib/elite/types";
 import { saveDrill, deleteDrill, type DrillInput } from "@/lib/elite/drill-actions";
 import { createClient } from "@/lib/elite/supabase/client";
 import { DrillVideo } from "./DrillVideo";
@@ -24,6 +24,7 @@ const EMPTY: DrillInput = {
   minutes: 10,
   cues: "",
   needs_wall: false,
+  needs_goal: false,
   small_space: false,
   opt_in: false,
   video_url: "",
@@ -89,6 +90,7 @@ export function DrillBank({
     const m = new Map<string, Drill[]>();
     m.set(PLYO_PILLAR, []);
     for (const p of PROGRESS_METRICS) m.set(p, []);
+    m.set(SHOOTING_PILLAR, []);
     m.set(STRENGTH_PILLAR, []);
     for (const d of initial) m.get(d.pillar)?.push(d);
     return m;
@@ -155,13 +157,15 @@ export function DrillBank({
               onChange={(e) => setEditing({ ...editing, pillar: e.target.value })}
               className={inputCls}
             >
-              {[PLYO_PILLAR, ...PROGRESS_METRICS, STRENGTH_PILLAR].map((p) => (
+              {[PLYO_PILLAR, ...PROGRESS_METRICS, SHOOTING_PILLAR, STRENGTH_PILLAR].map((p) => (
                 <option key={p} value={p} className="bg-black">
                   {p === PLYO_PILLAR
                     ? "Plyo (session warm-ups)"
                     : p === STRENGTH_PILLAR
                       ? "Strengthening (session finishers)"
-                      : p}
+                      : p === SHOOTING_PILLAR
+                        ? "Shooting (tick Needs a goal when it does)"
+                        : p}
                 </option>
               ))}
             </select>
@@ -199,6 +203,15 @@ export function DrillBank({
                 className="h-4 w-4 accent-accent"
               />
               Needs a wall
+            </label>
+            <label className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-sm text-white/70">
+              <input
+                type="checkbox"
+                checked={editing.needs_goal}
+                onChange={(e) => setEditing({ ...editing, needs_goal: e.target.checked })}
+                className="h-4 w-4 accent-accent"
+              />
+              Needs a goal (only players with a goal get it)
             </label>
             <label className="flex items-center gap-2.5 rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-sm text-white/70">
               <input
@@ -282,7 +295,9 @@ export function DrillBank({
                   ? `${drills.length} warm-ups · every session opens with one, rotated`
                   : pillar === STRENGTH_PILLAR
                     ? `${drills.length} finishers · last drill of a session, every session when a player's note calls for it`
-                    : `${drills.length} drills`}
+                    : pillar === SHOOTING_PILLAR
+                      ? `${drills.length} drills · a drill marked goal goes only to players with a goal`
+                      : `${drills.length} drills`}
               </span>
             </h2>
             <div className="space-y-2">
@@ -299,6 +314,11 @@ export function DrillBank({
                       {d.needs_wall && (
                         <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/45">
                           wall
+                        </span>
+                      )}
+                      {d.needs_goal && (
+                        <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/45">
+                          goal
                         </span>
                       )}
                       {d.small_space && (
@@ -335,6 +355,7 @@ export function DrillBank({
                           minutes: d.minutes,
                           cues: d.cues,
                           needs_wall: d.needs_wall,
+                          needs_goal: Boolean(d.needs_goal),
                           small_space: Boolean(d.small_space),
                           opt_in: Boolean(d.opt_in),
                           video_url: d.video_url ?? "",

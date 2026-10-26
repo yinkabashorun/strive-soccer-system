@@ -21,6 +21,8 @@ import {
 import type {
   Achievement,
   Checkin,
+  Course,
+  CourseStep,
   CoachingCall,
   Game,
   CoachNote,
@@ -290,6 +292,48 @@ export async function getSessionTemplates(opts?: {
       .map((x) => (Array.isArray(x.elite_drills) ? x.elite_drills[0] : x.elite_drills))
       .filter((d): d is Drill => Boolean(d)),
   }));
+}
+
+// Courses (041): every course with its steps and, for drill steps, the
+// joined bank row. Service client by default so the Courses tab reads
+// the bank rows a player cannot read under RLS (020); the pages decide
+// what a member sees through visibleCourses() in lib/elite/courses.ts.
+export async function getCourses(opts?: {
+  includeInactive?: boolean;
+  client?: SupabaseClient;
+}): Promise<Course[]> {
+  const supabase = opts?.client ?? createServiceClient() ?? createClient();
+  if (!supabase) return [];
+  let q = supabase
+    .from("elite_courses")
+    .select("id, slug, name, subtitle, intro, kind, active, sort, elite_course_steps(*, elite_drills(*))")
+    .order("sort");
+  if (!opts?.includeInactive) q = q.eq("active", true);
+  const { data, error } = await q;
+  if (error || !data) return [];
+  type RawStep = Omit<CourseStep, "drill"> & { elite_drills: Drill | Drill[] | null };
+  type Raw = Omit<Course, "steps"> & { elite_course_steps: RawStep[] | null };
+  return (data as Raw[]).map((c) => ({
+    id: c.id,
+    slug: c.slug,
+    name: c.name,
+    subtitle: c.subtitle,
+    intro: c.intro,
+    kind: c.kind,
+    active: c.active,
+    sort: c.sort,
+    steps: [...(c.elite_course_steps ?? [])]
+      .sort((a, b) => a.level_no - b.level_no || a.sort - b.sort)
+      .map(({ elite_drills, ...s }) => ({
+        ...s,
+        drill: Array.isArray(elite_drills) ? elite_drills[0] ?? null : elite_drills,
+      })),
+  }));
+}
+
+export async function getCourse(slug: string, client?: SupabaseClient): Promise<Course | null> {
+  const all = await getCourses({ includeInactive: true, client });
+  return all.find((c) => c.slug === slug) ?? null;
 }
 
 // Everything the two gates need to turn a few-yards player's week into

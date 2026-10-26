@@ -151,13 +151,16 @@ commit.
       plyos as Level 1 Bounce, sprint levels to be added at
       /coach/drills as his sprint clips land; (4) agility and
       shooting as clips land; RECRUITING DRAFTED Oct 26 as templates
-      and rules of thumb (his direction), seeded SWITCHED OFF, awaiting
-      his read at https://claude.ai/artifact/Ce3tE517A9B6cKBCeeNHL9, one tap
-      to On at /coach/drills.
+      and rules of thumb (his direction), review page
+      https://claude.ai/artifact/Ce3tE517A9B6cKBCeeNHL9.
       COLLEGE and ACADEMY drafted Oct 26 the same way (his "We need a
-      college course and a academy course"), seeded SWITCHED OFF, his
-      read at https://claude.ai/artifact/BrbkPqVFzpaYBZnhyijbGM; the
-      General Nutrition Guide is the last lesson course still unwritten. SIXTH, added Oct 25: a NUTRITION bundle, a lesson
+      college course and a academy course"), review page
+      https://claude.ai/artifact/BrbkPqVFzpaYBZnhyijbGM. ALL THREE
+      SWITCHED ON Oct 26 on his "I don't see them In courses" (see
+      RECORD): seven courses live on the Courses tab for every member,
+      written by me, unread by him; any edit or off switch is one tap
+      at /coach/drills. The General Nutrition Guide is the last lesson
+      course still unwritten. SIXTH, added Oct 25: a NUTRITION bundle, a lesson
       course like recruiting (general food guidance for a training
       day, match day, hydration; no calorie targets, supplements or
       weight goals; a not-medical-advice line, and the privacy / terms
@@ -2271,6 +2274,18 @@ commit.
       Review page https://claude.ai/artifact/BrbkPqVFzpaYBZnhyijbGM.
       Gary's own overseas page still needs his voice. Nothing on the
       tab until his yes; seven courses in the table, four on the tab.
+- [x] SWITCHED ON Oct 26 2026 (Coach Yinka: "I don't see them In
+      courses"): Recruiting, College and Academy set active = true in
+      prod by one SQL update, verified after: all seven courses active
+      (Keep It Up 14 steps, Weak Foot 8, Strength 17, Speed 3,
+      Recruiting 9, College 7, Academy 6). The player Courses tab hides
+      an off course by design, which is why he saw four; the coach
+      editor at /coach/drills lists every course with its switch. The
+      three lesson courses go to every member as I wrote them, before
+      his read; he edits any page or switches a course off in the
+      editor. Migrations 045 and 046 still seed them off, on purpose:
+      a fresh database starts with them hidden until a coach taps On.
+      No player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

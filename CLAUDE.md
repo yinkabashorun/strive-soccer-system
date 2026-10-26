@@ -159,8 +159,18 @@ commit.
       SWITCHED ON Oct 26 on his "I don't see them In courses" (see
       RECORD): seven courses live on the Courses tab for every member,
       written by me, unread by him; any edit or off switch is one tap
-      at /coach/drills. The General Nutrition Guide is the last lesson
-      course still unwritten. SIXTH, added Oct 25: a NUTRITION bundle, a lesson
+      at /coach/drills. COLLEGE AND ACADEMY REORGANISED BY COMPONENT
+      Oct 26 (his "organized well into the different components ...
+      separated intelligently", see RECORD): migration 047 written and
+      merged, review page updated at the same link, PROD APPLY PENDING:
+      the statement deletes the old pages before inserting the new
+      ones, so the Supabase tool asked for a confirmation tap and the
+      prompt timed out. Next session: run 047 through execute_sql (two
+      DO blocks, one call each) and tick the apply on the prompt, or
+      paste supabase/migrations/047_college_and_academy_components.sql
+      into the Supabase SQL editor; until then the Courses tab still
+      shows the 046 shape (7 and 6 pages). The General Nutrition Guide
+      is the last lesson course still unwritten. SIXTH, added Oct 25: a NUTRITION bundle, a lesson
       course like recruiting (general food guidance for a training
       day, match day, hydration; no calorie targets, supplements or
       weight goals; a not-medical-advice line, and the privacy / terms
@@ -2286,6 +2296,44 @@ commit.
       editor. Migrations 045 and 046 still seed them off, on purpose:
       a fresh database starts with them hidden until a coach taps On.
       No player data touched.
+- [x] REORGANISED Oct 26 2026, COLLEGE AND ACADEMY BY COMPONENT (Coach
+      Yinka: "They need to be organized well into the different
+      components that go into each college and academy. They should be
+      separated intelligently"): each level is now one component of the
+      route and each page one thing to do inside it. COLLEGE, subtitle
+      "The college route, part by part.", 16 pages in 9 components:
+      Start here (The levels; The five checks, each pointing at its
+      component); Grades (transcript, Eligibility Center for D1 or D2,
+      grades are money); Film (tape then the full game, season in the
+      title); The school list (Twenty across three levels; Position
+      need, how to read a roster); Outreach (which Recruiting template
+      when; The club coach's call); Exposure (ID camps; Showcases; The
+      money test); The visit (Unofficial visits; What to ask a coach);
+      Money and the decision (Money, plainly; Deciding); The timeline
+      (By grade, no contact-rule dates). ACADEMY, 13 pages in 9
+      components: Start here (The ladder; How academies find you, what a
+      director checks); Your league (Dominate the rung, when to move
+      clubs); The club coach and the director (Directors call
+      directors); Film (One tape a season, birth year in the title);
+      The tryout (Email to a director; On the day); Age and grades (Age
+      matters earlier; Grades still matter); The pro academy (How the
+      MLS academies work; When an offer comes, ask); Overseas (Before
+      you chase overseas); The parent's job (The far side of the
+      field). Same facts as 046, nothing new invented: no dates, no
+      alumni, never a roster, scholarship or academy place promised;
+      "they" for the player everywhere. Recruiting unchanged, still the
+      shared kit. Migration 047: for each course, if the "Start here"
+      component is absent, delete the old pages, update subtitle and
+      intro, insert the new pages, raise on a partial count; a course
+      already restructured (or edited by a coach after this) is left
+      alone. Generator and review page from scratchpad routes2.py;
+      review republished at https://claude.ai/artifact/BrbkPqVFzpaYBZnhyijbGM.
+      PROD: the live rows were checked first (still exactly the 046
+      shape, no coach edits), then the College block was sent through
+      execute_sql and the tool asked for a confirmation tap on the
+      delete; no answer came in 60 s, so NOTHING ran. Both courses are
+      still live in the 046 shape until the apply (OPEN item). No
+      player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

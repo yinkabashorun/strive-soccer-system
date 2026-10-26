@@ -2096,6 +2096,13 @@ commit.
       (page.html, render.mjs, you-said-we-built-1080.png). Nothing on
       the page or in the app changed. One asset, three uses proposed:
       a /demo section, a six-slide carousel, six story frames.
+      THEN (Coach Yinka: "Show me"): rendered as a nine-slide 4:5
+      carousel, 1080x1350: cover (YOU SAID. WE BUILT.), six pair slides
+      (the parent's line top, the answer and gold tag bottom), the
+      session strip, the $249 locked-for-life close with DM "ELITE".
+      Source carousel.html + render-carousel.mjs (?slide=N), finals in
+      marketing/offer/you-said-we-built/slides/01-09.png, preview sheet
+      carousel-preview.png. Sent, not posted; nothing on /demo changed.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -177,8 +177,10 @@ commit.
       pillar; Level 4 Top speed added the same day (migration 049,
       Zigzag sprint and backpedal, Zigzag sprint); then five more
       (migration 050: Sprint around the cones into Technique; 15 yard
-      sprint and three drop sprints into Acceleration). The Speed
-      course is 13 drills in four levels. Still to come from
+      sprint and three drop sprints into Acceleration); then Level 5
+      Explosiveness (migration 052: Push-up start sprint, Long jumps,
+      Side bounds). The Speed course is 16 drills in five levels.
+      Still to come from
       his Oct 27 filming: FINISHING and
       HEADING (both under the Shooting pillar as course drills, his
       "These are just for the courses"), clips not yet sent. The
@@ -2441,6 +2443,23 @@ commit.
       drive, 15 yard sprint, in place, forward and back, sideways (his
       order); files renamed in public/drills to match. Cues still
       mine, FLAG as above.
+      THEN same day (four more: "these are for explosiveness, the
+      second should be trimmed its long jumps, then the last 2 are
+      side bounds put them in the same video it shows diff
+      directions"): IMG_7416 3.5 s = push-up position at the cone, up
+      and sprint; IMG_7417 13.5 s = standing long jumps, TRIMMED to
+      2.5 s to 12.8 s (a hand covered the lens for the first second
+      and a half, he stands still after the last landing); IMG_7419
+      5.0 s + IMG_7420 5.6 s = side bounds away from the camera then
+      back toward it, joined in that order. Encoded into public/drills/
+      speed-push-up-start-sprint.mp4 (1.4 MB, 3.3 s), speed-long-
+      jumps.mp4 (3.2 MB, 10.3 s), speed-side-bounds.mp4 (4.2 MB,
+      10.2 s). Migration 052 APPLIED TO PROD and verified: three Speed
+      course drills (sorts 200 to 220, opt_in, open space) and Speed
+      Level 5 "Explosiveness" (his word) in his order. Speed course:
+      16 drills, five levels (Bounce, Technique and coordination,
+      Acceleration, Top speed, Explosiveness). how / reps / cues mine,
+      FLAG as above. No player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

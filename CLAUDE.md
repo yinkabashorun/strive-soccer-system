@@ -2430,6 +2430,17 @@ commit.
       turn and sprint (easiest first, my order). Speed course: 13
       drills, four levels, all course drills, no week touched. No
       player data touched.
+      CORRECTED minutes later (Coach Yinka: "The first is shuffle in
+      place, then it's shuffle forward back, then sideways"): my read
+      of the three drop sprints was WRONG (no "turn", no shuffle-less
+      one). In the order he sent them: IMG_7410 "Speed: Drop, shuffle
+      in place, sprint", IMG_7411 "Speed: Drop, shuffle forward and
+      back, sprint", IMG_7412 "Speed: Drop, shuffle sideways, sprint".
+      Migration 051 APPLIED TO PROD and verified: titles, how, cues and
+      video_url updated by old title, Acceleration order now Kneel and
+      drive, 15 yard sprint, in place, forward and back, sideways (his
+      order); files renamed in public/drills to match. Cues still
+      mine, FLAG as above.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -179,7 +179,13 @@ commit.
       (migration 050: Sprint around the cones into Technique; 15 yard
       sprint and three drop sprints into Acceleration); then Level 5
       Explosiveness (migration 052: Push-up start sprint, Long jumps,
-      Side bounds). The Speed course is 16 drills in five levels.
+      Side bounds); then The cross into Top speed (migration 053). The
+      Speed course is 17 drills in five levels. PENDING from 053: the
+      level renames (Bounce to Warm-up, Technique and coordination to
+      Technique) and the three-line intro asked for a confirmation tap
+      and timed out; re-run the update statements of
+      supabase/migrations/053_speed_the_cross_and_simple_levels.sql
+      (or rename the two levels in the editor at /coach/drills).
       Still to come from
       his Oct 27 filming: FINISHING and
       HEADING (both under the Shooting pillar as course drills, his
@@ -2460,6 +2466,27 @@ commit.
       16 drills, five levels (Bounce, Technique and coordination,
       Acceleration, Top speed, Explosiveness). how / reps / cues mine,
       FLAG as above. No player data touched.
+      THEN same day (Coach Yinka: "This is the last drill it is called
+      the cross. After you put this in organize the course as best you
+      can and simplistic"): IMG_7422 8.0 s = five cones in a cross,
+      every move from the middle cone: sprint to the top and backpedal
+      back, shuffle to each side and back, backpedal to the bottom and
+      sprint back. Encoded into public/drills/speed-the-cross.mp4
+      (1.8 MB). Migration 053 written: the drill (sort 230, opt_in,
+      open space) placed last in Top speed with the two zigzags (change
+      of direction at speed); the levels made simple with his words
+      kept where he gave them: 1 Warm-up (was Bounce, my name), 2
+      Technique (was Technique and coordination), 3 Acceleration, 4
+      Top speed, 5 Explosiveness; intro cut to three lines ("Warm up
+      first, every time." / "Work one level at a time. Full rest
+      between reps; speed is never tired work." / "Land soft, leave
+      fast."). PROD: the insert of the drill and its step went through
+      and is live; the UPDATE statements (two level renames, the
+      intro) asked for a confirmation tap through the MCP and timed
+      out, so the tab still shows "Bounce" and "Technique and
+      coordination" and the old two-line intro until they are re-run
+      (OPEN item). Speed course: 17 drills, five levels. how / reps /
+      cues mine, FLAG as above. No player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

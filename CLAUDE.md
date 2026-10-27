@@ -169,8 +169,15 @@ commit.
       DO blocks, one call each) and tick the apply on the prompt, or
       paste supabase/migrations/047_college_and_academy_components.sql
       into the Supabase SQL editor; until then the Courses tab still
-      shows the 046 shape (7 and 6 pages). The General Nutrition Guide
-      is the last lesson course still unwritten. SIXTH, added Oct 25: a NUTRITION bundle, a lesson
+      shows the 046 shape (7 and 6 pages). Oct 27: tried again, same
+      prompt, same timeout; the apply needs Coach Yinka to tap the
+      confirmation inside 60 s or to paste the file himself. SPEED
+      SPRINT LEVELS LIVE Oct 27 (migration 048, see RECORD): Stop and
+      go, 50% 100% 25%, Kneel and drive, course drills under the Speed
+      pillar. Still to come from his Oct 27 filming: FINISHING and
+      HEADING (both under the Shooting pillar as course drills, his
+      "These are just for the courses"), clips not yet sent. The
+      General Nutrition Guide is the last lesson course still unwritten. SIXTH, added Oct 25: a NUTRITION bundle, a lesson
       course like recruiting (general food guidance for a training
       day, match day, hydration; no calorie targets, supplements or
       weight goals; a not-medical-advice line, and the privacy / terms
@@ -2334,6 +2341,52 @@ commit.
       delete; no answer came in 60 s, so NOTHING ran. Both courses are
       still live in the 046 shape until the apply (OPEN item). No
       player data touched.
+- [x] DECIDED Oct 26-27 2026 (Coach Yinka, on "is it worth it"): the
+      shooting, speed and heading / finishing clips are COURSE ONLY
+      ("These are just for the courses"), never week drills on their
+      own. Rule: every such clip is banked with the course tick
+      (opt_in) so the builder cannot place it; it shows on the Courses
+      tab for every member; the coach can still offer one to a player
+      in the slot by hand. Finishing and Heading are two courses, both
+      banked under the Shooting pillar (heading to finish, no new
+      pillar needed); Speed sprints under the Speed pillar. Heading
+      flag given, not decided: US youth rules restrict heading at the
+      youngest ages and limit it in practice at 12 and 13, and every
+      current buyer is 12 to 15, so the course should read as older
+      players' work and no heading drill should reach a week without an
+      age rule. His read on the offer, recorded for the record: paired
+      with distribution, proof and retention, the grand slam offer is
+      the engine; the offer is built, this week is announcement and
+      calls.
+- [x] LIVE Oct 27 2026, SPEED SPRINT LEVELS (Coach Yinka sent four phone
+      clips: "Stop & go and 50%, 100%, 25%, and the first and last vids
+      need to be put together as kneel and drive. Stop and go and the %
+      ones are for technique / coordination"): clips read frame by
+      frame (IMG_7400 4.6 s = sprint in, dead stop on the cone, go
+      again; IMG_7401 15.7 s = three runs at half, full and quarter
+      speed; IMG_7413 4.7 s + IMG_7415 2.3 s = two kneeling-start
+      drive-outs, joined in that order). All four HLG portrait,
+      encoded with the Oct 21 recipe (tone map, 720x1280, crf 27,
+      3.5 Mb/s cap, -an, 0.2 s off the front) into public/drills/
+      speed-stop-and-go.mp4 (1.7 MB), speed-50-100-25.mp4 (4.8 MB),
+      speed-kneel-and-drive.mp4 (2.6 MB, the two takes concatenated
+      stream-copy). Migration 048 APPLIED TO PROD in one call and
+      verified: three bank rows, pillar Speed, titles "Speed: Stop and
+      go" (sort 100), "Speed: 50%, 100%, 25%" (110), "Speed: Kneel and
+      drive" (120), opt_in true, active true, open space, no wall, no
+      goal, 5 / 6 / 5 min; Speed course Level 2 "Technique and
+      coordination" (his words) with the two in the order he listed,
+      Level 3 "Acceleration" (MY name, he gave none) with Kneel and
+      drive; no beginner / advanced tags (none given). how / reps /
+      cues written by me from the footage, FLAG: edit at /coach/drills
+      if not what he coaches. The Speed pillar had zero drills before
+      this; as course drills they stay off the builder's menu, so no
+      week changes. Idempotent seed (by title; steps only while Level 2
+      is absent; refuses a partial). Files live at
+      thestriveapp.com/drills/... once the merge deploys. The 047
+      College apply was retried the same session and timed out on the
+      confirmation prompt again. 136 tests green. No player data
+      touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

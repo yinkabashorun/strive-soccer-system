@@ -174,7 +174,9 @@ commit.
       confirmation inside 60 s or to paste the file himself. SPEED
       SPRINT LEVELS LIVE Oct 27 (migration 048, see RECORD): Stop and
       go, 50% 100% 25%, Kneel and drive, course drills under the Speed
-      pillar. Still to come from his Oct 27 filming: FINISHING and
+      pillar; Level 4 Top speed added the same day (migration 049,
+      Zigzag sprint and backpedal, Zigzag sprint). Still to come from
+      his Oct 27 filming: FINISHING and
       HEADING (both under the Shooting pillar as course drills, his
       "These are just for the courses"), clips not yet sent. The
       General Nutrition Guide is the last lesson course still unwritten. SIXTH, added Oct 25: a NUTRITION bundle, a lesson
@@ -2387,6 +2389,19 @@ commit.
       College apply was retried the same session and timed out on the
       confirmation prompt again. 136 tests green. No player data
       touched.
+      THEN same day (Coach Yinka sent two more: "Both are zigzag the
+      first is sprint and back pedal the second is just a straight
+      sprint. These are for top speed"): IMG_7404 10.0 s = sprint to a
+      cone, backpedal to the next, sprint on, through a zigzag line;
+      IMG_7406 7.6 s = a straight zigzag sprint cutting at each cone.
+      Same encode into public/drills/speed-zigzag-sprint-and-
+      backpedal.mp4 (3.6 MB) and speed-zigzag-sprint.mp4 (2.9 MB).
+      Migration 049 APPLIED TO PROD and verified: two more Speed course
+      drills (sorts 130, 140, opt_in, open space) and Speed Level 4
+      "Top speed" (his words) in his order. The Speed course now runs
+      Bounce, Technique and coordination, Acceleration, Top speed:
+      three plyos and five sprints. how / reps / cues mine, FLAG as
+      above. No player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

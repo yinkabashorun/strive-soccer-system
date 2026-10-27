@@ -175,7 +175,10 @@ commit.
       SPRINT LEVELS LIVE Oct 27 (migration 048, see RECORD): Stop and
       go, 50% 100% 25%, Kneel and drive, course drills under the Speed
       pillar; Level 4 Top speed added the same day (migration 049,
-      Zigzag sprint and backpedal, Zigzag sprint). Still to come from
+      Zigzag sprint and backpedal, Zigzag sprint); then five more
+      (migration 050: Sprint around the cones into Technique; 15 yard
+      sprint and three drop sprints into Acceleration). The Speed
+      course is 13 drills in four levels. Still to come from
       his Oct 27 filming: FINISHING and
       HEADING (both under the Shooting pillar as course drills, his
       "These are just for the courses"), clips not yet sent. The
@@ -2402,6 +2405,31 @@ commit.
       Bounce, Technique and coordination, Acceleration, Top speed:
       three plyos and five sprints. how / reps / cues mine, FLAG as
       above. No player data touched.
+      THEN same day (five more clips: "This first one is for
+      coordination / technique sprint and get around each cone. The
+      others are for acceleration so there's 15 yard sprints as the
+      second vid I sent. Then the last 3 are diff variations of a drop
+      sprint where he drops his hands and hips, shuffles a direction
+      then sprints"): read frame by frame at 8 fps. IMG_7408 9.3 s =
+      sprint to each cone and all the way around it, down the line and
+      back; IMG_7409 5.8 s = a flat-out 15 yard sprint from a low
+      start; IMG_7410 4.1 s = hands up, drop hands and hips, straight
+      sprint forward, NO shuffle; IMG_7412 7.3 s = drop, shuffle
+      sideways, sprint forward; IMG_7411 5.2 s = drop, shuffle
+      sideways, turn, sprint away. Names from that read, his to
+      rename: "Speed: Sprint around the cones", "Speed: 15 yard
+      sprint", "Speed: Drop and sprint", "Speed: Drop, shuffle,
+      sprint", "Speed: Drop, shuffle, turn and sprint" (sorts 150 to
+      190). Same encode into public/drills/ (speed-sprint-around-the-
+      cones 3.6 MB, speed-15-yard-sprint 1.6 MB, speed-drop-and-sprint
+      1.9 MB, speed-drop-shuffle-sprint 2.2 MB, speed-drop-shuffle-
+      turn-and-sprint 1.2 MB). Migration 050 APPLIED TO PROD and
+      verified: Around the cones is third in Level 2 Technique and
+      coordination; Level 3 Acceleration now runs Kneel and drive, 15
+      yard sprint, Drop and sprint, Drop shuffle sprint, Drop shuffle
+      turn and sprint (easiest first, my order). Speed course: 13
+      drills, four levels, all course drills, no week touched. No
+      player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -2487,6 +2487,34 @@ commit.
       coordination" and the old two-line intro until they are re-run
       (OPEN item). Speed course: 17 drills, five levels. how / reps /
       cues mine, FLAG as above. No player data touched.
+- [x] EDITED Oct 28 2026, THE SHOOTING REEL (Coach Yinka sent a 12.5 s
+      phone clip of a player talking to camera: "Edit this video to go
+      viral put captions and name the 3 in a sleek font that matches
+      our brand"): marketing/reels/shooting-3-things/
+      strive-shooting-3-things.mp4 (1080x1920, 30 fps, 12.6 MB), built
+      by build.py there (libass captions from the brand woff2 fonts
+      converted to TTF, zoompan for the zooms, loudnorm to -14 LUFS).
+      The clip had a phone-app title ("Score 5x More Goals In 30
+      Seconds") baked into the first 2.7 s in a non-brand font; a 1.36x
+      hook zoom anchored low hides it and the same hook is set in Barlow
+      Condensed Black with a gold STRIVE SOCCER eyebrow. Pop captions
+      in Barlow Condensed Black, white with a dark outline, the three
+      names in brand gold; the three stack top-left as they are said
+      (01 / 02 / 03 gold eyebrow numbers, Barlow Condensed Black); a
+      small punch-in on each; @STRIVESOCCERFC with the gold underline
+      bottom-left, the white mark bottom-right; no bars, no em dashes.
+      THE THREE, from the audio: 01 Chest over the ball, 02 Strike with
+      the laces, 03 Head over the ball. TRANSCRIPT CAVEAT: every speech
+      model host (Hugging Face, OpenAI's model CDN, Vosk, Silero,
+      GitHub releases) is blocked from this environment; pocketsphinx
+      (bundled model) plus keyword spotting gave the timings and the
+      confident phrases ("three things to remember", "chest over the
+      ball", "second", "strike with the laces", "third", "...head...the
+      ball"); the connective lines ("when shooting", "lean forward with
+      your", "keep your", "and follow through") are my best read and
+      are marked sure=False in build.py. FLAG: Coach Yinka checks the
+      caption words against the audio before posting; a correction is
+      one line in CAPS and a re-render. No player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -2547,6 +2547,28 @@ commit.
       faces.json, overlays.ass, endcard.ass, README with the style);
       the v1 captioned MP4 and its script removed. Sent to him; no
       player data touched.
+      CORRECTED (Coach Yinka: "(How you listed the 1 2 and 3) I liked
+      the hook but you removed the hook I PUT. Atleast ask yk have
+      more sense with these things. Save all this as a skill"): TWO
+      MISTAKES OF MINE. (1) v1 and v2 hid his own on-screen hook
+      ("Score 5x More Goals In 30 Seconds", baked in by his phone app)
+      under a zoom and put mine in its place, without asking. STANDING
+      RULE from this: never remove, cover or replace anything the coach
+      put in a clip (a title, a caption, a sticker) without asking
+      first. (2) "I like how you listed them" meant the stacked 01 02
+      03 list of v1, not the single pop-ups of v2. V3 BUILT: his hook
+      untouched (no hook zoom, no brand hook), the stacked list back,
+      placed by the face rule; on this clip the only spot his face
+      never reaches is the top-right corner, so the list sits there in
+      a compact inline layout (gold number and name on one line, 46 px)
+      and fades at 11.5 s before he re-enters on the right; watermark
+      and end card as v2; still no captions (his). The face check is
+      now box by box per sample (a face that roams left then right no
+      longer blocks a corner it never reaches) with a 24 px margin.
+      SAVED AS A SKILL: .claude/skills/strive-reel/ (SKILL.md with the
+      rules and the look, reel_build.py driven by a spec.json, faces.py
+      for the face track); the reel folder keeps spec.json, faces.json,
+      the .ass files, fonts and the MP4. Sent to him.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 
@@ -2664,6 +2686,12 @@ Assessment call windows: Wed/Thu 6-9pm, Sat evenings (~5-8pm), Sun afternoons
   nothing dropped quietly. Same standard for copy and marketing as for
   code: real numbers, confirmed facts, the brand rules, nothing
   invented.
+- STANDING RULE (Coach Yinka, Oct 28 2026: "you removed the hook I PUT.
+  Atleast ask"): never remove, cover or replace anything the coach put
+  in a clip he sends (an on-screen title, his captions, a sticker, his
+  cut) without asking first. Overlays go around what he made. Same for
+  any asset he made: ask before changing it. The reel build lives in
+  .claude/skills/strive-reel.
 - Refunds: same-day, gracious, always.
 - Registration = payment. Public scarcity numbers must be real.
 - No em dashes in any player/parent-facing copy or scripts.

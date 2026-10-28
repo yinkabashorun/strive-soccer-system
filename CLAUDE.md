@@ -2523,6 +2523,30 @@ commit.
       the spoken lines in order (typed or a phone voice-note
       transcript); no caption is guessed from audio again. The posted
       MP4 is not final until he sends the lines and it is re-rendered.
+      THEN (Coach Yinka: "No it's all good. I'll do captions I like
+      how you listed them but it has to be in an ideal part of the
+      video never covering his face ... maybe it's just single line
+      pop ups ... Then the strive soccer water mark isn't good can we
+      have an outro Or a strive elite personalized remote training
+      watermark"): V2 BUILT, the house reel style from here. No
+      spoken-word captions (his). FACE RULE: faces.py (OpenCV Haar on
+      the zoom-only pass, every 3rd frame) tracks the face; build.py
+      checks each overlay's window against the face boxes plus 40 px
+      and takes the first clear candidate (hook: upper middle, top,
+      lower middle; names: right side at shoulder height, left side,
+      lower right). On this clip the hook landed lower-middle (his
+      face is upper-left while the ball flies) and all three names
+      beside him on the right at shoulder height, two short lines
+      each, gold 01 / 02 / 03, 1.8 to 2.1 s each. Watermark replaced
+      by STRIVE ELITE (ELITE gold) over PERSONALIZED REMOTE TRAINING,
+      bottom-right; the handle and the mark are gone. End card 2.4 s
+      with a 0.3 s crossfade (STRIVE ELITE, gold rule, PERSONALIZED
+      REMOTE TRAINING, DM US "ELITE", thestriveapp.com/demo) carrying
+      the outro's end swish. Output 14.9 s. Repo:
+      marketing/reels/shooting-3-things/ (build.py, faces.py,
+      faces.json, overlays.ass, endcard.ass, README with the style);
+      the v1 captioned MP4 and its script removed. Sent to him; no
+      player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

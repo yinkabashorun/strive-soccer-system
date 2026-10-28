@@ -2515,6 +2515,14 @@ commit.
       are marked sure=False in build.py. FLAG: Coach Yinka checks the
       caption words against the audio before posting; a correction is
       one line in CAPS and a re-render. No player data touched.
+      OUTCOME same day (Coach Yinka: "The captions were wrong but I
+      like the overlays. Good to know"): the best-read captions were
+      WRONG; the overlay design (hook, stacking 01/02/03 names, gold
+      words, handle, mark, punch-ins) is approved and stays the house
+      reel style. RULE FROM HERE: every reel arrives as the clip PLUS
+      the spoken lines in order (typed or a phone voice-note
+      transcript); no caption is guessed from audio again. The posted
+      MP4 is not final until he sends the lines and it is re-rendered.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -1,0 +1,31 @@
+{
+  "src": "SOURCE_CLIP.mov",
+  "out": "strive-shooting-3-things.mp4",
+  "fonts": "fonts",
+  "outro": "../../outro/strive-elite-outro-9s-vertical-1080x1920.mp4",
+  "faces": "faces.json",
+  "keep_hook": true,
+  "list_style": "stack",
+  "names": [
+    {
+      "start": 5.41,
+      "num": "01",
+      "text": "CHEST OVER THE BALL"
+    },
+    {
+      "start": 7.33,
+      "num": "02",
+      "text": "STRIKE WITH THE LACES"
+    },
+    {
+      "start": 9.6,
+      "num": "03",
+      "text": "HEAD OVER THE BALL"
+    }
+  ],
+  "punch": true,
+  "watermark": true,
+  "endcard": true,
+  "captions": [],
+  "list_end": 11.5
+}

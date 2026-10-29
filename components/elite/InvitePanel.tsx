@@ -7,12 +7,21 @@ import {
   type InviteCode,
 } from "@/lib/elite/invite-actions";
 import { cn } from "@/lib/utils";
+import type { InviteRole } from "@/lib/elite/invite-link";
 
 // Coach tool: generate single-use invite codes for paying clients and see
-// which have been redeemed.
-export function InvitePanel({ initial }: { initial: InviteCode[] }) {
+// which have been redeemed. The head coach (admin) can also mint a COACH
+// code (054): it creates a coach login, not a member.
+export function InvitePanel({
+  initial,
+  canInviteCoach = false,
+}: {
+  initial: InviteCode[];
+  canInviteCoach?: boolean;
+}) {
   const [codes, setCodes] = useState<InviteCode[]>(initial);
   const [note, setNote] = useState("");
+  const [role, setRole] = useState<InviteRole>("player");
   const [fresh, setFresh] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +30,7 @@ export function InvitePanel({ initial }: { initial: InviteCode[] }) {
   function generate() {
     setError(null);
     start(async () => {
-      const res = await generateInviteCode(note);
+      const res = await generateInviteCode(note, role);
       if (!res.ok) {
         setError(res.error ?? "Could not generate a code.");
         return;
@@ -32,6 +41,7 @@ export function InvitePanel({ initial }: { initial: InviteCode[] }) {
           id: `local-${res.code}`,
           code: res.code,
           note,
+          role,
           used_by: null,
           used_at: null,
           created_at: new Date().toISOString(),
@@ -74,11 +84,34 @@ export function InvitePanel({ initial }: { initial: InviteCode[] }) {
         in.
       </p>
 
+      {canInviteCoach && (
+        <div className="mt-4 flex gap-2 text-xs">
+          {(["player", "coach"] as InviteRole[]).map((r) => (
+            <button
+              key={r}
+              type="button"
+              onClick={() => setRole(r)}
+              className={cn(
+                "rounded-full border px-3 py-1 font-semibold uppercase tracking-[0.14em] transition-colors",
+                role === r
+                  ? "border-accent/50 bg-accent/10 text-accent"
+                  : "border-white/12 text-white/45 hover:text-white/80"
+              )}
+            >
+              {r === "player" ? "Client" : "Coach"}
+            </button>
+          ))}
+          <span className="self-center text-white/35">
+            {role === "coach" ? "Creates a coach login, not a member." : ""}
+          </span>
+        </div>
+      )}
+
       <div className="mt-4 flex gap-2">
         <input
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          placeholder="Client name (optional)"
+          placeholder={role === "coach" ? "Coach name (optional)" : "Client name (optional)"}
           className="flex-1 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-sm text-bone placeholder:text-white/25 focus:border-accent/40 focus:outline-none"
         />
         <button
@@ -127,6 +160,11 @@ export function InvitePanel({ initial }: { initial: InviteCode[] }) {
             >
               <div className="min-w-0">
                 <span className="font-mono text-white/80">{c.code}</span>
+                {c.role === "coach" && (
+                  <span className="ml-2 rounded-full border border-accent/30 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-accent">
+                    coach
+                  </span>
+                )}
                 {c.note && (
                   <span className="ml-2 text-white/40">· {c.note}</span>
                 )}

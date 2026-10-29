@@ -2710,6 +2710,23 @@ commit.
       these are real the day he runs them, so they go on the page and
       in the post on his word once the two formats are stamped. The
       deck is private until he shares it. No player data touched.
+      CUT TO FOUR SLIDES same hour (Coach Yinka: "narrow this down to
+      as little slides as possible ... start pulling / creating photos
+      to make this more aesthetic"): 1 cover, full-bleed photo of Coach
+      Yinka and Coach Gary at sunset under a dark gradient; 2 the
+      problem, the hook and the three parent problems beside the
+      cone-dribbling photo; 3 the answer, the four parts with every
+      item under each, beside the coach-watching photo; 4 the value
+      table ($2,400) beside a gold panel with the drop ($500 struck,
+      $249 locked for life, join by Nov 1, month to month, same-day
+      refund) and DM "ELITE". PHOTOS: the five real shots from the Oct
+      4 ad shoot (marketing/ads/strive-elite-2026-10/src/photos:
+      coaches, dribble, watching, sprint, juggler), resized and
+      uploaded to the deck as assets; sprint and juggler are uploaded
+      but unused. No stock, no generated images, no alumni photos (the
+      Joseph Igot highlight shot stays private, Sept 29 rule). The
+      six long-form slides were removed; marketing/offer/deck/ holds
+      the four-slide source.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

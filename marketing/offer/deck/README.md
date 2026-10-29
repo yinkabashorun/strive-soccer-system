@@ -6,18 +6,20 @@ from its Share menu; Share > Export gives PDF and PowerPoint).
 
 1. Cover: STRIVE ELITE over the photo of Coach Yinka and Coach Gary.
 2. The problem: the page's hook and the three parent problems, beside
-   the cone-dribbling photo.
+   the photo of a coach crouched on the field.
 3. The answer: one membership, four parts (the week, accountability,
    courses for the weaknesses, Film Room every week), every item listed
-   under its part, beside the coach-watching photo.
+   under its part, beside a portrait crop of the two coaches.
 4. Worth and price: the value table ($2,400 a month at the $80 rate)
    beside the drop ($500/mo from Nov 2 struck through, $249/mo locked
    for life by Nov 1, month to month, same-day refund) and DM "ELITE".
 
-Photos are the five real shots from the Oct 4 ad shoot
-(marketing/ads/strive-elite-2026-10/src/photos), resized under 400 KB
-and uploaded to the deck as assets (the /_blob ids in the slide files).
-No stock, no generated images.
+Photos: only Coach Yinka and Coach Gary, by his instruction (no players,
+no training sessions). The sunset shot of both and the crouched shot come
+from the Oct 4 ad shoot (marketing/ads/strive-elite-2026-10/src/photos);
+the portrait crops of the pair are in photos/ here. Uploaded to the deck
+as assets (the /_blob ids in the slide files). No stock, no generated
+images.
 
 Two items are NEW to the offer here, added by Coach Yinka Oct 29: Film
 Room weekly and the monthly 1:1 check-in call. Neither is built in the

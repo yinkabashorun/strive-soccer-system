@@ -2727,6 +2727,19 @@ commit.
       Joseph Igot highlight shot stays private, Sept 29 rule). The
       six long-form slides were removed; marketing/offer/deck/ holds
       the four-slide source.
+      THEN (Coach Yinka: "Use other photos not In person but use me and
+      coach Gary"): every player and training-session photo is out of
+      the deck. The only shots of the two coaches in the repo are the
+      sunset photo of both (Oct 4 shoot) and the crouched one, so: cover
+      keeps the full sunset shot; the problem slide now carries the
+      crouched coach; the answer slide carries a portrait crop of the
+      two of them out of the sunset shot (crops in marketing/offer/
+      deck/photos, uploaded as assets). The dribble, sprint and juggler
+      photos stay uploaded but unused. The session's other uploads were
+      checked and are book pages, not photos. FLAG: one photo of the
+      pair is doing the work of three slides; new shots of the two
+      coaches (studio, a Zoom screen, the app on a phone in hand) would
+      let each slide carry its own.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

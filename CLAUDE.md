@@ -2667,6 +2667,49 @@ commit.
       it; Gary gets no pings for Coach Yinka's players, flagged, not
       changed). Admin unchanged. 143 tests, verify green. No player data
       touched.
+- [x] DECIDED + BUILT Oct 29 2026, THE FINAL OFFER DECK (Coach Yinka:
+      "make final offer deck. we add this Film Room weekly / Monthly 1:1
+      Check In Calls"; then "frame it like ... the problem it's for at
+      the top, and then list the rest ... accountability, courses for
+      weaknesses, film review ... at the end a price drop, show the
+      actual value in the marketplace, then we drop the price ...
+      logical sale"): TWO ITEMS JOIN THE OFFER, his call: FILM ROOM,
+      WEEKLY (stack item 11 from Oct 12; this SUPERSEDES the Sept 30
+      "Elite is app only, film is Complete" boundary, Complete being
+      retired) and a MONTHLY 1:1 CHECK-IN CALL. Neither is built in the
+      app; both are delivered by hand (clips arrive through Send a
+      Clip, the breakdown comes back the same week; calls on GHL +
+      Zoom). STILL HIS TO STAMP: clips per player per week, the Film
+      Room format (live session or recorded breakdown), who runs each
+      (Coach Yinka, Gary, both), how the call is booked. DECK: ten
+      16:9 slides at https://claude.ai/artifact/89kpxoAWLRQgbbZtieQH6Z
+      (source in marketing/offer/deck/, Barlow Condensed + Barlow,
+      brand black and gold): cover; the problem (the page hook plus
+      the three parent problems from Oct 11); the answer in four
+      parts; 01 The week; 02 Accountability (check-in call, Side by
+      Side, Send a Clip, Monday text, pick up where you left off); 03
+      Courses (the seven live); 04 Film Room; the value stack; the
+      price drop ($500 from Nov 2 struck through to $249 locked for
+      life by Nov 1, month to month, same-day refund); DM "ELITE". THE
+      VALUE STACK, on his "you do the math of how much each is worth,
+      like the session if 1:1 is already a band": ONE RULE, every coach
+      touch priced at Strive's own confirmed $80 private-session rate.
+      The week 16 x $80 = $1,280 (the VSL's anchor); Film Room 4
+      breakdowns x $80 = $320; seven courses, one session each to be
+      taught the ladder, 7 x $80 = $560; accountability, Side by Side
+      every two weeks plus Send a Clip replies, 2 reviews x $80 = $160;
+      the monthly check-in call 1 x $80 = $80; TOTAL $2,400 a month, 30
+      coach touches. The Monday text, Extra Work and time trained are
+      built in, not counted. The price slide carries "$2,400 a month of
+      coaching, bought piece by piece" above the drop. The multipliers
+      are my derivation from his one confirmed rate, not a marketplace
+      survey; the rule is printed on the slide so a parent can check it.
+      COPY DEBT now open: /demo, the Oct
+      29 carousel and the Oct 25 announcement say nothing about Film
+      Room or the call; the Oct 12 rule says announce what is real, and
+      these are real the day he runs them, so they go on the page and
+      in the post on his word once the two formats are stamped. The
+      deck is private until he shares it. No player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

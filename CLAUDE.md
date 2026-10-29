@@ -2569,6 +2569,31 @@ commit.
       rules and the look, reel_build.py driven by a spec.json, faces.py
       for the face track); the reel folder keeps spec.json, faces.json,
       the .ass files, fonts and the MP4. Sent to him.
+- [x] BUILT Oct 29 2026, THE LAUNCH CAROUSEL (Coach Yinka: "Okay can you
+      make a carousel announcing the new offer. ITS TIME"): seven 4:5
+      slides at marketing/announcement/carousel/slides/01-07.png
+      (source carousel.html + render-carousel.mjs, preview strip
+      carousel-preview.png, README). 1 cover "Strive Elite is open" with
+      the announcement's own line ("Coach Gary and I put everything we
+      know about training alone into one place"); 2 the week (every
+      Monday, four in season / six off-season, about 40 minutes, every
+      drill on video, built for one player not fifteen); 3 the session
+      strip from the You said. We built. carousel (warm-up, Keep It Up,
+      three drills, finisher); 4 What's in it (Extra Work, Send a Clip,
+      Side by Side, Pick up where you left off, Strength finishers, Any
+      space, lines from /demo); 5 SEVEN COURSES in the app today (Keep
+      It Up, Weak Foot, Strength, Speed, Recruiting, College, Academy,
+      each with its live subtitle, "Every course, every member,
+      included. More added as we film them."); 6 $249/mo locked for
+      life, join by Nov 1, $500/mo from Nov 2, month to month, same-day
+      refund; 7 DM "ELITE" (call booked, thestriveapp.com/demo link in
+      bio, Nov 1). Every fact matches /demo and the Oct 25 announcement
+      post, which is the caption to post it with. FLAGS, his call: the
+      courses slide is the first public mention of the courses (the Oct
+      12 rule allows it, all seven are live on the Courses tab), and
+      Recruiting, College and Academy are still my drafts he has not
+      read; drop slide 5 if he wants the courses held back. Sent, not
+      posted. No player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

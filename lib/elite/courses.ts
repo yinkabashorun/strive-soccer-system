@@ -154,3 +154,23 @@ export function visibleCourses(courses: Course[]): Course[] {
     .filter((c) => c.steps.length > 0)
     .sort((a, b) => a.sort - b.sort || a.name.localeCompare(b.name));
 }
+
+// What the Courses library lists for a viewer (Oct 29 2026). A member gets
+// visibleCourses. Staff (coach or admin, who live in the coach shell and
+// never see the player tab) get every course the way a member would see
+// it, plus the ones a member cannot see yet, so they can read a course
+// before switching it on; courseNotice says why a member would not see it.
+export function libraryCourses(courses: Course[], opts: { staff: boolean }): Course[] {
+  if (!opts.staff) return visibleCourses(courses);
+  return courses
+    .map((c) => ({ ...c, steps: c.steps.filter(stepIsUsable) }))
+    .sort((a, b) => a.sort - b.sort || a.name.localeCompare(b.name));
+}
+
+export function courseNotice(course: Pick<Course, "active" | "steps">): string | null {
+  if (!course.active) return "Off. Members cannot see this course until it is switched on in the drill bank.";
+  if (course.steps.filter(stepIsUsable).length === 0) {
+    return "Nothing to show yet. Members see a course once it has a filmed drill or a written lesson.";
+  }
+  return null;
+}

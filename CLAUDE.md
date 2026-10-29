@@ -2611,6 +2611,33 @@ commit.
       there is no coach-only onboarding path. If Gary should see the
       coach dashboard, add his email to that env var and redeploy, and
       decide whether full admin is what he should have.
+      CORRECTED minutes later (Coach Yinka: "bro wtf wym the way a
+      family does. he is a coach"): the player code was the wrong
+      kind. SHIPPED, COACH INVITE CODES (migration 054, APPLIED TO PROD
+      and verified): elite_invite_codes.role, 'player' (default, every
+      existing row) or 'coach', check-constrained. A coach code is
+      minted only by an ADMIN (generateInviteCode refuses it for a
+      coach, so a coach cannot mint coaches); the redeem route reads
+      the role off the code, creates the auth user with that role (the
+      auth trigger makes the matching profile), and for a coach stops
+      there: no elite_players row, no membership gate, no welcome text,
+      straight to /coach. The sign-up page looks the code up and shows
+      the coach form (name, email, password; no parent phone); the
+      coach dashboard's Invite panel has a Client / Coach switch for
+      the admin only and a "coach" badge on coach codes. Pure rules in
+      lib/elite/invite-link.ts (inviteRoleOf, signupLanding,
+      redeemFieldsComplete), tests/invite-link.test.ts grew by 3 (139
+      total), verify green. A role 'coach' profile has the same RLS
+      and the same coach dashboard as the admin (elite_is_coach covers
+      both; nothing in the app is admin-only except minting coach
+      codes and the Vercel allowlist bootstrap); he also receives the
+      coach daily digest email like any coach profile. The plan
+      builder keeps attributing weeks to the admin (it orders by role,
+      admin first). GARY'S CODE: a coach code with note "Coach Gary"
+      inserted by SQL and given in chat; the earlier player code
+      STRIVE-50A2DC was expired (expires_at = now, note marked
+      superseded), never redeemed. The Sept 30 "Gary does not get an
+      app login yet" is superseded: Gary gets a coach login.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

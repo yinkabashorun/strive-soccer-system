@@ -133,7 +133,7 @@ export default async function CoachDashboard() {
 
       <WeeklyDeposits />
 
-      <InvitePanel initial={inviteCodes} />
+      <InvitePanel initial={inviteCodes} canInviteCoach={viewer?.role === "admin"} />
 
       <section>
         <h2 className="mb-3 flex items-center gap-2 font-display text-xl font-bold uppercase tracking-tight">

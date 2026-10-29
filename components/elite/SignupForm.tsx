@@ -6,19 +6,25 @@ import { useRouter } from "next/navigation";
 import { KeyRound, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/elite/supabase/client";
 import { enterDemoPlayer, enterDemoCoach } from "@/lib/elite/auth-actions";
+import { signupLanding, type InviteRole } from "@/lib/elite/invite-link";
 
-// Player-only signup gated by a single-use invite code. Coaches are
-// provisioned separately (seed script / admin) - there is deliberately no
-// public path to a coach account. An invite LINK (/signup?code=…) prefills
-// the code so parents just fill in name/email/password.
+// Signup gated by a single-use invite code. A player code (the default)
+// creates a family's account; a coach code (054, admin-generated) creates a
+// coach, with no public path to one: the code's role comes from the server
+// and the redeem route enforces it, this form only shapes the fields. An
+// invite LINK (/signup?code=…) prefills the code so people just fill in
+// name/email/password.
 export function SignupForm({
   configured,
   initialCode = "",
+  inviteRole = "player",
 }: {
   configured: boolean;
   initialCode?: string;
+  inviteRole?: InviteRole;
 }) {
   const router = useRouter();
+  const coach = inviteRole === "coach";
   const [code, setCode] = useState(initialCode.toUpperCase());
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -67,21 +73,22 @@ export function SignupForm({
         return;
       }
     }
-    router.push("/dashboard");
+    router.push(signupLanding(data.role === "coach" ? "coach" : "player"));
     router.refresh();
   }
 
   return (
     <div className="elite-card p-7 sm:p-8">
       <div className="chip-accent mb-3 inline-flex">
-        <KeyRound className="h-3.5 w-3.5" /> Invite only
+        <KeyRound className="h-3.5 w-3.5" /> {coach ? "Coach invite" : "Invite only"}
       </div>
       <h1 className="font-display text-3xl font-black uppercase tracking-tight">
-        Activate your membership
+        {coach ? "Create your coach account" : "Activate your membership"}
       </h1>
       <p className="mt-1.5 text-sm text-white/50">
-        Enter the invite code your coach sent you to create your Strive Elite
-        account.
+        {coach
+          ? "This invite creates a coach login for Strive Elite: the roster, every player's week, the drill bank and the courses."
+          : "Enter the invite code your coach sent you to create your Strive Elite account."}
       </p>
 
       <form onSubmit={onSubmit} className="mt-6 space-y-4">
@@ -93,10 +100,10 @@ export function SignupForm({
           autoComplete="off"
         />
         <Input
-          label="Player name"
+          label={coach ? "Your name" : "Player name"}
           value={fullName}
           onChange={setFullName}
-          placeholder="Player's full name"
+          placeholder={coach ? "Your full name" : "Player's full name"}
           autoComplete="name"
         />
         <Input
@@ -107,23 +114,27 @@ export function SignupForm({
           placeholder="you@example.com"
           autoComplete="email"
         />
-        <Input
-          label="Parent phone (for text updates)"
-          type="tel"
-          value={phone}
-          onChange={setPhone}
-          placeholder="(703) 555-0100"
-          autoComplete="tel"
-        />
-        <Input
-          label="Player's own phone (optional, if they have one)"
-          type="tel"
-          value={playerPhone}
-          onChange={setPlayerPhone}
-          placeholder="(703) 555-0100"
-          autoComplete="tel"
-          required={false}
-        />
+        {!coach && (
+          <>
+            <Input
+              label="Parent phone (for text updates)"
+              type="tel"
+              value={phone}
+              onChange={setPhone}
+              placeholder="(703) 555-0100"
+              autoComplete="tel"
+            />
+            <Input
+              label="Player's own phone (optional, if they have one)"
+              type="tel"
+              value={playerPhone}
+              onChange={setPlayerPhone}
+              placeholder="(703) 555-0100"
+              autoComplete="tel"
+              required={false}
+            />
+          </>
+        )}
         <Input
           label="Password"
           type="password"
@@ -155,7 +166,7 @@ export function SignupForm({
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
-            "Create my account"
+            coach ? "Create my coach account" : "Create my account"
           )}
         </button>
       </form>
@@ -166,15 +177,17 @@ export function SignupForm({
           Sign in
         </Link>
       </p>
-      <p className="mt-2 text-center text-xs text-white/30">
-        Don&apos;t have a code?{" "}
-        <a
-          href="https://strivesoccer100x.com"
-          className="text-white/50 hover:text-accent"
-        >
-          Apply to join
-        </a>
-      </p>
+      {!coach && (
+        <p className="mt-2 text-center text-xs text-white/30">
+          Don&apos;t have a code?{" "}
+          <a
+            href="https://strivesoccer100x.com"
+            className="text-white/50 hover:text-accent"
+          >
+            Apply to join
+          </a>
+        </p>
+      )}
       <p className="mt-4 text-center text-[11px] text-white/25">
         By creating an account you agree to our{" "}
         <Link href="/terms" className="hover:text-white/50">

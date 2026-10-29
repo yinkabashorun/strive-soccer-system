@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { SignupForm } from "@/components/elite/SignupForm";
 import { createServiceClient, isSupabaseConfigured } from "@/lib/elite/supabase/server";
 import { getViewer } from "@/lib/elite/session";
-import { inviteLanding } from "@/lib/elite/invite-link";
+import { inviteLanding, inviteRoleOf, type InviteRole } from "@/lib/elite/invite-link";
 
 export const metadata: Metadata = {
   title: "Get started · Strive Elite",
@@ -20,16 +20,20 @@ export default async function SignupPage({
   const code = (searchParams?.code ?? "").trim().toUpperCase();
   const viewer = await getViewer();
 
+  // The link's code also tells the form what it creates (054): a coach
+  // code shows the coach form (no parent phone) and lands on /coach.
   let inviteUsed = false;
+  let inviteRole: InviteRole = "player";
   if (code && !viewer) {
     const admin = createServiceClient();
     if (admin) {
       const { data } = await admin
         .from("elite_invite_codes")
-        .select("used_by")
+        .select("used_by, role")
         .eq("code", code)
         .maybeSingle();
       inviteUsed = Boolean(data?.used_by);
+      inviteRole = inviteRoleOf(data?.role);
     }
   }
 
@@ -40,5 +44,5 @@ export default async function SignupPage({
   });
   if (landing) redirect(landing);
 
-  return <SignupForm configured={isSupabaseConfigured()} initialCode={code} />;
+  return <SignupForm configured={isSupabaseConfigured()} initialCode={code} inviteRole={inviteRole} />;
 }

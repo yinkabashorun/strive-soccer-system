@@ -4,11 +4,13 @@ import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { createClient } from "./supabase/server";
 import { getViewer } from "./session";
+import { inviteRoleOf, type InviteRole } from "./invite-link";
 
 export type InviteCode = {
   id: string;
   code: string;
   note: string;
+  role: InviteRole;
   used_by: string | null;
   used_at: string | null;
   created_at: string;
@@ -26,10 +28,16 @@ async function requireCoach() {
   return viewer;
 }
 
-// Generate a new single-use invite code (coach only).
-export async function generateInviteCode(note: string) {
+// Generate a new single-use invite code (coach only). A player code is
+// the default; a COACH code (054) redeems as a coach profile and only an
+// admin can make one, so a coach cannot mint more coaches.
+export async function generateInviteCode(note: string, roleInput: InviteRole = "player") {
   const viewer = await requireCoach();
   if (!viewer) return { ok: false as const, error: "unauthorized" };
+  const role = inviteRoleOf(roleInput);
+  if (role === "coach" && viewer.role !== "admin") {
+    return { ok: false as const, error: "Only the head coach can invite a coach." };
+  }
   const supabase = createClient();
   if (!supabase) {
     // demo mode: hand back a code without persisting
@@ -39,6 +47,7 @@ export async function generateInviteCode(note: string) {
   const { error } = await supabase.from("elite_invite_codes").insert({
     code,
     note: note?.trim() || "",
+    role,
     created_by: viewer.profile.id,
   });
   if (error) return { ok: false as const, error: error.message };
@@ -53,7 +62,7 @@ export async function listInviteCodes(): Promise<InviteCode[]> {
   if (!supabase) return [];
   const { data } = await supabase
     .from("elite_invite_codes")
-    .select("id, code, note, used_by, used_at, created_at")
+    .select("id, code, note, role, used_by, used_at, created_at")
     .order("created_at", { ascending: false });
-  return (data as InviteCode[] | null) ?? [];
+  return ((data as InviteCode[] | null) ?? []).map((c) => ({ ...c, role: inviteRoleOf(c.role) }));
 }

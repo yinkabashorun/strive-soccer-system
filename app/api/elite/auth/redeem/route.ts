@@ -3,14 +3,16 @@ import { createServiceClient } from "@/lib/elite/supabase/server";
 import { sendPlayerEmail } from "@/lib/elite/email";
 import { normalizePhone } from "@/lib/elite/sms";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
+import { inviteRoleOf, redeemFieldsComplete } from "@/lib/elite/invite-link";
 
 export const runtime = "nodejs";
 
-// Redeem an invite code and create a fully-provisioned, active player.
-// Uses the service role so the new user is email-confirmed immediately
+// Redeem an invite code and create a fully-provisioned account: a player
+// (the default) or, for a coach code (054), a coach profile with no player
+// row. Uses the service role so the new user is email-confirmed immediately
 // (no confirmation link) and the invite is validated server-side.
 //
-// POST { code, fullName, email, phone, password } -> { ok } | { error }
+// POST { code, fullName, email, phone, password } -> { ok, role } | { error }
 export async function POST(req: Request) {
   // Invite codes are STRIVE-XXXXXX (6 hex chars, ~16.7M combinations) with
   // no other throttling anywhere - without this, someone could script
@@ -46,7 +48,7 @@ export async function POST(req: Request) {
   const password = body.password ?? "";
 
   if (!code) return NextResponse.json({ error: "An invite code is required." }, { status: 400 });
-  if (!fullName || !email || !phone || password.length < 8) {
+  if (!fullName || !email || password.length < 8) {
     return NextResponse.json(
       { error: "Enter your name, email, phone, and a password of at least 8 characters." },
       { status: 400 }
@@ -64,7 +66,7 @@ export async function POST(req: Request) {
   // 1) validate the code (unused + not expired)
   const { data: invite } = await admin
     .from("elite_invite_codes")
-    .select("id, created_by, used_by, expires_at")
+    .select("id, created_by, used_by, expires_at, role")
     .eq("code", code)
     .maybeSingle();
 
@@ -85,13 +87,23 @@ export async function POST(req: Request) {
   if (invite.expires_at && new Date(invite.expires_at).getTime() < Date.now()) {
     return NextResponse.json({ error: "That invite code has expired." }, { status: 400 });
   }
+  // The code decides what gets created (054). A family's code needs the
+  // parent phone (every text goes there); a coach's code does not.
+  const role = inviteRoleOf(invite.role);
+  if (!redeemFieldsComplete(role, { fullName, email, phone, password })) {
+    return NextResponse.json(
+      { error: "Enter your name, email, phone, and a password of at least 8 characters." },
+      { status: 400 }
+    );
+  }
 
-  // 2) create the auth user (email pre-confirmed)
+  // 2) create the auth user (email pre-confirmed). The auth trigger reads
+  // the role off the metadata and creates the matching profile row.
   const { data: created, error: createErr } = await admin.auth.admin.createUser({
     email,
     password,
     email_confirm: true,
-    user_metadata: { full_name: fullName, role: "player" },
+    user_metadata: { full_name: fullName, role },
   });
   if (createErr || !created?.user) {
     const msg = createErr?.message?.includes("already")
@@ -104,10 +116,20 @@ export async function POST(req: Request) {
   // 3) ensure the profile row (the auth trigger also does this)
   await admin.from("elite_profiles").upsert({
     id: userId,
-    role: "player",
+    role,
     full_name: fullName,
     email,
   });
+
+  // A coach is a profile, nothing more: no player row, no membership
+  // gate, no welcome text. Burn the code and send them to the dashboard.
+  if (role === "coach") {
+    await admin
+      .from("elite_invite_codes")
+      .update({ used_by: userId, used_at: new Date().toISOString() })
+      .eq("id", invite.id);
+    return NextResponse.json({ ok: true, role });
+  }
 
   // 4) provision the player linked to the inviting coach. subscription_status
   // starts at "none", NOT "active" - there is no real payment-to-account
@@ -169,5 +191,5 @@ export async function POST(req: Request) {
     }).catch(() => undefined);
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, role });
 }

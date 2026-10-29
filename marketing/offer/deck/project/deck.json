@@ -3,11 +3,10 @@
   "createdOnFiles": { "v": 1, "at": "2026-10-29T20:05:00Z" },
   "lists": "css",
   "title": "Strive Elite Offer",
-  "order": ["cover", "problem", "answer", "week", "accountability", "courses", "film-room", "stack", "price", "close"],
+  "order": ["cover", "problem", "offer", "price"],
   "sections": {
-    "open": { "description": "The problem Strive Elite is built for.", "start": "cover" },
-    "pillars": { "description": "The answer in four parts: the week, accountability, courses, film review.", "start": "week" },
-    "offer": { "description": "The whole stack, its value, the price drop and the ask.", "start": "stack" }
+    "open": { "description": "Who built it and the problem it is built for.", "start": "cover" },
+    "offer": { "description": "The four parts, what they are worth, and the price.", "start": "offer" }
   },
   "faces": {
     "barlow-condensed": { "family": "Barlow Condensed", "href": "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800;900&display=swap" },

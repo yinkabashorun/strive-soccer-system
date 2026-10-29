@@ -2594,6 +2594,23 @@ commit.
       Recruiting, College and Academy are still my drafts he has not
       read; drop slide 5 if he wants the courses held back. Sent, not
       posted. No player data touched.
+- [x] DONE Oct 29 2026 (Coach Yinka: "okay make invite code for coach
+      gary"): one single-use invite code inserted into
+      elite_invite_codes by SQL, note "Coach Gary", created_by Coach
+      Yinka's profile, no expiry, same STRIVE-XXXXXX shape the coach
+      page generates. The code itself was given in chat, not written
+      here. WHAT IT DOES: an invite code redeems as a PLAYER account
+      (redeem route: role player, elite_players row at
+      subscription_status none, coach_id Coach Yinka), so Gary signing
+      up with it sees the app the way a family does, not the coach
+      side. Supersedes the Sept 30 "Gary does not get an app login yet"
+      for a player-view login only. NOT DONE, his call: a coach login
+      for Gary. The only coach path in the code is STRIVE_COACH_EMAILS
+      in Vercel (session.ts isAllowlistedCoach), which makes an email
+      ADMIN (sees every player, every setting, same as Coach Yinka);
+      there is no coach-only onboarding path. If Gary should see the
+      coach dashboard, add his email to that env var and redeploy, and
+      decide whether full admin is what he should have.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

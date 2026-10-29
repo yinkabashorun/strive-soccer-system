@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  courseNotice,
   levelsOf,
+  libraryCourses,
   slugify,
   stepIsUsable,
   stepTitle,
@@ -153,5 +155,24 @@ describe("what members see", () => {
     ]);
     expect(list.map((c) => c.id)).toEqual(["a", "b"]);
     expect(list[0].steps).toHaveLength(1);
+  });
+  // Oct 29 2026: the coach shell shows the same library, plus what a
+  // member cannot see yet, each with the reason.
+  it("staff see every course in order, members only the visible ones", () => {
+    const all = [
+      course({ id: "b", slug: "b", name: "B", sort: 20, steps: [step({ drill_id: filmed.id, drill: filmed })] }),
+      course({ id: "off", slug: "off", name: "Off", sort: 30, active: false, steps: [step({ drill_id: filmed.id, drill: filmed })] }),
+      course({ id: "empty", slug: "empty", name: "Empty", sort: 40, steps: [step({ drill_id: unfilmed.id, drill: unfilmed })] }),
+      course({ id: "a", slug: "a", name: "A", sort: 10, steps: [step({ title: "t", body: "b" })] }),
+    ];
+    expect(libraryCourses(all, { staff: false }).map((c) => c.id)).toEqual(["a", "b"]);
+    const staff = libraryCourses(all, { staff: true });
+    expect(staff.map((c) => c.id)).toEqual(["a", "b", "off", "empty"]);
+    expect(staff.find((c) => c.id === "empty")?.steps).toHaveLength(0);
+  });
+  it("names why a member would not see a course", () => {
+    expect(courseNotice(course({ steps: [step({ title: "t", body: "b" })] }))).toBeNull();
+    expect(courseNotice(course({ active: false, steps: [step({ title: "t", body: "b" })] }))).toMatch(/^Off\./);
+    expect(courseNotice(course({ steps: [step({ drill_id: unfilmed.id, drill: unfilmed })] }))).toMatch(/^Nothing to show yet/);
   });
 });

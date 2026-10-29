@@ -2638,6 +2638,35 @@ commit.
       STRIVE-50A2DC was expired (expires_at = now, note marked
       superseded), never redeemed. The Sept 30 "Gary does not get an
       app login yet" is superseded: Gary gets a coach login.
+- [x] SHIPPED Oct 29 2026 (Coach Yinka: "make it so we can see
+      courses"; then "also make sure gary can see all players on the
+      roster"): (1) COURSES IN THE COACH SHELL. Coaches and the admin are
+      bounced out of the player shell to /coach, and the Courses pages
+      only existed there, so no coach could see what members see. Now
+      /coach/courses and /coach/courses/[slug] render the SAME
+      components as the member tab (components/elite/CourseLibrary.tsx,
+      CourseList + CourseView, the player pages rewired to them so the
+      two can never drift), with "Courses" in the coach nav. Staff see
+      every course (libraryCourses in courses.ts, pure, tested): an off
+      course carries an Off badge and the line "Members cannot see this
+      course until it is switched on", an empty one "Nothing to show
+      yet" (courseNotice), and every page links to the editor in the
+      drill bank. Members see exactly what they saw before. (2) ONE
+      TEAM, migration 055 APPLIED TO PROD and verified: my 054 record
+      above was WRONG where it says a coach profile has the same RLS as
+      the admin. Migration 013 (applied) scoped a plain coach to players
+      whose coach_id is theirs, and every player's coach_id is Coach
+      Yinka's, so Gary's coach login would have opened on an EMPTY
+      roster and been refused every player page, plan, message and
+      clip. 055 redefines elite_coach_manages() to elite_is_coach() (the
+      one function every per-player policy from 013 names), rewrites
+      the two elite_players policies and the roster RPC in place (ALTER
+      POLICY, no DROP), so every coach manages every player exactly as
+      the admin does. coach_id stays as the label of who invited the
+      player (the redeem route and the per-player coach email pings use
+      it; Gary gets no pings for Coach Yinka's players, flagged, not
+      changed). Admin unchanged. 143 tests, verify green. No player data
+      touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

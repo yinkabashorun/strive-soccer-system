@@ -13,8 +13,9 @@ thestriveapp.com/demo).
    finisher.
 4. What's in it: Extra Work, Send a Clip, Side by Side, Pick up where
    you left off, Strength finishers, Any space.
-5. Seven courses in the app today: Keep It Up, Weak Foot, Strength,
-   Speed, Recruiting, College, Academy.
+5. Six courses in the app today: Keep It Up, Weak Foot, Strength,
+   Speed, College Recruiting, Academy Recruiting (Oct 31; the Oct 29
+   render said seven, with Recruiting, College and Academy apart).
 6. $249/mo locked for life. Join by Nov 1. $500/mo from Nov 2. Month to
    month, same-day refund.
 7. DM "ELITE": call booked, the demo page, the Nov 1 line.

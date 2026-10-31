@@ -3,7 +3,7 @@
   "createdOnFiles": { "v": 1, "at": "2026-10-29T20:05:00Z" },
   "lists": "css",
   "title": "Strive Elite Offer",
-  "order": ["cover", "problem", "offer", "price"],
+  "order": ["cover", "problem", "offer", "courses", "price"],
   "sections": {
     "open": { "description": "Who built it and the problem it is built for.", "start": "cover" },
     "offer": { "description": "The four parts, what they are worth, and the price.", "start": "offer" }

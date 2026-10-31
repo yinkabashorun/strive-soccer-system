@@ -159,7 +159,13 @@ commit.
       SWITCHED ON Oct 26 on his "I don't see them In courses" (see
       RECORD): seven courses live on the Courses tab for every member,
       written by me, unread by him; any edit or off switch is one tap
-      at /coach/drills. COLLEGE AND ACADEMY REORGANISED BY COMPONENT
+      at /coach/drills. SUPERSEDED Oct 31 (see RECORD): Recruiting,
+      College and Academy are OFF; COLLEGE RECRUITING (24 pages) and
+      ACADEMY RECRUITING (20 pages) replace them, each carrying its
+      own CV, emails, tape and tracker; SIX courses on the tab; the
+      047 apply below is MOOT (the old College and Academy rows are
+      off and can be deleted in the editor, never through the MCP).
+      COLLEGE AND ACADEMY REORGANISED BY COMPONENT
       Oct 26 (his "organized well into the different components ...
       separated intelligently", see RECORD): migration 047 written and
       merged, review page updated at the same link, PROD APPLY PENDING:
@@ -2740,6 +2746,49 @@ commit.
       pair is doing the work of three slides; new shots of the two
       coaches (studio, a Zoom screen, the app on a phone in hand) would
       let each slide carry its own.
+- [x] LIVE Oct 31 2026, COLLEGE RECRUITING AND ACADEMY RECRUITING (Coach
+      Yinka, Oct 29: "Recruiting isn't seperate from college and
+      academy. We need a college recruiting course and an academy
+      recruiting course. Also let's get a list of the courses and list
+      them like this"): the Recruiting kit (045: the CV, the five
+      emails, the tape rules, the rules, the tracker) is folded INTO
+      the two component courses of 047, so each route carries its own
+      templates in its own words. Migration 056 APPLIED TO PROD in
+      three calls (two seed blocks, then the off switch; the UPDATE
+      went through without a confirmation prompt this time) and
+      verified: COLLEGE RECRUITING, slug college-recruiting, 11
+      components, 24 pages (Start here; Grades; The CV; Film, the tape
+      rules with the grad-year title; The school list; Outreach, which
+      email when + the five templates + the club coach's call;
+      Exposure; The visit; Money and the decision; The rules + the
+      tracker; The timeline). ACADEMY RECRUITING, slug
+      academy-recruiting, 12 components, 20 pages (Start here; Your
+      league; The club coach and the director; The CV by birth year;
+      Film, one tape a season; Outreach, the director's email + before
+      a game they can watch + after a game + the follow-up + after a
+      tryout or ID session, all by birth year; The tryout; Age and
+      grades; The pro academy; Overseas; The rules + the tracker by
+      club; The parent's job). Every "see Recruiting" line now points
+      inside the course. Both seeded ON because they replace live
+      courses; recruiting, college and academy set active = false and
+      sorted to the bottom, NOT deleted (DELETE hangs through the MCP;
+      the coach deletes them at /coach/drills once he has read the new
+      two; the 047 apply is moot). Six courses on the Courses tab:
+      Keep It Up 14, Weak Foot 8, Strength 17, Speed 17, College
+      Recruiting 24, Academy Recruiting 20. Same facts as 045 to 047,
+      nothing new invented: no contact-rule dates, no alumni, never a
+      roster, scholarship or academy place promised. Review page
+      republished at https://claude.ai/artifact/BrbkPqVFzpaYBZnhyijbGM
+      (generator scratchpad routes3.py on top of routes2.py). THE LIST
+      "like this": the offer deck gained a fifth slide, the six courses
+      numbered 01 to 06 in the answer slide's list style, one line
+      each; the answer slide's course line and the value table updated
+      (six courses 6 x $80 = $480, total $2,320, 29 coach touches, was
+      $2,400 / 30). The Oct 29 launch carousel's slide 5 re-rendered as
+      "Six courses" with the two recruiting tiles (and its preview
+      strip); carousel and deck READMEs updated. Nothing on /demo
+      changed (the page never named the courses). No player data
+      touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

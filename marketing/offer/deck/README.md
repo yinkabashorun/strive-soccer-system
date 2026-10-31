@@ -1,6 +1,6 @@
 # Strive Elite offer deck (Oct 29 2026)
 
-The final offer deck, a logical sale in FOUR 16:9 slides, published at
+The final offer deck, a logical sale in FIVE 16:9 slides, published at
 https://claude.ai/artifact/89kpxoAWLRQgbbZtieQH6Z (private until shared
 from its Share menu; Share > Export gives PDF and PowerPoint).
 
@@ -10,7 +10,11 @@ from its Share menu; Share > Export gives PDF and PowerPoint).
 3. The answer: one membership, four parts (the week, accountability,
    courses for the weaknesses, Film Room every week), every item listed
    under its part, beside a portrait crop of the two coaches.
-4. Worth and price: the value table ($2,400 a month at the $80 rate)
+4. The courses: the six on the Courses tab (Oct 31), listed the way the
+   answer slide lists the four parts: 01 Keep It Up, 02 Weak Foot,
+   03 Strength, 04 Speed, 05 College Recruiting, 06 Academy
+   Recruiting, one line each.
+5. Worth and price: the value table ($2,320 a month at the $80 rate)
    beside the drop ($500/mo from Nov 2 struck through, $249/mo locked
    for life by Nov 1, month to month, same-day refund) and DM "ELITE".
 
@@ -28,11 +32,13 @@ Zoom). Format, cadence details and who runs them are his to stamp.
 
 The value stack prices every coach touch at Strive's own confirmed $80
 private-session rate, one rule for every line: the week 16 x $80 =
-$1,280 (the VSL's anchor), Film Room 4 x $80 = $320, seven courses
-taught once each 7 x $80 = $560, accountability (Side by Side every two
+$1,280 (the VSL's anchor), Film Room 4 x $80 = $320, six courses
+taught once each 6 x $80 = $480, accountability (Side by Side every two
 weeks plus Send a Clip replies) 2 x $80 = $160, the monthly check-in
-call $80. Total $2,400 a month, 30 coach touches. The Monday text, Extra
-Work and time trained are built in, not counted.
+call $80. Total $2,320 a month, 29 coach touches. The Monday text, Extra
+Work and time trained are built in, not counted. (Oct 29 the deck said
+seven courses and $2,400; Recruiting was folded into College Recruiting
+and Academy Recruiting on Oct 31, so six.)
 
 `project/` is the deck's source exactly as published (deck.json plus one
 HTML file per slide, Barlow Condensed + Barlow, brand black and gold).

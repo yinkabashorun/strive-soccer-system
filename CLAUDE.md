@@ -2803,6 +2803,15 @@ commit.
       strip); carousel and deck READMEs updated. Nothing on /demo
       changed (the page never named the courses). No player data
       touched.
+      THEN (Coach Yinka sent page 91 of $100M Offers, Trim and Stack:
+      that was the "like this"): the six courses rewritten in the
+      book's format, Problem -> Solution wording -> Name ($ value) ->
+      the delivery vehicles a) to h), every line live in the app, at
+      marketing/offer/courses-trim-and-stack.md and in chat. Values on
+      the deck's $80-one-session rule; the per-level alternative
+      (courses $3,520, deck total $5,360) written at the bottom,
+      unstamped. The deck slide stays the short numbered list until he
+      says which rule.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -2740,6 +2740,20 @@ commit.
       pair is doing the work of three slides; new shots of the two
       coaches (studio, a Zoom screen, the app on a phone in hand) would
       let each slide carry its own.
+- [x] DECIDED Oct 31 2026 (Coach Yinka, settling Des Mantas' $148
+      Small Group charge of Oct 28: "there are no makeup we are pushing
+      to strive elite today was the last friday"): Friday Oct 31 2026
+      was the LAST Friday group session; in-person groups are being
+      pushed to Strive Elite. This goes further than the Oct 25 advice
+      (keep Friday groups + Sunday drop-ins for the winter). NOT YET
+      CLARIFIED: whether Sunday drop-ins, Saturday drop-ins, Monday and
+      Tuesday 1:1s and the Sunday makeup also end, what happens to the
+      other Small Group monthly subscriptions in Stripe (each one charges
+      again unless cancelled), Gary's Friday assistant role, and the PWC
+      permit (Fri 5-8pm to Jan 27). Des Mantas (player Alexander):
+      Coach Yinka refunds the Oct 28 $148 in Stripe and cancels the
+      subscription; reply text drafted with no makeup mention and a soft
+      Strive Elite line. No app or player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

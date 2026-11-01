@@ -2812,6 +2812,23 @@ commit.
       (courses $3,520, deck total $5,360) written at the bottom,
       unstamped. The deck slide stays the short numbered list until he
       says which rule.
+- [x] DRAFTED Nov 1 2026, THE OFFER POST (Coach Yinka: "show me your
+      example of the post and have it so I'm able to adjust copy"):
+      the Strive Elite announcement rewritten in the Trim and Stack
+      shape he sent (page 91): hook, then THE WEEK / ACCOUNTABILITY /
+      COURSES FOR THE WEAKNESSES / FILM ROOM each as problem, what we
+      do, what is delivered; then WHAT THAT IS WORTH ($2,320 at the
+      $80 rate) and THE PRICE ($500 from Nov 2, $249 locked for life by
+      Nov 1, month to month, same-day refund), DM ELITE. Full post
+      1,896 characters, a short cut 1,047. Editable copy in a Claude
+      Doc, https://claude.ai/artifact/XqbbitJT7za8HNkan4EDw8, with a
+      source table for every line and his open calls; the record copy
+      at marketing/announcement/strive-elite-offer-post.md. FLAGGED,
+      not decided: today IS Nov 1 and nothing has been posted, so the
+      $249 line is true only if it goes up today; otherwise extend the
+      window or post at $500. Film Room and the check-in call are in
+      the post as "every week" / "once a month" only, since their
+      formats are unstamped. Nothing posted; no player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

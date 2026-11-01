@@ -2869,6 +2869,14 @@ commit.
       earlier today, so routes3.py is gone; the migration files are the
       record). FLAG: the privacy / terms pages may want the same
       not-medical-advice sentence; not changed. No player data touched.
+      THEN (Coach Yinka: "Show the actual post"): the post as ONE 4:5
+      image, no carousel: eyebrow "New in Strive Elite", headline "Every
+      member gets all of it.", a two-column grid of the nine value
+      blocks (name + one line), "All included. $249/mo locked for life
+      if you join by Nov 1. $500/mo after.", handle and a DM "ELITE"
+      pill. Source marketing/announcement/offer-post/post.html +
+      render.mjs, final post.png. Sent, not posted; the Nov 1 date line
+      is still his call.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -196,7 +196,8 @@ commit.
       his Oct 27 filming: FINISHING and
       HEADING (both under the Shooting pillar as course drills, his
       "These are just for the courses"), clips not yet sent. The
-      General Nutrition Guide is the last lesson course still unwritten. SIXTH, added Oct 25: a NUTRITION bundle, a lesson
+      General Nutrition Guide is LIVE Nov 1 (migration 057, see
+      RECORD). SIXTH, added Oct 25: a NUTRITION bundle, a lesson
       course like recruiting (general food guidance for a training
       day, match day, hydration; no calorie targets, supplements or
       weight goals; a not-medical-advice line, and the privacy / terms
@@ -2829,6 +2830,45 @@ commit.
       window or post at $500. Film Room and the check-in call are in
       the post as "every week" / "once a month" only, since their
       formats are unstamped. Nothing posted; no player data touched.
+      REWRITTEN same day (Coach Yinka: "The whole point is to display
+      our offers ... why are you saying Strive Elite now open? ... We're
+      showing what we're adding ... Short, simple, sweet value"): my
+      first draft was wrong in two ways, it opened on "Strive Elite is
+      open" (already announced) and lumped the courses into one line.
+      The post is now "We added a lot to Strive Elite this month. Every
+      member gets all of it." followed by nine value blocks, two lines
+      each: STRENGTH, SPEED, WEAK FOOT, KEEP IT UP, GENERAL NUTRITION
+      GUIDE, COLLEGE RECRUITING, ACADEMY RECRUITING, FILM ROOM EVERY
+      WEEK, MONTHLY 1:1 CALL, then "All included", the $249 / $500 line,
+      DM ELITE. A one-line-each story version beside it. Same doc, same
+      record file. RULE FROM THIS for every offer piece: lead with the
+      value added, one block per thing a parent can picture, never a
+      course count, never "open" again. Shooting stays out until the
+      clips land. The carousel was not re-rendered (his "we don't need
+      a slideshow").
+- [x] LIVE Nov 1 2026, THE GENERAL NUTRITION GUIDE (named by Coach Yinka
+      Oct 25; in the offer post Nov 1, so it had to be real): migration
+      057 APPLIED TO PROD in one call and verified. Lesson course, slug
+      general-nutrition-guide, sort 70, ACTIVE, subtitle "Fuel for a
+      training day, a match day, and the hours between.", 13 pages in 7
+      parts: Start here (Three rules; The plate), A training day
+      (Before training; After training), Match day (The night before;
+      Game morning; Halftime and after), Hydration (Drink before you
+      are thirsty), Tournament weekends (Two or three games in a day),
+      Habits (Breakfast every day; Snacks that travel; Growing), The
+      parent's job (What helps). Rules kept: general guidance only, no
+      calorie counts, no supplements, no weight targets, "it is not
+      medical advice" in the intro and on the first and last pages,
+      energy drinks ruled out, weight and growth questions sent to the
+      doctor, "general" in the name everywhere. Written by me from
+      common youth sports nutrition guidance; he edits any page at
+      /coach/drills. Seven courses on the Courses tab: Keep It Up 14,
+      Weak Foot 8, Strength 17, Speed 17, College Recruiting 24, Academy
+      Recruiting 20, General Nutrition Guide 13. Generator at scratchpad
+      nutrition.py (the scratchpad was wiped by a container restart
+      earlier today, so routes3.py is gone; the migration files are the
+      record). FLAG: the privacy / terms pages may want the same
+      not-medical-advice sentence; not changed. No player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

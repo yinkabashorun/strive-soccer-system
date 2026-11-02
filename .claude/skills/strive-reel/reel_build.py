@@ -31,7 +31,11 @@ def P(k, default=None):
     v = spec.get(k, default)
     return os.path.join(D, v) if isinstance(v, str) and not os.path.isabs(v) and k in ("src", "out", "fonts", "outro", "faces") else v
 
-FF = "/usr/local/lib/python3.11/dist-packages/imageio_ffmpeg/binaries/ffmpeg-linux-x86_64-v7.0.2"
+import shutil
+FF = next((p for p in ["/usr/local/lib/python3.11/dist-packages/imageio_ffmpeg/binaries/ffmpeg-linux-x86_64-v7.0.2",
+                       shutil.which("ffmpeg")] if p and os.path.exists(p)), None)
+if not FF:
+    sys.exit("no ffmpeg found (imageio-ffmpeg binary or ffmpeg on PATH)")
 SRC, OUT, FONTS, OUTRO = P("src"), P("out"), P("fonts"), P("outro")
 GOLD = "&H0058A8C8"; WHITE = "&H00FFFFFF"; BLACK = "&H000D0D0D"; DIM = "&H00D9D9D9"
 MARGIN = 24
@@ -42,6 +46,12 @@ def duration(path):
     return int(m[1]) * 3600 + int(m[2]) * 60 + float(m[3])
 
 DUR = duration(SRC)
+def has_audio(path):
+    # Drill clips are encoded silent (-an, Oct 25 rule); a montage of them has
+    # no audio stream, so the mix starts from silence instead of failing.
+    r = subprocess.run([FF, "-hide_banner", "-i", path], capture_output=True, text=True).stderr
+    return "Audio:" in r
+SRC_AUDIO = has_audio(SRC)
 keep_hook = spec.get("keep_hook", True)
 hook = None if keep_hook else spec.get("hook")
 HIDE = (hook or {}).get("hide_baked_until", 0) if hook else 0
@@ -192,7 +202,8 @@ if "--zoom-only" in sys.argv:
     print("wrote", f"{D}/zoomed.mp4"); sys.exit(0)
 
 main = f"[0:v]{zoom},ass={D}/overlays.ass:fontsdir={FONTS},format=yuv420p[main]"
-audio_main = "[0:a]loudnorm=I=-14:TP=-1.5:LRA=11,aformat=sample_rates=48000:channel_layouts=stereo"
+audio_main = ("[0:a]loudnorm=I=-14:TP=-1.5:LRA=11,aformat=sample_rates=48000:channel_layouts=stereo" if SRC_AUDIO
+              else f"anullsrc=r=48000:cl=stereo,atrim=0:{DUR},asetpts=PTS-STARTPTS")
 if E:
     off = DUR - XFADE
     fc = (f"{main};color=c=0x0d0d0d:s=1080x1920:r=30:d={E}[blk];"

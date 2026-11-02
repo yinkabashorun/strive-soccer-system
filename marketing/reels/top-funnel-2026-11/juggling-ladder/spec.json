@@ -1,0 +1,60 @@
+{
+  "src": "source.mp4",
+  "out": "strive-juggling-ladder-7-levels.mp4",
+  "fonts": "../fonts",
+  "outro": "../../../outro/strive-elite-outro-9s-vertical-1080x1920.mp4",
+  "faces": "faces.json",
+  "keep_hook": false,
+  "hook": {
+    "eyebrow": "THE JUGGLING LADDER",
+    "lines": [
+      "CAN YOUR PLAYER",
+      "PASS LEVEL 7?"
+    ],
+    "end": 2.2,
+    "hide_baked_until": 0
+  },
+  "list_style": "stack",
+  "names": [
+    {
+      "start": 2.3,
+      "num": "01",
+      "text": "ONE TOUCH"
+    },
+    {
+      "start": 3.2,
+      "num": "02",
+      "text": "TWO TOUCHES EACH FOOT"
+    },
+    {
+      "start": 6.2,
+      "num": "03",
+      "text": "ONE, TWO"
+    },
+    {
+      "start": 9.2,
+      "num": "04",
+      "text": "LACES, INSIDE"
+    },
+    {
+      "start": 12.2,
+      "num": "05",
+      "text": "THIGH"
+    },
+    {
+      "start": 15.2,
+      "num": "06",
+      "text": "THIGHS, LACES"
+    },
+    {
+      "start": 18.2,
+      "num": "07",
+      "text": "HEAD IT UP"
+    }
+  ],
+  "punch": true,
+  "watermark": true,
+  "endcard": true,
+  "captions": [],
+  "list_end": 21.3
+}

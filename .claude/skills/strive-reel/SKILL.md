@@ -81,6 +81,19 @@ python3 .claude/skills/strive-reel/reel_build.py <reel>/spec.json
 }
 ```
 
+## Montage reels from the drill bank (top of funnel, Nov 2 2026)
+
+For a reel cut from Strive's own filmed drill clips (public/drills), use
+`montage_reel.py plan.json`: it cuts and joins the segments into
+source.mp4, writes the spec with one list item per clip and our hook
+on screen from frame one (allowed here because nothing of the coach's is
+on these clips), runs the zoom-only pass, the face track and the full
+build. The bank clips are silent, so the builder starts from a silent
+track; Coach Yinka adds trending audio in the Instagram app. Hook rules
+from the Nov 2 research: a number or list promise and a specific
+outcome, on screen inside 1.5 s, a new clip every 3 to 4.5 s, under
+30 s. Plans live under marketing/reels/top-funnel-2026-11/.
+
 Timings for `names` come from the audio (pocketsphinx keyword spotting
 with the phrases he named works for timing even though it cannot be
 trusted for words) or from him. Keep the reel folder under

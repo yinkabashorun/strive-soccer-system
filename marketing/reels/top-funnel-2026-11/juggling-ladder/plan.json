@@ -1,0 +1,64 @@
+{
+  "out": "strive-juggling-ladder-7-levels.mp4",
+  "hook": {
+    "eyebrow": "THE JUGGLING LADDER",
+    "lines": [
+      "CAN YOUR PLAYER",
+      "PASS LEVEL 7?"
+    ],
+    "end": 2.2
+  },
+  "segments": [
+    {
+      "clip": "../../../../public/drills/juggling-one-touch-catch.mp4",
+      "in": 0,
+      "out": 3.2,
+      "num": "01",
+      "text": "ONE TOUCH"
+    },
+    {
+      "clip": "../../../../public/drills/juggling-two-touches-each-foot-keep-it-up.mp4",
+      "in": 0,
+      "out": 3.0,
+      "num": "02",
+      "text": "TWO TOUCHES EACH FOOT"
+    },
+    {
+      "clip": "../../../../public/drills/juggling-one-two-keep-it-up.mp4",
+      "in": 0,
+      "out": 3.0,
+      "num": "03",
+      "text": "ONE, TWO"
+    },
+    {
+      "clip": "../../../../public/drills/juggling-laces-inside-keep-it-up.mp4",
+      "in": 0,
+      "out": 3.0,
+      "num": "04",
+      "text": "LACES, INSIDE"
+    },
+    {
+      "clip": "../../../../public/drills/juggling-thighs-high.mp4",
+      "in": 0,
+      "out": 3.0,
+      "num": "05",
+      "text": "THIGH"
+    },
+    {
+      "clip": "../../../../public/drills/juggling-thighs-laces-keep-it-up.mp4",
+      "in": 0,
+      "out": 3.0,
+      "num": "06",
+      "text": "THIGHS, LACES"
+    },
+    {
+      "clip": "../../../../public/drills/juggling-head-it-up.mp4",
+      "in": 0,
+      "out": 3.5,
+      "num": "07",
+      "text": "HEAD IT UP"
+    }
+  ],
+  "fonts": "../fonts",
+  "outro": "../../../outro/strive-elite-outro-9s-vertical-1080x1920.mp4"
+}

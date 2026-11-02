@@ -1,0 +1,50 @@
+{
+  "src": "source.mp4",
+  "out": "strive-explosive-5-jumps.mp4",
+  "fonts": "../fonts",
+  "outro": "../../../outro/strive-elite-outro-9s-vertical-1080x1920.mp4",
+  "faces": "faces.json",
+  "keep_hook": false,
+  "hook": {
+    "eyebrow": "EXPLOSIVE FIRST STEP",
+    "lines": [
+      "5 JUMPS.",
+      "NO GYM."
+    ],
+    "end": 2.2,
+    "hide_baked_until": 0
+  },
+  "list_style": "stack",
+  "names": [
+    {
+      "start": 2.3,
+      "num": "01",
+      "text": "POGO JUMPS"
+    },
+    {
+      "start": 4.0,
+      "num": "02",
+      "text": "LATERAL HOPS"
+    },
+    {
+      "start": 8.0,
+      "num": "03",
+      "text": "BROAD JUMPS"
+    },
+    {
+      "start": 12.0,
+      "num": "04",
+      "text": "SQUAT JUMPS"
+    },
+    {
+      "start": 16.0,
+      "num": "05",
+      "text": "BULGARIAN SPLIT JUMPS"
+    }
+  ],
+  "punch": true,
+  "watermark": true,
+  "endcard": true,
+  "captions": [],
+  "list_end": 19.6
+}

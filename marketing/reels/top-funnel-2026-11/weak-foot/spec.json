@@ -1,0 +1,45 @@
+{
+  "src": "source.mp4",
+  "out": "strive-weak-foot-4-drills.mp4",
+  "fonts": "../fonts",
+  "outro": "../../../outro/strive-elite-outro-9s-vertical-1080x1920.mp4",
+  "faces": "faces.json",
+  "keep_hook": false,
+  "hook": {
+    "eyebrow": "NO WALL NEEDED",
+    "lines": [
+      "4 WEAK FOOT DRILLS",
+      "FOR YOUR DRIVEWAY"
+    ],
+    "end": 2.2,
+    "hide_baked_until": 0
+  },
+  "list_style": "stack",
+  "names": [
+    {
+      "start": 2.3,
+      "num": "01",
+      "text": "TAP, PULL, PUSH"
+    },
+    {
+      "start": 4.5,
+      "num": "02",
+      "text": "OUTSIDE PULL, INSIDE PULL"
+    },
+    {
+      "start": 9.0,
+      "num": "03",
+      "text": "POP AND SETTLE"
+    },
+    {
+      "start": 13.5,
+      "num": "04",
+      "text": "POP AND JUGGLE"
+    }
+  ],
+  "punch": true,
+  "watermark": true,
+  "endcard": true,
+  "captions": [],
+  "list_end": 17.6
+}

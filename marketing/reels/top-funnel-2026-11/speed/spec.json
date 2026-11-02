@@ -1,0 +1,50 @@
+{
+  "src": "source.mp4",
+  "out": "strive-speed-5-drills.mp4",
+  "fonts": "../fonts",
+  "outro": "../../../outro/strive-elite-outro-9s-vertical-1080x1920.mp4",
+  "faces": "faces.json",
+  "keep_hook": false,
+  "hook": {
+    "eyebrow": "SPEED",
+    "lines": [
+      "5 DRILLS FOR A",
+      "FASTER FIRST STEP"
+    ],
+    "end": 2.2,
+    "hide_baked_until": 0
+  },
+  "list_style": "stack",
+  "names": [
+    {
+      "start": 2.3,
+      "num": "01",
+      "text": "KNEEL AND DRIVE"
+    },
+    {
+      "start": 4.0,
+      "num": "02",
+      "text": "PUSH-UP START"
+    },
+    {
+      "start": 7.3,
+      "num": "03",
+      "text": "DROP, SHUFFLE, SPRINT"
+    },
+    {
+      "start": 11.3,
+      "num": "04",
+      "text": "ZIGZAG SPRINT"
+    },
+    {
+      "start": 15.3,
+      "num": "05",
+      "text": "THE CROSS"
+    }
+  ],
+  "punch": true,
+  "watermark": true,
+  "endcard": true,
+  "captions": [],
+  "list_end": 19.4
+}

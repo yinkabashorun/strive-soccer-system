@@ -2877,6 +2877,35 @@ commit.
       pill. Source marketing/announcement/offer-post/post.html +
       render.mjs, final post.png. Sent, not posted; the Nov 1 date line
       is still his call.
+- [x] BUILT Nov 2 2026, FIVE TOP-FUNNEL REELS (Coach Yinka: "Make some
+      top funnel reels with the videos you have. Do research on what is
+      going viral and what will convert"): research first (vendor blogs
+      only, no soccer-specific data; sources in the README): the hook on
+      screen inside 1.5 s as text because most Reels play on mute, a
+      number or list promise with a specific outcome, a new shot every
+      2 to 3 s, under 30 s, a question for comments; the biggest soccer
+      tutorial account found (@alexramostraining, reels reported in the
+      tens of millions) runs "5 Skills You Will See in 2026" / "4 Fixes
+      to Hit the Perfect Long Ball", which is the house 01 02 03 style.
+      BUILT from the bank's own silent clips (nothing of the coach's on
+      them, so our hook is allowed), through a new
+      .claude/skills/strive-reel/montage_reel.py (plan.json of clip
+      cuts + hook + list -> source montage -> spec -> zoom pass -> face
+      track with the python3.13 that holds OpenCV -> full build;
+      reel_build.py now finds ffmpeg on PATH and starts from a silent
+      track when the source has no audio). marketing/reels/
+      top-funnel-2026-11/: Weak foot (4 drills, no wall, 20.4 s),
+      Juggling ladder (7 levels, "Can your player pass level 7?",
+      24.1 s), Speed (5 drills, faster first step, 22.2 s), Explosive
+      (5 jumps, no gym, 22.4 s), Ball mastery (5 patterns in a few
+      yards, 22.9 s); each with the watermark and the DM ELITE end
+      card; face rule held on every one (stack moved to the right on
+      Explosive and Ball mastery). Captions in his voice, one question
+      each, and the posting rule (add trending audio in the Instagram
+      app, never a claimed song) in the README. FLAG: the Explosive
+      clips were filmed in a gym under a "NO GYM" hook; the alternative
+      "NO EQUIPMENT" is one line in plan.json. Sent, not posted. No
+      player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

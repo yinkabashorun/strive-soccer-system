@@ -1,0 +1,50 @@
+{
+  "out": "strive-speed-5-drills.mp4",
+  "hook": {
+    "eyebrow": "SPEED",
+    "lines": [
+      "5 DRILLS FOR A",
+      "FASTER FIRST STEP"
+    ],
+    "end": 2.2
+  },
+  "segments": [
+    {
+      "clip": "../../../../public/drills/speed-kneel-and-drive.mp4",
+      "in": 0,
+      "out": 4.0,
+      "num": "01",
+      "text": "KNEEL AND DRIVE"
+    },
+    {
+      "clip": "../../../../public/drills/speed-push-up-start-sprint.mp4",
+      "in": 0,
+      "out": 3.3,
+      "num": "02",
+      "text": "PUSH-UP START"
+    },
+    {
+      "clip": "../../../../public/drills/speed-drop-shuffle-sideways-sprint.mp4",
+      "in": 0,
+      "out": 4.0,
+      "num": "03",
+      "text": "DROP, SHUFFLE, SPRINT"
+    },
+    {
+      "clip": "../../../../public/drills/speed-zigzag-sprint.mp4",
+      "in": 0,
+      "out": 4.0,
+      "num": "04",
+      "text": "ZIGZAG SPRINT"
+    },
+    {
+      "clip": "../../../../public/drills/speed-the-cross.mp4",
+      "in": 0,
+      "out": 4.5,
+      "num": "05",
+      "text": "THE CROSS"
+    }
+  ],
+  "fonts": "../fonts",
+  "outro": "../../../outro/strive-elite-outro-9s-vertical-1080x1920.mp4"
+}

@@ -1,0 +1,50 @@
+{
+  "out": "strive-ball-mastery-few-yards.mp4",
+  "hook": {
+    "eyebrow": "NO FIELD NEEDED",
+    "lines": [
+      "BALL MASTERY",
+      "IN A FEW YARDS"
+    ],
+    "end": 2.2
+  },
+  "segments": [
+    {
+      "clip": "../../../../public/drills/two-touch-ball-mastery-v1.mp4",
+      "in": 0,
+      "out": 4.0,
+      "num": "01",
+      "text": "TWO TOUCH, VARIATION 1"
+    },
+    {
+      "clip": "../../../../public/drills/two-touch-ball-mastery-v2.mp4",
+      "in": 0,
+      "out": 4.0,
+      "num": "02",
+      "text": "TWO TOUCH, VARIATION 2"
+    },
+    {
+      "clip": "../../../../public/drills/l-turn-roll-touch.mp4",
+      "in": 0,
+      "out": 4.5,
+      "num": "03",
+      "text": "L TURN, ROLL, TOUCH"
+    },
+    {
+      "clip": "../../../../public/drills/neymar-feint.mp4",
+      "in": 0,
+      "out": 4.0,
+      "num": "04",
+      "text": "NEYMAR FEINT"
+    },
+    {
+      "clip": "../../../../public/drills/ball-mastery-juggle-catch.mp4",
+      "in": 0,
+      "out": 4.0,
+      "num": "05",
+      "text": "JUGGLE AND CATCH"
+    }
+  ],
+  "fonts": "../fonts",
+  "outro": "../../../outro/strive-elite-outro-9s-vertical-1080x1920.mp4"
+}

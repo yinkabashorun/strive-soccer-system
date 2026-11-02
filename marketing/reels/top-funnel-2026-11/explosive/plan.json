@@ -1,0 +1,50 @@
+{
+  "out": "strive-explosive-5-jumps.mp4",
+  "hook": {
+    "eyebrow": "EXPLOSIVE FIRST STEP",
+    "lines": [
+      "5 JUMPS.",
+      "NO GYM."
+    ],
+    "end": 2.2
+  },
+  "segments": [
+    {
+      "clip": "../../../../public/drills/plyo-pogo-jumps.mp4",
+      "in": 0,
+      "out": 4.0,
+      "num": "01",
+      "text": "POGO JUMPS"
+    },
+    {
+      "clip": "../../../../public/drills/plyo-lateral-hops.mp4",
+      "in": 0,
+      "out": 4.0,
+      "num": "02",
+      "text": "LATERAL HOPS"
+    },
+    {
+      "clip": "../../../../public/drills/plyo-broad-jumps.mp4",
+      "in": 0,
+      "out": 4.0,
+      "num": "03",
+      "text": "BROAD JUMPS"
+    },
+    {
+      "clip": "../../../../public/drills/plyo-squat-jumps.mp4",
+      "in": 0,
+      "out": 4.0,
+      "num": "04",
+      "text": "SQUAT JUMPS"
+    },
+    {
+      "clip": "../../../../public/drills/plyo-bulgarian-split-jumps.mp4",
+      "in": 0,
+      "out": 4.0,
+      "num": "05",
+      "text": "BULGARIAN SPLIT JUMPS"
+    }
+  ],
+  "fonts": "../fonts",
+  "outro": "../../../outro/strive-elite-outro-9s-vertical-1080x1920.mp4"
+}

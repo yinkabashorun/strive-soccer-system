@@ -1,0 +1,50 @@
+{
+  "src": "source.mp4",
+  "out": "strive-ball-mastery-few-yards.mp4",
+  "fonts": "../fonts",
+  "outro": "../../../outro/strive-elite-outro-9s-vertical-1080x1920.mp4",
+  "faces": "faces.json",
+  "keep_hook": false,
+  "hook": {
+    "eyebrow": "NO FIELD NEEDED",
+    "lines": [
+      "BALL MASTERY",
+      "IN A FEW YARDS"
+    ],
+    "end": 2.2,
+    "hide_baked_until": 0
+  },
+  "list_style": "stack",
+  "names": [
+    {
+      "start": 2.3,
+      "num": "01",
+      "text": "TWO TOUCH, VARIATION 1"
+    },
+    {
+      "start": 4.0,
+      "num": "02",
+      "text": "TWO TOUCH, VARIATION 2"
+    },
+    {
+      "start": 8.0,
+      "num": "03",
+      "text": "L TURN, ROLL, TOUCH"
+    },
+    {
+      "start": 12.5,
+      "num": "04",
+      "text": "NEYMAR FEINT"
+    },
+    {
+      "start": 16.5,
+      "num": "05",
+      "text": "JUGGLE AND CATCH"
+    }
+  ],
+  "punch": true,
+  "watermark": true,
+  "endcard": true,
+  "captions": [],
+  "list_end": 20.1
+}

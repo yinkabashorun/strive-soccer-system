@@ -66,7 +66,29 @@ $500 a month, for 90 days. All included.
 DM ELITE.
 ```
 
-## The three slides (Nov 4 2026)
+## The carousel, six slides (Nov 4 2026, Coach Yinka: "package this in a
+way where every single follower I have swipes")
+
+Order: cover.png, problem.png, post.png, promise.png, program.png,
+close.png. Preview strip carousel-preview.png. Photos are the real Oct 4
+shoot (photos/, cropped 4:5 from marketing/ads/strive-elite-2026-10/src/
+photos): the sprint for the cover, the crouched coach for slide 2, the two
+coaches for the close. No stock, no generated images, no alumni.
+
+1. cover: the promise IS the hook. "IF THEY'RE NOT SHOCKED IN 90 DAYS,
+   YOU DON'T PAY." over the sprinting player, eyebrow "For ECNL and MLS
+   NEXT players", a Swipe cue.
+2. problem: the /demo headline "Team training 3-4x a week is not close to
+   enough." then "The next level is decided in the hours between
+   practices ... That's the part nobody coaches. So we built the thing
+   that does."
+3. post: every member gets all of it (unchanged).
+4. promise: the 90-day promise, big.
+5. program: who it's for, how 90 days run, $500/mo.
+6. close: the two coaches, "Your player's first week is waiting.", the
+   price in one line, DM "ELITE".
+
+## The three core slides (Nov 4 2026)
 
 1. post.png: the post above, closing on the Option 3 promise line and
    "$500 a month, for 90 days."

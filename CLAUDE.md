@@ -3209,6 +3209,12 @@ commit.
       level with Gary's. Flagged once: a mirror reverses the crest and
       the adidas mark on him (the NVA sock lettering is below the crop).
       photos/yinka.jpg replaced; preview strip re-rendered. Sent.
+      THEN (Coach Yinka: "Send examples with both new pictures"): both
+      covers rendered side by side, cover-standing.png (the standing
+      NVA photo, nothing mirrored) and cover-sprint.png (the sprint
+      photo mirrored toward Gary); cover.png stays the sprint version
+      until he picks. Sources photos/yinka-standing.jpg and
+      photos/yinka-sprint.jpg. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

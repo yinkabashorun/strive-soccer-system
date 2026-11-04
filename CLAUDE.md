@@ -3336,6 +3336,17 @@ commit.
       placements now live in compose-photos.py in the folder (run from
       there; rebuilds photos/stepN.jpg and close.jpg), so the crops are
       reproducible. Re-rendered, preview strip rebuilt. Sent.
+      THEN (Coach Yinka, on the close: "I want the text to cover my
+      middle chest and down, crop in a way that looks good"): the
+      CLOSE is the one slide with the headline LOW. The celebration
+      photo scaled to 1.9x with the heart hands and his face in the
+      top third under the "Strive Elite" eyebrow, the headline starting
+      at his mid chest (y 600) and running down, the price line
+      directly under it, the DM "ELITE" pill and the handle at the
+      bottom; the gradient darkens from the chest down so the text
+      reads. The reflected top band is dimmed hard on this one (night
+      sky lights turned it brown at the default). The five step slides
+      keep the headline at the top. Preview strip rebuilt. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

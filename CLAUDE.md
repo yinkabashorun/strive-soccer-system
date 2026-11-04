@@ -3215,6 +3215,11 @@ commit.
       photo mirrored toward Gary); cover.png stays the sprint version
       until he picks. Sources photos/yinka-standing.jpg and
       photos/yinka-sprint.jpg. Sent.
+      THEN (Coach Yinka: "Mirror the other one towards Gary then show
+      me"): cover-standing.png re-rendered with the standing photo
+      mirrored too, so in both options he faces Gary; the Audi rings
+      and adidas mark read reversed on it. cover.png still the sprint
+      version until he picks. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

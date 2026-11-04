@@ -35,17 +35,12 @@
       "start": 12.5,
       "num": "04",
       "text": "TAP, PULL, PUSH"
-    },
-    {
-      "start": 17.0,
-      "num": "05",
-      "text": "JUGGLE AND CATCH"
     }
   ],
   "punch": true,
   "watermark": true,
   "endcard": true,
   "captions": [],
-  "list_end": 20.6,
+  "list_end": 16.6,
   "loudness": -16
 }

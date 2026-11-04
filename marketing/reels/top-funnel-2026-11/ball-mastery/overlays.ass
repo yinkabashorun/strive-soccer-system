@@ -24,15 +24,13 @@ Style: Rule,Barlow Medium,30,&H0058A8C8,&H0058A8C8,&H0058A8C8,&H00000000,0,0,0,0
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 Dialogue: 2,0:00:00.00,0:00:02.20,Eyebrow,,0,0,0,,{\an5\pos(490,990)\fad(150,200)}NO FIELD NEEDED
 Dialogue: 2,0:00:00.00,0:00:02.20,Hook,,0,0,0,,{\an5\pos(490,1130)\fad(150,200)\fscx96\fscy96\t(0,260,\fscx100\fscy100)}BALL MASTERY\NIN A FEW YARDS
-Dialogue: 4,0:00:02.30,0:00:20.60,Num,,0,0,0,,{\an7\pos(64,840)\fad(120,160)}01
-Dialogue: 4,0:00:02.30,0:00:20.60,Stack,,0,0,0,,{\an7\pos(64,880)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}TWO TOUCH, VARIATION 1
-Dialogue: 4,0:00:04.00,0:00:20.60,Num,,0,0,0,,{\an7\pos(64,944)\fad(120,160)}02
-Dialogue: 4,0:00:04.00,0:00:20.60,Stack,,0,0,0,,{\an7\pos(64,984)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}TWO TOUCH, VARIATION 2
-Dialogue: 4,0:00:08.00,0:00:20.60,Num,,0,0,0,,{\an7\pos(64,1048)\fad(120,160)}03
-Dialogue: 4,0:00:08.00,0:00:20.60,Stack,,0,0,0,,{\an7\pos(64,1088)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}L TURN, ROLL, TOUCH
-Dialogue: 4,0:00:12.50,0:00:20.60,Num,,0,0,0,,{\an7\pos(64,1152)\fad(120,160)}04
-Dialogue: 4,0:00:12.50,0:00:20.60,Stack,,0,0,0,,{\an7\pos(64,1192)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}TAP, PULL, PUSH
-Dialogue: 4,0:00:17.00,0:00:20.60,Num,,0,0,0,,{\an7\pos(64,1256)\fad(120,160)}05
-Dialogue: 4,0:00:17.00,0:00:20.60,Stack,,0,0,0,,{\an7\pos(64,1296)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}JUGGLE AND CATCH
-Dialogue: 1,0:00:00.00,0:00:21.00,Wm,,0,0,0,,{\an1\pos(60,1440)}STRIVE {\c&H0058A8C8}ELITE
-Dialogue: 1,0:00:00.00,0:00:21.00,WmSub,,0,0,0,,{\an1\pos(60,1484)}PERSONALIZED REMOTE TRAINING
+Dialogue: 4,0:00:02.30,0:00:16.60,Num,,0,0,0,,{\an7\pos(64,944)\fad(120,160)}01
+Dialogue: 4,0:00:02.30,0:00:16.60,Stack,,0,0,0,,{\an7\pos(64,984)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}TWO TOUCH, VARIATION 1
+Dialogue: 4,0:00:04.00,0:00:16.60,Num,,0,0,0,,{\an7\pos(64,1048)\fad(120,160)}02
+Dialogue: 4,0:00:04.00,0:00:16.60,Stack,,0,0,0,,{\an7\pos(64,1088)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}TWO TOUCH, VARIATION 2
+Dialogue: 4,0:00:08.00,0:00:16.60,Num,,0,0,0,,{\an7\pos(64,1152)\fad(120,160)}03
+Dialogue: 4,0:00:08.00,0:00:16.60,Stack,,0,0,0,,{\an7\pos(64,1192)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}L TURN, ROLL, TOUCH
+Dialogue: 4,0:00:12.50,0:00:16.60,Num,,0,0,0,,{\an7\pos(64,1256)\fad(120,160)}04
+Dialogue: 4,0:00:12.50,0:00:16.60,Stack,,0,0,0,,{\an7\pos(64,1296)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}TAP, PULL, PUSH
+Dialogue: 1,0:00:00.00,0:00:17.00,Wm,,0,0,0,,{\an1\pos(60,1440)}STRIVE {\c&H0058A8C8}ELITE
+Dialogue: 1,0:00:00.00,0:00:17.00,WmSub,,0,0,0,,{\an1\pos(60,1484)}PERSONALIZED REMOTE TRAINING

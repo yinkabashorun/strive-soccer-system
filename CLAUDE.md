@@ -2971,6 +2971,21 @@ commit.
       5 clips with sound. Caption updated. Re-sent. That clip also
       opens the weak foot reel; if he wants no overlap, the ball
       mastery reel runs as four drills (the hook carries no number).
+      THEN (Coach Yinka: "How is 5 juggle and catch you got the names
+      wrong for few yards"): MY MISTAKE. The file
+      public/drills/ball-mastery-juggle-catch.mp4 (Gary, shirtless,
+      same field as the Oct 21 three) shows the ball ON THE GROUND
+      between two cones, sole rolls back and across; it is not juggling,
+      it has NO row in the bank, and its name was invented from the
+      file name, which was wrong from the day it was encoded (Oct 23
+      merge). It is also the /demo Ball Mastery tile and the outro's
+      Ball Mastery tile, labelled only "Ball Mastery" there, so those
+      stand. Reel cut to FOUR drills, every name a bank title: two
+      touch v1, two touch v2, L turn roll touch, tap pull push; 19.4 s,
+      all four with sound. Caption says four. RULE restated: a reel
+      name is the bank title or his words, never a read of the footage.
+      OPEN for him: what that sole-roll clip is called; once named it
+      gets a bank row, the file is renamed, and it can go back in.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

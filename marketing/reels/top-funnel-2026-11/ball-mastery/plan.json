@@ -36,13 +36,6 @@
       "out": 4.5,
       "num": "04",
       "text": "TAP, PULL, PUSH"
-    },
-    {
-      "clip": "../../../../public/drills/ball-mastery-juggle-catch.mp4",
-      "in": 0,
-      "out": 4.0,
-      "num": "05",
-      "text": "JUGGLE AND CATCH"
     }
   ],
   "fonts": "../fonts",

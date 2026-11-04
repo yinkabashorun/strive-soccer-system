@@ -22,7 +22,7 @@ claimed song, Oct 7 rule); the clip sound is the bed under it.
 | Juggling ladder | all 7 clips |
 | Speed | NONE: the five sprint clips were encoded silent the day they arrived (Oct 27), no copy with sound exists in the repo. Silent track until the end swish; add audio in the app, or send the original phone files and it rebuilds with them |
 | Explosive | all 5 clips (gym sound) |
-| Ball mastery | 4 of 5: the two-touch pair, L turn and tap pull push; juggle-and-catch was silent at source |
+| Ball mastery | all 4 clips |
 
 ## What the research said (Nov 2 2026)
 
@@ -53,7 +53,7 @@ by our own retention curve.
 | Juggling ladder | juggling-ladder/strive-juggling-ladder-7-levels.mp4 | 24.1 s | THE JUGGLING LADDER / CAN YOUR PLAYER PASS LEVEL 7? | One touch; Two touches each foot; One, two; Laces, inside; Thigh; Thighs, laces; Head it up |
 | Speed | speed/strive-speed-5-drills.mp4 | 24.7 s | SPEED / 5 DRILLS FOR A FASTER FIRST STEP | The cross (whole clip, Coach Yinka's call Nov 4); Kneel and drive; Push-up start; Drop shuffle sprint; Zigzag sprint |
 | Explosive | explosive/strive-explosive-5-jumps.mp4 | 22.5 s | EXPLOSIVE FIRST STEP / 5 JUMPS. NO GYM. | Pogo; Lateral hops; Broad jumps; Squat jumps; Bulgarian split jumps |
-| Ball mastery | ball-mastery/strive-ball-mastery-few-yards.mp4 | 23.4 s | NO FIELD NEEDED / BALL MASTERY IN A FEW YARDS | Two touch v1; Two touch v2; L turn roll touch; Tap pull push (Gary's weak foot clip, replaced the Neymar feint Nov 4: that clip is another player on a court, and the reel is all Gary); Juggle and catch |
+| Ball mastery | ball-mastery/strive-ball-mastery-few-yards.mp4 | 19.4 s | NO FIELD NEEDED / BALL MASTERY IN A FEW YARDS | Two touch v1; Two touch v2; L turn roll touch; Tap pull push (Gary's weak foot clip; the Neymar feint was another player on a court and the file called juggle-catch is Gary's sole rolls with no bank row and no name from Coach Yinka, so both are out, Nov 4) |
 
 Flag on Explosive: the clips were filmed in a gym, and the hook says
 "no gym". The jumps need no equipment, which is the point, but if the
@@ -108,9 +108,9 @@ These run as the warm-up in every Strive Elite session. DM ELITE.
 
 Ball mastery
 ```
-No field, no problem. Five ball mastery patterns in a few yards.
+No field, no problem. Four ball mastery patterns in a few yards.
 
-Two touch, variation 1. Two touch, variation 2. L turn, roll, touch. Tap, pull, push. Juggle and catch. Three rounds of a minute each.
+Two touch, variation 1. Two touch, variation 2. L turn, roll, touch. Tap, pull, push. Three rounds of a minute each.
 
 Which one is your player trying first? Comment below.
 

@@ -22,7 +22,10 @@ SPEED
 A faster first step and a higher top speed. Win the race to every ball.
 
 WEAK FOOT
-Shoot, pass and turn with either foot, so your player never has to pass up a chance.
+Shoot, pass and dribble with either foot, so your player never has to pass up a chance.
+
+PASSING
+The low ball, the driven ball, the ping. Master every type of pass and pick the right one.
 
 FIRST TOUCH
 Everything you need for your first touch, from the first bounce to juggling with every surface.
@@ -57,7 +60,8 @@ New in Strive Elite, all included.
 
 Strength. More power, fewer injuries.
 Speed. A faster first step, win every race.
-Weak Foot. Shoot, pass and turn with either foot.
+Weak Foot. Shoot, pass and dribble with either foot.
+Passing. Low, driven, pinged. Master every ball.
 First Touch. Everything your first touch needs.
 Scoring Goals. Finish, shoot quicker, win headers.
 General Nutrition Guide. Training day, match day, hydration.
@@ -70,7 +74,7 @@ $249 a month locked for life if you join by Nov 1. DM ELITE.
 ```
 
 Flags: the General Nutrition Guide is live (Nov 1). SCORING GOALS (first called Finishing in the
-Box) was added Nov 4 on Coach Yinka's "cap about it for now": the course
+Box) and PASSING were added Nov 4 on Coach Yinka's "cap about it for now": the course
 is NOT in the app, no shooting clip has been sent, and the block carries
 no drill count on purpose; it becomes true the day the clips are banked
 and the course is switched on. The Nov 1 date needs his call if the

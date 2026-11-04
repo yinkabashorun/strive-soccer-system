@@ -48,7 +48,7 @@ Send your player's game clips. Coach Gary and I break them down and give the dri
 MONTHLY 1:1 CALL
 A deep dive into what to improve next and exactly how to work on it.
 
-30-DAY DRIBBLING TRANSFORMATION
+DRIBBLING TRANSFORMATION
 Thirty days of work to become the silkiest, most dangerous dribbler on the team.
 
 All included. $249 a month, locked for life, if you join by November 1. $500 after.
@@ -72,13 +72,13 @@ College Recruiting. The CV, the emails, the tape, the list.
 Academy Recruiting. The ladder, the director, the tryout.
 Film Room. Your clips, broken down every week.
 Monthly 1:1 call. A deep dive into what to improve next.
-30-Day Dribbling. The silkiest, most dangerous dribbler on the team.
+Dribbling Transformation. The silkiest, most dangerous dribbler on the team.
 
 $249 a month locked for life if you join by Nov 1. DM ELITE.
 ```
 
 Flags: the General Nutrition Guide is live (Nov 1). SCORING GOALS (first called Finishing in the
-Box), PASSING and the 30-DAY DRIBBLING TRANSFORMATION were added Nov 4 on Coach Yinka's "cap about it for now": the course
+Box), PASSING and the DRIBBLING TRANSFORMATION were added Nov 4 on Coach Yinka's "cap about it for now": the course
 is NOT in the app, no shooting clip has been sent, and the block carries
 no drill count on purpose; it becomes true the day the clips are banked
 and the course is switched on. The Nov 1 date needs his call if the

@@ -3290,6 +3290,24 @@ commit.
       that the kid next to them never put in." (4 h x 13 weeks; the
       four hours is his figure, the off-season six-session week comes
       to about four hours, in season about 2.7). Sent.
+      THEN (Coach Yinka sent ten photos of himself and Gary: "Pictures
+      of me and Gary you can choose to use from"): PLACED, credibility
+      first: step 1 Coach Yinka striking the ball in the NVA white
+      (aesthetic); step 2 Gary in the Armenia U19 shirt mid-stride;
+      step 3 Gary at seven for Armenia U16 with the ball; step 4 Gary
+      with the captain's armband and the ECNL patch on his sleeve (the
+      audience in one frame); step 5 two panels like the cover, Coach
+      Yinka in the college lineup at 27 beside Gary in the Fortuna
+      Koln 8 (college and academy, the two doors); the close is Coach
+      Yinka's Gainesville celebration, eyebrow now "Strive Elite".
+      Landscape photos run as a full-width band fading to black (no
+      heavy upscale); portraits run full-bleed; the top bar got a text
+      shadow for bright skies. Held in reserve: the NVA studio
+      portrait and the Armenia U16 team photo (photos/src/). The Oct 4
+      shoot crops, the drill-bank frames and the unused problem slide
+      are deleted from the folder. Every slide in the ten now carries
+      a photo of one of the two coaches or is typographic (recap,
+      promise, cost drop). Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

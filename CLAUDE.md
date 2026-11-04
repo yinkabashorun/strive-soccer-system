@@ -3768,6 +3768,20 @@ commit.
       and tell us about your player." No hashtags, no em dashes, no
       alumni. The long twelve-block caption below it stays with the
       single grid post (post.png). Sent in chat; nothing posted.
+      THEN (Coach Yinka: "How can we lead with the guarantee? And make
+      it a bit more righty without repeating what's in the post too
+      much"; I read "righty" as tighter and said so): CAPTION
+      REWRITTEN, 650 characters. It opens on the guarantee as its
+      first line ("In 90 days, if your player's coach, teammates or
+      the other parents aren't shocked at the difference, you don't
+      pay us a cent."), then the guarantee's two other halves in one
+      sentence, "Built by Coach Gary and me for ECNL and MLS NEXT
+      players who want the next level. Designed by players who have
+      done just that.", "$985 paid in full, or $400 a month. Swipe to
+      see everything inside.", and "DM ELITE and tell us about your
+      player." The inside paragraph, the private-session comparison
+      and the $100,000 question are cut because the slides carry
+      them. Saved in strive-elite-offer-post.md. Nothing posted.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

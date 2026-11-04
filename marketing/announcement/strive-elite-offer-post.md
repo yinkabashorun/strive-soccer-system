@@ -16,27 +16,23 @@ player GETS, never a drill count or a level count ("no one cares that
 it's 8 drills, both feet"). Keep It Up is called First Touch on the
 post; Finishing in the Box is Scoring Goals.
 
-## THE CAPTION FOR THE CAROUSEL (final ten slides, Nov 4 2026, Coach Yinka: "Caption for the post?")
+## THE CAPTION FOR THE CAROUSEL (final ten slides, Nov 4 2026, Coach Yinka: "How can we lead with the guarantee? And make it a bit more tight without repeating what's in the post too much")
 
-The slides carry the detail, so this is short: the cover's question, what is
-inside in one paragraph, the guarantee, the price, the aim, the ask. Instagram's
-limit is 2,200 characters; this is 1060. The long grid caption below belongs to
-the single grid post (post.png), not the carousel.
+Leads with the guarantee, then the aim, the price and the ask. It leaves out what
+is inside (the slides carry that) and the private-session comparison (the price
+slide carries that). 525 characters; Instagram's limit is 2,200. The long
+grid caption below belongs to the single grid post (post.png), not the carousel.
+The first version (opened on the $100,000 question, 1,060 characters) is in the
+git history.
 
 ```
-If a parent paid us $100,000 to get their player into a pro academy, what would we do?
+In 90 days, if your player's coach, teammates or the other parents aren't shocked at the difference, you don't pay us a cent.
 
-We put all of it into one program. Strive Elite, built by Coach Gary and me.
+That's the Strive Elite guarantee. Your player does 75% of the work we give them, and we keep working with them, free, until the people around them are shocked.
 
-Swipe to see what's inside:
+Built by Coach Gary and me for ECNL and MLS NEXT players who want the next level. Designed by players who have done just that.
 
-A week built around what your player specifically needs, outside team training. Strength, speed, weak foot, passing, first touch, scoring goals and dribbling. Film Room every week and a monthly 1:1 call with Gary and me. College and academy recruiting. And the Strive Elite community, so your player is around our top players and players just as hungry.
-
-The 90-day guarantee: your player does 75% of the work we give them. If their coach, teammates or the other parents aren't shocked at the difference, you don't pay us a cent. And we keep working with your player, free, until they are.
-
-$985 paid in full for the 90 days, or $400 a month. That is the price of one private session a week for three months, for all of it.
-
-For ECNL and MLS NEXT players who want the next level. Designed by players who have done just that.
+$985 paid in full, or $400 a month. Swipe to see everything inside.
 
 DM ELITE and tell us about your player.
 ```

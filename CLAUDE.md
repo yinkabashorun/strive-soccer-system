@@ -3564,6 +3564,14 @@ commit.
       opponents"): step 2's last sentence is his words, "Dominating
       opponents." The slide reads "Gets to the ball first. Wins the
       50/50. Dominating opponents." Sent.
+      THEN (Coach Yinka, on slide 2: "'this trains the one thing
+      holding them back' doesn't make sense, we train multiple things.
+      We train what they specifically need to grow"): step 1's middle
+      sentence is now "This trains what your player specifically needs
+      to grow." The full line reads "Team practice trains the whole
+      team. This trains what your player specifically needs to grow.
+      Four extra hours a week is 52 hours in three months that the kid
+      next to them never puts in." Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

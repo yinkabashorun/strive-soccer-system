@@ -194,7 +194,7 @@ First Touch. Everything your first touch needs.
 Scoring Goals. Finish, shoot quicker, win headers.
 General Nutrition Guide. Training day, match day, hydration.
 College Recruiting. The CV, the emails, the tape, the list.
-Academy Recruiting. The ladder, the director, the tryout.
+Academy Recruiting. The ladder, the connections, the trial.
 Film Room. Your clips, broken down every week.
 Monthly 1:1 call. A deep dive into what to improve next.
 Dribbling Transformation. Most dangerous dribbler on the team.

@@ -3578,6 +3578,13 @@ commit.
       U16 photo (Gary in the orange kit, ball at his feet); step 3,
       the weapons, carries the two players in blue and red. Copy and
       tiles stay with their slides. Preview strip rebuilt. Both sent.
+      THEN (Coach Yinka: "For academy recruiting box switch the copy,
+      to connections instead of director and trial instead of
+      tryout"): the Academy Recruiting line is now "The ladder, the
+      connections, the trial." on the doors slide, the recap, the
+      standalone post and the caption. Public wording only: the course
+      inside the app still says director and tryout in its own pages
+      (his call whether those follow). Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

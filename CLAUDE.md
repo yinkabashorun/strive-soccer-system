@@ -3202,6 +3202,13 @@ commit.
       (yinka.jpg, gary.jpg). Preview strip re-rendered. Sent. Slides 2
       and 6 still carry the Oct 4 shoot photos until his group, camp
       and story photos arrive.
+      THEN (Coach Yinka sent a third photo, himself sprinting in the
+      NVA kit, facing left: "Rotate my picture so I'm looking in
+      Gary's direction"): the left panel is now that photo MIRRORED so
+      he runs toward Gary across the gold line, cropped with his face
+      level with Gary's. Flagged once: a mirror reverses the crest and
+      the adidas mark on him (the NVA sock lettering is below the crop).
+      photos/yinka.jpg replaced; preview strip re-rendered. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

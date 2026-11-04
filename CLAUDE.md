@@ -3515,6 +3515,16 @@ commit.
       months. The price of five sessions, for a month of all of it."
       FINAL REVISION sent, ten slides: cover, five steps, recap,
       guarantee, cost drop, close. Not posted.
+      THEN (Coach Yinka: "The pricing page must be easier to ingest,
+      less can be more"): THE COST DROP IS TWO NUMBERS. Eyebrow "The
+      price"; "Bought piece by piece" with one line ("Every session,
+      breakdown, call and course inside, paid for one at a time for
+      90 days.") over $7,920 struck through at 200 px; a rule; "Strive
+      Elite. All of it, 90 days." over $985 in gold at 200 px; "One
+      payment, with the guarantee. Or $400 a month."; fine print
+      "Priced at our own $80 session rate. $985 is the price of twelve
+      private sessions." The itemised table is gone from the slide
+      and lives in strive-elite-offer-post.md. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

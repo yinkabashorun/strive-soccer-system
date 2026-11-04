@@ -3439,6 +3439,20 @@ commit.
       posting order. Not posted; the paid-in-full price, the guarantee
       mechanics (75% as sessions done in the app, the day 90 refund,
       no cap on the free continuation) and Stripe are still his.
+      THEN (Coach Yinka: "The little boxes need revision they should
+      be written similar to how the bundle copy is"): the gold chips
+      on the five step slides are now TILES in the bundle's shape, the
+      name in gold with the destination line under it, the twelve
+      lines lifted word for word from the post grid (Strength "More
+      power. Fewer injuries." and so on). Five items had no bundle
+      line and got one in the same voice, mine: The Week "Built around
+      one player, every Monday.", Extra Work "More sessions when they
+      want more.", Pick Up Where You Left Off "A break never costs a
+      thing.", Send a Clip "Any drill, checked by us.", Side by Side
+      "The same drill, two weeks apart." Tiles flow three across for
+      three or five items (the last row stretches) and two by two for
+      four; the bottom gradient starts higher so the sentence reads
+      over the photo. Preview strip rebuilt. The five sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

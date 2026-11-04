@@ -3560,6 +3560,10 @@ commit.
       (first step, race, injuries), so the final line says what the
       tiles do not: speed, strength and staying healthy as results on
       the pitch. Steps 3 to 5 untouched. Sent.
+      THEN (Coach Yinka: "Last sentence just say dominating
+      opponents"): step 2's last sentence is his words, "Dominating
+      opponents." The slide reads "Gets to the ball first. Wins the
+      50/50. Dominating opponents." Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

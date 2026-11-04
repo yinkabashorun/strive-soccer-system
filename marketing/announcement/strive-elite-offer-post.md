@@ -86,6 +86,10 @@ in the negative space at the top, the coach's face in a clear band around
 the middle with nothing over it, the one sentence and the gold chips low;
 each photo is pre-composed into photos/stepN.jpg or photos/close.jpg so
 the face lands in that band, and the page shows it full-frame.
+The close is the exception, on his word ("the text to cover my middle
+chest and down"): the celebration photo fills the top, the headline starts
+at mid chest and runs down, the price line and the DM pill under it.
+Crops are rebuilt by compose-photos.py in the folder.
 (Earlier cut: one full-frame image from Strive's own footage (public/drills frames:
 juggling thighs high, the cross, weak foot tap pull push, the 15 yard
 sprint; Gary's Fortuna Koln photo on step 5), one headline, one sentence,)

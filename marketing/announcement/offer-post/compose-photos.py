@@ -6,7 +6,7 @@
 # of the space above our head."
 from PIL import Image, ImageFilter, ImageEnhance
 S="photos/src/"; F=220
-def comp(src,k,head,target,out,canvas=(1080,1350),mirror=False):
+def comp(src,k,head,target,out,canvas=(1080,1350),mirror=False,band_bright=.8):
     im=Image.open(S+src).convert("RGB")
     if mirror: im=im.transpose(Image.FLIP_LEFT_RIGHT)
     im=im.resize((round(im.width*k),round(im.height*k)),Image.LANCZOS)
@@ -16,7 +16,7 @@ def comp(src,k,head,target,out,canvas=(1080,1350),mirror=False):
         # continue the photo upward: the top rows reflected, stretched, blurred and darkened,
         # feathered into the real edge so there is no hard line under the headline
         band=im.crop((0,0,im.width,120)).transpose(Image.FLIP_TOP_BOTTOM).resize((im.width,y+F),Image.LANCZOS)
-        band=band.filter(ImageFilter.GaussianBlur(60)); band=ImageEnhance.Brightness(band).enhance(.8)
+        band=band.filter(ImageFilter.GaussianBlur(60)); band=ImageEnhance.Brightness(band).enhance(band_bright)
         c.paste(band,(x,0))
         mask=Image.linear_gradient("L").resize((im.width,F))  # 0 at top -> 255 at bottom
         top=im.crop((0,0,im.width,F)); c.paste(top,(x,y),mask)
@@ -32,4 +32,4 @@ comp("gary-ecnl-captain.jpg",1.6,(340,95),(430,490),"photos/step4.jpg")
 l=comp("yinka-college-lineup.jpg",0.9,(540,270),(270,510),None,(540,1350))
 r=comp("gary-fortuna-koln.png",0.9,(560,560),(270,510),None,(540,1350))
 c=Image.new("RGB",(1080,1350),(13,13,13)); c.paste(l,(0,0)); c.paste(r,(540,0)); c.save("photos/step5.jpg",quality=92)
-comp("yinka-gainesville-celebration.jpg",1.6,(520,80),(560,540),"photos/close.jpg")
+comp("yinka-gainesville-celebration.jpg",1.9,(520,80),(560,250),"photos/close.jpg",band_bright=.3)  # close: the headline starts at mid chest (Coach Yinka, Nov 4)

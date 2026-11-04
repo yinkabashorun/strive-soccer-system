@@ -23,6 +23,9 @@ FOR COACH YINKA, NOT FOR MANUS (read before pasting):
   them before the first family joins at this price.
 - Stripe needs the $985 and $400 prices. The Meta ad copy, the outro and
   ad 5 still carry the old $249 / $500 offer.
+- In person is gone from the Manus pages. Still to check on your side: the
+  GHL intake survey (any in-person question), Carla's DM replies for FALL
+  and PRIVATE, and the Instagram bio.
 - The page code in the repo (/demo) still carries the old offer block too;
   this brief is for the Manus pages only.
 
@@ -124,12 +127,22 @@ Pixel.
 
 ## B. FORM CONFIRMATION PAGE
 
-Only the "Strive Elite, at home" card changes. Everything else stays
-(headline "You're in. One more step.", the Book your call buttons, the
-Video coming soon slot, WHAT HAPPENS ON THE CALL, the In person card, the
-footer).
+WE ARE NOT DOING IN PERSON ANY MORE (Coach Yinka, Nov 4). Remove every
+in-person reference from this page:
+- Sub-headline becomes: "We read every form ourselves. Book your call
+  below and we'll go through your player's situation together and map
+  out the right next step."
+- WHAT HAPPENS ON THE CALL, third line becomes: "Whether Strive Elite is
+  the right fit for them."
+- Delete the TWO WAYS TO TRAIN section and its "In person" card. In its
+  place, label it STRIVE ELITE and show one full-width card, the one
+  below.
+- Delete any line that says many players do both, or mentions field
+  work, 1-on-1s, duos, groups or drop-ins.
+Everything else stays (headline "You're in. One more step.", the Book
+your call buttons, the Video coming soon slot, the footer).
 
-New copy for card 2:
+New copy for the one card:
 
 **Strive Elite, at home**
 A 90-day program for ECNL and MLS NEXT players who want the next level.
@@ -143,4 +156,4 @@ you don't pay us a cent.
 Remove from this page: "$500 a month", "Join by Nov 1 and lock in $249 a
 month for life", "month to month" and "same-day refund".
 
-Same hard rules as above. No em dashes, "your player", "we".
+Same hard rules as above, and never any mention of in-person training. No em dashes, "your player", "we".

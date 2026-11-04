@@ -80,7 +80,8 @@ arrive and are then rebuilt. No stock, no generated images, no alumni.
    what would we do? Then we put all of it into one program. Strive
    Elite." Eyebrow "For ECNL and MLS NEXT players", "Swipe to see
    inside". Two-panel photo cover: Coach Yinka (left, daylight, the NVA
-   kit) and Coach Gary (right, night, SC Fortuna Koln number 8), his own
+   kit, his sprint photo MIRRORED on his word so he faces Gary; the
+   crest and any lettering read reversed as a result) and Coach Gary (right, night, SC Fortuna Koln number 8), his own
    photos sent Nov 4 (photos/yinka.jpg, photos/gary.jpg, 540x1350 halves
    cropped so both faces sit level), a gold hairline between them, one
    grade and one gradient over both, COACH YINKA / COACH GARY tags. The earlier promise

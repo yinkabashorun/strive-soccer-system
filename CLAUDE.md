@@ -3408,6 +3408,15 @@ commit.
       in marketing/announcement/strive-elite-offer-post.md. Not posted;
       the paid-in-full price, the promise mechanics and Stripe are
       still his.
+      THEN (Coach Yinka sent a photo of himself on the sideline in a
+      chair, sunglasses, notebook and pen, the pitch behind him: "For
+      we'd watch every game use this picture"): STEP 4 is that photo
+      (photos/src/yinka-sideline-notes.jpg, 1.4x), the headline in the
+      sky, his face clear under it, the notebook in the frame under
+      the copy. He looks to the right, so his face sits a touch left
+      of centre (x 420) and the frame balances on the pitch he is
+      watching; a dead-centre crop pushed the notebook out. Gary's
+      ECNL captain photo stays in src. Preview strip rebuilt. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

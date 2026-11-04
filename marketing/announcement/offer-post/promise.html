@@ -12,7 +12,11 @@ body{font-family:'Barlow',sans-serif;color:#fff;position:relative;padding:84px 8
 .gold{color:#c8a858}
 .eyebrow{font-family:'Barlow Condensed';font-weight:800;font-size:26px;letter-spacing:.3em;text-transform:uppercase;color:#c8a858}
 h1{font-family:'Barlow Condensed';font-weight:900;font-size:132px;line-height:.92;text-transform:uppercase;margin-top:22px;letter-spacing:.01em}
-.rule{width:120px;height:3px;background:#c8a858;margin:52px 0 48px}
+.steps{margin-top:44px;border-top:1px solid rgba(255,255,255,.14)}
+.row{display:flex;gap:34px;align-items:flex-start;padding:34px 0 32px;border-bottom:1px solid rgba(255,255,255,.14)}
+.n{flex:none;width:112px;font-family:'Barlow Condensed';font-weight:900;font-size:104px;line-height:.8;color:#c8a858}
+.t{font-size:42px;line-height:1.28;font-weight:500;padding-top:2px}
+.t b{font-weight:700;color:#c8a858}
 .p{font-size:48px;line-height:1.28;font-weight:500}
 .p+.p{margin-top:34px}
 .p b{font-weight:700;color:#c8a858}
@@ -27,11 +31,12 @@ h1{font-family:'Barlow Condensed';font-weight:900;font-size:132px;line-height:.9
 
 <div class="eyebrow">Strive Elite</div>
 <h1>The 90-day<br><span class="gold">guarantee.</span></h1>
-<div class="rule"></div>
 
-<p class="p">Your player does <b>75% of the work</b> we give them for 90 days.</p>
-<p class="p">If their teammates and their parents aren't coming up to you <b>shocked</b> at the difference, <b>you don't pay us a cent.</b></p>
-<p class="p">And we keep working with your player, free, until they are.</p>
+<div class="steps">
+  <div class="row"><div class="n">01</div><p class="t">Your player does <b>75% of the work</b> we give them for 90 days.</p></div>
+  <div class="row"><div class="n">02</div><p class="t">If their teammates and their parents aren't coming up to you <b>shocked</b> at the difference, <b>you don't pay us a cent.</b></p></div>
+  <div class="row"><div class="n">03</div><p class="t">And we keep working with your player, <b>free</b>, until they are.</p></div>
+</div>
 
 <p class="note">We can say this because we see every session your player does. The work is tracked in the app, so the 75% is a number, not an opinion. The result is judged by the people who watch them play, not by us.</p>
 

@@ -3675,6 +3675,18 @@ commit.
       sees the old ones. Flagged to him with the one-tap fix (edit the
       reps at /coach/drills so the app matches the graphic); not done,
       it is a drill-bank change and his coaching call. Sent.
+      THEN (Coach Yinka sent IMG_6736.mov, "Here's the v up cover"):
+      the V-ups card now has its thumbnail. The clip is 1080x1920
+      HEVC 10-bit HLG, 11 s, a V-up on grass under a blue sky; frame
+      at 1.5 s (the top of the V, legs and torso up), tone mapped to
+      SDR with the house recipe and cropped square tight on him
+      (marketing/announcement/offer-post/app/strength-v-ups.jpg). The
+      card's title now holds "Strength: V-ups" on one line and the
+      bottom fade of the phone starts lower so the new picture is not
+      dimmed. THE CLIP WAS USED AS THE COVER ONLY: it is NOT in the
+      drill bank or public/drills; the bank's V-ups row still plays
+      its Manus video. If he wants this clip to replace it, say so
+      and it goes in with the standard encode. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

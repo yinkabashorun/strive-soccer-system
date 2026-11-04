@@ -3097,6 +3097,11 @@ commit.
       wrapped to two lines; the caption keeps the full name 30-DAY
       DRIBBLING TRANSFORMATION. Spacing restored to the original
       rhythm. Sent.
+      THEN (Coach Yinka: "Just name it dribbling transformation"):
+      the block is DRIBBLING TRANSFORMATION on the image and in the
+      caption (name set at 35 px in that one block so it holds one
+      line; every other name stays 40 px), line "Silkiest, most
+      dangerous, in 30 days." Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

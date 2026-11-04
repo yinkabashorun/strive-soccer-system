@@ -2,37 +2,98 @@
 <title>Step 01 (1080x1350)</title>
 <link rel="stylesheet" href="../../covers/strive-elite-meeting/fonts.css">
 <style>
-/* The walk, framed the Nike way (Coach Yinka, Nov 4 2026): headline in the
-   negative space at the top, the coach uncovered in the clear band under
-   it, the sentence and the chips low. Photos are pre-composed in
-   photos/stepN.jpg so the face lands at about y 500. */
+/* Slide 2 of the walk, built from the product (Coach Yinka, Nov 4 2026:
+   "use photos of inside the app that you create ... something easy to
+   digest that shows a session example"). The right column is a phone
+   showing the app's real session screen (components/elite/TodaySession.tsx:
+   "Today . Session N of N", the red Start here badge on the plyo
+   warm-up, the gold Finisher badge, the reps chip). Titles, reps and clips
+   are real bank drills; thumbnails are frames of those clips (app/*.jpg).
+   The left column is the copy, with the 52 hours as the one big number. */
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{width:1080px;height:1350px;background:#0d0d0d;overflow:hidden}
 body{font-family:'Barlow',sans-serif;color:#fff;position:relative}
-.ph{position:absolute;inset:0;background:#0d0d0d url(photos/step1.jpg) center top/1080px 1350px;filter:saturate(.85) contrast(1.06)}
-
-.sh{position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,13,13,.92) 0%,rgba(13,13,13,.55) 22%,rgba(13,13,13,0) 36%,rgba(13,13,13,0) 68%,rgba(13,13,13,.55) 80%,#0d0d0d 93%,#0d0d0d 100%)}
+.glow{position:absolute;right:-120px;top:330px;width:760px;height:760px;background:radial-gradient(closest-side,rgba(212,175,55,.16),rgba(212,175,55,0));}
 .top{position:absolute;left:64px;top:56px;right:64px;display:flex;justify-content:space-between;align-items:center}
 .step{font-family:'Barlow Condensed';font-weight:800;font-size:23px;letter-spacing:.3em;text-transform:uppercase;color:#c8a858}
 .wm{font-family:'Barlow Condensed';font-weight:900;font-size:25px;letter-spacing:.12em;text-transform:uppercase}
 .wm span{color:#c8a858}
-h1{position:absolute;left:64px;top:104px;right:64px;font-family:'Barlow Condensed';font-weight:900;font-size:104px;line-height:.9;text-transform:uppercase;letter-spacing:.005em;text-shadow:0 8px 50px rgba(0,0,0,.6)}
+h1{position:absolute;left:64px;top:104px;right:64px;font-family:'Barlow Condensed';font-weight:900;font-size:100px;line-height:.9;text-transform:uppercase;letter-spacing:.005em}
 h1 span{color:#c8a858}
-.low{position:absolute;left:64px;right:64px;bottom:140px}
-.p{font-size:30px;line-height:1.3;font-weight:500;max-width:860px;color:rgba(255,255,255,.95);text-shadow:0 2px 14px rgba(0,0,0,.9),0 0 3px rgba(0,0,0,.6)}
-.chips{margin-top:24px;display:flex;flex-wrap:wrap;gap:10px}
-.chips span{display:block;flex:1 1 30%;padding:14px 18px 13px;border:1.5px solid rgba(200,168,88,.85);border-radius:4px;background:rgba(13,13,13,.6)}
-.chips.n2 span,.chips.n4 span{flex-basis:44%}
-.chips b{display:block;font-family:'Barlow Condensed';font-weight:800;font-size:27px;line-height:1;letter-spacing:.08em;text-transform:uppercase;color:#c8a858;white-space:nowrap}
-.chips i{display:block;font-style:normal;margin-top:6px;font-size:22px;line-height:1.25;color:rgba(255,255,255,.9)}
+
+/* left column: the copy */
+.copy{position:absolute;left:64px;top:430px;width:440px}
+.p{font-size:30px;line-height:1.3;font-weight:500;color:rgba(255,255,255,.95)}
+.stat{margin-top:46px}
+.stat .l{font-family:'Barlow Condensed';font-weight:800;font-size:25px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.7)}
+.stat .n{font-family:'Barlow Condensed';font-weight:900;font-size:124px;line-height:.92;white-space:nowrap;text-transform:uppercase;color:#c8a858;letter-spacing:-.005em}
+.stat .c{margin-top:8px;font-size:28px;line-height:1.3;font-weight:500;color:#fff}
+.tiles{margin-top:56px;display:grid;gap:10px}
+.tiles span{display:block;padding:13px 16px 12px;border:1.5px solid rgba(200,168,88,.85);border-radius:4px;background:rgba(13,13,13,.6)}
+.tiles b{display:block;font-family:'Barlow Condensed';font-weight:800;font-size:27px;line-height:1;letter-spacing:.08em;text-transform:uppercase;color:#c8a858;white-space:nowrap}
+.tiles i{display:block;font-style:normal;margin-top:6px;font-size:22px;line-height:1.25;color:rgba(255,255,255,.9)}
+
+/* right column: the phone */
+.phone{position:absolute;left:548px;top:430px;width:468px;height:900px;border-radius:64px 64px 0 0;background:#1a1a1d;padding:11px 11px 0;box-shadow:0 0 0 2px #2a2a2f,0 40px 90px -30px rgba(0,0,0,.9),0 0 60px -10px rgba(212,175,55,.18);overflow:hidden}
+.screen{height:100%;border-radius:54px 54px 0 0;background:#0a0a0a;position:relative;overflow:hidden;padding:0 18px}
+.island{position:absolute;left:50%;top:12px;width:112px;height:32px;margin-left:-56px;border-radius:20px;background:#000}
+.status{height:62px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 22px 6px;font-weight:600;font-size:19px;color:#fff}
+.sess{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.02);border-radius:26px;padding:16px 14px 14px;margin-top:6px}
+.sh{display:flex;justify-content:space-between;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.42);padding:0 4px}
+.cards{margin-top:14px;display:grid;gap:11px}
+.card{display:flex;align-items:center;gap:12px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.02);border-radius:22px;padding:15px 13px 15px 14px;min-height:122px}
+.card.start{border-color:rgba(239,68,68,.28);background:rgba(239,68,68,.045)}
+.ck{flex:none;width:32px;height:32px;border-radius:50%;border:2px solid rgba(255,255,255,.25)}
+.tx{flex:1;min-width:0}
+.tt{font-size:21px;line-height:1.15;font-weight:600;color:#F5F4EF}
+.bd{display:inline-block;vertical-align:2px;margin-right:6px;border-radius:4px;padding:2px 6px;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.bd.red{background:rgba(239,68,68,.92);color:#fff}
+.bd.gold{background:rgba(212,175,55,.92);color:#000}
+.chip{display:inline-block;margin-top:9px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);border-radius:999px;padding:3px 10px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8a8a92;white-space:nowrap}
+.th{flex:none;position:relative;width:96px;height:96px;border-radius:14px;overflow:hidden;background:#000}
+.th img{width:100%;height:100%;object-fit:cover;display:block}
+.th:after{content:"";position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:rgba(0,0,0,.55);border:1.5px solid rgba(255,255,255,.7)}
+.th:before{content:"";position:absolute;left:50%;top:50%;margin:-7px 0 0 -4px;border-left:11px solid #fff;border-top:7px solid transparent;border-bottom:7px solid transparent;z-index:2}
+.fade{position:absolute;left:0;right:0;bottom:0;height:150px;background:linear-gradient(180deg,rgba(13,13,13,0),#0d0d0d 85%)}
+
 .swipe{position:absolute;right:64px;bottom:60px;font-family:'Barlow Condensed';font-weight:800;font-size:22px;letter-spacing:.28em;text-transform:uppercase;display:flex;align-items:center;gap:12px}
 .swipe i{display:block;width:40px;height:2px;background:#c8a858;position:relative}
 .swipe i:after{content:"";position:absolute;right:0;top:-6px;width:12px;height:12px;border-top:2px solid #c8a858;border-right:2px solid #c8a858;transform:rotate(45deg)}
 .handle{position:absolute;left:64px;bottom:60px;font-weight:700;font-size:22px;letter-spacing:.18em;text-transform:uppercase}
 .handle:after{content:"";display:block;height:2px;width:100%;background:#c8a858;margin-top:6px}
 </style>
-<div class="ph"></div><div class="sh"></div>
+<div class="glow"></div>
 <div class="top"><div class="step">What we'd do, 01 of 05</div><div class="wm">Strive <span>Elite</span></div></div>
 <h1>First, we'd build<br>their week <span>outside<br>team training.</span></h1>
-<div class="low"><p class="p">Team practice trains the whole team. This trains what your player specifically needs to grow. Four extra hours a week is 52 hours in three months that the kid next to them never puts in.</p><div class="chips n3"><span><b>The Week</b><i>Built around one player, every Monday.</i></span><span><b>Extra Work</b><i>More sessions when they want more.</i></span><span><b>Pick Up Where You Left Off</b><i>A break doesn't cost you.</i></span></div></div>
+
+<div class="copy">
+  <p class="p">Team practice trains the whole team. This trains what your player specifically needs to grow.</p>
+  <div class="stat">
+    <div class="l">Four extra hours a week is</div>
+    <div class="n">52 hours</div>
+    <p class="c">in three months that the kid next to them never puts in.</p>
+  </div>
+  <div class="tiles">
+    <span><b>The Week</b><i>Built around one player, every Monday.</i></span>
+    <span><b>Extra Work</b><i>More sessions when they want more.</i></span>
+    <span><b>Pick Up Where You Left Off</b><i>A break doesn't cost you.</i></span>
+  </div>
+</div>
+
+<div class="phone"><div class="screen">
+  <div class="island"></div>
+  <div class="status"><span>9:41</span><span>5G &nbsp;▮▮▮</span></div>
+  <div class="sess">
+    <div class="sh"><span>Today · Session 2 of 4</span><span>0/5 done</span></div>
+    <div class="cards">
+      <div class="card start"><div class="ck"></div><div class="tx"><div class="tt"><span class="bd red">Start here</span><span style="white-space:nowrap">Plyo warm-up:</span> Pogo jumps</div><span class="chip">3 x 15</span></div><div class="th"><img src="app/plyo-pogo-jumps.jpg"></div></div>
+      <div class="card"><div class="ck"></div><div class="tx"><div class="tt">Weak foot tap, pull, push</div><span class="chip">3 x 1 min, rest 30 sec</span></div><div class="th"><img src="app/weak-foot-tap-pull-push.jpg"></div></div>
+      <div class="card"><div class="ck"></div><div class="tx"><div class="tt">2 touch ball mastery variation 1</div><span class="chip">3 x 1 min, rest 30 sec</span></div><div class="th"><img src="app/two-touch-ball-mastery-v1.jpg"></div></div>
+      <div class="card"><div class="ck"></div><div class="tx"><div class="tt">L turn, roll, touch</div><span class="chip">3 x 1 min, rest 30 sec</span></div><div class="th"><img src="app/l-turn-roll-touch.jpg"></div></div>
+      <div class="card"><div class="ck"></div><div class="tx"><div class="tt"><span class="bd gold">Finisher</span>Strength: Front plank</div><span class="chip">3 x 30 sec</span></div></div>
+    </div>
+  </div>
+</div></div>
+<div class="fade" style="top:1170px;height:180px;position:absolute"></div>
+
 <div class="handle">@strivesoccerfc</div><div class="swipe">Next <i></i></div>

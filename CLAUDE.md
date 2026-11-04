@@ -3595,6 +3595,35 @@ commit.
       was pulled back. His screenshot still showed "the director, the
       tryout", so his editor held the earlier export: he uses the
       re-sent recap.png. Sent.
+      THEN (Coach Yinka: "For 'build the week outside of team
+      training' can we use photos of inside the app that you create,
+      be creative for the layout. But something easy to digest that
+      shows a session example. Pick your best session"): SLIDE 2
+      (step1) IS NOW THE APP, not a photo of him. The headline stays;
+      the right column is a phone showing the app's real session
+      screen as TodaySession.tsx draws it (Today . Session 2 of 4,
+      0/5 done, the red Start here badge on the plyo warm-up, the
+      gold Finisher badge, the reps chip, a round check on every
+      card) in the app's own colours (ink black, gold D4AF37, bone).
+      THE SESSION, my pick, every line a real bank drill with its
+      real reps (pulled read-only from elite_drills, no player data):
+      Plyo warm-up: Pogo jumps 3 x 15; Weak foot tap, pull, push 3 x 1
+      min, rest 30 sec; 2 touch ball mastery variation 1 (same reps);
+      L turn, roll, touch (same reps); Strength: Front plank 3 x 30
+      sec. The thumbnails are frames of the real drill clips
+      (marketing/announcement/offer-post/app/*.jpg, square crops of
+      public/drills); they stand in for the video the app plays under
+      each card, and the descriptions are left off so the card reads
+      at a glance. The left column: "Team practice trains the whole
+      team. This trains what your player specifically needs to grow."
+      then the 52 HOURS as the one big gold number ("Four extra
+      hours a week is 52 hours in three months that the kid next to
+      them never puts in."), then the three tiles. No total session
+      time is shown (the bank minutes add to 23, not the 40 minutes
+      the old launch carousel said). The studio portrait is out of
+      the carousel (stays in photos/src); its composition line and
+      photos/step1.jpg are removed from compose-photos.py. Preview
+      strip rebuilt. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

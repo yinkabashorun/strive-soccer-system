@@ -3369,6 +3369,17 @@ commit.
       version in strive-elite-offer-post.md. Supersedes the Oct 25
       "3 months for $1,350" proposal. Stripe needs both prices (the
       $350 standard price is still there). Sent, not posted.
+      THEN (Coach Yinka, on step 1: "Use different picture of me
+      here"): the NVA strike photo is OUT of step 1. Two photos of him
+      were left unused in photos/src: the studio portrait in the black
+      NVA kit (arms crossed, grey backdrop) and the standing field shot
+      in the white. STEP 1 IS NOW THE STUDIO PORTRAIT, my pick: the
+      cleanest, most premium frame of the set, the grey backdrop graded
+      down (brightness .72, contrast 1.18 in compose-photos.py) so it
+      sits with the black slides, face in the band under the headline.
+      The standing shot rendered beside it as step1-standing.png
+      (step1-standing.html, photos/step1-standing.jpg) for him to pick;
+      the strike photo stays in src. Preview strip rebuilt. Both sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

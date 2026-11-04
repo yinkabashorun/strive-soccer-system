@@ -6,8 +6,9 @@
 # of the space above our head."
 from PIL import Image, ImageFilter, ImageEnhance
 S="photos/src/"; F=220
-def comp(src,k,head,target,out,canvas=(1080,1350),mirror=False,band_bright=.8):
+def comp(src,k,head,target,out,canvas=(1080,1350),mirror=False,band_bright=.8,grade=None):
     im=Image.open(S+src).convert("RGB")
+    if grade: im=ImageEnhance.Contrast(ImageEnhance.Brightness(im).enhance(grade[0])).enhance(grade[1])
     if mirror: im=im.transpose(Image.FLIP_LEFT_RIGHT)
     im=im.resize((round(im.width*k),round(im.height*k)),Image.LANCZOS)
     x=round(target[0]-head[0]*k); y=round(target[1]-head[1]*k)
@@ -25,7 +26,8 @@ def comp(src,k,head,target,out,canvas=(1080,1350),mirror=False,band_bright=.8):
         c.paste(im,(x,y))
     if out: c.save(out,quality=92)
     return c
-comp("yinka-nva-strike.jpg",1.5,(590,300),(600,500),"photos/step1.jpg")
+comp("yinka-nva-studio.jpg",1.3,(609,289),(600,535),"photos/step1.jpg",grade=(.72,1.18))  # step 1: the studio portrait, his "different picture" Nov 4; the grey backdrop graded down toward brand black
+comp("yinka-nva-standing.jpg",1.5,(566,276),(620,500),"photos/step1-standing.jpg")  # the other option offered
 comp("gary-armenia-u19.jpg",1.3,(780,470),(700,490),"photos/step2.jpg")
 comp("gary-armenia-u16.jpg",1.5,(575,160),(620,510),"photos/step3.jpg")
 comp("gary-ecnl-captain.jpg",1.6,(340,95),(430,490),"photos/step4.jpg")

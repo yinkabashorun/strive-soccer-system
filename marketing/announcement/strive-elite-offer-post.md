@@ -73,9 +73,16 @@ the $80-rate stack as the anchor, the promise on its own slide)
 
 Order: cover, step1, step2, step3, step4, step5, recap, promise, costdrop,
 close (PNG per name; preview strip carousel-preview.png). Each step slide
-is one full-frame image from Strive's own footage (public/drills frames:
+is one full-frame photo of the two coaches (Coach Yinka's own photos, Nov
+4, originals in photos/src): step 1 Coach Yinka striking the ball in the
+NVA white; step 2 Gary for Armenia U19; step 3 Gary at seven for Armenia
+U16, ball at his feet; step 4 Gary with the captain's armband and the ECNL
+patch; step 5 two panels, Coach Yinka in the college lineup at 27 beside
+Gary in the Fortuna Koln 8; the close is Coach Yinka's Gainesville
+celebration. The drill-bank frames and the Oct 4 shoot photos are out.
+(Earlier cut: one full-frame image from Strive's own footage (public/drills frames:
 juggling thighs high, the cross, weak foot tap pull push, the 15 yard
-sprint; Gary's Fortuna Koln photo on step 5), one headline, one sentence,
+sprint; Gary's Fortuna Koln photo on step 5), one headline, one sentence,)
 the item names as gold-outlined chips (Coach Yinka, Nov 4: "Would Nike
 post a layout like this?" on the first text-only cut). Each is half
 problem, half what we built, answering the cover's question in

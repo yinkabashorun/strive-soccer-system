@@ -61,13 +61,8 @@ by our own retention curve.
 | Weak foot | weak-foot/strive-weak-foot-4-drills.mp4 | 21.9 s | NO WALL NEEDED / 4 WEAK FOOT DRILLS FOR YOUR DRIVEWAY | Tap pull push; Outside pull inside pull; Pop and settle; Pop and juggle |
 | Juggling ladder | juggling-ladder/strive-juggling-ladder-7-levels.mp4 | 24.1 s | THE JUGGLING LADDER / CAN YOUR PLAYER PASS LEVEL 7? | One touch; Two touches each foot; One, two; Laces, inside; Thigh; Thighs, laces; Head it up |
 | Speed | speed/strive-speed-5-drills.mp4 | 24.7 s | SPEED / 5 DRILLS FOR A FASTER FIRST STEP | The cross (whole clip, Coach Yinka's call Nov 4); Kneel and drive; Push-up start; Drop shuffle sprint; Zigzag sprint |
-| Explosive | explosive/strive-explosive-5-jumps.mp4 | 22.5 s | EXPLOSIVE FIRST STEP / 5 JUMPS. NO GYM. | Pogo; Lateral hops; Broad jumps; Squat jumps; Bulgarian split jumps |
+| Explosive | explosive/strive-explosive-5-jumps.mp4 | 22.5 s | EXPLOSIVE FIRST STEP / 5 JUMPS. | Pogo; Lateral hops; Broad jumps; Squat jumps; Bulgarian split jumps |
 | Ball mastery | ball-mastery/strive-ball-mastery-few-yards.mp4 | 14.9 s | NO FIELD NEEDED / BALL MASTERY IN A FEW YARDS | Two touch v1; Two touch v2; L turn roll touch (Coach Yinka's call Nov 4, "just the first 3": the Neymar feint was another player on a court, the file called juggle-catch is Gary's sole rolls with no bank row, and tap pull push stays with the weak foot reel) |
-
-Flag on Explosive: the clips were filmed in a gym, and the hook says
-"no gym". The jumps need no equipment, which is the point, but if the
-contrast reads wrong, change the hook to "5 JUMPS. NO EQUIPMENT." in
-explosive/plan.json and rebuild (one minute).
 
 ## Captions (Coach Yinka's voice, paste as written or edit)
 
@@ -106,7 +101,7 @@ The whole Speed course, 17 drills in five levels, is in Strive Elite. DM ELITE.
 
 Explosive
 ```
-Five jumps that build an explosive first step. No weights, no gym membership, a few yards of ground.
+Five jumps that build an explosive first step. No weights, a few yards of ground.
 
 Pogo jumps. Lateral hops. Broad jumps. Squat jumps. Bulgarian split jumps. Land soft, leave fast.
 

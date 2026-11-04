@@ -3017,6 +3017,10 @@ commit.
       and the static graphics (the Sept 30 brand look is untouched).
       All five reels rebuilt and re-sent; placements unchanged. SKILL.md
       and the reel README carry the new rule. No player data touched.
+      THEN (Coach Yinka: "And remove the 'no gym' part"): the Explosive
+      hook is "EXPLOSIVE FIRST STEP / 5 JUMPS." (the "NO GYM." line is
+      gone; the clips were filmed in a gym). Caption's "no gym
+      membership" removed too. Rebuilt and re-sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

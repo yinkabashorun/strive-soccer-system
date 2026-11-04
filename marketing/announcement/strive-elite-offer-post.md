@@ -70,14 +70,18 @@ DM ELITE.
 way where every single follower I have swipes")
 
 Order: cover.png, problem.png, post.png, promise.png, program.png,
-close.png. Preview strip carousel-preview.png. Photos are the real Oct 4
-shoot (photos/, cropped 4:5 from marketing/ads/strive-elite-2026-10/src/
-photos): the sprint for the cover, the crouched coach for slide 2, the two
-coaches for the close. No stock, no generated images, no alumni.
+close.png. Preview strip carousel-preview.png. PHOTO RULE (Coach Yinka, Nov 4): proof photos only, big group sessions,
+camps, Gary's national team photo, his own story; never the posed Oct 4
+shoot shots. Slides 2 and 6 still carry shoot photos until his files
+arrive and are then rebuilt. No stock, no generated images, no alumni.
 
-1. cover: the promise IS the hook. "IF THEY'RE NOT SHOCKED IN 90 DAYS,
-   YOU DON'T PAY." over the sprinting player, eyebrow "For ECNL and MLS
-   NEXT players", a Swipe cue.
+1. cover: Coach Yinka's hook (Nov 4). "We asked ourselves one question.
+   If a parent paid us $100,000 to get their player into a pro academy,
+   what would we do? Then we put all of it into one program. Strive
+   Elite." Eyebrow "For ECNL and MLS NEXT players", "Swipe to see
+   inside". Photo slot photos/hero.jpg (a big group session or camp
+   photo, his to send); brand black until then. The earlier promise
+   hook moved to slide 4 only.
 2. problem: the /demo headline "Team training 3-4x a week is not close to
    enough." then "The next level is decided in the hours between
    practices ... That's the part nobody coaches. So we built the thing

@@ -73,7 +73,12 @@ the $80-rate stack as the anchor, the promise on its own slide)
 
 Order: cover, step1, step2, step3, step4, step5, recap, promise, costdrop,
 close (PNG per name; preview strip carousel-preview.png). Each step slide
-is half problem, half what we built, answering the cover's question in
+is one full-frame image from Strive's own footage (public/drills frames:
+juggling thighs high, the cross, weak foot tap pull push, the 15 yard
+sprint; Gary's Fortuna Koln photo on step 5), one headline, one sentence,
+the item names as gold-outlined chips (Coach Yinka, Nov 4: "Would Nike
+post a layout like this?" on the first text-only cut). Each is half
+problem, half what we built, answering the cover's question in
 order: 01 First, we'd build their week ourselves (The Week, Extra Work,
 Pick Up Where You Left Off); 02 Then we'd build the body (Strength, Speed,
 Nutrition Guide); 03 Then we'd sharpen the weapons (Weak Foot, First

@@ -5,6 +5,10 @@ file is the record. Coach Yinka's direction Nov 1: the post shows the
 VALUE added to Strive Elite, not that it is open (that was announced).
 One block per piece of value, short, easy to digest, no course count.
 Nothing posted until he says so.
+COPY RULE (Coach Yinka, Nov 4): every line under a name says what the
+player GETS, never a drill count or a level count ("no one cares that
+it's 8 drills, both feet"). Keep It Up is called First Touch on the
+post; Finishing in the Box is Scoring Goals.
 
 ## The post
 
@@ -12,19 +16,19 @@ Nothing posted until he says so.
 We added a lot to Strive Elite this month. Every member gets all of it.
 
 STRENGTH
-Core, hips and legs, no equipment. 17 filmed moves in 5 levels. Harder to knock off the ball.
+More power on the ball and fewer injuries. Core, hips and legs, no equipment needed.
 
 SPEED
-17 sprint and jump drills in 5 levels. First step, acceleration, top speed.
+A faster first step and a higher top speed. Win the race to every ball.
 
 WEAK FOOT
-8 filmed drills, first touches to wall turns. Both feet, no excuses.
+Shoot, pass and turn with either foot, so your player never has to pass up a chance.
 
-KEEP IT UP
-The juggling ladder. 7 levels, filmed drill by drill.
+FIRST TOUCH
+Everything you need for your first touch, from the first bounce to juggling with every surface.
 
-FINISHING IN THE BOX
-Shooting in the box, first touch to strike. Pick the corner before the touch, strike through, land balanced.
+SCORING GOALS
+Finishing accurately, getting shots off quicker, and mastering heading.
 
 GENERAL NUTRITION GUIDE
 What to eat on a training day and a match day, and how to hydrate. Simple and general, no diets.
@@ -39,7 +43,7 @@ FILM ROOM, EVERY WEEK
 Send your player's game clips. Coach Gary and I break them down and give the drill that fixes it.
 
 MONTHLY 1:1 CALL
-You, your player and your coach, once a month.
+A deep dive into what to improve next and exactly how to work on it.
 
 All included. $249 a month, locked for life, if you join by November 1. $500 after.
 
@@ -51,22 +55,22 @@ DM ELITE.
 ```
 New in Strive Elite, all included.
 
-Strength. 17 moves, 5 levels, no equipment.
-Speed. 17 drills, first step to top speed.
-Weak Foot. 8 drills, both feet.
-Keep It Up. The juggling ladder, 7 levels.
-Finishing in the Box. Shooting, first touch to strike.
+Strength. More power, fewer injuries.
+Speed. A faster first step, win every race.
+Weak Foot. Shoot, pass and turn with either foot.
+First Touch. Everything your first touch needs.
+Scoring Goals. Finish, shoot quicker, win headers.
 General Nutrition Guide. Training day, match day, hydration.
 College Recruiting. The CV, the emails, the tape, the list.
 Academy Recruiting. The ladder, the director, the tryout.
 Film Room. Your clips, broken down every week.
-Monthly 1:1 call with your coach.
+Monthly 1:1 call. A deep dive into what to improve next.
 
 $249 a month locked for life if you join by Nov 1. DM ELITE.
 ```
 
-Flags: the General Nutrition Guide is live (Nov 1). FINISHING IN THE
-BOX was added Nov 4 on Coach Yinka's "cap about it for now": the course
+Flags: the General Nutrition Guide is live (Nov 1). SCORING GOALS (first called Finishing in the
+Box) was added Nov 4 on Coach Yinka's "cap about it for now": the course
 is NOT in the app, no shooting clip has been sent, and the block carries
 no drill count on purpose; it becomes true the day the clips are banked
 and the course is switched on. The Nov 1 date needs his call if the

@@ -3048,6 +3048,24 @@ commit.
       Box course is being filmed; the block stands. Clips arrive with
       their names and beginner / advanced tags, then banked under
       Shooting with the course tick and switched on the same session.
+      THEN (Coach Yinka: "change the name to scoring goals ... Instead
+      of naming it Keep It Up, let's name it First Touch ... No one
+      gives a fuck that it's 8 drills, both feet. It's not the actual
+      value ... revise all that copy"): COPY RULE for every offer
+      piece from here: the line under a name says what the player
+      gets, never a drill or level count. Post re-rendered: Strength
+      "More power. Fewer injuries."; Speed "A faster first step. Win
+      every race."; Weak Foot "Shoot, pass and turn with either
+      foot."; FIRST TOUCH (was Keep It Up on the post; the course in
+      the app is still named Keep It Up, not renamed, his call if it
+      should match) "Everything your first touch needs."; SCORING
+      GOALS (was Finishing in the Box) "Finish, shoot quicker, win
+      headers." (heading is in on his word; the Oct 27 age flag
+      stands); Monthly 1:1 Call "A deep dive into what to improve
+      next."; Nutrition, Film Room, College and Academy lines kept on
+      his "good". Caption rewritten the same way in
+      strive-elite-offer-post.md. Price line still "join by Nov 1",
+      still his. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -3044,6 +3044,10 @@ commit.
       switched on. STILL HIS: the "join by Nov 1" price line is stale
       (today is Nov 4, nothing posted): extend the date or post at
       $500, one line and a re-render. No player data touched.
+      THEN (Coach Yinka: "We are building it"): the Finishing in the
+      Box course is being filmed; the block stands. Clips arrive with
+      their names and beginner / advanced tags, then banked under
+      Shooting with the course tick and switched on the same session.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

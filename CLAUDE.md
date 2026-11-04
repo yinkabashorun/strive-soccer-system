@@ -3118,6 +3118,41 @@ commit.
       Recruiting), "WITH COACH YINKA AND COACH GARY." (Film Room,
       Monthly 1:1 Call). Headline and rows tightened to fit. Sent as a
       proposal; his to keep or change.
+- [x] DECIDED + BUILT Nov 4 2026, THE 90-DAY OFFER (Coach Yinka: "Now
+      it's November 4th so the text at the bottom needs to go with our
+      new irresistible offer ... make it a 3-month program, promise a
+      tangible result ... if you do 75% of what we assign you and
+      teammates and parents aren't coming up to you shocked about how
+      good you've gotten, you don't pay us a single cent and we'll
+      continue working for you until that happens"; then "Option 3";
+      then "send the final slide deck with updated prices ... prices of
+      your choice ... this program is for ECNL and MLS Next players
+      looking to reach the next level. Designed by players who have
+      done just that"): SUPERSEDES the Nov 1 founding window ($249
+      locked for life by Nov 1, now closed) and the Oct 14 2-week proof
+      guarantee as the public promise. STRIVE ELITE IS A 90-DAY PROGRAM
+      with THE 90-DAY PROMISE: put in 75% of the work for 90 days; if
+      the player's teammates and their parents aren't shocked at the
+      difference, the family doesn't pay a cent, and we keep working
+      free until they are. PRICE, MY CALL on his word: $500 a month for
+      90 days (his Oct 12 list price; the $2,320 value stack at his $80
+      rate; Film Room weekly and a monthly call cap families per coach;
+      ECNL and MLS NEXT club fees already sit in that range). THREE
+      SLIDES in marketing/announcement/offer-post/ (post.png with the
+      Option 3 close and "$500 a month, for 90 days."; promise.png;
+      program.png with "ECNL and MLS NEXT players who want the next
+      level. Designed by players who have done just that.", how 90 days
+      run, $500/mo), render.mjs now takes page and output args; the
+      caption in strive-elite-offer-post.md rewritten with the promise
+      and the price and the reasoning recorded there. Sent. STILL HIS
+      TO STAMP before the first family joins: 75% = sessions done as
+      the app counts them (courses untracked); "don't pay a cent" =
+      every month refunded at day 90 on the parent's word; no cap on
+      the free continuation; Stripe still carries the $350 standard
+      price and needs $500. COPY DEBT: /demo offer block still says
+      $249 locked by Nov 1 and $500 from Nov 2 with no promise; the
+      outro's offer block says the same; the ad 5 image and the deck's
+      price slide too. Nothing posted; no player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

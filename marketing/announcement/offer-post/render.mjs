@@ -1,4 +1,4 @@
-// Renders post.html to post.png (1080x1350). usage: node render.mjs
+// Renders a 1080x1350 page to PNG. usage: node render.mjs [page.html] [out.png]  (default post.html -> post.png)
 import { spawn } from "node:child_process";
 import { existsSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -8,6 +8,7 @@ const CHROME = [process.env.CHROME,
   "/opt/pw-browsers/chromium-1194/chrome-linux/chrome"].find((p) => p && existsSync(p));
 if (!CHROME) { console.error("no Chrome found; set CHROME=/path/to/chrome"); process.exit(1); }
 
+const [IN = "post.html", OUT = "post.png"] = process.argv.slice(2);
 const port = 9352, w = 1080, h = 1350;
 const chrome = spawn(CHROME, ["--headless=new", "--no-sandbox", "--disable-gpu", "--hide-scrollbars",
   `--remote-debugging-port=${port}`, `--window-size=${w},${h}`, "about:blank"], { stdio: ["ignore", "ignore", "pipe"] });
@@ -22,10 +23,10 @@ const send = (method, params = {}) => new Promise((ok) => { const i = ++id; pend
 
 await send("Page.enable");
 await send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
-await send("Page.navigate", { url: "file://" + resolve("post.html") });
+await send("Page.navigate", { url: "file://" + resolve(IN) });
 await new Promise((r) => setTimeout(r, 700));
 await send("Runtime.evaluate", { expression: "document.fonts.ready.then(()=>true)", awaitPromise: true });
 const shot = await send("Page.captureScreenshot", { format: "png" });
-writeFileSync("post.png", Buffer.from(shot.result.data, "base64"));
-console.log("wrote post.png");
+writeFileSync(OUT, Buffer.from(shot.result.data, "base64"));
+console.log("wrote " + OUT);
 ws.close(); chrome.kill();

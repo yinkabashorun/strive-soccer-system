@@ -3168,6 +3168,15 @@ commit.
       two coaches, "Your player's first week is waiting.", the price in
       one line, DM "ELITE". Caption is the post caption in
       strive-elite-offer-post.md. Sent, not posted.
+      THEN (Coach Yinka: "don't use those pictures ... use the big
+      group pictures of us training, camps, Gary's national team photo,
+      something from my story. Things like that actually build trust
+      ... give us aura"): PHOTO RULE for the offer and every trust
+      piece from here: proof photos (big group sessions, camps, Gary's
+      national team shot, Coach Yinka's own story), never the posed
+      shoot shots. None of those are in the repo (only the Oct 4 shoot
+      and the private Joseph Igot highlight photo), so the cover, slide
+      2 and the close wait on the photos he sends; slides 3 to 5 stand.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

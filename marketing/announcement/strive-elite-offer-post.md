@@ -71,9 +71,8 @@ we help them do this, then this ... problem, solution ... and then the
 end with a cost drop"; quiz answers: the walk, keep the grid as the recap,
 the $80-rate stack as the anchor, the promise on its own slide)
 
-Order: cover, step1, step2, step3, step4, step5 (the community, added Nov 4:
-"Then we'd put them around greatness.", Gary with the ECNL patch), step6
-(the doors, was step5), recap, promise, costdrop, close (PNG per name; preview strip carousel-preview.png). Each step slide
+Order: cover, step1, step2, step3, step4, step5, recap, promise, costdrop,
+close (the community is a row on the recap, Nov 4, not its own slide) (PNG per name; preview strip carousel-preview.png). Each step slide
 is one full-frame photo of the two coaches (Coach Yinka's own photos, Nov
 4, originals in photos/src): step 1 Coach Yinka striking the ball in the
 NVA white; step 2 Gary for Armenia U19; step 3 Gary at seven for Armenia

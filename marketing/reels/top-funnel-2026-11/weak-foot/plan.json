@@ -39,5 +39,6 @@
     }
   ],
   "fonts": "../fonts",
-  "outro": "../../../outro/strive-elite-outro-9s-vertical-1080x1920.mp4"
+  "outro": "../../../outro/strive-elite-outro-9s-vertical-1080x1920.mp4",
+  "audio_commit": "36849aa"
 }

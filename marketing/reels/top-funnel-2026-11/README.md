@@ -4,10 +4,25 @@ Five reels cut from the drill bank (public/drills, Strive's own filmed
 clips, nothing of the coach's on them), built with the strive-reel skill
 through `montage_reel.py`: hook on screen from frame one, the 01 / 02 /
 03 list building up as each clip lands, the STRIVE ELITE watermark, the
-2.4 s DM "ELITE" end card. 1080x1920, 30 fps. The drill clips are silent
-(Oct 25 rule), so each reel has a silent track until the end swish:
-ADD TRENDING AUDIO IN THE INSTAGRAM APP when posting (never a claimed
-song, Oct 7 rule). Sent to Coach Yinka, not posted.
+2.4 s DM "ELITE" end card. 1080x1920, 30 fps. Sent to Coach Yinka, not
+posted. REBUILT Nov 4 2026 on his two asks: the reels carry the clips'
+ORIGINAL SOUND (the bank files stay muted under the Oct 25 rule; the
+builder pulls each clip from git commit 36849aa, the last before the
+mute) and every overlay sits inside the Instagram / TikTok safe zones
+(x 60 to 920, y 270 to 1360: clear of the top bar, the icon column and
+the caption area; watermark bottom-left above the caption). Trending
+audio still goes on top IN THE INSTAGRAM APP when posting (never a
+claimed song, Oct 7 rule); the clip sound is the bed under it.
+
+## Sound, reel by reel
+
+| Reel | Original sound |
+| --- | --- |
+| Weak foot | all 4 clips (quiet driveway recordings, lifted up to +18 dB) |
+| Juggling ladder | all 7 clips |
+| Speed | NONE: the five sprint clips were encoded silent the day they arrived (Oct 27), no copy with sound exists in the repo. Silent track until the end swish; add audio in the app, or send the original phone files and it rebuilds with them |
+| Explosive | all 5 clips (gym sound) |
+| Ball mastery | 3 of 5: the two-touch pair and L turn; Neymar feint and juggle-and-catch were silent at source |
 
 ## What the research said (Nov 2 2026)
 
@@ -107,4 +122,7 @@ A week built around your player, every drill on video. DM ELITE.
 From each reel folder: `python3 ../../../../.claude/skills/strive-reel/montage_reel.py plan.json`.
 Edit the hook lines, the list names or the clip cuts in plan.json. The
 folder keeps plan.json, spec.json, faces.json, the two .ass files and
-the final MP4; source.mp4 is rebuilt from the bank every time.
+the final MP4; source.mp4 and the audio/ folder are scratch, rebuilt
+from the bank and from git every time (both gitignored). To give a
+segment sound from a file he sends, add `"audio": "path"` to that
+segment in plan.json.

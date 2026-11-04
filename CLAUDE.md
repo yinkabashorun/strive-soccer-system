@@ -3536,6 +3536,13 @@ commit.
       $400 a month." under it, smaller; fine print "Priced at our own
       $80 session rate."; the "twelve private sessions" line is gone.
       THE FINAL ten sent. Not posted.
+      THEN (Coach Yinka: "For the second slide don't darken the image
+      of me"): slide 2 is step1, the studio portrait. The brightness
+      and contrast grade I had put on the photo is OFF (compose-photos.py
+      no longer passes grade for step1), the bottom fade now starts at
+      68% instead of 56% and is lighter, and the sentence carries a
+      stronger text shadow so it still reads over his shirt. The
+      headline fade at the top is unchanged. Preview strip rebuilt. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

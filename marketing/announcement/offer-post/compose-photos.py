@@ -26,7 +26,7 @@ def comp(src,k,head,target,out,canvas=(1080,1350),mirror=False,band_bright=.8,gr
         c.paste(im,(x,y))
     if out: c.save(out,quality=92)
     return c
-comp("yinka-nva-studio.jpg",1.3,(609,289),(540,535),"photos/step1.jpg",grade=(.72,1.18))  # step 1: the studio portrait, his "different picture" Nov 4; the grey backdrop graded down toward brand black
+comp("yinka-nva-studio.jpg",1.3,(609,289),(540,535),"photos/step1.jpg")  # step 1: the studio portrait, his "different picture" Nov 4; the grey backdrop graded down toward brand black
 comp("gary-armenia-u19.jpg",1.3,(780,470),(540,490),"photos/step2.jpg")
 comp("gary-armenia-u16.jpg",1.5,(575,160),(540,510),"photos/step3.jpg")
 comp("yinka-sideline-notes.jpg",1.4,(300,520),(420,500),"photos/step4.jpg")  # step 4: Coach Yinka on the sideline with the notebook, his pick Nov 4; he looks right, so the face sits a touch left of centre and the notebook stays in frame (ECNL photo kept in src)

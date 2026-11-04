@@ -3417,6 +3417,28 @@ commit.
       of centre (x 420) and the frame balances on the pitch he is
       watching; a dead-centre crop pushed the notebook out. Gary's
       ECNL captain photo stays in src. Preview strip rebuilt. Sent.
+      THEN (Coach Yinka: "how can the first page get their attention
+      without all the extra, remove the extra text but keep the coach
+      names. The promise also needs to be worded better, rn it speaks
+      to the parent and player in the same sentence, and let's call it
+      a guarantee. On that slide and the last slide. Do all this then
+      send final slideshow"): COVER cut to the question and the two
+      coach tags: the ECNL eyebrow, "We asked ourselves one question"
+      and "Then we put all of it into one program. Strive Elite." are
+      gone; the question grew to 100 px; the Strive Elite wordmark,
+      handle and Swipe cue stay as the frame. THE 90-DAY GUARANTEE
+      (was promise): every line now speaks to the parent, "Your player
+      does 75% of the work we give them for 90 days." / "If their
+      teammates and their parents aren't coming up to you shocked at
+      the difference, you don't pay us a cent." / "And we keep working
+      with your player, free, until they are."; the fine print
+      unchanged. "Guarantee" replaces "promise" on the close, and for
+      consistency on the cost drop's gold block, the recap's last line,
+      the standalone post, program.png and the caption (the file is
+      still promise.html / promise.png). FINAL SLIDESHOW sent, ten in
+      posting order. Not posted; the paid-in-full price, the guarantee
+      mechanics (75% as sessions done in the app, the day 90 refund,
+      no cap on the free continuation) and Stripe are still his.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

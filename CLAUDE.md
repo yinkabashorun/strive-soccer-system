@@ -3572,6 +3572,12 @@ commit.
       team. This trains what your player specifically needs to grow.
       Four extra hours a week is 52 hours in three months that the kid
       next to them never puts in." Sent.
+      THEN (Coach Yinka: "Swap the athleticism picture with the
+      weapons"): the photos on steps 2 and 3 are swapped in
+      compose-photos.py. Step 2, athleticism, now carries the Armenia
+      U16 photo (Gary in the orange kit, ball at his feet); step 3,
+      the weapons, carries the two players in blue and red. Copy and
+      tiles stay with their slides. Preview strip rebuilt. Both sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

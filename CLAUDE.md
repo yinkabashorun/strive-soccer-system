@@ -3278,6 +3278,18 @@ commit.
       player ready when the moment comes. We never promise a roster
       spot. We make them impossible to ignore." He will send a big
       group session or camp photo for the recap or the close. Sent.
+      THEN (Coach Yinka: "Instead of the body, athleticism. For their
+      week, it's their week outside of team training. Explain how
+      personalized sessions for them to get ahead then do quick math
+      for if they train an extra 4 hours a week than players their
+      age, how much that is after 3 months"): step 2 headline is "Then
+      we'd build ATHLETICISM."; step 1 headline is "First, we'd build
+      their week OUTSIDE TEAM TRAINING." with the line "Personalized
+      sessions, built for one player, so they get ahead on the days the
+      team is off. Four extra hours a week is 52 hours in three months
+      that the kid next to them never put in." (4 h x 13 weeks; the
+      four hours is his figure, the off-season six-session week comes
+      to about four hours, in season about 2.7). Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

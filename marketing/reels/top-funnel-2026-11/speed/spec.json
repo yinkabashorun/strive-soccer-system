@@ -22,22 +22,22 @@
       "text": "KNEEL AND DRIVE"
     },
     {
-      "start": 4.0,
+      "start": 3.9,
       "num": "02",
       "text": "PUSH-UP START"
     },
     {
-      "start": 7.3,
+      "start": 6.6,
       "num": "03",
       "text": "DROP, SHUFFLE, SPRINT"
     },
     {
-      "start": 11.3,
+      "start": 11.0,
       "num": "04",
       "text": "ZIGZAG SPRINT"
     },
     {
-      "start": 15.3,
+      "start": 14.5,
       "num": "05",
       "text": "THE CROSS"
     }
@@ -46,5 +46,6 @@
   "watermark": true,
   "endcard": true,
   "captions": [],
-  "list_end": 19.4
+  "list_end": 18.0,
+  "loudness": -16
 }

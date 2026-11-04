@@ -46,5 +46,6 @@
   "watermark": true,
   "endcard": true,
   "captions": [],
-  "list_end": 20.1
+  "list_end": 20.1,
+  "loudness": -16
 }

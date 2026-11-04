@@ -22,6 +22,14 @@ Spec keys (see SKILL.md for the rules behind them):
   endcard        true = 2.4 s end card with DM US "ELITE" and the outro swish
   captions       [] (default). Only filled from lines the coach SENT, never guessed.
                  [{"start":..,"end":..,"text":".."}]; gold with {g}..{/g}.
+  loudness       integrated loudness target in LUFS (default -14, speech; a
+                 montage of ambient drill sound uses -16). Two-pass, linear.
+
+Every overlay sits inside the SAFE box: clear of the Instagram and TikTok
+top bar, the right-hand icon column and the caption / handle area at the
+bottom (Coach Yinka, Nov 4 2026: "make sure text placement makes sense for
+Instagram and TikTok"). The watermark sits bottom-left just above the
+caption area, where a handle normally reads.
 """
 import json, subprocess, sys, re, os
 
@@ -39,6 +47,14 @@ if not FF:
 SRC, OUT, FONTS, OUTRO = P("src"), P("out"), P("fonts"), P("outro")
 GOLD = "&H0058A8C8"; WHITE = "&H00FFFFFF"; BLACK = "&H000D0D0D"; DIM = "&H00D9D9D9"
 MARGIN = 24
+# Social safe box on the 1080x1920 canvas. Instagram Reels and TikTok draw
+# their own UI over the top ~250 px, a column of icons down the right edge
+# (x > ~950 from mid-height down) and the handle, caption and audio line
+# over the bottom ~450 px. Text and the list stay inside this box; the
+# watermark takes the strip just under it, bottom-left.
+SAFE_L, SAFE_R, SAFE_T, SAFE_B = 60, 920, 270, 1360
+SAFE_CX = (SAFE_L + SAFE_R) // 2
+WM_Y = 1440   # baseline of STRIVE ELITE; the sub line sits under it, above the caption area
 
 def duration(path):
     r = subprocess.run([FF, "-hide_banner", "-i", path], capture_output=True, text=True).stderr
@@ -63,7 +79,9 @@ XFADE = 0.3
 
 faces = json.load(open(P("faces"))) if spec.get("faces") and os.path.exists(P("faces")) else []
 def face_boxes(t0, t1):
-    return [f["face"] for f in faces if t0 <= f["t"] <= t1 and f["face"] and f["face"][2] >= 150]
+    # YuNet boxes on a head-to-toe shot run about 90 to 150 px wide; anything
+    # under 60 px is a bystander or noise, not the player.
+    return [f["face"] for f in faces if t0 <= f["t"] <= t1 and f["face"] and f["face"][2] >= 60]
 def clear(rect, t0, t1):
     # Every face sample in the window must miss the rectangle (plus margin).
     # Checked box by box, not as one union, so a face that roams left then
@@ -74,6 +92,14 @@ def clear(rect, t0, t1):
         if not (x1 <= fx0 or x0 >= fx1 or y1 <= fy0 or y0 >= fy1):
             return False
     return True
+def hits(rect, t0, t1):
+    # How many face samples in the window the rectangle (plus margin) touches.
+    x0, y0, x1, y1 = rect; n = 0
+    for bx, by, bw, bh in face_boxes(t0, t1):
+        fx0, fy0, fx1, fy1 = bx - MARGIN, by - MARGIN, bx + bw + MARGIN, by + bh + MARGIN
+        if not (x1 <= fx0 or x0 >= fx1 or y1 <= fy0 or y0 >= fy1):
+            n += 1
+    return n
 def pick(cands, w, h, t0, t1, label):
     for x, y in cands:
         if clear((x, y, x + w, y + h), t0, t1):
@@ -85,14 +111,18 @@ def gold(text): return text.replace("{g}", "{\\c" + GOLD + "}").replace("{/g}", 
 
 ev = []
 if hook:
-    hx, hy = pick([(60, 1000), (60, 260), (60, 1250)], 960, 300, 0, hook["end"], "hook")
+    # Lower middle first (faces live in the upper half of a filmed drill),
+    # then the top of the safe box, then the middle. Centred on the safe
+    # box, not the canvas, so the right-hand icon column never touches it.
+    HW, HH = SAFE_R - SAFE_L, 300
+    hx, hy = pick([(SAFE_L, 960), (SAFE_L, SAFE_T + 30), (SAFE_L, 640)], HW, HH, 0, hook["end"], "hook")
     cy = hy + 150
     hook_text = "\\N".join(hook["lines"])
-    ev.append(f"Dialogue: 2,{ts(0)},{ts(hook['end'])},Eyebrow,,0,0,0,,{{\\an5\\pos(540,{cy-120})\\fad(150,200)}}{hook.get('eyebrow','STRIVE SOCCER')}")
-    ev.append(f"Dialogue: 2,{ts(0)},{ts(hook['end'])},Hook,,0,0,0,,{{\\an5\\pos(540,{cy+20})\\fad(150,200)\\fscx96\\fscy96\\t(0,260,\\fscx100\\fscy100)}}{hook_text}")
+    ev.append(f"Dialogue: 2,{ts(0)},{ts(hook['end'])},Eyebrow,,0,0,0,,{{\\an5\\pos({SAFE_CX},{cy-120})\\fad(150,200)}}{hook.get('eyebrow','STRIVE SOCCER')}")
+    ev.append(f"Dialogue: 2,{ts(0)},{ts(hook['end'])},Hook,,0,0,0,,{{\\an5\\pos({SAFE_CX},{cy+20})\\fad(150,200)\\fscx96\\fscy96\\t(0,260,\\fscx100\\fscy100)}}{hook_text}")
 
 for c in spec.get("captions", []):
-    ev.append(f"Dialogue: 3,{ts(c['start'])},{ts(c['end'])},Cap,,0,0,0,,{{\\an5\\pos(540,1470)\\fscx88\\fscy88\\t(0,110,\\fscx104\\fscy104)\\t(110,200,\\fscx100\\fscy100)\\fad(40,60)}}{gold(c['text'])}")
+    ev.append(f"Dialogue: 3,{ts(c['start'])},{ts(c['end'])},Cap,,0,0,0,,{{\\an5\\pos({SAFE_CX},{SAFE_B-70})\\fscx88\\fscy88\\t(0,110,\\fscx104\\fscy104)\\t(110,200,\\fscx100\\fscy100)\\fad(40,60)}}{gold(c['text'])}")
 
 if names and style == "stack":
     # The numbered list builds up and stays. Tries the big size first, then a
@@ -104,18 +134,39 @@ if names and style == "stack":
     # smaller), then number inline with the name (compact, for a top
     # corner the face only grazes). Corners first; lower spots last.
     layouts = [("over", 72, 136), ("over", 60, 104), ("inline", 60, 78), ("inline", 50, 66), ("inline", 46, 60)]
-    spots = [("tl", 40), ("tr", 40), ("tl", 24), ("tr", 24), ("tl", 220), ("tr", 220), ("bl", 1120), ("br", 1120), ("br", 760), ("bl", 760)]
-    for side, y in spots:
+    # Spots inside the safe box: top corners, a little lower, mid-height,
+    # then anchored to the bottom of the box ("bottom" = y so the list ends
+    # at SAFE_B), then right-mid and left-mid. Never past SAFE_R, so the
+    # list clears the icon column, and never under SAFE_T, clear of the top bar.
+    spots = [("tl", SAFE_T + 20), ("tr", SAFE_T + 20), ("tl", SAFE_T + 90), ("tr", SAFE_T + 90), ("tl", 520), ("tr", 520),
+             ("bl", "bottom"), ("br", "bottom"), ("br", 760), ("bl", 760)]
+    for side, y0 in spots:
         for layout, size, step in layouts:
             extra = 5 if layout == "inline" else 0            # "01  " in front
             w = max(width(n["text"], size) + int(0.36 * size * extra) for n in names); h = step * len(names)
-            x = 64 if side.endswith("l") else 1016 - w
+            y = SAFE_B - h if y0 == "bottom" else y0
+            if y < SAFE_T or y + h > SAFE_B:
+                continue
+            x = SAFE_L + 4 if side.endswith("l") else SAFE_R - w
             if clear((x, y, x + w, y + h), t0, t1):
                 placed = (x, y, size, step, w, layout); break
         if placed: break
     if not placed:
-        size, step = 60, 104; w = max(width(n["text"], size) for n in names)
-        placed = (1016 - w, 760, size, step, w, "over"); print("stack: no clear spot, using right-mid")
+        # No spot is clear for the whole list window (a player who roams the
+        # frame for 20 s). Take the spot the face reaches least often, in the
+        # smallest layouts, and say how often; then look at the frames.
+        scored = []
+        for order, (side, y0) in enumerate(spots):
+            for layout, size, step in layouts[2:]:
+                extra = 5 if layout == "inline" else 0
+                w = max(width(n["text"], size) + int(0.36 * size * extra) for n in names); h = step * len(names)
+                y = SAFE_B - h if y0 == "bottom" else y0
+                if y < SAFE_T or y + h > SAFE_B:
+                    continue
+                x = SAFE_L + 4 if side.endswith("l") else SAFE_R - w
+                scored.append((hits((x, y, x + w, y + h), t0, t1), order, (x, y, size, step, w, layout)))
+        n_hits, _, placed = min(scored)
+        print(f"stack: no clear spot, least covered: face reaches it in {n_hits} of {len(face_boxes(t0, t1))} samples")
     x, y, size, step, w, layout = placed
     print(f"stack: ({x},{y}) size {size} {layout}")
     right = x > 540; an = 9 if right else 7; ax = x + w if right else x
@@ -135,14 +186,17 @@ elif names:
         words = n["text"].split(); half = (len(words) + 1) // 2
         l1, l2 = " ".join(words[:half]), " ".join(words[half:])
         w, h = 330, 230
-        x, y = pick([(720, 600), (720, 760), (40, 600), (40, 760), (720, 1150), (40, 1150)], w, h, n["start"], en, f"name {n['num']}")
+        rx = SAFE_R - w
+        x, y = pick([(rx, 600), (rx, 760), (SAFE_L, 600), (SAFE_L, 760), (rx, SAFE_B - h), (SAFE_L, SAFE_B - h)], w, h, n["start"], en, f"name {n['num']}")
         right = x > 540; an = 9 if right else 7; ax = x + w if right else x
         ev.append(f"Dialogue: 4,{ts(n['start'])},{ts(en)},Num,,0,0,0,,{{\\an{an}\\pos({ax},{y})\\fad(120,160)}}{n['num']}")
         ev.append(f"Dialogue: 4,{ts(n['start'])},{ts(en)},Name,,0,0,0,,{{\\an{an}\\pos({ax},{y+40})\\fad(120,160)\\fscx90\\fscy90\\t(0,140,\\fscx100\\fscy100)}}{l1}\\N{l2}")
 
 if spec.get("watermark", True):
-    ev.append(f"Dialogue: 1,{ts(0)},{ts(DUR)},Wm,,0,0,0,,{{\\an3\\pos(1030,1800)}}STRIVE {{\\c{GOLD}}}ELITE")
-    ev.append(f"Dialogue: 1,{ts(0)},{ts(DUR)},WmSub,,0,0,0,,{{\\an3\\pos(1030,1844)}}PERSONALIZED REMOTE TRAINING")
+    # Bottom-left, just above where Instagram and TikTok print the handle and
+    # caption, and well clear of the icon column on the right.
+    ev.append(f"Dialogue: 1,{ts(0)},{ts(DUR)},Wm,,0,0,0,,{{\\an1\\pos({SAFE_L},{WM_Y})}}STRIVE {{\\c{GOLD}}}ELITE")
+    ev.append(f"Dialogue: 1,{ts(0)},{ts(DUR)},WmSub,,0,0,0,,{{\\an1\\pos({SAFE_L},{WM_Y+44})}}PERSONALIZED REMOTE TRAINING")
 
 styles = f"""[Script Info]
 ScriptType: v4.00+
@@ -202,7 +256,21 @@ if "--zoom-only" in sys.argv:
     print("wrote", f"{D}/zoomed.mp4"); sys.exit(0)
 
 main = f"[0:v]{zoom},ass={D}/overlays.ass:fontsdir={FONTS},format=yuv420p[main]"
-audio_main = ("[0:a]loudnorm=I=-14:TP=-1.5:LRA=11,aformat=sample_rates=48000:channel_layouts=stereo" if SRC_AUDIO
+LOUD = spec.get("loudness", -14)
+def loudnorm_pass():
+    """Two-pass loudnorm: measure, then apply one linear gain (LRA target wide
+    so it never falls back to the dynamic mode, which pumps a quiet clip up
+    between touches). A silent track is passed through untouched."""
+    base = f"loudnorm=I={LOUD}:TP=-1.5:LRA=20"
+    r = subprocess.run([FF, "-hide_banner", "-nostats", "-i", SRC, "-vn", "-af", base + ":print_format=json",
+                        "-f", "null", "-"], capture_output=True, text=True).stderr
+    m = json.loads(r[r.rindex("{"):].replace("-inf", "-99"))
+    if float(m["input_i"]) < -70:
+        print("audio: silent source, no normalisation"); return "[0:a]anull"
+    print(f"audio: {float(m['input_i']):.1f} LUFS -> {LOUD} LUFS, linear")
+    return (f"[0:a]{base}:measured_I={m['input_i']}:measured_TP={m['input_tp']}:measured_LRA={m['input_lra']}"
+            f":measured_thresh={m['input_thresh']}:offset={m['target_offset']}:linear=true")
+audio_main = (loudnorm_pass() + ",aformat=sample_rates=48000:channel_layouts=stereo" if SRC_AUDIO
               else f"anullsrc=r=48000:cl=stereo,atrim=0:{DUR},asetpts=PTS-STARTPTS")
 if E:
     off = DUR - XFADE

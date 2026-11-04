@@ -36,24 +36,37 @@ the same day. Follow it exactly; change it only on his word.
   punch-in (6%) when each lands. `"pops"` (one name at a time, two short
   lines) exists for clips with no room for a stack.
 - **Watermark:** STRIVE ELITE (ELITE gold) over PERSONALIZED REMOTE
-  TRAINING, bottom-right, the whole clip. Not the Strive Soccer handle, not
-  the ball mark; he rejected those.
+  TRAINING, bottom-left just above where Instagram and TikTok print the
+  handle and caption (since Nov 4 2026; it was bottom-right, under the
+  icon column), the whole clip. Not the Strive Soccer handle, not the
+  ball mark; he rejected those.
+- **Safe zones (Nov 4 2026, "make sure text placement makes sense for
+  Instagram and TikTok"):** every overlay sits inside x 60 to 920, y 270
+  to 1360 on the 1080x1920 canvas: clear of the top bar, the right-hand
+  icon column and the bottom caption area on both apps, and inside the
+  4:5 feed-preview crop. The constants are at the top of `reel_build.py`
+  (SAFE_L/R/T/B); the hook is centred on the safe box, not the canvas.
 - **End card:** 2.4 s, brand black, STRIVE ELITE, gold rule, PERSONALIZED
   REMOTE TRAINING, DM US "ELITE", thestriveapp.com/demo, 0.3 s crossfade,
   carrying the end swish from `marketing/outro/strive-elite-outro-9s-vertical-1080x1920.mp4`.
-- Speech loudness normalised to -14 LUFS. Output 1080x1920, 30 fps, H.264,
-  AAC, faststart.
+- Loudness normalised two-pass, linear (no pumping between touches): -14
+  LUFS for a talking clip, -16 for a montage of ambient drill sound
+  (`loudness` in the spec). Output 1080x1920, 30 fps, H.264, AAC, faststart.
 
 ## The face rule
 
 Nothing ever covers the player's face. `faces.py` tracks the face with
-OpenCV (Haar frontal, profile as fallback) on the zoom-only pass; the
-builder checks every overlay's on-screen window against the union of face
-boxes in that window plus a 40 px margin and takes the first clear
-candidate position (stack: top-left, top-right, right-mid, left-mid,
-lower-left, lower-right). It prints where each overlay landed; look at
-frames at each point's time before sending. Some clips will not have a
-clean spot; say so rather than covering the face.
+OpenCV YuNet (`models/face_detection_yunet_2023mar.onnx`, kept in this
+folder; it holds the face when the player looks down at the ball, which
+the old Haar cascade lost on every montage reel) on the zoom-only pass;
+the builder checks every overlay's on-screen window box by box against
+the face samples in that window plus a 24 px margin and takes the first
+clear candidate inside the safe box (stack: top-left, top-right, a
+little lower, mid-height, bottom-anchored, right-mid, left-mid). When no
+spot is clear for the whole list window it takes the spot the face
+reaches least often and prints how often. It prints where each overlay
+landed; look at frames at each point's time before sending. Some clips
+will not have a clean spot; say so rather than covering the face.
 
 ## Build
 
@@ -88,8 +101,17 @@ For a reel cut from Strive's own filmed drill clips (public/drills), use
 source.mp4, writes the spec with one list item per clip and our hook
 on screen from frame one (allowed here because nothing of the coach's is
 on these clips), runs the zoom-only pass, the face track and the full
-build. The bank clips are silent, so the builder starts from a silent
-track; Coach Yinka adds trending audio in the Instagram app. Hook rules
+build. The bank clips are silent (Oct 25 rule), but the reels carry the
+clips' ORIGINAL sound (Coach Yinka, Nov 4 2026: "unmute the original
+videos just for the reels"): `"audio_commit": "36849aa"` in the plan
+makes the builder pull each clip from the last commit before the mute
+into a scratch `audio/` folder, level every segment to -18 LUFS (gain
+capped at +18 dB and -1.5 dBTP so a quiet driveway clip does not turn
+to hiss), and the whole reel is normalised once, linearly, to -16 LUFS.
+A segment can name its own `"audio"` file instead (a clip he sends with
+sound); a clip with no sound anywhere gets silence for its length and
+the build log says which. The bank files themselves stay muted. Coach
+Yinka still adds trending audio in the Instagram app on top. Hook rules
 from the Nov 2 research: a number or list promise and a specific
 outcome, on screen inside 1.5 s, a new clip every 3 to 4.5 s, under
 30 s. Plans live under marketing/reels/top-funnel-2026-11/.

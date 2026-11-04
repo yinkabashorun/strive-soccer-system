@@ -2906,6 +2906,48 @@ commit.
       clips were filmed in a gym under a "NO GYM" hook; the alternative
       "NO EQUIPMENT" is one line in plan.json. Sent, not posted. No
       player data touched.
+- [x] REBUILT Nov 4 2026, THE FIVE REELS (Coach Yinka: "Those reels are
+      so gooddd, now can you unmute the original videos just for the
+      reels. And Make sure text placement makes sense for Instagram and
+      TikTok"; then "every reel is good except the speed one isn't
+      clipped correctly, it didn't actually show the drill"): (1) SOUND.
+      The bank files stay muted (Oct 25 rule); the reels carry the clips'
+      original audio, pulled by montage_reel.py from git commit 36849aa
+      (the last before the mute) via "audio_commit" in plan.json, each
+      segment levelled to -18 LUFS (gain capped at +18 dB and -1.5 dBTP;
+      the weak foot driveway clips were recorded at -41 to -45 LUFS and
+      are lifted the full 18 dB), then the whole reel normalised once,
+      two-pass linear, to -16 LUFS (reel_build.py "loudness", -14 stays
+      the default for a talking clip). Weak foot 4 of 4 clips with sound,
+      Juggling 7 of 7, Explosive 5 of 5, Ball mastery 3 of 5 (Neymar
+      feint and juggle-and-catch were silent at source), SPEED 0 of 5:
+      the sprint clips were encoded silent the day they arrived (Oct 27)
+      and no copy with sound exists in the repo; it stays silent until
+      the end swish unless he sends the original phone files (a segment
+      takes "audio": path). Trending audio still goes on top in the
+      Instagram app. (2) SAFE ZONES, now the rule in reel_build.py for
+      every reel: overlays inside x 60 to 920, y 270 to 1360 (clear of
+      the IG / TikTok top bar, right icon column and caption area, and
+      inside the 4:5 feed crop); hook centred on that box; watermark
+      bottom-left just above the caption area (was bottom-right under
+      the icons); captions and pops moved the same way. (3) FACE TRACK
+      REPLACED: with the list pushed below y 270 it landed on two
+      players' heads in the first rebuild because Haar saw 34 of 217
+      faces (it loses a face looking down at the ball); faces.py now
+      runs OpenCV YuNet (model file kept in the skill folder, sha256
+      8f2383e4..., from opencv_zoo) and sees 180 of 180, 207 of 217,
+      198 of 201. The builder takes the first clear spot in the safe box
+      and, when no spot is clear for the whole list window, the spot the
+      face reaches least often, printing the count; on these montages
+      the list ended lower-left beside the legs (weak foot brushes
+      beside his face for a moment at about 10 s, not over it). (4)
+      SPEED RE-CUT by frame: every segment now starts at the move, not
+      the set-up: kneel and drive 0.4 to 4.3 s (the kneel held under the
+      hook, then the drive-out), push-up start 0.6 to 3.3, drop shuffle
+      sprint 2.4 to 6.8, zigzag sprint 3.9 to 7.4 (the run away through
+      the cones), the cross 3.8 to 7.7; 20.8 s. source.mp4 and audio/
+      are gitignored scratch. All five re-sent. SKILL.md and the reel
+      README carry the rules. No player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

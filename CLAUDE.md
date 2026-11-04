@@ -3383,6 +3383,22 @@ commit.
       PICKED (Coach Yinka: "The black armed crossed one"): the studio
       portrait stands as step 1; the standing option's files removed,
       the photo stays in src.
+      THEN (Coach Yinka sent the Armenia U16 team photo: "For the your
+      players first week is waiting use Gary and his national team
+      wearing orange photo crop well ofc and go over the other slides
+      to make sure spacing on everything is premium and works nicely"):
+      the CLOSE now carries the whole Armenia U16 line, Gary number 7
+      in the front row, scaled so the eleven fit the width edge to
+      edge (0.8x, nobody clipped), sky under the eyebrow, the headline
+      over the front row's lower body, the price line under it, DM
+      pill and handle at the bottom; the celebration photo stays in
+      src. The price line cut to two lines ("All included, with the
+      promise."). SPACING PASS over the ten: the PROMISE slide was
+      top-heavy with a dead bottom third, so its type grew (headline
+      132, body 48, note 27) to fill the frame, and its DM pill is
+      replaced by the Next cue (slide 8 of 10; the pill is the close's
+      alone). Cover, the five steps, the recap and the cost drop were
+      checked and left as they were. Preview strip rebuilt. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

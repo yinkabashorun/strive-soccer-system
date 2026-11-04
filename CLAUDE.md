@@ -2959,6 +2959,18 @@ commit.
       been cut at 4.5 s, which ended as the second pop went up. It now
       runs the whole 6.0 s clip: pop, the touches, the second pop, the
       last touch. Weak foot reel 21.9 s. Re-sent.
+      THEN (Coach Yinka: "The Neymar faint is not ball master and it
+      needs to be a vid of Gary like the others"): neymar-feint.mp4 is
+      older footage of a different player on an indoor court; the
+      other three in-place clips in the bank (L turn pullback chop,
+      push pull fake roll, triangle turning) are other players too.
+      Gary's few-yards ball mastery on Strive's own domain is the
+      two-touch pair, L turn roll touch, juggle and catch and his weak
+      foot set, so 04 is now TAP, PULL, PUSH (weak-foot-tap-pull-push,
+      0 to 4.5 s, with its sound); the reel is all Gary, 23.4 s, 4 of
+      5 clips with sound. Caption updated. Re-sent. That clip also
+      opens the weak foot reel; if he wants no overlap, the ball
+      mastery reel runs as four drills (the hook carries no number).
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

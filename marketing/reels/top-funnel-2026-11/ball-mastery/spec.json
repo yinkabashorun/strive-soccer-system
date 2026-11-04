@@ -34,10 +34,10 @@
     {
       "start": 12.5,
       "num": "04",
-      "text": "NEYMAR FEINT"
+      "text": "TAP, PULL, PUSH"
     },
     {
-      "start": 16.5,
+      "start": 17.0,
       "num": "05",
       "text": "JUGGLE AND CATCH"
     }
@@ -46,6 +46,6 @@
   "watermark": true,
   "endcard": true,
   "captions": [],
-  "list_end": 20.1,
+  "list_end": 20.6,
   "loudness": -16
 }

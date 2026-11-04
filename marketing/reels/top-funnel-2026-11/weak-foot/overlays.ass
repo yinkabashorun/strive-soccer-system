@@ -24,9 +24,9 @@ Style: Rule,Barlow Medium,30,&H0058A8C8,&H0058A8C8,&H0058A8C8,&H00000000,0,0,0,0
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 Dialogue: 2,0:00:00.00,0:00:02.20,Eyebrow,,0,0,0,,{\an5\pos(490,990)\fad(150,200)}NO WALL NEEDED
 Dialogue: 2,0:00:00.00,0:00:02.20,Hook,,0,0,0,,{\an5\pos(490,1130)\fad(150,200)\fscx96\fscy96\t(0,260,\fscx100\fscy100)}4 WEAK FOOT DRILLS\NFOR YOUR DRIVEWAY
-Dialogue: 4,0:00:02.30,0:00:17.60,Stack,,0,0,0,,{\an7\pos(64,1120)\fad(120,160)\fs46\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs23\c&H0058A8C8\fsp6}01{\r\fs46}  TAP, PULL, PUSH
-Dialogue: 4,0:00:04.50,0:00:17.60,Stack,,0,0,0,,{\an7\pos(64,1180)\fad(120,160)\fs46\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs23\c&H0058A8C8\fsp6}02{\r\fs46}  OUTSIDE PULL, INSIDE PULL
-Dialogue: 4,0:00:09.00,0:00:17.60,Stack,,0,0,0,,{\an7\pos(64,1240)\fad(120,160)\fs46\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs23\c&H0058A8C8\fsp6}03{\r\fs46}  POP AND SETTLE
-Dialogue: 4,0:00:13.50,0:00:17.60,Stack,,0,0,0,,{\an7\pos(64,1300)\fad(120,160)\fs46\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs23\c&H0058A8C8\fsp6}04{\r\fs46}  POP AND JUGGLE
-Dialogue: 1,0:00:00.00,0:00:18.00,Wm,,0,0,0,,{\an1\pos(60,1440)}STRIVE {\c&H0058A8C8}ELITE
-Dialogue: 1,0:00:00.00,0:00:18.00,WmSub,,0,0,0,,{\an1\pos(60,1484)}PERSONALIZED REMOTE TRAINING
+Dialogue: 4,0:00:02.30,0:00:19.10,Stack,,0,0,0,,{\an7\pos(64,1120)\fad(120,160)\fs46\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs23\c&H0058A8C8\fsp6}01{\r\fs46}  TAP, PULL, PUSH
+Dialogue: 4,0:00:04.50,0:00:19.10,Stack,,0,0,0,,{\an7\pos(64,1180)\fad(120,160)\fs46\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs23\c&H0058A8C8\fsp6}02{\r\fs46}  OUTSIDE PULL, INSIDE PULL
+Dialogue: 4,0:00:09.00,0:00:19.10,Stack,,0,0,0,,{\an7\pos(64,1240)\fad(120,160)\fs46\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs23\c&H0058A8C8\fsp6}03{\r\fs46}  POP AND SETTLE
+Dialogue: 4,0:00:13.50,0:00:19.10,Stack,,0,0,0,,{\an7\pos(64,1300)\fad(120,160)\fs46\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs23\c&H0058A8C8\fsp6}04{\r\fs46}  POP AND JUGGLE
+Dialogue: 1,0:00:00.00,0:00:19.50,Wm,,0,0,0,,{\an1\pos(60,1440)}STRIVE {\c&H0058A8C8}ELITE
+Dialogue: 1,0:00:00.00,0:00:19.50,WmSub,,0,0,0,,{\an1\pos(60,1484)}PERSONALIZED REMOTE TRAINING

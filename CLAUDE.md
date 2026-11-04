@@ -3525,6 +3525,17 @@ commit.
       "Priced at our own $80 session rate. $985 is the price of twelve
       private sessions." The itemised table is gone from the slide
       and lives in strive-elite-offer-post.md. Sent.
+      THEN (Coach Yinka: "When you say 12 private sessions that
+      doesn't mean much but say the price of a single 1:1 session once
+      a week for 3 months. Obv word it better. And see how you can
+      improve that slide with context and copy overall. Then send the
+      final"): under the $985 the line is now "The price of one
+      private session a week for three months. Except this is all of
+      it, every week, from both of us." (12 weeks x $80 = $960), set
+      as the slide's main line; "One payment, with the guarantee. Or
+      $400 a month." under it, smaller; fine print "Priced at our own
+      $80 session rate."; the "twelve private sessions" line is gone.
+      THE FINAL ten sent. Not posted.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

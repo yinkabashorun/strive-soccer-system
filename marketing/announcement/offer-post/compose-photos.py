@@ -26,10 +26,10 @@ def comp(src,k,head,target,out,canvas=(1080,1350),mirror=False,band_bright=.8,gr
         c.paste(im,(x,y))
     if out: c.save(out,quality=92)
     return c
-comp("yinka-nva-studio.jpg",1.3,(609,289),(600,535),"photos/step1.jpg",grade=(.72,1.18))  # step 1: the studio portrait, his "different picture" Nov 4; the grey backdrop graded down toward brand black
-comp("gary-armenia-u19.jpg",1.3,(780,470),(700,490),"photos/step2.jpg")
-comp("gary-armenia-u16.jpg",1.5,(575,160),(620,510),"photos/step3.jpg")
-comp("gary-ecnl-captain.jpg",1.6,(340,95),(430,490),"photos/step4.jpg")
+comp("yinka-nva-studio.jpg",1.3,(609,289),(540,535),"photos/step1.jpg",grade=(.72,1.18))  # step 1: the studio portrait, his "different picture" Nov 4; the grey backdrop graded down toward brand black
+comp("gary-armenia-u19.jpg",1.3,(780,470),(540,490),"photos/step2.jpg")
+comp("gary-armenia-u16.jpg",1.5,(575,160),(540,510),"photos/step3.jpg")
+comp("gary-ecnl-captain.jpg",1.6,(340,95),(540,490),"photos/step4.jpg")
 l=comp("yinka-college-lineup.jpg",0.9,(540,270),(270,510),None,(540,1350))
 r=comp("gary-armenia-u19-lineup.jpg",0.72,(587,703),(270,510),None,(540,1350))  # Gary in the middle of the Armenia line, his pick Nov 4 (Koln photo kept in src)
 c=Image.new("RGB",(1080,1350),(13,13,13)); c.paste(l,(0,0)); c.paste(r,(540,0)); c.save("photos/step5.jpg",quality=92)

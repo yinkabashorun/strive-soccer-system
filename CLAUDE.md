@@ -3399,6 +3399,15 @@ commit.
       replaced by the Next cue (slide 8 of 10; the pill is the close's
       alone). Cover, the five steps, the recap and the cost drop were
       checked and left as they were. Preview strip rebuilt. Sent.
+      THEN (Coach Yinka: "Make sure solo pics the coach is centered,
+      as well. Then send final carousel"): on steps 1 to 4 the coach's
+      face now sits on the centre line (x 540) in compose-photos.py;
+      step 5 (two panels) and the close (the team) unchanged. THE FINAL
+      CAROUSEL, ten slides in posting order, sent as one set: cover,
+      step1 to step5, recap, promise, costdrop, close, with the caption
+      in marketing/announcement/strive-elite-offer-post.md. Not posted;
+      the paid-in-full price, the promise mechanics and Stripe are
+      still his.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

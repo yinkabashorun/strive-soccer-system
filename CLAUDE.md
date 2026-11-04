@@ -3153,6 +3153,21 @@ commit.
       $249 locked by Nov 1 and $500 from Nov 2 with no promise; the
       outro's offer block says the same; the ad 5 image and the deck's
       price slide too. Nothing posted; no player data touched.
+      THEN (Coach Yinka: "take what you know about content, about hooks
+      ... the beauty and the layout and the imagery ... package this in
+      a way where every single follower I have swipes"): SIX-SLIDE
+      CAROUSEL in marketing/announcement/offer-post/ (cover, problem,
+      post, promise, program, close; preview strip
+      carousel-preview.png; photos/ are 4:5 crops of the real Oct 4
+      shoot, no stock or generated images, no alumni). Cover hook is
+      the promise itself over the sprinting player ("IF THEY'RE NOT
+      SHOCKED IN 90 DAYS, YOU DON'T PAY.", eyebrow "For ECNL and MLS
+      NEXT players", Swipe cue); slide 2 is the /demo headline over the
+      crouched coach with Gary's "that's the part nobody coaches" line;
+      3 to 5 are the three approved slides unchanged; the close is the
+      two coaches, "Your player's first week is waiting.", the price in
+      one line, DM "ELITE". Caption is the post caption in
+      strive-elite-offer-post.md. Sent, not posted.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

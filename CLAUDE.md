@@ -3784,6 +3784,22 @@ commit.
       them. Saved in strive-elite-offer-post.md. Nothing posted.
       CORRECTION: the rewritten caption is 525 characters, not 650 (the
       first line is exactly 125, so it shows whole before the "more" cut).
+      THEN (Coach Yinka: "Okay send final post"): ALL TEN SLIDES
+      RE-RENDERED from source so nothing stale shipped, checked as one
+      sheet, and sent in posting order: cover, step1 (the app session,
+      52 hours), step2 (athleticism), step3 (the weapons), step4 (watch
+      every game), step5 (the doors), recap, promise (the 90-Day
+      Guarantee), costdrop (the price, $7,920 struck, $985 or $400 a
+      month), close (the Armenia U16 team). With the 525-character
+      caption that opens on the guarantee. NOT POSTED. Still his
+      before the first family joins at this price: what the 75% counts
+      (proposed: sessions done as the app counts them), what "don't pay
+      a cent" means at $985 and at $400 a month (proposed: refunded at
+      day 90, every dollar, on the parent's word), who decides the
+      "shocked" test (proposed: the parent), the no-cap free
+      continuation, Stripe prices $985 and $400 with the $350 removed,
+      and the Instagram DM reply for ELITE. The slide 2 sets and reps
+      are tougher than the bank's; the bank still shows the old ones.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

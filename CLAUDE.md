@@ -3637,6 +3637,20 @@ commit.
       public/drills; the finisher has no thumbnail because its clip
       is hosted on Manus, which this environment cannot reach, same
       as the first version. Sent.
+      THEN (Coach Yinka: "Those are some weak ass drills, do the more
+      advanced ones"): the session is swapped for the hardest filmed
+      drills whose clips I can reach, titles and reps as stored in
+      the bank: Plyo warm-up: Bulgarian split jumps 3 x 8 each leg;
+      Wall pass, touch behind the leg 3 x 90 sec, rest 30 sec; Pass,
+      touch past, Cruyff turn, outside touch 3 x 90 sec, rest 30 sec;
+      Push pull, fake roll, roll across 3 x 1 min, rest 30 sec;
+      Strength: Single leg RDL 3 x 8 each side as the finisher. The
+      Confidence moves (Elastico, Maradona, La Croqueta, Mbappe Chop)
+      and the Ronaldinho and cone-weave drills are the flashier
+      ones, but their clips are on Manus (403 from this environment,
+      checked), so they cannot be framed for thumbnails; if he wants
+      one on the slide, send the file or a frame and it goes in. The
+      two wall drills mean this is a player with a wall. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

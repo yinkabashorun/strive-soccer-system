@@ -14,6 +14,15 @@ the caption area; watermark bottom-left above the caption). Trending
 audio still goes on top IN THE INSTAGRAM APP when posting (never a
 claimed song, Oct 7 rule); the clip sound is the bed under it.
 
+## The type (Nov 4 2026)
+
+On Coach Yinka's "a more premium Nike font ... sleek": every big line is
+OSWALD BOLD (the open-licence twin of Trade Gothic Bold Condensed, Nike's
+long-time apparel and retail face), the eyebrow, the 01 02 03 numbers and
+the small lines are INTER. No hard outline any more: crisp white type on
+a soft dark haze. Fonts and OFL licences in fonts/ (copied from the
+skill). Barlow stays on the outro and the static graphics.
+
 ## Sound, reel by reel
 
 | Reel | Original sound |

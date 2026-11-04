@@ -192,7 +192,7 @@ if names and style == "stack":
             say(6, n["start"], t1, "Num", f"\\an{an}\\pos({ax},{yy})\\fad(120,160)", n["num"])
             say(6, n["start"], t1, "Stack", f"\\an{an}\\pos({ax},{yy+40})\\fad(120,160)\\fs{size}{pop}", n["text"])
         else:
-            num = f"{{\\fn{SMALL}\\fs{int(size*0.42)}\\c{GOLD}\\fsp5}}{n['num']}{{\\r\\fs{size}}}  "
+            num = f"{{\\fn{SMALL}\\fs{int(size*0.56)}\\c{GOLD}\\fsp4}}{n['num']}{{\\r\\fs{size}}}  "
             say(6, n["start"], t1, "Stack", f"\\an{an}\\pos({ax},{yy})\\fad(120,160)\\fs{size}{pop}", f"{num}{n['text']}")
     names_done = True
 elif names:

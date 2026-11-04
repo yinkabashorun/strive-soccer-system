@@ -3077,6 +3077,18 @@ commit.
       course row); same standing as Scoring Goals: on the post on his
       word, built the day the clips land with their names and tags.
       Caption and story version carry the same two changes. Sent.
+      THEN (Coach Yinka: "you can't leave out the 30-day dribbling
+      transformation course, where they can become the silkiest, most
+      dangerous dribbler on their team"): a TWELFTH block, 30-DAY
+      DRIBBLING TRANSFORMATION, "Become the silkiest, most dangerous
+      dribbler on the team.", his name and his words, as the last
+      full-width row; headline and row spacing tightened so twelve
+      fit above the price line. Not in the app as a course (the bank
+      has the Confidence moves, 1v1 freestyle and the cone weaves to
+      build it from, zero filming needed once he orders it); same
+      standing as Scoring Goals and Passing. The Oct 11 flag on
+      "most ... on your team" promises stands as a note, his call.
+      Caption and story version updated. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

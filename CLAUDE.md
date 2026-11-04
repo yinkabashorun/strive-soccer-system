@@ -3702,6 +3702,18 @@ commit.
       day 90, every dollar, on the parent's word, and the $400 monthly
       family stops paying and gets the paid months back), and that the
       free continuation has no cap. Sent.
+      THEN (Coach Yinka: "Should we change it from teammates to
+      coach / teammates / other parents. However you can word it
+      best"): step 02 now reads "If their coach, their teammates and
+      the other parents aren't coming up to you shocked at the
+      difference, you don't pay us a cent." "Other parents" replaces
+      "their parents", which could be read as the player's own. The
+      standalone post and the caption carry the same line ("If your
+      player's coach, their teammates and the other parents aren't
+      shocked at the difference"). The slide's spacing tightened for
+      the longer step. OPEN, his call at the stamp: with three
+      groups named, the day 90 test needs one rule, proposed that the
+      parent makes the call and no group has to be heard from. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

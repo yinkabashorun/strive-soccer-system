@@ -3756,6 +3756,18 @@ commit.
       line, "Every session is tracked in the app, so the 75% is a
       number, not an opinion." Who judges the result is for the
       written terms at the stamp, not for the slide. Sent.
+      THEN (Coach Yinka: "Caption for the post?"): the CAROUSEL
+      CAPTION written and saved at the top of strive-elite-offer-post.md
+      (1,060 characters, Instagram's cap is 2,200). The cover's question
+      ("If a parent paid us $100,000 to get their player into a pro
+      academy, what would we do?"), "Strive Elite, built by Coach Gary
+      and me", one paragraph of what is inside, the 90-day guarantee in
+      the slide's words, "$985 paid in full for the 90 days, or $400 a
+      month. That is the price of one private session a week for three
+      months, for all of it.", the ECNL and MLS NEXT aim, and "DM ELITE
+      and tell us about your player." No hashtags, no em dashes, no
+      alumni. The long twelve-block caption below it stays with the
+      single grid post (post.png). Sent in chat; nothing posted.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

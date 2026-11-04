@@ -3553,6 +3553,13 @@ commit.
       headline already says outside team training; 4 h x 13 weeks is
       still his figure). Three lines, clear of his chest. The other
       four steps' sentences were not touched. Sent.
+      THEN (Coach Yinka: "For the athleticism, still standing in March
+      means nothing"): step 2's sentence is now "Gets to the ball
+      first. Wins the 50/50. Still at full strength when the games
+      matter most." My first rewrite repeated the tiles under it
+      (first step, race, injuries), so the final line says what the
+      tiles do not: speed, strength and staying healthy as results on
+      the pitch. Steps 3 to 5 untouched. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

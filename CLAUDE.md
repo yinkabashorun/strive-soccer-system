@@ -3714,6 +3714,17 @@ commit.
       the longer step. OPEN, his call at the stamp: with three
       groups named, the day 90 test needs one rule, proposed that the
       parent makes the call and no group has to be heard from. Sent.
+      THEN (Coach Yinka: "Idk that's a lot, I don't like the yellow
+      numbers"): the gold 01 / 02 / 03 are GONE and the slide is cut
+      down. Three statements, 52 px, hairline rules between, gold only
+      on the key words (75% of the work, shocked, you don't pay us a
+      cent, free). Step 2 is shorter: "If their coach, teammates and
+      the other parents aren't shocked at the difference, you don't
+      pay us a cent." (the "coming up to you" clause is cut; the post
+      and caption already read without it). The fine print is one
+      short line pair: "Every session is tracked in the app, so the
+      75% is a number, not an opinion. The result is judged by the
+      people who watch them play, not by us." Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -1,4 +1,4 @@
-# Strive Elite, what we added (Nov 1 2026)
+# Strive Elite, what we added (Nov 1 2026; the 90-day offer Nov 4)
 
 Editable copy: https://claude.ai/artifact/XqbbitJT7za8HNkan4EDw8. This
 file is the record. Coach Yinka's direction Nov 1: the post shows the
@@ -57,10 +57,47 @@ A deep dive into what to improve next and exactly how to work on it.
 DRIBBLING TRANSFORMATION
 Thirty days of work to become the silkiest, most dangerous dribbler on the team.
 
-All included. $249 a month, locked for life, if you join by November 1. $500 after.
+Every member gets all of it, and a promise with it. Put in 75% of the work for 90 days. If your player's teammates and their parents aren't shocked at the difference, you don't pay us a cent. And we keep working with your player, free, until they are.
+
+For ECNL and MLS NEXT players who want the next level. Designed by players who have done just that.
+
+$500 a month, for 90 days. All included.
 
 DM ELITE.
 ```
+
+## The three slides (Nov 4 2026)
+
+1. post.png: the post above, closing on the Option 3 promise line and
+   "$500 a month, for 90 days."
+2. promise.png: THE 90-DAY PROMISE. "Put in 75% of the work we give
+   your player for 90 days. If their teammates and their parents aren't
+   coming up to you shocked at how good they've gotten, you don't pay
+   us a cent. And we keep working with your player, free, until they
+   are." Small line: the work is tracked in the app, so the 75% is a
+   number; the result is judged by the people who watch them play.
+3. program.png: WHO IT'S FOR. "ECNL and MLS NEXT players who want the
+   next level. Designed by players who have done just that." How 90
+   days run (a new week every Monday; the courses after the week's
+   work; Film Room every week, a 1:1 call every month). $500/mo for 90
+   days, all included, same-day refund, and the promise.
+
+Render: `node render.mjs promise.html promise.png` (same for the others).
+
+THE PRICE, chosen on Coach Yinka's "prices of your choice" (Nov 4): $500
+a month for 90 days. It is the list price he stamped Oct 12 for Nov 2
+on; the Nov 1 founding window has closed; the value stack prices the
+month at $2,320 of coaching at his own $80 rate; Film Room every week
+and a call every month cap how many families two coaches can serve, so
+revenue per family has to carry the promise; ECNL and MLS NEXT families
+already pay club fees in that range (FVA Union about $4,245 a year in
+the Sept 14 research). No pay-in-full price on the post; that stays a
+call-only option if he wants one.
+
+THE PROMISE MECHANICS, his to stamp before the first family joins: the
+75% is sessions done over the 90 days as the app counts them (courses
+are not tracked); "you don't pay a cent" means every month refunded at
+day 90 on the parent's word; "we keep working, free" has no cap stated.
 
 ## The story version
 
@@ -80,7 +117,7 @@ Film Room. Your clips, broken down every week.
 Monthly 1:1 call. A deep dive into what to improve next.
 Dribbling Transformation. Most dangerous dribbler on the team.
 
-$249 a month locked for life if you join by Nov 1. DM ELITE.
+Do 75% of the work for 90 days. If the people around your player aren't shocked, you don't pay. $500 a month. DM ELITE.
 ```
 
 Flags: the General Nutrition Guide is live (Nov 1). SCORING GOALS (first called Finishing in the

@@ -2953,6 +2953,12 @@ commit.
       full 7.8 s clip, with the hook over its first 2.2 s; then kneel
       and drive, push-up start, drop shuffle sprint, zigzag sprint;
       24.7 s. Re-sent.
+      THEN (Coach Yinka: "For the juggling the pop and juggle needs to
+      start with a pop and then show the touch then another pop and
+      touch"): the weak foot reel's fourth clip, pop and juggle, had
+      been cut at 4.5 s, which ended as the second pop went up. It now
+      runs the whole 6.0 s clip: pop, the touches, the second pop, the
+      last touch. Weak foot reel 21.9 s. Re-sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

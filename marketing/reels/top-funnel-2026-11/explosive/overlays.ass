@@ -24,8 +24,8 @@ Style: Rule,Inter Medium,30,&H0058A8C8,&H0058A8C8,&H0058A8C8,&H00000000,0,0,0,0,
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 Dialogue: 2,0:00:00.00,0:00:02.20,Eyebrow,,0,0,0,,{\an5\pos(490,980)\fad(150,200)\c&H000000&\1a&H50&\blur10\bord6\3c&H000000&\3a&H50&}EXPLOSIVE FIRST STEP
 Dialogue: 3,0:00:00.00,0:00:02.20,Eyebrow,,0,0,0,,{\an5\pos(490,980)\fad(150,200)}EXPLOSIVE FIRST STEP
-Dialogue: 2,0:00:00.00,0:00:02.20,Hook,,0,0,0,,{\an5\pos(490,1130)\fad(150,200)\fscx96\fscy96\t(0,260,\fscx100\fscy100)\c&H000000&\1a&H50&\blur10\bord6\3c&H000000&\3a&H50&}5 JUMPS.\NNO GYM.
-Dialogue: 3,0:00:00.00,0:00:02.20,Hook,,0,0,0,,{\an5\pos(490,1130)\fad(150,200)\fscx96\fscy96\t(0,260,\fscx100\fscy100)}5 JUMPS.\NNO GYM.
+Dialogue: 2,0:00:00.00,0:00:02.20,Hook,,0,0,0,,{\an5\pos(490,1130)\fad(150,200)\fscx96\fscy96\t(0,260,\fscx100\fscy100)\c&H000000&\1a&H50&\blur10\bord6\3c&H000000&\3a&H50&}5 JUMPS.
+Dialogue: 3,0:00:00.00,0:00:02.20,Hook,,0,0,0,,{\an5\pos(490,1130)\fad(150,200)\fscx96\fscy96\t(0,260,\fscx100\fscy100)}5 JUMPS.
 Dialogue: 6,0:00:02.30,0:00:19.60,Stack,,0,0,0,,{\an7\pos(64,1060)\fad(120,160)\fs46\fscx90\fscy90\t(0,140,\fscx100\fscy100)\c&H000000&\1a&H50&\blur10\bord6\3c&H000000&\3a&H50&}{\fnInter SemiBold\fs25\c&H0058A8C8\fsp4}01{\r\fs46}  POGO JUMPS
 Dialogue: 7,0:00:02.30,0:00:19.60,Stack,,0,0,0,,{\an7\pos(64,1060)\fad(120,160)\fs46\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnInter SemiBold\fs25\c&H0058A8C8\fsp4}01{\r\fs46}  POGO JUMPS
 Dialogue: 6,0:00:04.00,0:00:19.60,Stack,,0,0,0,,{\an7\pos(64,1120)\fad(120,160)\fs46\fscx90\fscy90\t(0,140,\fscx100\fscy100)\c&H000000&\1a&H50&\blur10\bord6\3c&H000000&\3a&H50&}{\fnInter SemiBold\fs25\c&H0058A8C8\fsp4}02{\r\fs46}  LATERAL HOPS

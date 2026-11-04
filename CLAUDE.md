@@ -3323,6 +3323,19 @@ commit.
       hairline; the close carries the headline at the top, the price
       line and the DM "ELITE" pill at the bottom. Copy unchanged from
       the entry above. Preview strip re-rendered. Sent.
+      THEN (Coach Yinka, with screenshots of the PREVIOUS send, headline
+      low and sky above the head: "Adjust the crop on these so we fit
+      better instead of the space above our head"): the crops
+      TIGHTENED on all six. Every photo scaled up (1.3x to 1.6x, the
+      two step 5 panels 0.9x) so the coach fills the frame, face still
+      in the clear band under the headline, which already takes the
+      space above the head. A photo that starts below the top edge
+      (U16, ECNL captain, the lineup, the celebration) is continued
+      upward with its own top rows reflected, blurred and feathered
+      over 220 px so no hard line sits under the headline. The
+      placements now live in compose-photos.py in the folder (run from
+      there; rebuilds photos/stepN.jpg and close.jpg), so the crops are
+      reproducible. Re-rendered, preview strip rebuilt. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

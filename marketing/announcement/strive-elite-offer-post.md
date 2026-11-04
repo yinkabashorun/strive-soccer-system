@@ -23,6 +23,9 @@ WEAK FOOT
 KEEP IT UP
 The juggling ladder. 7 levels, filmed drill by drill.
 
+FINISHING IN THE BOX
+Shooting in the box, first touch to strike. Pick the corner before the touch, strike through, land balanced.
+
 GENERAL NUTRITION GUIDE
 What to eat on a training day and a match day, and how to hydrate. Simple and general, no diets.
 
@@ -52,6 +55,7 @@ Strength. 17 moves, 5 levels, no equipment.
 Speed. 17 drills, first step to top speed.
 Weak Foot. 8 drills, both feet.
 Keep It Up. The juggling ladder, 7 levels.
+Finishing in the Box. Shooting, first touch to strike.
 General Nutrition Guide. Training day, match day, hydration.
 College Recruiting. The CV, the emails, the tape, the list.
 Academy Recruiting. The ladder, the director, the tryout.
@@ -61,6 +65,9 @@ Monthly 1:1 call with your coach.
 $249 a month locked for life if you join by Nov 1. DM ELITE.
 ```
 
-Flags: the General Nutrition Guide is in the post and must be live in
-the app before posting (being written Nov 1); Shooting is out until the
-clips land; the Nov 1 date needs his call if the post goes up later.
+Flags: the General Nutrition Guide is live (Nov 1). FINISHING IN THE
+BOX was added Nov 4 on Coach Yinka's "cap about it for now": the course
+is NOT in the app, no shooting clip has been sent, and the block carries
+no drill count on purpose; it becomes true the day the clips are banked
+and the course is switched on. The Nov 1 date needs his call if the
+post goes up later.

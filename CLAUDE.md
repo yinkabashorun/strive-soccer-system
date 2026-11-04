@@ -3828,6 +3828,24 @@ commit.
       repo (DemoLanding.tsx), the outro, ad 5 and the deck still carry
       the old $249 / $500 offer. Nothing on /demo changed. No player data
       touched.
+- [x] DECIDED Nov 4 2026 (Coach Yinka, on the Manus update: "And how we
+      aren't Doing in person"): IN-PERSON TRAINING IS OFF THE PUBLIC
+      OFFER. This confirms where the Oct 31 entry (last Friday group,
+      groups pushed to Strive Elite) was heading; the Oct 31 open
+      questions (Sunday and Saturday drop-ins, Monday and Tuesday 1:1s,
+      the other Small Group subscriptions, Gary's Friday role, the PWC
+      permit) are still not answered by him and the weekly schedule and
+      price tables above are not edited. Applied to the Manus briefs:
+      the confirmation page loses the In person card, the Two ways to
+      train section, "in person, at home, or both" and "many players do
+      both"; it shows one Strive Elite card and the call decides only
+      whether Strive Elite fits. manus-confirmation-brief.md About
+      section rewritten to say we do not offer in-person training;
+      manus-offer-update.md section B carries the removals. To check on
+      his side: the GHL intake survey, Carla's FALL and PRIVATE DM
+      replies, the Instagram bio, /demo and the sales-process line in
+      this file (still describes the in-person path). No player data
+      touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

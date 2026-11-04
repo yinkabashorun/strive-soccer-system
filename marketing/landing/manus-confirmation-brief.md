@@ -13,20 +13,17 @@ wait. Keep it short. Nothing on this page sells harder than the call.
 ## About Strive (use for tone and facts, do not add to it)
 
 Strive Soccer is a youth soccer training program in Northern Virginia,
-run by Coach Yinka and Coach Gary. Two ways to train with us:
+run by Coach Yinka and Coach Gary. As of Nov 4 2026 WE DO NOT OFFER IN
+PERSON TRAINING. The only program is Strive Elite, our at-home program,
+and this page must never mention in-person, field, 1-on-1, duo, group or
+drop-in sessions. Strive Elite: a 90-day program for ECNL and MLS NEXT
+players who want the next level. Every Monday the player gets a new week
+in the app, a video for every drill, courses on top, Film Room every
+week and a monthly call with us. Built by Coach Yinka and Coach Gary
+around what that player specifically needs. $985 paid in full, or $400
+a month, with a guarantee (see manus-offer-update.md).
 
-- In person: 1-on-1 sessions, duo sessions, and Friday group sessions
-  for middle school and high school players. Field work with the
-  coaches, built around the individual player.
-- Strive Elite: our at-home program. Every Monday the player gets a new
-  week in the app, four sessions of about 40 minutes, a video for every
-  drill, progress tracking, and a weekly text to the parent. Built by
-  Coach Yinka and Coach Gary around what that player specifically needs
-  to reach the next level. As of Nov 4 2026 it is a 90-day program,
-  $985 paid in full or $400 a month, with a guarantee (see
-  manus-offer-update.md). The old $500 / $249 offer is retired.
-
-The call decides which fits. Many players do both.
+The call is to see whether Strive Elite is the right fit.
 
 ## Page structure and exact copy (top to bottom)
 
@@ -39,8 +36,7 @@ You're in. One more step.
 
 ### Sub-headline (Barlow 15px, white 55%)
 We read every form ourselves. Book your call below and we'll go through
-your player's situation together and map out the right next step, in
-person, at home, or both.
+your player's situation together and map out the right next step.
 
 ### Primary button (gold #c8a858 fill, black text, full width on phones)
 Book your call
@@ -57,18 +53,14 @@ video for this slot later. Do not embed anything there now.
 Three short lines, one column, no numbers:
 - Where your player is right now and what's getting in the way.
 - What they're working toward this season and beyond.
-- Which path fits: in-person sessions, Strive Elite at home, or both.
+- Whether Strive Elite is the right fit for them.
 
-### Section label: TWO WAYS TO TRAIN
-Two cards, side by side on tablet and up, stacked on phones:
+### Section label: STRIVE ELITE
+One full-width card (no In person card, no second card):
 
-1. **In person**
-   1-on-1s, duos, and Friday groups in Northern Virginia. Field work
-   with Coach Yinka and Coach Gary, built around your player.
-2. **Strive Elite, at home**
-   SUPERSEDED Nov 4 2026 (the $500 / $249-by-Nov-1 copy that stood here
-   is gone). Use the card copy in manus-offer-update.md, section B: the
-   90-day program, $985 paid in full or $400 a month, and the guarantee.
+**Strive Elite, at home**
+The card copy in manus-offer-update.md, section B: the 90-day program,
+$985 paid in full or $400 a month, and the guarantee.
 
 ### Second button (outlined, white border)
 Book your call

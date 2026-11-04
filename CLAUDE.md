@@ -3107,6 +3107,17 @@ commit.
       most dangerous dribbler on the team" stays in the caption's
       block; "The most dangerous dribbler on the team." wrapped).
       Sent.
+      THEN (Coach Yinka: "How do we show the context these are courses
+      they can do after their sessions are wrapped up? Without taking
+      away from the zoom calls or college and academy recruitment"):
+      PROPOSED and rendered, three gold section labels with their own
+      rule, the grid under each: "COURSES. ON TOP OF THE WEEKLY
+      SESSIONS WE BUILD." (Strength, Speed, Weak Foot, Passing, First
+      Touch, Scoring Goals, Dribbling Transformation, Nutrition Guide),
+      "THE ROAD TO THE NEXT LEVEL." (College Recruiting, Academy
+      Recruiting), "WITH COACH YINKA AND COACH GARY." (Film Room,
+      Monthly 1:1 Call). Headline and rows tightened to fit. Sent as a
+      proposal; his to keep or change.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

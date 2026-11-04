@@ -5,6 +5,12 @@ file is the record. Coach Yinka's direction Nov 1: the post shows the
 VALUE added to Strive Elite, not that it is open (that was announced).
 One block per piece of value, short, easy to digest, no course count.
 Nothing posted until he says so.
+LAYOUT (Nov 4): three labelled groups so the courses read as extra
+work on top of the weekly sessions and the coach touches stand alone:
+"Courses. On top of the weekly sessions we build." (the eight skill and
+body courses), "The road to the next level." (College Recruiting,
+Academy Recruiting), "With Coach Yinka and Coach Gary." (Film Room,
+Monthly 1:1 Call).
 COPY RULE (Coach Yinka, Nov 4): every line under a name says what the
 player GETS, never a drill count or a level count ("no one cares that
 it's 8 drills, both feet"). Keep It Up is called First Touch on the

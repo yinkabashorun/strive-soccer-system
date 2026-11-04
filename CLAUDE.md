@@ -2986,6 +2986,13 @@ commit.
       name is the bank title or his words, never a read of the footage.
       OPEN for him: what that sole-roll clip is called; once named it
       gets a bank row, the file is renamed, and it can go back in.
+      THEN (Coach Yinka: "It's time for the final StriveElite post just
+      make the a few yards one just the first 3"): the few-yards reel
+      is the first three only, two touch v1, two touch v2, L turn roll
+      touch, 14.9 s, all three with sound; tap pull push stays with the
+      weak foot reel. Caption says three. Re-sent. This is the final
+      cut of the five; the set is his to post, trending audio added in
+      the Instagram app.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

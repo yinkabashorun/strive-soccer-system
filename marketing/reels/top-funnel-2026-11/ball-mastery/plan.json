@@ -29,13 +29,6 @@
       "out": 4.5,
       "num": "03",
       "text": "L TURN, ROLL, TOUCH"
-    },
-    {
-      "clip": "../../../../public/drills/weak-foot-tap-pull-push.mp4",
-      "in": 0,
-      "out": 4.5,
-      "num": "04",
-      "text": "TAP, PULL, PUSH"
     }
   ],
   "fonts": "../fonts",

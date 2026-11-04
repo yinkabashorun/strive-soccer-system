@@ -30,17 +30,12 @@
       "start": 8.0,
       "num": "03",
       "text": "L TURN, ROLL, TOUCH"
-    },
-    {
-      "start": 12.5,
-      "num": "04",
-      "text": "TAP, PULL, PUSH"
     }
   ],
   "punch": true,
   "watermark": true,
   "endcard": true,
   "captions": [],
-  "list_end": 16.6,
+  "list_end": 12.1,
   "loudness": -16
 }

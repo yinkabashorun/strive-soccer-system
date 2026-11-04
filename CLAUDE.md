@@ -3260,6 +3260,24 @@ commit.
       the cover. Step 5's sentence carries "We never promise a roster
       spot." Frames are 720p upscaled with a light sharpen; fine at
       feed size, flagged for anything printed. Sent.
+      THEN (Coach Yinka, after rejecting a future-pacing "scene" draft
+      as "doing way too much ... keep what we have"; then "just analyze
+      the copy with the bundles ... they care about the destination,
+      about going to Hawaii ... We have to be the private jet"): COPY
+      RULE restated for every line on the offer: the DESTINATION, what
+      the player becomes, in premium plain words; never the mechanism
+      (no "we watch and we tell them", no plane, no tickets). The five
+      step sentences rewritten that way, slides otherwise untouched:
+      01 "A week built around one player, not fifteen. Every Monday it
+      goes after the exact thing holding them back."; 02 "Faster than
+      the kid next to them. Stronger on the ball. Still standing in
+      March."; 03 "Both feet. A first touch that kills the ball dead. A
+      finish that does not need a second chance."; 04 "Every game
+      watched. Every mistake turned into next week's work. Nothing
+      slips."; 05 "A clear path to college or the academy, and a
+      player ready when the moment comes. We never promise a roster
+      spot. We make them impossible to ignore." He will send a big
+      group session or camp photo for the recap or the close. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

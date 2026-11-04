@@ -3725,6 +3725,17 @@ commit.
       short line pair: "Every session is tracked in the app, so the
       75% is a number, not an opinion. The result is judged by the
       people who watch them play, not by us." Sent.
+      THEN (Coach Yinka: "And use the word or so it doesn't imply all
+      3"): step 2 is "If none of their coach, teammates or the other
+      parents are shocked at the difference, you don't pay us a cent."
+      A bare "or" in "if the coach, teammates or parents aren't
+      shocked" can be read as ANY ONE not being shocked triggers the
+      refund, which is far more expensive for Strive and is not the
+      guarantee he built; "none of ... or ..." keeps the intent: one
+      of the three being shocked is enough, nobody being shocked is a
+      refund. The standalone post and the caption read the same:
+      "If none of your player's coach, teammates or the other parents
+      are shocked at the difference, you don't pay us a cent." Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

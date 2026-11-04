@@ -57,7 +57,7 @@ A deep dive into what to improve next and exactly how to work on it.
 DRIBBLING TRANSFORMATION
 Thirty days of work to become the silkiest, most dangerous dribbler on the team.
 
-Every member gets all of it, and a guarantee with it. Your player does 75% of the work for 90 days. If your player's coach, their teammates and the other parents aren't shocked at the difference, you don't pay us a cent. And we keep working with your player, free, until they are.
+Every member gets all of it, and a guarantee with it. Your player does 75% of the work for 90 days. If none of your player's coach, teammates or the other parents are shocked at the difference, you don't pay us a cent. And we keep working with your player, free, until they are.
 
 For ECNL and MLS NEXT players who want the next level. Designed by players who have done just that.
 

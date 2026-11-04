@@ -22,21 +22,14 @@ Style: Rule,Barlow Medium,30,&H0058A8C8,&H0058A8C8,&H0058A8C8,&H00000000,0,0,0,0
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
-Dialogue: 2,0:00:00.00,0:00:02.20,Eyebrow,,0,0,0,,{\an5\pos(540,290)\fad(150,200)}THE JUGGLING LADDER
-Dialogue: 2,0:00:00.00,0:00:02.20,Hook,,0,0,0,,{\an5\pos(540,430)\fad(150,200)\fscx96\fscy96\t(0,260,\fscx100\fscy100)}CAN YOUR PLAYER\NPASS LEVEL 7?
-Dialogue: 4,0:00:02.30,0:00:21.30,Num,,0,0,0,,{\an9\pos(1016,40)\fad(120,160)}01
-Dialogue: 4,0:00:02.30,0:00:21.30,Stack,,0,0,0,,{\an9\pos(1016,80)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}ONE TOUCH
-Dialogue: 4,0:00:03.20,0:00:21.30,Num,,0,0,0,,{\an9\pos(1016,144)\fad(120,160)}02
-Dialogue: 4,0:00:03.20,0:00:21.30,Stack,,0,0,0,,{\an9\pos(1016,184)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}TWO TOUCHES EACH FOOT
-Dialogue: 4,0:00:06.20,0:00:21.30,Num,,0,0,0,,{\an9\pos(1016,248)\fad(120,160)}03
-Dialogue: 4,0:00:06.20,0:00:21.30,Stack,,0,0,0,,{\an9\pos(1016,288)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}ONE, TWO
-Dialogue: 4,0:00:09.20,0:00:21.30,Num,,0,0,0,,{\an9\pos(1016,352)\fad(120,160)}04
-Dialogue: 4,0:00:09.20,0:00:21.30,Stack,,0,0,0,,{\an9\pos(1016,392)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}LACES, INSIDE
-Dialogue: 4,0:00:12.20,0:00:21.30,Num,,0,0,0,,{\an9\pos(1016,456)\fad(120,160)}05
-Dialogue: 4,0:00:12.20,0:00:21.30,Stack,,0,0,0,,{\an9\pos(1016,496)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}THIGH
-Dialogue: 4,0:00:15.20,0:00:21.30,Num,,0,0,0,,{\an9\pos(1016,560)\fad(120,160)}06
-Dialogue: 4,0:00:15.20,0:00:21.30,Stack,,0,0,0,,{\an9\pos(1016,600)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}THIGHS, LACES
-Dialogue: 4,0:00:18.20,0:00:21.30,Num,,0,0,0,,{\an9\pos(1016,664)\fad(120,160)}07
-Dialogue: 4,0:00:18.20,0:00:21.30,Stack,,0,0,0,,{\an9\pos(1016,704)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}HEAD IT UP
-Dialogue: 1,0:00:00.00,0:00:21.70,Wm,,0,0,0,,{\an3\pos(1030,1800)}STRIVE {\c&H0058A8C8}ELITE
-Dialogue: 1,0:00:00.00,0:00:21.70,WmSub,,0,0,0,,{\an3\pos(1030,1844)}PERSONALIZED REMOTE TRAINING
+Dialogue: 2,0:00:00.00,0:00:02.20,Eyebrow,,0,0,0,,{\an5\pos(490,990)\fad(150,200)}THE JUGGLING LADDER
+Dialogue: 2,0:00:00.00,0:00:02.20,Hook,,0,0,0,,{\an5\pos(490,1130)\fad(150,200)\fscx96\fscy96\t(0,260,\fscx100\fscy100)}CAN YOUR PLAYER\NPASS LEVEL 7?
+Dialogue: 4,0:00:02.30,0:00:21.30,Stack,,0,0,0,,{\an7\pos(64,898)\fad(120,160)\fs50\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs25\c&H0058A8C8\fsp6}01{\r\fs50}  ONE TOUCH
+Dialogue: 4,0:00:03.20,0:00:21.30,Stack,,0,0,0,,{\an7\pos(64,964)\fad(120,160)\fs50\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs25\c&H0058A8C8\fsp6}02{\r\fs50}  TWO TOUCHES EACH FOOT
+Dialogue: 4,0:00:06.20,0:00:21.30,Stack,,0,0,0,,{\an7\pos(64,1030)\fad(120,160)\fs50\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs25\c&H0058A8C8\fsp6}03{\r\fs50}  ONE, TWO
+Dialogue: 4,0:00:09.20,0:00:21.30,Stack,,0,0,0,,{\an7\pos(64,1096)\fad(120,160)\fs50\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs25\c&H0058A8C8\fsp6}04{\r\fs50}  LACES, INSIDE
+Dialogue: 4,0:00:12.20,0:00:21.30,Stack,,0,0,0,,{\an7\pos(64,1162)\fad(120,160)\fs50\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs25\c&H0058A8C8\fsp6}05{\r\fs50}  THIGH
+Dialogue: 4,0:00:15.20,0:00:21.30,Stack,,0,0,0,,{\an7\pos(64,1228)\fad(120,160)\fs50\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs25\c&H0058A8C8\fsp6}06{\r\fs50}  THIGHS, LACES
+Dialogue: 4,0:00:18.20,0:00:21.30,Stack,,0,0,0,,{\an7\pos(64,1294)\fad(120,160)\fs50\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs25\c&H0058A8C8\fsp6}07{\r\fs50}  HEAD IT UP
+Dialogue: 1,0:00:00.00,0:00:21.70,Wm,,0,0,0,,{\an1\pos(60,1440)}STRIVE {\c&H0058A8C8}ELITE
+Dialogue: 1,0:00:00.00,0:00:21.70,WmSub,,0,0,0,,{\an1\pos(60,1484)}PERSONALIZED REMOTE TRAINING

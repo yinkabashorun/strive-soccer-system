@@ -22,17 +22,12 @@ Style: Rule,Barlow Medium,30,&H0058A8C8,&H0058A8C8,&H0058A8C8,&H00000000,0,0,0,0
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
-Dialogue: 2,0:00:00.00,0:00:02.20,Eyebrow,,0,0,0,,{\an5\pos(540,290)\fad(150,200)}NO FIELD NEEDED
-Dialogue: 2,0:00:00.00,0:00:02.20,Hook,,0,0,0,,{\an5\pos(540,430)\fad(150,200)\fscx96\fscy96\t(0,260,\fscx100\fscy100)}BALL MASTERY\NIN A FEW YARDS
-Dialogue: 4,0:00:02.30,0:00:20.10,Num,,0,0,0,,{\an9\pos(1016,760)\fad(120,160)}01
-Dialogue: 4,0:00:02.30,0:00:20.10,Stack,,0,0,0,,{\an9\pos(1016,800)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}TWO TOUCH, VARIATION 1
-Dialogue: 4,0:00:04.00,0:00:20.10,Num,,0,0,0,,{\an9\pos(1016,864)\fad(120,160)}02
-Dialogue: 4,0:00:04.00,0:00:20.10,Stack,,0,0,0,,{\an9\pos(1016,904)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}TWO TOUCH, VARIATION 2
-Dialogue: 4,0:00:08.00,0:00:20.10,Num,,0,0,0,,{\an9\pos(1016,968)\fad(120,160)}03
-Dialogue: 4,0:00:08.00,0:00:20.10,Stack,,0,0,0,,{\an9\pos(1016,1008)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}L TURN, ROLL, TOUCH
-Dialogue: 4,0:00:12.50,0:00:20.10,Num,,0,0,0,,{\an9\pos(1016,1072)\fad(120,160)}04
-Dialogue: 4,0:00:12.50,0:00:20.10,Stack,,0,0,0,,{\an9\pos(1016,1112)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}NEYMAR FEINT
-Dialogue: 4,0:00:16.50,0:00:20.10,Num,,0,0,0,,{\an9\pos(1016,1176)\fad(120,160)}05
-Dialogue: 4,0:00:16.50,0:00:20.10,Stack,,0,0,0,,{\an9\pos(1016,1216)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}JUGGLE AND CATCH
-Dialogue: 1,0:00:00.00,0:00:20.50,Wm,,0,0,0,,{\an3\pos(1030,1800)}STRIVE {\c&H0058A8C8}ELITE
-Dialogue: 1,0:00:00.00,0:00:20.50,WmSub,,0,0,0,,{\an3\pos(1030,1844)}PERSONALIZED REMOTE TRAINING
+Dialogue: 2,0:00:00.00,0:00:02.20,Eyebrow,,0,0,0,,{\an5\pos(490,990)\fad(150,200)}NO FIELD NEEDED
+Dialogue: 2,0:00:00.00,0:00:02.20,Hook,,0,0,0,,{\an5\pos(490,1130)\fad(150,200)\fscx96\fscy96\t(0,260,\fscx100\fscy100)}BALL MASTERY\NIN A FEW YARDS
+Dialogue: 4,0:00:02.30,0:00:20.10,Stack,,0,0,0,,{\an7\pos(64,970)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs30\c&H0058A8C8\fsp6}01{\r\fs60}  TWO TOUCH, VARIATION 1
+Dialogue: 4,0:00:04.00,0:00:20.10,Stack,,0,0,0,,{\an7\pos(64,1048)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs30\c&H0058A8C8\fsp6}02{\r\fs60}  TWO TOUCH, VARIATION 2
+Dialogue: 4,0:00:08.00,0:00:20.10,Stack,,0,0,0,,{\an7\pos(64,1126)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs30\c&H0058A8C8\fsp6}03{\r\fs60}  L TURN, ROLL, TOUCH
+Dialogue: 4,0:00:12.50,0:00:20.10,Stack,,0,0,0,,{\an7\pos(64,1204)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs30\c&H0058A8C8\fsp6}04{\r\fs60}  NEYMAR FEINT
+Dialogue: 4,0:00:16.50,0:00:20.10,Stack,,0,0,0,,{\an7\pos(64,1282)\fad(120,160)\fs60\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs30\c&H0058A8C8\fsp6}05{\r\fs60}  JUGGLE AND CATCH
+Dialogue: 1,0:00:00.00,0:00:20.50,Wm,,0,0,0,,{\an1\pos(60,1440)}STRIVE {\c&H0058A8C8}ELITE
+Dialogue: 1,0:00:00.00,0:00:20.50,WmSub,,0,0,0,,{\an1\pos(60,1484)}PERSONALIZED REMOTE TRAINING

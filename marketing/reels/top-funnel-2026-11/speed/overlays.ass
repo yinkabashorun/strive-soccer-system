@@ -22,12 +22,12 @@ Style: Rule,Barlow Medium,30,&H0058A8C8,&H0058A8C8,&H0058A8C8,&H00000000,0,0,0,0
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
-Dialogue: 2,0:00:00.00,0:00:02.20,Eyebrow,,0,0,0,,{\an5\pos(540,1030)\fad(150,200)}SPEED
-Dialogue: 2,0:00:00.00,0:00:02.20,Hook,,0,0,0,,{\an5\pos(540,1170)\fad(150,200)\fscx96\fscy96\t(0,260,\fscx100\fscy100)}5 DRILLS FOR A\NFASTER FIRST STEP
-Dialogue: 4,0:00:02.30,0:00:19.40,Stack,,0,0,0,,{\an7\pos(64,40)\fad(120,160)\fs50\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs25\c&H0058A8C8\fsp6}01{\r\fs50}  KNEEL AND DRIVE
-Dialogue: 4,0:00:04.00,0:00:19.40,Stack,,0,0,0,,{\an7\pos(64,106)\fad(120,160)\fs50\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs25\c&H0058A8C8\fsp6}02{\r\fs50}  PUSH-UP START
-Dialogue: 4,0:00:07.30,0:00:19.40,Stack,,0,0,0,,{\an7\pos(64,172)\fad(120,160)\fs50\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs25\c&H0058A8C8\fsp6}03{\r\fs50}  DROP, SHUFFLE, SPRINT
-Dialogue: 4,0:00:11.30,0:00:19.40,Stack,,0,0,0,,{\an7\pos(64,238)\fad(120,160)\fs50\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs25\c&H0058A8C8\fsp6}04{\r\fs50}  ZIGZAG SPRINT
-Dialogue: 4,0:00:15.30,0:00:19.40,Stack,,0,0,0,,{\an7\pos(64,304)\fad(120,160)\fs50\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs25\c&H0058A8C8\fsp6}05{\r\fs50}  THE CROSS
-Dialogue: 1,0:00:00.00,0:00:19.80,Wm,,0,0,0,,{\an3\pos(1030,1800)}STRIVE {\c&H0058A8C8}ELITE
-Dialogue: 1,0:00:00.00,0:00:19.80,WmSub,,0,0,0,,{\an3\pos(1030,1844)}PERSONALIZED REMOTE TRAINING
+Dialogue: 2,0:00:00.00,0:00:02.20,Eyebrow,,0,0,0,,{\an5\pos(490,990)\fad(150,200)}SPEED
+Dialogue: 2,0:00:00.00,0:00:02.20,Hook,,0,0,0,,{\an5\pos(490,1130)\fad(150,200)\fscx96\fscy96\t(0,260,\fscx100\fscy100)}5 DRILLS FOR A\NFASTER FIRST STEP
+Dialogue: 4,0:00:02.30,0:00:18.00,Stack,,0,0,0,,{\an7\pos(64,1030)\fad(120,160)\fs50\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs25\c&H0058A8C8\fsp6}01{\r\fs50}  KNEEL AND DRIVE
+Dialogue: 4,0:00:03.90,0:00:18.00,Stack,,0,0,0,,{\an7\pos(64,1096)\fad(120,160)\fs50\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs25\c&H0058A8C8\fsp6}02{\r\fs50}  PUSH-UP START
+Dialogue: 4,0:00:06.60,0:00:18.00,Stack,,0,0,0,,{\an7\pos(64,1162)\fad(120,160)\fs50\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs25\c&H0058A8C8\fsp6}03{\r\fs50}  DROP, SHUFFLE, SPRINT
+Dialogue: 4,0:00:11.00,0:00:18.00,Stack,,0,0,0,,{\an7\pos(64,1228)\fad(120,160)\fs50\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs25\c&H0058A8C8\fsp6}04{\r\fs50}  ZIGZAG SPRINT
+Dialogue: 4,0:00:14.50,0:00:18.00,Stack,,0,0,0,,{\an7\pos(64,1294)\fad(120,160)\fs50\fscx90\fscy90\t(0,140,\fscx100\fscy100)}{\fnBarlow SemiBold\fs25\c&H0058A8C8\fsp6}05{\r\fs50}  THE CROSS
+Dialogue: 1,0:00:00.00,0:00:18.40,Wm,,0,0,0,,{\an1\pos(60,1440)}STRIVE {\c&H0058A8C8}ELITE
+Dialogue: 1,0:00:00.00,0:00:18.40,WmSub,,0,0,0,,{\an1\pos(60,1484)}PERSONALIZED REMOTE TRAINING

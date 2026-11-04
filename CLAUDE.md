@@ -3102,6 +3102,11 @@ commit.
       caption (name set at 35 px in that one block so it holds one
       line; every other name stays 40 px), line "Silkiest, most
       dangerous, in 30 days." Sent.
+      THEN (Coach Yinka: "And caption it something else"): the line
+      is "Most dangerous dribbler on the team." (the full "silkiest,
+      most dangerous dribbler on the team" stays in the caption's
+      block; "The most dangerous dribbler on the team." wrapped).
+      Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

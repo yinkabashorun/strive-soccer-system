@@ -2993,6 +2993,30 @@ commit.
       weak foot reel. Caption says three. Re-sent. This is the final
       cut of the five; the set is his to post, trending audio added in
       the Instagram app.
+- [x] RE-TYPED Nov 4 2026, THE REEL LOOK (Coach Yinka: "we need a more
+      premium Nike fonts not that one we have now. And the colors
+      everything must look extremely good and professional. Sleek"):
+      seven open-licence condensed faces rendered side by side on a real
+      frame (Bebas Neue, Anton, Oswald, League Gothic, Archivo
+      Condensed, Saira ExtraCondensed oblique, Barlow as the control),
+      in the old hard-outline finish and in a crisp-type-over-haze
+      finish. CHOSEN, my call: OSWALD BOLD for every big line (the
+      open-licence twin of Trade Gothic Bold Condensed, the face Nike
+      ran across apparel and retail for years; clean and tall at phone
+      size, not meme-heavy like Anton), INTER SemiBold tracked for the
+      eyebrow and the 01 02 03 numbers, Inter Medium for the small
+      lines; the finish is crisp white with NO outline on a soft dark
+      haze (a blurred black copy of every line one layer below, in
+      reel_build.py's say()). Gold #c8a858 stays on the numbers, the
+      eyebrow, the rule and ELITE only; end card re-set in the same
+      type. Runner-up if he wants the 90s swoosh feel: Saira
+      ExtraCondensed Black with a slight oblique. Fonts (static cuts
+      from the Google Fonts variable files, made with fontTools) and
+      their OFL licences live in .claude/skills/strive-reel/fonts/ and
+      are copied beside each reel; Barlow stays the face of the outro
+      and the static graphics (the Sept 30 brand look is untouched).
+      All five reels rebuilt and re-sent; placements unchanged. SKILL.md
+      and the reel README carry the new rule. No player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

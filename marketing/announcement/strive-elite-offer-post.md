@@ -146,12 +146,12 @@ arrive and are then rebuilt. No stock, no generated images, no alumni.
 
 1. post.png: the post above, closing on the Option 3 promise line and
    "$500 a month, for 90 days."
-2. promise.png: THE 90-DAY PROMISE. "Put in 75% of the work we give
-   your player for 90 days. If their teammates and their parents aren't
-   coming up to you shocked at how good they've gotten, you don't pay
-   us a cent. And we keep working with your player, free, until they
-   are." Small line: the work is tracked in the app, so the 75% is a
-   number; the result is judged by the people who watch them play.
+2. promise.png: THE 90-DAY GUARANTEE. Three statements, no numerals:
+   "Your player does 75% of the work we give them for 90 days." "If
+   their coach, teammates or the other parents aren't shocked at the
+   difference, you don't pay us a cent." "And we keep working with your
+   player, free, until they are." Small line: "Every session is
+   tracked in the app, so the 75% is a number, not an opinion."
 3. program.png: WHO IT'S FOR. "ECNL and MLS NEXT players who want the
    next level. Designed by players who have done just that." How 90
    days run (a new week every Monday; the courses after the week's

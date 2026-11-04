@@ -3747,6 +3747,15 @@ commit.
       refund. The terms written at the stamp should say the guarantee
       is judged on the whole (nobody shocked = refund) or that the
       parent's call at day 90 decides. Sent.
+      THEN (Coach Yinka: "And why'd you have to say at the bottom
+      people who watch them play not us. When we are the COACHES!"):
+      he is right, the fine print put the two of them outside their
+      own program. The sentence "The result is judged by the people
+      who watch them play, not by us." is GONE from the slide and from
+      the caption file's description of it; the fine print is one
+      line, "Every session is tracked in the app, so the 75% is a
+      number, not an opinion." Who judges the result is for the
+      written terms at the stamp, not for the slide. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

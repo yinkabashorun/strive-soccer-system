@@ -3543,6 +3543,16 @@ commit.
       68% instead of 56% and is lighter, and the sentence carries a
       stronger text shadow so it still reads over his shirt. The
       headline fade at the top is unchanged. Preview strip rebuilt. Sent.
+      THEN (Coach Yinka: "The copy needs to be improved? Personalized
+      sessions built for one player means nothing to the reader"):
+      step 1's sentence rewritten around what the reader can picture,
+      not the feature name: "Team practice trains the whole team. This
+      trains the one thing holding your player back. Four extra hours
+      a week is 52 hours in three months that the kid next to them
+      never puts in." (the days-the-team-is-off clause cut, the
+      headline already says outside team training; 4 h x 13 weeks is
+      still his figure). Three lines, clear of his chest. The other
+      four steps' sentences were not touched. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

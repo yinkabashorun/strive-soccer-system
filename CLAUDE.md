@@ -3066,6 +3066,17 @@ commit.
       his "good". Caption rewritten the same way in
       strive-elite-offer-post.md. Price line still "join by Nov 1",
       still his. Sent.
+      THEN (Coach Yinka: weak foot "turn" or "dribble", either works;
+      "add a passing course in there as well ... low driven, mid
+      driven, ping ... more variation in your passing"): Weak Foot is
+      "Shoot, pass and dribble with either foot."; an ELEVENTH block
+      PASSING "Low, driven, pinged. Master every ball." added beside
+      it (rows tightened so it fits; Monthly 1:1 Call is the
+      full-width last row). A Passing COURSE does not exist in the
+      app either (the Passing pillar holds wall drills only; no
+      course row); same standing as Scoring Goals: on the post on his
+      word, built the day the clips land with their names and tags.
+      Caption and story version carry the same two changes. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

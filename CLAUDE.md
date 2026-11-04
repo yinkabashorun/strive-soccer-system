@@ -3624,6 +3624,19 @@ commit.
       the carousel (stays in photos/src); its composition line and
       photos/step1.jpg are removed from compose-photos.py. Preview
       strip rebuilt. Sent.
+      THEN (Coach Yinka: "Different drills, excellent graphic
+      though"): same graphic, a different session, again straight
+      from the bank (read-only query, titles and reps as stored): Plyo
+      warm-up: Broad jumps 3 x 5; Weak foot pop and settle 3 x 10
+      reps, rest 30 sec; 2 touch ball mastery variation 2 3 x 1 min,
+      rest 30 sec; Two touch passing 3 x 90 sec, rest 30 sec (a wall
+      drill, so this is a player with a wall); Strength: Hollow hold
+      3 x 20 sec as the finisher. Four pillars (plyo, weak foot, ball
+      mastery, passing) in four different settings (gym, open field,
+      cones, brick wall). Thumbnails are frames of the clips in
+      public/drills; the finisher has no thumbnail because its clip
+      is hosted on Manus, which this environment cannot reach, same
+      as the first version. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

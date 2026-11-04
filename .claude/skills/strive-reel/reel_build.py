@@ -47,6 +47,16 @@ if not FF:
 SRC, OUT, FONTS, OUTRO = P("src"), P("out"), P("fonts"), P("outro")
 GOLD = "&H0058A8C8"; WHITE = "&H00FFFFFF"; BLACK = "&H000D0D0D"; DIM = "&H00D9D9D9"
 MARGIN = 24
+# Type (Coach Yinka, Nov 4 2026: "a more premium Nike font ... sleek"):
+# Oswald Bold for every big line (the open-licence twin of Trade Gothic
+# Bold Condensed, Nike's long-time apparel and retail face), Inter for the
+# small lines. Both ship in the skill's fonts/ folder with their OFL files.
+DISPLAY, SMALL, SMALL_MED = "Oswald", "Inter SemiBold", "Inter Medium"
+WIDTH_EM = 0.46          # Oswald Bold, uppercase, average advance per character
+# Finish: crisp white type with NO outline, sitting on a soft dark haze (a
+# blurred copy of the same text one layer below). The old hard outline read
+# cheap; this is the sleek version he asked for.
+GLOW = "\\c&H000000&\\1a&H50&\\blur10\\bord6\\3c&H000000&\\3a&H50&"
 # Social safe box on the 1080x1920 canvas. Instagram Reels and TikTok draw
 # their own UI over the top ~250 px, a column of icons down the right edge
 # (x > ~950 from mid-height down) and the handle, caption and audio line
@@ -106,10 +116,15 @@ def pick(cands, w, h, t0, t1, label):
             print(f"{label}: ({x},{y})"); return x, y
     print(f"{label}: no clear spot in {len(cands)} candidates, using the last"); return cands[-1]
 def ts(t): return f"{int(t//3600)}:{int(t%3600//60):02d}:{t%60:05.2f}"
-def width(text, size): return int(0.36 * size * len(text))   # Barlow Condensed Black, uppercase
+def width(text, size): return int(WIDTH_EM * size * len(text))
 def gold(text): return text.replace("{g}", "{\\c" + GOLD + "}").replace("{/g}", "{\\c" + WHITE + "}")
 
 ev = []
+def say(layer, t0, t1, style, tag, text, glow=True):
+    """One overlay line: the haze copy on `layer`, the crisp text one layer up."""
+    if glow:
+        ev.append(f"Dialogue: {layer},{ts(t0)},{ts(t1)},{style},,0,0,0,,{{{tag}{GLOW}}}{text}")
+    ev.append(f"Dialogue: {layer+1},{ts(t0)},{ts(t1)},{style},,0,0,0,,{{{tag}}}{text}")
 if hook:
     # Lower middle first (faces live in the upper half of a filmed drill),
     # then the top of the safe box, then the middle. Centred on the safe
@@ -118,11 +133,11 @@ if hook:
     hx, hy = pick([(SAFE_L, 960), (SAFE_L, SAFE_T + 30), (SAFE_L, 640)], HW, HH, 0, hook["end"], "hook")
     cy = hy + 150
     hook_text = "\\N".join(hook["lines"])
-    ev.append(f"Dialogue: 2,{ts(0)},{ts(hook['end'])},Eyebrow,,0,0,0,,{{\\an5\\pos({SAFE_CX},{cy-120})\\fad(150,200)}}{hook.get('eyebrow','STRIVE SOCCER')}")
-    ev.append(f"Dialogue: 2,{ts(0)},{ts(hook['end'])},Hook,,0,0,0,,{{\\an5\\pos({SAFE_CX},{cy+20})\\fad(150,200)\\fscx96\\fscy96\\t(0,260,\\fscx100\\fscy100)}}{hook_text}")
+    say(2, 0, hook["end"], "Eyebrow", f"\\an5\\pos({SAFE_CX},{cy-130})\\fad(150,200)", hook.get("eyebrow", "STRIVE SOCCER"))
+    say(2, 0, hook["end"], "Hook", f"\\an5\\pos({SAFE_CX},{cy+20})\\fad(150,200)\\fscx96\\fscy96\\t(0,260,\\fscx100\\fscy100)", hook_text)
 
 for c in spec.get("captions", []):
-    ev.append(f"Dialogue: 3,{ts(c['start'])},{ts(c['end'])},Cap,,0,0,0,,{{\\an5\\pos({SAFE_CX},{SAFE_B-70})\\fscx88\\fscy88\\t(0,110,\\fscx104\\fscy104)\\t(110,200,\\fscx100\\fscy100)\\fad(40,60)}}{gold(c['text'])}")
+    say(4, c["start"], c["end"], "Cap", f"\\an5\\pos({SAFE_CX},{SAFE_B-70})\\fscx88\\fscy88\\t(0,110,\\fscx104\\fscy104)\\t(110,200,\\fscx100\\fscy100)\\fad(40,60)", gold(c["text"]))
 
 if names and style == "stack":
     # The numbered list builds up and stays. Tries the big size first, then a
@@ -174,11 +189,11 @@ if names and style == "stack":
         yy = y + i * step
         pop = "\\fscx90\\fscy90\\t(0,140,\\fscx100\\fscy100)"
         if layout == "over":
-            ev.append(f"Dialogue: 4,{ts(n['start'])},{ts(t1)},Num,,0,0,0,,{{\\an{an}\\pos({ax},{yy})\\fad(120,160)}}{n['num']}")
-            ev.append(f"Dialogue: 4,{ts(n['start'])},{ts(t1)},Stack,,0,0,0,,{{\\an{an}\\pos({ax},{yy+40})\\fad(120,160)\\fs{size}{pop}}}{n['text']}")
+            say(6, n["start"], t1, "Num", f"\\an{an}\\pos({ax},{yy})\\fad(120,160)", n["num"])
+            say(6, n["start"], t1, "Stack", f"\\an{an}\\pos({ax},{yy+40})\\fad(120,160)\\fs{size}{pop}", n["text"])
         else:
-            num = f"{{\\fnBarlow SemiBold\\fs{int(size*0.5)}\\c{GOLD}\\fsp6}}{n['num']}{{\\r\\fs{size}}}  "
-            ev.append(f"Dialogue: 4,{ts(n['start'])},{ts(t1)},Stack,,0,0,0,,{{\\an{an}\\pos({ax},{yy})\\fad(120,160)\\fs{size}{pop}}}{num}{n['text']}")
+            num = f"{{\\fn{SMALL}\\fs{int(size*0.42)}\\c{GOLD}\\fsp5}}{n['num']}{{\\r\\fs{size}}}  "
+            say(6, n["start"], t1, "Stack", f"\\an{an}\\pos({ax},{yy})\\fad(120,160)\\fs{size}{pop}", f"{num}{n['text']}")
     names_done = True
 elif names:
     for i, n in enumerate(names):
@@ -189,14 +204,14 @@ elif names:
         rx = SAFE_R - w
         x, y = pick([(rx, 600), (rx, 760), (SAFE_L, 600), (SAFE_L, 760), (rx, SAFE_B - h), (SAFE_L, SAFE_B - h)], w, h, n["start"], en, f"name {n['num']}")
         right = x > 540; an = 9 if right else 7; ax = x + w if right else x
-        ev.append(f"Dialogue: 4,{ts(n['start'])},{ts(en)},Num,,0,0,0,,{{\\an{an}\\pos({ax},{y})\\fad(120,160)}}{n['num']}")
-        ev.append(f"Dialogue: 4,{ts(n['start'])},{ts(en)},Name,,0,0,0,,{{\\an{an}\\pos({ax},{y+40})\\fad(120,160)\\fscx90\\fscy90\\t(0,140,\\fscx100\\fscy100)}}{l1}\\N{l2}")
+        say(6, n["start"], en, "Num", f"\\an{an}\\pos({ax},{y})\\fad(120,160)", n["num"])
+        say(6, n["start"], en, "Name", f"\\an{an}\\pos({ax},{y+40})\\fad(120,160)\\fscx90\\fscy90\\t(0,140,\\fscx100\\fscy100)", f"{l1}\\N{l2}")
 
 if spec.get("watermark", True):
     # Bottom-left, just above where Instagram and TikTok print the handle and
     # caption, and well clear of the icon column on the right.
-    ev.append(f"Dialogue: 1,{ts(0)},{ts(DUR)},Wm,,0,0,0,,{{\\an1\\pos({SAFE_L},{WM_Y})}}STRIVE {{\\c{GOLD}}}ELITE")
-    ev.append(f"Dialogue: 1,{ts(0)},{ts(DUR)},WmSub,,0,0,0,,{{\\an1\\pos({SAFE_L},{WM_Y+44})}}PERSONALIZED REMOTE TRAINING")
+    say(0, 0, DUR, "Wm", f"\\an1\\pos({SAFE_L},{WM_Y})", f"STRIVE {{\\c{GOLD}}}ELITE")
+    say(0, 0, DUR, "WmSub", f"\\an1\\pos({SAFE_L},{WM_Y+40})", "PERSONALIZED REMOTE TRAINING")
 
 styles = f"""[Script Info]
 ScriptType: v4.00+
@@ -207,18 +222,18 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Hook,Barlow Condensed Black,124,{WHITE},{WHITE},{BLACK},&H80000000,0,0,0,0,100,100,0,0,1,5,3,5,40,40,0,1
-Style: Eyebrow,Barlow SemiBold,38,{GOLD},{GOLD},{BLACK},&H80000000,0,0,0,0,100,100,7,0,1,3,2,5,40,40,0,1
-Style: Cap,Barlow Condensed Black,104,{WHITE},{WHITE},{BLACK},&H90000000,0,0,0,0,100,100,0,0,1,5,3,5,60,60,0,1
-Style: Num,Barlow SemiBold,36,{GOLD},{GOLD},{BLACK},&H80000000,0,0,0,0,100,100,7,0,1,3,2,7,0,0,0,1
-Style: Stack,Barlow Condensed Black,72,{WHITE},{WHITE},{BLACK},&H90000000,0,0,0,0,100,100,0,0,1,4,3,7,0,0,0,1
-Style: Name,Barlow Condensed Black,84,{WHITE},{WHITE},{BLACK},&H90000000,0,0,0,0,100,100,0,0,1,4,3,7,0,0,0,1
-Style: Wm,Barlow Condensed Black,54,{WHITE},{WHITE},{BLACK},&H80000000,0,0,0,0,100,100,1,0,1,3,2,3,0,0,0,1
-Style: WmSub,Barlow SemiBold,26,{DIM},{DIM},{BLACK},&H80000000,0,0,0,0,100,100,4,0,1,2,1,3,0,0,0,1
-Style: EndTitle,Barlow Condensed Black,170,{WHITE},{WHITE},{BLACK},&H00000000,0,0,0,0,100,100,2,0,1,0,0,5,0,0,0,1
-Style: EndSub,Barlow SemiBold,34,{WHITE},{WHITE},{BLACK},&H00000000,0,0,0,0,100,100,8,0,1,0,0,5,0,0,0,1
-Style: EndUrl,Barlow Medium,32,{DIM},{DIM},{BLACK},&H00000000,0,0,0,0,100,100,2,0,1,0,0,5,0,0,0,1
-Style: Rule,Barlow Medium,30,{GOLD},{GOLD},{GOLD},&H00000000,0,0,0,0,100,100,0,0,1,0,0,7,0,0,0,1
+Style: Hook,{DISPLAY},128,{WHITE},{WHITE},{BLACK},&H00000000,0,0,0,0,100,100,0,0,1,0,0,5,40,40,0,1
+Style: Eyebrow,{SMALL},30,{GOLD},{GOLD},{BLACK},&H00000000,0,0,0,0,100,100,6,0,1,0,0,5,40,40,0,1
+Style: Cap,{DISPLAY},100,{WHITE},{WHITE},{BLACK},&H00000000,0,0,0,0,100,100,0,0,1,0,0,5,60,60,0,1
+Style: Num,{SMALL},30,{GOLD},{GOLD},{BLACK},&H00000000,0,0,0,0,100,100,5,0,1,0,0,7,0,0,0,1
+Style: Stack,{DISPLAY},72,{WHITE},{WHITE},{BLACK},&H00000000,0,0,0,0,100,100,0,0,1,0,0,7,0,0,0,1
+Style: Name,{DISPLAY},84,{WHITE},{WHITE},{BLACK},&H00000000,0,0,0,0,100,100,0,0,1,0,0,7,0,0,0,1
+Style: Wm,{DISPLAY},54,{WHITE},{WHITE},{BLACK},&H00000000,0,0,0,0,100,100,1,0,1,0,0,3,0,0,0,1
+Style: WmSub,{SMALL_MED},22,{DIM},{DIM},{BLACK},&H00000000,0,0,0,0,100,100,4,0,1,0,0,3,0,0,0,1
+Style: EndTitle,{DISPLAY},176,{WHITE},{WHITE},{BLACK},&H00000000,0,0,0,0,100,100,2,0,1,0,0,5,0,0,0,1
+Style: EndSub,{SMALL},32,{WHITE},{WHITE},{BLACK},&H00000000,0,0,0,0,100,100,9,0,1,0,0,5,0,0,0,1
+Style: EndUrl,{SMALL_MED},30,{DIM},{DIM},{BLACK},&H00000000,0,0,0,0,100,100,2,0,1,0,0,5,0,0,0,1
+Style: Rule,{SMALL_MED},30,{GOLD},{GOLD},{GOLD},&H00000000,0,0,0,0,100,100,0,0,1,0,0,7,0,0,0,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text

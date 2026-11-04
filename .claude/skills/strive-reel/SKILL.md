@@ -24,12 +24,19 @@ the same day. Follow it exactly; change it only on his word.
 
 ## The look
 
-- Fonts: Barlow Condensed Black for anything big, Barlow SemiBold tracked
-  for eyebrows, Barlow Medium for small lines. TTFs are converted from
-  `marketing/outro/src/fonts/*.woff2` with fontTools (see Build).
-- Colours: white text, dark outline (#0d0d0d), brand gold #c8a858 only on
-  the numbers, one key word, the rule and ELITE. No bright yellow, no bars
-  over the video, no em dashes.
+- Fonts (Coach Yinka, Nov 4 2026: "a more premium Nike font ... sleek",
+  replacing Barlow on reels): OSWALD BOLD for every big line (the
+  open-licence twin of Trade Gothic Bold Condensed, Nike's long-time
+  apparel and retail face), INTER SemiBold tracked for eyebrows and the
+  01 02 03 numbers, Inter Medium for small lines. The TTFs and their OFL
+  licences live in this skill's `fonts/` folder; copy that folder next to
+  the reel (the Barlow set stays only for the outro and the static
+  graphics, which keep the Sept 30 brand look).
+- Finish: crisp white type with NO outline, sitting on a soft dark haze
+  (`reel_build.py` draws a blurred black copy of every line one layer
+  below it). Brand gold #c8a858 only on the numbers, the eyebrow, one key
+  word, the rule and ELITE. No bright yellow, no bars over the video, no
+  em dashes.
 - **The list, his preferred style:** gold `01 / 02 / 03` eyebrow numbers,
   the name in white Barlow Condensed Black under each, building up as each
   point is said and staying to the end (`list_style: "stack"`). A small
@@ -72,11 +79,7 @@ will not have a clean spot; say so rather than covering the face.
 
 ```
 pip install opencv-python-headless<5 fonttools brotli   # once per environment
-mkdir -p <reel>/fonts && python3 - <<'EOF'                # once: brand TTFs
-from fontTools.ttLib import TTFont; import glob, os
-for f in glob.glob('marketing/outro/src/fonts/*.woff2'):
-    t = TTFont(f); t.flavor = None; t.save('<reel>/fonts/' + os.path.basename(f)[:-6] + '.ttf')
-EOF
+cp -r .claude/skills/strive-reel/fonts <reel>/fonts         # once: Oswald + Inter TTFs
 python3 .claude/skills/strive-reel/reel_build.py <reel>/spec.json --zoom-only
 python3 .claude/skills/strive-reel/faces.py <reel>/zoomed.mp4 <reel>/faces.json
 python3 .claude/skills/strive-reel/reel_build.py <reel>/spec.json

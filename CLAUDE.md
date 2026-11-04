@@ -2948,6 +2948,11 @@ commit.
       the cones), the cross 3.8 to 7.7; 20.8 s. source.mp4 and audio/
       are gitignored scratch. All five re-sent. SKILL.md and the reel
       README carry the rules. No player data touched.
+      THEN (Coach Yinka: "The speed the cross needs to show the whole
+      thing and should be the first drill"): the cross is now 01, the
+      full 7.8 s clip, with the hook over its first 2.2 s; then kneel
+      and drive, push-up start, drop shuffle sprint, zigzag sprint;
+      24.7 s. Re-sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

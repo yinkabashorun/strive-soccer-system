@@ -51,7 +51,7 @@ by our own retention curve.
 | --- | --- | --- | --- | --- |
 | Weak foot | weak-foot/strive-weak-foot-4-drills.mp4 | 20.4 s | NO WALL NEEDED / 4 WEAK FOOT DRILLS FOR YOUR DRIVEWAY | Tap pull push; Outside pull inside pull; Pop and settle; Pop and juggle |
 | Juggling ladder | juggling-ladder/strive-juggling-ladder-7-levels.mp4 | 24.1 s | THE JUGGLING LADDER / CAN YOUR PLAYER PASS LEVEL 7? | One touch; Two touches each foot; One, two; Laces, inside; Thigh; Thighs, laces; Head it up |
-| Speed | speed/strive-speed-5-drills.mp4 | 20.8 s | SPEED / 5 DRILLS FOR A FASTER FIRST STEP | Kneel and drive; Push-up start; Drop shuffle sprint; Zigzag sprint; The cross |
+| Speed | speed/strive-speed-5-drills.mp4 | 24.7 s | SPEED / 5 DRILLS FOR A FASTER FIRST STEP | The cross (whole clip, Coach Yinka's call Nov 4); Kneel and drive; Push-up start; Drop shuffle sprint; Zigzag sprint |
 | Explosive | explosive/strive-explosive-5-jumps.mp4 | 22.5 s | EXPLOSIVE FIRST STEP / 5 JUMPS. NO GYM. | Pogo; Lateral hops; Broad jumps; Squat jumps; Bulgarian split jumps |
 | Ball mastery | ball-mastery/strive-ball-mastery-few-yards.mp4 | 22.9 s | NO FIELD NEEDED / BALL MASTERY IN A FEW YARDS | Two touch v1; Two touch v2; L turn roll touch; Neymar feint; Juggle and catch |
 

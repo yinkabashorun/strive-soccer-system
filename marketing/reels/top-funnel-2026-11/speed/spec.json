@@ -19,33 +19,33 @@
     {
       "start": 2.3,
       "num": "01",
+      "text": "THE CROSS"
+    },
+    {
+      "start": 7.76,
+      "num": "02",
       "text": "KNEEL AND DRIVE"
     },
     {
-      "start": 3.9,
-      "num": "02",
+      "start": 11.66,
+      "num": "03",
       "text": "PUSH-UP START"
     },
     {
-      "start": 6.6,
-      "num": "03",
+      "start": 14.36,
+      "num": "04",
       "text": "DROP, SHUFFLE, SPRINT"
     },
     {
-      "start": 11.0,
-      "num": "04",
-      "text": "ZIGZAG SPRINT"
-    },
-    {
-      "start": 14.5,
+      "start": 18.76,
       "num": "05",
-      "text": "THE CROSS"
+      "text": "ZIGZAG SPRINT"
     }
   ],
   "punch": true,
   "watermark": true,
   "endcard": true,
   "captions": [],
-  "list_end": 18.0,
+  "list_end": 21.86,
   "loudness": -16
 }

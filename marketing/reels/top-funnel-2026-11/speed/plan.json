@@ -10,39 +10,39 @@
   },
   "segments": [
     {
+      "clip": "../../../../public/drills/speed-the-cross.mp4",
+      "in": 0,
+      "out": 7.76,
+      "num": "01",
+      "text": "THE CROSS"
+    },
+    {
       "clip": "../../../../public/drills/speed-kneel-and-drive.mp4",
       "in": 0.4,
       "out": 4.3,
-      "num": "01",
+      "num": "02",
       "text": "KNEEL AND DRIVE"
     },
     {
       "clip": "../../../../public/drills/speed-push-up-start-sprint.mp4",
       "in": 0.6,
       "out": 3.3,
-      "num": "02",
+      "num": "03",
       "text": "PUSH-UP START"
     },
     {
       "clip": "../../../../public/drills/speed-drop-shuffle-sideways-sprint.mp4",
       "in": 2.4,
       "out": 6.8,
-      "num": "03",
+      "num": "04",
       "text": "DROP, SHUFFLE, SPRINT"
     },
     {
       "clip": "../../../../public/drills/speed-zigzag-sprint.mp4",
       "in": 3.9,
       "out": 7.4,
-      "num": "04",
-      "text": "ZIGZAG SPRINT"
-    },
-    {
-      "clip": "../../../../public/drills/speed-the-cross.mp4",
-      "in": 3.8,
-      "out": 7.7,
       "num": "05",
-      "text": "THE CROSS"
+      "text": "ZIGZAG SPRINT"
     }
   ],
   "fonts": "../fonts",

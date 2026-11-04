@@ -3585,6 +3585,16 @@ commit.
       standalone post and the caption. Public wording only: the course
       inside the app still says director and tryout in its own pages
       (his call whether those follow). Sent.
+      THEN (Coach Yinka, with a screenshot of the recap inside his
+      editor: "The bottom space means it's not spread out as best as
+      it can no?"): the RECAP's rows were bunched at the top with a
+      dead strip above the footer. Row padding 8/7 to 11/10, section
+      gaps 14 to 22 px, the closing line's margin 22 to 30 px, so the
+      grid fills the slide and a clear gap sits above the handle. A
+      first try at 13/12 pushed the closing line onto the handle and
+      was pulled back. His screenshot still showed "the director, the
+      tryout", so his editor held the earlier export: he uses the
+      re-sent recap.png. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

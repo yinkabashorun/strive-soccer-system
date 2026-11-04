@@ -3473,6 +3473,31 @@ commit.
       $400, both from the confirmed rate). The close, the standalone
       post, program.png and the caption carry $985 / $400. Preview
       strip rebuilt. Sent. Stripe needs both prices.
+      THEN (Coach Yinka: "'A break never costs a thing' makes no
+      sense. Say 'a break doesn't cost you'. Also add a slide for
+      community and 'giving them proximity to greatness' with Strive
+      Elite community connecting them to our top players and other
+      like-minded players. Include that in the slide with all the
+      courses"): (1) step 1's tile reads "A break doesn't cost you."
+      (2) A SIXTH STEP: the walk is now cover, 01 the week, 02
+      athleticism, 03 the weapons, 04 watch every game, 05 THE
+      COMMUNITY (new: "Then we'd put them around greatness.", line
+      "Proximity to greatness. Our top players, and players just as
+      hungry, in one room with them.", tile "Strive Elite Community:
+      Our top players and like-minded players, in one place.", photo
+      Gary with the armband and the ECNL patch, photos/step5.jpg), 06
+      the doors (the old step5.html / step5.png / photos/step5.jpg
+      renamed to step6, counters "of 06" on every step), recap,
+      guarantee, cost drop, close: ELEVEN slides. "Our top players"
+      names nobody (the Sept 29 alumni rule); the community is the
+      GroupMe from Oct 16, wins and motivation. (3) The RECAP carries
+      a full-width "Strive Elite Community: Proximity to greatness. Our
+      top players and like-minded players, in one place." row under
+      College and Academy in "The road to the next level"; the headline
+      and the rows tightened so it fits, the close line now "All of it,
+      in one program. The guarantee is next." The standalone post.png
+      was NOT given the row (not in the carousel). Preview strip
+      rebuilt as eleven. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

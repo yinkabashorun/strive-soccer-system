@@ -3246,6 +3246,20 @@ commit.
       cut is superseded; problem.png stays in the folder unused. Step
       slides are brand black with a faint step numeral, no photos.
       Sent, not posted.
+      REJECTED same hour (Coach Yinka, with screenshots of steps 1 to
+      3: "Would Nike post a layout like this? Is this really the
+      standard? No it's not, it also needs to be digestible"): the
+      text-only step slides were a spec sheet, top-heavy with a dead
+      bottom third. REBUILT to the standard: one full-frame image, one
+      headline, one sentence, the item names as gold-outlined chips,
+      nothing else. Images are Strive's own footage, frames pulled from
+      the bank clips in public/drills (step 1 juggling thighs high at
+      the goal; step 2 the cross at dusk; step 3 weak foot tap pull
+      push on the field; step 4 the 15 yard sprint under the lights)
+      and Gary's Fortuna Koln photo on step 5, each graded the same as
+      the cover. Step 5's sentence carries "We never promise a roster
+      spot." Frames are 720p upscaled with a light sharpen; fine at
+      feed size, flagged for anything printed. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

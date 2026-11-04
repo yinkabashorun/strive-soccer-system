@@ -3308,6 +3308,21 @@ commit.
       are deleted from the folder. Every slide in the ten now carries
       a photo of one of the two coaches or is typographic (recap,
       promise, cost drop). Sent.
+      THEN (Coach Yinka: "Frame them correctly with the text like how
+      Nike would"): the five step slides and the close REFRAMED. One
+      layout for all six: the headline alone in the negative space at
+      the top (104 px from the top, 104 px type), the coach's face in a
+      clear band around y 500 with nothing over it, the one sentence
+      and the gold chips low (140 px from the bottom), a top gradient
+      for the headline and a bottom gradient for the copy, the middle
+      untouched. Every photo is pre-composed with PIL into
+      photos/stepN.jpg and photos/close.jpg (scale and offset chosen so
+      the face lands in the band; landscape shots sit on brand black
+      rather than upscaled) and the page shows it full-frame, same
+      grade as the cover. Step 5 keeps the two panels and the gold
+      hairline; the close carries the headline at the top, the price
+      line and the DM "ELITE" pill at the bottom. Copy unchanged from
+      the entry above. Preview strip re-rendered. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

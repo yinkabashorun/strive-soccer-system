@@ -80,6 +80,12 @@ U16, ball at his feet; step 4 Gary with the captain's armband and the ECNL
 patch; step 5 two panels, Coach Yinka in the college lineup at 27 beside
 Gary in the Fortuna Koln 8; the close is Coach Yinka's Gainesville
 celebration. The drill-bank frames and the Oct 4 shoot photos are out.
+FRAMING (Coach Yinka, Nov 4: "Frame them correctly with the text like how
+Nike would"): on every step slide and the close the headline sits alone
+in the negative space at the top, the coach's face in a clear band around
+the middle with nothing over it, the one sentence and the gold chips low;
+each photo is pre-composed into photos/stepN.jpg or photos/close.jpg so
+the face lands in that band, and the page shows it full-frame.
 (Earlier cut: one full-frame image from Strive's own footage (public/drills frames:
 juggling thighs high, the cross, weak foot tap pull push, the 15 yard
 sprint; Gary's Fortuna Koln photo on step 5), one headline, one sentence,)

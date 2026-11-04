@@ -27,7 +27,6 @@ def comp(src,k,head,target,out,canvas=(1080,1350),mirror=False,band_bright=.8,gr
     if out: c.save(out,quality=92)
     return c
 comp("yinka-nva-studio.jpg",1.3,(609,289),(600,535),"photos/step1.jpg",grade=(.72,1.18))  # step 1: the studio portrait, his "different picture" Nov 4; the grey backdrop graded down toward brand black
-comp("yinka-nva-standing.jpg",1.5,(566,276),(620,500),"photos/step1-standing.jpg")  # the other option offered
 comp("gary-armenia-u19.jpg",1.3,(780,470),(700,490),"photos/step2.jpg")
 comp("gary-armenia-u16.jpg",1.5,(575,160),(620,510),"photos/step3.jpg")
 comp("gary-ecnl-captain.jpg",1.6,(340,95),(430,490),"photos/step4.jpg")

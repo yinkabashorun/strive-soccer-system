@@ -3380,6 +3380,9 @@ commit.
       The standing shot rendered beside it as step1-standing.png
       (step1-standing.html, photos/step1-standing.jpg) for him to pick;
       the strike photo stays in src. Preview strip rebuilt. Both sent.
+      PICKED (Coach Yinka: "The black armed crossed one"): the studio
+      portrait stands as step 1; the standing option's files removed,
+      the photo stays in src.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

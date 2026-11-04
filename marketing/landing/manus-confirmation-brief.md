@@ -22,9 +22,9 @@ run by Coach Yinka and Coach Gary. Two ways to train with us:
   week in the app, four sessions of about 40 minutes, a video for every
   drill, progress tracking, and a weekly text to the parent. Built by
   Coach Yinka and Coach Gary around what that player specifically needs
-  to reach the next level. $500 a month, month to month. Anyone who
-  joins by Nov 1 locks in $249 a month for life. Same-day refund if it's
-  not for them.
+  to reach the next level. As of Nov 4 2026 it is a 90-day program,
+  $985 paid in full or $400 a month, with a guarantee (see
+  manus-offer-update.md). The old $500 / $249 offer is retired.
 
 The call decides which fits. Many players do both.
 
@@ -66,10 +66,9 @@ Two cards, side by side on tablet and up, stacked on phones:
    1-on-1s, duos, and Friday groups in Northern Virginia. Field work
    with Coach Yinka and Coach Gary, built around your player.
 2. **Strive Elite, at home**
-   A new week every Monday in the app. Four sessions, a video for every
-   drill, and a text to you every week. Built by both of us around what
-   your player specifically needs. $500 a month. Join by Nov 1 and lock
-   in $249 a month for life.
+   SUPERSEDED Nov 4 2026 (the $500 / $249-by-Nov-1 copy that stood here
+   is gone). Use the card copy in manus-offer-update.md, section B: the
+   90-day program, $985 paid in full or $400 a month, and the guarantee.
 
 ### Second button (outlined, white border)
 Book your call

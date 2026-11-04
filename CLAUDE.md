@@ -3736,6 +3736,17 @@ commit.
       refund. The standalone post and the caption read the same:
       "If none of your player's coach, teammates or the other parents
       are shocked at the difference, you don't pay us a cent." Sent.
+      THEN (Coach Yinka: "Leave out the word none just say if
+      their"): his decision after the reading risk was flagged. Step 2
+      is "If their coach, teammates or the other parents aren't shocked
+      at the difference, you don't pay us a cent." on the slide, the
+      standalone post ("If your player's coach, teammates or the other
+      parents aren't shocked ...") and the caption. THE RISK STANDS AND
+      MUST BE CLOSED IN THE STAMP, not on the slide: a reader can take
+      this to mean any one of the three not being shocked triggers the
+      refund. The terms written at the stamp should say the guarantee
+      is judged on the whole (nobody shocked = refund) or that the
+      parent's call at day 90 decides. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

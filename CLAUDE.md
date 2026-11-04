@@ -3223,6 +3223,29 @@ commit.
       THEN (Coach Yinka: "Nope that one won't work"): the mirrored
       standing option is OUT (file and crop removed); THE COVER IS THE
       SPRINT VERSION, cover.png, him mirrored and driving toward Gary.
+      THEN (Coach Yinka: "the rest of the carousel should go with the
+      cover ... first we help them do this, then this ... problem,
+      solution, problem, solution ... end with a cost drop ... put a
+      pop-up quiz for that"; quiz: the walk, keep the grid as the
+      recap, the $2,320-style $80-rate anchor, the promise on its own
+      slide): THE WALK BUILT, ten slides in
+      marketing/announcement/offer-post/: cover; five step slides, each
+      half problem, half what we built, answering the cover's question
+      in order (01 the week + Extra Work + Pick Up Where You Left Off;
+      02 the body: Strength, Speed, Nutrition Guide; 03 the weapons:
+      Weak Foot, First Touch, Passing, Scoring Goals, Dribbling; 04
+      watch every game: Film Room, Monthly 1:1 Call, Send a Clip, Side
+      by Side; 05 open the doors: College Recruiting, Academy
+      Recruiting, "What we never promise: a roster spot or a
+      scholarship"); the twelve-block grid as the recap; the promise;
+      THE COST DROP at the confirmed $80 session rate (week $1,280,
+      Film Room and the call $400, ten courses $800, Side by Side and
+      Send a Clip $160, $2,640 a month struck through, Strive Elite
+      $500/mo for 90 days; the deck's $2,320 was six courses, the post
+      now carries ten, same rule, flagged); the close. The six-slide
+      cut is superseded; problem.png stays in the folder unused. Step
+      slides are brand black with a faint step numeral, no photos.
+      Sent, not posted.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

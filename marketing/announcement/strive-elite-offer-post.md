@@ -66,7 +66,30 @@ $500 a month, for 90 days. All included.
 DM ELITE.
 ```
 
-## The carousel, six slides (Nov 4 2026, Coach Yinka: "package this in a
+## The carousel, THE WALK, ten slides (Nov 4 2026, Coach Yinka: "first
+we help them do this, then this ... problem, solution ... and then the
+end with a cost drop"; quiz answers: the walk, keep the grid as the recap,
+the $80-rate stack as the anchor, the promise on its own slide)
+
+Order: cover, step1, step2, step3, step4, step5, recap, promise, costdrop,
+close (PNG per name; preview strip carousel-preview.png). Each step slide
+is half problem, half what we built, answering the cover's question in
+order: 01 First, we'd build their week ourselves (The Week, Extra Work,
+Pick Up Where You Left Off); 02 Then we'd build the body (Strength, Speed,
+Nutrition Guide); 03 Then we'd sharpen the weapons (Weak Foot, First
+Touch, Passing, Scoring Goals, Dribbling); 04 Then we'd watch every game
+(Film Room, Monthly 1:1 Call, Send a Clip, Side by Side); 05 Then we'd
+open the doors (College Recruiting, Academy Recruiting, "What we never
+promise: a roster spot or a scholarship"). The recap is the twelve-block
+grid with its close line swapped for "Every one of these, in one program
+... The promise is next." The cost drop prices every coach touch at the
+confirmed $80 private-session rate (the deck's rule): the week 16 x $80 =
+$1,280; Film Room and the call $400; ten courses $800; Side by Side and
+Send a Clip $160; $2,640 a month struck through, then Strive Elite $500/mo
+for 90 days with the promise. (The deck's $2,320 was six courses; the post
+now carries ten, same rule.)
+
+## The earlier six-slide cut (Nov 4 2026, Coach Yinka: "package this in a
 way where every single follower I have swipes")
 
 Order: cover.png, problem.png, post.png, promise.png, program.png,

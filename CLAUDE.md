@@ -3027,6 +3027,23 @@ commit.
       sprint in through the cones, the turn, the backpedal out; the
       straight zigzag sprint is out). 29.8 s, still silent at source.
       README list and caption updated. Rebuilt and re-sent.
+- [x] Nov 4 2026, THE OFFER POST RE-SENT (Coach Yinka: "I need the final
+      StriveElite post"; then "What about the shooting & finishing in
+      the box course"; then "I know just cap about it for now"): the
+      post.png and caption sent as built Nov 1. Checked the live
+      database first: NO shooting or finishing course exists and the
+      bank holds zero Shooting drills (the clips were never sent; the
+      pillar and needs_goal flag have been ready since Oct 26). On his
+      word a TENTH block, FINISHING IN THE BOX ("Shooting, first touch
+      to strike."), was added to the image and the caption, with no
+      drill count on purpose; the Monthly 1:1 Call line shortened so
+      every block is one line. THIS BLOCK IS NOT TRUE IN THE APP YET
+      and breaks his own Oct 12 announce-only-what-is-real rule, said
+      so once, his call; it becomes true the day the clips land, are
+      banked under Shooting with the course tick, and the course is
+      switched on. STILL HIS: the "join by Nov 1" price line is stale
+      (today is Nov 4, nothing posted): extend the date or post at
+      $500, one line and a re-render. No player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

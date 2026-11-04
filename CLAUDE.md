@@ -3177,6 +3177,17 @@ commit.
       shoot shots. None of those are in the repo (only the Oct 4 shoot
       and the private Joseph Igot highlight photo), so the cover, slide
       2 and the close wait on the photos he sends; slides 3 to 5 stand.
+      THEN (Coach Yinka: "For the hook, say something like, we thought
+      to ourselves, if a parent paid us $100,000 to transform their kid
+      as a player, or to get their kid on a pro academy, what would we
+      do? And then we put it all into one program. Strive Elite. Swipe
+      to see the inside"): COVER REWRITTEN to his hook ("their player"
+      by the Oct 7 rule; "pro academy" kept as the hypothetical, not a
+      promise): eyebrow "We asked ourselves one question", the question
+      with $100,000 in gold, "Then we put all of it into one program.
+      STRIVE ELITE.", "Swipe to see inside". Rendered on brand black
+      with a photos/hero.jpg slot for the group photo he sends. The
+      promise stays as slide 4's headline. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

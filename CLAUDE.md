@@ -3089,6 +3089,14 @@ commit.
       standing as Scoring Goals and Passing. The Oct 11 flag on
       "most ... on your team" promises stands as a note, his call.
       Caption and story version updated. Sent.
+      THEN (Coach Yinka: "Put the dribbling transformation on the
+      right make the copy work so it fits you can change it"): the
+      block sits in the right column beside Monthly 1:1 Call, six
+      even rows; on the image it is named 30-DAY DRIBBLING ("The
+      silkiest, most dangerous dribbler.") because the full name
+      wrapped to two lines; the caption keeps the full name 30-DAY
+      DRIBBLING TRANSFORMATION. Spacing restored to the original
+      rhythm. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

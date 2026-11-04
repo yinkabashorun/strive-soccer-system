@@ -72,7 +72,7 @@ College Recruiting. The CV, the emails, the tape, the list.
 Academy Recruiting. The ladder, the director, the tryout.
 Film Room. Your clips, broken down every week.
 Monthly 1:1 call. A deep dive into what to improve next.
-30-Day Dribbling Transformation. The silkiest, most dangerous dribbler on the team.
+30-Day Dribbling. The silkiest, most dangerous dribbler on the team.
 
 $249 a month locked for life if you join by Nov 1. DM ELITE.
 ```

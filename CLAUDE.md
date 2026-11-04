@@ -3220,6 +3220,9 @@ commit.
       mirrored too, so in both options he faces Gary; the Audi rings
       and adidas mark read reversed on it. cover.png still the sprint
       version until he picks. Sent.
+      THEN (Coach Yinka: "Nope that one won't work"): the mirrored
+      standing option is OUT (file and crop removed); THE COVER IS THE
+      SPRINT VERSION, cover.png, him mirrored and driving toward Gary.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

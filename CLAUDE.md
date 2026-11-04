@@ -3453,6 +3453,26 @@ commit.
       three or five items (the last row stretches) and two by two for
       four; the bottom gradient starts higher so the sentence reads
       over the photo. Preview strip rebuilt. The five sent.
+      THEN (Coach Yinka: "forget about side by side remove that box.
+      Then find a way to present the pricing in a better way that
+      makes them feel stupid for saying no. Also make it 985 up front
+      or 400 monthly"): (1) SIDE BY SIDE is off the offer surface: the
+      tile is gone from step 4 (Film Room, Monthly 1:1 Call, Send a
+      Clip remain) and the cost drop's row is "Send a Clip, two reviews
+      of your player's own clips, $160". The app feature itself is
+      untouched. (2) THE PRICE, HIS NUMBERS, STAMPED: $985 PAID IN FULL
+      for the 90 days, or $400 A MONTH (three months, $1,200).
+      Supersedes my $1,250 / $500 of the same day. (3) THE COST DROP
+      now sells against our own confirmed $80 private-session rate,
+      nothing invented: the four rows, "Every month, piece by piece
+      $2,640", then "For the 90 days $7,920" struck through, then the
+      gold block "Strive Elite, all 90 days. Paid in full. About twelve
+      private sessions with us, for three months of everything above.
+      With the guarantee. $985", then "Or $400 a month. Five private
+      sessions, for a month of all of it." (12 x $80 = $960, 5 x $80 =
+      $400, both from the confirmed rate). The close, the standalone
+      post, program.png and the caption carry $985 / $400. Preview
+      strip rebuilt. Sent. Stripe needs both prices.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

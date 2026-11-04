@@ -61,7 +61,7 @@ Every member gets all of it, and a guarantee with it. Your player does 75% of th
 
 For ECNL and MLS NEXT players who want the next level. Designed by players who have done just that.
 
-$1,250 paid in full for the 90 days, or $500 a month. All included.
+$985 paid in full for the 90 days, or $400 a month. All included.
 
 DM ELITE.
 ```
@@ -167,13 +167,14 @@ month at $2,320 of coaching at his own $80 rate; Film Room every week
 and a call every month cap how many families two coaches can serve, so
 revenue per family has to carry the promise; ECNL and MLS NEXT families
 already pay club fees in that range (FVA Union about $4,245 a year in
-the Sept 14 research). PAID IN FULL (Coach Yinka, Nov 4: "package the price into a pif
-model, whatever you think will work best"; the number is my call,
-unstamped): $1,250 paid in full for the 90 days, or $500 a month for
-three months ($1,500). One payment saves $250, half a month; the family
-is committed to the full 90 days the promise needs; the promise refunds
-the full $1,250 at day 90 on the parent's word. Paid in full leads on
+the Sept 14 research). PAID IN FULL, STAMPED (Coach Yinka, Nov 4: "make it 985 up front or 400
+monthly"): $985 paid in full for the 90 days, or $400 a month for three
+months ($1,200). The cost drop sells it against our own $80 session rate:
+$7,920 for the 90 days bought piece by piece, struck; $985 is about twelve
+private sessions with us; $400 a month is five. The guarantee refunds
+what was paid at day 90 on the parent's word. Paid in full leads on
 every price line, monthly is the alternative. Stripe needs both prices.
+(My earlier $1,250 / $500 is superseded.)
 
 THE PROMISE MECHANICS, his to stamp before the first family joins: the
 75% is sessions done over the 90 days as the app counts them (courses
@@ -198,7 +199,7 @@ Film Room. Your clips, broken down every week.
 Monthly 1:1 call. A deep dive into what to improve next.
 Dribbling Transformation. Most dangerous dribbler on the team.
 
-Do 75% of the work for 90 days. If the people around your player aren't shocked, you don't pay. $1,250 paid in full, or $500 a month. DM ELITE.
+Do 75% of the work for 90 days. If the people around your player aren't shocked, you don't pay. $985 paid in full, or $400 a month. DM ELITE.
 ```
 
 Flags: the General Nutrition Guide is live (Nov 1). SCORING GOALS (first called Finishing in the

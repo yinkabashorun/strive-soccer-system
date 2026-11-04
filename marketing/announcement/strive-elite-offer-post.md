@@ -61,7 +61,7 @@ Every member gets all of it, and a promise with it. Put in 75% of the work for 9
 
 For ECNL and MLS NEXT players who want the next level. Designed by players who have done just that.
 
-$500 a month, for 90 days. All included.
+$1,250 paid in full for the 90 days, or $500 a month. All included.
 
 DM ELITE.
 ```
@@ -166,8 +166,13 @@ month at $2,320 of coaching at his own $80 rate; Film Room every week
 and a call every month cap how many families two coaches can serve, so
 revenue per family has to carry the promise; ECNL and MLS NEXT families
 already pay club fees in that range (FVA Union about $4,245 a year in
-the Sept 14 research). No pay-in-full price on the post; that stays a
-call-only option if he wants one.
+the Sept 14 research). PAID IN FULL (Coach Yinka, Nov 4: "package the price into a pif
+model, whatever you think will work best"; the number is my call,
+unstamped): $1,250 paid in full for the 90 days, or $500 a month for
+three months ($1,500). One payment saves $250, half a month; the family
+is committed to the full 90 days the promise needs; the promise refunds
+the full $1,250 at day 90 on the parent's word. Paid in full leads on
+every price line, monthly is the alternative. Stripe needs both prices.
 
 THE PROMISE MECHANICS, his to stamp before the first family joins: the
 75% is sessions done over the 90 days as the app counts them (courses
@@ -192,7 +197,7 @@ Film Room. Your clips, broken down every week.
 Monthly 1:1 call. A deep dive into what to improve next.
 Dribbling Transformation. Most dangerous dribbler on the team.
 
-Do 75% of the work for 90 days. If the people around your player aren't shocked, you don't pay. $500 a month. DM ELITE.
+Do 75% of the work for 90 days. If the people around your player aren't shocked, you don't pay. $1,250 paid in full, or $500 a month. DM ELITE.
 ```
 
 Flags: the General Nutrition Guide is live (Nov 1). SCORING GOALS (first called Finishing in the

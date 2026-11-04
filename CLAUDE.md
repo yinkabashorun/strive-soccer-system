@@ -3347,6 +3347,28 @@ commit.
       reads. The reflected top band is dimmed hard on this one (night
       sky lights turned it brown at the default). The five step slides
       keep the headline at the top. Preview strip rebuilt. Sent.
+      THEN (Coach Yinka sent a photo of Gary in the middle of the
+      Armenia line, number 8 between 7 and 21: "for this I'll give Gary
+      another picture he's in the middle"): step 5's right panel is
+      that photo (photos/src/gary-armenia-u19-lineup.jpg, the phone
+      screenshot's black bars cropped off), Gary's face level with
+      Coach Yinka's in the college lineup on the left, two anthem-line
+      shots side by side. The Fortuna Koln photo stays in src and on
+      the cover.
+      DECIDED Nov 4 2026, PAID IN FULL (Coach Yinka: "let's package the
+      price into a pif model, whatever you think will work best"; the
+      number is MY CALL, unstamped): $1,250 PAID IN FULL for the 90
+      days, or $500 a month for three months ($1,500). One payment
+      saves $250, half a month; the family is committed to the full 90
+      days the promise needs; the promise refunds the full $1,250 at
+      day 90 on the parent's word. Paid in full leads on every price
+      line, monthly is the alternative: the cost drop's gold block
+      ($2,640 struck, "$1,250", "All 90 days, paid in full. With the
+      promise. Or $500 a month."), the close's line, the standalone
+      post's price line, program.png, the caption and the story
+      version in strive-elite-offer-post.md. Supersedes the Oct 25
+      "3 months for $1,350" proposal. Stripe needs both prices (the
+      $350 standard price is still there). Sent, not posted.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

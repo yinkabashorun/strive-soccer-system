@@ -3021,6 +3021,12 @@ commit.
       hook is "EXPLOSIVE FIRST STEP / 5 JUMPS." (the "NO GYM." line is
       gone; the clips were filmed in a gym). Caption's "no gym
       membership" removed too. Rebuilt and re-sent.
+      THEN (Coach Yinka: "Make the last speed drill the zigzag forward
+      backward one"): 05 on the speed reel is now ZIGZAG SPRINT AND
+      BACKPEDAL (speed-zigzag-sprint-and-backpedal, 0.8 to 9.4 s: the
+      sprint in through the cones, the turn, the backpedal out; the
+      straight zigzag sprint is out). 29.8 s, still silent at source.
+      README list and caption updated. Rebuilt and re-sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

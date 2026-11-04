@@ -38,11 +38,11 @@
       "text": "DROP, SHUFFLE, SPRINT"
     },
     {
-      "clip": "../../../../public/drills/speed-zigzag-sprint.mp4",
-      "in": 3.9,
-      "out": 7.4,
+      "clip": "../../../../public/drills/speed-zigzag-sprint-and-backpedal.mp4",
+      "in": 0.8,
+      "out": 9.4,
       "num": "05",
-      "text": "ZIGZAG SPRINT"
+      "text": "ZIGZAG SPRINT AND BACKPEDAL"
     }
   ],
   "fonts": "../fonts",

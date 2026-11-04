@@ -3800,6 +3800,34 @@ commit.
       continuation, Stripe prices $985 and $400 with the $350 removed,
       and the Instagram DM reply for ELITE. The slide 2 sets and reps
       are tougher than the bank's; the bank still shows the old ones.
+- [x] WRITTEN Nov 4 2026, THE MANUS OFFER UPDATE (Coach Yinka: "Give an
+      update to manus to update copy on our new offer"): paste-ready brief
+      at marketing/landing/manus-offer-update.md. LANDING PAGE: the old
+      $500 / "lock $249 for life" offer block is replaced by four
+      sections between Fair questions and the form: WHAT'S INSIDE
+      ("Every member gets all of it", the ECNL and MLS NEXT aim line, four
+      groups: the week, courses on top of the weekly sessions, the road
+      to the next level with the community, with Coach Yinka and Coach
+      Gary: Film Room, Monthly 1:1 Call, Send a Clip; the carousel's
+      name-plus-destination lines, no counts), THE 90-DAY GUARANTEE (the
+      approved three statements and the 75% fine print), THE PRICE
+      ($7,920 struck, $985 paid in full, "the price of one private
+      session a week for three months, except this is all of it", or
+      $400 a month, "priced at our own $80 session rate") and the closing
+      line now "We'll" not "I'll". CONFIRMATION PAGE: only the Strive
+      Elite at-home card changes. Both older briefs carry a SUPERSEDED
+      pointer where the old offer copy stood. The update's hard rules
+      allow only the numbers it names (90 days, 75%, $985, $400, $7,920,
+      $80) and ban $249, $350, $500, Nov 1/2, "month to month" and
+      same-day refund copy on those pages. FLAGGED to him in the file, not
+      decided: the filmed VSL still carries the old pricing; Passing,
+      Scoring Goals and Dribbling Transformation are not courses in the
+      app and Film Room and the call formats are unstamped, yet the page
+      lists them on the carousel's authority; the guarantee terms and
+      Stripe's $985 / $400 prices are still unstamped; /demo in this
+      repo (DemoLanding.tsx), the outro, ad 5 and the deck still carry
+      the old $249 / $500 offer. Nothing on /demo changed. No player data
+      touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

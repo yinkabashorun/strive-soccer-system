@@ -114,11 +114,10 @@ Three cards, one column:
    manage, no falling behind.
 
 ### Offer block
-A card with a gold 30% border and a faint gold fill, centered text:
-- Large: **$500** then smaller "/mo"
-- Line: "Starting Nov 2. Join by Nov 1 and lock $249/mo for life."
-- Bold line: "Tell us about your player below. I'll personally reach out
-  to get your call on the books."
+SUPERSEDED Nov 4 2026. The $500 / "lock $249 for life" block that stood
+here is replaced by What's inside, the 90-day guarantee and the $985 /
+$400 price block. Exact copy: manus-offer-update.md in this folder. Do
+not use the old block.
 
 ### The form (the close)
 Embed this GoHighLevel survey exactly, full width, white background,

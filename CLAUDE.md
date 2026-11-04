@@ -3687,6 +3687,21 @@ commit.
       drill bank or public/drills; the bank's V-ups row still plays
       its Manus video. If he wants this clip to replace it, say so
       and it goes in with the standard encode. Sent.
+      THEN (Coach Yinka: "Final guarantee page"): the 90-DAY
+      GUARANTEE slide (promise.png) is laid out as THREE NUMBERED
+      STEPS with hairline rules, the words exactly as approved:
+      01 "Your player does 75% of the work we give them for 90 days."
+      02 "If their teammates and their parents aren't coming up to you
+      shocked at the difference, you don't pay us a cent." 03 "And we
+      keep working with your player, free, until they are." The fine
+      print is unchanged. Before it was three paragraphs of text; the
+      structure was not visible at a glance. STILL UNSTAMPED, flagged
+      again with this send: what the 75% counts (proposed: sessions
+      done as the app counts them, courses untracked), what "don't pay
+      a cent" means for the $985 paid in full (proposed: refunded at
+      day 90, every dollar, on the parent's word, and the $400 monthly
+      family stops paying and gets the paid months back), and that the
+      free continuation has no cap. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

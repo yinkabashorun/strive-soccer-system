@@ -3651,6 +3651,15 @@ commit.
       checked), so they cannot be framed for thumbnails; if he wants
       one on the slide, send the file or a frame and it goes in. The
       two wall drills mean this is a player with a wall. Sent.
+      THEN (Coach Yinka: "Why does the strength not have a picture?"
+      then "don't do single leg RDL, do a core workout"): the
+      finisher has no picture because its clip is on files.manuscdn.com,
+      which this environment's network policy blocks (403 from the
+      proxy, checked); I did not fake one. He can add that host under
+      Allowed domains in the environment's network settings, or send
+      the clip. The finisher is now a CORE drill from the bank:
+      Strength: V-ups, 3 x 10, rest 30 sec (was Single leg RDL). Still
+      no thumbnail, same reason. Preview strip rebuilt. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

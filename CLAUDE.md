@@ -3498,6 +3498,23 @@ commit.
       in one program. The guarantee is next." The standalone post.png
       was NOT given the row (not in the carousel). Preview strip
       rebuilt as eleven. Sent.
+      REVERSED minutes later (Coach Yinka: "Don't add a new slide for
+      it. Once done send final revision"; and on the cost drop's
+      three lines: "Can this copy make more sense to the reader before
+      you send final post"): the community SLIDE is gone (step5
+      community files removed, the doors back to step5, counters "of
+      05"); the community stays as the full-width row on the recap.
+      THE COST DROP rewritten so it reads top to bottom: eyebrow "What
+      all of this would cost on its own", headline "Priced piece by
+      piece, at our $80 session rate.", the four rows (Ten courses now
+      "One coaching session each."), then "Adds up to, every month
+      $2,640", "Over the 90 days $7,920" struck, the gold block
+      "Strive Elite. All of it, 90 days. One payment. The price of
+      twelve private sessions, for three months of everything above.
+      With the guarantee. $985", then "Or $400 a month for three
+      months. The price of five sessions, for a month of all of it."
+      FINAL REVISION sent, ten slides: cover, five steps, recap,
+      guarantee, cost drop, close. Not posted.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

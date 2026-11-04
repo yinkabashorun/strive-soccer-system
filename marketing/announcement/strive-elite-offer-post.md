@@ -79,8 +79,11 @@ arrive and are then rebuilt. No stock, no generated images, no alumni.
    If a parent paid us $100,000 to get their player into a pro academy,
    what would we do? Then we put all of it into one program. Strive
    Elite." Eyebrow "For ECNL and MLS NEXT players", "Swipe to see
-   inside". Photo slot photos/hero.jpg (a big group session or camp
-   photo, his to send); brand black until then. The earlier promise
+   inside". Two-panel photo cover: Coach Yinka (left, daylight, the NVA
+   kit) and Coach Gary (right, night, SC Fortuna Koln number 8), his own
+   photos sent Nov 4 (photos/yinka.jpg, photos/gary.jpg, 540x1350 halves
+   cropped so both faces sit level), a gold hairline between them, one
+   grade and one gradient over both, COACH YINKA / COACH GARY tags. The earlier promise
    hook moved to slide 4 only.
 2. problem: the /demo headline "Team training 3-4x a week is not close to
    enough." then "The next level is decided in the hours between

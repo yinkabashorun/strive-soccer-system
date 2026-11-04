@@ -3188,6 +3188,20 @@ commit.
       STRIVE ELITE.", "Swipe to see inside". Rendered on brand black
       with a photos/hero.jpg slot for the group photo he sends. The
       promise stays as slide 4's headline. Sent.
+      THEN (Coach Yinka sent two photos, himself in the NVA kit on a
+      field by day and Gary in the SC Fortuna Koln number 8 at night:
+      "Use these two photos for the cover be creative it better be
+      insane and high quality and sleek"): COVER REBUILT as a two-panel
+      photo cover, him left and Gary right, each a 540x1350 half
+      cropped so the two faces sit level, a gold hairline between the
+      panels, one grade (slight desaturate, a touch of contrast) and
+      one gradient pulling day and night together, COACH YINKA / COACH
+      GARY tags at the top of each panel, the $100,000 question and
+      STRIVE ELITE over the dark lower third, Swipe to see inside.
+      Photos kept in marketing/announcement/offer-post/photos/
+      (yinka.jpg, gary.jpg). Preview strip re-rendered. Sent. Slides 2
+      and 6 still carry the Oct 4 shoot photos until his group, camp
+      and story photos arrive.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

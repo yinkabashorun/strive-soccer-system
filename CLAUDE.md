@@ -3660,6 +3660,21 @@ commit.
       the clip. The finisher is now a CORE drill from the bank:
       Strength: V-ups, 3 x 10, rest 30 sec (was Single leg RDL). Still
       no thumbnail, same reason. Preview strip rebuilt. Sent.
+      THEN (Coach Yinka: "For the 3rd drill do the 3 cone turning
+      drill. And make sets and reps a bit more intense"): drill 3 is
+      now "3 cone turning drill" (Passing, wall drill, clip
+      triangle-turning.mp4, frame at 2.4 s). THE NUMBERS ON SLIDE 2 NOW
+      DIFFER FROM THE BANK, by his ask, and the slide is the only
+      place they are stated: Bulgarian split jumps 4 x 10 each leg
+      (bank: 3 x 8); Wall pass behind the leg 4 x 90 sec, rest 20 sec
+      (bank 3 x 90, rest 30); 3 cone turning drill 4 x 90 sec, rest 20
+      sec (bank 3 x 90, rest 30); Push pull, fake roll 4 x 1 min, rest
+      20 sec (bank 3 x 1, rest 30); V-ups 4 x 12, rest 20 sec (bank 3
+      x 10, rest 30). Sets +1, rest -10 sec, reps up a little. THE
+      APP STILL SHOWS THE BANK NUMBERS: a parent who opens a session
+      sees the old ones. Flagged to him with the one-tap fix (edit the
+      reps at /coach/drills so the app matches the graphic); not done,
+      it is a drill-bank change and his coaching call. Sent.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

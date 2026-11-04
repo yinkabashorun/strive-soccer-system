@@ -3782,6 +3782,8 @@ commit.
       player." The inside paragraph, the private-session comparison
       and the $100,000 question are cut because the slides carry
       them. Saved in strive-elite-offer-post.md. Nothing posted.
+      CORRECTION: the rewritten caption is 525 characters, not 650 (the
+      first line is exactly 125, so it shows whole before the "more" cut).
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

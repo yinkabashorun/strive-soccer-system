@@ -3925,6 +3925,48 @@ commit.
       product's delivered course, and whether the $97 page stays or
       retires, is not answered. Not verified in a real signed-in browser
       from here. No player data touched.
+- [x] REBUILT Nov 5 2026, THE DRIBBLING TRANSFORMATION COURSE AS A
+      NATIVE COURSE (Coach Yinka, after two more zips that were
+      byte-identical to the first: "I want you to rebuild it and host on
+      your OWN domain. but you dont have access to the course
+      material?"): I DID have the course material, every word of it in
+      the zip's 28 pages; what I lacked was the video FILES, which sit on
+      files.manuscdn.com (blocked here) and which the zip never held. Of
+      the 15 video links in the course, 14 are drills (the same Manus
+      files the drill bank already uses; the hero .mov is not in the
+      bank). Migration 060 APPLIED TO PROD in one call and verified
+      (lesson kind, no address, ON, 27 steps, 14 with video): the course
+      row changes from a link to a LESSON course of 27 pages in six parts
+      (Start here: welcome, philosophy, session structure; Phase 1 Cone
+      Weave, 0 to 15 min: overview + 3 drills; Phase 2 Ball Mastery, 15 to
+      25 min: overview + 2 drills; Phase 3 1v1 Skills, 25 to 60 min:
+      overview + 9 drills; The program: the 60-minute session and the
+      30-day plan; Mindset: comfort zone, control, talent and work, you
+      have everything you need, now train). Each drill is a page with its
+      video, its specs line (sets, reps, intensity, rest) and its setup,
+      execution and key cues. Every word is the course's own; the ONLY
+      change is the em dashes, which became colons, commas and full
+      stops (house rule). Intro lines are his own phrases ("60 minutes of
+      structured training", "Train 5 days a week, minimum", "Consistency
+      beats intensity every time"). The static site hosting built hours
+      earlier (the /learn route, its content folder, the registry, two
+      test files, the middleware and config entries) is REMOVED, so there
+      is one path, not two; the link-course kind and its same-site
+      address stay as a general feature. verify green (148 tests).
+      WHAT IS STILL NOT OURS: the 14 drill videos still stream from
+      Manus like the 26 other bank clips (OPEN: migrate Manus-hosted
+      drill videos); to move them, Coach Yinka adds files.manuscdn.com to
+      Allowed domains in the environment's network settings, or sends the
+      files. NOT carried over: the hero video (a file not in the repo) and
+      the two quote photos (Iniesta, Ronaldo), since lesson pages have no
+      image field. FLAGS: the course's own pages disagree on timing (the
+      Session structure page puts Cone Weave at 0 to 15 min; the
+      60-minute session page puts a warm-up at 0 to 15 and Cone Weave at
+      15 to 25), copied as written; the Ronaldinho Step Over video is the
+      bank's paused "Stepover" file, fine here because lesson pages do not
+      check the bank; the Netlify copy stays public until he closes it;
+      the public $97 /dribbling-course page and checkout still exist and
+      whether they stay is unanswered. No player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

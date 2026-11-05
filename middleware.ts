@@ -13,7 +13,6 @@ export const config = {
     "/homework/:path*",
     "/progress/:path*",
     "/coach/:path*",
-    "/learn/:path*",
     "/login",
     "/signup",
   ],

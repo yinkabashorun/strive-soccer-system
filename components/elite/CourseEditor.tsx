@@ -176,7 +176,7 @@ export function CourseEditor({ courses, bank }: { courses: Course[]; bank: Drill
               <input
                 value={courseDraft.external_url}
                 onChange={(e) => setCourseDraft({ ...courseDraft, external_url: e.target.value })}
-                placeholder="https://... or /learn/..."
+                placeholder="https://... or /courses/..."
                 className={inputCls}
               />
             </div>

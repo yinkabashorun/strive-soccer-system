@@ -172,11 +172,11 @@ export function CourseEditor({ courses, bank }: { courses: Course[]; bank: Drill
           </div>
           {courseDraft.kind === "link" && (
             <div>
-              <label className={labelCls}>Address (opens when a member taps the course)</label>
+              <label className={labelCls}>Address (opens when a member taps the course; https or a path on this site)</label>
               <input
                 value={courseDraft.external_url}
                 onChange={(e) => setCourseDraft({ ...courseDraft, external_url: e.target.value })}
-                placeholder="https://"
+                placeholder="https://... or /learn/..."
                 className={inputCls}
               />
             </div>

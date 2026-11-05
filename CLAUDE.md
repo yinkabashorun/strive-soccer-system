@@ -3880,6 +3880,51 @@ commit.
       No player data touched.
       CORRECTION: the course count above is garbled. The tab shows EIGHT
       active courses (the seven live before, plus Dribbling Transformation).
+- [x] HOSTED Nov 5 2026, THE DRIBBLING TRANSFORMATION SITE BEHIND THE
+      LOGIN (Coach Yinka: "Can I send you the zip for you to host it?",
+      "Behind login", then the zip ball-mastery-course-no-password.zip):
+      28 static pages (an index and 27 slides: welcome, philosophy,
+      session structure, three phases with their drills, the 60-minute
+      session, the 30-day plan, mindset, final message, outro), no
+      scripts, no password, Google Fonts and 19 videos hosted on
+      files.manuscdn.com. I READ the index and the hero, a drill, the
+      30-day plan and the outro in full and checked every page for
+      scripts, external addresses and banned words: no scripts, no AI
+      wording, no "your child". Copied unchanged to
+      content/courses/dribbling-transformation/ (serve.py left out).
+      SERVED by app/learn/[slug]/[[...path]]/route.ts, registry and path
+      rules in lib/elite/private-sites.ts: only a plain .html file of a
+      registered site can be named (no dot-dot, no other extension, no
+      nested path); a signed-out visitor or the demo tour is sent to sign
+      in; a coach or admin is served; a player needs an active or
+      trialing membership (the player shell's own rule), else a 403; pages
+      are private, no-store, noindex. /learn is in the session-refresh
+      middleware so a long course read does not bounce to sign-in at the
+      one-hour mark; next.config ships the files with the route (28 in
+      the trace). The bare folder redirects to .../index.html so the
+      pages' relative links resolve. Migration 059 widens the link-course
+      shape check to allow a path on our own domain (single leading
+      slash); the course card for such an address opens in the same tab.
+      tests/private-sites.test.ts and tests/learn-route.test.ts (the
+      route mocked: signed out, demo, paused, active, coach, bad file) +
+      courses tests; 159 tests, verify green, a local run showed signed-out
+      requests redirected and traversal and serve.py 404. The Courses
+      card is switched from the Netlify address to the hosted copy. THE
+      NETLIFY SITE STAYS UP and is public to anyone with its address; take
+      it down or put it behind a password on the Netlify side when he
+      wants it closed. FLAGS (his call, content untouched): the pages use
+      25 em dashes (the Phase headings and body text) against the
+      no-em-dash rule; the videos and the hero .mov load from Manus' CDN
+      (a moved or deleted Manus file breaks that slide; a HEVC .mov may
+      not play on Chrome or Android), so they should move to our own
+      storage like the drill clips; the slides carry no way back to the
+      app except the browser's back button; pages say "Slide 22 of 28"
+      while the index lists 27; and the app already has a public $97
+      "Strive Dribbling System" sales page and checkout at
+      /dribbling-course (old product): whether this site is that
+      product's delivered course, and whether the $97 page stays or
+      retires, is not answered. Not verified in a real signed-in browser
+      from here. No player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

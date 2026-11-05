@@ -142,16 +142,25 @@ export function validateStepInput(
 }
 
 // LINK courses (058, Nov 4 2026): a card that opens a page outside the
-// app (the Dribbling Transformation site). The address is https only, so
-// nothing else (javascript:, data:, http:) can ever become an href.
+// course's own page in the app. The address is either https (a site
+// elsewhere) or a path on our own domain that starts with a single slash
+// (a private course site served behind the login, 059), so nothing else
+// (javascript:, data:, http:, //host) can ever become an href.
 export function cleanExternalUrl(raw: string | null | undefined): string | null {
   const t = (raw ?? "").trim();
-  if (!/^https:\/\/[^\s]+$/i.test(t) || t.length > 500) return null;
+  if (t.length === 0 || t.length > 500) return null;
+  if (/^\/[^/\\\s][^\s\\]*$/.test(t)) return t;
+  if (!/^https:\/\/[^\s]+$/i.test(t)) return null;
   try {
     return new URL(t).protocol === "https:" ? t : null;
   } catch {
     return null;
   }
+}
+
+// True for an address on our own domain: it opens in the same tab.
+export function isInternalHref(href: string): boolean {
+  return href.startsWith("/");
 }
 
 // The address a link course opens, or null when it has none (or a bad one).
@@ -200,7 +209,7 @@ export function courseNotice(
   if (course.kind === "link") {
     return externalHref({ kind: "link", external_url: course.external_url ?? null })
       ? null
-      : "No address yet. Members see a link course once it has an https address.";
+      : "No address yet. Members see a link course once it has a good address.";
   }
   if (course.steps.filter(stepIsUsable).length === 0) {
     return "Nothing to show yet. Members see a course once it has a filmed drill or a written lesson.";

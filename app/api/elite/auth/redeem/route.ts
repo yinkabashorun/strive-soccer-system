@@ -50,7 +50,7 @@ export async function POST(req: Request) {
   if (!code) return NextResponse.json({ error: "An invite code is required." }, { status: 400 });
   if (!fullName || !email || password.length < 8) {
     return NextResponse.json(
-      { error: "Enter your name, email, both phone numbers, and a password of at least 8 characters." },
+      { error: "Enter your name, email, phone, and a password of at least 8 characters." },
       { status: 400 }
     );
   }
@@ -92,7 +92,7 @@ export async function POST(req: Request) {
   const role = inviteRoleOf(invite.role);
   if (!redeemFieldsComplete(role, { fullName, email, phone, playerPhone, password })) {
     return NextResponse.json(
-      { error: "Enter your name, email, both phone numbers, and a password of at least 8 characters." },
+      { error: "Enter your name, email, phone, and a password of at least 8 characters." },
       { status: 400 }
     );
   }

@@ -3,6 +3,7 @@ import { CLIP_BUCKET } from "./clips";
 import { DEFAULT_BENCHMARK_TITLE, fallbackBenchmark, type Benchmark } from "./progress-video";
 import type { TemplateContext, TemplateUsage } from "./bank-conform";
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { unstable_noStore as noStore } from "next/cache";
 import { createClient, createServiceClient } from "./supabase/server";
 import { recentAppErrors } from "./app-errors-server";
 import {
@@ -302,6 +303,11 @@ export async function getCourses(opts?: {
   includeInactive?: boolean;
   client?: SupabaseClient;
 }): Promise<Course[]> {
+  // Never serve a course from Next's data cache (Nov 5 2026): that cache
+  // survives deployments, so a course row changed in the database (the
+  // Dribbling Transformation went from a Netlify link to in-app pages)
+  // kept opening its old address after the new build was live.
+  noStore();
   const supabase = opts?.client ?? createServiceClient() ?? createClient();
   if (!supabase) return [];
   let q = supabase

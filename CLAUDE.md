@@ -3967,6 +3967,7 @@ commit.
       check the bank; the Netlify copy stays public until he closes it;
       the public $97 /dribbling-course page and checkout still exist and
       whether they stay is unanswered. No player data touched.
+- [x] FIXED Nov 5 2026 (Coach Yinka: "i see the course row but when you click on it it goes to the netlify .com"): the database and the new build were both right (course row kind lesson, 27 pages, no address; Vercel deployed ab19d59 at 15:41 UTC), yet the live app still opened the old link. CAUSE, most likely: Next's data cache, which survives deployments, held the course query from when the row was a Netlify link. getCourses (lib/elite/data.ts) now calls unstable_noStore(), the one reader of elite_courses, so a course change in the database shows on the next page load and never needs a redeploy. verify green. Not seen from this environment (thestriveapp.com is blocked): Coach Yinka confirms the card now opens the in-app pages after the deploy. His mention of a "Strive2026" password refers to the Netlify original only; the in-app course has no password and none is shown anywhere.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

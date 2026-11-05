@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   cleanExternalUrl,
+  isInternalHref,
   courseIsUsable,
   courseNotice,
   externalHref,
@@ -205,9 +206,18 @@ describe("link courses", () => {
     expect(cleanExternalUrl("javascript:alert(1)")).toBeNull();
     expect(cleanExternalUrl("data:text/html,x")).toBeNull();
     expect(cleanExternalUrl("//example.com")).toBeNull();
+    expect(cleanExternalUrl("/\\evil.com")).toBeNull();
     expect(cleanExternalUrl("https://exa mple.com")).toBeNull();
     expect(cleanExternalUrl("")).toBeNull();
     expect(cleanExternalUrl(null)).toBeNull();
+  });
+
+  it("a path on our own site is a good address (059), a doubled slash is not", () => {
+    expect(cleanExternalUrl("/learn/dribbling-transformation/index.html")).toBe("/learn/dribbling-transformation/index.html");
+    expect(cleanExternalUrl("/ x")).toBeNull();
+    expect(cleanExternalUrl("/")).toBeNull();
+    expect(isInternalHref("/learn/x/index.html")).toBe(true);
+    expect(isInternalHref("https://example.com/")).toBe(false);
   });
 
   it("externalHref is set for a link course only", () => {
@@ -236,7 +246,7 @@ describe("link courses", () => {
   it("staff see why a link course is hidden", () => {
     const url = "https://totalballmastery.netlify.app/";
     expect(courseNotice(course({ kind: "link", external_url: url }))).toBeNull();
-    expect(courseNotice(course({ kind: "link", external_url: null }))).toMatch(/https address/);
+    expect(courseNotice(course({ kind: "link", external_url: null }))).toMatch(/good address/);
     expect(courseNotice(course({ kind: "link", external_url: url, active: false }))).toMatch(/^Off/);
   });
 

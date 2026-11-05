@@ -50,7 +50,7 @@ export async function saveCourse(input: CourseInput) {
   // check constraint says the same; this says it first, in plain words).
   const external_url = kind === "link" ? cleanExternalUrl(input.external_url) : null;
   if (kind === "link" && !external_url) {
-    return { ok: false as const, error: "A link course needs an address that starts with https://." };
+    return { ok: false as const, error: "A link course needs an address that starts with https:// or with a single /." };
   }
 
   if (input.id) {
@@ -60,7 +60,7 @@ export async function saveCourse(input: CourseInput) {
     const was = (existing as { kind: CourseKind } | null)?.kind;
     const patch: Record<string, unknown> = { name, subtitle, intro };
     if (was === "link") {
-      if (!external_url) return { ok: false as const, error: "A link course needs an address that starts with https://." };
+      if (!external_url) return { ok: false as const, error: "A link course needs an address that starts with https:// or with a single /." };
       patch.external_url = external_url;
     }
     const { error } = await c.supabase

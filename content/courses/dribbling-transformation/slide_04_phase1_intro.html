@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Phase 1: Cone Weave</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #0d0d0d; color: #ffffff; font-family: 'Barlow', sans-serif; overflow-x: hidden; }
+        .slide-container {
+            width: 100%; margin: 0 auto; min-height: 100vh; position: relative;
+            background-color: #0d0d0d; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; padding: 40px 20px 100px;
+        }
+        .content {
+            position: relative; z-index: 3; width: 100%; max-width: 700px;
+            text-align: center;
+        }
+        .phase-badge {
+            display: inline-block; border: 1px solid rgba(255,255,255,0.3);
+            padding: 6px 20px; font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 700; font-size: 13px; letter-spacing: 0.25em;
+            color: rgba(255,255,255,0.6); text-transform: uppercase; margin-bottom: 24px;
+        }
+        h1 {
+            font-family: 'Barlow Condensed', sans-serif; font-weight: 800;
+            font-size: 64px; line-height: 0.95; text-transform: uppercase; margin-bottom: 16px;
+        }
+        .time-label {
+            font-family: 'Barlow Condensed', sans-serif; font-weight: 700;
+            font-size: 20px; letter-spacing: 0.15em; color: rgba(255,255,255,0.5);
+            text-transform: uppercase; margin-bottom: 24px;
+        }
+        p {
+            font-size: 17px; line-height: 1.6; max-width: 500px; margin: 0 auto 32px;
+            color: rgba(255,255,255,0.75);
+        }
+        .drills-list {
+            list-style: none; text-align: left; max-width: 360px; margin: 0 auto 40px;
+        }
+        .drills-list li {
+            padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08);
+            font-size: 15px; color: rgba(255,255,255,0.7); display: flex; align-items: center; gap: 10px;
+        }
+        .drills-list li .dot { width: 6px; height: 6px; background: #fff; border-radius: 50%; flex-shrink: 0; }
+        .phase-nav {
+            display: flex; gap: 8px; justify-content: center; margin-bottom: 32px; flex-wrap: wrap;
+        }
+        .phase-link {
+            font-family: 'Barlow Condensed', sans-serif; font-size: 12px; font-weight: 700;
+            letter-spacing: 0.15em; text-transform: uppercase; text-decoration: none;
+            padding: 8px 16px; border: 1px solid rgba(255,255,255,0.15); color: rgba(255,255,255,0.4);
+        }
+        .phase-link.active { border-color: #fff; color: #fff; }
+        .phase-link:active { background: #fff; color: #0d0d0d; }
+        .nav-buttons { display: flex; gap: 12px; width: 100%; max-width: 500px; }
+        .nav-btn { background: rgba(255,255,255,0.08); color: #fff; padding: 14px 0; text-decoration: none; text-transform: uppercase; font-weight: 700; letter-spacing: 0.1em; border: 1px solid rgba(255,255,255,0.15); text-align: center; flex: 1; font-size: 13px; font-family: 'Barlow Condensed', sans-serif; }
+        .nav-btn.home { flex: 0 0 50px; font-size: 20px; }
+        .nav-btn:active { background: #fff; color: #0d0d0d; }
+
+        @media (min-width: 768px) {
+            h1 { font-size: 120px; }
+            .time-label { font-size: 28px; }
+            p { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+
+
+
+    <div class="slide-container">
+        <div class="content">
+            <div class="phase-badge">Phase 1 of 3</div>
+            <h1>Cone Weave</h1>
+            <div class="time-label">0 – 15 Minutes</div>
+            <p>Establish your rhythm. Sharpen your touch. Prepare your feet for speed.</p>
+            <ul class="drills-list">
+                <li><span class="dot"></span>Inside & Outside Cone Weave</li>
+                <li><span class="dot"></span>La Croqueta Cone Weave</li>
+                <li><span class="dot"></span>8-Cone Freestyle</li>
+            </ul>
+            <div class="phase-nav">
+                <a href="slide_04_phase1_intro.html" class="phase-link active">Phase 1</a>
+                <a href="slide_08_phase2_intro.html" class="phase-link">Phase 2</a>
+                <a href="slide_11_phase3_intro.html" class="phase-link">Phase 3</a>
+            </div>
+            <div class="nav-buttons">
+                <a href="slide_03_structure.html" class="nav-btn">‹ PREV</a>
+                <a href="index.html" class="nav-btn home">⌂</a>
+                <a href="slide_05_drill_inside_outside.html" class="nav-btn">NEXT ›</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

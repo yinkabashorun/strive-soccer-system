@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>60 Minute Elite Session</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Barlow:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #0d0d0d; color: #ffffff; font-family: 'Barlow', sans-serif; overflow-x: hidden; }
+        .slide-container {
+            width: 100%;
+            max-width: 1280px;
+            margin: 0 auto;
+            min-height: 100vh;
+            background-color: #0d0d0d;
+            padding: 40px 20px 80px;
+            display: flex;
+            flex-direction: column;
+        }
+        h1 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-weight: 800;
+            font-size: 36px; /* Mobile */
+            text-transform: uppercase;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .schedule {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .block {
+            background: #1a1a1a;
+            padding: 20px;
+            border-left: 4px solid #ffffff;
+        }
+        .block h3 {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 24px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            color: #ffffff;
+        }
+        .block .time {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .block ul {
+            list-style: none;
+            padding: 0;
+        }
+        .block li {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 6px;
+            padding-left: 16px;
+            position: relative;
+        }
+        .block li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #ffffff;
+        }
+
+        /* Desktop overrides */
+        @media (min-width: 768px) {
+            .slide-container { padding: 80px; }
+            h1 { font-size: 64px; margin-bottom: 40px; text-align: left; }
+            .schedule { display: grid; grid-template-columns: repeat(2, 1fr); gap: 32px; }
+            .block { padding: 32px; }
+            .block h3 { font-size: 28px; }
+        }
+
+        /* Navigation Bar */
+        .nav-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 32px;
+            width: 100%;
+        }
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            padding: 12px 0;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            flex: 1;
+            font-size: 14px;
+        }
+        .nav-btn.home {
+            flex: 0 0 50px; /* Small square for home */
+            font-size: 20px;
+        }
+        .nav-btn:active { background: #fff; color: #0d0d0d; }
+    </style>
+</head>
+<body>
+
+
+
+
+    <div class="slide-container">
+        <h1>The 60-Minute Elite Session</h1>
+        <div class="schedule">
+            <div class="block">
+                <h3>Warm Up</h3>
+                <div class="time">0 - 15 Minutes</div>
+                <ul>
+                    <li>Dynamic Stretching</li>
+                    <li>Light Jogging</li>
+                    <li>Juggling (Feet only)</li>
+                </ul>
+            </div>
+            <div class="block">
+                <h3>Cone Weave</h3>
+                <div class="time">15 - 25 Minutes</div>
+                <ul>
+                    <li>Inside & Outside (4 Sets)</li>
+                    <li>La Croqueta Weave (4 Sets)</li>
+                    <li>8-Cone Freestyle (4 Sets)</li>
+                </ul>
+            </div>
+            <div class="block">
+                <h3>Ball Mastery</h3>
+                <div class="time">25 - 40 Minutes</div>
+                <ul>
+                    <li>Ronaldinho Drill (3 Sets)</li>
+                    <li>Figure 8 (3 Sets)</li>
+                    <li>Freestyle Box (3 Sets)</li>
+                </ul>
+            </div>
+            <div class="block">
+                <h3>1v1 Skills</h3>
+                <div class="time">40 - 60 Minutes</div>
+                <ul>
+                    <li>Neymar Feint (10 mins)</li>
+                    <li>Body Feint (10 mins)</li>
+                    <li>Full Speed Execution</li>
+                </ul>
+            </div>
+        </div>
+
+<div class="nav-buttons">
+            <a href="slide_20_drill_freestyle.html" class="nav-btn">‹ PREV</a>
+            <a href="index.html" class="nav-btn home">⌂</a>
+            <a href="slide_22_30day_plan.html" class="nav-btn">NEXT ›</a>
+        </div>
+    </div>
+</body>
+</html>

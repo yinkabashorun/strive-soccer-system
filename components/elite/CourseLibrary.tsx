@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, BookOpen, ChevronRight, Download, ExternalLink, PencilLine } from "lucide-react";
 import type { Course } from "@/lib/elite/types";
-import { courseNotice, externalHref, levelsOf, stepTitle, stepVideo } from "@/lib/elite/courses";
+import { courseNotice, externalHref, isInternalHref, levelsOf, stepTitle, stepVideo } from "@/lib/elite/courses";
 import { DrillVideo } from "@/components/elite/DrillVideo";
 import { cn } from "@/lib/utils";
 
@@ -53,10 +53,11 @@ export function CourseList({
             // A link course opens its own site in a new tab (058); every
             // other course opens its page in the app.
             const out = externalHref(c);
-            const Card = out ? "a" : Link;
-            const cardProps = out
-              ? { href: out, target: "_blank", rel: "noopener noreferrer" }
-              : { href: `${basePath}/${c.slug}` };
+            const Card = out && !isInternalHref(out) ? "a" : Link;
+            const cardProps =
+              out && !isInternalHref(out)
+                ? { href: out, target: "_blank", rel: "noopener noreferrer" }
+                : { href: out ?? `${basePath}/${c.slug}` };
             return (
               <Card
                 key={c.id}
@@ -85,7 +86,7 @@ export function CourseList({
                   </div>
                   {notice && <div className="mt-1.5 text-xs text-amber-300/80">{notice}</div>}
                 </div>
-                {out ? (
+                {out && !isInternalHref(out) ? (
                   <ExternalLink className="h-5 w-5 shrink-0 text-white/30" />
                 ) : (
                   <ChevronRight className="h-5 w-5 shrink-0 text-white/30" />

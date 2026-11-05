@@ -112,12 +112,19 @@ describe("the announcements", () => {
     expect(film.sms).toContain("tap Film");
     expect(film.sms).toContain("https://thestriveapp.com/film");
   });
+  it("texts the player directly, in the second person", () => {
+    expect(film.playerSms.startsWith("Hey Tim,")).toBe(true);
+    expect(film.playerSms).toContain("Sunday, Nov 8 at 7:00 PM ET");
+    expect(film.playerSms).toContain("3 to 5 clips from your games or training");
+    expect(film.playerSms).toContain("https://thestriveapp.com/film");
+  });
   it("keeps to the house voice and fits one text", () => {
-    for (const s of [film.sms, film.pushBody, film.inAppBody]) {
+    for (const s of [film.sms, film.playerSms, film.pushBody, film.inAppBody]) {
       expect(s).not.toMatch(/—|!/);
       expect(s).not.toMatch(/\b(AI|automated|algorithm|generated)\b/);
     }
     expect(film.sms.length).toBeLessThanOrEqual(480);
+    expect(film.playerSms.length).toBeLessThanOrEqual(480);
   });
   it("falls back to the player's first name when there is no parent name", () => {
     const m = filmRoomAnnouncement({
@@ -141,6 +148,9 @@ describe("the announcements", () => {
     expect(m.sms).toContain("30 minutes");
     expect(m.sms).not.toMatch(/—|!/);
     expect(m.sms.length).toBeLessThanOrEqual(480);
+    expect(m.playerSms.startsWith("Hey Tim,")).toBe(true);
+    expect(m.playerSms).not.toMatch(/—|!/);
+    expect(m.playerSms.length).toBeLessThanOrEqual(480);
   });
 });
 

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Check, Clapperboard, Loader2, Megaphone, Trash2 } from "lucide-react";
-import { announceFilmRoom, deleteFilmRoom, saveFilmRoom } from "@/lib/elite/film-room-actions";
+import { Check, Clapperboard, Loader2, Trash2 } from "lucide-react";
+import { deleteFilmRoom, saveFilmRoom } from "@/lib/elite/film-room-actions";
 import { FILM_CLIPS_MAX, FILM_CLIPS_MIN, fmtWhen } from "@/lib/elite/film-room";
 import type { FilmRoomWithClips } from "@/lib/elite/film-room-data";
 import { cn } from "@/lib/utils";
@@ -27,10 +27,12 @@ export function FilmRoomAdmin({
   const [link, setLink] = useState("");
   const [topic, setTopic] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [sent, setSent] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
   function add() {
     setError(null);
+    setSent(null);
     start(async () => {
       const res = await saveFilmRoom({ day, time, zoom_url: link, topic });
       if (!res.ok) {
@@ -39,6 +41,10 @@ export function FilmRoomAdmin({
       }
       setLink("");
       setTopic("");
+      if ("announced" in res && res.announced) {
+        const a = res.announced;
+        setSent(`Announced to ${a.members} member${a.members === 1 ? "" : "s"}: ${a.texted} text${a.texted === 1 ? "" : "s"} to players and parents, ${a.pushed} push.`);
+      }
     });
   }
 
@@ -73,10 +79,18 @@ export function FilmRoomAdmin({
           onChange={(e) => setTopic(e.target.value)}
           className={input}
         />
-        <p className="text-xs text-white/40">Times are Virginia time. Clips are asked for by 9 PM the night before.</p>
+        <p className="text-xs text-white/40">
+          Times are Virginia time. Clips are asked for by 9 PM the night before. Saving sends the announcement to
+          every active player and parent right away.
+        </p>
         {error && <p className="text-xs text-red-300">{error}</p>}
+        {sent && (
+          <p className="flex items-center gap-1.5 text-xs text-accent">
+            <Check className="h-3.5 w-3.5" /> {sent}
+          </p>
+        )}
         <button onClick={add} disabled={pending} className="btn w-full py-2 text-sm">
-          {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save Film Room"}
+          {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Save and announce"}
         </button>
       </div>
 
@@ -118,19 +132,6 @@ function RoomCard({ room, past = false }: { room: FilmRoomWithClips; past?: bool
       const time = d.toLocaleTimeString("en-GB", { timeZone: "America/New_York", hour: "2-digit", minute: "2-digit" });
       const res = await saveFilmRoom({ id: room.id, day, time, zoom_url: link, topic: room.topic });
       setNote(res.ok ? "Link saved." : res.error ?? "Couldn't save.");
-    });
-  }
-
-  function announce(again: boolean) {
-    if (again && !window.confirm("Send this announcement to every active member again?")) return;
-    setNote(null);
-    start(async () => {
-      const res = await announceFilmRoom(room.id, again);
-      setNote(
-        res.ok
-          ? `Sent to ${res.members} member${res.members === 1 ? "" : "s"}: ${res.texted} texted, ${res.pushed} push.`
-          : res.error ?? "Couldn't send."
-      );
     });
   }
 
@@ -180,14 +181,6 @@ function RoomCard({ room, past = false }: { room: FilmRoomWithClips; past?: bool
 
       {!past && (
         <div className="mt-3 flex flex-wrap gap-2">
-          <button
-            onClick={() => announce(announced)}
-            disabled={pending}
-            className="inline-flex items-center gap-1.5 rounded-full border border-accent/40 px-4 py-1.5 text-xs font-semibold text-accent hover:bg-accent/10 disabled:opacity-60"
-          >
-            {pending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Megaphone className="h-3.5 w-3.5" />}
-            {announced ? "Send again" : "Announce to members"}
-          </button>
           <button
             onClick={remove}
             disabled={pending}

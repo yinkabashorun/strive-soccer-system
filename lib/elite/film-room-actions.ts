@@ -5,6 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { getViewer } from "./session";
 import { createClient, createServiceClient } from "./supabase/server";
 import { CLIP_BUCKET, ownsFilmRoomPath } from "./clips";
+import type { Announcement } from "./film-room";
 import {
   CHECKIN_SLOT_MINUTES,
   FILM_CLIPS_MAX,
@@ -20,7 +21,7 @@ import {
   nyLocalToIso,
 } from "./film-room";
 import { withoutPlayersOnBreak } from "./health";
-import { sendPlayerSMS } from "./sms";
+import { sendPlayerOwnSMS, sendPlayerSMS } from "./sms";
 import { sendPushToPlayer } from "./push";
 import { sendCoachEmail, sendPlayerEmail } from "./email";
 
@@ -49,15 +50,13 @@ function refresh() {
   revalidatePath("/dashboard");
 }
 
-type Msg = { sms: string; pushTitle: string; pushBody: string; inAppTitle: string; inAppBody: string };
-
-// Tell every active member (not on a break) by text to the parent, push,
+// Tell every active member (not on a break) by a text to the parent and one to the player's own phone, push,
 // email and the in-app bell. Best-effort per channel, never throws.
 async function notifyMembers(
   db: SupabaseClient,
   kind: string,
   url: string,
-  build: (p: { full_name: string; parent_name: string | null }) => Msg
+  build: (p: { full_name: string; parent_name: string | null }) => Announcement
 ): Promise<{ members: number; texted: number; pushed: number }> {
   const { data } = await db
     .from("elite_players")
@@ -75,12 +74,14 @@ async function notifyMembers(
         .from("elite_notifications")
         .insert({ player_id: p.id, kind, title: m.inAppTitle, body: m.inAppBody })
         .then(() => undefined, () => undefined);
-      const [sms, push] = await Promise.all([
+      const [sms, own, push] = await Promise.all([
         sendPlayerSMS(p.id, { event: kind, message: m.sms }).catch(() => false),
+        sendPlayerOwnSMS(p.id, { event: kind, message: m.playerSms }).catch(() => false),
         sendPushToPlayer(p.id, { title: m.pushTitle, body: m.pushBody, url }).catch(() => ({ sent: 0 })),
         sendPlayerEmail(p.id, { event: kind, subject: m.inAppTitle, body: m.inAppBody }).catch(() => false),
       ]);
       if (sms) texted++;
+      if (own) texted++;
       pushed += push.sent;
     })
   );
@@ -114,20 +115,48 @@ export async function saveFilmRoom(input: {
     zoom_url: cleanZoom(input.zoom_url),
     topic: input.topic.trim().slice(0, 140),
   };
-  const res = input.id
-    ? await db.from("elite_film_rooms").update(row).eq("id", input.id)
-    : await db.from("elite_film_rooms").insert({ ...row, created_by: viewer.profile.id });
-  if (res.error) {
+  // A new Film Room is announced the moment it is saved (Coach Yinka,
+  // Nov 5 2026: "notifications should only come when I save a film room").
+  // Editing one later (the Zoom link, the topic) never sends anything.
+  if (input.id) {
+    const { error } = await db.from("elite_film_rooms").update(row).eq("id", input.id);
+    if (error) {
+      return {
+        ok: false as const,
+        error: error.code === "23505" ? "There is already a Film Room at that time." : "Couldn't save.",
+      };
+    }
+    refresh();
+    return { ok: true as const };
+  }
+  if (new Date(row.scheduled_at).getTime() < Date.now()) {
+    return { ok: false as const, error: "That time has already passed. Pick the next one." };
+  }
+  const { data: room, error } = await db
+    .from("elite_film_rooms")
+    .insert({ ...row, created_by: viewer.profile.id, announced_at: new Date().toISOString() })
+    .select("id, scheduled_at, clips_due_at")
+    .single();
+  if (error || !room) {
     return {
       ok: false as const,
       error:
-        res.error.code === "23505"
+        error?.code === "23505"
           ? "There is already a Film Room at that time."
           : "Couldn't save. Run database migration 062 first.",
     };
   }
+  const counts = await notifyMembers(db, "film_room", "/film", (p) =>
+    filmRoomAnnouncement({
+      parentName: p.parent_name,
+      playerName: p.full_name,
+      scheduledAt: room.scheduled_at,
+      clipsDueAt: room.clips_due_at,
+      appUrl: APP_URL,
+    })
+  );
   refresh();
-  return { ok: true as const };
+  return { ok: true as const, announced: counts };
 }
 
 export async function deleteFilmRoom(id: string) {
@@ -140,33 +169,6 @@ export async function deleteFilmRoom(id: string) {
   await db.from("elite_film_rooms").delete().eq("id", id);
   refresh();
   return { ok: true as const };
-}
-
-// Announce a Film Room to every active member: text to the parent, push,
-// email and the bell, telling them when it is, how many clips and by when,
-// and where (Film tab). Once per room unless the coach sends it again.
-export async function announceFilmRoom(id: string, again = false) {
-  if (!(await requireCoach())) return { ok: false as const, error: "Coaches only." };
-  const db = createServiceClient();
-  if (!db) return { ok: true as const, members: 0, texted: 0, pushed: 0 };
-  const { data: room } = await db.from("elite_film_rooms").select("*").eq("id", id).maybeSingle();
-  if (!room) return { ok: false as const, error: "That Film Room is gone." };
-  if (room.announced_at && !again) return { ok: false as const, error: "Already announced." };
-  if (new Date(room.scheduled_at).getTime() < Date.now()) {
-    return { ok: false as const, error: "That Film Room has already happened." };
-  }
-  await db.from("elite_film_rooms").update({ announced_at: room.announced_at ?? new Date().toISOString() }).eq("id", id);
-  const counts = await notifyMembers(db, "film_room", "/film", (p) =>
-    filmRoomAnnouncement({
-      parentName: p.parent_name,
-      playerName: p.full_name,
-      scheduledAt: room.scheduled_at,
-      clipsDueAt: room.clips_due_at,
-      appUrl: APP_URL,
-    })
-  );
-  refresh();
-  return { ok: true as const, ...counts };
 }
 
 // ------------------------------------------------------------------

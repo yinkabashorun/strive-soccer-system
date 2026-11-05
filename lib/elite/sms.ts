@@ -133,3 +133,28 @@ export async function sendPlayerSMS(
     (player.parent_name || player.full_name || "").trim().split(" ")[0] || "there";
   return sendSms(player.parent_phone, firstName, opts.message);
 }
+
+// Text the player's OWN phone (player_phone, 026), addressed to the
+// player by first name. Skipped when the player has no phone on file or
+// it is the same number as the parent's (that family gets one text).
+export async function sendPlayerOwnSMS(
+  playerId: string,
+  opts: { event: string; message: string }
+): Promise<boolean> {
+  if (!isSmsConfigured()) return false;
+  const admin = createServiceClient();
+  if (!admin) return false;
+
+  const { data: player } = await admin
+    .from("elite_players")
+    .select("full_name, parent_phone, player_phone")
+    .eq("id", playerId)
+    .maybeSingle();
+  if (!player?.player_phone) return false;
+  const own = normalizePhone(player.player_phone);
+  if (!own) return false;
+  if (player.parent_phone && normalizePhone(player.parent_phone) === own) return false;
+
+  const firstName = (player.full_name || "").trim().split(" ")[0] || "there";
+  return sendSms(own, firstName, opts.message);
+}

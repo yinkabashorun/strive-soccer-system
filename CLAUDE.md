@@ -3878,6 +3878,8 @@ commit.
       should match; (3) it is on the tab for every member now, on his
       word, before he or I have read it; one tap off at /coach/drills.
       No player data touched.
+      CORRECTION: the course count above is garbled. The tab shows EIGHT
+      active courses (the seven live before, plus Dribbling Transformation).
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

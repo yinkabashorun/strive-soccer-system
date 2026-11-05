@@ -2,23 +2,28 @@ import { CalendarDays, Clapperboard } from "lucide-react";
 import { getViewer } from "@/lib/elite/session";
 import { getFilm, getGames, getPlayer } from "@/lib/elite/data";
 import { liveWeekFor, monthFromWeek } from "@/lib/elite/time";
+import { getNextFilmRoom, getPlayerFilmRoomClips } from "@/lib/elite/film-room-data";
+import { FilmRoomCard } from "@/components/elite/FilmRoomCard";
 import { FilmTimeline } from "@/components/elite/FilmTimeline";
 import { GameSchedule } from "@/components/elite/GameSchedule";
 import { TourGuide } from "@/components/elite/TourGuide";
 
 export const metadata = { title: "Film · Strive Elite" };
 
-// Monthly film review - Month 1, Month 2, Month 3. One link per month,
-// one coach breakdown per month.
+// The weekly Film Room (062): when it is, the Zoom link and the place to
+// upload three to five clips. Below it, the monthly film timeline for a
+// Complete member (retired tier, kept as it was) and the game schedule.
 export default async function FilmPage() {
   const viewer = await getViewer();
   if (!viewer?.playerId) return null;
-  const [player, films, games] = await Promise.all([
+  const [player, films, games, room] = await Promise.all([
     getPlayer(viewer.playerId),
     getFilm(viewer.playerId),
     getGames(viewer.playerId),
+    getNextFilmRoom(),
   ]);
   if (!player) return null;
+  const roomClips = room && !viewer.demo ? await getPlayerFilmRoomClips(viewer.playerId, room.id) : [];
 
   const currentMonth = monthFromWeek(liveWeekFor(player.week1_monday, player.current_week));
   const firstName = player.full_name.split(" ")[0];
@@ -29,32 +34,25 @@ export default async function FilmPage() {
 
       <header className="animate-fade-up">
         <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
-          <Clapperboard className="h-3.5 w-3.5 text-accent" /> Month {currentMonth}
+          <Clapperboard className="h-3.5 w-3.5 text-accent" /> Every week
         </div>
         <h1 className="mt-1 font-display text-3xl font-black sm:text-4xl">
-          Film review
+          Film Room
         </h1>
         <p className="mt-2 text-white/50">
-          Once a month, Coach breaks down your real footage: what&apos;s
+          Coach Yinka and Coach Gary go through your clips on Zoom: what&apos;s
           working, what&apos;s next.
         </p>
       </header>
 
-      {player.tier === "elite" ? (
-        // Film review is a Complete Pathway feature (029). Elite is the app
-        // only, so the timeline never renders for them - a clean line
-        // instead of a dead uploader.
-        <div className="elite-card p-6">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
-            Complete Pathway
-          </div>
-          <p className="mt-2 text-white/70">
-            Monthly film review, with Coach breaking down your real footage,
-            is part of Strive Complete Pathway. Message Coach if you want to
-            move up.
-          </p>
-        </div>
-      ) : (
+      <FilmRoomCard
+        room={room}
+        clips={roomClips}
+        playerId={viewer.playerId}
+        firstName={firstName}
+      />
+
+      {player.tier !== "elite" && (
         <FilmTimeline
           films={films}
           currentMonth={currentMonth}

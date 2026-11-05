@@ -315,11 +315,9 @@ export default async function PlayerProfile({
           {/* Break from training (034): set, move, or end a return date */}
           <BreakControl playerId={player.id} breaks={breaks} today={today} />
 
-          {/* Weekly 1:1 calls - Complete Pathway only. The post-call note
-              feeds the next plan. */}
-          {player.tier !== "elite" && (
-            <CoachingCallsPanel playerId={player.id} calls={calls} />
-          )}
+          {/* Monthly check-in calls (062): a booked slot writes the call
+              here for every member. The post-call note feeds the next plan. */}
+          <CoachingCallsPanel playerId={player.id} calls={calls} />
 
           {/* AI memory note - steers every generated week */}
           <EditableMemory

@@ -17,7 +17,7 @@ function mondayIndex(day: string): number {
   return (js + 6) % 7;
 }
 
-function shiftDay(day: string, delta: number): string {
+export function shiftDay(day: string, delta: number): string {
   const d = new Date(day + "T00:00:00Z");
   d.setUTCDate(d.getUTCDate() + delta);
   return d.toISOString().slice(0, 10);

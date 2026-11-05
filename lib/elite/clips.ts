@@ -63,3 +63,29 @@ export function ownsFilmRoomPath(path: string, playerId: string, roomId: string)
   if (!UUID.test(parts[2]) || parts[2].toLowerCase() !== roomId.toLowerCase()) return false;
   return wellFormedFile(parts[3]);
 }
+
+// Send a clip is one every two weeks (Coach Yinka, Nov 5 2026: "they've
+// been sending every clip ... I just need once every 2 weeks or so"). The
+// button sat on every drill card with no limit, and two members sent 48
+// clips in two weeks. The weekly Film Room and the progress video are
+// where more footage goes.
+export const CLIP_COOLDOWN_DAYS = 14;
+
+export function clipCooldown(
+  lastClipIso: string | null | undefined,
+  nowMs = Date.now()
+): { open: boolean; opensAt: string | null } {
+  if (!lastClipIso) return { open: true, opensAt: null };
+  const opens = new Date(lastClipIso).getTime() + CLIP_COOLDOWN_DAYS * 86_400_000;
+  return nowMs >= opens ? { open: true, opensAt: null } : { open: false, opensAt: new Date(opens).toISOString() };
+}
+
+export function clipCooldownMessage(opensAtIso: string): string {
+  const day = new Date(opensAtIso).toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+    timeZone: "America/New_York",
+  });
+  return `You already sent a clip. The next one opens ${day}. Film Room is open every week for more.`;
+}

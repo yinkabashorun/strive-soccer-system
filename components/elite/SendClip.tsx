@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { Check, Loader2, Video } from "lucide-react";
-import { sendClip } from "@/lib/elite/player-actions";
+import { checkClipOpen, sendClip } from "@/lib/elite/player-actions";
 import { clipExtension, clipPath } from "@/lib/elite/clips";
 import { uploadClip } from "@/lib/elite/clip-upload";
 import { cn } from "@/lib/utils";
@@ -23,9 +23,23 @@ export function SendClip({
   compact?: boolean;
 }) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const [state, setState] = useState<"idle" | "uploading" | "sent" | "error">("idle");
+  const [state, setState] = useState<"idle" | "checking" | "uploading" | "sent" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
   const [, start] = useTransition();
+
+  // One clip every two weeks: ask before opening the camera.
+  async function onTap() {
+    setError(null);
+    setState("checking");
+    const open = await checkClipOpen();
+    if (!open.ok) {
+      setError(open.error ?? "Send a clip isn't open right now.");
+      setState("idle");
+      return;
+    }
+    setState("idle");
+    fileRef.current?.click();
+  }
 
   async function onFile(file: File) {
     setError(null);
@@ -69,12 +83,12 @@ export function SendClip({
       ) : (
         <button
           type="button"
-          disabled={state === "uploading"}
-          onClick={() => fileRef.current?.click()}
+          disabled={state === "uploading" || state === "checking"}
+          onClick={() => void onTap()}
           className="inline-flex items-center gap-1.5 rounded-full border border-white/12 px-3 py-1.5 text-xs font-semibold text-white/70 transition-colors hover:border-accent/50 hover:text-bone disabled:opacity-60"
           aria-label={`Send a clip of ${title}`}
         >
-          {state === "uploading" ? (
+          {state === "uploading" || state === "checking" ? (
             <Loader2 className="h-3.5 w-3.5 animate-spin" />
           ) : (
             <Video className="h-3.5 w-3.5" />

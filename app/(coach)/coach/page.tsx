@@ -16,7 +16,6 @@ import { PlanBuilderStatus } from "@/components/elite/PlanBuilderStatus";
 import { AppErrorsCard } from "@/components/elite/AppErrorsCard";
 import { liveWeekNumber, nyDayNumber, nyToday } from "@/lib/elite/time";
 import { Avatar } from "@/components/Avatar";
-import { MarkAllReadButton } from "@/components/elite/MarkAllReadButton";
 import { StatTile } from "@/components/elite/StatTile";
 import { InvitePanel } from "@/components/elite/InvitePanel";
 import { WeeklyDeposits } from "@/components/elite/WeeklyDeposits";
@@ -92,7 +91,6 @@ export default async function CoachDashboard() {
     roster.length > 0
       ? Math.round(roster.reduce((s, r) => s + r.homework_pct, 0) / roster.length)
       : 0;
-  const toAnswer = inbox.pendingCheckins + inbox.unreadMessages;
 
   const first = viewer?.profile.full_name.split(" ").slice(-1)[0] ?? "Coach";
 
@@ -110,7 +108,7 @@ export default async function CoachDashboard() {
         </p>
       </header>
 
-      <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <section className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <StatTile label="Players" value={roster.length} sub="On the program" accent />
         <StatTile
           label="Plans to build"
@@ -119,15 +117,7 @@ export default async function CoachDashboard() {
           accent={toBuild > 0}
         />
         <StatTile label="Avg homework" value={`${avgHw}%`} sub="Completion" />
-        <StatTile
-          label="To answer"
-          value={toAnswer}
-          sub="Check-ins + messages"
-          accent={toAnswer > 0}
-        />
       </section>
-
-      {!viewer?.demo && <MarkAllReadButton count={inbox.unreadMessages} />}
 
       {!viewer?.demo && <PlanBuilderStatus run={builderRun} behind={behind} />}
 

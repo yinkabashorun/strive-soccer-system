@@ -281,24 +281,21 @@ export default async function PlayerProfile({
             <ProgressPanel progress={progress} />
           </section>
 
-          {/* Parent reports */}
+          {/* This week's parent report. It resets with the week: only the
+              latest report shows, never the pile of every week before it. */}
           {reports.length > 0 && (
             <section>
               <h2 className="mb-3 flex items-center gap-2 font-display text-xl font-bold uppercase tracking-tight">
-                <Users className="h-4 w-4 text-accent" /> Parent reports
+                <Users className="h-4 w-4 text-accent" /> This week&apos;s parent report
               </h2>
-              <div className="space-y-3">
-                {reports.map((r) => (
-                  <div key={r.id} className="elite-card p-5">
-                    <ReportRow label="Summary" value={r.summary} />
-                    <ReportRow label="Improvement" value={r.improvement} />
-                    <ReportRow label="Homework" value={r.homework} />
-                    <ReportRow label="Next focus" value={r.next_focus} />
-                    <div className="mt-2 text-xs text-white/35">
-                      {timeAgo(r.created_at)} · ready to send
-                    </div>
-                  </div>
-                ))}
+              <div className="elite-card p-5">
+                <ReportRow label="Summary" value={reports[0].summary} />
+                <ReportRow label="Improvement" value={reports[0].improvement} />
+                <ReportRow label="Homework" value={reports[0].homework} />
+                <ReportRow label="Next focus" value={reports[0].next_focus} />
+                <div className="mt-2 text-xs text-white/35">
+                  {timeAgo(reports[0].created_at)} · ready to send
+                </div>
               </div>
             </section>
           )}

@@ -490,3 +490,43 @@ export type AppError = {
   player_id: string | null;
   user_agent: string | null;
 };
+
+// Weekly Film Room and monthly check-in calls (062).
+export type FilmRoom = {
+  id: string;
+  scheduled_at: string; // ISO
+  clips_due_at: string; // ISO
+  zoom_url: string;
+  topic: string;
+  announced_at: string | null;
+  created_at: string;
+};
+
+export type FilmRoomClip = {
+  id: string;
+  film_room_id: string;
+  player_id: string;
+  clip_path: string;
+  created_at: string;
+  url?: string | null; // 1-hour signed link, coach side only
+};
+
+export type CheckinDay = {
+  id: string;
+  starts_at: string;
+  ends_at: string;
+  slot_minutes: number;
+  zoom_url: string;
+  coach_name: string;
+  announced_at: string | null;
+};
+
+export type CheckinSlot = {
+  id: string;
+  day_id: string;
+  starts_at: string;
+  player_id: string | null;
+  booked_at: string | null;
+  month_key: string | null;
+  call_id: string | null;
+};

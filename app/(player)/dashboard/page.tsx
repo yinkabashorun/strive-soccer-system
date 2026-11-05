@@ -32,6 +32,8 @@ import { currentBreak } from "@/lib/elite/breaks";
 import { settleBreaksForPlayer } from "@/lib/elite/breaks-server";
 import { fmtDuration, timeTrained, weekMinutes } from "@/lib/elite/time-trained";
 import { CoachingCallsCard } from "@/components/elite/CoachingCallsCard";
+import { CheckinBooking } from "@/components/elite/CheckinBooking";
+import { getPlayerCheckin } from "@/lib/elite/film-room-data";
 import { CheckinCard } from "@/components/elite/CheckinCard";
 import { StatTile } from "@/components/elite/StatTile";
 import { fmtMonday, liveWeekFor, nextMondayNY, nyToday } from "@/lib/elite/time";
@@ -64,7 +66,7 @@ export default async function DashboardPage() {
     player.week1_monday = week1Monday;
   }
 
-  const [allHomework, achievements, messages, checkins, plans, calls, breaks, progressVideos] =
+  const [allHomework, achievements, messages, checkins, plans, calls, breaks, progressVideos, monthlyCheckin] =
     await Promise.all([
       getHomework(player.id),
       getAchievements(player.id),
@@ -74,6 +76,7 @@ export default async function DashboardPage() {
       getCoachingCalls(player.id),
       getTrainingBreaks(player.id),
       getProgressVideos(player.id),
+      viewer.demo ? Promise.resolve({ booked: null, open: [] }) : getPlayerCheckin(player.id),
     ]);
 
   const firstName = player.full_name.split(" ")[0];
@@ -230,6 +233,10 @@ export default async function DashboardPage() {
           }
         />
       )}
+
+      {/* Monthly check-in call (062): the call you hold and the times you
+          can book. Shows nothing when there is nothing to book. */}
+      {!viewer.demo && <CheckinBooking checkin={monthlyCheckin} firstName={firstName} />}
 
       {/* Weekly 1:1 call - Complete Pathway only (029). Elite never sees
           this; the demo tour doesn't cover calls. */}

@@ -102,6 +102,7 @@ export function validateStepInput(
   kind: CourseKind,
   input: StepInput
 ): { ok: true; row: StepRow } | { ok: false; error: string } {
+  if (kind === "link") return { ok: false, error: "A link course has no steps. It opens its address." };
   const level_no = Math.floor(Number(input.level_no));
   if (!Number.isFinite(level_no) || level_no < 1 || level_no > 99) {
     return { ok: false, error: "Level must be a number from 1 to 99." };
@@ -140,8 +141,33 @@ export function validateStepInput(
   };
 }
 
+// LINK courses (058, Nov 4 2026): a card that opens a page outside the
+// app (the Dribbling Transformation site). The address is https only, so
+// nothing else (javascript:, data:, http:) can ever become an href.
+export function cleanExternalUrl(raw: string | null | undefined): string | null {
+  const t = (raw ?? "").trim();
+  if (!/^https:\/\/[^\s]+$/i.test(t) || t.length > 500) return null;
+  try {
+    return new URL(t).protocol === "https:" ? t : null;
+  } catch {
+    return null;
+  }
+}
+
+// The address a link course opens, or null when it has none (or a bad one).
+export function externalHref(course: Pick<Course, "kind" | "external_url">): string | null {
+  return course.kind === "link" ? cleanExternalUrl(course.external_url) : null;
+}
+
 // A course is shown on the tab when it is active and has at least one
-// step a member can use: a filmed, active drill, or a lesson.
+// step a member can use: a filmed, active drill, or a lesson. A link
+// course has no steps; it is shown when it is active and its address is
+// good.
+export function courseIsUsable(course: Pick<Course, "kind" | "external_url" | "steps">): boolean {
+  if (course.kind === "link") return externalHref(course) !== null;
+  return course.steps.some(stepIsUsable);
+}
+
 export function stepIsUsable(step: CourseStep): boolean {
   if (step.drill_id) return Boolean(step.drill && step.drill.active !== false && step.drill.video_url);
   return Boolean(step.title && step.body);
@@ -151,7 +177,7 @@ export function visibleCourses(courses: Course[]): Course[] {
   return courses
     .filter((c) => c.active)
     .map((c) => ({ ...c, steps: c.steps.filter(stepIsUsable) }))
-    .filter((c) => c.steps.length > 0)
+    .filter(courseIsUsable)
     .sort((a, b) => a.sort - b.sort || a.name.localeCompare(b.name));
 }
 
@@ -167,8 +193,15 @@ export function libraryCourses(courses: Course[], opts: { staff: boolean }): Cou
     .sort((a, b) => a.sort - b.sort || a.name.localeCompare(b.name));
 }
 
-export function courseNotice(course: Pick<Course, "active" | "steps">): string | null {
+export function courseNotice(
+  course: Pick<Course, "active" | "steps"> & Partial<Pick<Course, "kind" | "external_url">>
+): string | null {
   if (!course.active) return "Off. Members cannot see this course until it is switched on in the drill bank.";
+  if (course.kind === "link") {
+    return externalHref({ kind: "link", external_url: course.external_url ?? null })
+      ? null
+      : "No address yet. Members see a link course once it has an https address.";
+  }
   if (course.steps.filter(stepIsUsable).length === 0) {
     return "Nothing to show yet. Members see a course once it has a filmed drill or a written lesson.";
   }

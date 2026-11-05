@@ -135,7 +135,8 @@ export type SessionTemplate = {
 // shown to every member on the Courses tab as a library (nothing
 // tracked). A drill course's steps are bank drills by id; a lesson
 // course's steps are pages. One step is one or the other, never both.
-export type CourseKind = "drill" | "lesson";
+// A LINK course (058) has no steps: its card opens external_url.
+export type CourseKind = "drill" | "lesson" | "link";
 export type CourseTag = "beginner" | "advanced";
 export type CourseStep = {
   id: string;
@@ -160,6 +161,7 @@ export type Course = {
   subtitle: string | null;
   intro: string | null;
   kind: CourseKind;
+  external_url?: string | null; // link courses (058): where the card opens
   active: boolean;
   sort: number;
   steps: CourseStep[];

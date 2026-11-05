@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  cleanExternalUrl,
+  courseIsUsable,
   courseNotice,
+  externalHref,
   levelsOf,
   libraryCourses,
   slugify,
@@ -174,5 +177,71 @@ describe("what members see", () => {
     expect(courseNotice(course({ steps: [step({ title: "t", body: "b" })] }))).toBeNull();
     expect(courseNotice(course({ active: false, steps: [step({ title: "t", body: "b" })] }))).toMatch(/^Off\./);
     expect(courseNotice(course({ steps: [step({ drill_id: unfilmed.id, drill: unfilmed })] }))).toMatch(/^Nothing to show yet/);
+  });
+});
+
+// LINK courses (058, Nov 4 2026): a card that opens a page outside the
+// app. https only; no steps; shown when active with a good address.
+function course(partial: Partial<Course>): Course {
+  return {
+    id: "c1",
+    slug: "c1",
+    name: "C",
+    subtitle: null,
+    intro: null,
+    kind: "drill",
+    active: true,
+    sort: 0,
+    steps: [],
+    ...partial,
+  };
+}
+
+describe("link courses", () => {
+  it("only an https address ever becomes a link", () => {
+    expect(cleanExternalUrl("https://totalballmastery.netlify.app/")).toBe("https://totalballmastery.netlify.app/");
+    expect(cleanExternalUrl("  https://example.com/a?b=1  ")).toBe("https://example.com/a?b=1");
+    expect(cleanExternalUrl("http://example.com")).toBeNull();
+    expect(cleanExternalUrl("javascript:alert(1)")).toBeNull();
+    expect(cleanExternalUrl("data:text/html,x")).toBeNull();
+    expect(cleanExternalUrl("//example.com")).toBeNull();
+    expect(cleanExternalUrl("https://exa mple.com")).toBeNull();
+    expect(cleanExternalUrl("")).toBeNull();
+    expect(cleanExternalUrl(null)).toBeNull();
+  });
+
+  it("externalHref is set for a link course only", () => {
+    const url = "https://totalballmastery.netlify.app/";
+    expect(externalHref({ kind: "link", external_url: url })).toBe(url);
+    expect(externalHref({ kind: "link", external_url: "http://x.com" })).toBeNull();
+    expect(externalHref({ kind: "drill", external_url: url })).toBeNull();
+  });
+
+  it("a link course is on the tab when active with a good address, no steps needed", () => {
+    const url = "https://totalballmastery.netlify.app/";
+    const ok = course({ slug: "dribbling", kind: "link", external_url: url });
+    expect(courseIsUsable(ok)).toBe(true);
+    expect(visibleCourses([ok]).map((c) => c.slug)).toEqual(["dribbling"]);
+    expect(visibleCourses([{ ...ok, active: false }])).toEqual([]);
+    expect(visibleCourses([{ ...ok, external_url: null }])).toEqual([]);
+    expect(visibleCourses([{ ...ok, external_url: "http://x.com" }])).toEqual([]);
+  });
+
+  it("a drill or lesson course still needs a usable step", () => {
+    expect(visibleCourses([course({ kind: "lesson", steps: [] })])).toEqual([]);
+    const lesson = step({ title: "T", body: "B" });
+    expect(visibleCourses([course({ kind: "lesson", steps: [lesson] })])).toHaveLength(1);
+  });
+
+  it("staff see why a link course is hidden", () => {
+    const url = "https://totalballmastery.netlify.app/";
+    expect(courseNotice(course({ kind: "link", external_url: url }))).toBeNull();
+    expect(courseNotice(course({ kind: "link", external_url: null }))).toMatch(/https address/);
+    expect(courseNotice(course({ kind: "link", external_url: url, active: false }))).toMatch(/^Off/);
+  });
+
+  it("a link course takes no steps", () => {
+    const v = validateStepInput("link", { course_id: "c", level_no: 1, title: "T", body: "B" });
+    expect(v.ok).toBe(false);
   });
 });

@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { ArrowLeft, BookOpen, ChevronRight, Download, PencilLine } from "lucide-react";
+import { ArrowLeft, BookOpen, ChevronRight, Download, ExternalLink, PencilLine } from "lucide-react";
 import type { Course } from "@/lib/elite/types";
-import { courseNotice, levelsOf, stepTitle, stepVideo } from "@/lib/elite/courses";
+import { courseNotice, externalHref, levelsOf, stepTitle, stepVideo } from "@/lib/elite/courses";
 import { DrillVideo } from "@/components/elite/DrillVideo";
 import { cn } from "@/lib/utils";
 
@@ -50,10 +50,17 @@ export function CourseList({
           {courses.map((c) => {
             const levels = levelsOf(c.steps).length;
             const notice = staff ? courseNotice(c) : null;
+            // A link course opens its own site in a new tab (058); every
+            // other course opens its page in the app.
+            const out = externalHref(c);
+            const Card = out ? "a" : Link;
+            const cardProps = out
+              ? { href: out, target: "_blank", rel: "noopener noreferrer" }
+              : { href: `${basePath}/${c.slug}` };
             return (
-              <Link
+              <Card
                 key={c.id}
-                href={`${basePath}/${c.slug}`}
+                {...cardProps}
                 className={cn(
                   "elite-card flex items-center justify-between gap-4 p-5 transition-colors hover:border-accent/40",
                   notice && "opacity-70"
@@ -70,14 +77,20 @@ export function CourseList({
                   </div>
                   {c.subtitle && <div className="mt-0.5 text-sm text-white/55">{c.subtitle}</div>}
                   <div className="mt-1.5 text-xs text-white/35">
-                    {c.kind === "drill"
+                    {c.kind === "link"
+                      ? "Opens the course"
+                      : c.kind === "drill"
                       ? `${levels} level${levels === 1 ? "" : "s"} · ${c.steps.length} drill${c.steps.length === 1 ? "" : "s"}, every one on video`
                       : `${c.steps.length} lesson${c.steps.length === 1 ? "" : "s"}`}
                   </div>
                   {notice && <div className="mt-1.5 text-xs text-amber-300/80">{notice}</div>}
                 </div>
-                <ChevronRight className="h-5 w-5 shrink-0 text-white/30" />
-              </Link>
+                {out ? (
+                  <ExternalLink className="h-5 w-5 shrink-0 text-white/30" />
+                ) : (
+                  <ChevronRight className="h-5 w-5 shrink-0 text-white/30" />
+                )}
+              </Card>
             );
           })}
         </div>

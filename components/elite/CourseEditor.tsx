@@ -24,7 +24,7 @@ const inputCls =
   "w-full rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-sm text-bone placeholder:text-white/25 focus:border-accent/40 focus:outline-none";
 const labelCls = "mb-1 block text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35";
 
-type CourseDraft = { id?: string; name: string; subtitle: string; intro: string; kind: CourseKind };
+type CourseDraft = { id?: string; name: string; subtitle: string; intro: string; kind: CourseKind; external_url: string };
 type StepDraft = {
   id?: string;
   course_id: string;
@@ -139,7 +139,7 @@ export function CourseEditor({ courses, bank }: { courses: Course[]; bank: Drill
           </p>
         </div>
         <button
-          onClick={() => setCourseDraft({ name: "", subtitle: "", intro: "", kind: "drill" })}
+          onClick={() => setCourseDraft({ name: "", subtitle: "", intro: "", kind: "drill", external_url: "" })}
           className="btn-accent shrink-0 px-4 py-2.5 text-sm"
         >
           <Plus className="h-4 w-4" /> New course
@@ -170,9 +170,20 @@ export function CourseEditor({ courses, bank }: { courses: Course[]; bank: Drill
             <label className={labelCls}>Intro (one rule per line)</label>
             <textarea value={courseDraft.intro} onChange={(e) => setCourseDraft({ ...courseDraft, intro: e.target.value })} rows={3} className={inputCls} />
           </div>
+          {courseDraft.kind === "link" && (
+            <div>
+              <label className={labelCls}>Address (opens when a member taps the course)</label>
+              <input
+                value={courseDraft.external_url}
+                onChange={(e) => setCourseDraft({ ...courseDraft, external_url: e.target.value })}
+                placeholder="https://"
+                className={inputCls}
+              />
+            </div>
+          )}
           {!courseDraft.id && (
             <div className="flex flex-wrap gap-2">
-              {(["drill", "lesson"] as CourseKind[]).map((k) => (
+              {(["drill", "lesson", "link"] as CourseKind[]).map((k) => (
                 <button
                   key={k}
                   type="button"
@@ -182,7 +193,7 @@ export function CourseEditor({ courses, bank }: { courses: Course[]; bank: Drill
                     courseDraft.kind === k ? "border-accent bg-accent/15 text-accent" : "border-white/15 text-white/50"
                   )}
                 >
-                  {k === "drill" ? "Drill course (steps are bank drills)" : "Lesson course (steps are pages)"}
+                  {k === "drill" ? "Drill course (steps are bank drills)" : k === "lesson" ? "Lesson course (steps are pages)" : "Link course (opens a page outside the app)"}
                 </button>
               ))}
             </div>
@@ -214,21 +225,25 @@ export function CourseEditor({ courses, bank }: { courses: Course[]; bank: Drill
                       <span className="font-semibold text-bone">{c.name}</span>
                       {c.subtitle && <span className="text-sm text-white/45">{c.subtitle}</span>}
                       <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/45">
-                        {c.kind === "drill" ? "drills" : "lessons"}
+                        {c.kind === "drill" ? "drills" : c.kind === "link" ? "link" : "lessons"}
                       </span>
                       {!c.active && (
                         <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/45">off</span>
                       )}
                     </div>
+                    {c.kind === "link" ? (
+                      <div className="mt-1 truncate text-xs text-white/45">{c.external_url ?? "No address yet"}</div>
+                    ) : (
                     <div className="mt-1 text-xs text-white/45">
                       {levelsOf(c.steps).length} level{levelsOf(c.steps).length === 1 ? "" : "s"} · {c.steps.length} step{c.steps.length === 1 ? "" : "s"}
                       {usable < c.steps.length && <span className="text-amber-300"> · {c.steps.length - usable} hidden (unfilmed or paused)</span>}
                       {c.active && usable === 0 && <span className="text-amber-300"> · nothing to show yet</span>}
                     </div>
+                    )}
                   </div>
                   <div className={cn("flex shrink-0 gap-1", pending && "opacity-40")}>
                     <button
-                      onClick={() => setCourseDraft({ id: c.id, name: c.name, subtitle: c.subtitle ?? "", intro: c.intro ?? "", kind: c.kind })}
+                      onClick={() => setCourseDraft({ id: c.id, name: c.name, subtitle: c.subtitle ?? "", intro: c.intro ?? "", kind: c.kind, external_url: c.external_url ?? "" })}
                       className="rounded-lg p-2 text-white/40 hover:bg-white/5 hover:text-bone"
                       title="Edit"
                     >
@@ -251,7 +266,7 @@ export function CourseEditor({ courses, bank }: { courses: Course[]; bank: Drill
                   </div>
                 </div>
 
-                {isOpen && (
+                {isOpen && c.kind !== "link" && (
                   <div className="mt-4 space-y-3 border-t border-white/8 pt-4">
                     {levelsOf(c.steps).map((lvl) => (
                       <div key={lvl.no}>

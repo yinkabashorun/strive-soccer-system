@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "./supabase/server";
 import { getViewer } from "./session";
-import { slugify, validateStepInput, type StepInput } from "./courses";
+import { cleanExternalUrl, slugify, validateStepInput, type StepInput } from "./courses";
 import type { CourseKind } from "./types";
 
 // Courses (offer stack item 9, Oct 26 2026). Coach-only writes through
@@ -33,6 +33,7 @@ export type CourseInput = {
   subtitle?: string | null;
   intro?: string | null;
   kind: CourseKind;
+  external_url?: string | null; // link courses only (058)
 };
 
 export async function saveCourse(input: CourseInput) {
@@ -42,15 +43,29 @@ export async function saveCourse(input: CourseInput) {
 
   const name = input.name.trim().slice(0, 80);
   if (!name) return { ok: false as const, error: "Give the course a name." };
-  const kind: CourseKind = input.kind === "lesson" ? "lesson" : "drill";
+  const kind: CourseKind = input.kind === "lesson" ? "lesson" : input.kind === "link" ? "link" : "drill";
   const subtitle = (input.subtitle ?? "").trim().slice(0, 120) || null;
   const intro = (input.intro ?? "").trim().slice(0, 2000) || null;
+  // A link course carries an https address and nothing else does (058's
+  // check constraint says the same; this says it first, in plain words).
+  const external_url = kind === "link" ? cleanExternalUrl(input.external_url) : null;
+  if (kind === "link" && !external_url) {
+    return { ok: false as const, error: "A link course needs an address that starts with https://." };
+  }
 
   if (input.id) {
     // The kind is fixed once steps exist: a drill step cannot become a lesson.
+    // A link course's address can change; no other kind has one.
+    const { data: existing } = await c.supabase.from("elite_courses").select("kind").eq("id", input.id).maybeSingle();
+    const was = (existing as { kind: CourseKind } | null)?.kind;
+    const patch: Record<string, unknown> = { name, subtitle, intro };
+    if (was === "link") {
+      if (!external_url) return { ok: false as const, error: "A link course needs an address that starts with https://." };
+      patch.external_url = external_url;
+    }
     const { error } = await c.supabase
       .from("elite_courses")
-      .update({ name, subtitle, intro })
+      .update(patch)
       .eq("id", input.id);
     if (error) return { ok: false as const, error: "Couldn't save the course." };
     paths();
@@ -70,10 +85,10 @@ export async function saveCourse(input: CourseInput) {
     .maybeSingle();
   const { data, error } = await c.supabase
     .from("elite_courses")
-    .insert({ slug, name, subtitle, intro, kind, active: false, sort: ((last?.sort as number | undefined) ?? 0) + 10 })
+    .insert({ slug, name, subtitle, intro, kind, external_url, active: false, sort: ((last?.sort as number | undefined) ?? 0) + 10 })
     .select("id")
     .single();
-  if (error || !data) return { ok: false as const, error: "Couldn't create the course. Run database migration 041 first." };
+  if (error || !data) return { ok: false as const, error: "Couldn't create the course. Run database migrations 041 and 058 first." };
   paths();
   return { ok: true as const, id: data.id as string };
 }

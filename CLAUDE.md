@@ -3846,6 +3846,38 @@ commit.
       replies, the Instagram bio, /demo and the sales-process line in
       this file (still describes the in-person path). No player data
       touched.
+- [x] LIVE Nov 5 2026, THE DRIBBLING TRANSFORMATION COURSE AS A LINK
+      (Coach Yinka sent https://totalballmastery.netlify.app/ with "Ball
+      master course^", then "Dribbling *", then "it's the course when
+      they click course it should take them there"): the course is its
+      own site, so the Courses tab now has a LINK course kind. Migration
+      058 APPLIED TO PROD statement by statement and verified:
+      elite_courses.external_url, kind widened to drill | lesson | link,
+      and a shape check (a link course has an https address, no other
+      kind has one). SEEDED ON: slug dribbling-transformation, name
+      "Dribbling Transformation" (the offer's name), subtitle "Most
+      dangerous dribbler on the team.", sorted second after Keep It Up.
+      Seven courses on the tab (eight with this one counting the six
+      older ones plus Nutrition: Keep It Up, Dribbling Transformation,
+      Weak Foot, Strength, Speed, College Recruiting, Academy
+      Recruiting, General Nutrition Guide). CODE: courses.ts
+      cleanExternalUrl (https only, so javascript:, data: and http: can
+      never become an href), externalHref, courseIsUsable; a link course
+      is on the tab when active with a good address and needs no steps;
+      the list card opens the address in a new tab (noopener) with an
+      external-link icon and "Opens the course"; /courses/[slug] and the
+      coach page redirect to it; the coach editor has a Link course kind
+      with an address field, and course-actions refuses steps on a link
+      course and a bad address. tests/courses.test.ts +6; typecheck,
+      lint, build green. NOT VERIFIED: the site itself. The session's
+      network policy blocks netlify.app, so its content, whether it runs
+      30 days, and whether it works on a phone are unread. FLAGS: (1) the
+      page is outside the app and not behind membership, anyone with the
+      address can open it; (2) the address says "totalballmastery" while
+      the course is the Dribbling Transformation, rename it if the name
+      should match; (3) it is on the tab for every member now, on his
+      word, before he or I have read it; one tap off at /coach/drills.
+      No player data touched.
 
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 

@@ -1,7 +1,7 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { getCourse } from "@/lib/elite/data";
-import { externalHref, stepIsUsable } from "@/lib/elite/courses";
-import { CourseView } from "@/components/elite/CourseLibrary";
+import { stepIsUsable } from "@/lib/elite/courses";
+import { CourseView, LinkCourseGate } from "@/components/elite/CourseLibrary";
 
 // One course from the coach shell: rendered exactly as a member sees it,
 // but an off course or one with nothing usable still opens (with the
@@ -9,8 +9,7 @@ import { CourseView } from "@/components/elite/CourseLibrary";
 export default async function CoachCoursePage({ params }: { params: { slug: string } }) {
   const course = await getCourse(params.slug);
   if (!course) notFound();
-  const out = externalHref(course);
-  if (out) redirect(out);
+  if (course.kind === "link") return <LinkCourseGate course={course} basePath="/coach/courses" staff />;
   const steps = course.steps.filter(stepIsUsable);
   return <CourseView course={{ ...course, steps }} basePath="/coach/courses" staff />;
 }

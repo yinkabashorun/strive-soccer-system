@@ -50,14 +50,12 @@ export function CourseList({
           {courses.map((c) => {
             const levels = levelsOf(c.steps).length;
             const notice = staff ? courseNotice(c) : null;
-            // A link course opens its own site in a new tab (058); every
-            // other course opens its page in the app.
+            // Every course opens its page in the app first. A link course's
+            // page is the gate (LinkCourseGate) that shows the course's
+            // password before the button to its own site (Nov 5 2026).
             const out = externalHref(c);
-            const Card = out && !isInternalHref(out) ? "a" : Link;
-            const cardProps =
-              out && !isInternalHref(out)
-                ? { href: out, target: "_blank", rel: "noopener noreferrer" }
-                : { href: out ?? `${basePath}/${c.slug}` };
+            const Card = Link;
+            const cardProps = { href: `${basePath}/${c.slug}` };
             return (
               <Card
                 key={c.id}
@@ -79,7 +77,7 @@ export function CourseList({
                   {c.subtitle && <div className="mt-0.5 text-sm text-white/55">{c.subtitle}</div>}
                   <div className="mt-1.5 text-xs text-white/35">
                     {c.kind === "link"
-                      ? "Opens the course"
+                      ? "Opens the course site"
                       : c.kind === "drill"
                       ? `${levels} level${levels === 1 ? "" : "s"} · ${c.steps.length} drill${c.steps.length === 1 ? "" : "s"}, every one on video`
                       : `${c.steps.length} lesson${c.steps.length === 1 ? "" : "s"}`}
@@ -95,6 +93,80 @@ export function CourseList({
             );
           })}
         </div>
+      )}
+    </div>
+  );
+}
+
+// A link course (058): its page in the app shows the course's own lines
+// (the password, written in the course intro by the coach) and then the
+// button to its site, which opens in a new tab. An address on our own
+// domain opens in the same tab. The password is content in the database,
+// never in the code.
+export function LinkCourseGate({
+  course,
+  basePath,
+  staff = false,
+}: {
+  course: Course;
+  basePath: string;
+  staff?: boolean;
+}) {
+  const out = externalHref(course);
+  const lines = (course.intro ?? "").split("\n").map((l) => l.trim()).filter(Boolean);
+  const notice = staff ? courseNotice(course) : null;
+  const sameTab = out ? isInternalHref(out) : false;
+
+  return (
+    <div className="space-y-7">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Link
+          href={basePath}
+          className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-white/40 hover:text-bone"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" /> Courses
+        </Link>
+        {staff && (
+          <Link
+            href="/coach/drills"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-accent hover:underline"
+          >
+            <PencilLine className="h-3.5 w-3.5" /> Edit in the drill bank
+          </Link>
+        )}
+      </div>
+
+      {notice && (
+        <div className="rounded-xl border border-amber-300/30 bg-amber-300/[0.06] px-4 py-3 text-sm text-amber-200/90">
+          {notice}
+        </div>
+      )}
+
+      <header className="animate-fade-up">
+        {course.subtitle && (
+          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">{course.subtitle}</div>
+        )}
+        <h1 className="mt-1 font-display text-3xl font-black uppercase tracking-tight sm:text-4xl">{course.name}</h1>
+      </header>
+
+      {lines.length > 0 && (
+        <div className="elite-card space-y-2 p-5">
+          {lines.map((l, i) => (
+            <p key={i} className={i === 0 ? "font-display text-2xl font-bold tracking-tight text-bone" : "text-sm text-white/60"}>
+              {l}
+            </p>
+          ))}
+        </div>
+      )}
+
+      {out && (
+        <a
+          href={out}
+          {...(sameTab ? {} : { target: "_blank", rel: "noopener noreferrer" })}
+          className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wider text-ink hover:opacity-90"
+        >
+          Open the course <ExternalLink className="h-4 w-4" />
+        </a>
       )}
     </div>
   );

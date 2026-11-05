@@ -13,7 +13,13 @@ import {
   nextSunday,
   nyLocalToIso,
 } from "@/lib/elite/film-room";
-import { filmRoomPath, ownsFilmRoomPath } from "@/lib/elite/clips";
+import {
+  CLIP_COOLDOWN_DAYS,
+  clipCooldown,
+  clipCooldownMessage,
+  filmRoomPath,
+  ownsFilmRoomPath,
+} from "@/lib/elite/clips";
 
 const PLAYER = "11111111-1111-4111-8111-111111111111";
 const ROOM = "22222222-2222-4222-8222-222222222222";
@@ -164,5 +170,27 @@ describe("Film Room storage paths", () => {
     expect(ownsFilmRoomPath(`clips/${PLAYER}/${ROOM}/1.mp4`, PLAYER, ROOM)).toBe(false);
     expect(ownsFilmRoomPath(`filmroom/${PLAYER}/${ROOM}/../1.mp4`, PLAYER, ROOM)).toBe(false);
     expect(ownsFilmRoomPath(`filmroom/${PLAYER}/${ROOM}/1.exe`, PLAYER, ROOM)).toBe(false);
+  });
+});
+
+describe("Send a clip is one every two weeks", () => {
+  const day = 86_400_000;
+  const last = "2026-11-05T15:00:00.000Z";
+  const t0 = new Date(last).getTime();
+  it("is open for someone who has never sent one", () => {
+    expect(clipCooldown(null, t0)).toEqual({ open: true, opensAt: null });
+  });
+  it("closes for 14 days after a clip and says when it opens", () => {
+    expect(CLIP_COOLDOWN_DAYS).toBe(14);
+    const cd = clipCooldown(last, t0 + 13 * day);
+    expect(cd.open).toBe(false);
+    expect(cd.opensAt).toBe("2026-11-19T15:00:00.000Z");
+    expect(clipCooldown(last, t0 + 14 * day).open).toBe(true);
+  });
+  it("tells them when, and points to the Film Room", () => {
+    const m = clipCooldownMessage("2026-11-19T15:00:00.000Z");
+    expect(m).toContain("Thursday, Nov 19");
+    expect(m).toContain("Film Room");
+    expect(m).not.toMatch(/—|!/);
   });
 });

@@ -8,7 +8,7 @@ import { sendCoachEmail } from "./email";
 import { clipText, coachProfileUrl, progressText, textCoaches } from "./coach-alerts";
 import { normalizePhone } from "./sms";
 import { liveWeekFor, monthFromWeek } from "./time";
-import { CLIP_BUCKET, ownsClipPath, ownsProgressPath } from "./clips";
+import { CLIP_BUCKET, clipCooldown, clipCooldownMessage, ownsClipPath, ownsProgressPath } from "./clips";
 import { getBenchmark, getHomework, getProgressVideos } from "./data";
 import { previousProgressVideo, progressVideoDue } from "./progress-video";
 import { sendPlayerSMS } from "./sms";
@@ -277,6 +277,28 @@ export async function sendPlayerMessage(body: string) {
 // elite-film bucket (storage RLS, migration 036). This records it as a
 // message in their chat with the coach and pings the coach. Same cookie
 // client and same insert policy as sendPlayerMessage.
+// Is the player's Send a clip open (one every two weeks)? Asked before the
+// phone opens its camera, so nobody films a clip that will be refused.
+export async function checkClipOpen() {
+  const viewer = await getViewer();
+  if (!viewer?.playerId) return { ok: false as const, error: "Sign in first." };
+  if (viewer.demo) return { ok: true as const };
+  const supabase = createClient();
+  if (!supabase) return { ok: true as const };
+  const { data } = await supabase
+    .from("elite_messages")
+    .select("created_at")
+    .eq("player_id", viewer.playerId)
+    .eq("from_role", "player")
+    .not("clip_path", "is", null)
+    .order("created_at", { ascending: false })
+    .limit(1);
+  const last = (data as { created_at: string }[] | null)?.[0]?.created_at ?? null;
+  const cd = clipCooldown(last);
+  if (!cd.open && cd.opensAt) return { ok: false as const, error: clipCooldownMessage(cd.opensAt) };
+  return { ok: true as const };
+}
+
 export async function sendClip(input: { homeworkId: string; path: string }) {
   const viewer = await getViewer();
   if (!viewer?.playerId) return { ok: false as const, error: "Sign in first." };
@@ -286,6 +308,9 @@ export async function sendClip(input: { homeworkId: string; path: string }) {
   }
   const supabase = createClient();
   if (!supabase) return { ok: true as const };
+
+  const open = await checkClipOpen();
+  if (!open.ok) return open;
 
   const { data: hw } = await supabase
     .from("elite_homework")

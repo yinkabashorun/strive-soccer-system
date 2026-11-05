@@ -909,17 +909,6 @@ export async function markPlayerMessagesRead(playerId: string) {
   return { ok: true as const };
 }
 
-// Clear every unread player message at once (the dashboard's Mark all
-// read), for the backlog that built up before opening a thread cleared it.
-export async function markAllPlayerMessagesRead() {
-  if (!(await requireCoach())) return { ok: false as const };
-  const supabase = createClient();
-  if (!supabase) return { ok: true as const };
-  await supabase.from("elite_messages").update({ read: true }).eq("from_role", "player").eq("read", false);
-  revalidatePath("/coach");
-  return { ok: true as const };
-}
-
 // A coach sets their own number for upload texts (063).
 export async function saveAlertPhone(phone: string) {
   const viewer = await requireCoach();

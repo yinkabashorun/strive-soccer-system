@@ -5,6 +5,7 @@ import { createClient, createServiceClient } from "./supabase/server";
 import { getViewer } from "./session";
 import { maybeAwardAchievements } from "./achievements";
 import { sendCoachEmail } from "./email";
+import { clipText, coachProfileUrl, progressText, textCoaches } from "./coach-alerts";
 import { normalizePhone } from "./sms";
 import { liveWeekFor, monthFromWeek } from "./time";
 import { CLIP_BUCKET, ownsClipPath, ownsProgressPath } from "./clips";
@@ -305,6 +306,7 @@ export async function sendClip(input: { homeworkId: string; path: string }) {
   });
   if (error) return { ok: false as const, error: "Couldn't send the clip. Try again." };
 
+  await textCoaches(clipText(viewer.profile.full_name, title, coachProfileUrl(viewer.playerId))).catch(() => 0);
   await sendCoachEmail(viewer.playerId, {
     event: "player_clip",
     subject: `${viewer.profile.full_name} sent a clip: ${title}`,
@@ -392,6 +394,7 @@ export async function submitProgressVideo(input: { path: string; week: number; s
     }
   }
 
+  await textCoaches(progressText(player.full_name, week, coachProfileUrl(player.id))).catch(() => 0);
   await sendCoachEmail(player.id, {
     event: "progress_video",
     subject: `${player.full_name} filmed the week ${week} progress video`,

@@ -16,6 +16,7 @@ import { PlanBuilderStatus } from "@/components/elite/PlanBuilderStatus";
 import { AppErrorsCard } from "@/components/elite/AppErrorsCard";
 import { liveWeekNumber, nyDayNumber, nyToday } from "@/lib/elite/time";
 import { Avatar } from "@/components/Avatar";
+import { MarkAllReadButton } from "@/components/elite/MarkAllReadButton";
 import { StatTile } from "@/components/elite/StatTile";
 import { InvitePanel } from "@/components/elite/InvitePanel";
 import { WeeklyDeposits } from "@/components/elite/WeeklyDeposits";
@@ -125,6 +126,8 @@ export default async function CoachDashboard() {
           accent={toAnswer > 0}
         />
       </section>
+
+      {!viewer?.demo && <MarkAllReadButton count={inbox.unreadMessages} />}
 
       {!viewer?.demo && <PlanBuilderStatus run={builderRun} behind={behind} />}
 

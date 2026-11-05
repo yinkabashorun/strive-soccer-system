@@ -46,6 +46,7 @@ import { CheckinsPanel } from "@/components/elite/CheckinsPanel";
 import { CoachFilmPanel } from "@/components/elite/CoachFilmPanel";
 import { CoachGamesPanel } from "@/components/elite/CoachGamesPanel";
 import { MessageThread } from "@/components/elite/MessageThread";
+import { MarkThreadRead } from "@/components/elite/MarkThreadRead";
 import { IntakePanel } from "@/components/elite/IntakePanel";
 import { OfferedDrillsPanel } from "@/components/elite/OfferedDrillsPanel";
 import { DeletePlayerButton } from "@/components/elite/DeletePlayerButton";
@@ -377,6 +378,10 @@ export default async function PlayerProfile({
               <MessageSquare className="h-3.5 w-3.5" /> Message{" "}
               {player.full_name.split(" ")[0]}
             </div>
+            <MarkThreadRead
+              playerId={player.id}
+              unread={messages.filter((m) => m.from_role === "player" && !m.read).length}
+            />
             <MessageThread
               messages={messages}
               meRole="coach"

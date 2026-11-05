@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Clapperboard, Loader2, Trash2, Upload, Video } from "lucide-react";
-import { recordFilmRoomClip, removeFilmRoomClip } from "@/lib/elite/film-room-actions";
+import { notifyCoachesOfFilmRoomClips, recordFilmRoomClip, removeFilmRoomClip } from "@/lib/elite/film-room-actions";
 import { clipExtension, filmRoomPath } from "@/lib/elite/clips";
 import { uploadClip } from "@/lib/elite/clip-upload";
 import { FILM_CLIPS_MAX, FILM_CLIPS_MIN, fmtWhen } from "@/lib/elite/film-room";
@@ -53,6 +53,7 @@ export function FilmRoomCard({
     setError(null);
     const files = Array.from(list).slice(0, remaining);
     const t0 = Date.now();
+    let added = 0;
     for (let i = 0; i < files.length; i++) {
       const f = files[i];
       setBusy(`Sending clip ${i + 1} of ${files.length}`);
@@ -67,7 +68,9 @@ export function FilmRoomCard({
         setError(res.error ?? "Couldn't add the clip.");
         break;
       }
+      added++;
     }
+    if (added > 0) await notifyCoachesOfFilmRoomClips({ roomId: room.id, added });
     setBusy(null);
     router.refresh();
   }

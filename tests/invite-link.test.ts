@@ -21,11 +21,15 @@ describe("coach invites", () => {
     expect(signupLanding("coach")).toBe("/coach");
     expect(signupLanding("player")).toBe("/dashboard");
   });
-  it("needs the parent phone for a family, not for a coach", () => {
+  it("needs both phones for a family, neither for a coach", () => {
     const base = { fullName: "Gary Grigoryan", email: "g@example.com", password: "longenough" };
     expect(redeemFieldsComplete("coach", { ...base, phone: "" })).toBe(true);
-    expect(redeemFieldsComplete("player", { ...base, phone: "" })).toBe(false);
-    expect(redeemFieldsComplete("player", { ...base, phone: "7035550100" })).toBe(true);
+    expect(redeemFieldsComplete("player", { ...base, phone: "", playerPhone: "7035550101" })).toBe(false);
+    expect(redeemFieldsComplete("player", { ...base, phone: "7035550100" })).toBe(false);
+    expect(redeemFieldsComplete("player", { ...base, phone: "7035550100", playerPhone: " " })).toBe(false);
+    expect(redeemFieldsComplete("player", { ...base, phone: "7035550100", playerPhone: "7035550101" })).toBe(true);
+    // a player with no phone of their own repeats the parent's number
+    expect(redeemFieldsComplete("player", { ...base, phone: "7035550100", playerPhone: "7035550100" })).toBe(true);
     expect(redeemFieldsComplete("coach", { ...base, phone: "", password: "short" })).toBe(false);
     expect(redeemFieldsComplete("coach", { ...base, phone: "", fullName: " " })).toBe(false);
   });

@@ -125,14 +125,16 @@ export function SignupForm({
               autoComplete="tel"
             />
             <Input
-              label="Player's own phone (optional, if they have one)"
+              label="Player's phone (Film Room and call texts)"
               type="tel"
               value={playerPhone}
               onChange={setPlayerPhone}
               placeholder="(703) 555-0100"
               autoComplete="tel"
-              required={false}
             />
+            <p className="-mt-1 text-xs text-white/40">
+              No phone of their own? Use the parent&apos;s number again.
+            </p>
           </>
         )}
         <Input

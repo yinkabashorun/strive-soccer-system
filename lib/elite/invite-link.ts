@@ -29,14 +29,18 @@ export function signupLanding(role: InviteRole): string {
 }
 
 // The fields a redeem needs. A family gives the parent phone (text
-// updates go there); a coach gives name, email and password only.
+// updates go there) AND the player's own phone (Film Room and check-in
+// texts reach the player directly, Nov 5 2026); a player with no phone of
+// their own gives the parent's number again and the family gets one text.
+// A coach gives name, email and password only.
 export function redeemFieldsComplete(
   role: InviteRole,
-  fields: { fullName: string; email: string; phone: string; password: string }
+  fields: { fullName: string; email: string; phone: string; playerPhone?: string; password: string }
 ): boolean {
-  const { fullName, email, phone, password } = fields;
+  const { fullName, email, phone, playerPhone = "", password } = fields;
   if (!fullName.trim() || !email.trim() || password.length < 8) return false;
-  return role === "coach" || phone.trim().length > 0;
+  if (role === "coach") return true;
+  return phone.trim().length > 0 && playerPhone.trim().length > 0;
 }
 
 export function inviteLanding(input: {

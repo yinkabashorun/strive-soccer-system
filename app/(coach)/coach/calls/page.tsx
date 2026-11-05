@@ -1,6 +1,9 @@
 import { getCheckinDaysForCoach, getFilmRoomsForCoach } from "@/lib/elite/film-room-data";
 import { defaultFilmRoom } from "@/lib/elite/film-room";
 import { nyToday } from "@/lib/elite/time";
+import { getViewer } from "@/lib/elite/session";
+import { getAlertPhone } from "@/lib/elite/coach-alerts";
+import { AlertPhoneCard } from "@/components/elite/AlertPhoneCard";
 import { FilmRoomAdmin } from "@/components/elite/FilmRoomAdmin";
 import { CheckinDaysAdmin } from "@/components/elite/CheckinDaysAdmin";
 
@@ -10,7 +13,12 @@ export const metadata = { title: "Calls · Strive Elite" };
 // Film Room with Coach Gary and the monthly 1:1 check-in calls. Dates and
 // times are Virginia time.
 export default async function CoachCallsPage() {
-  const [rooms, days] = await Promise.all([getFilmRoomsForCoach(), getCheckinDaysForCoach()]);
+  const viewer = await getViewer();
+  const [rooms, days, alertPhone] = await Promise.all([
+    getFilmRoomsForCoach(),
+    getCheckinDaysForCoach(),
+    viewer ? getAlertPhone(viewer.profile.id) : Promise.resolve(""),
+  ]);
   const film = defaultFilmRoom(nyToday());
   return (
     <div className="space-y-10">
@@ -22,6 +30,7 @@ export default async function CoachCallsPage() {
           gets a text, a push and a note in the app.
         </p>
       </header>
+      <AlertPhoneCard initial={alertPhone} />
       <FilmRoomAdmin rooms={rooms} defaultDay={film.day} defaultTime={film.time} />
       <CheckinDaysAdmin days={days} defaultDay={nyToday()} />
     </div>

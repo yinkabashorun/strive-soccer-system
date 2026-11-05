@@ -24,6 +24,7 @@ import { withoutPlayersOnBreak } from "./health";
 import { sendPlayerOwnSMS, sendPlayerSMS } from "./sms";
 import { sendPushToPlayer } from "./push";
 import { sendCoachEmail, sendPlayerEmail } from "./email";
+import { coachCallsUrl, filmRoomText, textCoaches } from "./coach-alerts";
 
 // Weekly Film Room and monthly check-in calls (062, Nov 5 2026). Coach
 // actions check the viewer is staff; member actions check the viewer owns
@@ -315,6 +316,35 @@ export async function recordFilmRoomClip(input: { roomId: string; path: string }
   }
   refresh();
   revalidatePath(`/coach/players/${viewer.playerId}`);
+  return { ok: true as const };
+}
+
+// One text to the coaches per batch a member adds (the uploader calls this
+// once after its clips are in, so five clips are one text, not five).
+export async function notifyCoachesOfFilmRoomClips(input: { roomId: string; added: number }) {
+  const viewer = await getViewer();
+  if (!viewer?.playerId) return { ok: false as const };
+  if (viewer.demo) return { ok: true as const };
+  const db = createServiceClient();
+  if (!db) return { ok: true as const };
+  const added = Math.max(0, Math.min(FILM_CLIPS_MAX, Math.floor(input.added)));
+  if (added === 0) return { ok: true as const };
+  const [{ data: room }, { count }] = await Promise.all([
+    db.from("elite_film_rooms").select("scheduled_at").eq("id", input.roomId).maybeSingle(),
+    db
+      .from("elite_film_room_clips")
+      .select("id", { count: "exact", head: true })
+      .eq("film_room_id", input.roomId)
+      .eq("player_id", viewer.playerId),
+  ]);
+  if (!room) return { ok: false as const };
+  const day = new Date(room.scheduled_at).toLocaleDateString("en-US", {
+    weekday: "long",
+    timeZone: "America/New_York",
+  });
+  await textCoaches(
+    filmRoomText(viewer.profile.full_name, added, count ?? added, day, coachCallsUrl())
+  ).catch(() => 0);
   return { ok: true as const };
 }
 

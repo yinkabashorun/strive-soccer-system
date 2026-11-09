@@ -1,0 +1,50 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,900;1,600&family=Inter:wght@500;600&display=block" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{width:1080px;height:1350px;overflow:hidden;background:#efe9df}
+  .stage{position:relative;width:1080px;height:1350px;overflow:hidden;
+    background:radial-gradient(ellipse at 50% 40%,#f8f4ec 0%,#efe9df 55%,#e4dccf 100%)}
+  /* film grain */
+  .grain{position:absolute;inset:0;opacity:.18;mix-blend-mode:multiply;pointer-events:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .6 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>")}
+  .ring{position:absolute;left:90px;top:150px;width:900px;height:900px;border-radius:50%;
+    background:radial-gradient(circle at 50% 45%,#ffffff 0%,#fbf8f2 62%,#f1ebe0 100%);
+    box-shadow:inset 0 0 60px rgba(160,140,100,.25),0 0 0 2px rgba(200,168,88,.10)}
+  .gold{position:absolute;left:190px;top:840px;width:700px;height:700px;border-radius:50%;
+    background:radial-gradient(circle at 50% 30%,#ecd9a0 0%,#c8a858 40%,#9c7f37 66%,rgba(156,127,55,0) 71%);filter:blur(1px)}
+  .p{position:absolute;filter:drop-shadow(0 18px 24px rgba(40,30,10,.25))}
+  .fade{-webkit-mask-image:linear-gradient(to bottom,#000 62%,transparent 96%);mask-image:linear-gradient(to bottom,#000 62%,transparent 96%)}
+  #p2{left:325px;top:58px;height:760px;opacity:.95}
+  #p1{left:60px;top:420px;height:600px}
+  #p4{left:600px;top:400px;height:640px;-webkit-mask-image:linear-gradient(to bottom,transparent 0%,#000 9%,#000 62%,transparent 96%);mask-image:linear-gradient(to bottom,transparent 0%,#000 9%,#000 62%,transparent 96%)}
+  #p3{left:385px;top:400px;height:760px}
+  .cream{position:absolute;left:0;right:0;top:1070px;bottom:0;
+    background:linear-gradient(to bottom,rgba(239,233,223,0) 0%,#efe9df 22%)}
+  .arc{position:absolute;left:-60px;top:1110px;width:1200px;height:900px;border-radius:50%;
+    border:2px solid rgba(20,20,20,.28);border-bottom:none}
+  .name{position:absolute;left:0;right:0;top:1152px;text-align:center;
+    font-family:'Playfair Display',serif;font-weight:900;font-size:104px;letter-spacing:1px;color:#121212;line-height:1}
+  .sub{position:absolute;left:0;right:0;top:1262px;text-align:center;
+    font-family:'Playfair Display',serif;font-style:italic;font-weight:600;font-size:34px;color:#1c1c1c}
+  .handle{position:absolute;left:44px;top:40px;font-family:'Inter',sans-serif;font-weight:600;font-size:22px;
+    letter-spacing:3px;color:#1c1c1c;text-transform:uppercase}
+  .handle span{display:block;height:2px;width:100%;background:#c8a858;margin-top:6px}
+  .logo{position:absolute;right:40px;top:26px;width:92px;mix-blend-mode:multiply}
+</style></head>
+<body><div class="stage">
+  <div class="ring"></div>
+  <img class="p fade" id="p2" src="cutouts/p2.png">
+  <img class="p fade" id="p1" src="cutouts/p1.png">
+  <img class="p fade" id="p4" src="cutouts/p4.png">
+  <div class="gold"></div>
+  <img class="p fade" id="p3" src="cutouts/p3.png">
+  <div class="cream"></div>
+  <div class="arc"></div>
+  <div class="name">STRIVE ELITE</div>
+  <div class="sub">Personalized remote training</div>
+  <div class="handle">@strivesoccerfc<span></span></div>
+  <img class="logo" src="strive-logo-512.png">
+  <div class="grain"></div>
+</div></body></html>

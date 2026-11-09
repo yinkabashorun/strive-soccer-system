@@ -1,0 +1,76 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Inter:wght@500;600;700&display=block" rel="stylesheet">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{width:1080px;height:1350px;overflow:hidden;background:#050505}
+  .stage{position:relative;width:1080px;height:1350px;overflow:hidden;
+    background:radial-gradient(ellipse 62% 48% at 50% 46%,#3a2c12 0%,#17110a 42%,#050505 78%)}
+  .rays{position:absolute;inset:-300px;opacity:.28;
+    background:repeating-conic-gradient(from 0deg at 50% 46%,rgba(240,205,120,.6) 0deg .8deg,transparent .8deg 7deg);
+    -webkit-mask-image:radial-gradient(circle at 50% 46%,#000 0%,transparent 48%);mask-image:radial-gradient(circle at 50% 46%,#000 0%,transparent 48%)}
+  .halo{position:absolute;left:240px;top:340px;width:600px;height:600px;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,214,120,.55) 0%,rgba(210,165,70,.18) 38%,transparent 68%);filter:blur(14px)}
+  .spark{position:absolute;border-radius:50%;background:#ffd98a;box-shadow:0 0 8px 2px rgba(255,200,90,.7)}
+  .eyebrow{position:absolute;left:0;right:0;top:64px;text-align:center;font-family:'Inter',sans-serif;font-weight:600;
+    font-size:22px;letter-spacing:12px;color:#e9d9ad;padding-left:12px}
+  /* big type behind the trophy */
+  .head{position:absolute;left:0;right:0;text-align:center;font-family:'Oswald',sans-serif;font-weight:700;line-height:.86;
+    text-transform:uppercase;white-space:nowrap}
+  .h1{top:118px;font-size:196px;letter-spacing:2px;
+    background:linear-gradient(180deg,#ffffff 0%,#f5ecd2 55%,#bfae86 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 6px 18px rgba(0,0,0,.8))}
+  .h2{top:300px;font-size:560px;letter-spacing:-6px;
+    background:linear-gradient(180deg,#fff3c4 0%,#e9c766 30%,#c49a3a 62%,#6d5114 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 0 30px rgba(232,190,90,.35))}
+  .trophy{position:absolute;left:50%;top:410px;height:640px;transform:translateX(-50%);
+    filter:drop-shadow(0 0 40px rgba(255,210,120,.35)) drop-shadow(0 40px 40px rgba(0,0,0,.85)) saturate(.9) contrast(1.05)}
+  .eng{position:absolute;left:50%;top:410px;height:640px;width:335px;transform:translateX(-50%)}
+  .floor{position:absolute;left:0;right:0;top:960px;bottom:0;
+    background:linear-gradient(to bottom,rgba(5,5,5,0) 0%,rgba(5,5,5,.9) 40%,#050505 55%)}
+  .rule{position:absolute;left:390px;width:300px;height:2px;background:linear-gradient(90deg,transparent,#c8a858,transparent)}
+  .prize{position:absolute;left:0;right:0;top:1080px;text-align:center;font-family:'Oswald',sans-serif;font-weight:700;
+    font-size:112px;line-height:1;letter-spacing:2px;
+    background:linear-gradient(180deg,#fff6d8 0%,#efd287 45%,#c39a3c 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 0 20px rgba(232,190,90,.4))}
+  .sub{position:absolute;left:0;right:0;top:1134px;text-align:center;font-family:'Oswald',sans-serif;font-weight:500;
+    font-size:30px;letter-spacing:10px;color:#f4ecd8;padding-left:10px}
+  .foot{position:absolute;left:0;right:0;top:1228px;text-align:center;font-family:'Inter',sans-serif;font-weight:600;
+    font-size:19px;letter-spacing:7px;color:#cfc2a0;padding-left:7px}
+  .foot i{font-style:normal;color:#c8a858;margin:0 18px}
+  .slot{border:1.5px dashed #c8a858;padding:4px 12px;color:#e6cf8e}
+  .logo{position:absolute;left:50%;top:1276px;width:62px;transform:translateX(-50%);filter:invert(1);mix-blend-mode:screen;opacity:.95}
+  .grain{position:absolute;inset:0;opacity:.10;mix-blend-mode:overlay;pointer-events:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>")}
+</style></head>
+<body><div class="stage" id="s">
+  <div class="rays"></div>
+  <div class="halo"></div>
+  <div class="eyebrow"><span class="slot">DATE</span></div>
+  <div class="head h1">STRIVE ELITE</div>
+  <div class="head h2">5V5</div>
+  <img class="trophy" src="trophy/photo-trophy.png" alt="">
+  <svg class="eng" viewBox="0 0 509 972" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="e" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3d2603"/><stop offset="1" stop-color="#6e4a0a"/></linearGradient>
+    <path id="l1" d="M112,100 Q255,116 398,100"/></defs>
+    <g font-family="Oswald" font-weight="700" text-anchor="middle" font-size="34" letter-spacing="6">
+      <text fill="#fff6d0" opacity=".6" transform="translate(0,1.4)"><textPath href="#l1" startOffset="50%">STRIVE ELITE</textPath></text>
+      <text fill="url(#e)" opacity=".93"><textPath href="#l1" startOffset="50%">STRIVE ELITE</textPath></text>
+    </g>
+  </svg>
+  <div class="floor"></div>
+  <div class="rule" style="top:1062px"></div>
+  <div class="prize">$5,000 CASH PRIZE</div>
+  <div class="foot"><span class="slot">LOCATION</span><i>•</i>DM <span class="slot">WORD</span> TO ENTER</div>
+  <img class="logo" src="strive-logo-512.png">
+  <div class="grain"></div>
+</div>
+<script>
+  // deterministic sparks around the trophy
+  let x=7;const r=()=>(x=(x*16807)%2147483647)/2147483647;const s=document.getElementById('s');
+  for(let i=0;i<70;i++){const d=document.createElement('div');d.className='spark';
+    const a=r()*Math.PI*2,rad=180+r()*420,sz=1+r()*3.2;
+    d.style.left=(540+Math.cos(a)*rad*1.05)+'px';d.style.top=(600+Math.sin(a)*rad*.85)+'px';
+    d.style.width=d.style.height=sz+'px';d.style.opacity=.35+r()*.6;s.insertBefore(d,s.children[2]);}
+</script>
+</body></html>

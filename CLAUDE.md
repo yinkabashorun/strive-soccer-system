@@ -3982,6 +3982,20 @@ commit.
       THEN (Coach Yinka: "yes do all that can help"): .gitignore now ignores learned/**/transcript.md, so any transcript the learn skill writes or he pastes stays on the machine and never reaches the public repo; each learned/<name>/notes.md (paraphrased) is still committed. OPEN for him: a real capacity number (new players per week) before any lead-magnet CTA uses scarcity.
 - [x] DRAFTED Nov 9 2026, THE 60-SECOND WEAK FOOT TEST (Coach Yinka: "Yea", to drafting it with the lead-magnet skill): marketing/lead-magnets/weak-foot-test.md. Reveal-a-problem magnet: 30 seconds of inside-outside touches with the strong foot, 30 with the weak foot, the parent sends both counts. Four names for a story poll, the post and caption ("Comment WEAKFOOT"), a reel option with Gary doing the test (needs filming), the auto-reply DM with the test and three qualifying questions (age, team and level, goal), and follow-ups for qualified, not-a-fit and no-reply. No price, no scarcity, no target number for a "good" gap. OPEN for him: pick the name, WEAKFOOT reply in Carla's GHL flow, which booking link the follow-up sends, the capacity number. Nothing posted.
 
+## Skills (use them without being asked)
+
+These live in .claude/skills/. Load the matching skill BEFORE starting the
+work whenever a request fits it, even if Coach Yinka does not name it.
+
+- lead-magnet: ANY piece meant to get parents (followers, /demo visitors,
+  old clients) to book a call: posts, captions, reels' CTAs, DM scripts,
+  Carla's replies, story polls, landing or confirmation page copy, ads,
+  freebies, "comment X" posts, follow-up texts. Its Strive rules apply.
+- strive-reel: any video he sends to edit, caption or post.
+- learn: any video, podcast or transcript he wants learned or turned into
+  a skill. Transcripts never go into this public repo (gitignored).
+  Source of saved transcripts: his Google Drive folder, once named (OPEN).
+
 ## Growth target (stamped Sept 19, Coach Yinka's own call)
 
 By Oct 31 2026: 20+ fully remote on MRR, 35-40 in-person on MRR, 8-10

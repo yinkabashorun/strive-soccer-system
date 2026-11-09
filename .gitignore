@@ -146,3 +146,6 @@ vite.config.ts.timestamp-*
 marketing/reels/**/source.mp4
 marketing/reels/**/zoomed.mp4
 marketing/reels/**/audio/
+
+# learn skill: verbatim transcripts stay local (public repo, owners hold the copyright); notes.md is committed
+learned/**/transcript.md

@@ -11,7 +11,8 @@
     -webkit-mask-image:radial-gradient(circle at 50% 38%,#000 0%,transparent 62%);mask-image:radial-gradient(circle at 50% 38%,#000 0%,transparent 62%)}
   .halo{position:absolute;left:190px;top:40px;width:700px;height:700px;border-radius:50%;
     background:radial-gradient(circle,rgba(230,200,120,.45) 0%,rgba(200,168,88,.15) 40%,transparent 70%);filter:blur(10px)}
-  .trophy{position:absolute;left:220px;top:56px;width:640px;height:636px;filter:drop-shadow(0 0 50px rgba(230,195,110,.35)) drop-shadow(0 30px 40px rgba(0,0,0,.6))}
+  .trophy{position:absolute;left:311px;top:30px;width:458px;height:875px;filter:drop-shadow(0 0 50px rgba(230,195,110,.35)) drop-shadow(0 30px 40px rgba(0,0,0,.6))}
+  .trophy img{filter:saturate(.88) contrast(1.04)}
   .trophy img,.trophy svg{position:absolute;left:0;top:0;width:100%;height:100%}
   .p{position:absolute;filter:drop-shadow(0 20px 26px rgba(0,0,0,.65)) contrast(1.06) saturate(.92)}
   .fade{-webkit-mask-image:linear-gradient(to bottom,#000 60%,transparent 95%);mask-image:linear-gradient(to bottom,#000 60%,transparent 95%)}
@@ -44,18 +45,16 @@
   <div class="rays"></div>
   <div class="halo"></div>
   <div class="trophy">
-    <img src="trophy/trophy-cut.png" alt="">
-    <svg viewBox="0 0 1042 1036" xmlns="http://www.w3.org/2000/svg">
+    <img src="trophy/photo-trophy.png" alt="">
+    <svg viewBox="0 0 509 972" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="eng" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2a1a05"/><stop offset="1" stop-color="#5a3f12"/></linearGradient>
-        <path id="l1" d="M330,318 Q521,338 712,318"/>
-        <path id="l2" d="M380,392 Q521,408 662,392"/>
+        <linearGradient id="eng" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3d2603"/><stop offset="1" stop-color="#6e4a0a"/></linearGradient>
+        <linearGradient id="gl" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff3c4"/><stop offset=".5" stop-color="#e6c35a"/><stop offset="1" stop-color="#a77b1c"/></linearGradient>
+        <path id="l1" d="M112,100 Q255,116 398,100"/>
       </defs>
-      <g font-family="Playfair Display" font-weight="900" font-size="64" letter-spacing="12" text-anchor="middle">
-        <text fill="#ffe9b0" opacity=".55" transform="translate(0,2.5)"><textPath href="#l1" startOffset="50%">STRIVE</textPath></text>
-        <text fill="#ffe9b0" opacity=".55" transform="translate(0,2.5)"><textPath href="#l2" startOffset="50%">ELITE</textPath></text>
-        <text fill="url(#eng)" opacity=".92"><textPath href="#l1" startOffset="50%">STRIVE</textPath></text>
-        <text fill="url(#eng)" opacity=".92"><textPath href="#l2" startOffset="50%">ELITE</textPath></text>
+      <g font-family="Playfair Display" font-weight="900" text-anchor="middle">
+        <text font-size="33" letter-spacing="5" fill="#fff6d0" opacity=".6" transform="translate(0,1.4)"><textPath href="#l1" startOffset="50%">STRIVE ELITE</textPath></text>
+        <text font-size="33" letter-spacing="5" fill="url(#eng)" opacity=".93"><textPath href="#l1" startOffset="50%">STRIVE ELITE</textPath></text>
       </g>
     </svg>
   </div>

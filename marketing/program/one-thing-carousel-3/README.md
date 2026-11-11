@@ -76,12 +76,16 @@ the strength finisher or the speed drill.
    once fitness and speed started, and never said he was forced into one
    thing at a time, which is where the structure comes from.)
 8. "BUT I'VE GOT MORE THAN ONE THING TO FIX." / Good. It's three months.
-   You get six. We master your weaknesses one at a time. Two weeks each,
-   biggest first. The rest keep improving the whole way. / 12 WEEKS, one
-   main focus, the rest still training: six rows, each a gold block (the
-   main focus for those two weeks: weak foot, first touch, passing, ball
-   mastery, 1v1 skills, speed) beside a white block "Still improving:
-   the other five". Same gold and white as his story slide before it.
+   You get six. One weakness leads for two weeks and gets half of every
+   session. The other half keeps the rest of your game improving. So
+   nothing starts from zero, and nothing slips back. / 12 WEEKS, every
+   session split in two: six gold blocks down the left, one per two
+   weeks, each marked "leads" (weak foot, first touch, passing, ball
+   mastery, 1v1 skills, speed); ONE tall white block down the right,
+   running beside all twelve weeks: "The other half, every session: THE
+   REST OF YOUR GAME. Passing is already improving before it leads. Your
+   weak foot stays sharp after its two weeks." ("The other five" was
+   rejected by him: it did not make the idea click.)
 9. "SO IT'S ONLY WEAK FOOT FOR TWO WEEKS?" / NO. Two drills on your weak
    foot. Two on the rest of your game. A different part every session, so
    nothing goes cold while your weak foot catches up. (The app's session:

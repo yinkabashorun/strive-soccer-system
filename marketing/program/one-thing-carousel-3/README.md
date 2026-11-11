@@ -82,7 +82,7 @@ the strength finisher or the speed drill.
    session split in two: six gold blocks down the left, one per two
    weeks, each marked "leads" (weak foot, first touch, passing, ball
    mastery, 1v1 skills, speed); ONE tall white block down the right,
-   running beside all twelve weeks: "The other half, every session: THE
+   running beside all twelve weeks: "The other half of every session: THE
    REST OF YOUR GAME. Passing is already improving before it leads. Your
    weak foot stays sharp after its two weeks." ("The other five" was
    rejected by him: it did not make the idea click.)

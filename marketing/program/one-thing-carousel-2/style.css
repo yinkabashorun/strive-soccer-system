@@ -1,0 +1,93 @@
+/* "You're training everything" carousel (Coach Yinka, Nov 11 2026: an
+   opinion, easy to take in, graphics that make it click, the objections
+   answered). Written to the player, in his voice. One idea a slide; the
+   picture carries the argument, the words stay short and concrete. */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1350px;background:#0d0d0d;overflow:hidden}
+body{font-family:'Barlow',sans-serif;color:#fff;position:relative}
+.gold{color:#c8a858}
+.top{position:absolute;left:64px;top:56px;right:64px;display:flex;justify-content:space-between;align-items:center;z-index:3}
+.step{font-family:'Barlow Condensed';font-weight:800;font-size:23px;letter-spacing:.3em;text-transform:uppercase;color:#c8a858}
+.wm{font-family:'Barlow Condensed';font-weight:900;font-size:25px;letter-spacing:.12em;text-transform:uppercase}
+.wm span{color:#c8a858}
+.pad{position:absolute;left:64px;right:64px;top:132px}
+h1{font-family:'Barlow Condensed';font-weight:900;font-size:124px;line-height:.9;text-transform:uppercase;letter-spacing:.005em}
+h1 span{color:#c8a858}
+.q{font-family:'Barlow Condensed';font-weight:900;font-size:112px;line-height:.92;text-transform:uppercase;color:rgba(255,255,255,.55)}
+.p{font-size:42px;line-height:1.3;font-weight:500;color:rgba(255,255,255,.94);max-width:950px}
+.p b{font-weight:700;color:#c8a858}
+.cap{font-family:'Barlow Condensed';font-weight:800;font-size:27px;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.6)}
+.cap b{color:#c8a858}
+.swipe{position:absolute;right:64px;bottom:60px;font-family:'Barlow Condensed';font-weight:800;font-size:22px;letter-spacing:.28em;text-transform:uppercase;display:flex;align-items:center;gap:12px;z-index:3}
+.swipe i{display:block;width:40px;height:2px;background:#c8a858;position:relative}
+.swipe i:after{content:"";position:absolute;right:0;top:-6px;width:12px;height:12px;border-top:2px solid #c8a858;border-right:2px solid #c8a858;transform:rotate(45deg)}
+.handle{position:absolute;left:64px;bottom:60px;font-weight:700;font-size:22px;letter-spacing:.18em;text-transform:uppercase;z-index:3}
+.handle:after{content:"";display:block;height:2px;width:100%;background:#c8a858;margin-top:6px}
+/* the week as twelve drills: four sessions across, three drills down */
+.week{display:grid;grid-template-columns:repeat(4,1fr);gap:22px 26px}
+.dot{aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.1)}
+.dot.g{background:#c8a858}
+.dot.w{background:none;border:5px solid #fff}
+.days{display:grid;grid-template-columns:repeat(4,1fr);gap:26px;margin-bottom:16px}
+.days div{text-align:center;font-family:'Barlow Condensed';font-weight:800;font-size:22px;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+/* v2 (Coach Yinka, Nov 11: "4 is the only good graphic"): one picture
+   for the whole post, the week as twelve drills. Every later slide is
+   that same week, changed. Words sit inside the drills where they help. */
+.dot{display:flex;align-items:center;justify-content:center;text-align:center;font-family:'Barlow Condensed';font-weight:800;font-size:25px;line-height:1.02;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.72);padding:0 10px}
+.dot.g{color:#0d0d0d}
+.dot.wf{background:#fff;color:#0d0d0d;border:0}
+.dot.dimg{background:rgba(200,168,88,.28)}
+/* v3 (Coach Yinka, Nov 11: "Premium. What is this circle bullshit. Use
+   the right words"): no circles. The week is a timetable of blocks with
+   the real names of what gets trained, and the session slides show the
+   app's own session screen with real bank drills and frames of their
+   clips, the look he approved on the offer carousel. */
+.tt{display:grid;gap:12px}
+.tr{display:grid;grid-template-columns:132px repeat(3,1fr);gap:12px}
+.tr .lb{display:flex;flex-direction:column;justify-content:center;font-family:'Barlow Condensed';font-weight:800;font-size:21px;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+.tr .lb b{font-weight:900;font-size:64px;line-height:.9;letter-spacing:0;color:#fff}
+.bk{height:128px;border-radius:6px;display:flex;flex-direction:column;justify-content:center;padding:0 22px;font-family:'Barlow Condensed';font-weight:800;font-size:36px;line-height:1;letter-spacing:.03em;text-transform:uppercase;background:rgba(255,255,255,.07);color:rgba(255,255,255,.62)}
+.bk small{display:block;font-size:19px;letter-spacing:.2em;margin-bottom:8px;opacity:.7}
+.bk.g{background:#c8a858;color:#0d0d0d}
+.bk.w{background:none;border:2.5px solid #fff;color:#fff}
+/* the app's session card, large (slide 5) and inside the phone (8, 9) */
+.card{display:flex;align-items:center;gap:14px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.02);border-radius:22px;padding:14px 13px 14px 14px}
+.card.start{border-color:rgba(239,68,68,.28);background:rgba(239,68,68,.045)}
+.card.hi{border:2px solid #D4AF37;background:rgba(212,175,55,.08)}
+.card.lo{opacity:.38}
+.ck{flex:none;width:32px;height:32px;border-radius:50%;border:2px solid rgba(255,255,255,.25)}
+.tx{flex:1;min-width:0}
+.tl{font-size:21px;line-height:1.15;font-weight:600;color:#F5F4EF}
+.bd{display:inline-block;vertical-align:2px;margin-right:6px;border-radius:4px;padding:2px 6px;font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
+.bd.red{background:rgba(239,68,68,.92);color:#fff}.bd.gd{background:rgba(212,175,55,.92);color:#000}
+.chip{display:inline-block;margin-top:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);border-radius:999px;padding:3px 10px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#8a8a92;white-space:nowrap}
+.th{flex:none;position:relative;width:88px;height:88px;border-radius:14px;overflow:hidden;background:#000}
+.th img{width:100%;height:100%;object-fit:cover;display:block}
+.th:after{content:"";position:absolute;left:50%;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:rgba(0,0,0,.55);border:1.5px solid rgba(255,255,255,.7)}
+.th:before{content:"";position:absolute;left:50%;top:50%;margin:-7px 0 0 -4px;border-left:11px solid #fff;border-top:7px solid transparent;border-bottom:7px solid transparent;z-index:2}
+.phone{position:absolute;left:548px;top:452px;width:468px;height:900px;border-radius:64px 64px 0 0;background:#1a1a1d;padding:11px 11px 0;box-shadow:0 0 0 2px #2a2a2f,0 40px 90px -30px rgba(0,0,0,.9),0 0 60px -10px rgba(212,175,55,.18);overflow:hidden}
+.screen{height:100%;border-radius:54px 54px 0 0;background:#0a0a0a;position:relative;overflow:hidden;padding:0 18px}
+.island{position:absolute;left:50%;top:12px;width:112px;height:32px;margin-left:-56px;border-radius:20px;background:#000}
+.status{height:62px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 22px 6px;font-weight:600;font-size:19px;color:#fff}
+.sess{border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.02);border-radius:26px;padding:16px 14px 14px;margin-top:6px}
+.shd{display:flex;justify-content:space-between;font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:rgba(255,255,255,.42);padding:0 4px}
+.cards{margin-top:14px;display:grid;gap:10px}
+.glow{position:absolute;right:-120px;top:360px;width:760px;height:760px;background:radial-gradient(closest-side,rgba(212,175,55,.16),rgba(212,175,55,0))}
+.fadeb{position:absolute;left:0;right:0;top:1262px;height:88px;background:linear-gradient(180deg,rgba(13,13,13,0),#0d0d0d 85%)}
+.copy{position:absolute;left:64px;top:470px;width:440px}
+.copy .big{font-family:'Barlow Condensed';font-weight:900;font-size:150px;line-height:.86;text-transform:uppercase;color:#c8a858}
+.copy .p{margin-top:22px;font-size:35px;line-height:1.3}
+/* draft 2 (Coach Yinka, Nov 11: "very very good ... keep thinking in that
+   direction ... tighten, smoother transitions, more context"): a lead-in
+   line on every slide carries the thread from the one before. */
+.step{letter-spacing:.24em}
+.fr{border:1px solid rgba(212,175,55,.28);background:rgba(212,175,55,.06);border-radius:26px;padding:20px 18px 18px;margin-top:10px}
+.fr .e{font-size:12px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:#D4AF37}
+.fr .w{margin-top:8px;font-family:'Barlow Condensed';font-weight:800;font-size:34px;line-height:1.02;color:#F5F4EF}
+.fr .s{margin-top:4px;font-size:15px;color:rgba(255,255,255,.55)}
+.fr .btn{display:inline-block;margin-top:14px;background:#D4AF37;color:#000;border-radius:999px;padding:9px 20px;font-size:15px;font-weight:700}
+.fr .u{margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.1);font-size:16px;font-weight:600;color:#F5F4EF}
+.fr .u small{display:block;margin-top:3px;font-weight:400;font-size:13px;color:rgba(255,255,255,.5)}
+.fr .cl{margin-top:9px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);border-radius:14px;padding:11px 14px;font-size:15px;color:rgba(255,255,255,.82)}
+.fr .cl b{color:#D4AF37;margin-right:8px}
+.fr .ok{margin-top:12px;font-size:13px;color:#D4AF37}

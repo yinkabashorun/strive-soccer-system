@@ -64,7 +64,7 @@ the strength finisher or the speed drill.
    touch.
 7. His strike photo in the black NVA training kit, him centred, across
    the top. / IT'S HOW I CAME BACK. / Five months out with a hip tear.
-   Two months before preseason, I was cleared for touches and a jog.
+   Two months before preseason, I was cleared to get touches and to jog.
    Nothing else. / ONE MAIN THING AT A TIME, not by choice: three rows,
    gold is the main thing, white is what stayed on the side. All I could
    do: THE BALL (a wall, 45 minutes, every day). Once I could run:

@@ -92,7 +92,9 @@ the strength finisher or the speed drill.
 11. "THERE'S MORE TO THE GAME THAN DRILLS." / WE KNOW. Every Sunday, Coach
     Gary and I go through clips from your games with you, live on Zoom.
     And once a month, a 1:1 call on where you're at. (The app's Film Room
-    and check-in cards.)
+    and check-in cards. Under "Pick a time" the slide reads "30 minutes,
+    one on one. All of it on your game."; the app itself still says "One
+    call a month. Tap a time to book it.")
 12. Close. ONE THING AT A TIME. HARDER EVERY WEEK. NOTHING LEFT BEHIND. /
     Three months, built around you by Coach Gary and me. / DM us "ELITE" /
     Tell us your one thing. We'll take it from there.

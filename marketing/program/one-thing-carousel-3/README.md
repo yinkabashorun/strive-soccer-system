@@ -76,8 +76,12 @@ the strength finisher or the speed drill.
    once fitness and speed started, and never said he was forced into one
    thing at a time, which is where the structure comes from.)
 8. "BUT I'VE GOT MORE THAN ONE THING TO FIX." / Good. It's three months.
-   You get six. Coach Gary and I ask what's holding you back, then put
-   them in order. Biggest problem first.
+   You get six. We master your weaknesses one at a time. Two weeks each,
+   biggest first. The rest keep improving the whole way. / 12 WEEKS, one
+   main focus, the rest still training: six rows, each a gold block (the
+   main focus for those two weeks: weak foot, first touch, passing, ball
+   mastery, 1v1 skills, speed) beside a white block "Still improving:
+   the other five". Same gold and white as his story slide before it.
 9. "SO IT'S ONLY WEAK FOOT FOR TWO WEEKS?" / NO. Two drills on your weak
    foot. Two on the rest of your game. A different part every session, so
    nothing goes cold while your weak foot catches up. (The app's session:

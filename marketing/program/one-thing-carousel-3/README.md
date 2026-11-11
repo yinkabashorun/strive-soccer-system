@@ -62,11 +62,12 @@ the strength finisher or the speed drill.
    leg). Still easy? EYES CLOSED. /
    Nobody gets stronger lifting the same weight all year. Same with your
    touch.
-7. IT'S HOW I CAME BACK. / Six months out with a hip tear. Two months to
-   get ready for a more competitive team. / I DIDN'T TRAIN EVERYTHING.
-   ONE THING AT A TIME. / My two months, in this order: first the ball (a
-   wall, 45 minutes, every day), then fitness (once I could run), then
-   speed (once I could sprint). / BENCH PLAYER TO STARTER.
+7. IT'S HOW I CAME BACK. / Five months out with a hip tear. Once I was
+   cleared to get touches and jog, I had two months before preseason. /
+   I DIDN'T TRAIN EVERYTHING. ONE THING AT A TIME. / My two months, in
+   this order: first the ball (a wall, 45 minutes, every day), then
+   fitness (once I could run), then speed (once I could sprint). / I came
+   into preseason in THE BEST FORM OF MY LIFE. (His words, Nov 11.)
 8. "BUT I'VE GOT MORE THAN ONE THING TO FIX." / Good. It's three months.
    You get six. Coach Gary and I ask what's holding you back, then put
    them in order. Biggest problem first.
@@ -100,7 +101,7 @@ Train a bit of everything and it gets two drills a week out of sixteen. Two. Tha
 
 Give it two drills every session for two weeks. Make week two harder than week one. Keep the rest of the session for the rest of your game so nothing goes cold. Then move to the next thing.
 
-That is how I came back from six months out with a hip tear. It is how Coach Gary and I build every Strive Elite player's three months.
+That is how I came back from five months out with a hip tear, in the best form of my life. It is how Coach Gary and I build every Strive Elite player's three months.
 
 DM ELITE and tell us your one thing.
 

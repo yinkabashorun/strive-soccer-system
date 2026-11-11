@@ -209,17 +209,21 @@ commit.
       arrives with its pattern name and beginner / advanced tag.
       Announce each course only when it is in the app (Oct 12 launch
       rule).
-- [ ] NICHE: THE COMEBACK PLAYER (DECIDED in direction Nov 11 2026, see
-      RECORD; nothing built): the program's front door is a player cleared
-      to train with the ball and play without contact, not yet cleared for
-      contact. NEEDS BUILDING FIRST: clearance stages set by the FAMILY
-      in the app (the PARKED injury mode, rebuilt as stages, with the
-      builder and a database guard keeping drills to the stage). WAITING
-      ON Coach Yinka: the training structure he will share (one focus at
-      a time, progressive overload, reps kept on everything else, "the
-      exact structure I used to come back from a 6-month hip tear"), then
-      the name, the stage list, and the written refund terms.
-
+- [ ] NICHE: THE COMEBACK PLAYER + THE 3-MONTH PROGRAM (direction decided
+      Nov 11 2026, see RECORD): the front door is a player cleared to
+      train with the ball and play without contact, not yet cleared for
+      contact; it is still Strive Elite, one program. THE 3-MONTH PROGRAM
+      IS BUILT Nov 11 (migration 065): the quiz, six focuses and the
+      threads sit on every player page. WAITING ON Coach Yinka: the quiz
+      on each current member BEFORE SUNDAY NOV 15, 3PM ET so the week of
+      Nov 16 is a program week (later = Nov 23); a check of the
+      drill-to-pillar tags and levels at /coach/drills; the drills to
+      film (marketing/program/strive-elite-program-structure.md); Tim's
+      built weeks 2 and 3; the stage list; the written refund terms (do
+      the work, not satisfied, money back, for everyone). STILL TO BUILD:
+      clearance stages set by the family (the PARKED injury mode), the
+      weekly run target, few-yards programs, a player view of the
+      program, position breakdowns, the injury-ad landing page.
 ### RECORD (chronological)
 
 - [x] CHECKED Sept 26 2026 via direct DB query: 3 of 4 real players

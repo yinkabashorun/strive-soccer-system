@@ -39,6 +39,13 @@ thing. So a session row is drawn as the app really runs it after the
 warm-up: two weak foot drills, one drill for the rest of the game, and
 the strength finisher or the speed drill.
 
+THE COPY RULE HE SET ON NOV 11 ("You just say things like the other half,
+say the rest of the session ... apply this principle to all the copy"):
+say the whole thing. Name what you mean every time (your weak foot, the
+rest of the session, the drills) instead of a clipped reference the
+reader has to work out (it, this one, the other half, the other five,
+the rest). Every slide below was rewritten to that rule.
+
 1. Cover. YOU'RE TRAINING EVERYTHING. THAT'S THE PROBLEM. / A bit of
    everything keeps you the same player. This is the 3-month program
    that fixes it.
@@ -47,65 +54,64 @@ the strength finisher or the speed drill.
    feeling good. / THREE MONTHS LATER YOU'RE THE SAME PLAYER.
 3. Every player has one thing holding them back. / SAY IT'S YOUR WEAK
    FOOT. / Defenders get told one thing: "Force him to his left." Then
-   they do it all game. / Team training is for the team. This one's on you. / SO
-   HOW MUCH WORK DOES IT GET?
-4. RIGHT NOW IT GETS 2 DRILLS IN 4 SESSIONS. / Four sessions of four blocks, two gold. /
-   Four sessions. Sixteen drills. A bit of everything. That's not
-   training your weak foot. That's visiting it.
-5. SAME 4 SESSIONS. NOW IT GETS 8. / Each session: weak foot, weak foot,
-   then two white blocks (passing and strength, 1v1 skills and speed,
-   first touch and strength, ball mastery and speed). / Two every
-   session, two weeks straight. Enough to change it. Then the next thing
-   gets its turn.
-6. AND IT HAS TO GET HARDER. / Week one: Weak foot tap, pull, push. Week
-   two: Weak foot pop and juggle (his pick over the wall pass behind the
-   leg). Still easy? EYES CLOSED. /
-   Nobody gets stronger lifting the same weight all year. Same with your
-   touch.
+   they do it all game. / Team training is for the team. Your weak foot
+   is on you. / SO HOW MUCH WORK DOES YOUR WEAK FOOT GET?
+4. RIGHT NOW YOUR WEAK FOOT GETS 2 DRILLS IN 4 SESSIONS. / Four sessions
+   of four blocks, two gold. / Four sessions. Sixteen drills. A bit of
+   everything. That's not training your weak foot. That's visiting it.
+5. SAME 4 SESSIONS. NOW YOUR WEAK FOOT GETS 8 DRILLS. / Each session:
+   weak foot, weak foot, then two white blocks (passing and strength, 1v1
+   skills and speed, first touch and strength, ball mastery and speed). /
+   Two weak foot drills every session, two weeks straight. Enough to
+   change it. Then your next weakness gets its turn.
+6. AND THE DRILLS HAVE TO GET HARDER. / Week one: Weak foot tap, pull,
+   push. Week two: Weak foot pop and juggle. Still easy? DO IT WITH YOUR
+   EYES CLOSED. / Nobody gets stronger lifting the same weight all year.
+   Your touch works the same way.
 7. His strike photo in the black NVA training kit, him centred, across
-   the top. / IT'S HOW I CAME BACK. / Five months out with a hip tear.
-   Two months before preseason, I was cleared to get touches and to jog.
-   Nothing else. / ONE MAIN THING AT A TIME, not by choice: three rows,
-   gold is the main thing, white is what stayed on the side. All I could
-   do: THE BALL (a wall, 45 minutes, every day). Once I could run:
-   FITNESS, the ball on the side. Once I could sprint: SPEED, the ball
-   and fitness on the side. / That's when it clicked. Put one thing
-   first, keep the rest going on the side, and you make so much more
-   progress. / I CAME INTO PRESEASON IN THE BEST FORM OF MY LIFE.
-   (Rewritten on his note that the old slide read as if the ball stopped
-   once fitness and speed started, and never said he was forced into one
-   thing at a time, which is where the structure comes from.)
+   the top. / IT'S HOW I CAME BACK. / I was out for five months with a
+   hip tear. Two months before preseason, I was cleared to get touches
+   and to jog. That was all. / ONE MAIN THING AT A TIME, I had no choice:
+   three rows, gold is the main thing, white is what stayed on the side.
+   All I could do: THE BALL (on a wall, 45 minutes, every day). Once I
+   could run: FITNESS, the ball on the side. Once I could sprint: SPEED,
+   the ball and fitness on the side. / That's when it clicked. Put one
+   thing first, keep the rest of your game going on the side, and you
+   make so much more progress. / I CAME INTO PRESEASON IN THE BEST FORM
+   OF MY LIFE.
 8. "BUT I'VE GOT MORE THAN ONE THING TO FIX." / Good. It's three months.
-   You get six. One weakness leads for two weeks and gets half of every
-   session. The other half keeps the rest of your game improving. So
-   nothing starts from zero, and nothing slips back. / 12 WEEKS, every
-   session split in two: six gold blocks down the left, one per two
-   weeks, each marked "leads" (weak foot, first touch, passing, ball
-   mastery, 1v1 skills, speed); ONE tall white block down the right,
-   running beside all twelve weeks: "The other half of every session: THE
-   REST OF YOUR GAME. Passing is already improving before it leads. Your
-   weak foot stays sharp after its two weeks." ("The other five" was
-   rejected by him: it did not make the idea click.)
+   You get six. One weakness is the main focus for two weeks and gets
+   half of every session. The rest of the session keeps your other
+   weaknesses improving. So nothing starts from zero, and nothing slips
+   back. / 12 WEEKS, every session split in two: six gold blocks down the
+   left, one per two weeks, each marked "main focus" (weak foot, first
+   touch, passing, ball mastery, 1v1 skills, speed); ONE tall white block
+   down the right, running beside all twelve weeks: "The rest of every
+   session: YOUR OTHER WEAKNESSES. Passing is already improving before it
+   becomes the main focus. Your weak foot stays sharp after its two
+   weeks."
 9. "SO IT'S ONLY WEAK FOOT FOR TWO WEEKS?" / NO. Two drills on your weak
-   foot. Two on the rest of your game. A different part every session, so
-   nothing goes cold while your weak foot catches up. (The app's session:
-   the warm-up, then four drills, the last two lit.)
-10. "WHAT ABOUT SPEED AND STRENGTH?" / THEY DON'T WAIT THEIR TURN. Plyos
-    open every session. That's speed and strength before you touch a
-    ball. Speed work comes next. Two strength drills finish it. (The
-    app's session with the plyo warm-up, the speed drill and two strength
-    finishers lit: V-ups and Front plank. His note: "Do 2 strength
-    finishers, and highlight plyos bc plyos is speed and strength." The
-    app places one finisher a session today.)
+   foot. Two drills on the rest of your game. A different part of your
+   game every session, so nothing goes cold while your weak foot catches
+   up. (The app's session: the warm-up, then four drills, the last two
+   lit.)
+10. "WHAT ABOUT SPEED AND STRENGTH?" / SPEED AND STRENGTH DON'T WAIT THEIR
+    TURN. Plyos open every session. That's speed and strength work before
+    you touch a ball. Speed work comes next. Two strength drills finish
+    the session. (The app's session with the plyo warm-up, the speed
+    drill and two strength finishers lit: V-ups and Front plank. The app
+    places one finisher a session today.)
 11. "THERE'S MORE TO THE GAME THAN DRILLS." / WE KNOW. Every Sunday, Coach
     Gary and I go through clips from your games with you, live on Zoom.
-    And once a month, a 1:1 call on where you're at. (The app's Film Room
-    and check-in cards. Under "Pick a time" the slide reads "30 minutes,
-    one on one. All of it on your game."; the app itself still says "One
-    call a month. Tap a time to book it.")
+    And once a month, you get a 1:1 call with us about where your game is
+    at. (The app's Film Room and check-in cards. Under "Pick a time" the
+    slide reads "30 minutes, one on one with your coach. Every minute is
+    about your game."; the app itself still says "One call a month. Tap a
+    time to book it.")
 12. Close. ONE THING AT A TIME. HARDER EVERY WEEK. NOTHING LEFT BEHIND. /
     Three months, built around you by Coach Gary and me. / DM us "ELITE" /
-    Tell us your one thing. We'll take it from there.
+    Tell us the one thing holding you back. We'll build your three months
+    around it.
 
 Slides 10 and 11 came back from draft 2 on his fourth note ("I liked the
 one where it was about strength and speed and there's more to the game
@@ -118,13 +124,13 @@ No price, no guarantee, no urgency line.
 
 Every player has one thing holding them back. Say it's your weak foot.
 
-Train a bit of everything and it gets two drills a week out of sixteen. Two. That is why it is the same foot it was three months ago.
+Train a bit of everything and your weak foot gets two drills a week out of sixteen. That is why it is the same foot it was three months ago.
 
-Give it two drills every session for two weeks. Make week two harder than week one. Keep the rest of the session for the rest of your game so nothing goes cold. Then move to the next thing.
+Give your weak foot two drills every session for two weeks. Make the drills in week two harder than the drills in week one. Use the rest of the session on the rest of your game so nothing goes cold. Then move to your next weakness.
 
 That is how I came back from five months out with a hip tear, in the best form of my life. It is how Coach Gary and I build every Strive Elite player's three months.
 
-DM ELITE and tell us your one thing.
+DM ELITE and tell us the one thing holding you back.
 
 ## His calls
 

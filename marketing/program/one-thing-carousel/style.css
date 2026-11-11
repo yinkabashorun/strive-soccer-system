@@ -30,3 +30,10 @@ h1 span{color:#c8a858}
 .dot.w{background:none;border:5px solid #fff}
 .days{display:grid;grid-template-columns:repeat(4,1fr);gap:26px;margin-bottom:16px}
 .days div{text-align:center;font-family:'Barlow Condensed';font-weight:800;font-size:22px;letter-spacing:.24em;text-transform:uppercase;color:rgba(255,255,255,.5)}
+/* v2 (Coach Yinka, Nov 11: "4 is the only good graphic"): one picture
+   for the whole post, the week as twelve drills. Every later slide is
+   that same week, changed. Words sit inside the drills where they help. */
+.dot{display:flex;align-items:center;justify-content:center;text-align:center;font-family:'Barlow Condensed';font-weight:800;font-size:25px;line-height:1.02;letter-spacing:.07em;text-transform:uppercase;color:rgba(255,255,255,.72);padding:0 10px}
+.dot.g{color:#0d0d0d}
+.dot.wf{background:#fff;color:#0d0d0d;border:0}
+.dot.dimg{background:rgba(200,168,88,.28)}

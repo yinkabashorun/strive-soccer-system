@@ -13,8 +13,14 @@ Render one: `node render.mjs 03-two.html 03-two.png`.
 ## What the copy is doing
 
 - It opens in the reader's own training, not in our program.
-- One picture carries the argument: the week as twelve dots. Spread over
-  six things, the weak foot gets 2. Put on one thing, it gets 8. The
+- One picture carries the whole post: the week as twelve drills (four
+  sessions across, three drills down). He said slide 4 was the only good
+  graphic, so every other graphic is now that same week, changed: the
+  spread week with a word in every drill (3), the focused week (4), six
+  small copies of it (7), the bottom row lit up with what else gets
+  worked (8), speed and strength added above and below it (9). Slide 5 is
+  type that grows as the work gets harder. Spread over six things, the
+  weak foot gets 2. Put on one thing, it gets 8. The
   numbers are the app's own week (four sessions, three skill drills, two
   of three on the focus), so they are true.
 - Progressive overload is one comparison everybody already believes:

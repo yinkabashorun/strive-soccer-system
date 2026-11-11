@@ -61,11 +61,13 @@ the strength finisher or the speed drill.
    two: Wall pass, touch behind the leg. Still easy? EYES CLOSED. /
    Nobody gets stronger lifting the same weight all year. Same with your
    touch.
-7. IT'S HOW I CAME BACK. / First: the ball. Once I could run: fitness.
-   Once I could sprint: speed. / Six months out with a hip tear. I
-   couldn't run, so I started with a ball and a wall, 45 minutes, every
-   day. I'd been a bench player. I moved to a more competitive team and
-   started.
+7. IT'S HOW I CAME BACK. / Six months out with a hip tear. Two months to
+   get ready for a more competitive team. No time to fix everything at
+   once. / SO ONE THING GOT MOST OF MY WORK. THEN THE NEXT. / My two
+   months, in this order: first the ball, once I could run fitness, once
+   I could sprint speed. / A ball and a wall, 45 minutes, every day. The
+   rest of my game kept moving. It just wasn't the main thing. I went
+   from the bench to starting.
 8. "BUT I'VE GOT MORE THAN ONE THING TO FIX." / Good. It's three months.
    You get six. Coach Gary and I ask what's holding you back, then put
    them in order. Biggest problem first.
@@ -119,3 +121,24 @@ DM ELITE and tell us your one thing.
 - "Shooting" is on slide 4 only as part of the ordinary week a player
   already does (slide 2 says "a couple of shots"); the program has no
   shooting focus yet.
+
+## Fifth note: weeks and sessions, and the comeback copy
+
+"The sessions design needs to make it more clear that it's the weeks and
+sessions however you can make it more premium / clear. And that's how I
+came back we need the copy to represent the purpose of the structure and
+how I used the principal of this structure."
+
+- Every schedule now has a header over a gold rule that names the stretch
+  of time on the left and what is in it on the right, and every row is
+  labelled the same way (the unit small, its number big): slide 4 "ONE
+  WEEK / 4 sessions, 16 drills"; slide 5 "WEEK 1 AND WEEK 2 / 4 sessions
+  each"; slide 6 "TWO WEEKS ON YOUR WEAK FOOT" with rows Week 1 and Week
+  2; slide 8 "12 WEEKS / two weeks on each" with the week labels larger
+  inside each block.
+- Slide 7 now says why the structure exists and how he used it: no time
+  to fix everything at once, so one thing got most of the work, then the
+  next, while the rest kept moving. "No time to fix everything at once"
+  and "the rest of my game kept moving" are my wording of his principle
+  ("focused on one thing ... still making progress in all the others");
+  his to check.

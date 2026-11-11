@@ -94,3 +94,13 @@ h1 span{color:#c8a858}
 
 /* draft 3b (Coach Yinka, Nov 11: the length of the program has to be clear before "one thing" comes up): it rides the wordmark on every slide and leads the cover. */
 .wm em{font-style:normal;font-weight:800;font-size:19px;letter-spacing:.22em;color:rgba(255,255,255,.62);margin-left:16px;padding-left:16px;border-left:2px solid rgba(255,255,255,.3)}
+
+/* draft 3c (Coach Yinka, Nov 11: "the sessions design needs to make it
+   more clear that it's the weeks and sessions"): every schedule carries
+   a header that names the stretch of time on the left and what is in it
+   on the right, over a gold rule, and every row is labelled the same
+   way (the unit small, its number big). */
+.hd{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2px solid #c8a858;padding-bottom:14px;margin-bottom:16px}
+.hd b{font-family:'Barlow Condensed';font-weight:900;font-size:50px;line-height:.9;letter-spacing:.02em;text-transform:uppercase;color:#fff}
+.hd span{font-family:'Barlow Condensed';font-weight:800;font-size:23px;letter-spacing:.24em;text-transform:uppercase;color:#c8a858}
+.tr .lb{color:rgba(255,255,255,.72);font-size:22px}

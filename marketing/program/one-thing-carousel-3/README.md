@@ -58,8 +58,8 @@ the strength finisher or the speed drill.
    session, two weeks straight. Enough to change it. Then the next thing
    gets its turn.
 6. AND IT HAS TO GET HARDER. / Week one: Weak foot tap, pull, push. Week
-   two: Weak foot pop and settle (pop it up, first touch; his pick over
-   the wall pass behind the leg). Still easy? EYES CLOSED. /
+   two: Weak foot pop and juggle (his pick over the wall pass behind the
+   leg). Still easy? EYES CLOSED. /
    Nobody gets stronger lifting the same weight all year. Same with your
    touch.
 7. IT'S HOW I CAME BACK. / Six months out with a hip tear. Two months to

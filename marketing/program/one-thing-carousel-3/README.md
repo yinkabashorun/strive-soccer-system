@@ -5,7 +5,7 @@ slide that ads context into the weak foot because we just randomly say
 the weak foot gets 2 drills. Also can we trim down to less slides and
 more punchy."
 
-Draft. Nothing is posted until he approves it. Ten 4:5 slides,
+Draft. Nothing is posted until he approves it. Twelve 4:5 slides,
 1080x1350 (draft 2 was twelve). Render one:
 `node render.mjs 04-two.html 04-two.png`.
 
@@ -28,7 +28,7 @@ Draft. Nothing is posted until he approves it. Ten 4:5 slides,
   rides the wordmark on every slide, and slide 7 answers "Good. It's
   three months. You get six."
 
-## The slides (ten, after his third note)
+## The slides (twelve, after his third and fourth notes)
 
 His note: "We should do 4 drills a session. Also keep the slide that was
 like everybody remembers this session, and it was the average normal
@@ -70,13 +70,23 @@ the strength finisher or the speed drill.
    You get six. Coach Gary and I ask what's holding you back, then put
    them in order. Biggest problem first.
 9. "SO IT'S ONLY WEAK FOOT FOR TWO WEEKS?" / NO. Two drills on your weak
-   foot. Two on the rest of your game. Passing, speed, strength. A
-   different mix every session. Nothing goes cold. (The app's session:
+   foot. Two on the rest of your game. A different part every session, so
+   nothing goes cold while your weak foot catches up. (The app's session:
    the warm-up, then four drills, the last two lit.)
-10. Close. ONE THING AT A TIME. HARDER EVERY WEEK. NOTHING LEFT BEHIND. /
-    Three months, built around you by Coach Gary and me. Film Room every
-    Sunday. A 1:1 call every month. / DM us "ELITE" / Tell us your one
-    thing. We'll take it from there.
+10. "WHAT ABOUT SPEED AND STRENGTH?" / THEY DON'T WAIT THEIR TURN. Speed
+    work comes right after the warm-up. Strength ends the session. Every
+    session, for as long as you need them. (The app's session, both lit.)
+11. "THERE'S MORE TO THE GAME THAN DRILLS." / WE KNOW. Every Sunday, Coach
+    Gary and I go through clips from your games with you, live on Zoom.
+    And once a month, a 1:1 call on where you're at. (The app's Film Room
+    and check-in cards.)
+12. Close. ONE THING AT A TIME. HARDER EVERY WEEK. NOTHING LEFT BEHIND. /
+    Three months, built around you by Coach Gary and me. / DM us "ELITE" /
+    Tell us your one thing. We'll take it from there.
+
+Slides 10 and 11 came back from draft 2 on his fourth note ("I liked the
+one where it was about strength and speed and there's more to the game
+than drills"), so the Film Room line is off the close again.
 
 Every claim is something the app does today (migrations 065 and 062).
 No price, no guarantee, no urgency line.

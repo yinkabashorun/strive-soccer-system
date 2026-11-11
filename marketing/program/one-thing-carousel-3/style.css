@@ -91,3 +91,6 @@ h1 span{color:#c8a858}
 .fr .cl{margin-top:9px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.03);border-radius:14px;padding:11px 14px;font-size:15px;color:rgba(255,255,255,.82)}
 .fr .cl b{color:#D4AF37;margin-right:8px}
 .fr .ok{margin-top:12px;font-size:13px;color:#D4AF37}
+
+/* draft 3b (Coach Yinka, Nov 11: the length of the program has to be clear before "one thing" comes up): it rides the wordmark on every slide and leads the cover. */
+.wm em{font-style:normal;font-weight:800;font-size:19px;letter-spacing:.22em;color:rgba(255,255,255,.62);margin-left:16px;padding-left:16px;border-left:2px solid rgba(255,255,255,.3)}

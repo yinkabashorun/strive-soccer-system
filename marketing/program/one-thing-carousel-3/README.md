@@ -20,11 +20,18 @@ Draft. Nothing is posted until he approves it. Nine 4:5 slides,
   (only one thing, speed and strength) are one slide, one phone. Film
   Room and the monthly call are one line on the close.
 - Shorter lines everywhere.
+- The length of the program is clear before "one thing" comes up (his
+  note the same day; he wrote "30 day", read as the 3-month program the
+  app and the offer run on, flagged to him): the cover's second line
+  says "This is the 3-month program that fixes it.", "3-month program"
+  rides the wordmark on every slide, and slide 7 answers "Good. It's
+  three months. You get six."
 
 ## The slides
 
-1. Cover. YOU'RE TRAINING EVERYTHING. THAT'S THE PROBLEM. / Why a bit of
-   everything keeps you the same player.
+1. Cover. YOU'RE TRAINING EVERYTHING. THAT'S THE PROBLEM. / A bit of
+   everything keeps you the same player. This is the 3-month program
+   that fixes it.
 2. Every player has one thing holding them back. / SAY IT'S YOUR WEAK
    FOOT. / Defenders work it out in ten minutes. Then they show you onto
    it all game. / Team training is for the team. This one's on you. / SO
@@ -44,9 +51,9 @@ Draft. Nothing is posted until he approves it. Nine 4:5 slides,
    couldn't run, so I started with a ball and a wall, 45 minutes, every
    day. I'd been a bench player. I moved to a more competitive team and
    started.
-7. "BUT I'VE GOT MORE THAN ONE THING TO FIX." / Good. You get six. Coach
-   Gary and I ask what's holding you back, then put it in order. Biggest
-   problem first. / Three months, six gold blocks.
+7. "BUT I'VE GOT MORE THAN ONE THING TO FIX." / Good. It's three months. You get six.
+   Coach Gary and I ask what's holding you back, then put them in order.
+   Biggest problem first. / Three months, six gold blocks.
 8. "SO IT'S ONLY WEAK FOOT FOR TWO WEEKS?" / NO. Two drills on your weak
    foot. The third is the rest of your game. Speed after the warm-up.
    Strength to finish. Nothing goes cold. (The app's session, those three

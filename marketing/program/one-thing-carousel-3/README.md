@@ -46,10 +46,10 @@ the strength finisher or the speed drill.
    passes off the wall. A couple of shots. / You sweat. You go home
    feeling good. / THREE MONTHS LATER YOU'RE THE SAME PLAYER.
 3. Every player has one thing holding them back. / SAY IT'S YOUR WEAK
-   FOOT. / Defenders work it out in ten minutes. Then they show you onto
-   it all game. / Team training is for the team. This one's on you. / SO
+   FOOT. / Defenders get told one thing: "Force him to his left." Then
+   they do it all game. / Team training is for the team. This one's on you. / SO
    HOW MUCH WORK DOES IT GET?
-4. RIGHT NOW IT GETS 2 DRILLS. / Four sessions of four blocks, two gold. /
+4. RIGHT NOW IT GETS 2 DRILLS IN 4 SESSIONS. / Four sessions of four blocks, two gold. /
    Four sessions. Sixteen drills. A bit of everything. That's not
    training your weak foot. That's visiting it.
 5. SAME 4 SESSIONS. NOW IT GETS 8. / Each session: weak foot, weak foot,
@@ -114,8 +114,8 @@ DM ELITE and tell us your one thing.
 
 - It speaks to the player ("you"). A parent version swaps in "your
   player" throughout; say the word.
-- "Defenders work it out in ten minutes" on slide 3 is my line, a
-  picture not a statistic; change it if it is not how he would say it.
+- Slide 3's line is his: "Force him to his left" (the sentence around it,
+  "Defenders get told one thing ... Then they do it all game", is mine).
 - Slide 7 is his story; he checks every word.
 - Film Room and the 1:1 call are one line on the close now. The full
   slide for them is in draft 2 (11-film) if he wants it back.

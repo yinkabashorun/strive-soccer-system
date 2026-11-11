@@ -23,6 +23,7 @@ import {
   getPlayer,
   getPlayerSummary,
   getBenchmark,
+  getProgram,
   getProgress,
   getProgressVideos,
   getTrainingBreaks,
@@ -49,6 +50,8 @@ import { MessageThread } from "@/components/elite/MessageThread";
 import { MarkThreadRead } from "@/components/elite/MarkThreadRead";
 import { IntakePanel } from "@/components/elite/IntakePanel";
 import { OfferedDrillsPanel } from "@/components/elite/OfferedDrillsPanel";
+import { ProgramPanel } from "@/components/elite/ProgramPanel";
+import { focusCounts } from "@/lib/elite/bank-conform";
 import { DeletePlayerButton } from "@/components/elite/DeletePlayerButton";
 import { QuickComposer } from "@/components/elite/QuickComposer";
 import { StatusControl } from "@/components/elite/StatusControl";
@@ -89,6 +92,8 @@ export default async function PlayerProfile({
   // the coach's pick, else the bank default, else the first skill drill
   // they completed.
   const benchmark = await getBenchmark(player, homework);
+  // The 3-month program (065), if the coach has saved one.
+  const program = await getProgram(player.id);
 
   // Weeks derive from the calendar: live = where the program clock is
   // today, contentWeek = what the player is actually training.
@@ -325,6 +330,15 @@ export default async function PlayerProfile({
 
           {/* Intake snapshot */}
           <IntakePanel player={player} />
+
+          {/* The 3-month program (065): the quiz, six focuses, the threads */}
+          <ProgramPanel
+            playerId={player.id}
+            program={program}
+            counts={focusCounts(bankForStudio.drills, player)}
+            liveWeek={live}
+            nextWeek={Math.max(maxBuilt + 1, live)}
+          />
 
           {/* Course drills offered to this player (040): switch, then tick */}
           <OfferedDrillsPanel

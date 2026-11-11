@@ -5,6 +5,7 @@ import { createClient } from "./supabase/server";
 import { getViewer } from "./session";
 import { backfillHomeworkVideos } from "./data";
 import { PLYO_PILLAR, PROGRESS_METRICS, SHOOTING_PILLAR, STRENGTH_PILLAR } from "./types";
+import { isFocusPillar } from "./program";
 
 export type DrillInput = {
   id?: string; // present = update, absent = create
@@ -18,6 +19,9 @@ export type DrillInput = {
   needs_goal: boolean; // 042: needs a goal to shoot at
   small_space: boolean; // 033: works in a few yards
   opt_in: boolean; // 040: course drill, only when the coach offers it to a player
+  focus_pillar?: string; // 065: the program pillar this drill belongs to ("" = none)
+  level?: number; // 065: 1 easier, 2 standard, 3 harder
+  harder?: string; // 065: the "make it harder" line shown with the cue
   video_url: string;
   demo_by: string;
 };
@@ -66,6 +70,9 @@ export async function saveDrill(input: DrillInput) {
     needs_goal: Boolean(input.needs_goal),
     small_space: Boolean(input.small_space),
     opt_in: Boolean(input.opt_in),
+    focus_pillar: isFocusPillar(input.focus_pillar) ? input.focus_pillar : null,
+    level: input.level === 1 || input.level === 3 ? input.level : isFocusPillar(input.focus_pillar) ? 2 : null,
+    harder: (input.harder ?? "").trim().slice(0, 160),
     video_url: /^https?:\/\/.+/.test(input.video_url.trim())
       ? input.video_url.trim().slice(0, 500)
       : "",
@@ -81,7 +88,7 @@ export async function saveDrill(input: DrillInput) {
   if (error) {
     // pre-021 / pre-033 (no video or small_space columns): save the rest
     // so editing never blocks
-    const { video_url: _v, demo_by: _d, small_space: _s, opt_in: _o, needs_goal: _g, ...legacy } = row;
+    const { video_url: _v, demo_by: _d, small_space: _s, opt_in: _o, needs_goal: _g, focus_pillar: _f, level: _l, harder: _h, ...legacy } = row;
     ({ error } = await write(legacy));
   }
   if (error) {

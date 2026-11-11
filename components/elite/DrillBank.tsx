@@ -7,6 +7,7 @@ import { saveDrill, deleteDrill, type DrillInput } from "@/lib/elite/drill-actio
 import { createClient } from "@/lib/elite/supabase/client";
 import { DrillVideo } from "./DrillVideo";
 import { cn } from "@/lib/utils";
+import { PROGRAM_CATEGORIES, pillarName } from "@/lib/elite/program";
 
 const MAX_VIDEO_MB = 150;
 
@@ -27,6 +28,9 @@ const EMPTY: DrillInput = {
   needs_goal: false,
   small_space: false,
   opt_in: false,
+  focus_pillar: "",
+  level: 2,
+  harder: "",
   video_url: "",
   demo_by: "",
 };
@@ -232,6 +236,44 @@ export function DrillBank({
               Course drill (only in a week when you offer it to that player)
             </label>
           </div>
+          {/* 065, the 3-month program: which focus this drill belongs to,
+              how hard it is inside that focus, and how to make it harder. */}
+          <div className="grid gap-3 sm:grid-cols-2">
+            <select
+              value={editing.focus_pillar ?? ""}
+              onChange={(e) => setEditing({ ...editing, focus_pillar: e.target.value })}
+              className={inputCls}
+              aria-label="Program focus"
+            >
+              <option value="">Program focus: none</option>
+              {PROGRAM_CATEGORIES.filter((c) => c.mode === "focus").map((c) => (
+                <optgroup key={c.key} label={c.name}>
+                  {c.pillars.map((p) => (
+                    <option key={p.key} value={p.key}>
+                      {p.name}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
+            <select
+              value={editing.level ?? 2}
+              onChange={(e) => setEditing({ ...editing, level: Number(e.target.value) })}
+              className={inputCls}
+              aria-label="Level inside the focus"
+            >
+              <option value={1}>Level 1, easier</option>
+              <option value={2}>Level 2, standard</option>
+              <option value={3}>Level 3, harder</option>
+            </select>
+          </div>
+          <input
+            value={editing.harder ?? ""}
+            onChange={(e) => setEditing({ ...editing, harder: e.target.value })}
+            placeholder="Make it harder (eyes closed, weak foot only...)"
+            maxLength={160}
+            className={inputCls}
+          />
           <input
             value={editing.cues}
             onChange={(e) => setEditing({ ...editing, cues: e.target.value })}
@@ -326,6 +368,11 @@ export function DrillBank({
                           few yards
                         </span>
                       )}
+                      {d.focus_pillar && (
+                        <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/50">
+                          {pillarName(d.focus_pillar)} · L{d.level ?? 2}
+                        </span>
+                      )}
                       {d.opt_in && (
                         <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/45">
                           course
@@ -358,6 +405,9 @@ export function DrillBank({
                           needs_goal: Boolean(d.needs_goal),
                           small_space: Boolean(d.small_space),
                           opt_in: Boolean(d.opt_in),
+                          focus_pillar: d.focus_pillar ?? "",
+                          level: d.level ?? 2,
+                          harder: d.harder ?? "",
                           video_url: d.video_url ?? "",
                           demo_by: d.demo_by ?? "",
                         })

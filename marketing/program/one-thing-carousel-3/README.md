@@ -71,9 +71,9 @@ the rest). Every slide below was rewritten to that rule.
 7. His strike photo in the black NVA training kit, him centred, across
    the top. / IT'S HOW I CAME BACK. / I was out for five months with a
    hip tear. Two months before preseason, I was cleared to get touches
-   and to jog. That was all. / ONE MAIN THING AT A TIME, I had no choice:
+   and to jog. That was all. / ONE MAIN THING AT A TIME:
    three rows, gold is the main thing, white is what stayed on the side.
-   All I could do: THE BALL (on a wall, 45 minutes, every day). Once I
+   All I could do: THE BALL (touches against a wall, 45 minutes, every day). Once I
    could run: FITNESS, the ball on the side. Once I could sprint: SPEED,
    the ball and fitness on the side. / That's when it clicked. Put one
    thing first, keep the rest of your game going on the side, and you

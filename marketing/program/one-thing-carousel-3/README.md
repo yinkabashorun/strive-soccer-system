@@ -63,12 +63,18 @@ the strength finisher or the speed drill.
    Nobody gets stronger lifting the same weight all year. Same with your
    touch.
 7. His strike photo in the black NVA training kit, him centred, across
-   the top half. / IT'S HOW I CAME BACK. / Five months out with a hip
-   tear. Once I was cleared to get touches and jog, I had two months
-   before preseason. / ONE THING AT A TIME, my two months: first the ball
-   (a wall, 45 minutes, every day), then fitness (once I could run), then
-   speed (once I could sprint). / I came into preseason in THE BEST FORM
-   OF MY LIFE. (His words and his photo, Nov 11.)
+   the top. / IT'S HOW I CAME BACK. / Five months out with a hip tear.
+   Two months before preseason, I was cleared for touches and a jog.
+   Nothing else. / ONE MAIN THING AT A TIME, not by choice: three rows,
+   gold is the main thing, white is what stayed on the side. All I could
+   do: THE BALL (a wall, 45 minutes, every day). Once I could run:
+   FITNESS, the ball on the side. Once I could sprint: SPEED, the ball
+   and fitness on the side. / That's when it clicked. Put one thing
+   first, keep the rest going on the side, and you make so much more
+   progress. / I CAME INTO PRESEASON IN THE BEST FORM OF MY LIFE.
+   (Rewritten on his note that the old slide read as if the ball stopped
+   once fitness and speed started, and never said he was forced into one
+   thing at a time, which is where the structure comes from.)
 8. "BUT I'VE GOT MORE THAN ONE THING TO FIX." / Good. It's three months.
    You get six. Coach Gary and I ask what's holding you back, then put
    them in order. Biggest problem first.

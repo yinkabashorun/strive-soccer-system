@@ -29,12 +29,13 @@ Same look, same approved lines, merged. Render: `node render.mjs 02-your-week.ht
    weeks?"). "BUT I'VE GOT MORE THAN ONE THING TO FIX." / Good. It's three
    months. You get six. ...
 6. `06-every-week` (was slides 10 and 11). "WHAT ABOUT SPEED, STRENGTH AND MY
-   GAMES?" / SPEED, STRENGTH AND YOUR GAMES DON'T WAIT THEIR TURN. / EVERY
-   WEEK, next to your main focus: Every session, SPEED AND STRENGTH (Plyos
-   open the session. Speed work comes next. Two strength drills finish the
-   session.) / Every Sunday, FILM ROOM (Coach Gary and I go through clips from
-   your games with you, live on Zoom.) / Every month, 1:1 CALL (30 minutes,
-   one on one with your coach. Every minute is about your game.)
+   GAMES?" / SPEED, STRENGTH AND YOUR GAMES DON'T WAIT THEIR TURN. / Every
+   session, SPEED AND STRENGTH (Plyos open the session. Speed work comes next.
+   Two strength drills finish the session.) / Every Sunday, FILM ROOM (Coach
+   Gary and I go through clips from your games with you, live on Zoom.) /
+   Every month, 1:1 CALL (One on one with your coach. Every minute is about
+   your game.) Beside the copy, the phone with the app's session screen: the
+   plyo warm-up, the speed drill and both strength finishers lit.
 7. `07-close` (unchanged). ONE THING AT A TIME. HARDER EVERY WEEK. NOTHING LEFT
    BEHIND. / Three months, built around you by Coach Gary and me. / DM us
    "ELITE" / Tell us the one thing holding you back. We'll build your three
@@ -47,8 +48,8 @@ Same look, same approved lines, merged. Render: `node render.mjs 02-your-week.ht
 - "Defenders get told one thing: 'Force him to his left.'" is off the slides
   and in the caption.
 - "Still easy? Do it with your eyes closed."
-- The phone screens (the session cards, the Film Room and check-in cards);
-  slide 6 is type in the block look instead.
+- The Film Room and check-in cards from the app (slide 6 carries the session
+  phone; Film Room and the 1:1 call are words beside it).
 
 ## Caption
 
@@ -67,7 +68,5 @@ DM ELITE and tell us the one thing holding you back.
 - The carousel shows 4 drills a session, 2 on the main focus, and two strength
   drills to finish; the app builds 3 skill drills and one finisher (his
   "Carousel only" call, Nov 11).
-- "30 minutes" for the 1:1 call is his Nov 5 example; the coach sets the length
-  per day in the app.
 - It speaks to the player, not the parent. No price, no guarantee, by design.
 - Carla's ELITE reply should expect "the one thing holding you back".

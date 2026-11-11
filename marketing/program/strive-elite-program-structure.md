@@ -41,9 +41,7 @@ sits under which pillar is my read and needs his confirmation.
 | 3 Passing | Short and combination | 8 | every one needs a wall |
 | | Long and driven | 0 | gap |
 | | Passing in the air | 0 | gap |
-| 4 Shooting and finishing | Strike technique | 0 | gap |
-| | Finishing | 0 | gap |
-| | Heading | 0 | gap, age flag from Oct 27 stands |
+| 4 Shooting and finishing | (left out for now, Coach Yinka, Nov 11) | 0 | not on the menu, not on the film list |
 | 5 Speed and agility | Acceleration | 5 | course-only today |
 | | Top speed | 3 | course-only today |
 | | Change of direction | 3 | course-only today |
@@ -66,10 +64,9 @@ leaving the pillar.
 Film first (zero today, and the offer post already names them):
 1. Passing in the air: 6
 2. Long and driven passing (low, mid, ping): 6
-3. Strike technique: 6
-4. Finishing: 6
-5. Running with the ball: 6
-6. Decision making: 4 to 6
+3. Running with the ball: 6
+4. Decision making: 4 to 6
+(Shooting and finishing are left out for now, his call Nov 11.)
 
 Fill next (thin):
 7. First touch out of the air, not juggling: 3 more
@@ -111,11 +108,57 @@ Output: three blocks, two focus pillars each, the threads per month, the
 maintenance pool, and for an injured player the stage each block waits on.
 Coach Yinka edits and confirms before anything is built for the player.
 
+## How it fits what the app already does (read from the code, Nov 11)
+
+One function decides every week: conformSessionsToBank in
+lib/elite/bank-conform.ts. It runs when a plan is generated and again when
+it is published, and it already builds a session in four parts: warm-up,
+the slot after the warm-up, three skill drills, finisher. The program is
+one more input to that function, the way the few-yards templates are:
+
+| Program piece | Where it lands | New or existing |
+|---|---|---|
+| Focus pillar, 2 of 3 skill drills | the three skill drills | new rule in the same function |
+| Maintenance, 1 of 3 | the three skill drills | new rule, drawn from the player's other pillars |
+| Strength thread | the finisher, every session | EXISTING ("required" mode, today switched on by an injury note) |
+| Speed or power thread | the slot after the warm-up | EXISTING slot (today it carries juggling); speed drills allowed in for a player whose program names speed (his OK, Nov 11) |
+| Conditioning thread | a weekly target the player ticks | NEW (a run is not a drill; the database refuses a homework row without a video) |
+| Harder over the fortnight | which drills are picked | NEW: a level on each drill, easier first |
+| Clearance stage | which drills may be picked at all | NEW: the parked injury mode |
+
+What does NOT change:
+- The existing pillars (Ball Mastery, Weak Foot, Passing and the rest)
+  stay exactly as they are. They carry the ratings, the development score
+  the ads show, and time trained by pillar. The new pillar is a second
+  tag on the drill, beside the old one.
+- A player with no program builds exactly as today. Every earlier change
+  to the builder was made this way: the default reproduces today's week.
+- A week already built is never rewritten. A program starts at the next
+  Monday build after Coach Yinka confirms it.
+- The hourly builder, the Sunday rule, breaks, the audit, the filmed
+  guard, Extra Work, the progress clip, Film Room: untouched.
+
+The roster today (read-only, Nov 11): seven active profiles, two of them
+Coach Yinka's own test profiles. Mason Jhaveri is on week 11, Abdul Rahim
+8, Bryan 4, Mason Rawat 3, Tim Kovalev 1 (restarted Nov 9, cleared for
+plyos and running, not long balls or shots). Nobody is moved onto a
+program without his word, one player at a time.
+
+Open fit questions:
+- Length: three blocks of four weeks is 12 weeks; 90 days is nearly 13.
+  Proposed: week 13 is a re-film and review week.
+- After week 12 or 13: a new quiz and a new three months, or back to the
+  ordinary week. His call.
+- A few-yards player's week is his hand-built sessions today; a program
+  for that player comes after the open-space build.
+- Members already in: start a program from where they are, or leave them
+  on the ordinary week. His call, per player.
+
 ## Still his to decide
 
 - The category and pillar names.
-- Speed drills are course-only today. A speed focus or thread needs them
-  in the week: allow a program to pull its own course drills in (my
-  suggestion), or convert them.
+- DECIDED Nov 11: a program may pull speed drills into the week when speed
+  is that player's focus or thread.
 - The promise wording and terms (do the work, not satisfied, money back).
-- Where the quiz lives (my read: a form on the player page in the app).
+- Where the quiz lives: in the app is fine with him, once the fit above
+  is agreed.

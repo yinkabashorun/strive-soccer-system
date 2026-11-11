@@ -13,16 +13,15 @@ Render one: `node render.mjs 03-two.html 03-two.png`.
 ## What the copy is doing
 
 - It opens in the reader's own training, not in our program.
-- One picture carries the whole post: the week as twelve drills (four
-  sessions across, three drills down). He said slide 4 was the only good
-  graphic, so every other graphic is now that same week, changed: the
-  spread week with a word in every drill (3), the focused week (4), six
-  small copies of it (7), the bottom row lit up with what else gets
-  worked (8), speed and strength added above and below it (9). Slide 5 is
-  type that grows as the work gets harder. Spread over six things, the
-  weak foot gets 2. Put on one thing, it gets 8. The
-  numbers are the app's own week (four sessions, three skill drills, two
-  of three on the focus), so they are true.
+- The graphics are the product and the week in real words (his third
+  note: "Premium. What is this circle bullshit. Use the right words").
+  Slides 3, 4 and 7 are a timetable of blocks named the way he names the
+  work (weak foot, first touch, ball mastery, 1v1 skills, passing,
+  juggling, speed). Slides 5, 8 and 9 show the app's own session cards
+  with real bank drills, their real reps and frames of their clips
+  (app/*.jpg). No circles, no charts. Spread over six things, the weak
+  foot gets 2. Put on one thing, it gets 8. The dot version of slide 4 he
+  first approved is kept as 04-eight-dots.png.
 - Progressive overload is one comparison everybody already believes:
   nobody gets stronger lifting the same weight all year.
 - His comeback is the proof, in his words.

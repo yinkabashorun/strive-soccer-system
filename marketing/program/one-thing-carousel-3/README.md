@@ -63,12 +63,10 @@ the strength finisher or the speed drill.
    Nobody gets stronger lifting the same weight all year. Same with your
    touch.
 7. IT'S HOW I CAME BACK. / Six months out with a hip tear. Two months to
-   get ready for a more competitive team. No time to fix everything at
-   once. / SO ONE THING GOT MOST OF MY WORK. THEN THE NEXT. / My two
-   months, in this order: first the ball, once I could run fitness, once
-   I could sprint speed. / A ball and a wall, 45 minutes, every day. The
-   rest of my game kept moving. It just wasn't the main thing. I went
-   from the bench to starting.
+   get ready for a more competitive team. / I DIDN'T TRAIN EVERYTHING.
+   ONE THING AT A TIME. / My two months, in this order: first the ball (a
+   wall, 45 minutes, every day), then fitness (once I could run), then
+   speed (once I could sprint). / BENCH PLAYER TO STARTER.
 8. "BUT I'VE GOT MORE THAN ONE THING TO FIX." / Good. It's three months.
    You get six. Coach Gary and I ask what's holding you back, then put
    them in order. Biggest problem first.
@@ -143,3 +141,14 @@ how I used the principal of this structure."
   and "the rest of my game kept moving" are my wording of his principle
   ("focused on one thing ... still making progress in all the others");
   his to check.
+
+## Sixth note: the comeback slide restructured
+
+"Adjust the page of my story to make more sense with the post and to be
+structured better." The slide now runs in the post's own order and words:
+the situation in one line, the cover's idea turned around ("I didn't
+train everything. One thing at a time.", which the close repeats), his
+two months as the same schedule graphic the other slides use, and the
+result as one line. The two paragraphs are gone. The Week 2 card on slide
+6 is named Weak foot pop and juggle and keeps the frame with the ball
+popped up, his pick.

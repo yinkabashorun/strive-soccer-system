@@ -62,12 +62,13 @@ the strength finisher or the speed drill.
    leg). Still easy? EYES CLOSED. /
    Nobody gets stronger lifting the same weight all year. Same with your
    touch.
-7. IT'S HOW I CAME BACK. / Five months out with a hip tear. Once I was
-   cleared to get touches and jog, I had two months before preseason. /
-   I DIDN'T TRAIN EVERYTHING. ONE THING AT A TIME. / My two months, in
-   this order: first the ball (a wall, 45 minutes, every day), then
-   fitness (once I could run), then speed (once I could sprint). / I came
-   into preseason in THE BEST FORM OF MY LIFE. (His words, Nov 11.)
+7. His strike photo in the black NVA training kit, him centred, across
+   the top half. / IT'S HOW I CAME BACK. / Five months out with a hip
+   tear. Once I was cleared to get touches and jog, I had two months
+   before preseason. / ONE THING AT A TIME, my two months: first the ball
+   (a wall, 45 minutes, every day), then fitness (once I could run), then
+   speed (once I could sprint). / I came into preseason in THE BEST FORM
+   OF MY LIFE. (His words and his photo, Nov 11.)
 8. "BUT I'VE GOT MORE THAN ONE THING TO FIX." / Good. It's three months.
    You get six. Coach Gary and I ask what's holding you back, then put
    them in order. Biggest problem first.

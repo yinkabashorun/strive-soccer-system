@@ -111,6 +111,13 @@ export type Drill = {
   // 040: a course drill. Never enters a week on its own; only when the
   // coach offers it to that player (Player.offer_opt_in + opt_in_drill_ids).
   opt_in?: boolean;
+  // 065, the 3-month program: the pillar a half-month focus draws this
+  // drill from (lib/elite/program.ts FOCUS_PILLARS), its level inside
+  // that pillar (1 easier, 2 standard, 3 harder) and the coach's "make
+  // it harder" line shown with the cue. All optional; unset = today.
+  focus_pillar?: string | null;
+  level?: number | null;
+  harder?: string | null;
   active: boolean;
   sort: number;
   // 021: demo video + credit ("" = none)

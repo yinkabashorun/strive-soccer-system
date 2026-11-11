@@ -8,7 +8,7 @@ import { sendPlayerEmail } from "./email";
 import { sendPushToPlayer } from "./push";
 import { normalizePhone, sendPlayerSMS } from "./sms";
 import { isSundayEveNY, liveWeekFor, mondayOfWeekNY, nextMondayNY, unlockInstant } from "./time";
-import { getDrillBank, loadTemplateContext, normalizeTitle } from "./data";
+import { getDrillBank, loadProgramWeek, loadTemplateContext, normalizeTitle } from "./data";
 import { conformSessionsToBank, offeredBank, strengthRequired } from "./bank-conform";
 import { sessionsWord, TRAINING_LOADS } from "./training";
 import { resolveWeekTarget } from "./week-target";
@@ -661,16 +661,19 @@ export async function applyGeneratedPlanCore(
   // Course drills (040): an opt-in drill the coach has not offered this
   // player is not in the bank as far as this publish is concerned, so a
   // hand-edited studio plan naming it gets a replacement, not a link.
-  const bank = offeredBank(wholeBank, player as PlayerEnvRow | null);
+  // The 3-month program (065): this week's focus and threads, read here
+  // again so a hand-edited studio plan still publishes as a program week.
+  const program = await loadProgramWeek(playerId, week, supabase);
+  const bank = offeredBank(wholeBank, player as PlayerEnvRow | null, program);
   // Same strengthening rule as generation: a player whose note (or these
   // notes) mentions an injury / rehab / core / hip / strength work ends
   // every session with one filmed finisher, enforced here too so a
   // hand-edited studio plan can't drop it.
-  const strength = strengthRequired(
-    `${rawNotes}\n${(player as { coach_memory?: string | null } | null)?.coach_memory ?? ""}`
-  )
-    ? "required"
-    : "optional";
+  const strength =
+    program?.strength ||
+    strengthRequired(`${rawNotes}\n${(player as { coach_memory?: string | null } | null)?.coach_memory ?? ""}`)
+      ? "required"
+      : "optional";
   const env = player as PlayerEnvRow | null;
   // Few-yards players (035): the publish gate loads the coach's templates
   // and this player's rotation itself, so a hand-edited studio plan for a
@@ -690,7 +693,8 @@ export async function applyGeneratedPlanCore(
       : null,
     plan.weekly_focus,
     strength,
-    tpl
+    tpl,
+    program
   );
   const sessionCount = sessionsToPublish.length;
   const sessionsSaid = sessionsWord(sessionCount);

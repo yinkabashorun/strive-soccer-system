@@ -25,7 +25,7 @@
 import { createServiceClient } from "./supabase/server";
 import { generatePlanFromNotes } from "./ai-coach";
 import { applyGeneratedPlanCore } from "./coach-actions";
-import { getDrillBank, latestCoachingCallNotes, loadTemplateContext } from "./data";
+import { getDrillBank, latestCoachingCallNotes, loadTemplateContext, loadProgramWeek } from "./data";
 import { isSundayEveNY, liveWeekFor } from "./time";
 import { alertCoach, latestCronRun, PLAN_BUILDER_JOB, startCronRun, updateCronRun } from "./cron-log";
 import { auditLiveWeeks, type HealthIssue } from "./health";
@@ -179,7 +179,10 @@ export async function runAutoWeeklyPlans(
         .join("\n");
       // Few-yards players (035): their week is the coach's templates.
       const tpl = await loadTemplateContext(player, admin);
-      const { plan } = await generatePlanFromNotes(notes, player, player.coach_memory, bank, tpl);
+      // The 3-month program (065): the focus and threads of the week
+      // this run is building, or null for a player with no program.
+      const program = await loadProgramWeek(player.id, target, admin);
+      const { plan } = await generatePlanFromNotes(notes, player, player.coach_memory, bank, tpl, program);
       const applied = await applyGeneratedPlanCore(player.id, notes, plan, coach.id, admin);
       results.push({ playerId: player.id, name: player.full_name, ok: true, week: applied.week });
     } catch (err) {

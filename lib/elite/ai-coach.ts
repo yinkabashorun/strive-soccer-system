@@ -26,6 +26,7 @@ import {
   strengthRequired,
   type StrengthMode,
 } from "./bank-conform";
+import type { ProgramWeek } from "./program";
 import { EmptyBankError, methodologyContext } from "./methodology";
 
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-4-8";
@@ -252,7 +253,8 @@ function sanitize(
   player?: Player,
   bank?: Drill[],
   strength: StrengthMode = "optional",
-  tpl?: TemplateContext
+  tpl?: TemplateContext,
+  program?: ProgramWeek | null
 ): GeneratedPlan {
   const validMetrics = new Set(PROGRESS_METRICS as readonly string[]);
   const weekly_focus = ensureSentence(
@@ -268,7 +270,8 @@ function sanitize(
     player,
     weekly_focus,
     strength,
-    tpl
+    tpl,
+    program
   );
   return {
     weekly_focus,
@@ -306,7 +309,8 @@ function fallbackPlan(
   player?: Player,
   bank?: Drill[],
   strength: StrengthMode = "optional",
-  tpl?: TemplateContext
+  tpl?: TemplateContext,
+  program?: ProgramWeek | null
 ): GeneratedPlan {
   const haystack = `${notes}\n${(player?.weaknesses ?? []).join("\n")}`.toLowerCase();
   const PILLAR_HINTS: [RegExp, (typeof PROGRESS_METRICS)[number]][] = [
@@ -378,7 +382,11 @@ function fallbackPlan(
   });
 
   const names = pillars.map((p) => p.toLowerCase());
-  const focus = `Back to the pillars: ${names.join(", ")}`;
+  // A program week names its focus (065); the sessions are rebuilt around
+  // it by conformSessionsToBank either way.
+  const focus = program
+    ? `This week's focus is ${program.focusName.toLowerCase()}, two drills of it in every session`
+    : `Back to the pillars: ${names.join(", ")}`;
 
   return sanitize(
     {
@@ -397,7 +405,8 @@ function fallbackPlan(
     player,
     bank,
     strength,
-    tpl
+    tpl,
+    program
   );
 }
 
@@ -406,7 +415,8 @@ export async function generatePlanFromNotes(
   player?: Player,
   memory?: string,
   bank?: Drill[], // the coach's drill bank; composition is restricted to it
-  tpl?: TemplateContext // (035) few-yards templates + usage; set only for a tight-space player
+  tpl?: TemplateContext, // (035) few-yards templates + usage; set only for a tight-space player
+  program?: ProgramWeek | null // (065) the 3-month program's week, when the player has one
 ): Promise<{
   plan: GeneratedPlan;
   source: "ai" | "fallback";
@@ -416,18 +426,19 @@ export async function generatePlanFromNotes(
   // Course drills (040): an opt-in drill is on this player's menu only if
   // the coach offered it to them. Filtered here, once, so the prompt, the
   // fallback and sanitize() all compose from the same bank.
-  bank = bank ? offeredBank(bank, player) : bank;
+  bank = bank ? offeredBank(bank, player, program) : bank;
   // Strengthening finisher rule for this week: required in every session
   // when the notes or the player's memory (coach note, call notes,
   // check-in) say injury / rehab / core / hip / strength; else the AI's
   // call. Enforced on the output by conformSessionsToBank either way.
-  const strength: StrengthMode = strengthRequired(`${notes}\n${memory ?? ""}\n${player?.coach_memory ?? ""}`)
-    ? "required"
-    : "optional";
+  const strength: StrengthMode =
+    program?.strength || strengthRequired(`${notes}\n${memory ?? ""}\n${player?.coach_memory ?? ""}`)
+      ? "required"
+      : "optional";
   const c = client();
   if (!c)
     return {
-      plan: fallbackPlan(notes, player, bank, strength, tpl),
+      plan: fallbackPlan(notes, player, bank, strength, tpl, program),
       source: "fallback",
       reason: "no_key",
       reasonKind: "no_key",
@@ -470,7 +481,12 @@ export async function generatePlanFromNotes(
       strength === "required"
         ? "\n\nSTRENGTHENING THIS WEEK (hard rule): the notes or the coach's memory mention an injury, rehab, core, hip or strength work, so END EVERY SESSION with exactly one strengthening finisher from the bank's finisher list, and keep the skill drills and player summary consistent with whatever the injury rules out."
         : "";
-    const userMsg = `${context}${memoryBlock}${templateBlock}${strengthBlock}\n\nCoach's raw session notes:\n"""\n${notes}\n"""\n\nUsing everything you know about this player above, generate the ${sessionsWord(n)}-session weekly plan JSON now. Plan around their history, follow-through, trends, and the coach's note.`;
+    // Program week (065): the focus is fixed by the coach's 3-month plan.
+    // The system places the focus drills; the plan's words follow it.
+    const programBlock = program
+      ? `\n\nPROGRAM FOCUS THIS WEEK (hard rule): this player is on a 3-month program and this week's focus is ${program.focusName} (month ${program.block}, ${program.weekInHalf === 1 ? "first" : "second"} week of this focus). In every session two of the three skill drills are ${program.focusName} drills, placed by the system from the bank; write ONE skill drill per session from a DIFFERENT area to keep the rest of the game moving, rotating the area across the sessions. Write the weekly focus, parent update and player summary around ${program.focusName}.${program.weekInHalf === 2 ? " It is the second week on this focus, so say the work steps up." : ""}`
+      : "";
+    const userMsg = `${context}${memoryBlock}${templateBlock}${strengthBlock}${programBlock}\n\nCoach's raw session notes:\n"""\n${notes}\n"""\n\nUsing everything you know about this player above, generate the ${sessionsWord(n)}-session weekly plan JSON now. Plan around their history, follow-through, trends, and the coach's note.`;
 
     // One attempt at a given output cap, with enough logging that a parse
     // failure is diagnosable from Vercel logs instead of guessed at.
@@ -503,7 +519,7 @@ export async function generatePlanFromNotes(
     }
     if (!parsed)
       return {
-        plan: fallbackPlan(notes, player, bank, strength, tpl),
+        plan: fallbackPlan(notes, player, bank, strength, tpl, program),
         source: "fallback",
         reason:
           stop === "max_tokens"
@@ -511,13 +527,13 @@ export async function generatePlanFromNotes(
             : "The AI responded but the plan could not be read. Generate again; if it repeats, check the Vercel logs for [strive-ai] lines.",
         reasonKind: "parse",
       };
-    return { plan: sanitize(parsed, player, bank, strength, tpl), source: "ai" };
+    return { plan: sanitize(parsed, player, bank, strength, tpl, program), source: "ai" };
   } catch (err) {
     const msg =
       err instanceof Error ? err.message.slice(0, 200) : "unknown error";
     console.log(`[strive-ai] api error: ${msg}`);
     return {
-      plan: fallbackPlan(notes, player, bank, strength, tpl),
+      plan: fallbackPlan(notes, player, bank, strength, tpl, program),
       source: "fallback",
       reason: msg,
       reasonKind: "api_error",

@@ -76,9 +76,14 @@ the strength finisher or the speed drill.
    foot. Two on the rest of your game. A different part every session, so
    nothing goes cold while your weak foot catches up. (The app's session:
    the warm-up, then four drills, the last two lit.)
-10. "WHAT ABOUT SPEED AND STRENGTH?" / THEY DON'T WAIT THEIR TURN. Speed
-    work comes right after the warm-up. Strength ends the session. Every
-    session, for as long as you need them. (The app's session, both lit.)
+10. "WHAT ABOUT SPEED AND STRENGTH?" / THEY DON'T WAIT THEIR TURN. Plyos
+    open every session. That's speed and strength before you touch a
+    ball. Speed work comes next. Two strength drills finish it. (The
+    app's session with the plyo warm-up, the speed drill and two strength
+    finishers lit: V-ups and Single leg bridge. His note: "Do 2 strength
+    finishers, and highlight plyos bc plyos is speed and strength." The
+    app places one finisher a session today; Single leg bridge has no
+    picture because its clip is on Manus.)
 11. "THERE'S MORE TO THE GAME THAN DRILLS." / WE KNOW. Every Sunday, Coach
     Gary and I go through clips from your games with you, live on Zoom.
     And once a month, a 1:1 call on where you're at. (The app's Film Room

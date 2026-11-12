@@ -25,7 +25,8 @@ Same look, same approved lines, merged. Render: `node render.mjs 02-your-week.ht
    drills get harder. / YOUR WEAK FOOT DRILLS, week 1, then week 2: Week 1
    Weak foot tap, pull, push and Weak foot outside pull, inside pull; Week 2,
    harder, Weak foot pop and juggle and Weak foot Ronaldinho drill (his name
-   for it; the bank row is "Ronaldinho drill", 4 x 60 sec on, 30 sec off;
+   for it; the bank row is "Ronaldinho drill"; on the slide 4 x 1 min, rest 30 sec, and
+   pop and juggle reads 5 mins, his wording, the bank still stores the old reps;
    frames of the clips) / That is progressive overload.
    Nobody gets stronger lifting the same weight all year.
 5. `05-story`. IT'S HOW I CAME BACK. Five months out with a hip tear, one main

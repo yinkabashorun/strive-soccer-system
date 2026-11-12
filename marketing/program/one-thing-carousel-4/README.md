@@ -45,7 +45,7 @@ Same look, same approved lines, merged. Render: `node render.mjs 02-your-week.ht
    phone with the app's session screen.
 8. `08-close`. ONE THING AT A TIME. HARDER EVERY WEEK. NOTHING LEFT BEHIND. /
    Three months, built around you by Coach Gary and me. / DM us "ELITE" / Tell
-   us the one thing holding you back. We'll build your three months around it.
+   us what's holding you back, and in three months it won't be.
 
 ## What the cut cost (his to bring back)
 
@@ -67,7 +67,7 @@ Give your weak foot two drills every session for two weeks. Make the drills in w
 
 That is how I came back from five months out with a hip tear, in the best form of my life. It is how Coach Gary and I build every Strive Elite player's three months.
 
-DM ELITE and tell us the one thing holding you back.
+DM ELITE and tell us what's holding you back.
 
 ## Still his before it goes up
 

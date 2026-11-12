@@ -29,8 +29,12 @@ Same look, same approved lines, merged. Render: `node render.mjs 02-your-week.ht
    Nobody gets stronger lifting the same weight all year.
 5. `05-story`. IT'S HOW I CAME BACK. Five months out with a hip tear, one main
    thing at a time, the best form of my life.
-6. `06-six`. "BUT I'VE GOT MORE THAN ONE THING TO FIX." / Good. It's three
-   months. You get six. ... (the 12 weeks, two weeks for each main focus)
+6. `06-six` (simplified Nov 12). "BUT I'VE GOT MORE THAN ONE THING TO FIX." /
+   GOOD. THREE MONTHS. SIX WEAKNESSES. / Each weakness is the main focus for
+   two weeks. Then your next weakness takes over. / 12 WEEKS, two weeks on
+   each weakness: Month 1 Weak foot, First touch; Month 2 Passing, Ball
+   mastery; Month 3 1v1 skills, Finishing / The rest of every session keeps
+   your other weaknesses improving, so nothing slips back.
 7. `07-every-week`. "WHAT ABOUT SPEED, STRENGTH AND MY GAMES?" / SPEED,
    STRENGTH AND YOUR GAMES DON'T WAIT THEIR TURN. / Every session, SPEED AND
    STRENGTH / Every Sunday, FILM ROOM / Every month, 1:1 CALL (One on one with
@@ -67,5 +71,9 @@ DM ELITE and tell us the one thing holding you back.
 - The carousel shows 4 drills a session, 2 on the main focus, and two strength
   drills to finish; the app builds 3 skill drills and one finisher (his
   "Carousel only" call, Nov 11).
+- FINISHING is on slide 6 as weeks 11 and 12 on his word, but the app has no
+  finishing drills and no finishing focus yet (shooting and finishing were
+  left out of the program on Nov 11). A member cannot be given that focus
+  until the clips are filmed and banked.
 - It speaks to the player, not the parent. No price, no guarantee, by design.
 - Carla's ELITE reply should expect "the one thing holding you back".

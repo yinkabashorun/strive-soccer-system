@@ -42,7 +42,10 @@ Same look, same approved lines, merged. Render: `node render.mjs 02-your-week.ht
    STRENGTH AND YOUR GAMES DON'T WAIT THEIR TURN. / Every session, SPEED AND
    STRENGTH / Every Sunday, FILM ROOM / Every month, 1:1 CALL (One on one with
    your coach. Deep mentorship to push you forward.) Beside the copy, the
-   phone with the app's session screen.
+   phone with the app's session screen, eight cards: the plyo warm-up, the
+   speed drill, four technical drills (Weak foot pop and settle; Wall pass,
+   touch, scissor; L turn, roll, touch; Pass, touch past, Cruyff turn; bank
+   titles and reps) and the two strength finishers.
 8. `08-close`. ONE THING AT A TIME. HARDER EVERY WEEK. NOTHING LEFT BEHIND. /
    Three months, built around you by Coach Gary and me. / DM us "ELITE" / Tell
    us what's holding you back, and in three months it won't be.

@@ -33,8 +33,8 @@ Same look, same approved lines, merged. Render: `node render.mjs 02-your-week.ht
    session, SPEED AND STRENGTH (Plyos open the session. Speed work comes next.
    Two strength drills finish the session.) / Every Sunday, FILM ROOM (Coach
    Gary and I go through clips from your games with you, live on Zoom.) /
-   Every month, 1:1 CALL (One on one with your coach. Every minute is about
-   your game.) Beside the copy, the phone with the app's session screen: the
+   Every month, 1:1 CALL (One on one with your coach. Deep mentorship to push
+   you forward.) Beside the copy, the phone with the app's session screen: the
    plyo warm-up, the speed drill and both strength finishers lit.
 7. `07-close` (unchanged). ONE THING AT A TIME. HARDER EVERY WEEK. NOTHING LEFT
    BEHIND. / Three months, built around you by Coach Gary and me. / DM us

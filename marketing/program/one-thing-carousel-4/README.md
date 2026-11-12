@@ -1,4 +1,4 @@
-# The opinion carousel, compact cut (seven slides)
+# The opinion carousel, compact cut (eight slides)
 
 Coach Yinka, Nov 11 2026: "You think you could shrink this down to like 6 or 7
 slides? ... a little more compact ... get the point across clearer and better."
@@ -6,40 +6,39 @@ slides? ... a little more compact ... get the point across clearer and better."
 The twelve-slide version stays as the record in `../one-thing-carousel-3/`.
 Same look, same approved lines, merged. Render: `node render.mjs 02-your-week.html 02-your-week.png`.
 
-## Slides, in posting order
+## Slides, in posting order (eight)
 
-1. `01-cover` (unchanged). YOU'RE TRAINING EVERYTHING. THAT'S THE PROBLEM. /
-   A bit of everything keeps you the same player. This is the 3-month program
-   that fixes it.
-2. `02-your-week` (was slides 2, 3 and 4). YOU KNOW THIS WEEK. / Some juggling.
-   Some cone work. A few passes off the wall. A couple of shots. Now say your
-   weak foot is the one thing holding you back. / THAT WEEK, WRITTEN DOWN, 4
-   sessions, 16 drills (the grid, two gold blocks) / YOUR WEAK FOOT GETS 2
-   DRILLS IN 4 SESSIONS. / That's not training your weak foot. That's visiting
-   it.
-3. `03-eight` (was slides 5 and 6). SAME 4 SESSIONS. NOW YOUR WEAK FOOT GETS 8
-   DRILLS. / THE SAME WEEK, REBUILT, 4 sessions, 16 drills (the grid, eight
-   gold, eight white; it mirrors slide 2's "That week, written down") / THEN
-   THE SAME WEEK AGAIN, with harder drills: Week 1 Weak foot tap, pull, push,
-   then Week 2, harder, Weak foot pop and juggle. / Two weeks. Sixteen weak
-   foot drills. Nobody gets stronger lifting the same weight all year.
-4. `04-story` (unchanged). IT'S HOW I CAME BACK. Five months out with a hip
-   tear, one main thing at a time, the best form of my life.
-5. `05-six` (unchanged; it also answers "so it's only weak foot for two
-   weeks?"). "BUT I'VE GOT MORE THAN ONE THING TO FIX." / Good. It's three
-   months. You get six. ...
-6. `06-every-week` (was slides 10 and 11). "WHAT ABOUT SPEED, STRENGTH AND MY
-   GAMES?" / SPEED, STRENGTH AND YOUR GAMES DON'T WAIT THEIR TURN. / Every
-   session, SPEED AND STRENGTH (Plyos open the session. Speed work comes next.
-   Two strength drills finish the session.) / Every Sunday, FILM ROOM (Coach
-   Gary and I go through clips from your games with you, live on Zoom.) /
-   Every month, 1:1 CALL (One on one with your coach. Deep mentorship to push
-   you forward.) Beside the copy, the phone with the app's session screen: the
-   plyo warm-up, the speed drill and both strength finishers lit.
-7. `07-close` (unchanged). ONE THING AT A TIME. HARDER EVERY WEEK. NOTHING LEFT
-   BEHIND. / Three months, built around you by Coach Gary and me. / DM us
-   "ELITE" / Tell us the one thing holding you back. We'll build your three
-   months around it.
+1. `01-cover`. YOU'RE TRAINING EVERYTHING. THAT'S THE PROBLEM. / A bit of
+   everything keeps you the same player. This is the 3-month program that
+   fixes it.
+2. `02-your-week`. YOU KNOW THIS WEEK. / Some juggling. Some cone work. A few
+   passes off the wall. A couple of shots. Now say your weak foot is the one
+   thing holding you back. / THAT WEEK, WRITTEN DOWN, 4 sessions, 16 drills /
+   YOUR WEAK FOOT GETS 2 DRILLS IN 4 SESSIONS. / That's not training your weak
+   foot. That's visiting it.
+3. `03-eight`. SAME 4 SESSIONS. NOW YOUR WEAK FOOT GETS 8 DRILLS. / THE SAME
+   WEEK, REBUILT, 4 sessions, 16 drills (the grid, eight gold, eight white) /
+   Two weak foot drills every session. That is enough work to change your weak
+   foot.
+4. `04-overload` (added Nov 12). THEN WE PROGRESSIVELY OVERLOAD YOUR WEAK
+   FOOT. / Every weakness is the main focus for two weeks. In week 2, the
+   drills get harder. / YOUR WEAK FOOT DRILLS, week 1, then week 2: Week 1
+   Weak foot tap, pull, push and Weak foot outside pull, inside pull; Week 2,
+   harder, Weak foot pop and juggle and Wall pass, touch behind the leg (bank
+   titles and reps, frames of the clips) / That is progressive overload.
+   Nobody gets stronger lifting the same weight all year.
+5. `05-story`. IT'S HOW I CAME BACK. Five months out with a hip tear, one main
+   thing at a time, the best form of my life.
+6. `06-six`. "BUT I'VE GOT MORE THAN ONE THING TO FIX." / Good. It's three
+   months. You get six. ... (the 12 weeks, two weeks for each main focus)
+7. `07-every-week`. "WHAT ABOUT SPEED, STRENGTH AND MY GAMES?" / SPEED,
+   STRENGTH AND YOUR GAMES DON'T WAIT THEIR TURN. / Every session, SPEED AND
+   STRENGTH / Every Sunday, FILM ROOM / Every month, 1:1 CALL (One on one with
+   your coach. Deep mentorship to push you forward.) Beside the copy, the
+   phone with the app's session screen.
+8. `08-close`. ONE THING AT A TIME. HARDER EVERY WEEK. NOTHING LEFT BEHIND. /
+   Three months, built around you by Coach Gary and me. / DM us "ELITE" / Tell
+   us the one thing holding you back. We'll build your three months around it.
 
 ## What the cut cost (his to bring back)
 

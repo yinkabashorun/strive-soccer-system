@@ -31,10 +31,11 @@ Same look, same approved lines, merged. Render: `node render.mjs 02-your-week.ht
    thing at a time, the best form of my life.
 6. `06-six` (simplified Nov 12). "BUT I'VE GOT MORE THAN ONE THING TO FIX." /
    GOOD. THREE MONTHS. SIX WEAKNESSES. / Each weakness is the main focus for
-   two weeks. Then your next weakness takes over. / 12 WEEKS, two weeks on
-   each weakness: Month 1 Weak foot, First touch; Month 2 Passing, Ball
-   mastery; Month 3 1v1 skills, Finishing / The rest of every session keeps
-   your other weaknesses improving, so nothing slips back.
+   two weeks. The rest of every session keeps your other weaknesses
+   improving. / 12 WEEKS, two weeks on each weakness: Month 1 Weak foot, First
+   touch; Month 2 Passing, Ball mastery; Month 3 1v1 skills, Finishing /
+   Imagine yourself after tackling your six biggest weaknesses as a player.
+   This is when your dreams become reality. (his line)
 7. `07-every-week`. "WHAT ABOUT SPEED, STRENGTH AND MY GAMES?" / SPEED,
    STRENGTH AND YOUR GAMES DON'T WAIT THEIR TURN. / Every session, SPEED AND
    STRENGTH / Every Sunday, FILM ROOM / Every month, 1:1 CALL (One on one with

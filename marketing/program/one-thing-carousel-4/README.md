@@ -18,11 +18,11 @@ Same look, same approved lines, merged. Render: `node render.mjs 02-your-week.ht
    DRILLS IN 4 SESSIONS. / That's not training your weak foot. That's visiting
    it.
 3. `03-eight` (was slides 5 and 6). SAME 4 SESSIONS. NOW YOUR WEAK FOOT GETS 8
-   DRILLS. / WEEK 1 AND WEEK 2, 4 sessions each (the grid, eight gold, eight
-   white) / Week 1 drill: Weak foot tap, pull, push. Week 2 drill, harder: Weak
-   foot pop and juggle. / Two weak foot drills every session, and the drills
-   get harder in week two. Nobody gets stronger lifting the same weight all
-   year.
+   DRILLS. / THE SAME WEEK, REBUILT, 4 sessions, 16 drills (the grid, eight
+   gold, eight white; it mirrors slide 2's "That week, written down") / THEN
+   THE SAME WEEK AGAIN, with harder drills: Week 1 Weak foot tap, pull, push,
+   then Week 2, harder, Weak foot pop and juggle. / Two weeks. Sixteen weak
+   foot drills. Nobody gets stronger lifting the same weight all year.
 4. `04-story` (unchanged). IT'S HOW I CAME BACK. Five months out with a hip
    tear, one main thing at a time, the best form of my life.
 5. `05-six` (unchanged; it also answers "so it's only weak foot for two

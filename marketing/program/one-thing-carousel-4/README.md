@@ -11,9 +11,9 @@ Same look, same approved lines, merged. Render: `node render.mjs 02-your-week.ht
 1. `01-cover`. YOU'RE TRAINING EVERYTHING. THAT'S THE PROBLEM. / A bit of
    everything keeps you the same player. This is the 3-month program that
    fixes it.
-2. `02-your-week`. YOU KNOW THIS WEEK. / Some juggling. Some cone work. A few
+2. `02-your-week`. THIS IS YOUR TRAINING NOW. / Some juggling. Some cone work. A few
    passes off the wall. A couple of shots. Now say your weak foot is the one
-   thing holding you back. / THAT WEEK, WRITTEN DOWN, 4 sessions, 16 drills /
+   thing holding you back. / YOUR WEEK, WRITTEN DOWN, 4 sessions, 16 drills /
    YOUR WEAK FOOT GETS 2 DRILLS IN 4 SESSIONS. / That's not training your weak
    foot. That's visiting it.
 3. `03-eight`. SAME 4 SESSIONS. NOW YOUR WEAK FOOT GETS 8 DRILLS. / THE SAME

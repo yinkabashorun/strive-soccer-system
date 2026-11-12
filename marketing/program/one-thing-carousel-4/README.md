@@ -59,6 +59,22 @@ Same look, same approved lines, merged. Render: `node render.mjs 02-your-week.ht
 
 ## Caption
 
+(Nov 12, his ask: relatable, does not repeat the slides, connects and converts.)
+
+You're not lazy. That's the frustrating part.
+
+You stay after practice. You're at the field on your own when your teammates are at home. And in the game on Saturday, the same thing still lets you down.
+
+Nobody ever showed you how to train on your own. Team practice gets coached. The hours you put in alone, you had to make up yourself.
+
+I made mine up too. It took five months out injured to show me I was working hard the wrong way.
+
+Swipe through. This is how Coach Gary and I train players now.
+
+Then DM us ELITE and tell us what's holding you back. We'll tell you where we'd start. New weeks start every Monday.
+
+### Earlier caption (it walked through the slides)
+
 Every player has one thing holding them back. Say it's your weak foot. Defenders get told one thing: "Force him to his left."
 
 Train a bit of everything and your weak foot gets two drills a week out of sixteen. That is why it is the same foot it was three months ago.

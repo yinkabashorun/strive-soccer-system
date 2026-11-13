@@ -13,6 +13,10 @@ export const maxDuration = 300;
 // handler touched request headers used to depend on CRON_SECRET being set,
 // so the route was only dynamic by accident. Now it's dynamic on purpose.
 export const dynamic = "force-dynamic";
+// force-dynamic alone does NOT stop Next caching this route's database
+// reads (see lib/elite/supabase/fresh-fetch.ts). This does, for every
+// fetch the route makes, whichever client makes it.
+export const fetchCache = "force-no-store";
 
 // The plan builder's heartbeat (Vercel cron, EVERY HOUR - vercel.json).
 // What each hour does is decided here in NY time, not by the schedule:

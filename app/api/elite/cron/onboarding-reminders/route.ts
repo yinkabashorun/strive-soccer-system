@@ -10,6 +10,10 @@ export const runtime = "nodejs";
 // handler touched request headers used to depend on CRON_SECRET being set,
 // so the route was only dynamic by accident. Now it's dynamic on purpose.
 export const dynamic = "force-dynamic";
+// force-dynamic alone does NOT stop Next caching this route's database
+// reads (see lib/elite/supabase/fresh-fetch.ts). This does, for every
+// fetch the route makes, whichever client makes it.
+export const fetchCache = "force-no-store";
 export const maxDuration = 60;
 
 // Nudges families who redeemed an invite code but never finished the

@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
+import { freshFetch } from "./fresh-fetch";
 
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
@@ -21,6 +22,7 @@ export function createClient() {
 
   const cookieStore = cookies();
   return createServerClient(url, key, {
+    global: { fetch: freshFetch }, // never Next's fetch cache (fresh-fetch.ts)
     cookies: {
       getAll() {
         return cookieStore.getAll();
@@ -47,6 +49,7 @@ export function createServiceClient() {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !serviceKey) return null;
   return createAdminClient(url, serviceKey, {
+    global: { fetch: freshFetch }, // never Next's fetch cache (fresh-fetch.ts)
     auth: { autoRefreshToken: false, persistSession: false },
   });
 }

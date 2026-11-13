@@ -3,6 +3,10 @@ import { runContactsSync } from "@/lib/sync-contacts";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// force-dynamic alone does NOT stop Next caching this route's database
+// reads (see lib/elite/supabase/fresh-fetch.ts). This does, for every
+// fetch the route makes, whichever client makes it.
+export const fetchCache = "force-no-store";
 export const maxDuration = 300;
 
 // GET /api/cron/sync-contacts

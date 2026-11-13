@@ -1,4 +1,5 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { freshFetch } from "./elite/supabase/fresh-fetch";
 
 // Strive OS is designed to run on Supabase: players, sessions, leads,
 // content, payments, and progress all map cleanly to Postgres tables.
@@ -24,7 +25,8 @@ export function supabase(): SupabaseClient {
       "Supabase env not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY."
     );
   }
-  _client = createClient(url, key);
+  // Reads come from the database, never Next's fetch cache.
+  _client = createClient(url, key, { global: { fetch: freshFetch } });
   return _client;
 }
 

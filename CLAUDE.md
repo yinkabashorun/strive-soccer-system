@@ -4004,6 +4004,7 @@ commit.
       THEN (Coach Yinka, screenshot of the NVA player: "now make sure his hand isnt cut off"): my crop of his photo stopped short of the right edge and clipped the outstretched hand; re-cut from the full width of the screenshot, the whole hand is back, fingers to where his photo ends. Re-rendered. Sent.
       THEN (Coach Yinka: "flip the dribbler so the ball faces the trophy"): the dribbler is MIRRORED (cutouts3/b4m.png, b4.png kept) so he and the ball drive toward the trophy; the Nike swoosh on his shirt and the logo on his shorts are flipped back in place so they read the right way. Re-rendered. Sent.
       THEN (Coach Yinka: "fix the hiccup on his bottom left short"): MY BUG: the logo patch on his shorts sat on the edge of the shorts, so flipping it back pasted a square of shorts onto empty space. Fixed: only the shirt swoosh is flipped back, and the body outline (alpha) is kept exactly as mirrored, so no patch can add or cut anything; the adidas mark on the shorts stays mirrored (symmetric enough to read). Re-rendered. Sent.
+      THEN (Coach Yinka: "and his shirt"): the swoosh patch had the same flaw (it touched the armpit edge, leaving a smudge and a half-doubled swoosh). Redone without patches: the mirrored swoosh is painted out in the shirt's own black, and only the bright strokes of the original, right-way swoosh are laid back on the same spot. Clean shirt, swoosh reads right. Re-rendered. Sent.
 
 ## Skills (use them without being asked)
 

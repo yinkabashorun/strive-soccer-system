@@ -4002,6 +4002,7 @@ commit.
       THEN (Coach Yinka: "Swap the two black guys on the outside. And make the vda guy look in to reverse him"): the VDA player now stands at the left edge and the celebration at the right edge. The VDA player is MIRRORED so he looks in toward the trophy (his word); the mirror would have printed "ADV" and a reversed crest and swoosh, so those three patches are flipped back in place with feathered edges and read the right way (cutouts3/b3m.png; the unmirrored b3.png stays). Re-rendered. Sent.
       THEN (Coach Yinka: "now swap the 4 inside players"): the inside four traded sides: the white long sleeve and the dribbler now stand on the left (in front of the VDA player), the braided and NVA pair on the right (beside the celebration), same sizes, positions mirrored. The dribbler's ball now sits behind him toward the left edge, as in his photo. Re-rendered. Sent.
       THEN (Coach Yinka, screenshot of the NVA player: "now make sure his hand isnt cut off"): my crop of his photo stopped short of the right edge and clipped the outstretched hand; re-cut from the full width of the screenshot, the whole hand is back, fingers to where his photo ends. Re-rendered. Sent.
+      THEN (Coach Yinka: "flip the dribbler so the ball faces the trophy"): the dribbler is MIRRORED (cutouts3/b4m.png, b4.png kept) so he and the ball drive toward the trophy; the Nike swoosh on his shirt and the logo on his shorts are flipped back in place so they read the right way. Re-rendered. Sent.
 
 ## Skills (use them without being asked)
 

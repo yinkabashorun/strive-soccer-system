@@ -51,11 +51,23 @@
   <div class="head h2">5V5</div>
   <img class="trophy" src="trophy/photo-trophy.png" alt="">
   <svg class="eng" viewBox="0 0 509 972" xmlns="http://www.w3.org/2000/svg">
-    <defs><linearGradient id="e" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#3d2603"/><stop offset="1" stop-color="#6e4a0a"/></linearGradient>
-    <path id="l1" d="M112,100 Q255,116 398,100"/></defs>
-    <g font-family="Oswald" font-weight="700" text-anchor="middle" font-size="34" letter-spacing="6">
-      <text fill="#fff6d0" opacity=".6" transform="translate(0,1.4)"><textPath href="#l1" startOffset="50%">STRIVE ELITE</textPath></text>
-      <text fill="url(#e)" opacity=".93"><textPath href="#l1" startOffset="50%">STRIVE ELITE</textPath></text>
+    <defs>
+      <linearGradient id="plate" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#1c1710"/><stop offset=".5" stop-color="#050505"/><stop offset="1" stop-color="#14100a"/></linearGradient>
+      <linearGradient id="shine" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".09"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient>
+      <linearGradient id="lg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fffdf2"/><stop offset=".45" stop-color="#f6dc8c"/><stop offset="1" stop-color="#c4932f"/></linearGradient>
+      <linearGradient id="edge" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#8a6420"/><stop offset=".5" stop-color="#fff0b8"/><stop offset="1" stop-color="#8a6420"/></linearGradient>
+      <filter id="glow" x="-20%" y="-60%" width="140%" height="220%"><feGaussianBlur stdDeviation="2.2" result="b"/><feFlood flood-color="#ffd76e" flood-opacity=".55"/><feComposite in2="b" operator="in" result="g"/><feMerge><feMergeNode in="g"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      <filter id="ds" x="-10%" y="-40%" width="120%" height="180%"><feDropShadow dx="0" dy="3" stdDeviation="3" flood-color="#000" flood-opacity=".55"/></filter>
+      <path id="l1" d="M110,121 Q255,136 400,121"/>
+    </defs>
+    <path d="M101,82 Q255,97 409,82 L406,134 Q255,149 104,134 Z" fill="url(#plate)" filter="url(#ds)"/>
+    <path d="M101,82 Q255,97 409,82 L406,134 Q255,149 104,134 Z" fill="url(#shine)"/>
+    <path d="M101,82 Q255,97 409,82" fill="none" stroke="url(#edge)" stroke-width="2.4"/>
+    <path d="M104,134 Q255,149 406,134" fill="none" stroke="url(#edge)" stroke-width="2.4"/>
+    <path d="M102,88 Q255,103 408,88" fill="none" stroke="#c8a858" stroke-opacity=".45" stroke-width=".8"/>
+    <path d="M104,128 Q255,143 406,128" fill="none" stroke="#c8a858" stroke-opacity=".45" stroke-width=".8"/>
+    <g font-family="Oswald" font-weight="700" text-anchor="middle" font-size="38" letter-spacing="7">
+      <text fill="url(#lg)" filter="url(#glow)"><textPath href="#l1" startOffset="50%">STRIVE ELITE</textPath></text>
     </g>
   </svg>
   <div class="floor"></div>

@@ -13,7 +13,8 @@ import { buildParentRecap } from "./parent-recap";
 import { SESSIONS_PER_WEEK, sessionsWord } from "./training";
 import { withoutPlayersOnBreak } from "./health";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://thestriveapp.com";
+import { APP_URL } from "./app-url";
+import { claimWeekAnnouncement, maySend } from "./announce";
 
 let lastRun = 0;
 
@@ -71,6 +72,12 @@ export async function unlockDueWeeks(): Promise<void> {
         .update({ current_week: plan.week, today_focus: plan.focus })
         .eq("id", plan.player_id);
     }
+
+    // One announcement per player per week, enforced by the database
+    // (announce.ts, migration 066). The week is live either way; the
+    // note, email, push, text and parent report go out only on the first
+    // claim for this week.
+    if (!maySend(await claimWeekAnnouncement(admin, plan.player_id as string, plan.week as number))) continue;
 
     await admin.from("elite_notifications").insert({
       player_id: plan.player_id,

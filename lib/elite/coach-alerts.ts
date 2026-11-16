@@ -8,7 +8,7 @@
 import { createServiceClient } from "./supabase/server";
 import { normalizePhone, sendSms } from "./sms";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://thestriveapp.com";
+import { APP_URL } from "./app-url";
 
 export type CoachRecipient = { name: string; phone: string };
 

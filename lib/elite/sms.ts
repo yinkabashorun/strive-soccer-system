@@ -7,7 +7,9 @@
 // Best-effort and no-op-safe the same way as lib/elite/email.ts and
 // lib/elite/push.ts: with no GHL_API_KEY set, every function quietly does
 // nothing and the app is fully functional without it.
+import { createHash } from "node:crypto";
 import { createServiceClient } from "./supabase/server";
+import { nyToday } from "./time";
 
 const GHL_BASE = "https://services.leadconnectorhq.com";
 const GHL_VERSION = "2021-07-28";
@@ -91,6 +93,39 @@ async function sendSmsToContact(contactId: string, message: string): Promise<boo
   return res.ok;
 }
 
+// THE SAME TEXT NEVER REACHES THE SAME PHONE TWICE IN ONE DAY.
+// Nov 12 2026 (Coach Yinka: "This text is spamming me. Make sure this
+// never happens again to me or any client"): a bug upstream sent one
+// family's "week 8 just went live" text every hour for four days. The
+// upstream bug is fixed and the week announcement has its own lock
+// (announce.ts); this is the last line, for every text the app sends,
+// whatever sends it. Before a text goes out, a row keyed on (number,
+// exact words, NY date) is inserted into elite_sms_sends (migration
+// 066). The key is unique, so a second identical text that day is
+// refused by the database and not sent. Only hashes are stored.
+export function smsSendKey(phone: string, message: string, day: string) {
+  const h = (v: string) => createHash("sha256").update(v).digest("hex");
+  return { phone_hash: h(phone), body_hash: h(message), sent_on: day };
+}
+
+// true = this exact text has not gone to this number today, send it.
+// A ledger that cannot be reached does not block a text (the family
+// still hears from us); a duplicate does.
+export function sendAllowed(error: { code?: string | null } | null | undefined): boolean {
+  return !error || error.code !== "23505";
+}
+
+async function claimSmsSend(phone: string, message: string): Promise<boolean> {
+  const admin = createServiceClient();
+  if (!admin) return true;
+  try {
+    const { error } = await admin.from("elite_sms_sends").insert(smsSendKey(phone, message, nyToday()));
+    return sendAllowed(error);
+  } catch {
+    return true;
+  }
+}
+
 // Upsert the contact by phone, then send the text. Exported directly (not
 // just via sendPlayerSMS) so it can be exercised on its own - e.g. a
 // one-off test send with no player record involved.
@@ -102,10 +137,12 @@ export async function sendSms(
   if (!isSmsConfigured()) return false;
   const normalized = normalizePhone(phone);
   if (!normalized) return false;
+  const body = capForSms(message);
+  if (!(await claimSmsSend(normalized, body))) return false;
   try {
     const contactId = await upsertContact(normalized, firstName);
     if (!contactId) return false;
-    return await sendSmsToContact(contactId, capForSms(message));
+    return await sendSmsToContact(contactId, body);
   } catch {
     return false;
   }

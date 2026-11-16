@@ -15,7 +15,8 @@ import { resolveWeekTarget } from "./week-target";
 import { buildParentRecap } from "./parent-recap";
 import type { FilmReview, GeneratedPlan, TrainingLoad, TrainingSpace } from "./types";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://thestriveapp.com";
+import { APP_URL } from "./app-url";
+import { claimWeekAnnouncement, maySend, mustRefuseRebuild, weekWasAnnounced } from "./announce";
 
 async function requireCoach() {
   const viewer = await getViewer();
@@ -625,6 +626,24 @@ export async function applyGeneratedPlanCore(
   const goesLiveNow = target.goesLiveNow;
   const unlocksAt = goesLiveNow ? new Date().toISOString() : unlockInstant(nextMondayNY());
 
+  // A week that is already live is never rebuilt (announce.ts). Publishing
+  // "live now" replaces that week's drills, so doing it to a week the
+  // family was already told about would wipe the player's checkmarks and
+  // announce it again. Nov 2026: a cached read made the hourly builder do
+  // exactly that, every hour. Checked here against the announcement
+  // ledger, before a single row is touched; the builder logs the throw
+  // and the coach is texted.
+  if (goesLiveNow && (await weekWasAnnounced(supabase, playerId, week))) {
+    const { count } = await supabase
+      .from("elite_homework")
+      .select("id", { count: "exact", head: true })
+      .eq("player_id", playerId)
+      .eq("week", week);
+    if (mustRefuseRebuild({ announced: true, drillsInWeek: count ?? 0 })) {
+      throw new Error(`Refusing to rebuild week ${week}: it is already live with ${count} drills`);
+    }
+  }
+
   // 1) record the session
   await supabase.from("elite_sessions").insert({
     player_id: playerId,
@@ -817,6 +836,9 @@ export async function applyGeneratedPlanCore(
     .update({ last_session_at: new Date().toISOString() })
     .eq("id", playerId);
 
+  // Whether this publish told the family. Stays true for a held week
+  // (Monday's unlock does the telling).
+  let announced = true;
   if (goesLiveNow) {
     // Live immediately: a player's first week (anchor the program clock
     // to this NY week's Monday - next Monday if today is Sunday, so week
@@ -832,6 +854,16 @@ export async function applyGeneratedPlanCore(
         ...(firstWeek ? { week1_monday: mondayOfWeekNY(target.anchorOffsetWeeks) } : {}),
       })
       .eq("id", playerId);
+    // One announcement per player per week, enforced by the database
+    // (announce.ts, migration 066). Everything below this line - the note,
+    // the email, the push, the text, the parent report - goes out only if
+    // this claim is the first for this week.
+    const claim = await claimWeekAnnouncement(supabase, playerId, week);
+    announced = claim !== "failed";
+    if (!maySend(claim)) {
+      revalidatePath(`/coach/players/${playerId}`);
+      return { ok: true, week, goesLiveNow, unlocksAt, announced };
+    }
     await supabase.from("elite_notifications").insert({
       player_id: playerId,
       kind: "new_week",
@@ -892,7 +924,7 @@ export async function applyGeneratedPlanCore(
   // flips them live and notifies then.
 
   revalidatePath(`/coach/players/${playerId}`);
-  return { ok: true, week, goesLiveNow, unlocksAt };
+  return { ok: true, week, goesLiveNow, unlocksAt, announced };
 }
 
 // Opening a player's thread marks their messages and clips read, the way a

@@ -62,6 +62,11 @@ export async function GET(req: Request) {
         .from("elite_cron_runs")
         .delete()
         .lt("ran_at", new Date(Date.now() - 60 * 864e5).toISOString());
+      // The sent-text ledger (066) only has to remember today.
+      await admin
+        .from("elite_sms_sends")
+        .delete()
+        .lt("sent_at", new Date(Date.now() - 60 * 864e5).toISOString());
     }
   } catch {
     /* next run tries again */

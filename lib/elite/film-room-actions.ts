@@ -32,7 +32,7 @@ import { coachCallsUrl, filmRoomText, textCoaches } from "./coach-alerts";
 // (members cannot read each other's rows), with the database's own
 // constraints under them: five clips a room, one check-in a month.
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://thestriveapp.com";
+import { APP_URL } from "./app-url";
 
 async function requireCoach() {
   const viewer = await getViewer();

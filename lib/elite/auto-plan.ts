@@ -184,7 +184,19 @@ export async function runAutoWeeklyPlans(
       const program = await loadProgramWeek(player.id, target, admin);
       const { plan } = await generatePlanFromNotes(notes, player, player.coach_memory, bank, tpl, program);
       const applied = await applyGeneratedPlanCore(player.id, notes, plan, coach.id, admin);
-      results.push({ playerId: player.id, name: player.full_name, ok: true, week: applied.week });
+      if (applied.announced === false) {
+        // The week is live but the announcement ledger could not be
+        // written, so nothing was sent (announce.ts). Loud on purpose:
+        // an error on the run row, and a text to the coach.
+        results.push({
+          playerId: player.id,
+          name: player.full_name,
+          ok: false,
+          error: `week ${applied.week} is live but the family was not told (the announcement could not be recorded)`,
+        });
+      } else {
+        results.push({ playerId: player.id, name: player.full_name, ok: true, week: applied.week });
+      }
     } catch (err) {
       results.push({
         playerId: player.id,

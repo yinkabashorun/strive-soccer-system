@@ -13,8 +13,8 @@ export const metadata: Metadata = {
   },
 };
 
-// /demo is the address the ads and the Instagram bio point at. The same
-// page is also the site's front door at / (app/page.tsx).
+// /demo is the address the ads and the Instagram bio point at. It is the
+// only place the landing page lives (the site's root is the app's door).
 export default function DemoPage() {
   return <DemoLanding />;
 }

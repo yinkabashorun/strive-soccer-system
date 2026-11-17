@@ -122,6 +122,85 @@ The course ends on the video and the call. A week later:
 
 > Hey [Parent], how is [Player] getting on with the dribbling course? If you want, we can get on a call and I'll show you what the next three months would look like for [Player].
 
+## 7. Twenty more, ready to send (Nov 17 2026)
+
+Written on Coach Yinka's "yes i love these. i need you to write 20 follow ups".
+Each one stands alone. Mix them three gives to one ask.
+
+### Helpful (8)
+
+1. The game bag. Any parent.
+> Hey [Parent], small thing that saves a lot of Saturday mornings. Have [Player] pack the bag the night before, and put a second pair of socks in it. Wet socks at halftime make for a long second half. Does [Player] pack their own bag yet?
+
+2. Game morning. Any parent.
+> Hey [Parent], a game day one. A normal breakfast at the table a couple of hours before kickoff beats anything eaten in the car on the way. Toast, eggs, fruit, whatever [Player] already eats. Nothing new on game day. Is [Player] a breakfast eater, or is it a fight every morning?
+
+3. The homework night. Any parent.
+> Hey [Parent], for the nights when homework takes over. 20 minutes is enough: 10 minutes of touches on the ball, then 10 minutes on the weak foot only. A short session that gets done beats a long one that gets skipped. Which nights are the busiest for [Player]?
+
+4. Filming a game. Any parent.
+> Hey [Parent], if you film [Player]'s games, three things make the video useful to a coach. Stand as high as you can near the halfway line. Hold the phone sideways. Keep the players around the ball in the frame instead of zooming in on [Player]. Do you film the games?
+
+5. Cold mornings. Any parent.
+> Hey [Parent], cold morning games are coming. Have [Player] jog and skip for five minutes before touching a ball, then get touches, then two short sprints. Players who start warm play the first ten minutes. Players who start cold watch them. What time are [Player]'s games this month?
+
+6. The one question for the club coach. Any parent.
+> Hey [Parent], the best question to ask [Player]'s club coach this season is a short one: "What is the one thing [Player] needs to improve to help the team more?" Coaches respect it, and you get a straight answer. Have you ever asked it?
+
+7. Watching a game on TV. Any parent.
+> Hey [Parent], next time a game is on TV, try this with [Player]. Pick one player in [Player]'s position and watch only them for ten minutes. Not the ball. Where they stand, where they look, when they move. What position does [Player] play?
+
+8. After a rough game. Any parent.
+> Hey [Parent], for the drive home after a rough game. The feedback can wait until tomorrow. The one line that works tonight is "I love watching you play." How does [Player] usually take a bad game?
+
+### Funny (4)
+
+9. The sideline. Any parent.
+> Hey [Parent], quick poll. How many times did you say "use your other foot" from the sideline last weekend? No judgment. Every sideline has one, and most of us have been it.
+
+10. Backyard and Saturday. Any parent.
+> Hey [Parent], does [Player] also turn into a different player between the backyard and Saturday's game? Brilliant at home, quiet on the field. Most parents I talk to say yes. Is that [Player] too?
+
+11. The empty goal. Players, by DM.
+> Be honest. How many of your training sessions this month were just shooting on an empty goal?
+
+12. The last one. Anyone who never replied.
+> Hey [Parent], last text from me, I promise. I'd rather be the coach who stopped texting than the coach who couldn't take a hint. If [Player] ever wants a plan built around their game, you know where to find us.
+
+### Their problem, then Strive Elite (5)
+
+13. Working hard, not changing. Any parent.
+> Hey [Parent], if [Player] trains hard and still looks like the same player as six months ago, it is usually not effort. It is training that is a bit of everything. Coach Gary and I find the one thing holding [Player] back and build the week around it. Want to find out what that one thing is?
+
+14. Only goes one way. Any parent.
+> Hey [Parent], if defenders have figured out that [Player] only goes one way, [Player] already knows it. It shows up as fewer touches and safer passes. A weak foot does not fix itself at team practice. It needs its own work every week, and that is what Coach Gary and I build. Want to see what that would look like for [Player]?
+
+15. No time. Any parent.
+> Hey [Parent], between school, practice and games, nobody has room for another two hour session. Strive Elite is built for that: short sessions at home that fit around homework, planned for [Player] so no time goes on guessing what to do. Would that fit [Player]'s week?
+
+16. Keeping score. Any parent.
+> Hey [Parent], you shouldn't have to be the one keeping track of whether [Player] trained. With Strive Elite you get a text when the new week is ready, and Coach Gary and I see every session [Player] finishes. Is the reminding at your house mostly on you right now?
+
+17. Coming back from an injury. ONLY a family whose player is injured or returning.
+> Hey [Parent], once the doctor or PT clears [Player] to train with the ball, there is a window before full contact. Players either lose ground in it or come back sharper than they left. Coach Gary and I build the training for exactly that window, around what [Player] is cleared to do. Where is [Player] in the recovery?
+
+### A gift (3)
+
+18. The dribbling course.
+> Hey [Parent], I'd like [Player] to have our dribbling course, free. It is the one our members use to get dangerous on the ball. Want me to send the link?
+
+19. The 60 second weak foot test.
+> Hey [Parent], a free one that takes 60 seconds. [Player] does 30 seconds of touches with the strong foot, then 30 with the weak foot, and counts both. Send me the two numbers and I'll tell you what they mean. Want to try it tonight?
+
+20. One clip, one fix. No-shows and old clients first: it costs coach time.
+> Hey [Parent], send me a 20 second clip of [Player] with the ball, any drill or any game. I'll watch it and tell you the one thing I'd work on first. No cost. Want to send one?
+
+Notes on these twenty: 17 goes only to a family who has told us about an
+injury, and never says we treat or heal anything. 20 is real coach time per
+reply, so start it with no-shows and old clients. 2 stays general food
+guidance, not medical advice. None of them names a price, a guarantee or a
+number of spots.
+
 ## Open before anything is sent (Coach Yinka's calls)
 
 - The dribbling course is password-protected on its own site, and the app

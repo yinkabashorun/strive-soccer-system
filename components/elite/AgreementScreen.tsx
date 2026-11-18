@@ -26,7 +26,7 @@ export function AgreementScreen({ signOut }: { signOut: () => Promise<void> }) {
   const [state, action] = useFormState<AgreeState, FormData>(acceptAgreement, { error: null });
 
   return (
-    <div className="min-h-[100svh] bg-black px-5 py-10 text-bone">
+    <div className="min-h-[100svh] bg-black px-5 pb-10 pt-[calc(2.5rem+env(safe-area-inset-top))] text-bone">
       <div className="mx-auto max-w-md">
         <Wordmark href={null} size="lg" />
         <h1 className="mt-8 font-display text-4xl font-black uppercase leading-[0.95]">

@@ -12,7 +12,7 @@ export default function AuthLayout({
   return (
     <div className="relative flex min-h-[100svh] flex-col bg-black text-bone">
       <div className="absolute inset-0 bg-radial-spot" />
-      <header className="relative z-10 flex items-center justify-between px-5 py-5 pt-safe">
+      <header className="relative z-10 flex items-center justify-between px-5 pb-5 pt-[calc(1.25rem+env(safe-area-inset-top))]">
         <Wordmark href={null} />
         {!native && (
           <a

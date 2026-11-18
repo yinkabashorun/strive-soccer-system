@@ -9,7 +9,7 @@ const CONTACT_EMAIL = "coach@strivesoccer100x.com";
 export default function TermsPage() {
   return (
     <div className="min-h-[100svh] bg-black text-bone">
-      <div className="mx-auto w-full max-w-2xl px-5 py-10 sm:px-6">
+      <div className="mx-auto w-full max-w-2xl px-5 pb-10 pt-[calc(2.5rem+env(safe-area-inset-top))] sm:px-6">
         <Wordmark href="/" />
         <h1 className="mt-8 font-display text-3xl font-black uppercase tracking-tight sm:text-4xl">
           Terms of Service

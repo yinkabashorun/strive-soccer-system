@@ -24,7 +24,7 @@ export default async function AccountPage() {
 
   return (
     <div className="min-h-[100svh] bg-black text-bone">
-      <div className="mx-auto w-full max-w-xl px-4 pb-16 pt-5 pt-safe sm:px-6">
+      <div className="mx-auto w-full max-w-xl px-4 pb-16 pt-[calc(1.25rem+env(safe-area-inset-top))] sm:px-6">
         <Link
           href={home}
           className="inline-flex h-11 items-center gap-1 pr-3 text-[15px] font-medium text-white/70"

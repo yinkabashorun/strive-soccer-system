@@ -118,7 +118,7 @@ export function AppNav({
 
       {/* Mobile top bar. The initials open Account (settings, help, sign
           out, delete account); sign out is no longer one stray tap away. */}
-      <div className="sticky top-0 z-40 flex items-center justify-between border-b border-white/5 bg-black/70 px-5 py-3 backdrop-blur-xl pt-safe lg:hidden">
+      <div className="sticky top-0 z-40 flex items-center justify-between border-b border-white/5 bg-black/70 px-5 pb-3 backdrop-blur-xl pt-safe lg:hidden">
         <Wordmark size="sm" />
         <div className="flex items-center gap-2">
           {notifications && <NotificationBell initial={notifications} />}

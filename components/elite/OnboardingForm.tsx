@@ -129,13 +129,13 @@ export function OnboardingForm({
               className={inputCls}
             />
           </Field>
-          <Field label="Dominant foot">
+          <Field label="Dominant foot" group>
             <Segmented options={FEET} value={foot} onChange={setFoot} />
           </Field>
-          <Field label="Boy or girl">
+          <Field label="Boy or girl" group>
             <Segmented options={GENDERS} value={gender} onChange={setGender} />
           </Field>
-          <Field label="Level" full>
+          <Field label="Level" full group>
             <Segmented options={LEVELS} value={level} onChange={setLevel} />
           </Field>
         </div>
@@ -172,7 +172,7 @@ export function OnboardingForm({
         <div className="space-y-4">
           {PROGRESS_METRICS.map((m) => (
             <div key={m}>
-              <div className="mb-1.5 flex items-center justify-between text-sm">
+              <div className="flex items-center justify-between text-sm">
                 <span className="font-medium text-white/80">{m}</span>
                 <span className="font-display font-bold text-accent">
                   {assessment[m]}
@@ -187,7 +187,8 @@ export function OnboardingForm({
                 onChange={(e) =>
                   setAssessment((a) => ({ ...a, [m]: Number(e.target.value) }))
                 }
-                className="w-full accent-accent"
+                aria-label={`${m}, out of 100`}
+                className="h-11 w-full accent-accent"
               />
             </div>
           ))}
@@ -201,21 +202,21 @@ export function OnboardingForm({
           every drill will make sense.
         </p>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Wall you can pass against nearby? (garage door, brick wall, fence)">
+          <Field label="Wall you can pass against nearby? (garage door, brick wall, fence)" group>
             <Segmented options={YES_NO} value={hasWall} onChange={setHasWall} />
           </Field>
-          <Field label="Goal you can shoot at nearby?">
+          <Field label="Goal you can shoot at nearby?" group>
             <Segmented options={YES_NO} value={hasGoal} onChange={setHasGoal} />
           </Field>
         </div>
         <div className="mt-4 grid gap-4">
-          <Field label="Where will you train most days?">
+          <Field label="Where will you train most days?" group>
             <Segmented options={SPACE_OPTIONS} value={space} onChange={setSpace} />
             <p className="mt-1.5 text-[13px] text-white/50">
               A ball and a few yards is enough. Pick that and every drill you get fits the space.
             </p>
           </Field>
-          <Field label="How much are you training with a team right now?">
+          <Field label="How much are you training with a team right now?" group>
             <Segmented options={LOAD_OPTIONS} value={load} onChange={setLoad} />
             <p className="mt-1.5 text-[13px] text-white/50">
               {load === LOAD_OPTIONS[1]
@@ -254,7 +255,7 @@ export function OnboardingForm({
               <button
                 type="button"
                 onClick={() => setEditingPhone(true)}
-                className="text-[13px] font-semibold text-accent hover:underline"
+                className="tap text-[13px] font-semibold text-accent hover:underline"
               >
                 Change
               </button>
@@ -273,7 +274,11 @@ export function OnboardingForm({
         </div>
       </Section>
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      {error && (
+        <p role="alert" className="rounded-xl border border-red-400/30 bg-red-400/10 px-4 py-3 text-sm text-red-200">
+          {error}
+        </p>
+      )}
 
       <button
         type="submit"
@@ -331,16 +336,28 @@ function Field({
   label,
   children,
   full,
+  group,
 }: {
   label: string;
   children: React.ReactNode;
   full?: boolean;
+  // A set of choice buttons rather than one field: a named group, so a
+  // tap on the question does not press the first answer.
+  group?: boolean;
 }) {
+  const cls = "block" + (full ? " sm:col-span-2" : "");
+  const title = <span className="mb-2 block text-sm font-medium text-white/70">{label}</span>;
+  if (group) {
+    return (
+      <div role="group" aria-label={label} className={cls}>
+        {title}
+        {children}
+      </div>
+    );
+  }
   return (
-    <label className={"block" + (full ? " sm:col-span-2" : "")}>
-      <span className="mb-2 block text-sm font-medium text-white/70">
-        {label}
-      </span>
+    <label className={cls}>
+      {title}
       {children}
     </label>
   );
@@ -362,11 +379,12 @@ function Segmented({
           key={o}
           type="button"
           onClick={() => onChange(o)}
+          aria-pressed={value === o}
           className={
-            "rounded-xl border px-3 py-2 text-sm font-medium transition-all " +
+            "min-h-[44px] rounded-xl border px-3.5 py-2 text-sm font-medium transition-all " +
             (value === o
               ? "border-accent/40 bg-accent/[0.08] text-accent"
-              : "border-white/10 bg-white/[0.02] text-white/50 hover:border-white/20")
+              : "border-white/10 bg-white/[0.02] text-white/60 hover:border-white/20")
           }
         >
           {o}

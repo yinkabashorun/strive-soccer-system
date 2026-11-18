@@ -9,7 +9,13 @@ import { enterDemoPlayer, enterDemoCoach } from "@/lib/elite/auth-actions";
 import { INVITE_USED_MESSAGE, INVITE_USED_NOTICE } from "@/lib/elite/invite-link";
 import { ACCOUNT_DELETED_MESSAGE, ACCOUNT_DELETED_NOTICE } from "@/lib/elite/account";
 
-export function LoginForm({ configured }: { configured: boolean }) {
+export function LoginForm({
+  configured,
+  native = false,
+}: {
+  configured: boolean;
+  native?: boolean; // inside the App Store app: sign-in only
+}) {
   const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next");
@@ -117,12 +123,14 @@ export function LoginForm({ configured }: { configured: boolean }) {
         </p>
       </form>
 
-      <p className="mt-5 text-center text-sm text-white/50">
-        New here?{" "}
-        <Link href="/signup" className="text-accent hover:underline">
-          Create an account
-        </Link>
-      </p>
+      {!native && (
+        <p className="mt-5 text-center text-sm text-white/50">
+          New here?{" "}
+          <Link href="/signup" className="text-accent hover:underline">
+            Create an account
+          </Link>
+        </p>
+      )}
 
       {/* The sales door: anyone can walk through a fully-loaded player
           experience - no account, no friction. */}

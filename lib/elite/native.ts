@@ -13,6 +13,11 @@ type CapacitorGlobal = {
   getPlatform?: () => string;
   Plugins?: Record<string, NativePlugin | undefined>;
   nativePromise?: (plugin: string, method: string, options?: unknown) => Promise<unknown>;
+  addListener?: (
+    plugin: string,
+    event: string,
+    callback: (data: unknown) => void
+  ) => { remove: () => Promise<void> };
 };
 
 function capacitor(): CapacitorGlobal | null {
@@ -52,6 +57,23 @@ export async function callNative(
     // an absent or failing native call never breaks the page
   }
   return null;
+}
+
+// Listen for an event a native plugin sends (a push token arriving, a
+// notification being tapped). Returns the function that stops listening;
+// outside the shell it listens to nothing.
+export function onNative(
+  plugin: string,
+  event: string,
+  callback: (data: unknown) => void
+): () => void {
+  if (!isNativeApp()) return () => undefined;
+  try {
+    const handle = capacitor()?.addListener?.(plugin, event, callback);
+    return () => void handle?.remove().catch(() => undefined);
+  } catch {
+    return () => undefined;
+  }
 }
 
 // A touch of feedback for a moment in the session. Native haptics inside

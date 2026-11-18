@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { AUTOPLAY_PREF_KEY, FEEL_PREF_KEY } from "@/lib/elite/session-flow";
+import { SOUND_PREF_KEY } from "@/lib/elite/set-timer";
 import {
   VAPID_PUBLIC_KEY,
   hasSubscription,
@@ -10,9 +11,14 @@ import {
   saveSubscription,
 } from "@/lib/elite/push-client";
 import { isNativeApp } from "@/lib/elite/native";
+import {
+  disableNativePush,
+  enableNativePush,
+  readNativePushStep,
+} from "@/lib/elite/native-push-client";
 import { cn } from "@/lib/utils";
 
-type Push = "loading" | "on" | "off" | "install" | "blocked" | "unavailable" | "native";
+type Push = "loading" | "on" | "off" | "install" | "blocked" | "unavailable";
 
 function readPref(key: string): boolean {
   try {
@@ -39,12 +45,20 @@ export function DeviceSettings({ showNotifications }: { showNotifications: boole
   const [busy, setBusy] = useState(false);
   const [feel, setFeel] = useState(true);
   const [autoplay, setAutoplay] = useState(true);
+  const [sound, setSound] = useState(true);
+  // Inside the App Store app the switch drives the phone's own
+  // notifications instead of web push.
+  const [native, setNative] = useState(false);
 
   useEffect(() => {
     setFeel(readPref(FEEL_PREF_KEY));
     setAutoplay(readPref(AUTOPLAY_PREF_KEY));
+    setSound(readPref(SOUND_PREF_KEY));
     if (isNativeApp()) {
-      setPush("native");
+      setNative(true);
+      void readNativePushStep().then((step) =>
+        setPush(step === "resync" ? "on" : step === "blocked" ? "blocked" : "off")
+      );
       return;
     }
     if (!VAPID_PUBLIC_KEY) {
@@ -64,6 +78,11 @@ export function DeviceSettings({ showNotifications }: { showNotifications: boole
   async function turnOn() {
     setBusy(true);
     try {
+      if (native) {
+        const step = await enableNativePush();
+        setPush(step === "resync" ? "on" : step === "blocked" ? "blocked" : "off");
+        return;
+      }
       const permission = await Notification.requestPermission();
       if (permission === "granted") {
         await saveSubscription();
@@ -81,7 +100,8 @@ export function DeviceSettings({ showNotifications }: { showNotifications: boole
   async function turnOff() {
     setBusy(true);
     try {
-      await removeSubscription();
+      if (native) await disableNativePush();
+      else await removeSubscription();
       setPush("off");
     } finally {
       setBusy(false);
@@ -96,7 +116,6 @@ export function DeviceSettings({ showNotifications }: { showNotifications: boole
       "On an iPhone, add Strive Elite to your home screen first: tap Share, then Add to Home Screen. Then turn them on here.",
     blocked: "Blocked for this app in your phone's settings. Allow them there, then come back.",
     unavailable: "Not available in this browser.",
-    native: "Managed in your phone's Settings, under Notifications, Strive Elite.",
   };
 
   return (
@@ -128,6 +147,15 @@ export function DeviceSettings({ showNotifications }: { showNotifications: boole
         onChange={(v) => {
           setFeel(v);
           writePref(FEEL_PREF_KEY, v);
+        }}
+      />
+      <Switch
+        label="Timer sound"
+        detail="A tone when a set or a rest starts and ends."
+        on={sound}
+        onChange={(v) => {
+          setSound(v);
+          writePref(SOUND_PREF_KEY, v);
         }}
       />
       <Switch

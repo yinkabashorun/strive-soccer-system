@@ -11,6 +11,8 @@ import {
   drillKind,
   drillName,
   isDone,
+  milestoneCrossed,
+  milestoneLabel,
   nextStep,
   sessionProgress,
   type DoneMap,
@@ -19,6 +21,7 @@ import { fmtDuration } from "@/lib/elite/time-trained";
 import { feel, keepAwake } from "@/lib/elite/native";
 import { AUTOPLAY_PREF_KEY } from "@/lib/elite/session-flow";
 import { SendClip } from "./SendClip";
+import { SetTimer } from "./SetTimer";
 import { cn } from "@/lib/utils";
 
 // The session, one drill at a time (Nov 18 2026). The whole screen is one
@@ -192,11 +195,9 @@ export function SessionPlayer({
             {drillName(drill.title)}
           </h2>
 
-          {drill.reps && (
-            <div className="mt-3 inline-flex rounded-2xl border border-accent/35 bg-accent/[0.08] px-4 py-2.5 font-display text-xl font-bold uppercase tracking-wide text-accent">
-              {drill.reps}
-            </div>
-          )}
+          {/* The coach's sets, with a timer when the words can be timed.
+              Keyed by drill so every drill starts with a fresh clock. */}
+          {drill.reps && <SetTimer key={drill.id} reps={drill.reps} />}
 
           {drill.exercise && (
             <div className="mt-4">
@@ -464,6 +465,7 @@ function Finish({
   const weekDone = sessionsLeftAfter <= 0;
   const added = useCountUp(minutes);
   const total = minutesBefore + added;
+  const milestone = milestoneCrossed(minutesBefore, minutesBefore + minutes);
   const R = 54;
   const C = 2 * Math.PI * R;
 
@@ -525,6 +527,18 @@ function Finish({
             </div>
           </div>
         </div>
+
+        {milestone !== null && (
+          <div className="mt-5 w-full max-w-xs rounded-2xl border border-accent/40 bg-accent/[0.08] px-4 py-3 animate-rise [animation-delay:620ms]">
+            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-accent">
+              Milestone
+            </div>
+            <div className="mt-0.5 font-display text-2xl font-black uppercase leading-none text-bone">
+              {milestoneLabel(milestone)}
+            </div>
+            <div className="mt-1 text-sm text-white/65">Every minute of it is yours for good.</div>
+          </div>
+        )}
 
         <p className="mt-5 max-w-xs text-[15px] leading-relaxed text-white/70 animate-rise [animation-delay:540ms]">
           {weekDone

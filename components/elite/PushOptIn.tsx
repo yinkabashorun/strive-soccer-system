@@ -5,6 +5,11 @@ import { Bell, Share } from "lucide-react";
 import type { NotifyStep } from "@/lib/elite/install";
 import { VAPID_PUBLIC_KEY, readStep, saveSubscription } from "@/lib/elite/push-client";
 import { isNativeApp } from "@/lib/elite/native";
+import {
+  enableNativePush,
+  readNativePushStep,
+  registerNativePush,
+} from "@/lib/elite/native-push-client";
 
 const DISMISS_KEY = "strive_push_dismissed";
 const INSTALL_DISMISS_KEY = "strive_install_dismissed";
@@ -26,17 +31,31 @@ function dismissed(key: string): boolean {
 //     18 2026 this case showed nothing at all, and no iPhone ever signed up);
 //   - already allowed: nothing on screen, the device is re-saved quietly.
 // Each card is shown until the member acts on it or taps "Not now", never
-// on every visit. Renders nothing when push isn't configured (no VAPID key).
+// on every visit. In a browser it renders nothing when push isn't configured
+// (no VAPID key). Inside the App Store app the same "Turn on notifications"
+// card asks the phone itself (native-push-client.ts).
 export function PushOptIn() {
   const [step, setStep] = useState<NotifyStep>("none");
   const [busy, setBusy] = useState(false);
 
+  // Inside the App Store app notifications are the phone's own (Apple's
+  // push service), not web push, and there is no "add to home screen".
+  const [native, setNative] = useState(false);
+
   useEffect(() => {
-    if (!VAPID_PUBLIC_KEY) return;
     if (typeof window === "undefined") return;
-    // Inside the App Store app notifications are the phone's own, set up
-    // by the shell: no web push and no "add to home screen" card there.
-    if (isNativeApp()) return;
+    if (isNativeApp()) {
+      setNative(true);
+      void readNativePushStep().then((next) => {
+        if (next === "resync") {
+          void registerNativePush();
+          return;
+        }
+        if (next === "enable" && !dismissed(DISMISS_KEY)) setStep("enable");
+      });
+      return;
+    }
+    if (!VAPID_PUBLIC_KEY) return;
     const next = readStep();
     if (next === "resync") {
       saveSubscription().catch(() => undefined);
@@ -50,8 +69,12 @@ export function PushOptIn() {
   async function enable() {
     setBusy(true);
     try {
-      const permission = await Notification.requestPermission();
-      if (permission === "granted") await saveSubscription();
+      if (native) {
+        await enableNativePush();
+      } else {
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") await saveSubscription();
+      }
     } catch {
       // best-effort: a failed subscribe just means no push, not a broken app
     } finally {
@@ -116,9 +139,9 @@ export function PushOptIn() {
         <button
           onClick={enable}
           disabled={busy}
-          className="rounded-xl bg-accent px-3.5 py-2 text-sm font-semibold text-black disabled:opacity-60"
+          className="rounded-xl bg-white px-3.5 py-2 text-sm font-semibold text-black disabled:opacity-60"
         >
-          {busy ? "..." : "Enable"}
+          {busy ? "..." : "Turn on"}
         </button>
       </div>
     </div>

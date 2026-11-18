@@ -127,6 +127,24 @@ export function afterSessionLine(sessionsLeft: number): string {
   return `${sessionsLeft} sessions left this week. The next one is there when you are.`;
 }
 
+// Milestones are hours trained, all time: a number that only ever goes up
+// and that a break cannot touch. Never a streak, never a count of what was
+// missed. Returns the highest milestone the minutes just trained carried
+// the player past, or null (most sessions).
+export const MILESTONE_HOURS = [1, 3, 5, 10, 15, 20, 25, 30, 40, 50, 75, 100, 150, 200, 300, 400, 500];
+
+export function milestoneCrossed(minutesBefore: number, minutesAfter: number): number | null {
+  let hit: number | null = null;
+  for (const h of MILESTONE_HOURS) {
+    if (minutesBefore < h * 60 && minutesAfter >= h * 60) hit = h;
+  }
+  return hit;
+}
+
+export function milestoneLabel(hours: number): string {
+  return hours === 1 ? "1 hour trained" : `${hours} hours trained`;
+}
+
 // The feel of each moment, lightest to strongest. One ladder, used by the
 // native shell's haptics and by the web fallback, so a single drill never
 // buzzes like a finished week. It follows Apple's guidance: use each system

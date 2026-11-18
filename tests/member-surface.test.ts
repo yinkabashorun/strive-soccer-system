@@ -16,6 +16,11 @@ describe("member-facing screens: the floors", () => {
     expect(names).toContain("components/elite/SessionPlayer.tsx");
     expect(names).toContain("components/elite/LoginForm.tsx");
     expect(names).toContain("components/elite/OnboardingForm.tsx");
+    // the free training log (069) holds the same floors
+    expect(names).toContain("app/(free)/log/page.tsx");
+    expect(names).toContain("components/elite/TrackerHome.tsx");
+    expect(names).toContain("components/elite/TrackerQuiz.tsx");
+    expect(names).toContain("components/elite/JoinForm.tsx");
   });
 
   it("no type under 11 px", () => {

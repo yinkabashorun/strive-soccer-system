@@ -9,6 +9,7 @@ export const ROOT = resolve(__dirname, "..", "..");
 
 export const MEMBER_ROOTS = [
   "app/(player)",
+  "app/(free)",
   "app/(auth)",
   "app/account",
   "app/support",

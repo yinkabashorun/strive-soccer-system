@@ -40,6 +40,13 @@ export default function TermsPage() {
               that. If the terms change in a way that matters, the app
               asks the adult to accept them again before training goes on.
             </p>
+            <p className="mt-3">
+              A free account is a training log only: a place to record the
+              training a player does on their own. It has no coaching plan,
+              no drills and no courses, and when free sign-up is open it is
+              created without an invite. Everything else in these terms
+              applies to it the same way.
+            </p>
           </Section>
 
           <Section title="The program">

@@ -7,6 +7,9 @@ import { getViewer } from "@/lib/elite/session";
 import { signOut } from "@/lib/elite/auth-actions";
 import { deleteGate } from "@/lib/elite/account";
 import { SUPPORT_EMAIL, concernMailto } from "@/lib/elite/support";
+import { fmtDuration } from "@/lib/elite/time-trained";
+import { trackerFor } from "@/lib/elite/tracker-server";
+import { FREE_HOME } from "@/lib/elite/tracker";
 
 export const metadata = { title: "Account · Strive Elite" };
 
@@ -19,7 +22,11 @@ export default async function AccountPage() {
   if (!viewer) redirect("/login?next=/account");
 
   const isPlayer = viewer.role === "player";
-  const home = isPlayer ? "/dashboard" : "/coach";
+  // A free account (069): the training log is its home, and its one
+  // setting is the weekly target. The example player is never one here.
+  const tracker = viewer.demo ? null : await trackerFor(viewer);
+  const isMember = isPlayer && !tracker;
+  const home = !isPlayer ? "/coach" : tracker ? FREE_HOME : "/dashboard";
   const canDelete = deleteGate(viewer).allowed;
 
   return (
@@ -44,9 +51,22 @@ export default async function AccountPage() {
           </div>
         </div>
 
-        {isPlayer && (
+        {isMember && (
           <Group title="Your training">
             <Row href="/progress" label="Progress" detail="Time trained and your coach's ratings" />
+          </Group>
+        )}
+        {tracker && (
+          <Group title="Your training">
+            <Row
+              href={`${FREE_HOME}/quiz`}
+              label="Weekly target"
+              detail={
+                tracker.target_minutes
+                  ? `${fmtDuration(tracker.target_minutes)} a week. Change it here.`
+                  : "Answer three questions to set it"
+              }
+            />
           </Group>
         )}
 
@@ -57,7 +77,7 @@ export default async function AccountPage() {
         )}
 
         <Group title="This phone">
-          <DeviceSettings showNotifications={isPlayer && !viewer.demo} />
+          <DeviceSettings showNotifications={isMember && !viewer.demo} />
         </Group>
 
         <Group title="Help">

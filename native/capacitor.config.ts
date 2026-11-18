@@ -30,7 +30,9 @@ const config: CapacitorConfig = {
   },
   plugins: {
     PushNotifications: {
-      presentationOptions: ["badge", "sound", "banner", "list"],
+      // Quiet while the app is open (Apple: no banner or sound in the foreground;
+      // the Coach tab and the bell show what arrived).
+      presentationOptions: ["badge", "list"],
     },
   },
 };

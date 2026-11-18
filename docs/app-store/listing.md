@@ -63,8 +63,10 @@ are allowed).
 Answer None to violence, gambling, mature themes and the rest. Say Yes to
 user-generated content (members send private clips and messages to their
 coaches) and describe it as private, coach-reviewed, with a report option.
-Unrestricted web access: No. Expect 4+ or 9+. Never choose the Kids
-Category.
+Say YES to "Messaging and Chat": a member messages their coach. Apps have
+been rejected under guideline 2.3.6 for answering No to this (see
+`research-2026-11-18.md`, B8). Unrestricted web access: No. Expect 4+ or
+9+. Never choose the Kids Category.
 
 ## App privacy answers
 

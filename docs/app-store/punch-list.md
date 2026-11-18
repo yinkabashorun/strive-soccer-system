@@ -69,24 +69,39 @@ poster image on any drill video, so a slow connection shows a black box.
 | A15 | Screen readers and contrast: every icon-only button has a name; grey text passes contrast on black. | TODO |
 | A16 | App icon at 1024 px from a sharp source, and the launch screen matched to the first frame of the app so there is no flash. | BLOCKED on D6 (the logo file) |
 | A17 | New App Store screenshots once A1 to A10 land (the five in `screenshots/` were taken before this pass). | TODO, after A1-A10 |
+| A18 | Sign-in on the server, so the session cookie is set by the server and the iPhone keeps it (a script-written cookie is capped at 7 days by WebKit, so a member who skips a week gets signed out). Same for the reset-password form. | TODO, after the A1-A15 branch lands (same files) |
+| A19 | The session is refreshed on every member page: `/film`, `/courses`, `/messages`, `/onboarding` and `/` were missing from the middleware. | DONE Nov 18 (`tests/session-refresh.test.ts`) |
+| A20 | Nothing bounces to Safari: Terms and Privacy links on the agreement and sign-up screens open in place inside the app; "your clip from two weeks ago", film links and course downloads play in the app. Zoom and mail links leave on purpose. | TODO |
+| A21 | Quiet while the app is open: no banner, no sound; the Coach tab and the bell show what arrived. | DONE Nov 18 (`native/capacitor.config.ts`, test) |
+| A22 | App-level privacy manifest in the app target (no tracking). | DONE Nov 18; the collected-data list is filled on the first build (C5) |
+| A23 | Saved passwords offered on the sign-in screen: the email field marked as the user name; the association file on the site and the entitlement in the app. | Field: TODO. File and entitlement: BLOCKED on the Team ID |
+| A24 | The screen stays on during a session on every iPhone the app allows: raise the minimum to iOS 16.4 or add the keep-awake plugin. | TODO |
+| A25 | A guard for guideline 2.5.19: a new member-facing feature stays hidden inside the app until a reviewed build describes it. One list, one test. | TODO |
+| A26 | Uploads that survive real life: progress for each clip, the screen kept awake, and large Film Room clips sent in resumable pieces. One line on where to turn the camera back on if it was refused. | TODO |
+| A27 | The public /demo page (it carries the Meta pixel) can never load inside the app. | TODO |
+| A28 | Launch screen is plain black matching the first screen, with no logo (Apple's launch guidance). Changes A16: the icon still needs the sharp logo, the launch screen does not. | TODO |
+| A29 | Every push text re-read against Apple's rules: it informs, never orders, never sells; one per event. | TODO |
+| A30 | Stop nudging a member who has ignored several nudges in a row. | TODO, needs his word on the number |
 
 ## B. Research to settle before the first build
 
-Each of these was marked UNCONFIRMED or NOT PROVEN in `README.md`. The
-answers go back into that file with their sources.
+ALL TEN ANSWERED Nov 18 2026, with sources, in `research-2026-11-18.md`
+(plus B11, ten behaviours of a calm app from Apple's design guidelines).
+Not every source could be opened from this environment; each answer says
+how sure it is. What each answer turned into:
 
-| ID | Question | Status |
-|---|---|---|
-| B1 | A shell that loads the live site (`server.url`): how Apple reviews these today under 4.2, and what the approved ones have in common. | TODO |
-| B2 | Staying signed in: do the sign-in cookies survive closing and reopening the app in the iPhone web view, and for how long. | TODO |
-| B3 | Keeping the screen awake during a session inside the iPhone web view, or the plugin that does it. | TODO |
-| B4 | Camera and photo library from a file field in the web view (Send a clip, Film Room, progress video). | TODO |
-| B5 | Links that leave the app: Zoom's Join link, the Dribbling Transformation site on the web, mailto. Which open where. | TODO |
-| B6 | Saved passwords and Face ID fill on the sign-in screen (associated domains, `webcredentials`). | TODO |
-| B7 | The app-level privacy manifest: required or not for this shell, and its contents. | TODO |
-| B8 | Apple's Declared Age Range API and the state age laws: what a small app with 12 to 15 year old members must do at submission. | TODO |
-| B9 | Guideline 3.1.1 and 3.1.3(d) for coaching apps: recent approvals and rejections, and the wording that worked in review notes. | TODO |
-| B10 | What a person who downloads the app without a membership should see, so Apple does not call it an app for nobody: the example tour, and whether a "request a call" link is allowed. | TODO, then HIS to decide |
+| ID | Question | Answer in one line | Became |
+|---|---|---|---|
+| B1 | A shell that loads the live site | Allowed; judged on what the reviewer experiences. Two rules bite: nothing new without review (2.5.19), nothing that drops into Safari. | A20, A25, the review notes |
+| B2 | Staying signed in | Server-set cookies last; script-written ones are capped at 7 days. Ours was script-written. | A18, A19, C4 |
+| B3 | Screen awake | Works in the iPhone web view from iOS 16.4. | A24 |
+| B4 | Camera and library | Works. Camera clips are medium quality; library videos are converted first; big uploads have no resume. | A26, C4 |
+| B5 | Links that leave | Any new-window link opens Safari, even our own pages. Zoom opens Zoom. | A20, A27 |
+| B6 | Saved passwords | Offered once the app and the site are associated; saving from the app needs a plugin (optional). | A23 |
+| B7 | Privacy manifest | Not required for upload by this shell today; expected anyway. | A22 |
+| B8 | Age laws and consent | Not a review gate. The age rating must say Yes to Messaging and Chat. A ticked box is not verifiable consent. | `listing.md`, C7, D13 |
+| B9 | The payment rule | Reviewers object to what the demo login can open (courses, videos), not to buy buttons. No proven wording exists. | D4, D12 |
+| B10 | No membership, no use | The example tour helps but never replaces demo logins. A second risk: "an app for one business" (3.2). Unlisted distribution is Apple's answer. | D11 |
 
 ## C. Blocked on the Apple Developer account (unpaid as of Nov 18)
 
@@ -98,6 +113,8 @@ answers go back into that file with their sources.
 | C4 | Prove B2 to B6 on a real phone, not on paper. |
 | C5 | The privacy answers, age rating, categories and review notes entered in App Store Connect from `listing.md`. |
 | C6 | TestFlight with the current members before public review. |
+| C7 | Apple's Declared Age Range call after sign-in, stored on the account (a small native plugin; build with the iOS 26.2 SDK or later). Needed before selling to families in Texas or Utah. |
+| C8 | The seven checks at the end of `research-2026-11-18.md` run on the first build (signed in after a restart and with the clock moved 8 and 30 days; screen awake; a 100 MB clip; every link; saved passwords; the upload email; a push with the app open and closed). |
 
 ## D. Coach Yinka's
 
@@ -113,13 +130,20 @@ answers go back into that file with their sources.
 | D8 | Approve the listing draft and the screenshots. |
 | D9 | Test Forgot your password on his phone; turn notifications on from his iPhone so the test notification can be sent. |
 | D10 | The heads-up text to families about the agreement screen. |
+| D11 | How the app is listed: public on the US storefront only (found in search, carries the "app for one business" risk), or unlisted (each family gets the link from the coach, no search presence). My suggestion: public, US only, and switch to unlisted if Apple objects. |
+| D12 | Book Apple's 30-minute "Meet with App Review" appointment once the account is active, and ask the payment question before submitting. |
+| D13 | Parental consent for a member under 13: tie the parent's payment and the sales call to the consent record (what is shown before payment, a short script on the call). A lawyer's call. |
+| D14 | The fallback order if Apple refuses on payment: appeal as 1:1 coaching; then take the course library out of the iPhone app; then Apple's in-app purchase. |
 
 ## Order
 
-A1 to A15 and B1 to B10 run now. A17 follows A. C starts the day the
+A1 to A15 run now on a branch that is not live. A18 to A30 follow in
+that order once the branch lands. A17 follows A. C starts the day the
 account is active. D items are asked for one at a time as each becomes
 the thing in the way.
 
 ## Log
 
 - Nov 18 2026: list opened from the walk of every member screen.
+- Nov 18 2026: research B1 to B11 back and saved. A19, A21, A22 done the
+  same hour. A18 to A30, C7, C8 and D11 to D14 added from it.

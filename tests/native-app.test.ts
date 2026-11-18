@@ -180,6 +180,25 @@ describe("the native shell (native/)", () => {
     expect(delegate).toContain("capacitorDidFailToRegisterForRemoteNotifications");
   });
 
+  it("stays quiet while the app is open: no banner, no sound", () => {
+    // The copy inside native/ios is written by "cap sync" at build time and
+    // is not in the repository; this file is the source.
+    const ts = read("native/capacitor.config.ts");
+    expect(ts).toContain('presentationOptions: ["badge", "list"]');
+    expect(ts).not.toMatch(/presentationOptions:[^\n]*(banner|sound)/);
+  });
+
+  it("ships a privacy manifest that says no tracking, inside the app target", () => {
+    const manifest = read("native/ios/App/App/PrivacyInfo.xcprivacy");
+    expect(manifest).toMatch(/<key>NSPrivacyTracking<\/key>\s*<false\/>/);
+    for (const key of ["NSPrivacyTrackingDomains", "NSPrivacyCollectedDataTypes", "NSPrivacyAccessedAPITypes"]) {
+      expect(manifest).toContain(`<key>${key}</key>`);
+    }
+    const project = read("native/ios/App/App.xcodeproj/project.pbxproj");
+    expect(project).toContain("PrivacyInfo.xcprivacy in Resources");
+    expect(project.match(/PrivacyInfo\.xcprivacy/g)!.length).toBe(6);
+  });
+
   it("has a real offline screen with a way back", () => {
     const offline = read("native/www/offline.html");
     expect(offline).toContain("Try again");

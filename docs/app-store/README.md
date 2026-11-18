@@ -1,5 +1,9 @@
 # Strive Elite on the App Store: the checklist
 
+A fifth research pass (Nov 18 2026, ten open questions answered with
+sources) is in `research-2026-11-18.md`; where it corrects a line below,
+the line says so. What is left to do is in `punch-list.md`.
+
 Written Nov 18 2026 from four research passes (Apple's App Review
 Guidelines and developer documentation, the Capacitor documentation, the
 FTC's COPPA rule and the app-store age laws, Apple's Human Interface
@@ -63,6 +67,28 @@ COACH YINKA, before submitting:
   States storefront only and use the external-purchase entitlement.
   Neither is built.
 
+## 2b. The second rejection risk: guideline 3.2, "a specific business"
+
+Reviewers have rejected apps "intended to be used by a specific business
+or organization, including partners, clients, or employees" that chose
+public distribution. An invite-only app for one coaching business is
+close to that. Apple's own answer is Unlisted App Distribution (still
+reviewed, found only by a direct link). COACH YINKA decides: public
+listing (US storefront only, with the example week and a "Request a
+call" link that opens in Safari), or unlisted. Details and sources:
+`research-2026-11-18.md`, B10.
+
+## 2c. Guideline 2.5.19 (added Oct 16 2026): nothing new without review
+
+The shell loads the live site, so a feature added to the site reaches
+the app the same minute, unreviewed. Rule from here: a NEW member-facing
+feature stays hidden inside the app (`inNativeApp()`) until a build whose
+review notes describe it is approved. Fixes and content (new weeks,
+drills, course pages) are fine. The review notes must list every
+difference between the app and the website (no account creation in the
+app; the Dribbling Transformation card). NOT BUILT as a guard yet
+(punch list A25).
+
 ## 3. Review rules and where each one stands
 
 | Rule | What it asks | Status |
@@ -95,8 +121,20 @@ COACH YINKA, before submitting:
   still parked.
 - Texas SB 2420 (in force since June 2026) and similar state laws:
   Apple's Declared Age Range API and consent signals. NOT BUILT (native
-  Swift work, needs the Apple account). Utah and Louisiana are delayed
-  to 2027. UNCONFIRMED how Apple enforces this for a small app at review.
+  Swift work, needs the Apple account). CORRECTED Nov 18: Apple says the
+  age laws changed nothing in App Review ("No, there are no changes to
+  the App Review process"), so this is a legal duty in some states, not
+  a review gate. Texas applies to new Texas accounts since June 4 2026;
+  Louisiana is reported moved to July 1 2027; sources conflict on Utah.
+  Minimum step before selling to families in Texas or Utah: one call to
+  the Declared Age Range API after sign-in (punch list C7). A lawyer
+  decides whether that can wait.
+- COPPA, CORRECTED Nov 18: a ticked box is NOT on the rule's list of
+  accepted consent methods. Two things already in the sales process are:
+  a card payment tied to the consent, and a video call with trained
+  staff. They need to be connected to the consent record (punch list
+  D13). Read 16 CFR 312.5(b)(2) and ask the lawyer before relying on
+  this.
 - Age rating questionnaire: expect 4+ or 9+. User-generated content
   (private clips, chat with a coach) must be declared.
 
@@ -155,15 +193,20 @@ Known gaps to close on the first real build:
 - Xcode must be version 26 (Apple's requirement since April 2026); the
   workflow asks for the `macos-26` runner.
 - An app-level privacy manifest (`PrivacyInfo.xcprivacy`) may be asked
-  for; Capacitor ships its own. Add it in Xcode if the upload warns.
+  for; Capacitor ships its own. DONE Nov 18: a minimal app-level
+  `PrivacyInfo.xcprivacy` (no tracking) is in the app target; its
+  collected-data list is filled from Xcode's own values on the first
+  build so it mirrors section 5.
 - Universal links (a texted link opening the app instead of Safari) need
   the Team ID in `/.well-known/apple-app-site-association`. NOT BUILT.
 - Capacitor documents `server.url` as meant for development. Shipping
   with it is common but it is the weakest point under guideline 4.2; the
   native features above are the answer to it.
 - Keeping the screen awake during a session uses the browser's wake lock,
-  UNCONFIRMED inside the native web view; a native plugin is the fix if
-  it does not hold.
+  CONFIRMED Nov 18 from WebKit's source: on by default in the iPhone web
+  view from iOS 16.4. The shell allows iOS 15, where there is none:
+  raise the minimum to 16.4 or add the keep-awake plugin (punch list
+  A24). Prove on a phone.
 - Android: not started. The same shell can be built for Google Play
   (account deletion on the web is already at /support#delete).
 

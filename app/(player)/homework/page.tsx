@@ -33,6 +33,7 @@ export default async function HomeworkPage() {
         items={homework}
         currentWeek={contentWeek}
         playerId={viewer.playerId}
+        example={viewer.demo}
         firstName={(player?.full_name ?? "").split(" ")[0]}
         totalMinutes={timeTrained(all).minutes}
       />

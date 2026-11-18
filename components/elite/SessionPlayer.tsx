@@ -19,9 +19,11 @@ import {
 } from "@/lib/elite/session-flow";
 import { fmtDuration } from "@/lib/elite/time-trained";
 import { feel, keepAwake } from "@/lib/elite/native";
+import { holdRefresh } from "@/lib/elite/fresh";
 import { AUTOPLAY_PREF_KEY } from "@/lib/elite/session-flow";
 import { SendClip } from "./SendClip";
 import { SetTimer } from "./SetTimer";
+import { PushOptIn } from "./PushOptIn";
 import { cn } from "@/lib/utils";
 
 // The session, one drill at a time (Nov 18 2026). The whole screen is one
@@ -46,6 +48,7 @@ export function SessionPlayer({
   sessionsTotal,
   weekDoneLine,
   playerId,
+  example = false,
   onClose,
 }: {
   drills: Homework[];
@@ -64,6 +67,7 @@ export function SessionPlayer({
   // What to say about next week when this session finishes the week.
   weekDoneLine?: string;
   playerId?: string; // enables Send a clip on skill drills
+  example?: boolean; // the example player: never asked about notifications
   onClose: () => void;
 }) {
   const [mounted, setMounted] = useState(false);
@@ -78,6 +82,8 @@ export function SessionPlayer({
   useEffect(() => {
     setMounted(true);
     const release = keepAwake();
+    // The page behind must not redraw under an open session (A5).
+    const letRefresh = holdRefresh();
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     const onKey = (e: KeyboardEvent) => {
@@ -86,6 +92,7 @@ export function SessionPlayer({
     window.addEventListener("keydown", onKey);
     return () => {
       release();
+      letRefresh();
       document.body.style.overflow = prev;
       window.removeEventListener("keydown", onKey);
       if (advance.current) clearTimeout(advance.current);
@@ -144,6 +151,7 @@ export function SessionPlayer({
       minutesBefore={minutesBefore}
       sessionsLeftAfter={sessionsLeftAfter}
       weekDoneLine={weekDoneLine}
+      askNotifications={Boolean(playerId) && !example}
       onClose={onClose}
     />
   ) : (
@@ -450,6 +458,7 @@ function Finish({
   minutesBefore,
   sessionsLeftAfter,
   weekDoneLine,
+  askNotifications,
   onClose,
 }: {
   title: string;
@@ -460,6 +469,9 @@ function Finish({
   minutesBefore: number;
   sessionsLeftAfter: number;
   weekDoneLine?: string;
+  // A member's own finish screen: the one place notifications are asked
+  // for, once (PushOptIn decides whether there is anything to ask).
+  askNotifications: boolean;
   onClose: () => void;
 }) {
   const weekDone = sessionsLeftAfter <= 0;
@@ -545,6 +557,8 @@ function Finish({
             ? weekDoneLine ?? "Every session of the week, done."
             : afterSessionLine(sessionsLeftAfter)}
         </p>
+
+        {askNotifications && <PushOptIn />}
        </div>
       </div>
 

@@ -82,3 +82,32 @@ export function pushStatusLine(s: PushStatus): { ok: boolean; line: string } {
     line: `On for ${s.playersOn} of ${s.playersTotal} active players (${devices}).`,
   };
 }
+
+// The one ask (App Store punch list, A8). Notifications are asked for
+// once, on the finish screen of a session the member has just completed:
+// the moment they can see why they would want to know the next week is
+// live. Not on first open, not at the top of every page. A member who
+// says not now is not asked again; the Account page stays the way in.
+//
+// "Asked" is kept on the phone. The two older keys are the "Not now" of
+// the card that used to sit at the top of every page: a member who
+// already answered that card has been asked.
+export const PUSH_ASKED_KEY = "strive_push_asked";
+export const PUSH_ASKED_LEGACY_KEYS = ["strive_push_dismissed", "strive_install_dismissed"] as const;
+
+export type FinishAsk = "enable" | "install_ios" | null;
+
+export function finishAsk(input: {
+  // Where this phone stands (notifyStep in a browser; inside the App
+  // Store app "enable" when the phone has not been asked, else "none").
+  step: NotifyStep;
+  // True once the ask has been shown on this phone, or the old card was
+  // answered.
+  asked: boolean;
+  // The example player is never asked.
+  example: boolean;
+}): FinishAsk {
+  if (input.example || input.asked) return null;
+  if (input.step === "enable" || input.step === "install_ios") return input.step;
+  return null;
+}

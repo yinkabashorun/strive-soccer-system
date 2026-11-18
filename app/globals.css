@@ -31,6 +31,46 @@ textarea,
 select {
   font-size: 16px;
 }
+/* On a phone a field under 16 px makes iOS zoom the whole page in when it
+   is tapped. A size class on the field would win over the rule above, so
+   on touch screens the floor is absolute. Desktop keeps its own sizes. */
+@media (pointer: coarse) {
+  input,
+  textarea,
+  select {
+    font-size: 16px !important;
+  }
+}
+
+/* Phone feel (App Store punch list, A4). The page itself never bounces
+   past its ends, and the controls behave like controls: a long press on a
+   button, a tab, an icon or a drill picture does not select text or open
+   the browser's own menu, and a tap answers at once. Text a person may
+   want to copy (messages, course pages, the legal pages) is untouched. */
+html,
+body {
+  overscroll-behavior-y: none;
+}
+button,
+summary,
+[role="button"],
+[role="switch"],
+[role="tab"],
+nav a,
+svg,
+img,
+video {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+a,
+button,
+summary,
+[role="button"],
+[role="switch"] {
+  touch-action: manipulation;
+}
 
 .pt-safe {
   padding-top: env(safe-area-inset-top);

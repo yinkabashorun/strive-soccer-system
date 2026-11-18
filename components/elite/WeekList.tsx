@@ -30,6 +30,7 @@ export function WeekList({
   playerId,
   firstName = "",
   totalMinutes = 0,
+  example = false,
 }: {
   items: Homework[];
   currentWeek: number;
@@ -37,6 +38,7 @@ export function WeekList({
   playerId?: string; // set on the player's own view: enables Send a clip (036)
   firstName?: string;
   totalMinutes?: number; // all time, as the server last counted it
+  example?: boolean; // the example player
 }) {
   const router = useRouter();
   const { done, toggle } = useDrillState();
@@ -189,6 +191,7 @@ export function WeekList({
           }
           sessionsTotal={sessions.length}
           playerId={playerId}
+          example={example}
           onClose={close}
         />
       )}

@@ -28,6 +28,7 @@ export function TodaySession({
   totalMinutes,
   nextWeekLine,
   playerId,
+  example = false,
 }: {
   week: number;
   rows: Homework[]; // every drill of the week being trained
@@ -35,6 +36,7 @@ export function TodaySession({
   totalMinutes: number; // all time, as the server last counted it
   nextWeekLine: string;
   playerId?: string; // enables Send a clip (036) on skill drills
+  example?: boolean; // the example player
 }) {
   const router = useRouter();
   const { done, toggle } = useDrillState();
@@ -70,6 +72,7 @@ export function TodaySession({
       sessionsTotal={sessions.length}
       weekDoneLine={nextWeekLine}
       playerId={playerId}
+      example={example}
       onClose={close}
     />
   );

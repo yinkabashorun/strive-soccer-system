@@ -2,7 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AppNav, type NavItem } from "@/components/elite/AppNav";
 import { Wordmark } from "@/components/elite/Wordmark";
-import { PushOptIn } from "@/components/elite/PushOptIn";
+import { FreshOnReturn } from "@/components/elite/FreshOnReturn";
+import { PushKeepAlive } from "@/components/elite/PushOptIn";
 import { getViewer } from "@/lib/elite/session";
 import { getNotifications, getPlayer } from "@/lib/elite/data";
 import { signOut } from "@/lib/elite/auth-actions";
@@ -78,6 +79,10 @@ export default async function PlayerLayout({
 
   return (
     <div className="min-h-[100svh] bg-black text-bone lg:flex">
+      <FreshOnReturn />
+      {/* A phone that already said yes to notifications stays on file.
+          The ask itself is on the finish screen of a session (A8). */}
+      {!viewer.demo && <PushKeepAlive />}
       <AppNav
         items={PLAYER_NAV}
         name={viewer.profile.full_name}
@@ -86,11 +91,6 @@ export default async function PlayerLayout({
         notifications={notifications}
       />
       <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-28 pt-5 sm:px-6 lg:pb-12 lg:pt-8">
-        {!viewer.demo && (
-          <div className="mb-4">
-            <PushOptIn />
-          </div>
-        )}
         {children}
       </main>
     </div>

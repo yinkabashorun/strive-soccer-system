@@ -1,8 +1,9 @@
 import { BarChart3, StickyNote } from "lucide-react";
 import { getViewer } from "@/lib/elite/session";
-import { getHomework, getNotes, getPlayer, getProgress } from "@/lib/elite/data";
+import { getAchievements, getHomework, getNotes, getPlayer, getProgress } from "@/lib/elite/data";
 import { ProgressPanel } from "@/components/elite/ProgressPanel";
 import { TimeTrainedPanel } from "@/components/elite/TimeTrainedPanel";
+import { Achievements } from "@/components/elite/Achievements";
 import { timeTrained } from "@/lib/elite/time-trained";
 import { timeAgo } from "@/lib/utils";
 import { TourGuide } from "@/components/elite/TourGuide";
@@ -10,11 +11,12 @@ import { TourGuide } from "@/components/elite/TourGuide";
 export default async function ProgressPage() {
   const viewer = await getViewer();
   if (!viewer?.playerId) return null;
-  const [player, progress, notes, homework] = await Promise.all([
+  const [player, progress, notes, homework, achievements] = await Promise.all([
     getPlayer(viewer.playerId),
     getProgress(viewer.playerId),
     getNotes(viewer.playerId),
     getHomework(viewer.playerId),
+    getAchievements(viewer.playerId),
   ]);
   // Progress is time trained (034): what was done, never what was missed.
   const time = timeTrained(homework);
@@ -37,6 +39,9 @@ export default async function ProgressPage() {
       </header>
 
       <TimeTrainedPanel time={time} />
+
+      {/* Earned, in gold. Moved here from Home so Home is one screen. */}
+      <Achievements achievements={achievements} />
 
       {/* The coach's rating of the seven pillars, kept under its own name.
           Green means trending up. */}

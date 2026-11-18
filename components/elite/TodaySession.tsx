@@ -100,7 +100,7 @@ export function TodaySession({
 
   return (
     <section className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03]">
-      <div className="p-5 pb-3">
+      <div className="p-5 pb-4">
         <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.2em] text-white/55">
           <span>
             Week {week} ·{" "}
@@ -136,6 +136,7 @@ export function TodaySession({
           done={done}
           onToggle={toggle}
           onOpen={(index) => setOpen({ group: current, index })}
+          compact
         />
       </div>
 

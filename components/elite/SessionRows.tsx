@@ -72,11 +72,15 @@ export function SessionRows({
   done,
   onToggle,
   onOpen,
+  compact = false,
 }: {
   drills: Homework[];
   done: DoneMap;
   onToggle: (id: string, next: boolean) => void;
   onOpen: (index: number) => void;
+  // Home: tighter rows, so a whole session and the Start button fit on
+  // one screen. Still a 56 x 52 tick target.
+  compact?: boolean;
 }) {
   return (
     <ul className="divide-y divide-white/[0.06]">
@@ -92,7 +96,7 @@ export function SessionRows({
               }}
               aria-label={ticked ? `Untick ${drillName(d.title)}` : `Tick ${drillName(d.title)}`}
               aria-pressed={ticked}
-              className="grid h-16 w-14 shrink-0 place-items-center"
+              className={cn("grid w-14 shrink-0 place-items-center", compact ? "h-[52px]" : "h-16")}
             >
               <span
                 className={cn(
@@ -105,18 +109,22 @@ export function SessionRows({
             </button>
             <button
               onClick={() => onOpen(i)}
-              className="flex min-w-0 flex-1 items-center gap-2 py-3 pr-2 text-left"
+              className={cn(
+                "flex min-w-0 flex-1 items-center gap-2 pr-2 text-left",
+                compact ? "min-h-[52px] py-1.5" : "py-3"
+              )}
             >
               <span className="min-w-0 flex-1">
                 <span
                   className={cn(
                     "block text-[15px] font-semibold leading-snug",
+                    compact && "truncate",
                     ticked ? "text-white/50" : "text-bone"
                   )}
                 >
                   {drillName(d.title)}
                 </span>
-                <span className="mt-0.5 block text-xs text-white/55">
+                <span className={cn("mt-0.5 block text-xs text-white/55", compact && "truncate")}>
                   {kind !== "skill" && (
                     <span className={cn("font-semibold", kind === "finisher" ? "text-accent" : "text-white/75")}>
                       {KIND_LABEL[kind]}

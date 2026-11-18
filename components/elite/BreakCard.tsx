@@ -8,20 +8,22 @@ import { fmtBreakDate, MAX_BREAK_DAYS } from "@/lib/elite/breaks";
 
 // A break is a date, not a penalty (offer stack item 8). Two states:
 //   on a break   -> the hero card: when you're back, and "I'm back early"
-//   not on one   -> a quiet one-liner that opens a date picker
+//   not on one   -> the date picker, opened from the quiet row under the
+//                   session card on Home (HomeMore.tsx)
 // Nothing here counts what was missed; the week they come back to is the
 // week they left (lib/elite/breaks.ts).
 export function BreakCard({
   current,
   firstName,
   today,
+  onCancel,
 }: {
   current: { since: string; until: string } | null;
   firstName: string;
   today: string; // NY date, YYYY-MM-DD, from the server so the picker's floor is right
+  onCancel?: () => void; // closes the picker without setting a break
 }) {
   const router = useRouter();
-  const [open, setOpen] = useState(false);
   const [until, setUntil] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -40,7 +42,7 @@ export function BreakCard({
         setError(res.error);
         return;
       }
-      setOpen(false);
+      onCancel?.();
       router.refresh();
     });
   }
@@ -74,68 +76,58 @@ export function BreakCard({
           type="button"
           onClick={back}
           disabled={pending}
-          className="btn mt-4 inline-flex items-center gap-2 px-5 py-2.5 disabled:opacity-60"
+          className="btn mt-4 inline-flex min-h-[44px] items-center gap-2 px-5 py-2.5 disabled:opacity-60"
         >
           {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
           I&apos;m back early
         </button>
-        {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
+        {error && <p role="alert" className="mt-3 text-sm text-red-400">{error}</p>}
       </section>
     );
   }
 
   return (
-    <section className="rounded-2xl border border-white/8 bg-white/[0.02] px-4 py-3">
-      {!open ? (
+    <section className="elite-card p-5">
+      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
+        <CalendarOff className="h-3.5 w-3.5" /> Taking a break
+      </div>
+      <label htmlFor="break-until" className="mt-2 block text-sm leading-relaxed text-white/65">
+        Pick the day you&apos;re back. Your training waits for you and picks up right where you
+        left off.
+      </label>
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <input
+          id="break-until"
+          type="date"
+          value={until}
+          min={today}
+          max={maxDay}
+          onChange={(e) => setUntil(e.target.value)}
+          className="h-11 rounded-xl border border-white/10 bg-black/40 px-3 text-sm text-bone outline-none focus:border-accent/50"
+        />
         <button
           type="button"
-          onClick={() => setOpen(true)}
-          className="flex w-full items-center justify-between text-left text-sm text-white/55 transition-colors hover:text-bone"
+          onClick={save}
+          disabled={pending || !until}
+          className="btn inline-flex min-h-[44px] items-center gap-2 px-4 py-2 text-sm disabled:opacity-50"
         >
-          <span className="flex items-center gap-2">
-            <CalendarOff className="h-4 w-4 text-white/50" /> Taking a break? Tell
-            us when you&apos;re back.
-          </span>
-          <span className="text-accent">→</span>
+          {pending && <Loader2 className="h-4 w-4 animate-spin" />}
+          Set my break
         </button>
-      ) : (
-        <div>
-          <p className="text-sm text-white/65">
-            Pick the day you&apos;re back. Your training waits for you and picks
-            up right where you left off.
-          </p>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <input
-              type="date"
-              value={until}
-              min={today}
-              max={maxDay}
-              onChange={(e) => setUntil(e.target.value)}
-              className="rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm text-bone outline-none focus:border-accent/50"
-            />
-            <button
-              type="button"
-              onClick={save}
-              disabled={pending || !until}
-              className="btn inline-flex items-center gap-2 px-4 py-2 text-sm disabled:opacity-50"
-            >
-              {pending && <Loader2 className="h-4 w-4 animate-spin" />}
-              Set my break
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setOpen(false);
-                setError(null);
-              }}
-              className="px-2 py-2 text-sm text-white/50 hover:text-white/70"
-            >
-              Cancel
-            </button>
-          </div>
-          {error && <p className="mt-2 text-sm text-red-400">{error}</p>}
-        </div>
-      )}
+        {onCancel && (
+          <button
+            type="button"
+            onClick={() => {
+              setError(null);
+              onCancel();
+            }}
+            className="inline-flex min-h-[44px] items-center px-3 text-sm text-white/60 hover:text-bone"
+          >
+            Cancel
+          </button>
+        )}
+      </div>
+      {error && <p role="alert" className="mt-2 text-sm text-red-400">{error}</p>}
     </section>
   );
 }

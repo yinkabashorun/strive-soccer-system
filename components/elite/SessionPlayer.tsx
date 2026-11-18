@@ -20,6 +20,7 @@ import {
 import { fmtDuration } from "@/lib/elite/time-trained";
 import { feel, keepAwake } from "@/lib/elite/native";
 import { holdRefresh } from "@/lib/elite/fresh";
+import { drillPoster, preloadNextClip } from "@/lib/elite/drill-poster";
 import { AUTOPLAY_PREF_KEY } from "@/lib/elite/session-flow";
 import { SendClip } from "./SendClip";
 import { SetTimer } from "./SetTimer";
@@ -181,7 +182,12 @@ export function SessionPlayer({
       {/* Middle: the drill */}
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-4">
         <div key={drill.id} className="mx-auto max-w-md animate-drill-in">
-          <DrillClip src={drill.video_url} done={drillDone} justTicked={justTicked} />
+          <DrillClip
+            src={drill.video_url}
+            nextSrc={drills[index + 1]?.video_url ?? null}
+            done={drillDone}
+            justTicked={justTicked}
+          />
 
           <div className="mt-4 flex items-center gap-2">
             <span
@@ -345,10 +351,12 @@ function Segments({
 // pauses it. When the drill is ticked a gold check lands over it.
 function DrillClip({
   src,
+  nextSrc,
   done,
   justTicked,
 }: {
   src: string | null;
+  nextSrc: string | null; // the drill after this one, fetched ahead
   done: boolean;
   justTicked: boolean;
 }) {
@@ -373,13 +381,38 @@ function DrillClip({
     else v.pause();
   }
 
+  // The still for this clip shows at once; the next drill's still and
+  // (unless the member switched demos off) its clip are fetched ahead, so
+  // moving on never starts from a black box (lib/elite/drill-poster.ts).
+  const poster = drillPoster(src);
+  const nextPoster = drillPoster(nextSrc);
+  const fetchNext = preloadNextClip({ autoplay, nextSrc });
+  useEffect(() => {
+    if (!nextPoster) return;
+    const img = new Image();
+    img.src = nextPoster;
+  }, [nextPoster]);
+
   return (
     <div className="relative mx-auto aspect-[4/5] max-h-[46svh] w-full overflow-hidden rounded-3xl border border-white/10 bg-ink-100">
+      {fetchNext && nextSrc && (
+        <video
+          key={nextSrc}
+          src={nextSrc}
+          preload="auto"
+          muted
+          playsInline
+          aria-hidden
+          tabIndex={-1}
+          className="pointer-events-none absolute h-px w-px opacity-0"
+        />
+      )}
       {src ? (
         <button onClick={toggle} aria-label={paused ? "Play the demo" : "Pause the demo"} className="block h-full w-full">
           <video
             ref={ref}
             src={src}
+            poster={poster ?? undefined}
             autoPlay={autoplay}
             muted
             loop

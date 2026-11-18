@@ -75,8 +75,11 @@ export default function PrivacyPage({
                 <strong className="text-bone">A free training log account:</strong>{" "}
                 your name, email and phone number, the answers you give
                 when you set it up (your grade, playing level, in season or
-                off season, and your goal), and each entry you log (the date,
-                the minutes, and whether it was training or gym work).
+                off season, and your goal), the days you plan to train, and
+                each entry you log (the date, the minutes, and whether it
+                was training or gym work). Friends you connect with by
+                link see your first name, last initial and your weekly
+                training time, and nobody else does.
               </li>
               <li>
                 <strong className="text-bone">Messages:</strong> any message

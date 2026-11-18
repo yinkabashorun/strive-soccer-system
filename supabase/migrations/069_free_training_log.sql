@@ -2,7 +2,9 @@
 -- Strive Elite - the free training log (Nov 18 2026)
 -- =====================================================================
 -- A free account logs the training a player does on their own, against a
--- weekly target, and shares the week. No drills, no courses, no plan.
+-- weekly target, on the days they chose, shares the week, and sees how
+-- the week went next to the friends they connected with by link. No
+-- drills, no courses, no plan from us.
 --
 -- ISOLATED FROM MEMBERS ON PURPOSE: a free account is an elite_profiles
 -- row (role 'player') with a row in elite_trackers and NO row in
@@ -22,8 +24,10 @@
 set lock_timeout = '8s';
 
 -- 1) The free account: the four quiz answers (grade, level, season,
---    goal), the weekly target, and the link the player shares. Grade is
---    what decides whether a player logs gym work: high school and older.
+--    goal), the weekly target, the days of the week the player plans to
+--    train (0 = Monday ... 6 = Sunday), and the link the player shares.
+--    Grade is what decides whether a player logs gym work: high school
+--    and older.
 create table if not exists public.elite_trackers (
   profile_id     uuid primary key references public.elite_profiles(id) on delete cascade,
   phone          text,
@@ -32,6 +36,7 @@ create table if not exists public.elite_trackers (
   season         text check (season is null or season in ('in_season', 'off_season')),
   goal           text check (goal is null or goal in ('start', 'higher_team', 'college', 'pro')),
   target_minutes integer check (target_minutes is null or (target_minutes between 30 and 2400)),
+  plan_days      smallint[] not null default '{}' check (plan_days <@ array[0, 1, 2, 3, 4, 5, 6]::smallint[]),
   quiz           jsonb not null default '{}'::jsonb,
   quiz_done_at   timestamptz,
   referral_code  text not null unique,
@@ -102,7 +107,46 @@ begin
   end if;
 end $$;
 
--- 3) The recommended weekly target, by season. A coach edits the two rows
+-- 3) Friends. Two free accounts are friends when one joined with the
+--    other's link, or opened it while signed in and said yes. One row per
+--    pair, the smaller id first, so a pair can never be stored twice.
+--    Friends see each other's first name, last initial and training time
+--    for the week. There is no board of all players: a player only ever
+--    reads their own pairs.
+create table if not exists public.elite_tracker_friends (
+  a          uuid not null references public.elite_trackers(profile_id) on delete cascade,
+  b          uuid not null references public.elite_trackers(profile_id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (a, b),
+  check (a < b)
+);
+
+create index if not exists elite_tracker_friends_b_idx
+  on public.elite_tracker_friends (b);
+
+alter table public.elite_tracker_friends enable row level security;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'elite_tracker_friends'
+      and policyname = 'elite_tracker_friends_own_read'
+  ) then
+    create policy elite_tracker_friends_own_read on public.elite_tracker_friends
+      for select using (a = auth.uid() or b = auth.uid());
+  end if;
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'elite_tracker_friends'
+      and policyname = 'elite_tracker_friends_coach_read'
+  ) then
+    create policy elite_tracker_friends_coach_read on public.elite_tracker_friends
+      for select using (public.elite_is_coach());
+  end if;
+end $$;
+
+-- 4) The recommended weekly target, by season. A coach edits the two rows
 --    at /coach/free.
 create table if not exists public.elite_target_table (
   season      text primary key check (season in ('in_season', 'off_season')),
@@ -141,7 +185,7 @@ insert into public.elite_target_table (season, minutes, minutes_max)
 values ('in_season', 240, null), ('off_season', 360, 720)
 on conflict (season) do nothing;
 
--- 4) App-wide switches a coach flips. First one: whether anyone can make
+-- 5) App-wide switches a coach flips. First one: whether anyone can make
 --    a free account. CLOSED until a coach opens it at /coach/free.
 create table if not exists public.elite_settings (
   key        text primary key,

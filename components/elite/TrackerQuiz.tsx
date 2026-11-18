@@ -2,8 +2,9 @@
 
 import { useState, useTransition } from "react";
 import Link from "next/link";
-import { ChevronLeft, Loader2, Minus, Plus } from "lucide-react";
+import { ChevronLeft, Minus, Plus } from "lucide-react";
 import { saveQuiz } from "@/lib/elite/tracker-actions";
+import { DaysPicker } from "./DaysPicker";
 import { fmtDuration } from "@/lib/elite/time-trained";
 import {
   FREE_HOME,
@@ -24,18 +25,21 @@ import {
   type TargetRow,
 } from "@/lib/elite/tracker";
 
-type Step = (typeof QUIZ_QUESTIONS)[number] | "target";
-const ORDER: Step[] = [...QUIZ_QUESTIONS, "target"];
+type Step = (typeof QUIZ_QUESTIONS)[number] | "target" | "days";
+const ORDER: Step[] = [...QUIZ_QUESTIONS, "target", "days"];
 
-// Four questions, one a screen, then the weekly target. A tap answers a
-// question and moves on; nothing is saved until the target is chosen.
+// The set-up: four questions, one a screen, then the weekly target, then
+// the days to train. A tap answers a question and moves on; nothing is
+// saved until the days are picked on the last screen.
 export function TrackerQuiz({
   targets,
   initial,
+  initialDays,
   currentTarget,
 }: {
   targets: TargetRow[];
   initial: { grade: Grade | null; level: Level | null; season: Season | null; goal: Goal | null };
+  initialDays: number[];
   // Set when the player has a target already and is here to change it.
   currentTarget: number | null;
 }) {
@@ -45,6 +49,7 @@ export function TrackerQuiz({
   const [season, setSeason] = useState<Season | null>(initial.season);
   const [goal, setGoal] = useState<Goal | null>(initial.goal);
   const [own, setOwn] = useState<number | null>(null);
+  const [target, setTarget] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saving, startSaving] = useTransition();
 
@@ -55,11 +60,19 @@ export function TrackerQuiz({
     if (at > 0) setStep(ORDER[at - 1]);
   };
 
-  function save(target: number) {
-    if (!grade || !level || !season || !goal) return;
+  // The target is chosen: on to the days.
+  function choose(minutes: number) {
+    setError(null);
+    setTarget(minutes);
+    setOwn(null);
+    setStep("days");
+  }
+
+  function save(days: number[]) {
+    if (!grade || !level || !season || !goal || target === null) return;
     setError(null);
     startSaving(async () => {
-      const res = await saveQuiz({ grade, level, season, goal, target });
+      const res = await saveQuiz({ grade, level, season, goal, target, days });
       if (!res.ok) return setError(res.error);
       // A full load, so the week opens on what was just saved.
       window.location.assign(FREE_HOME);
@@ -90,7 +103,11 @@ export function TrackerQuiz({
           <span />
         )}
         <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
-          {step === "target" ? "Your target" : `${at + 1} of ${QUIZ_QUESTIONS.length}`}
+          {step === "target"
+            ? "Your target"
+            : step === "days"
+              ? "Your days"
+              : `${at + 1} of ${QUIZ_QUESTIONS.length}`}
         </span>
       </div>
 
@@ -170,19 +187,16 @@ export function TrackerQuiz({
                 {fmtDuration(row.minutes)}
               </div>
               <p className="mt-5 text-[17px] leading-relaxed text-bone">{recommendLine(row)}</p>
-              {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
               <div className="mt-auto space-y-3 pt-8">
                 <button
                   type="button"
-                  disabled={saving}
-                  onClick={() => save(row.minutes)}
+                  onClick={() => choose(row.minutes)}
                   className="flex h-14 w-full items-center justify-center rounded-2xl bg-white font-display text-xl font-black uppercase tracking-wide text-black disabled:opacity-60"
                 >
-                  {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : "Make that my target"}
+                  Make that my target
                 </button>
                 <button
                   type="button"
-                  disabled={saving}
                   onClick={() => setOwn(currentTarget ?? row.minutes)}
                   className="flex h-14 w-full items-center justify-center rounded-2xl border border-white/15 text-[15px] font-semibold text-bone"
                 >
@@ -222,20 +236,29 @@ export function TrackerQuiz({
                 </button>
               </div>
               <p className="mt-3 text-center text-sm text-white/60">a week</p>
-              {error && <p className="mt-4 text-sm text-red-400">{error}</p>}
               <div className="mt-auto pt-8">
                 <button
                   type="button"
-                  disabled={saving}
-                  onClick={() => save(own)}
+                  onClick={() => choose(own)}
                   className="flex h-14 w-full items-center justify-center rounded-2xl bg-white font-display text-xl font-black uppercase tracking-wide text-black disabled:opacity-60"
                 >
-                  {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : "Save my target"}
+                  Use this target
                 </button>
               </div>
             </>
           )}
         </div>
+      )}
+
+      {step === "days" && target !== null && (
+        <DaysPicker
+          target={target}
+          initial={initialDays}
+          submitLabel={currentTarget ? "Save" : "Start my week"}
+          saving={saving}
+          error={error}
+          onSubmit={save}
+        />
       )}
     </div>
   );

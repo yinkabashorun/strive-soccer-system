@@ -1,13 +1,14 @@
 // The free training log: the pure rules (Nov 18 2026, migration 069).
 //
-// A free account logs the training a player does on their own, against a
-// weekly target, and shares the week. Nothing else: no drills, no
-// courses, no plan. Coach Yinka's rule for it: "super simplified, even if
-// we have to remove ideas". Whatever is not needed to log, see the week
-// or share it is not here.
+// A free account does four things: it plans the days of the week to
+// train, logs the training done on those days with one tap, shares the
+// week, and sees the week next to the friends it connected with by link.
+// No drills, no courses, no plan from us. Coach Yinka's rule for it:
+// "super simplified, even if we have to remove ideas".
 //
 // What this file will never grow: a streak, a count of days missed, a
-// board comparing players, or a score. The one number is time trained.
+// score, or a board of all players. The one number is time trained, and
+// the only people a player is ever shown next to are their own friends.
 import { fmtDuration } from "./time-trained";
 import { shiftDay } from "./time";
 import type { Role } from "./types";
@@ -259,6 +260,152 @@ export function firstNameOf(fullName: string): string {
   return fullName.trim().split(/\s+/)[0] ?? "";
 }
 
+// ---- Planning the week ------------------------------------------------
+
+// Days are numbered Monday 0 to Sunday 6, the same as the training week.
+export const DAY_LETTERS = ["M", "T", "W", "T", "F", "S", "S"] as const;
+export const DAY_SHORT = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"] as const;
+export const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"] as const;
+
+export function dayIndexOf(day: string): number {
+  return mondayIndex(day);
+}
+
+// The days a player picked: whole numbers 0 to 6, each once, in order. At
+// least one day, or it is not a plan.
+export function cleanPlanDays(raw: unknown): number[] | null {
+  if (!Array.isArray(raw)) return null;
+  const days = new Set<number>();
+  for (const v of raw) {
+    const n = typeof v === "number" ? v : Number(v);
+    if (!Number.isInteger(n) || n < 0 || n > 6) return null;
+    days.add(n);
+  }
+  if (days.size === 0) return null;
+  return [...days].sort((x, y) => x - y);
+}
+
+// The weekly target spread over the planned days, to the nearest five
+// minutes. A guide for the day, never a mark to be judged against.
+export function perDayMinutes(target: number, dayCount: number): number {
+  if (dayCount <= 0 || target <= 0) return 0;
+  return Math.max(5, Math.round(target / dayCount / 5) * 5);
+}
+
+// "4 days. About 1h a day."
+export function splitLine(target: number, dayCount: number): string | null {
+  if (dayCount <= 0) return null;
+  const days = dayCount === 1 ? "1 day" : `${dayCount} days`;
+  return `${days}. About ${fmtDuration(perDayMinutes(target, dayCount))} a day.`;
+}
+
+// "Mon, Wed, Fri"
+export function planDaysLabel(days: number[]): string {
+  return days.map((d) => DAY_SHORT[d]).join(", ");
+}
+
+// One mark of the seven-day strip under the ring. A planned day is
+// outlined, a day with training logged is filled, today is marked. A
+// planned day with nothing logged is only an outline: the strip never
+// says a day was missed.
+export type StripDay = {
+  day: string; // YYYY-MM-DD
+  index: number; // 0 = Monday
+  letter: string;
+  planned: boolean;
+  trained: boolean;
+  today: boolean;
+  minutes: number; // training that day
+};
+
+export function weekStrip(logs: TrainingLog[], planDays: number[], today: string): StripDay[] {
+  const { monday } = weekOf(today);
+  return DAY_LETTERS.map((letter, index) => {
+    const day = shiftDay(monday, index);
+    const minutes = logs.reduce(
+      (s, l) => (l.trained_on === day && l.kind === "training" ? s + l.minutes : s),
+      0
+    );
+    return {
+      day,
+      index,
+      letter,
+      planned: planDays.includes(index),
+      trained: minutes > 0,
+      today: day === today,
+      minutes,
+    };
+  });
+}
+
+// What a screen reader says for one mark of the strip.
+export function stripDayLabel(d: StripDay): string {
+  const what = d.trained
+    ? `${fmtDuration(d.minutes)} trained`
+    : d.planned
+      ? "a training day"
+      : "nothing planned";
+  return `${DAY_NAMES[d.index]}, ${shortDate(d.day)}${d.today ? ", today" : ""}: ${what}`;
+}
+
+// The one line under the strip. On a planned day it says so and gives the
+// day's share of the target. On any other day there is no line at all.
+export function todayLine(planDays: number[], target: number, today: string): string | null {
+  if (!planDays.includes(dayIndexOf(today))) return null;
+  return `Today is a training day. About ${fmtDuration(perDayMinutes(target, planDays.length))}.`;
+}
+
+// ---- Friends ----------------------------------------------------------
+
+// Two accounts are friends as one stored pair, the smaller id first, so
+// the same two people can never be stored twice. Nobody is their own
+// friend.
+export function friendPair(x: string, y: string): { a: string; b: string } | null {
+  if (!x || !y || x === y) return null;
+  return x < y ? { a: x, b: y } : { a: y, b: x };
+}
+
+// What a friend sees of a name: the first name and the last initial.
+export function shortName(fullName: string): string {
+  const parts = fullName.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "A teammate";
+  if (parts.length === 1) return parts[0];
+  const last = parts[parts.length - 1].replace(/\.$/, "");
+  return `${parts[0]} ${last[0].toUpperCase()}.`;
+}
+
+// The week with your friends: you and the friends you connected with by
+// link, ordered by TRAINING time this week (gym never counts). It starts
+// again every Monday with the week. People on the same time share a
+// place. Only the top ten are listed, and you are always on it.
+export type BoardEntry = { id: string; name: string; minutes: number };
+export type BoardRow = BoardEntry & { place: number; time: string; me: boolean };
+export const BOARD_CAP = 10;
+export const BOARD_TITLE = "This week with your friends";
+export const BOARD_EMPTY_LINE = "Send your link to a teammate and see who trains more this week.";
+
+export function friendsBoard(entries: BoardEntry[], meId: string): BoardRow[] {
+  const sorted = [...entries].sort(
+    (x, y) => y.minutes - x.minutes || x.name.localeCompare(y.name) || x.id.localeCompare(y.id)
+  );
+  let place = 0;
+  let last = Number.NaN;
+  const rows = sorted.map((e, i) => {
+    if (e.minutes !== last) {
+      place = i + 1;
+      last = e.minutes;
+    }
+    return { ...e, place, time: fmtDuration(e.minutes), me: e.id === meId };
+  });
+  const top = rows.slice(0, BOARD_CAP);
+  const mine = rows.find((r) => r.me);
+  return mine && !top.includes(mine) ? [...top, mine] : top;
+}
+
+export function addFriendQuestion(name: string): string {
+  return `Add ${name} as a friend?`;
+}
+
 // ---- The weekly card --------------------------------------------------
 
 // Everything on the card: the time trained this week, the dates, the
@@ -301,13 +448,6 @@ export function cleanReferralCode(raw: unknown): string | null {
 
 export function joinLink(appUrl: string, code: string): string {
   return `${appUrl.replace(/\/+$/, "")}/join?ref=${code}`;
-}
-
-export function joinedLine(count: number): string {
-  if (count <= 0) return "No one has joined with your link yet.";
-  return count === 1
-    ? "1 teammate joined with your link."
-    : `${count} teammates joined with your link.`;
 }
 
 // ---- Joining ----------------------------------------------------------
@@ -353,9 +493,16 @@ export function cleanJoin(input: {
 // member side, where the "Almost there" screen is.
 export const FREE_HOME = "/log";
 export const FREE_QUIZ = "/log/quiz";
+export const FREE_DAYS = "/log/days";
 
-// Where a free account opens: the week, or the four questions when they
-// have not been answered yet. Sign-in, the front door and a brand-new
+// A signed-in free account that opens a teammate's link is sent to its
+// week with the code along, where one sheet asks before anything is added.
+export function friendAskPath(code: string): string {
+  return `${FREE_HOME}?friend=${code}`;
+}
+
+// Where a free account opens: the week, or the set-up (four questions, a
+// target, the days) when it has not been finished yet. Sign-in, the front door and a brand-new
 // account all use this, so getting there is a single redirect.
 export function freeLanding(quizDone: boolean): string {
   return quizDone ? FREE_HOME : FREE_QUIZ;
@@ -386,12 +533,13 @@ export function programLink(inApp: boolean): string | null {
 export const FREE_ACCOUNT_EXISTS_MESSAGE =
   "This email already has a free training log account, so the invite cannot create a second one. Tell your coach and we will move you over.";
 
-// What a free account agrees to, in three plain lines above the two
+// What a free account agrees to, in four plain lines above the two
 // boxes (the boxes themselves are the same as every account's:
 // lib/elite/legal.ts). Written to the player, about what a free account
 // actually stores.
 export const FREE_AGREEMENT_POINTS: string[] = [
-  "We store your profile, your quiz answers and the training you log.",
+  "We store your profile, your quiz answers, the days you plan to train and the training you log.",
+  "Friends you connect with by link see your first name, last initial and your weekly training time.",
   "Some of that information is handled by the service providers named in the Privacy Policy.",
   "A coach may text or call the number you give us. Message and data rates may apply. Reply STOP to any text to end them.",
 ];

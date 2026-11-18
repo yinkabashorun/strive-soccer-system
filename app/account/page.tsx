@@ -9,7 +9,7 @@ import { deleteGate } from "@/lib/elite/account";
 import { SUPPORT_EMAIL, concernMailto } from "@/lib/elite/support";
 import { fmtDuration } from "@/lib/elite/time-trained";
 import { trackerFor } from "@/lib/elite/tracker-server";
-import { FREE_HOME, FREE_QUIZ } from "@/lib/elite/tracker";
+import { FREE_DAYS, FREE_HOME, FREE_QUIZ, planDaysLabel } from "@/lib/elite/tracker";
 
 export const metadata = { title: "Account · Strive Elite" };
 
@@ -67,6 +67,13 @@ export default async function AccountPage() {
                   : "Answer four questions to set it"
               }
             />
+            {tracker.plan_days.length > 0 && (
+              <Row
+                href={FREE_DAYS}
+                label="Training days"
+                detail={`${planDaysLabel(tracker.plan_days)}. Change them here.`}
+              />
+            )}
           </Group>
         )}
 

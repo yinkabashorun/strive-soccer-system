@@ -19,8 +19,24 @@ import {
   TARGET_MIN,
   allTimeMinutes,
   cardFacts,
+  BOARD_CAP,
+  BOARD_EMPTY_LINE,
+  BOARD_TITLE,
+  FREE_DAYS,
+  addFriendQuestion,
   cleanJoin,
   cleanKind,
+  cleanPlanDays,
+  friendAskPath,
+  friendPair,
+  friendsBoard,
+  perDayMinutes,
+  planDaysLabel,
+  shortName,
+  splitLine,
+  stripDayLabel,
+  todayLine,
+  weekStrip,
   cleanReferralCode,
   cleanTarget,
   dayLabel,
@@ -30,7 +46,6 @@ import {
   gymThisWeekLine,
   homeFor,
   joinLink,
-  joinedLine,
   logsThisWeek,
   mayLog,
   newReferralCode,
@@ -72,6 +87,10 @@ describe("the four questions", () => {
     expect(GOALS.map((g) => g.id)).toEqual(["start", "higher_team", "college", "pro"]);
     const quiz = code("components/elite/TrackerQuiz.tsx");
     expect(quiz).toContain('useState<Step>("grade")');
+    // then the target, then the days; nothing is saved before the last screen
+    expect(quiz).toContain('const ORDER: Step[] = [...QUIZ_QUESTIONS, "target", "days"];');
+    expect((quiz.match(/saveQuiz\(/g) ?? []).length).toBe(1);
+    expect(quiz).toContain("saveQuiz({ grade, level, season, goal, target, days })");
     expect(quiz).toContain("What grade are you in?");
     expect(quiz).toContain("${at + 1} of ${QUIZ_QUESTIONS.length}");
   });
@@ -353,17 +372,15 @@ describe("the link a player shares", () => {
     expect(cleanReferralCode(42)).toBeNull();
   });
 
-  it("points at /join on the real domain and says how many joined", () => {
+  it("points at /join on the real domain", () => {
     expect(joinLink("https://thestriveapp.com", "ABCDEFGH")).toBe("https://thestriveapp.com/join?ref=ABCDEFGH");
     expect(joinLink("https://thestriveapp.com/", "ABCDEFGH")).toBe("https://thestriveapp.com/join?ref=ABCDEFGH");
-    expect(joinedLine(0)).toBe("No one has joined with your link yet.");
-    expect(joinedLine(1)).toBe("1 teammate joined with your link.");
-    expect(joinedLine(7)).toBe("7 teammates joined with your link.");
   });
 
   it("promises nothing for inviting", () => {
-    const row = code("components/elite/InviteRow.tsx");
-    expect(row).not.toMatch(/unlock|reward|earn|\bpro\b|free month/i);
+    const board = code("components/elite/FriendsBoard.tsx");
+    expect(board).not.toMatch(/unlock|reward|earn|\bpro\b|free month/i);
+    expect(BOARD_EMPTY_LINE).not.toMatch(/unlock|reward|earn|win\b/i);
   });
 });
 
@@ -394,6 +411,10 @@ describe("joining", () => {
   it("the agreement lines say what a free account stores and how to stop texts", () => {
     const all = FREE_AGREEMENT_POINTS.join(" ");
     expect(all).toContain("the training you log");
+    expect(all).toContain("the days you plan to train");
+    // what a friend sees, said before the account exists
+    expect(all).toContain("Friends you connect with by link see your first name, last initial and your weekly training time.");
+    expect(read("app/privacy/page.tsx")).toMatch(/Friends you connect with by\s+link see your first name, last initial and your weekly\s+training time, and nobody else does\./);
     expect(all).toContain("service providers");
     expect(all).toContain("Reply STOP");
     expect(all).not.toContain("—");
@@ -412,7 +433,7 @@ describe("where a signed-in person belongs", () => {
     expect(FREE_HOME).toBe("/log");
   });
 
-  it("a free account that has not answered the four questions opens on them, in one step", () => {
+  it("a free account that has not finished the set-up opens on it, in one step", () => {
     expect(FREE_QUIZ).toBe("/log/quiz");
     expect(freeLanding(true)).toBe("/log");
     expect(freeLanding(false)).toBe("/log/quiz");
@@ -499,17 +520,21 @@ const FREE_FILES = [
   "components/elite/TrackerHome.tsx",
   "components/elite/TrackerQuiz.tsx",
   "components/elite/ShareWeek.tsx",
-  "components/elite/InviteRow.tsx",
+  "components/elite/FriendsBoard.tsx",
+  "components/elite/DaysPicker.tsx",
+  "components/elite/TrackerDays.tsx",
+  "components/elite/TrackerSheet.tsx",
   "components/elite/JoinForm.tsx",
   "lib/elite/tracker.ts",
   "lib/elite/tracker-server.ts",
+  "lib/elite/tracker-demo.ts",
   "lib/elite/tracker-actions.ts",
 ];
 
 describe("the free log stays what it is", () => {
-  it("no streaks, no boards, no scores, no prices, nothing that sounds like a machine", () => {
+  it("no streaks, no scores, no prizes, no prices, nothing that sounds like a machine", () => {
     const banned =
-      /\b(streak|leaderboard|rank(ing|ed|s)?|points?|score|badge|price|guarantee|AI|automated|algorithm)\b|\$\d|—/i;
+      /\b(streak|leaderboard|points?|score|badge|medal|crown|trophy|podium|price|guarantee|AI|automated|algorithm)\b|\$\d|—/i;
     for (const f of FREE_FILES) {
       const src = code(f);
       const hit = src.match(banned);
@@ -517,9 +542,31 @@ describe("the free log stays what it is", () => {
     }
   });
 
+  it("nothing about a day missed, and nothing announces a change of place", () => {
+    const words = /\bmissed\b|\bskipped\b|rest day|behind your|fell to|dropped to|moved up|overtook|passed you|you are (first|last)/i;
+    for (const f of FREE_FILES) {
+      const hit = code(f).match(words);
+      expect(hit, `${f}: ${hit?.[0]}`).toBeNull();
+    }
+    // the friends list sends nothing: no texts, no pushes, no in-app notes
+    for (const f of ["lib/elite/tracker-actions.ts", "lib/elite/tracker-server.ts", "components/elite/FriendsBoard.tsx"]) {
+      expect(code(f), f).not.toMatch(/sendSms|sendPush|textCoaches|elite_notifications|sendPlayerEmail/);
+    }
+  });
+
   it("the home screen has no timer and no milestone", () => {
     const home = code("components/elite/TrackerHome.tsx");
     expect(home).not.toMatch(/timer|stopwatch|milestone/i);
+    // the entries list left the home screen: the strip replaced it, and a
+    // day's entries open in a sheet
+    expect(home).toContain("<TrackerSheet title={dayLabel(openDay)}");
+    expect(home).not.toContain("Nothing logged yet this week");
+    // top to bottom: ring, days, the buttons, share, friends, the one line
+    const order = ["<svg viewBox", "strip.map(", "LOG_CHIPS.map(", "<ShareWeek", "<FriendsBoard", "{programHref && ("].map(
+      (mark) => home.indexOf(mark)
+    );
+    expect(order.every((n) => n > -1)).toBe(true);
+    expect([...order].sort((x, y) => x - y)).toEqual(order);
     const sql = read("supabase/migrations/069_free_training_log.sql");
     expect(sql).not.toMatch(/timer_started_at|team_sessions|own_minutes_now/);
   });
@@ -534,6 +581,7 @@ describe("the free log stays what it is", () => {
 describe("free accounts are invisible to everything a member query reads", () => {
   const ALLOWED = new Set([
     "lib/elite/tracker-server.ts",
+    "lib/elite/tracker-coach.ts",
     "lib/elite/tracker-actions.ts",
     "app/api/elite/auth/join/route.ts",
   ]);
@@ -543,7 +591,11 @@ describe("free accounts are invisible to everything a member query reads", () =>
       .flatMap((d) => walk(join(root, d)))
       .filter((f) => /\.(ts|tsx)$/.test(f));
     const touching = files
-      .filter((f) => /elite_trackers|elite_training_logs|elite_target_table|elite_settings/.test(readFileSync(f, "utf8")))
+      .filter((f) =>
+        /elite_trackers|elite_training_logs|elite_tracker_friends|elite_target_table|elite_settings/.test(
+          readFileSync(f, "utf8")
+        )
+      )
       .map(rel)
       .filter((f) => f !== "lib/elite/tracker.ts"); // comments only
     for (const f of touching) expect(ALLOWED.has(f), f).toBe(true);
@@ -558,14 +610,265 @@ describe("free accounts are invisible to everything a member query reads", () =>
 
   it("the tables are read-only to the browser and leave with the account", () => {
     const sql = read("supabase/migrations/069_free_training_log.sql");
-    expect((sql.match(/enable row level security/g) ?? []).length).toBe(4);
+    expect((sql.match(/enable row level security/g) ?? []).length).toBe(5);
     expect(sql).toContain("references public.elite_profiles(id) on delete cascade");
     expect(sql).toContain("references public.elite_trackers(profile_id) on delete cascade");
     // owners read; only a coach writes, and only the target table and the switches
     expect(sql.replace(/--.*$/gm, "")).not.toMatch(/\bdrop\b/i);
-    const ownerPolicies = sql.match(/create policy elite_(trackers|training_logs)_\w+ on[\s\S]*?;/g) ?? [];
-    expect(ownerPolicies.length).toBe(4);
+    const ownerPolicies =
+      sql.match(/create policy elite_(trackers|training_logs|tracker_friends)_\w+ on[\s\S]*?;/g) ?? [];
+    expect(ownerPolicies.length).toBe(6);
     for (const p of ownerPolicies) expect(p).toContain("for select");
     expect(sql).toContain("values ('free_signup_open', 'false'::jsonb)");
+  });
+});
+
+describe("planning the week", () => {
+  // Wed Nov 18 2026; the week is Mon Nov 16 to Sun Nov 22
+  const today = "2026-11-18";
+
+  it("takes any days of the week, each once, in order, and at least one", () => {
+    expect(cleanPlanDays([4, 0, 2, 0])).toEqual([0, 2, 4]);
+    expect(cleanPlanDays(["1", 6])).toEqual([1, 6]);
+    expect(cleanPlanDays([0, 1, 2, 3, 4, 5, 6])).toEqual([0, 1, 2, 3, 4, 5, 6]);
+    expect(cleanPlanDays([])).toBeNull();
+    expect(cleanPlanDays([7])).toBeNull();
+    expect(cleanPlanDays([-1])).toBeNull();
+    expect(cleanPlanDays([1.5])).toBeNull();
+    expect(cleanPlanDays("0,1")).toBeNull();
+    expect(cleanPlanDays(undefined)).toBeNull();
+  });
+
+  it("the database holds the same seven days", () => {
+    const sql = read("supabase/migrations/069_free_training_log.sql");
+    expect(sql).toContain("plan_days      smallint[] not null default '{}' check (plan_days <@ array[0, 1, 2, 3, 4, 5, 6]::smallint[])");
+  });
+
+  it("spreads the target over the days, to the nearest five minutes", () => {
+    expect(perDayMinutes(240, 4)).toBe(60);
+    expect(perDayMinutes(240, 7)).toBe(35); // 34.3
+    expect(perDayMinutes(240, 3)).toBe(80);
+    expect(perDayMinutes(360, 5)).toBe(70); // 72
+    expect(perDayMinutes(30, 7)).toBe(5); // never less than five
+    expect(perDayMinutes(240, 0)).toBe(0);
+    expect(splitLine(240, 4)).toBe("4 days. About 1h a day.");
+    expect(splitLine(240, 1)).toBe("1 day. About 4h a day.");
+    expect(splitLine(360, 5)).toBe("5 days. About 1h 10m a day.");
+    expect(splitLine(240, 0)).toBeNull();
+    expect(planDaysLabel([0, 2, 4])).toBe("Mon, Wed, Fri");
+  });
+
+  it("the strip: planned outlined, trained filled, today marked", () => {
+    const logs = [
+      log("2026-11-16", 45), // Monday, planned and trained
+      log("2026-11-17", 30), // Tuesday, not planned but trained
+      log("2026-11-18", 60, "gym"), // today: gym only is not training
+      log("2026-11-09", 90), // last week
+    ];
+    const strip = weekStrip(logs, [0, 2, 4], today);
+    expect(strip.map((d) => d.letter).join("")).toBe("MTWTFSS");
+    expect(strip.map((d) => d.day)).toEqual([
+      "2026-11-16", "2026-11-17", "2026-11-18", "2026-11-19", "2026-11-20", "2026-11-21", "2026-11-22",
+    ]);
+    expect(strip.map((d) => d.planned)).toEqual([true, false, true, false, true, false, false]);
+    expect(strip.map((d) => d.trained)).toEqual([true, true, false, false, false, false, false]);
+    expect(strip.map((d) => d.today)).toEqual([false, false, true, false, false, false, false]);
+    expect(strip[0].minutes).toBe(45);
+    expect(strip[2].minutes).toBe(0);
+  });
+
+  it("a planned day with nothing logged is only an outline, in words too", () => {
+    const strip = weekStrip([log("2026-11-16", 45)], [0, 1], today);
+    expect(stripDayLabel(strip[0])).toBe("Monday, Nov 16: 45m trained");
+    // Tuesday was planned and is past, with nothing logged
+    expect(stripDayLabel(strip[1])).toBe("Tuesday, Nov 17: a training day");
+    expect(stripDayLabel(strip[2])).toBe("Wednesday, Nov 18, today: nothing planned");
+    for (const d of strip) expect(stripDayLabel(d)).not.toMatch(/missed|skipped|late|behind/i);
+  });
+
+  it("says one thing on a training day and nothing at all on any other day", () => {
+    expect(todayLine([0, 2, 4, 5], 240, today)).toBe("Today is a training day. About 1h.");
+    expect(todayLine([0, 1], 240, today)).toBeNull();
+    expect(todayLine([], 240, today)).toBeNull();
+  });
+
+  it("is asked at the end of the set-up and changed from Account", () => {
+    expect(FREE_DAYS).toBe("/log/days");
+    const picker = code("components/elite/DaysPicker.tsx");
+    expect(picker).toContain("Which days will you train?");
+    expect(picker).toContain("disabled={saving || days.length === 0}");
+    expect(code("app/account/page.tsx")).toContain("href={FREE_DAYS}");
+    const actions = code("lib/elite/tracker-actions.ts");
+    expect(actions).toContain("export async function setPlanDays(");
+    // the set-up is not finished without at least one day
+    expect(code("lib/elite/tracker-server.ts")).toContain("tracker.plan_days.length > 0");
+  });
+
+  it("logging stays today only", () => {
+    const actions = code("lib/elite/tracker-actions.ts");
+    expect(actions).toMatch(/export async function logTraining\(\s*minutesInput: number,\s*kindInput: string = "training"\s*\)/);
+    expect(actions).toContain("const trained_on = nyToday();");
+  });
+});
+
+describe("friends", () => {
+  it("a pair is stored once, the smaller id first, and nobody is their own friend", () => {
+    expect(friendPair("b", "a")).toEqual({ a: "a", b: "b" });
+    expect(friendPair("a", "b")).toEqual({ a: "a", b: "b" });
+    expect(friendPair("a", "a")).toBeNull();
+    expect(friendPair("", "a")).toBeNull();
+    const sql = read("supabase/migrations/069_free_training_log.sql");
+    expect(sql).toContain("primary key (a, b)");
+    expect(sql).toContain("check (a < b)");
+    expect(sql).toContain("for select using (a = auth.uid() or b = auth.uid())");
+  });
+
+  it("a friend sees a first name and a last initial", () => {
+    expect(shortName("Marcus Bell")).toBe("Marcus B.");
+    expect(shortName("  marcus   de la cruz ")).toBe("marcus C.");
+    expect(shortName("Marcus")).toBe("Marcus");
+    expect(shortName("Marcus B.")).toBe("Marcus B.");
+    expect(shortName("")).toBe("A teammate");
+    expect(addFriendQuestion(shortName("Marcus Bell"))).toBe("Add Marcus B. as a friend?");
+  });
+
+  const entry = (id: string, name: string, minutes: number) => ({ id, name, minutes });
+
+  it("orders by training time this week, you included and marked", () => {
+    const rows = friendsBoard(
+      [entry("me", "Anthony E.", 135), entry("f1", "Marcus B.", 190), entry("f2", "Sam O.", 60)],
+      "me"
+    );
+    expect(rows.map((r) => [r.place, r.name, r.time, r.me])).toEqual([
+      [1, "Marcus B.", "3h 10m", false],
+      [2, "Anthony E.", "2h 15m", true],
+      [3, "Sam O.", "1h", false],
+    ]);
+  });
+
+  it("people on the same time share a place", () => {
+    const rows = friendsBoard(
+      [entry("me", "Anthony E.", 135), entry("f1", "Diego R.", 135), entry("f2", "Marcus B.", 190), entry("f3", "Jalen T.", 0), entry("f4", "Sam O.", 0)],
+      "me"
+    );
+    expect(rows.map((r) => [r.place, r.name])).toEqual([
+      [1, "Marcus B."],
+      [2, "Anthony E."],
+      [2, "Diego R."],
+      [4, "Jalen T."],
+      [4, "Sam O."],
+    ]);
+  });
+
+  it("lists the top ten, and you are always on it with your real place", () => {
+    const friends = Array.from({ length: 14 }, (_, i) => entry(`f${i}`, `Friend ${String(i).padStart(2, "0")}`, 600 - i * 10));
+    const rows = friendsBoard([...friends, entry("me", "Anthony E.", 5)], "me");
+    expect(BOARD_CAP).toBe(10);
+    expect(rows).toHaveLength(11);
+    expect(rows.slice(0, 10).every((r) => !r.me)).toBe(true);
+    expect(rows[10]).toMatchObject({ me: true, place: 15 });
+    // inside the top ten you are not listed twice
+    const inTop = friendsBoard([...friends, entry("me", "Anthony E.", 595)], "me");
+    expect(inTop).toHaveLength(10);
+    expect(inTop.filter((r) => r.me)).toHaveLength(1);
+    expect(inTop[1]).toMatchObject({ me: true, place: 2 });
+  });
+
+  it("alone, the list is one line and the link", () => {
+    expect(friendsBoard([entry("me", "Anthony E.", 0)], "me")).toHaveLength(1);
+    expect(BOARD_TITLE).toBe("This week with your friends");
+    expect(BOARD_EMPTY_LINE).toBe("Send your link to a teammate and see who trains more this week.");
+    const board = code("components/elite/FriendsBoard.tsx");
+    expect(board).toMatch(/friends\.length === 0 \? \(\s*<p[^>]*>\{BOARD_EMPTY_LINE\}<\/p>/);
+    expect(board).toContain('{copied ? "Link copied" : "Send my link"}');
+  });
+
+  it("gym never counts on it", () => {
+    const server = code("lib/elite/tracker-server.ts");
+    const fn = server.slice(server.indexOf("export async function friendsWeekFor("), server.indexOf("export async function friendAskFor("));
+    expect(fn).toContain('.eq("kind", "training")');
+    // and your own row is the ring's number: training only
+    expect(code("components/elite/TrackerHome.tsx")).toMatch(/<FriendsBoard\s+me=\{me\}\s+myMinutes=\{minutes\}/);
+  });
+
+  it("the list only ever reads the viewer's own friends: no function reads across all players", () => {
+    const server = code("lib/elite/tracker-server.ts");
+    // every read of entries, anywhere a player's screens read, is tied to given ids
+    const reads = [...server.matchAll(/\.from\("elite_training_logs"\)[\s\S]{0,160}/g)].map((m) => m[0]);
+    expect(reads.length).toBeGreaterThanOrEqual(2);
+    for (const r of reads) expect(r).toMatch(/\.(eq|in)\("profile_id",/);
+    // the ids of the friends list come from the viewer's own pairs
+    const fn = server.slice(server.indexOf("export async function friendsWeekFor("), server.indexOf("export async function friendAskFor("));
+    expect(fn).toContain("const ids = await friendIdsOf(admin, viewer.profile.id);");
+    expect(fn).toContain('.in("profile_id", some)');
+    const idsOf = server.slice(server.indexOf("async function friendIdsOf("), server.indexOf("export async function friendsWeekFor("));
+    expect(idsOf).toContain('.select("b").eq("a", profileId)');
+    expect(idsOf).toContain('.select("a").eq("b", profileId)');
+    // every read of the pairs in that file is tied to one account too
+    for (const m of server.matchAll(/\.from\("elite_tracker_friends"\)\.select\([^)]*\)([\s\S]{0,40})/g)) {
+      expect(m[1]).toMatch(/^\.eq\("(a|b)", profileId\)/);
+    }
+    // no page of all accounts is read there (that is the coach's file)
+    expect(server).not.toMatch(/\.range\(from, to\)|everyRow/);
+    // the one file that reads every account is the coach's, used by the coach page alone
+    const importers = ["app", "lib", "components"]
+      .flatMap((d) => walk(join(root, d)))
+      .filter((f) => /\.(ts|tsx)$/.test(f) && /tracker-coach["']/.test(readFileSync(f, "utf8")))
+      .map(rel);
+    expect(importers).toEqual(["app/(coach)/coach/free/page.tsx"]);
+    // and nothing a member or a free player can reach draws a list of all players
+    expect(code("app/(coach)/coach/free/page.tsx")).toContain('if (viewer.role === "player") redirect("/dashboard")');
+  });
+
+  it("friends are made by the link only: joining with it, or opening it signed in and saying yes", () => {
+    expect(friendAskPath("ABCDEFGH")).toBe("/log?friend=ABCDEFGH");
+    const route = code("app/api/elite/auth/join/route.ts");
+    expect(route).toContain("if (referredBy) await makeFriends(userId, referredBy)");
+    const join = code("app/(auth)/join/page.tsx");
+    expect(join).toContain("if (ref && (await trackerFor(viewer))) redirect(friendAskPath(ref));");
+    const page = code("app/(free)/log/page.tsx");
+    expect(page).toContain("friendAskFor(viewer, cleanReferralCode(searchParams?.friend))");
+    // nothing is added without the tap on Yes
+    const board = code("components/elite/FriendsBoard.tsx");
+    expect(board).toContain("addFriendQuestion(asking.name)");
+    expect(board).toMatch(/onClick=\{\(\) => answer\(true\)\}[\s\S]{0,260}Yes/);
+    expect((board.match(/confirmFriend\(/g) ?? []).length).toBe(1);
+    // no search, no browsing, no requests
+    expect(board).not.toMatch(/<input|search|request/i);
+  });
+
+  it("the server only pairs the signed-in player, and making friends is not callable from a browser", () => {
+    const actions = code("lib/elite/tracker-actions.ts");
+    expect(actions).toContain("makeFriends(o.profileId, otherId)");
+    expect(actions).toContain("friendPair(o.profileId, friendId)");
+    // the only functions a browser can call
+    const exported = [...actions.matchAll(/export async function (\w+)/g)].map((m) => m[1]).sort();
+    expect(exported).toEqual([
+      "confirmFriend",
+      "deleteLog",
+      "logTraining",
+      "removeFriend",
+      "saveQuiz",
+      "saveTargetRow",
+      "setFreeSignupOpen",
+      "setPlanDays",
+    ]);
+    const server = read("lib/elite/tracker-server.ts");
+    expect(server).not.toMatch(/^\s*["']use server["']/m);
+    expect(server).toContain("export async function makeFriends(");
+  });
+
+  it("a friend can be taken off from their row, quietly", () => {
+    const board = code("components/elite/FriendsBoard.tsx");
+    expect(board).toContain("Remove from my friends");
+    expect(board).toContain("await removeFriend(row.id)");
+    // your own row is not a button
+    expect(board).toMatch(/\{r\.me \? \(\s*<div/);
+  });
+
+  it("members still have no list of other players", () => {
+    for (const f of walk(join(root, "app/(player)")).map(rel)) {
+      expect(code(f), f).not.toMatch(/FriendsBoard|friendsBoard|friendsWeekFor/);
+    }
   });
 });

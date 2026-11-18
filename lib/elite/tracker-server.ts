@@ -1,29 +1,33 @@
-// The free training log: reading it (migration 069). Every read uses the
-// service client AFTER the caller has established who is signed in; the
-// tables also carry owner-read and coach-read RLS as a second lock.
+// The free training log: what one player's own screens read, and the one
+// write that is not a player's own tap (two accounts becoming friends).
+// Migration 069. Every call uses the service client AFTER the caller has
+// established who is signed in; the tables also carry owner-read RLS as a
+// second lock.
 //
-// With no database configured (a local build), the example data below
-// stands in so the screens can be seen. Nothing is saved in that mode.
-import { cookies } from "next/headers";
+// Nothing in this file reads across all players. The only other people a
+// player is ever shown are their own friends (friendsWeekFor). The
+// coach's list of every free account lives apart, in tracker-coach.ts.
+//
+// With no database configured (a local build), the example data in
+// tracker-demo.ts stands in so the screens can be seen.
 import { createServiceClient, isSupabaseConfigured } from "./supabase/server";
 import type { Viewer } from "./session";
-import { nyToday, shiftDay } from "./time";
 import {
   DEFAULT_TARGETS,
-  allTimeMinutes,
+  friendPair,
   homeFor,
+  shortName,
   tracksGym,
-  validateQuiz,
-  cleanTarget,
   weekOf,
+  type BoardEntry,
   type Goal,
   type Grade,
-  type Kind,
   type Level,
   type Season,
   type TargetRow,
   type TrainingLog,
 } from "./tracker";
+import { demoFriendAsk, demoFriends, demoLogs, demoTracker } from "./tracker-demo";
 
 export type Tracker = {
   profile_id: string;
@@ -33,53 +37,17 @@ export type Tracker = {
   season: Season | null;
   goal: Goal | null;
   target_minutes: number | null;
+  plan_days: number[];
   quiz_done_at: string | null;
   referral_code: string;
   referred_by: string | null;
   created_at: string;
 };
 
-const TRACKER_COLUMNS =
-  "profile_id, phone, grade, level, season, goal, target_minutes, quiz_done_at, referral_code, referred_by, created_at";
+export const TRACKER_COLUMNS =
+  "profile_id, phone, grade, level, season, goal, target_minutes, plan_days, quiz_done_at, referral_code, referred_by, created_at";
 
-// ---- The example account (no database) --------------------------------
-
-export function demoTracker(profileId: string): Tracker {
-  return {
-    profile_id: profileId,
-    phone: null,
-    grade: "high_school",
-    level: "elite",
-    season: "in_season",
-    goal: "college",
-    target_minutes: 240,
-    quiz_done_at: "2026-11-02T15:00:00.000Z",
-    referral_code: "STRV2EXM",
-    referred_by: null,
-    created_at: "2026-11-02T15:00:00.000Z",
-  };
-}
-
-export function demoLogs(today: string): TrainingLog[] {
-  const { monday } = weekOf(today);
-  const rows: [number, number, Kind][] = [
-    [0, 45, "training"],
-    [1, 30, "training"],
-    [1, 45, "gym"],
-    [2, 60, "training"],
-    [-5, 60, "training"],
-    [-3, 45, "gym"],
-    [-2, 90, "training"],
-  ];
-  return rows
-    .map(([offset, minutes, kind], i) => ({
-      id: `demo-log-${i}`,
-      trained_on: shiftDay(monday, offset),
-      minutes,
-      kind,
-    }))
-    .filter((l) => l.trained_on <= today);
-}
+type Admin = NonNullable<ReturnType<typeof createServiceClient>>;
 
 // ---- One account ------------------------------------------------------
 
@@ -91,7 +59,9 @@ export async function getTracker(profileId: string): Promise<Tracker | null> {
     .select(TRACKER_COLUMNS)
     .eq("profile_id", profileId)
     .maybeSingle();
-  return (data as Tracker | null) ?? null;
+  if (!data) return null;
+  const row = data as Tracker;
+  return { ...row, plan_days: row.plan_days ?? [] };
 }
 
 export async function hasTracker(profileId: string): Promise<boolean> {
@@ -123,16 +93,6 @@ export async function getTargetTable(): Promise<TargetRow[]> {
   return rows.length ? rows : DEFAULT_TARGETS;
 }
 
-export async function referralCount(profileId: string): Promise<number> {
-  const admin = createServiceClient();
-  if (!admin) return 0;
-  const { count } = await admin
-    .from("elite_trackers")
-    .select("profile_id", { count: "exact", head: true })
-    .eq("referred_by", profileId);
-  return count ?? 0;
-}
-
 // Is anyone allowed to make a free account right now? Closed unless a
 // coach opened it, and closed whenever the switch cannot be read.
 export async function isFreeSignupOpen(): Promise<boolean> {
@@ -149,6 +109,14 @@ export async function isFreeSignupOpen(): Promise<boolean> {
 
 // ---- Who is looking ---------------------------------------------------
 
+// The set-up is finished: the four questions are answered, a target is
+// set and at least one training day is picked.
+export function quizDone(
+  tracker: Pick<Tracker, "quiz_done_at" | "target_minutes" | "plan_days">
+): boolean {
+  return Boolean(tracker.quiz_done_at && tracker.target_minutes && tracker.plan_days.length > 0);
+}
+
 // Where this signed-in person belongs (lib/elite/tracker.ts homeFor).
 export async function homePathFor(viewer: Viewer): Promise<string> {
   const hasPlayer = Boolean(viewer.playerId);
@@ -161,35 +129,11 @@ export async function homePathFor(viewer: Viewer): Promise<string> {
   });
 }
 
-// The four questions are answered and a target is set.
-export function quizDone(tracker: Pick<Tracker, "quiz_done_at" | "target_minutes">): boolean {
-  return Boolean(tracker.quiz_done_at && tracker.target_minutes);
-}
-
-// The example account (no database) remembers the quiz a visitor takes in
-// a cookie, so the example week matches the answers they gave.
-export const DEMO_QUIZ_COOKIE = "strive_demo_quiz";
-
-function demoTrackerFromCookie(profileId: string): Tracker {
-  const base = demoTracker(profileId);
-  try {
-    const raw = cookies().get(DEMO_QUIZ_COOKIE)?.value;
-    if (!raw) return base;
-    const saved = JSON.parse(raw) as Record<string, unknown>;
-    const answers = validateQuiz(saved);
-    const target = cleanTarget(saved.target);
-    if (!answers || target === null) return base;
-    return { ...base, ...answers, target_minutes: target };
-  } catch {
-    return base;
-  }
-}
-
 // The free account behind this viewer, or null when they do not have one.
 // The example player stands in only when there is no database at all.
 export async function trackerFor(viewer: Viewer): Promise<Tracker | null> {
   if (viewer.role !== "player") return null;
-  if (viewer.demo) return isSupabaseConfigured() ? null : demoTrackerFromCookie(viewer.profile.id);
+  if (viewer.demo) return isSupabaseConfigured() ? null : demoTracker(viewer.profile.id);
   if (viewer.playerId) return null;
   return getTracker(viewer.profile.id);
 }
@@ -223,146 +167,101 @@ export async function emailHasFreeAccount(email: string): Promise<boolean> {
   return (await getTracker(profile.id as string)) !== null;
 }
 
-// ---- The coach's list -------------------------------------------------
+// ---- Friends ----------------------------------------------------------
 
-export type FreeAccount = {
-  profile_id: string;
-  name: string;
-  phone: string | null;
-  grade: Grade | null;
-  level: Level | null;
-  goal: Goal | null;
-  week_minutes: number; // training this week
-  gym_week_minutes: number; // gym this week, apart
-  all_minutes: number; // training, all time
-  joined: string;
-  referrals: number;
-};
-
-export type FreeOverview = {
-  open: boolean;
-  targets: TargetRow[];
-  accounts: FreeAccount[];
-  week_minutes: number;
-};
-
-export function demoOverview(today: string): FreeOverview {
-  const logs = demoLogs(today);
-  const { monday } = weekOf(today);
-  const thisWeek = logs.filter((l) => l.trained_on >= monday);
-  const week = thisWeek.reduce((n, l) => (l.kind === "training" ? n + l.minutes : n), 0);
-  const gym = thisWeek.reduce((n, l) => (l.kind === "gym" ? n + l.minutes : n), 0);
-  const all = allTimeMinutes(logs);
-  return {
-    open: false,
-    targets: DEFAULT_TARGETS,
-    week_minutes: week,
-    accounts: [
-      {
-        profile_id: "demo-free-1",
-        name: "Example Player",
-        phone: null,
-        grade: "high_school",
-        level: "elite",
-        goal: "college",
-        week_minutes: week,
-        gym_week_minutes: gym,
-        all_minutes: all,
-        joined: "2026-11-02T15:00:00.000Z",
-        referrals: 1,
-      },
-    ],
-  };
+// The ids of this player's own friends: every pair they are one side of.
+async function friendIdsOf(admin: Admin, profileId: string): Promise<string[]> {
+  const [left, right] = await Promise.all([
+    admin.from("elite_tracker_friends").select("b").eq("a", profileId),
+    admin.from("elite_tracker_friends").select("a").eq("b", profileId),
+  ]);
+  const ids = new Set<string>();
+  for (const r of (left.data as { b: string }[] | null) ?? []) ids.add(r.b);
+  for (const r of (right.data as { a: string }[] | null) ?? []) ids.add(r.a);
+  ids.delete(profileId);
+  return [...ids];
 }
 
-// Every free account, newest first, with this week's and all-time minutes.
-// Caller must already have checked the viewer is a coach.
-export async function getFreeOverview(): Promise<FreeOverview> {
-  const today = nyToday();
+// This player's friends, each with a first name, a last initial and the
+// TRAINING minutes they logged this week (gym never counts). Only ever
+// the viewer's own friends: the ids come from their own pairs, and every
+// read below is limited to those ids.
+export async function friendsWeekFor(viewer: Viewer, today: string): Promise<BoardEntry[]> {
+  if (viewer.demo) return demoFriends();
   const admin = createServiceClient();
-  if (!admin) return demoOverview(today);
+  if (!admin) return [];
+  const ids = await friendIdsOf(admin, viewer.profile.id);
+  if (ids.length === 0) return [];
 
-  // The database hands back at most 1,000 rows a request, so both lists
-  // are read a page at a time until a short page says that is all.
-  const PAGE = 1000;
-  async function everyRow<T>(
-    page: (from: number, to: number) => PromiseLike<{ data: unknown }>
-  ): Promise<T[]> {
-    const out: T[] = [];
-    for (let from = 0; ; from += PAGE) {
-      const { data } = await page(from, from + PAGE - 1);
-      const batch = (data as T[] | null) ?? [];
-      out.push(...batch);
-      if (batch.length < PAGE) return out;
-    }
-  }
-  type LogRow = { profile_id: string; trained_on: string; minutes: number; kind: Kind };
-  const [rows, logs, open, targets] = await Promise.all([
-    everyRow<Tracker>((from, to) =>
-      admin
-        .from("elite_trackers")
-        .select(TRACKER_COLUMNS)
-        .order("created_at", { ascending: false })
-        .order("profile_id")
-        .range(from, to)
-    ),
-    everyRow<LogRow>((from, to) =>
-      admin
-        .from("elite_training_logs")
-        .select("profile_id, trained_on, minutes, kind")
-        .order("created_at")
-        .order("id")
-        .range(from, to)
-    ),
-    isFreeSignupOpen(),
-    getTargetTable(),
-  ]);
-  const ids = rows.map((r) => r.profile_id);
-  // Names, a few hundred ids at a time (an id list rides in the address).
-  const nameOf = new Map<string, string>();
-  for (let i = 0; i < ids.length; i += 200) {
-    const { data: profiles } = await admin
-      .from("elite_profiles")
-      .select("id, full_name")
-      .in("id", ids.slice(i, i + 200));
-    for (const p of profiles ?? []) nameOf.set(p.id as string, (p.full_name as string) ?? "");
-  }
   const { monday, sunday } = weekOf(today);
-  const weekBy = new Map<string, number>();
-  const gymBy = new Map<string, number>();
-  const allBy = new Map<string, number>();
-  const add = (m: Map<string, number>, id: string, n: number) => m.set(id, (m.get(id) ?? 0) + n);
-  for (const l of logs) {
-    const thisWeek = l.trained_on >= monday && l.trained_on <= sunday;
-    if (l.kind === "gym") {
-      if (thisWeek) add(gymBy, l.profile_id, l.minutes);
-      continue;
+  const names = new Map<string, string>();
+  const minutes = new Map<string, number>();
+  // A couple of hundred ids at a time (an id list rides in the address),
+  // and each list of entries a page at a time (1,000 rows a request).
+  for (let i = 0; i < ids.length; i += 200) {
+    const some = ids.slice(i, i + 200);
+    const { data: profiles } = await admin.from("elite_profiles").select("id, full_name").in("id", some);
+    for (const p of profiles ?? []) names.set(p.id as string, (p.full_name as string) ?? "");
+    for (let from = 0; ; from += 1000) {
+      const { data } = await admin
+        .from("elite_training_logs")
+        .select("profile_id, minutes")
+        .in("profile_id", some)
+        .eq("kind", "training")
+        .gte("trained_on", monday)
+        .lte("trained_on", sunday)
+        .order("id")
+        .range(from, from + 999);
+      const rows = (data as { profile_id: string; minutes: number }[] | null) ?? [];
+      for (const r of rows) minutes.set(r.profile_id, (minutes.get(r.profile_id) ?? 0) + r.minutes);
+      if (rows.length < 1000) break;
     }
-    add(allBy, l.profile_id, l.minutes);
-    if (thisWeek) add(weekBy, l.profile_id, l.minutes);
   }
-  const referralsBy = new Map<string, number>();
-  for (const r of rows) {
-    if (r.referred_by) referralsBy.set(r.referred_by, (referralsBy.get(r.referred_by) ?? 0) + 1);
-  }
-
-  const accounts = rows.map((r) => ({
-    profile_id: r.profile_id,
-    name: nameOf.get(r.profile_id) ?? "",
-    phone: r.phone,
-    grade: r.grade,
-    level: r.level,
-    goal: r.goal,
-    week_minutes: weekBy.get(r.profile_id) ?? 0,
-    gym_week_minutes: gymBy.get(r.profile_id) ?? 0,
-    all_minutes: allBy.get(r.profile_id) ?? 0,
-    joined: r.created_at,
-    referrals: referralsBy.get(r.profile_id) ?? 0,
+  return ids.map((id) => ({
+    id,
+    name: shortName(names.get(id) ?? ""),
+    minutes: minutes.get(id) ?? 0,
   }));
-  return {
-    open,
-    targets,
-    accounts,
-    week_minutes: accounts.reduce((s, a) => s + a.week_minutes, 0),
-  };
+}
+
+// The owner of a link's code, when this viewer could add them: a real
+// free account, not the viewer, not a friend already. Null otherwise.
+// Gives back only what a friend would see of the name.
+export async function friendAskFor(
+  viewer: Viewer,
+  code: string | null
+): Promise<{ code: string; name: string } | null> {
+  if (!code) return null;
+  if (viewer.demo) return demoFriendAsk(code);
+  const admin = createServiceClient();
+  if (!admin) return null;
+  const { data: owner } = await admin
+    .from("elite_trackers")
+    .select("profile_id")
+    .eq("referral_code", code)
+    .maybeSingle();
+  const ownerId = owner?.profile_id as string | undefined;
+  if (!ownerId || ownerId === viewer.profile.id) return null;
+  if ((await friendIdsOf(admin, viewer.profile.id)).includes(ownerId)) return null;
+  const { data: profile } = await admin
+    .from("elite_profiles")
+    .select("full_name")
+    .eq("id", ownerId)
+    .maybeSingle();
+  return { code, name: shortName((profile?.full_name as string) ?? "") };
+}
+
+// Make two free accounts friends, both ways, as one stored pair. Safe to
+// repeat. NOT a server action (this file is not one): it is called only
+// by code that has already established both ids for itself, the sign-up
+// route (who sent the link) and the confirm action (the signed-in viewer
+// and the owner of the code they opened).
+export async function makeFriends(x: string, y: string): Promise<boolean> {
+  const pair = friendPair(x, y);
+  const admin = createServiceClient();
+  if (!pair || !admin) return false;
+  const { error } = await admin
+    .from("elite_tracker_friends")
+    .upsert(pair, { onConflict: "a,b", ignoreDuplicates: true });
+  return !error;
 }

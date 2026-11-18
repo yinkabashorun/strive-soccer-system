@@ -1,16 +1,19 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createServiceClient } from "./supabase/server";
 import { getViewer } from "./session";
 import { nyToday } from "./time";
-import { DEMO_QUIZ_COOKIE, getTracker, trackerFor } from "./tracker-server";
+import { getTracker, makeFriends, trackerFor } from "./tracker-server";
+import { DEMO_ASK, readDemoState, writeDemoState } from "./tracker-demo";
 import {
   FREE_HOME,
   GYM_REFUSED_MESSAGE,
   cleanKind,
+  cleanPlanDays,
+  cleanReferralCode,
   cleanTarget,
+  friendPair,
   mayLog,
   validateMinutes,
   validateQuiz,
@@ -22,11 +25,12 @@ import {
 // through here: the signed-in viewer is resolved first, the row touched is
 // always their own (the profile id comes from the session, never from the
 // browser), and only then is the service client used. The example account
-// (no database) answers ok and saves nothing.
+// (no database) answers ok and keeps what it did in a cookie only.
 
 type Fail = { ok: false; error: string };
 const fail = (error: string): Fail => ({ ok: false, error });
 const OFFLINE = "We could not reach the server. Try again in a minute.";
+const PICK_A_DAY = "Pick at least one day.";
 
 // The signed-in free account, or why not.
 type Owner =
@@ -51,28 +55,25 @@ async function owner(): Promise<Owner> {
   return { kind: "ok", admin, profileId: viewer.profile.id, grade: tracker.grade };
 }
 
-// Save the four quiz answers and the weekly target the player chose.
+// Save the set-up: the four quiz answers, the weekly target the player
+// chose, and the days they will train.
 export async function saveQuiz(input: {
   grade: string;
   level: string;
   season: string;
   goal: string;
   target: number;
+  days: number[];
 }): Promise<{ ok: true } | Fail> {
   const answers = validateQuiz(input);
   const target = cleanTarget(input.target);
   if (!answers || target === null) return fail("Answer all four questions, then pick a target.");
+  const days = cleanPlanDays(input.days);
+  if (!days) return fail(PICK_A_DAY);
   const o = await owner();
   if (o.kind === "no") return fail(o.error);
   if (o.kind === "demo") {
-    // The example account keeps the answers for this browser only.
-    cookies().set(DEMO_QUIZ_COOKIE, JSON.stringify({ ...answers, target }), {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-      maxAge: 60 * 60 * 24,
-    });
+    writeDemoState({ quiz: { ...answers, target }, days });
     return { ok: true };
   }
   const { error } = await o.admin
@@ -83,9 +84,29 @@ export async function saveQuiz(input: {
       season: answers.season,
       goal: answers.goal,
       target_minutes: target,
+      plan_days: days,
       quiz: answers,
       quiz_done_at: new Date().toISOString(),
     })
+    .eq("profile_id", o.profileId);
+  if (error) return fail(OFFLINE);
+  revalidatePath(FREE_HOME);
+  return { ok: true };
+}
+
+// Change the days of the week the player plans to train.
+export async function setPlanDays(input: number[]): Promise<{ ok: true } | Fail> {
+  const days = cleanPlanDays(input);
+  if (!days) return fail(PICK_A_DAY);
+  const o = await owner();
+  if (o.kind === "no") return fail(o.error);
+  if (o.kind === "demo") {
+    writeDemoState({ days });
+    return { ok: true };
+  }
+  const { error } = await o.admin
+    .from("elite_trackers")
+    .update({ plan_days: days })
     .eq("profile_id", o.profileId);
   if (error) return fail(OFFLINE);
   revalidatePath(FREE_HOME);
@@ -129,6 +150,58 @@ export async function deleteLog(id: string): Promise<{ ok: true } | Fail> {
     .delete()
     .eq("id", id)
     .eq("profile_id", o.profileId);
+  if (error) return fail(OFFLINE);
+  revalidatePath(FREE_HOME);
+  return { ok: true };
+}
+
+// ---- Friends ----------------------------------------------------------
+
+// "Yes" on the sheet a signed-in player sees after opening a teammate's
+// link. The teammate is found from the link's code; the other side of the
+// pair is always the signed-in player.
+export async function confirmFriend(codeInput: string): Promise<{ ok: true } | Fail> {
+  const code = cleanReferralCode(codeInput);
+  if (!code) return fail("That link is not one of ours.");
+  const o = await owner();
+  if (o.kind === "no") return fail(o.error);
+  if (o.kind === "demo") {
+    if (code === DEMO_ASK.code) writeDemoState({ added: true });
+    return { ok: true };
+  }
+  const { data: other } = await o.admin
+    .from("elite_trackers")
+    .select("profile_id")
+    .eq("referral_code", code)
+    .maybeSingle();
+  const otherId = other?.profile_id as string | undefined;
+  if (!otherId || otherId === o.profileId) return fail("That link is not one of ours.");
+  if (!(await makeFriends(o.profileId, otherId))) return fail(OFFLINE);
+  revalidatePath(FREE_HOME);
+  return { ok: true };
+}
+
+// Take a friend off: the pair is removed, for both of them. Only a pair
+// the signed-in player is one side of can be named.
+export async function removeFriend(friendId: string): Promise<{ ok: true } | Fail> {
+  if (typeof friendId !== "string" || !friendId) return fail("Nothing to remove.");
+  const o = await owner();
+  if (o.kind === "no") return fail(o.error);
+  if (o.kind === "demo") {
+    if (friendId === DEMO_ASK.id) {
+      writeDemoState({ added: false });
+    } else {
+      writeDemoState({ removed: [...new Set([...(readDemoState().removed ?? []), friendId])] });
+    }
+    return { ok: true };
+  }
+  const pair = friendPair(o.profileId, friendId);
+  if (!pair) return fail("Nothing to remove.");
+  const { error } = await o.admin
+    .from("elite_tracker_friends")
+    .delete()
+    .eq("a", pair.a)
+    .eq("b", pair.b);
   if (error) return fail(OFFLINE);
   revalidatePath(FREE_HOME);
   return { ok: true };

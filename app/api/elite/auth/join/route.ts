@@ -5,7 +5,7 @@ import { normalizePhone } from "@/lib/elite/sms";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { AGREEMENT_REQUIRED_MESSAGE, agreementComplete } from "@/lib/elite/legal";
 import { recordConsent } from "@/lib/elite/legal-server";
-import { isFreeSignupOpen } from "@/lib/elite/tracker-server";
+import { isFreeSignupOpen, makeFriends } from "@/lib/elite/tracker-server";
 import {
   JOIN_CLOSED_MESSAGE,
   JOIN_FIELDS_MESSAGE,
@@ -127,6 +127,11 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
+
+  // 4b) joining with a teammate's link makes the two of them friends, both
+  // ways (referred_by above stays as the count the coach sees). Best
+  // effort: a failure here never undoes the account.
+  if (referredBy) await makeFriends(userId, referredBy).catch(() => false);
 
   // 5) the agreement the person just gave (version, time, where).
   await recordConsent({

@@ -7,7 +7,7 @@ import { FREE_HOME } from "@/lib/elite/tracker";
 export const metadata = { title: "Your weekly target · Strive Elite" };
 export const dynamic = "force-dynamic";
 
-// Four questions, then the weekly target. First run lands here; after
+// Four questions, the weekly target, then the days to train. First run lands here; after
 // that it is reached from Account, to change the target or the season.
 export default async function QuizPage() {
   const viewer = await getViewer();
@@ -19,6 +19,7 @@ export default async function QuizPage() {
     <TrackerQuiz
       targets={await getTargetTable()}
       initial={{ grade: tracker.grade, level: tracker.level, season: tracker.season, goal: tracker.goal }}
+      initialDays={tracker.plan_days}
       currentTarget={tracker.quiz_done_at ? tracker.target_minutes : null}
     />
   );

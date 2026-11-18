@@ -19,6 +19,7 @@ const state = {
   createError: null as string | null,
   signInError: false,
   signIns: [] as Row[],
+  friends: [] as [string, string][],
   consents: [] as Row[],
   rateOk: true,
 };
@@ -76,7 +77,13 @@ vi.mock("@/lib/elite/session-start", () => ({
     return !state.signInError;
   },
 }));
-vi.mock("@/lib/elite/tracker-server", () => ({ isFreeSignupOpen: async () => state.open }));
+vi.mock("@/lib/elite/tracker-server", () => ({
+  isFreeSignupOpen: async () => state.open,
+  makeFriends: async (x: string, y: string) => {
+    state.friends.push([x, y]);
+    return true;
+  },
+}));
 vi.mock("@/lib/elite/legal-server", () => ({
   recordConsent: async (row: Row) => {
     state.consents.push(row);
@@ -119,6 +126,7 @@ beforeEach(() => {
     createError: null,
     signInError: false,
     signIns: [],
+    friends: [],
     consents: [],
     rateOk: true,
   });
@@ -203,6 +211,8 @@ describe("free sign-up", () => {
     expect(res.status).toBe(200);
     expect(state.lookedUp).toEqual(["ABCDEFGH"]);
     expect(state.inserts[0].row.referred_by).toBe("sender-9");
+    // and the two of them are friends
+    expect(state.friends).toEqual([["user-1", "sender-9"]]);
   });
 
   it("a bad or unknown code is ignored and never stops a sign-up", async () => {
@@ -218,6 +228,7 @@ describe("free sign-up", () => {
     expect(res.status).toBe(200);
     expect(state.lookedUp).toEqual(["ZZZZZZZZ"]);
     expect(state.inserts[0].row.referred_by).toBeNull();
+    expect(state.friends).toEqual([]);
   });
 
   it("draws a new link code when the first one is taken", async () => {

@@ -5,8 +5,8 @@ import { JoinForm } from "@/components/elite/JoinForm";
 import { getViewer } from "@/lib/elite/session";
 import { isSupabaseConfigured } from "@/lib/elite/supabase/server";
 import { inNativeApp } from "@/lib/elite/native-request";
-import { homePathFor, isFreeSignupOpen } from "@/lib/elite/tracker-server";
-import { JOIN_CLOSED_MESSAGE, cleanReferralCode } from "@/lib/elite/tracker";
+import { homePathFor, isFreeSignupOpen, trackerFor } from "@/lib/elite/tracker-server";
+import { JOIN_CLOSED_MESSAGE, cleanReferralCode, friendAskPath } from "@/lib/elite/tracker";
 
 export const metadata: Metadata = {
   title: "Start your training log · Strive Elite",
@@ -16,7 +16,8 @@ export const dynamic = "force-dynamic";
 
 // The free training log's front door (migration 069). Open to anyone only
 // while a coach has free sign-up switched on at /coach/free; otherwise it
-// says so and offers sign-in. A teammate's link carries ?ref=CODE.
+// says so and offers sign-in. A teammate's link carries ?ref=CODE: whoever
+// joins with it becomes that teammate's friend.
 export default async function JoinPage({
   searchParams,
 }: {
@@ -26,8 +27,14 @@ export default async function JoinPage({
   // rule, lib/elite/native-request.ts): the screen there is sign-in only.
   if (inNativeApp()) redirect("/login");
 
+  const ref = cleanReferralCode(searchParams?.ref);
   const viewer = await getViewer();
-  if (viewer && !viewer.demo) redirect(await homePathFor(viewer));
+  if (viewer) {
+    // Already has a free account and opened a teammate's link: their own
+    // week, where one sheet asks whether to add that teammate as a friend.
+    if (ref && (await trackerFor(viewer))) redirect(friendAskPath(ref));
+    if (!viewer.demo) redirect(await homePathFor(viewer));
+  }
 
   // With no database at all (a local build) the form is shown so it can
   // be looked at; it cannot create anything and says so, like the invite
@@ -47,5 +54,5 @@ export default async function JoinPage({
     );
   }
 
-  return <JoinForm configured={configured} referral={cleanReferralCode(searchParams?.ref) ?? ""} />;
+  return <JoinForm configured={configured} referral={ref ?? ""} />;
 }

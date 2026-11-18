@@ -6,35 +6,57 @@ import { X } from "lucide-react";
 import { deleteLog, logTraining } from "@/lib/elite/tracker-actions";
 import { fmtDuration } from "@/lib/elite/time-trained";
 import { feel } from "@/lib/elite/native";
-import { KINDS, LOG_CHIPS, dayLabel, gymThisWeekLine, type Kind, type TrainingLog } from "@/lib/elite/tracker";
+import {
+  KINDS,
+  LOG_CHIPS,
+  dayLabel,
+  gymThisWeekLine,
+  stripDayLabel,
+  todayLine,
+  weekStrip,
+  type BoardEntry,
+  type Kind,
+  type TrainingLog,
+} from "@/lib/elite/tracker";
 import { ShareWeek } from "./ShareWeek";
-import { InviteRow } from "./InviteRow";
+import { FriendsBoard } from "./FriendsBoard";
+import { TrackerSheet } from "./TrackerSheet";
 
 const UNDO_MS = 6000;
 
-// The free training log, whole: the week's ring, five buttons that log
-// with one tap, what was logged this week, share it, invite a teammate.
-// A tap shows up at once and is saved behind the screen; if the save
-// fails, the entry comes back off and the screen says so.
+// The free training log, whole, top to bottom: the week's ring, the seven
+// days (planned, trained, today), five buttons that log with one tap,
+// share the week, and the week next to your friends. A tap shows up at
+// once and is saved behind the screen; if the save fails, the entry comes
+// back off and the screen says so.
 //
-// Gym work is tracked apart, for high school and college players only
-// (`gym`): they get a Training | Gym switch above the buttons. The ring
-// and its number are training alone; gym never fills the ring.
+// Gym work is tracked apart, for players in high school or older only
+// (`gym`): they get a Training | Gym switch above the buttons. The ring,
+// the days and the friends list are training alone.
 export function TrackerHome({
   logs: serverLogs,
   target,
+  planDays,
+  today,
   gym,
   week,
+  me,
+  friends,
+  friendAsk,
   inviteLink,
-  joined,
   programHref,
 }: {
   logs: TrainingLog[]; // this week's, newest first
   target: number; // training minutes a week
+  planDays: number[]; // 0 = Monday
+  today: string; // the New York date, YYYY-MM-DD
   gym: boolean; // this player logs gym work too
   week: string; // "Nov 16 to Nov 22"
+  me: { id: string; name: string };
+  friends: BoardEntry[];
+  // A teammate whose link this player just opened, to be asked about.
+  friendAsk: { code: string; name: string } | null;
   inviteLink: string;
-  joined: string;
   // Where the one line about the coached program leads; null inside the
   // App Store app, where the line is not drawn (programLink in tracker.ts).
   programHref: string | null;
@@ -43,6 +65,7 @@ export function TrackerHome({
   const [kind, setKind] = useState<Kind>("training");
   const [undo, setUndo] = useState<{ id: string; minutes: number; kind: Kind } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [openDay, setOpenDay] = useState<string | null>(null);
   // Saves still on their way, by the id the screen is showing for them.
   const saving = useRef(new Map<string, Promise<string | null>>());
   const undoWait = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -60,11 +83,13 @@ export function TrackerHome({
     ? gymThisWeekLine(logs.reduce((s, l) => (l.kind === "gym" ? s + l.minutes : s), 0))
     : null;
   const percent = target > 0 ? Math.min(100, (minutes / target) * 100) : 0;
+  const strip = weekStrip(logs, planDays, today);
+  const guide = todayLine(planDays, target, today);
+  const dayEntries = openDay ? logs.filter((l) => l.trained_on === openDay) : [];
 
   function log(amount: number) {
     setError(null);
     const tempId = `new-${Date.now()}`;
-    const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/New_York" });
     const as: Kind = gym ? kind : "training";
     setLogs((cur) => [{ id: tempId, trained_on: today, minutes: amount, kind: as }, ...cur]);
     setKind("training"); // the switch goes back to Training after every log
@@ -121,11 +146,11 @@ export function TrackerHome({
   return (
     <div>
       {/* The week */}
-      <section className="flex flex-col items-center pt-2 text-center">
+      <section className="flex flex-col items-center pt-1 text-center">
         <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-white/60">
           This week · {week}
         </div>
-        <div className="relative mt-5 grid h-60 w-60 place-items-center">
+        <div className="relative mt-4 grid h-56 w-56 place-items-center">
           <svg viewBox="0 0 232 232" className="absolute inset-0 h-full w-full -rotate-90" aria-hidden>
             <circle cx="116" cy="116" r={R} fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="12" />
             <circle
@@ -146,13 +171,43 @@ export function TrackerHome({
               {fmtDuration(minutes)}
             </div>
             <div className="mt-2 text-sm text-white/60">of {fmtDuration(target)}</div>
+            {gymLine && <div className="mt-1 text-sm text-white/60">{gymLine}</div>}
           </div>
         </div>
-        {gymLine && <div className="mt-3 text-[15px] text-white/70">{gymLine}</div>}
+      </section>
+
+      {/* The seven days: planned outlined, trained filled, today marked */}
+      <section className="mt-4">
+        <div className="grid grid-cols-7">
+          {strip.map((d) => (
+            <button
+              key={d.day}
+              type="button"
+              onClick={() => setOpenDay(d.day)}
+              aria-label={stripDayLabel(d)}
+              className="flex h-14 flex-col items-center justify-center gap-1"
+            >
+              <span
+                className={
+                  "grid h-9 w-9 place-items-center rounded-full text-[15px] font-semibold " +
+                  (d.trained
+                    ? "bg-accent text-black"
+                    : d.planned
+                      ? "border border-white/50 text-bone"
+                      : "text-white/50")
+                }
+              >
+                {d.letter}
+              </span>
+              <span className={"h-1 w-1 rounded-full " + (d.today ? "bg-white" : "bg-transparent")} />
+            </button>
+          ))}
+        </div>
+        {guide && <p className="mt-1 text-center text-[15px] text-white/70">{guide}</p>}
       </section>
 
       {/* One tap logs it */}
-      <section className="mt-7">
+      <section className="mt-5">
         <h2 className="text-center text-[15px] font-semibold text-bone">
           Tap how long you trained today
         </h2>
@@ -191,7 +246,7 @@ export function TrackerHome({
             </button>
           ))}
         </div>
-        <div className="mt-2 flex min-h-[44px] items-center justify-center gap-3 text-sm" aria-live="polite">
+        <div className="mt-1 flex min-h-[44px] items-center justify-center gap-3 text-sm" aria-live="polite">
           {undo ? (
             <>
               <span className="text-white/70">
@@ -215,40 +270,17 @@ export function TrackerHome({
         </div>
       </section>
 
-      {/* What was logged this week */}
-      <section className="mt-3">
-        {logs.length === 0 ? (
-          <p className="text-center text-sm text-white/60">Nothing logged yet this week.</p>
-        ) : (
-          <ul className="divide-y divide-white/[0.07] border-y border-white/[0.07]">
-            {logs.map((l) => (
-              <li key={l.id} className="flex min-h-[48px] items-center gap-3 pl-1">
-                <span className="flex-1 text-[15px] text-white/70">
-                  {dayLabel(l.trained_on)}
-                  {gym && <span className="text-white/50"> · {l.kind === "gym" ? "Gym" : "Training"}</span>}
-                </span>
-                <span className="font-display text-xl font-bold tabular-nums text-bone">
-                  {fmtDuration(l.minutes)}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => void remove(l)}
-                  aria-label={`Delete ${fmtDuration(l.minutes)}${l.kind === "gym" ? " of gym work" : ""} on ${dayLabel(l.trained_on)}`}
-                  className="grid h-11 w-11 place-items-center text-white/50"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
-
-      <div className="mt-7">
+      <div className="mt-2">
         <ShareWeek stamp={`${minutes}:${logs.length}`} />
       </div>
 
-      <InviteRow link={inviteLink} joined={joined} />
+      <FriendsBoard
+        me={me}
+        myMinutes={minutes}
+        friends={friends}
+        ask={friendAsk}
+        inviteLink={inviteLink}
+      />
 
       {programHref && (
         <p className="mt-8 text-center text-sm leading-relaxed text-white/60">
@@ -257,6 +289,36 @@ export function TrackerHome({
             See how it works
           </Link>
         </p>
+      )}
+
+      {/* A day's entries, with the delete on each */}
+      {openDay && (
+        <TrackerSheet title={dayLabel(openDay)} onClose={() => setOpenDay(null)}>
+          {dayEntries.length === 0 ? (
+            <p className="py-3 text-[15px] text-white/70">Nothing logged on this day.</p>
+          ) : (
+            <ul className="divide-y divide-white/[0.08]">
+              {dayEntries.map((l) => (
+                <li key={l.id} className="flex min-h-[52px] items-center gap-3">
+                  <span className="flex-1 text-[15px] text-white/70">
+                    {l.kind === "gym" ? "Gym" : "Training"}
+                  </span>
+                  <span className="font-display text-xl font-bold tabular-nums text-bone">
+                    {fmtDuration(l.minutes)}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => void remove(l)}
+                    aria-label={`Delete ${fmtDuration(l.minutes)}${l.kind === "gym" ? " of gym work" : ""}`}
+                    className="grid h-11 w-11 place-items-center text-white/60"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </TrackerSheet>
       )}
     </div>
   );

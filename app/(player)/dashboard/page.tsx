@@ -23,14 +23,14 @@ import {
   getTrainingBreaks,
   getWeeklyPlans,
 } from "@/lib/elite/data";
-import { TodaySession, VictoryLap } from "@/components/elite/TodaySession";
+import { TodaySession } from "@/components/elite/TodaySession";
 import { ExtraWork } from "@/components/elite/ExtraWork";
 import { BreakCard } from "@/components/elite/BreakCard";
 import { ProgressVideoCard } from "@/components/elite/ProgressVideoCard";
 import { previousProgressVideo, progressVideoDue } from "@/lib/elite/progress-video";
 import { currentBreak } from "@/lib/elite/breaks";
 import { settleBreaksForPlayer } from "@/lib/elite/breaks-server";
-import { fmtDuration, timeTrained, weekMinutes } from "@/lib/elite/time-trained";
+import { fmtDuration, timeTrained } from "@/lib/elite/time-trained";
 import { CoachingCallsCard } from "@/components/elite/CoachingCallsCard";
 import { CheckinBooking } from "@/components/elite/CheckinBooking";
 import { getPlayerCheckin } from "@/lib/elite/film-room-data";
@@ -163,22 +163,17 @@ export default async function DashboardPage() {
       {/* THE thing: today's session (or the victory lap, or the break) */}
       {onBreak ? (
         <BreakCard current={onBreak} firstName={firstName} today={today} />
-      ) : weekDone ? (
-        <VictoryLap
+      ) : sessions.length > 0 ? (
+        // One client card for the whole week: the next session with its
+        // Start button, or the week-complete card once every session is
+        // done. It stays mounted across both, so the finish screen of the
+        // last session is never cut off by the page refreshing behind it.
+        <TodaySession
           week={contentWeek}
+          rows={thisWeek}
           firstName={firstName}
-          minutes={weekMinutes(allHomework, contentWeek)}
           totalMinutes={time.minutes}
           nextWeekLine={nextWeekLine}
-          totalSessions={sessions.length}
-        />
-      ) : current ? (
-        <TodaySession
-          session={current.n}
-          totalSessions={sessions.length || 4}
-          drills={current.list}
-          firstName={firstName}
-          extra={current.list.some((h) => h.is_extra)}
           playerId={player.id}
         />
       ) : (
@@ -253,13 +248,19 @@ export default async function DashboardPage() {
         />
       )}
 
-      {/* Compact truth strip: time trained, sessions, weeks (034) */}
+      {/* Compact truth strip: time trained, sessions, weeks (034). One
+          tap opens Progress, which no longer has a tab of its own. */}
       {homework.length > 0 && (
-        <section className="grid grid-cols-3 gap-3">
-          <StatTile label="Time" value={fmtDuration(time.minutes)} sub="Trained" />
-          <StatTile label="Sessions" value={time.sessions} sub="Done" />
-          <StatTile label="Weeks" value={time.weeks} sub="Trained" />
-        </section>
+        <Link href="/progress" aria-label="Open your progress" className="block">
+          <section className="grid grid-cols-3 gap-3">
+            <StatTile label="Time" value={fmtDuration(time.minutes)} sub="Trained" />
+            <StatTile label="Sessions" value={time.sessions} sub="Done" />
+            <StatTile label="Weeks" value={time.weeks} sub="Trained" />
+          </section>
+          <div className="mt-2 text-right text-sm font-medium text-white/60">
+            Your progress <span className="text-accent">→</span>
+          </div>
+        </Link>
       )}
 
       {/* A break is a date, not a penalty (034). Only the quiet one-liner

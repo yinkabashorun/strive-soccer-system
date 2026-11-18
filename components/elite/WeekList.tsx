@@ -1,279 +1,204 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
-import {
-  Check,
-  ChevronDown,
-  Clock,
-  PartyPopper,
-  StickyNote,
-} from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Check, ChevronDown, Play } from "lucide-react";
 import type { Homework } from "@/lib/elite/types";
-import { toggleHomework } from "@/lib/elite/player-actions";
+import {
+  groupSessions,
+  isDone,
+  sessionName,
+  sessionProgress,
+  type SessionGroup,
+} from "@/lib/elite/session-flow";
 import { sessionsWord } from "@/lib/elite/training";
-import { DrillVideo } from "./DrillVideo";
-import { SendClip } from "./SendClip";
+import { SessionPlayer } from "./SessionPlayer";
+import { SessionRows, WeekBar, liveMinutes, useDrillState } from "./SessionRows";
 import { cn } from "@/lib/utils";
 
-const DEFAULT_MIN = 15;
-
-function isPlyo(title: string): boolean {
-  return /plyo|warm-?up/i.test(title);
-}
-function isStrength(title: string): boolean {
-  return /^strength(ening)?\b/i.test(title.trim());
-}
-
-// The player's weekly loop: the current week broken into its sessions (four
-// In-Season, six Off-Season, plus any Extra Work the player added),
-// each starting with a plyometric warm-up (badged). A red "Next up" marks
-// the first incomplete drill. Earlier weeks collapse. When the whole week is
-// done, the player is told the next week drops at the weekend - no false
-// "new week ready" until the coach actually builds it.
+// The player's whole week: one card per session (four In-Season, six
+// Off-Season, plus any Extra Work). The session to do next is open with a
+// Start button; finished ones fold away under a gold tick; any of them
+// opens with a tap. Start opens the session full screen, one drill at a
+// time (SessionPlayer). Earlier weeks collapse underneath. When the whole
+// week is done the player is told the next one is on its way, never a
+// false "new week ready".
 export function WeekList({
   items,
   currentWeek,
   showPast = true,
   playerId,
+  firstName = "",
+  totalMinutes = 0,
 }: {
   items: Homework[];
   currentWeek: number;
   showPast?: boolean;
   playerId?: string; // set on the player's own view: enables Send a clip (036)
+  firstName?: string;
+  totalMinutes?: number; // all time, as the server last counted it
 }) {
-  const [state, setState] = useState<Record<string, boolean>>(() =>
-    Object.fromEntries(items.map((h) => [h.id, h.completed]))
-  );
-  const [, start] = useTransition();
+  const router = useRouter();
+  const { done, toggle } = useDrillState();
+  const [open, setOpen] = useState<{ group: SessionGroup; index: number } | null>(null);
+  const [expanded, setExpanded] = useState<Record<number, boolean>>({});
 
   const weeks = useMemo(() => {
     const by = new Map<number, Homework[]>();
-    for (const h of items) {
-      const arr = by.get(h.week) ?? [];
-      arr.push(h);
-      by.set(h.week, arr);
-    }
+    for (const h of items) by.set(h.week, [...(by.get(h.week) ?? []), h]);
     return [...by.entries()]
       .map(([week, list]) => ({ week, list }))
       .sort((a, b) => b.week - a.week);
   }, [items]);
 
-  function toggle(id: string) {
-    const next = !state[id];
-    setState((s) => ({ ...s, [id]: next }));
-    start(() => {
-      toggleHomework(id, next);
-    });
-  }
+  const close = useCallback(() => {
+    setOpen(null);
+    router.refresh();
+  }, [router]);
 
   if (!items.length) {
     return (
-      <div className="elite-card p-8 text-center text-white/45">
-        No drills assigned yet. Your coach builds your week. It lands here soon.
+      <div className="elite-card p-8 text-center text-white/60">
+        No drills yet. Your coach is building your week. It lands here the moment it is ready.
       </div>
     );
   }
 
   const topWeek = weeks.find((w) => w.week === currentWeek) ?? weeks[0];
   const past = weeks.filter((w) => w.week !== topWeek.week);
-
-  // group the current week into sessions
-  const sessionMap = new Map<number, Homework[]>();
-  for (const h of topWeek.list) {
-    const s = h.session ?? 1;
-    const arr = sessionMap.get(s) ?? [];
-    arr.push(h);
-    sessionMap.set(s, arr);
-  }
-  const sessions = [...sessionMap.entries()]
-    .map(([session, list]) => ({
-      session,
-      list: [...list].sort((a, b) => a.sort - b.sort),
-    }))
-    .sort((a, b) => a.session - b.session);
-
-  // "Next up" = first incomplete drill across sessions in order
-  let nextUpId: string | null = null;
-  for (const s of sessions) {
-    const hit = s.list.find((h) => !state[h.id]);
-    if (hit) {
-      nextUpId = hit.id;
-      break;
-    }
-  }
-
-  const sessionsDone = sessions.filter((s) =>
-    s.list.every((h) => state[h.id])
-  ).length;
+  const sessions = groupSessions(topWeek.list);
+  const nextUp = sessions.find((s) => s.list.some((h) => !isDone(h, done)));
+  const sessionsDone = sessions.filter((s) => s.list.every((h) => isDone(h, done))).length;
   const allDone = sessionsDone === sessions.length;
+  const allTime = liveMinutes(totalMinutes, topWeek.list, done);
 
   return (
-    <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
-          This week · Week {topWeek.week}
-        </span>
-        <span className="text-xs text-white/45">
-          {sessionsDone}/{sessions.length} sessions done
-        </span>
+    <div className="space-y-4">
+      <div>
+        <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.2em] text-white/55">
+          <span>Week {topWeek.week}</span>
+          <span className="tabular-nums">
+            {sessionsDone}/{sessions.length} sessions
+          </span>
+        </div>
+        <div className="mt-2.5">
+          <WeekBar sessions={sessions} done={done} />
+        </div>
       </div>
 
       {allDone && (
-        <div className="flex items-start gap-3 rounded-3xl border border-accent/25 bg-accent/[0.06] p-5">
-          <PartyPopper className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
+        <div className="flex items-start gap-3 rounded-3xl border border-accent/30 bg-accent/[0.07] p-5">
+          <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-accent text-black">
+            <Check className="h-3.5 w-3.5" strokeWidth={4} />
+          </span>
           <div>
-            <div className="font-display text-lg font-bold uppercase tracking-tight">
+            <div className="font-display text-xl font-black uppercase leading-none">
               Week complete
             </div>
-            <p className="mt-1 text-sm text-white/60">
-              All {sessionsWord(sessions.length)} sessions done. Real work. Rest and recover; your coach
-              drops next week&apos;s plan over the weekend.
+            <p className="mt-1.5 text-[15px] text-white/75">
+              All {sessionsWord(sessions.length)} sessions done. Your next week is on its way.
             </p>
           </div>
         </div>
       )}
 
       {sessions.map((s) => {
-        const done = s.list.filter((h) => state[h.id]).length;
+        const p = sessionProgress(s.list, done);
+        const isNext = nextUp?.n === s.n;
+        const isOpen = expanded[s.n] ?? isNext;
         return (
-          <div key={s.session}>
-            <div className="mb-2 flex items-center justify-between">
-              <span className="flex items-center gap-2 font-display text-sm font-bold uppercase tracking-tight">
-                <span className="grid h-6 w-6 place-items-center rounded-lg bg-accent/15 text-accent">
-                  {s.session}
+          <section
+            key={s.n}
+            className={cn(
+              "overflow-hidden rounded-3xl border bg-white/[0.03]",
+              isNext ? "border-white/15" : "border-white/[0.08]"
+            )}
+          >
+            <button
+              onClick={() => setExpanded((e) => ({ ...e, [s.n]: !isOpen }))}
+              aria-expanded={isOpen}
+              className="flex w-full items-center gap-3 p-4 text-left"
+            >
+              <span
+                className={cn(
+                  "grid h-9 w-9 shrink-0 place-items-center rounded-full font-display text-lg font-black",
+                  p.complete ? "bg-accent text-black" : "bg-white/[0.08] text-bone"
+                )}
+              >
+                {p.complete ? <Check className="h-4.5 w-4.5" strokeWidth={3.5} /> : s.n}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block font-display text-xl font-black uppercase leading-none">
+                  {sessionName(s)}
                 </span>
-                {s.list.some((h) => h.is_extra) ? "Extra session" : `Session ${s.session}`}
+                <span className="mt-1 block text-xs text-white/55">
+                  {p.complete
+                    ? `Done · ${p.minutesTotal} min`
+                    : `${p.done}/${p.total} drills · about ${p.minutesTotal} min`}
+                </span>
               </span>
-              <span className="text-xs text-white/40">
-                {done}/{s.list.length}
-              </span>
-            </div>
-            <ul className="space-y-2.5">
-              {s.list.map((h) => (
-                <DrillRow
-                  key={h.id}
-                  hw={h}
-                  done={state[h.id]}
-                  nextUp={h.id === nextUpId}
-                  onToggle={() => toggle(h.id)}
-                  playerId={playerId}
-                />
-              ))}
-            </ul>
-          </div>
+              <ChevronDown
+                className={cn("h-5 w-5 shrink-0 text-white/40 transition-transform", isOpen && "rotate-180")}
+              />
+            </button>
+
+            {isOpen && (
+              <>
+                <div className="border-t border-white/[0.06] px-1.5">
+                  <SessionRows
+                    drills={s.list}
+                    done={done}
+                    onToggle={toggle}
+                    onOpen={(index) => setOpen({ group: s, index })}
+                  />
+                </div>
+                {!p.complete && (
+                  <div className="p-4 pt-3">
+                    <button
+                      onClick={() => setOpen({ group: s, index: Math.max(0, p.nextIndex) })}
+                      className={cn(
+                        "flex h-14 w-full items-center justify-center gap-2.5 rounded-2xl font-display text-xl font-black uppercase tracking-wide transition-transform active:scale-[0.98]",
+                        isNext ? "bg-white text-black" : "border border-white/15 text-bone"
+                      )}
+                    >
+                      <Play className="h-5 w-5" fill="currentColor" />
+                      {p.done > 0 ? "Continue session" : "Start session"}
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+          </section>
         );
       })}
 
-      {showPast &&
-        past.map((w) => (
-          <PastWeek key={w.week} week={w.week} list={w.list} state={state} />
-        ))}
+      {showPast && past.map((w) => <PastWeek key={w.week} week={w.week} list={w.list} />)}
+
+      {open && (
+        <SessionPlayer
+          drills={open.group.list}
+          done={done}
+          onToggle={toggle}
+          startIndex={open.index}
+          title={sessionName(open.group)}
+          weekLabel={`Week ${topWeek.week}`}
+          firstName={firstName}
+          minutesBefore={allTime - sessionProgress(open.group.list, done).minutesDone}
+          sessionsLeftAfter={
+            sessions.filter((s) => s.n !== open.group.n && s.list.some((h) => !isDone(h, done))).length
+          }
+          sessionsTotal={sessions.length}
+          playerId={playerId}
+          onClose={close}
+        />
+      )}
     </div>
   );
 }
 
-function DrillRow({
-  hw,
-  done,
-  nextUp,
-  onToggle,
-  playerId,
-}: {
-  hw: Homework;
-  done: boolean;
-  nextUp: boolean;
-  onToggle: () => void;
-  playerId?: string;
-}) {
-  const plyo = isPlyo(hw.title);
-  const strength = isStrength(hw.title);
-  return (
-    <li
-      className={cn(
-        "elite-card flex gap-4 p-4 transition-colors",
-        done && "border-accent/20 bg-accent/[0.03]",
-        nextUp && !done && "border-red-500/40 bg-red-500/[0.04]",
-        plyo && !done && !nextUp && "border-red-500/20"
-      )}
-    >
-      <button
-        onClick={onToggle}
-        aria-label={done ? "Mark incomplete" : "Mark complete"}
-        className={cn(
-          "mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 transition-all",
-          done
-            ? "border-accent bg-accent text-black"
-            : "border-white/20 text-transparent hover:border-white/40"
-        )}
-      >
-        <Check className="h-4 w-4" strokeWidth={3} />
-      </button>
-
-      <div className="min-w-0 flex-1">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            {nextUp && !done && (
-              <span className="rounded-full bg-red-500/90 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-white">
-                Next up
-              </span>
-            )}
-            {plyo && (
-              <span className="rounded-full border border-red-500/40 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-red-300">
-                Plyo warm-up
-              </span>
-            )}
-            {strength && (
-              <span className="rounded-full border border-accent/40 px-2 py-0.5 text-[9px] font-bold uppercase tracking-[0.14em] text-accent">
-                Finisher
-              </span>
-            )}
-            <h4
-              className={cn(
-                "font-semibold leading-snug",
-                done ? "text-white/50 line-through" : "text-bone"
-              )}
-            >
-              {hw.title}
-            </h4>
-          </div>
-          <div className="flex shrink-0 items-center gap-1.5">
-            {hw.reps && <span className="chip whitespace-nowrap">{hw.reps}</span>}
-            <span className="chip flex items-center gap-1 whitespace-nowrap">
-              <Clock className="h-3 w-3" />
-              {hw.duration_min ?? DEFAULT_MIN}m
-            </span>
-          </div>
-        </div>
-        <p className="mt-1 text-sm leading-relaxed text-white/55">
-          {hw.exercise}
-        </p>
-        {hw.notes && (
-          <p className="mt-2 flex items-start gap-1.5 text-xs text-white/45">
-            <StickyNote className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-            {hw.notes}
-          </p>
-        )}
-        {hw.video_url && <DrillVideo src={hw.video_url} />}
-        {/* Send a clip (036): skill drills only, the player's own view */}
-        {playerId && !plyo && !strength && (
-          <SendClip playerId={playerId} homeworkId={hw.id} title={hw.title} />
-        )}
-      </div>
-    </li>
-  );
-}
-
-function PastWeek({
-  week,
-  list,
-  state,
-}: {
-  week: number;
-  list: Homework[];
-  state: Record<string, boolean>;
-}) {
+function PastWeek({ week, list }: { week: number; list: Homework[] }) {
   const [open, setOpen] = useState(false);
-  const done = list.filter((h) => state[h.id]).length;
+  const done = list.filter((h) => h.completed).length;
   const ordered = [...list].sort(
     (a, b) => (a.session ?? 1) - (b.session ?? 1) || a.sort - b.sort
   );
@@ -281,39 +206,29 @@ function PastWeek({
     <div className="elite-card overflow-hidden">
       <button
         onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
         className="flex w-full items-center justify-between p-4 text-left"
       >
-        <span className="text-sm font-medium text-white/70">Week {week}</span>
+        <span className="text-[15px] font-medium text-white/80">Week {week}</span>
         <span className="flex items-center gap-3">
-          <span className="text-xs text-white/40">
+          <span className="text-xs tabular-nums text-white/55">
             {done}/{list.length} done
           </span>
           <ChevronDown
-            className={cn(
-              "h-4 w-4 text-white/40 transition-transform",
-              open && "rotate-180"
-            )}
+            className={cn("h-4 w-4 text-white/40 transition-transform", open && "rotate-180")}
           />
         </span>
       </button>
       {open && (
-        <ul className="space-y-1.5 border-t border-white/6 p-4">
+        <ul className="space-y-2 border-t border-white/6 p-4">
           {ordered.map((h) => (
-            <li
-              key={h.id}
-              className="flex items-center gap-2.5 text-sm text-white/60"
-            >
+            <li key={h.id} className="flex items-center gap-2.5 text-sm text-white/70">
               <Check
-                className={cn(
-                  "h-4 w-4 shrink-0",
-                  state[h.id] ? "text-accent" : "text-white/20"
-                )}
+                className={cn("h-4 w-4 shrink-0", h.completed ? "text-accent" : "text-white/20")}
                 strokeWidth={3}
               />
-              <span className={state[h.id] ? "line-through" : ""}>
-                {h.title}
-              </span>
-              <span className="ml-auto text-xs text-white/30">{h.reps}</span>
+              <span className="min-w-0 flex-1 truncate">{h.title}</span>
+              <span className="shrink-0 text-xs text-white/40">{h.reps}</span>
             </li>
           ))}
         </ul>

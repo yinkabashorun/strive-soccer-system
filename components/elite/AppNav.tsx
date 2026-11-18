@@ -96,13 +96,13 @@ export function AppNav({
 
         <div className="mt-auto">
           <div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-white/[0.02] p-3">
-            <Avatar name={name} color={color} size={38} />
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-sm font-semibold text-bone">
-                {name}
-              </div>
-              <div className="text-[11px] text-white/40">{roleLabel}</div>
-            </div>
+            <Link href="/account" className="flex min-w-0 flex-1 items-center gap-3" aria-label="Account">
+              <Avatar name={name} color={color} size={38} />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-sm font-semibold text-bone">{name}</span>
+                <span className="block text-[11px] text-white/40">{roleLabel}</span>
+              </span>
+            </Link>
             <form action={signOut}>
               <button
                 type="submit"
@@ -116,21 +116,15 @@ export function AppNav({
         </div>
       </aside>
 
-      {/* Mobile top bar */}
+      {/* Mobile top bar. The initials open Account (settings, help, sign
+          out, delete account); sign out is no longer one stray tap away. */}
       <div className="sticky top-0 z-40 flex items-center justify-between border-b border-white/5 bg-black/70 px-5 py-3 backdrop-blur-xl pt-safe lg:hidden">
         <Wordmark size="sm" />
         <div className="flex items-center gap-2">
           {notifications && <NotificationBell initial={notifications} />}
-          <Avatar name={name} color={color} size={32} />
-          <form action={signOut}>
-            <button
-              type="submit"
-              className="grid h-9 w-9 place-items-center rounded-lg text-white/50 hover:text-white"
-              aria-label="Sign out"
-            >
-              <LogOut className="h-[18px] w-[18px]" />
-            </button>
-          </form>
+          <Link href="/account" aria-label="Account" className="grid h-11 w-11 place-items-center">
+            <Avatar name={name} color={color} size={32} />
+          </Link>
         </div>
       </div>
 
@@ -145,18 +139,18 @@ export function AppNav({
               <Link
                 key={item.href}
                 href={item.href}
-                className="flex flex-1 flex-col items-center gap-1 py-2.5"
+                className="flex min-h-[52px] flex-1 flex-col items-center justify-center gap-1 py-2"
               >
                 <Icon
                   className={cn(
                     "h-[22px] w-[22px] transition-colors",
-                    active ? "text-accent" : "text-white/40"
+                    active ? "text-accent" : "text-white/50"
                   )}
                 />
                 <span
                   className={cn(
-                    "text-[10px] font-medium",
-                    active ? "text-bone" : "text-white/40"
+                    "text-[11px] font-medium",
+                    active ? "text-bone" : "text-white/50"
                   )}
                 >
                   {item.label}

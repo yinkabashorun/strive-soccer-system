@@ -3,7 +3,7 @@ import { Wordmark } from "@/components/elite/Wordmark";
 
 export const metadata = { title: "Privacy Policy · Strive Elite" };
 
-const UPDATED = "September 26, 2026";
+const UPDATED = "November 18, 2026";
 const CONTACT_EMAIL = "coach@strivesoccer100x.com";
 
 export default function PrivacyPage() {
@@ -37,14 +37,24 @@ export default function PrivacyPage() {
               <li>
                 <strong className="text-bone">Parent/guardian contact info:</strong>{" "}
                 name, email address, and phone number, used to send you
-                updates about your player&apos;s training.
+                updates about your player&apos;s training. A player&apos;s
+                own phone number is optional and only used for training
+                texts if you add it.
               </li>
               <li>
                 <strong className="text-bone">Training data:</strong> weekly
                 homework completion, self-reported check-ins (energy,
-                rating, notes), progress ratings, and links to any film you
-                or your player submit (we store the link, e.g. to Hudl or
-                YouTube - we don&apos;t host the video file itself).
+                rating, notes), progress ratings, time trained, and links to
+                any game film you or your player submit (e.g. to Hudl or
+                YouTube).
+              </li>
+              <li>
+                <strong className="text-bone">Videos your player uploads:</strong>{" "}
+                clips of a drill sent to the coach, progress videos, and
+                clips added for a Film Room session. These files are stored
+                privately. Only your family and the coaches can open them.
+                A clip is never posted publicly unless a parent or guardian
+                has said yes to that specific clip.
               </li>
               <li>
                 <strong className="text-bone">Messages:</strong> any message
@@ -56,7 +66,8 @@ export default function PrivacyPage() {
                 your login email, a securely hashed password (we never see
                 or store your actual password), and, if you enable push
                 notifications, the technical subscription details needed to
-                send them.
+                send them. If the app shows an error page, we record which
+                page it was and what went wrong so we can fix it.
               </li>
             </ul>
           </Section>
@@ -91,7 +102,22 @@ export default function PrivacyPage() {
             <ul className="list-disc space-y-1.5 pl-5">
               <li>
                 <strong className="text-bone">Supabase</strong> stores our
-                database (everything listed above) and handles login.
+                database and uploaded videos (everything listed above) and
+                handles login.
+              </li>
+              <li>
+                <strong className="text-bone">Vercel</strong> hosts the app
+                itself.
+              </li>
+              <li>
+                <strong className="text-bone">Zoom</strong> hosts Film Room
+                sessions and coaching calls. Joining one is subject to
+                Zoom&apos;s own terms.
+              </li>
+              <li>
+                <strong className="text-bone">Apple and Google</strong>{" "}
+                deliver push notifications to your phone if you turn them
+                on.
               </li>
               <li>
                 <strong className="text-bone">GoHighLevel</strong> sends
@@ -118,10 +144,14 @@ export default function PrivacyPage() {
 
           <Section title="Children's information">
             <p>
-              Strive Elite is a program for youth players, most of whom are
-              under 13. Accounts are created and controlled by a parent or
-              guardian, not the child, and all communications about the
-              program go to the parent/guardian contact info on file. If
+              Strive Elite is a training program for youth players, most of
+              whom are between 12 and 15. Accounts are created and
+              controlled by a parent or guardian, and a player under 13
+              takes part only through an account their parent or guardian
+              set up and agreed to. Communications about the program go to
+              the parent/guardian contact info on file. We do not show
+              advertising in the app and we do not use your player&apos;s
+              information for advertising. If
               you have questions about your child&apos;s information, or
               want it corrected or removed, contact us at{" "}
               <a href={`mailto:${CONTACT_EMAIL}`} className="text-accent hover:underline">
@@ -134,12 +164,43 @@ export default function PrivacyPage() {
           <Section title="Your choices">
             <p>
               You can ask us at any time to see what information we have on
-              file for your player, correct anything that&apos;s wrong, or
-              delete your account. Deleting an account removes the
-              player&apos;s training history, messages, and progress data.
-              We keep information only as long as your player is an active
-              member, plus a reasonable period afterward for our own
-              records, unless you ask us to delete it sooner.
+              file for your player or to correct anything that&apos;s wrong.
+              You can turn push notifications off on the Account page in
+              the app, and stop text messages by replying STOP to one or
+              by asking us.
+            </p>
+          </Section>
+
+          <Section title="Deleting your account">
+            <p>
+              You can delete your account yourself, at any time, inside the
+              app: open <strong className="text-bone">Account</strong>, then{" "}
+              <strong className="text-bone">Delete my account</strong>. You
+              will be asked for your password to confirm. If you can&apos;t
+              sign in, email us at{" "}
+              <a href={`mailto:${CONTACT_EMAIL}`} className="text-accent hover:underline">
+                {CONTACT_EMAIL}
+              </a>{" "}
+              from the address on the account and we will delete it for
+              you.
+            </p>
+            <p>
+              Deleting an account is permanent and takes effect right away.
+              It removes the login, the player&apos;s profile, training
+              plans and history, progress data, messages, and every video
+              the player uploaded. What it does not remove: records of
+              payments, which are held by our payment processor and which we
+              keep as long as tax and accounting rules require, and text
+              messages already delivered to your phone. Backup copies held
+              by our hosting provider are overwritten on their regular
+              schedule. Deleting an account does not by itself stop a
+              monthly payment. We are told when an account is deleted and
+              stop the billing; you can also ask us directly.
+            </p>
+            <p>
+              While an account is open we keep its information so the
+              program can work. If a membership ends and the account is
+              left open, you can delete it the same way or ask us to.
             </p>
           </Section>
 

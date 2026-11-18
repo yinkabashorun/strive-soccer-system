@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient, createServiceClient } from "./supabase/server";
+import { removePlayerFiles } from "./account-server";
 import { getViewer } from "./session";
 import { sendPlayerEmail } from "./email";
 import { sendPushToPlayer } from "./push";
@@ -219,6 +220,9 @@ export async function deletePlayer(playerId: string) {
 
   const admin = player?.profile_id ? createServiceClient() : null;
   if (admin && player?.profile_id) {
+    // Their uploaded clips first (the same step the family's own "Delete
+    // my account" takes): deleting the row does not remove files.
+    await removePlayerFiles(admin, playerId);
     const { error } = await admin.auth.admin.deleteUser(player.profile_id);
     if (error) return { ok: false as const };
   } else {

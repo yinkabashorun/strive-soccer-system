@@ -7,13 +7,20 @@ import { Loader2, Lock, Mail } from "lucide-react";
 import { createClient } from "@/lib/elite/supabase/client";
 import { enterDemoPlayer, enterDemoCoach } from "@/lib/elite/auth-actions";
 import { INVITE_USED_MESSAGE, INVITE_USED_NOTICE } from "@/lib/elite/invite-link";
+import { ACCOUNT_DELETED_MESSAGE, ACCOUNT_DELETED_NOTICE } from "@/lib/elite/account";
 
 export function LoginForm({ configured }: { configured: boolean }) {
   const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next");
   // A used invite link lands here with a plain explanation, not an error.
-  const notice = params.get("notice") === INVITE_USED_NOTICE ? INVITE_USED_MESSAGE : null;
+  const noticeKey = params.get("notice");
+  const notice =
+    noticeKey === INVITE_USED_NOTICE
+      ? INVITE_USED_MESSAGE
+      : noticeKey === ACCOUNT_DELETED_NOTICE
+        ? ACCOUNT_DELETED_MESSAGE
+        : null;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);

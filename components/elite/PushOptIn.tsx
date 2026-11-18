@@ -2,18 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { Bell, Share } from "lucide-react";
-import { notifyStep, type NotifyPermission, type NotifyStep } from "@/lib/elite/install";
+import type { NotifyStep } from "@/lib/elite/install";
+import { VAPID_PUBLIC_KEY, readStep, saveSubscription } from "@/lib/elite/push-client";
+import { isNativeApp } from "@/lib/elite/native";
 
-const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 const DISMISS_KEY = "strive_push_dismissed";
 const INSTALL_DISMISS_KEY = "strive_install_dismissed";
-
-function urlBase64ToUint8Array(base64String: string) {
-  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
-  const raw = atob(base64);
-  return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
-}
 
 function dismissed(key: string): boolean {
   try {
@@ -22,42 +16,6 @@ function dismissed(key: string): boolean {
     // localStorage unavailable (private mode, etc.): show the card anyway
     return false;
   }
-}
-
-function readStep(): NotifyStep {
-  const hasPush = "serviceWorker" in navigator && "PushManager" in window;
-  const permission: NotifyPermission =
-    typeof Notification === "undefined" ? "unsupported" : Notification.permission;
-  const standalone =
-    window.matchMedia?.("(display-mode: standalone)").matches === true ||
-    (navigator as Navigator & { standalone?: boolean }).standalone === true;
-  return notifyStep({
-    userAgent: navigator.userAgent,
-    maxTouchPoints: navigator.maxTouchPoints ?? 0,
-    standalone,
-    hasPush,
-    permission,
-  });
-}
-
-// Put this device on file: register the service worker, reuse the
-// subscription the browser already holds or make one, and save it. Safe to
-// run on every visit (the save is an upsert), which is how a subscription
-// the browser quietly replaced finds its way back to the server.
-async function saveSubscription() {
-  const reg = await navigator.serviceWorker.register("/sw.js");
-  const existing = await reg.pushManager.getSubscription();
-  const sub =
-    existing ??
-    (await reg.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY!),
-    }));
-  await fetch("/api/elite/push/subscribe", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(sub.toJSON()),
-  });
 }
 
 // The notifications card at the top of the player app. What it shows is
@@ -76,6 +34,9 @@ export function PushOptIn() {
   useEffect(() => {
     if (!VAPID_PUBLIC_KEY) return;
     if (typeof window === "undefined") return;
+    // Inside the App Store app notifications are the phone's own, set up
+    // by the shell: no web push and no "add to home screen" card there.
+    if (isNativeApp()) return;
     const next = readStep();
     if (next === "resync") {
       saveSubscription().catch(() => undefined);

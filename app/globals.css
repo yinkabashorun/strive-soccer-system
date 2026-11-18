@@ -189,3 +189,21 @@ select {
   }
   .draw-line, .rise-in { animation: none; transform: none; opacity: 1; }
 }
+
+/* Reduced motion: every session-player animation becomes a short fade and
+   nothing slides, pops or draws (Apple HIG: replace movement with fades). */
+@media (prefers-reduced-motion: reduce) {
+  .animate-sheet-in,
+  .animate-drill-in,
+  .animate-check-pop,
+  .animate-rise,
+  .animate-glow-once,
+  .animate-bar-fill {
+    animation: fade-in 0.2s ease-out both !important;
+    transform: none !important;
+  }
+  .animate-ring-close {
+    animation: none !important;
+    stroke-dashoffset: 0 !important;
+  }
+}

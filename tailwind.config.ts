@@ -60,6 +60,16 @@ const config: Config = {
         marquee: "marquee 40s linear infinite",
         "fade-up": "fade-up 0.6s cubic-bezier(0.16,1,0.3,1) both",
         "fade-in": "fade-in 0.5s ease-out both",
+        // The session player (Nov 18 2026): short, precise, no bounce
+        // beyond a touch on the check. All of them collapse to a plain
+        // fade for reduced-motion users (globals.css).
+        "sheet-in": "sheet-in 0.28s cubic-bezier(0.2,0,0,1) both",
+        "drill-in": "drill-in 0.26s cubic-bezier(0.2,0,0,1) both",
+        "check-pop": "check-pop 0.36s cubic-bezier(0.2,0.9,0.3,1.2) both",
+        "ring-close": "ring-close 0.7s cubic-bezier(0.2,0,0,1) 0.1s both",
+        "glow-once": "glow-once 1.2s ease-out both",
+        rise: "rise 0.45s cubic-bezier(0.2,0,0,1) both",
+        "bar-fill": "bar-fill 0.4s cubic-bezier(0.2,0,0,1) both",
       },
       keyframes: {
         "pulse-soft": {
@@ -77,6 +87,35 @@ const config: Config = {
         "fade-in": {
           "0%": { opacity: "0" },
           "100%": { opacity: "1" },
+        },
+        "sheet-in": {
+          "0%": { opacity: "0", transform: "translateY(24px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "drill-in": {
+          "0%": { opacity: "0", transform: "translateX(18px)" },
+          "100%": { opacity: "1", transform: "translateX(0)" },
+        },
+        "check-pop": {
+          "0%": { opacity: "0", transform: "scale(0.6)" },
+          "100%": { opacity: "1", transform: "scale(1)" },
+        },
+        "ring-close": {
+          "0%": { strokeDashoffset: "var(--ring)" },
+          "100%": { strokeDashoffset: "0" },
+        },
+        "glow-once": {
+          "0%": { opacity: "0", transform: "scale(0.7)" },
+          "40%": { opacity: "1" },
+          "100%": { opacity: "0.35", transform: "scale(1.15)" },
+        },
+        rise: {
+          "0%": { opacity: "0", transform: "translateY(10px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "bar-fill": {
+          "0%": { transform: "scaleX(0)" },
+          "100%": { transform: "scaleX(1)" },
         },
       },
     },

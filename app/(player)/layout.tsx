@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AppNav, type NavItem } from "@/components/elite/AppNav";
 import { Wordmark } from "@/components/elite/Wordmark";
@@ -7,11 +8,12 @@ import { getNotifications, getPlayer } from "@/lib/elite/data";
 import { signOut } from "@/lib/elite/auth-actions";
 import { unlockDueWeeks } from "@/lib/elite/unlock";
 
+// Five tabs, the most an iPhone tab bar should carry (Apple HIG). Progress
+// lives one tap away: the time-trained strip on Home and the Account page.
 const PLAYER_NAV: NavItem[] = [
   { href: "/dashboard", label: "Home", icon: "Home" },
   { href: "/homework", label: "Training", icon: "Clipboard" },
   { href: "/courses", label: "Courses", icon: "BookOpen" },
-  { href: "/progress", label: "Progress", icon: "BarChart3" },
   { href: "/film", label: "Film", icon: "Film" },
   { href: "/messages", label: "Coach", icon: "MessageSquare" },
 ];
@@ -95,6 +97,9 @@ function GateScreen({ title, body }: { title: string; body: string }) {
       <form action={signOut} className="mt-8">
         <button className="btn px-6 py-3">Sign out</button>
       </form>
+      <Link href="/account" className="mt-4 text-sm text-white/55 underline-offset-4 hover:underline">
+        Account
+      </Link>
     </div>
   );
 }

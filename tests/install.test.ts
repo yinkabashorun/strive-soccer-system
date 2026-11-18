@@ -138,7 +138,8 @@ describe("the app installs to the home screen", () => {
 
   it("the notifications card decides through notifyStep and handles the iPhone case", () => {
     const card = read("components/elite/PushOptIn.tsx");
-    expect(card).toContain("notifyStep(");
+    expect(card).toContain("readStep()");
+    expect(read("lib/elite/push-client.ts")).toContain("notifyStep(");
     expect(card).toContain('"install_ios"');
     expect(card).toContain("Add to Home Screen");
   });

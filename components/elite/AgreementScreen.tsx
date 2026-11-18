@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useFormState, useFormStatus } from "react-dom";
 import { acceptAgreement, type AgreeState } from "@/lib/elite/legal-actions";
 import { AGREEMENT_POINTS, GUARDIAN_STATEMENT, TERMS_STATEMENT } from "@/lib/elite/legal";
+import { AppLink } from "./AppLink";
 import { Wordmark } from "./Wordmark";
 
 function Submit() {
@@ -48,13 +49,13 @@ export function AgreementScreen({ signOut }: { signOut: () => Promise<void> }) {
 
         <p className="mt-4 text-sm text-white/65">
           Read them in full:{" "}
-          <Link href="/terms" target="_blank" className="tap font-semibold text-bone underline underline-offset-4">
+          <AppLink href="/terms" title="Terms of Service" className="tap font-semibold text-bone underline underline-offset-4">
             Terms of Service
-          </Link>{" "}
+          </AppLink>{" "}
           and{" "}
-          <Link href="/privacy" target="_blank" className="tap font-semibold text-bone underline underline-offset-4">
+          <AppLink href="/privacy" title="Privacy Policy" className="tap font-semibold text-bone underline underline-offset-4">
             Privacy Policy
-          </Link>
+          </AppLink>
           .
         </p>
 

@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { KeyRound, Loader2 } from "lucide-react";
 import { enterDemoPlayer, enterDemoCoach } from "@/lib/elite/auth-actions";
 import { signupLanding, type InviteRole } from "@/lib/elite/invite-link";
+import { AppLink } from "./AppLink";
 
 // Signup gated by a single-use invite code. A player code (the default)
 // creates a family's account; a coach code (054, admin-generated) creates a
@@ -198,13 +199,13 @@ export function SignupForm({
             />
             <span>
               I agree to the{" "}
-              <Link href="/terms" target="_blank" className="tap underline underline-offset-2">
+              <AppLink href="/terms" title="Terms of Service" className="tap underline underline-offset-2">
                 Terms of Service
-              </Link>{" "}
+              </AppLink>{" "}
               and the{" "}
-              <Link href="/privacy" target="_blank" className="tap underline underline-offset-2">
+              <AppLink href="/privacy" title="Privacy Policy" className="tap underline underline-offset-2">
                 Privacy Policy
-              </Link>
+              </AppLink>
               .
             </span>
           </label>

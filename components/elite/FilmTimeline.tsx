@@ -5,6 +5,7 @@ import { CheckCircle2, Clapperboard, Loader2, Lock, PlayCircle } from "lucide-re
 import type { FilmUpload } from "@/lib/elite/types";
 import { submitFilm } from "@/lib/elite/player-actions";
 import { FilmReviewView } from "@/components/elite/FilmReviewView";
+import { AppLink } from "@/components/elite/AppLink";
 import { cn, timeAgo } from "@/lib/utils";
 
 // Month 1 / Month 2 / Month 3 film timeline. One video link per program
@@ -115,15 +116,14 @@ function MonthCard({
       >
         {label}
         {film?.url && (
-          <a
+          <AppLink
             href={film.url}
-            target="_blank"
-            rel="noreferrer"
+            title={film.title || `Month ${month} film`}
             className="mt-3 flex items-center gap-2 text-sm text-white/75 underline-offset-2 hover:text-accent hover:underline"
           >
             <PlayCircle className="h-4 w-4 shrink-0 text-accent" />
             <span className="truncate">{film.title || "Watch your film"}</span>
-          </a>
+          </AppLink>
         )}
         {film?.review ? (
           <div className="mt-3 rounded-2xl border border-white/8 bg-black/40 p-4 sm:p-5">

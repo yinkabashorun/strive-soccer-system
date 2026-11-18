@@ -8,6 +8,7 @@ import { clipExtension, filmRoomPath } from "@/lib/elite/clips";
 import { uploadClip } from "@/lib/elite/clip-upload";
 import { FILM_CLIPS_MAX, FILM_CLIPS_MIN, fmtWhen } from "@/lib/elite/film-room";
 import type { FilmRoom, FilmRoomClip } from "@/lib/elite/types";
+import { AppLink } from "./AppLink";
 
 // The member side of the weekly Film Room (062): when it is, the Zoom
 // link, and the place to upload three to five clips for Coach Yinka and
@@ -96,9 +97,9 @@ export function FilmRoomCard({
         {room.topic ? `. ${room.topic}` : "."}
       </p>
       {room.zoom_url ? (
-        <a href={room.zoom_url} target="_blank" rel="noreferrer" className="btn mt-3 inline-flex min-h-[44px] px-5 py-2 text-sm">
+        <AppLink href={room.zoom_url} title="Join on Zoom" className="btn mt-3 inline-flex min-h-[44px] px-5 py-2 text-sm">
           <Video className="mr-1.5 h-4 w-4" /> Join on Zoom
-        </a>
+        </AppLink>
       ) : (
         <p className="mt-3 text-sm text-white/50">The Zoom link will show up here before the session.</p>
       )}

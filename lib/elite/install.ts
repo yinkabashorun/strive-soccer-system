@@ -84,7 +84,8 @@ export function pushStatusLine(s: PushStatus): { ok: boolean; line: string } {
 }
 
 // The one ask (App Store punch list, A8). Notifications are asked for
-// once, on the finish screen of a session the member has just completed:
+// once, on its own screen right after the finish screen of a session the
+// member has just completed (they tap Done there, then see the ask):
 // the moment they can see why they would want to know the next week is
 // live. Not on first open, not at the top of every page. A member who
 // says not now is not asked again; the Account page stays the way in.

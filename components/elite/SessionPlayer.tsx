@@ -24,7 +24,7 @@ import { drillPoster, preloadNextClip } from "@/lib/elite/drill-poster";
 import { AUTOPLAY_PREF_KEY } from "@/lib/elite/session-flow";
 import { SendClip } from "./SendClip";
 import { SetTimer } from "./SetTimer";
-import { PushOptIn } from "./PushOptIn";
+import { PushOptIn, useNotificationsAsk } from "./PushOptIn";
 import { cn } from "@/lib/utils";
 
 // The session, one drill at a time (Nov 18 2026). The whole screen is one
@@ -77,6 +77,10 @@ export function SessionPlayer({
   const [justTicked, setJustTicked] = useState(false);
   const [showHow, setShowHow] = useState(false);
   const advance = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Notifications are asked for once, on its own screen after the finish
+  // screen of a member's own session (A8). Never the example player.
+  const { ask, shown } = useNotificationsAsk(Boolean(playerId) && !example);
+  const [asking, setAsking] = useState(false);
 
   const progress = useMemo(() => sessionProgress(drills, done), [drills, done]);
 
@@ -142,7 +146,16 @@ export function SessionPlayer({
     setJustTicked(false);
   }
 
-  const body = finished ? (
+  // Done on the finish screen: the ask, if there is one to make, else out.
+  function leaveFinish() {
+    if (!ask) return onClose();
+    shown();
+    setAsking(true);
+  }
+
+  const body = asking && ask ? (
+    <PushOptIn ask={ask} onDone={onClose} />
+  ) : finished ? (
     <Finish
       title={title}
       weekLabel={weekLabel}
@@ -152,8 +165,7 @@ export function SessionPlayer({
       minutesBefore={minutesBefore}
       sessionsLeftAfter={sessionsLeftAfter}
       weekDoneLine={weekDoneLine}
-      askNotifications={Boolean(playerId) && !example}
-      onClose={onClose}
+      onClose={leaveFinish}
     />
   ) : (
     <>
@@ -495,7 +507,6 @@ function Finish({
   minutesBefore,
   sessionsLeftAfter,
   weekDoneLine,
-  askNotifications,
   onClose,
 }: {
   title: string;
@@ -506,9 +517,6 @@ function Finish({
   minutesBefore: number;
   sessionsLeftAfter: number;
   weekDoneLine?: string;
-  // A member's own finish screen: the one place notifications are asked
-  // for, once (PushOptIn decides whether there is anything to ask).
-  askNotifications: boolean;
   onClose: () => void;
 }) {
   const weekDone = sessionsLeftAfter <= 0;
@@ -595,7 +603,6 @@ function Finish({
             : afterSessionLine(sessionsLeftAfter)}
         </p>
 
-        {askNotifications && <PushOptIn />}
        </div>
       </div>
 

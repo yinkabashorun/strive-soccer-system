@@ -81,7 +81,7 @@ describe("phone feel", () => {
   });
 });
 
-describe("notifications are asked for once, on a finish screen", () => {
+describe("notifications are asked for once, right after a finish screen", () => {
   it("asks a phone that can be asked, and tells an iPhone in a browser how", () => {
     expect(finishAsk({ step: "enable", asked: false, example: false })).toBe("enable");
     expect(finishAsk({ step: "install_ios", asked: false, example: false })).toBe("install_ios");
@@ -98,13 +98,20 @@ describe("notifications are asked for once, on a finish screen", () => {
     expect(finishAsk({ step: "enable", asked: false, example: true })).toBeNull();
   });
 
-  it("the ask lives on the finish screen and nowhere at the top of a page", () => {
+  it("the ask follows the finish screen and is nowhere at the top of a page", () => {
     const layout = code("app/(player)/layout.tsx");
     expect(layout).not.toContain("<PushOptIn");
     expect(layout).toContain("<PushKeepAlive />");
     const player = code("components/elite/SessionPlayer.tsx");
+    // Its own screen, reached from Done on the finish screen, so the
+    // button to answer it is always in reach of a thumb. The finish
+    // screen itself stays the ring, the minutes and Done.
+    expect(player).toContain("useNotificationsAsk(Boolean(playerId) && !example)");
+    expect(player).toMatch(/function leaveFinish\(\) \{\s*if \(!ask\) return onClose\(\);\s*shown\(\);\s*setAsking\(true\);/);
+    expect(player).toContain("<PushOptIn ask={ask} onDone={onClose} />");
+    expect(player).toContain("onClose={leaveFinish}");
     const finish = player.slice(player.indexOf("function Finish("));
-    expect(finish).toContain("<PushOptIn />");
+    expect(finish).not.toContain("PushOptIn");
     const card = code("components/elite/PushOptIn.tsx");
     expect(card).toContain("finishAsk(");
     expect(card).toContain("markAsked()");

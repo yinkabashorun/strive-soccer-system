@@ -82,6 +82,6 @@ describe("Home: one thing, then one quiet row", () => {
   });
 
   it("the shell leaves room for the tab bar and the phone's home indicator, no more", () => {
-    expect(read("app/(player)/layout.tsx")).toContain("pb-[calc(5.25rem+env(safe-area-inset-bottom))]");
+    expect(read("app/(player)/layout.tsx")).toContain("pb-[calc(4.75rem+env(safe-area-inset-bottom))]");
   });
 });

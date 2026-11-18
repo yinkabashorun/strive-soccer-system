@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Bell, Share } from "lucide-react";
 import {
   PUSH_ASKED_KEY,
@@ -65,36 +65,41 @@ export function PushKeepAlive() {
   return null;
 }
 
-// The one ask, on the finish screen of a completed session (A8): the
-// moment a member can see why they would want to hear that the next week
-// is live. What it shows is decided by finishAsk:
+// The one ask (A8). It is made once, right after the finish screen of a
+// completed session: the moment a member can see why they would want to
+// hear that the next week is live. What there is to ask is decided by
+// finishAsk:
 //   - a phone that can be asked: "Turn on notifications", one tap;
 //   - an iPhone or iPad in a browser tab: how to add the app to the home
 //     screen, the only place Apple offers push;
 //   - asked before, already on, blocked, or the example player: nothing.
-// It is marked asked the moment it is shown, so it is never shown twice.
-// The Account page is where a member turns notifications on later.
-export function PushOptIn({ example = false }: { example?: boolean }) {
+// `shown()` marks it asked, so it is never made twice. The Account page is
+// where a member turns notifications on later.
+export function useNotificationsAsk(enabled: boolean): { ask: FinishAsk; shown: () => void } {
   const [ask, setAsk] = useState<FinishAsk>(null);
-  const [busy, setBusy] = useState(false);
-  const [answered, setAnswered] = useState<"on" | "later" | null>(null);
 
   useEffect(() => {
-    if (example || typeof window === "undefined") return;
+    if (!enabled || typeof window === "undefined") return;
     let live = true;
     void currentStep()
       .then((step) => {
-        if (!live) return;
-        const next = finishAsk({ step, asked: wasAsked(), example });
-        if (!next) return;
-        markAsked();
-        setAsk(next);
+        if (live) setAsk(finishAsk({ step, asked: wasAsked(), example: false }));
       })
       .catch(() => undefined);
     return () => {
       live = false;
     };
-  }, [example]);
+  }, [enabled]);
+
+  const shown = useCallback(() => markAsked(), []);
+  return { ask, shown };
+}
+
+// The ask itself: one screen, one plain line of why, one button. Shown in
+// place of the finish screen after the member taps Done there, then the
+// session closes whatever they choose.
+export function PushOptIn({ ask, onDone }: { ask: Exclude<FinishAsk, null>; onDone: () => void }) {
+  const [busy, setBusy] = useState(false);
 
   async function enable() {
     setBusy(true);
@@ -109,72 +114,62 @@ export function PushOptIn({ example = false }: { example?: boolean }) {
       // best-effort: a failed subscribe just means no push, not a broken app
     } finally {
       setBusy(false);
-      setAnswered("on");
+      onDone();
     }
   }
 
-  if (!ask) return null;
-
-  if (answered) {
-    return (
-      <p className="mt-5 max-w-xs text-sm text-white/60" role="status">
-        {answered === "on"
-          ? "Done. You can change this any time on your Account page."
-          : "No problem. You can turn notifications on any time on your Account page."}
-      </p>
-    );
-  }
-
-  if (ask === "install_ios") {
-    return (
-      <div className="mt-5 w-full max-w-xs rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-left animate-rise [animation-delay:700ms]">
-        <div className="flex items-center gap-2.5">
-          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-accent/10 text-accent">
-            <Share className="h-4 w-4" />
-          </span>
-          <div className="text-[15px] font-semibold text-bone">Add Strive Elite to your home screen</div>
-        </div>
-        <p className="mt-2 text-sm leading-relaxed text-white/65">
-          Tap the Share button in your browser, then tap Add to Home Screen. Open Strive Elite
-          from your home screen and turn on notifications, so you know the moment your new week
-          is live or your coach messages you.
-        </p>
-        <button
-          onClick={() => setAnswered("later")}
-          className="mt-3 flex h-11 w-full items-center justify-center rounded-xl border border-white/15 text-sm font-semibold text-bone"
-        >
-          Got it
-        </button>
-      </div>
-    );
-  }
+  const install = ask === "install_ios";
+  const Icon = install ? Share : Bell;
 
   return (
-    <div className="mt-5 w-full max-w-xs rounded-2xl border border-white/10 bg-white/[0.03] p-4 text-left animate-rise [animation-delay:700ms]">
-      <div className="flex items-center gap-2.5">
-        <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-accent/10 text-accent">
-          <Bell className="h-4 w-4" />
-        </span>
-        <div className="text-[15px] font-semibold text-bone">Turn on notifications</div>
+    <div className="flex min-h-0 flex-1 flex-col pt-safe">
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 text-center">
+        <div className="flex min-h-full flex-col items-center justify-center py-6">
+          <span className="grid h-20 w-20 place-items-center rounded-full bg-accent/10 text-accent animate-rise">
+            <Icon className="h-9 w-9" />
+          </span>
+          <h2 className="mt-6 font-display text-4xl font-black uppercase leading-[0.95] animate-rise [animation-delay:80ms]">
+            {install ? "Add Strive Elite to your home screen" : "Turn on notifications"}
+          </h2>
+          <p className="mt-4 max-w-xs text-[15px] leading-relaxed text-white/75 animate-rise [animation-delay:160ms]">
+            {install
+              ? "Tap the Share button in your browser, then tap Add to Home Screen. Open Strive Elite from your home screen and turn on notifications, so you know the moment your new week is live or your coach messages you."
+              : "So you know the moment your new week is live, your coach messages you, or a Film Room is announced. Nothing else."}
+          </p>
+          <p className="mt-3 max-w-xs text-[13px] leading-relaxed text-white/60 animate-rise [animation-delay:220ms]">
+            You can change this any time on your Account page.
+          </p>
+        </div>
       </div>
-      <p className="mt-2 text-sm leading-relaxed text-white/65">
-        So you know the moment your new week is live, your coach messages you, or a Film Room is
-        announced. Nothing else.
-      </p>
-      <div className="mt-3 flex gap-2">
-        <button
-          onClick={() => setAnswered("later")}
-          className="flex h-11 flex-1 items-center justify-center rounded-xl text-sm font-medium text-white/60"
-        >
-          Not now
-        </button>
-        <button
-          onClick={enable}
-          disabled={busy}
-          className="flex h-11 flex-1 items-center justify-center rounded-xl border border-white/25 text-sm font-semibold text-bone disabled:opacity-60"
-        >
-          {busy ? "One moment" : "Turn on"}
-        </button>
+
+      <div className="px-4 pt-3 pb-safe">
+        <div className="mx-auto max-w-md pb-3">
+          {install ? (
+            <button
+              onClick={onDone}
+              className="flex h-14 w-full items-center justify-center rounded-2xl bg-white font-display text-xl font-black uppercase tracking-wide text-black active:scale-[0.98]"
+            >
+              Got it
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={enable}
+                disabled={busy}
+                className="flex h-14 w-full items-center justify-center rounded-2xl bg-white font-display text-xl font-black uppercase tracking-wide text-black active:scale-[0.98] disabled:opacity-60"
+              >
+                {busy ? "One moment" : "Turn on notifications"}
+              </button>
+              <button
+                onClick={onDone}
+                disabled={busy}
+                className="mt-1 flex h-12 w-full items-center justify-center text-[15px] font-medium text-white/65"
+              >
+                Not now
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

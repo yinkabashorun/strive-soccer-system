@@ -82,7 +82,7 @@ export default async function PlayerLayout({
         roleLabel="Player"
         notifications={notifications}
       />
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-[calc(5.25rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 lg:pb-12 lg:pt-8">
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-[calc(4.75rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 lg:pb-12 lg:pt-8">
         {children}
       </main>
     </div>

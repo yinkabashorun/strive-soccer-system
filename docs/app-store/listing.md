@@ -42,7 +42,7 @@ Description:
 > Message your coach, send a clip of a drill and get it checked, join the weekly Film Room and book your monthly 1:1 call.
 >
 > COURSES
-> A library of drills and guides to work through after your sessions: first touch, weak foot, strength, speed and more.
+> A library of drills and guides to work through after your sessions: juggling, dribbling, weak foot, strength, speed and more.
 >
 > Strive Elite is for members. If you are not a member yet, you can look around the app with the example player on the sign-in screen.
 

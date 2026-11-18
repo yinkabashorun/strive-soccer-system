@@ -51,3 +51,18 @@ export function accountDeletedText(name: string, role: Role): string {
 export const ACCOUNT_DELETED_NOTICE = "account_deleted";
 export const ACCOUNT_DELETED_MESSAGE =
   "Your account and everything in it has been deleted. If you paid monthly, your coach has been told and will stop the billing.";
+
+// Changing a password from inside the app (App Store punch list, A9). A
+// member should never have to sign out and use "Forgot your password" to
+// set a new one. The rule for what is acceptable lives here; the action
+// checks the current password before anything is changed.
+export const PASSWORD_MIN = 8;
+
+export function passwordChangeProblem(input: { current: string; next: string }): string | null {
+  if (!input.current) return "Enter your current password.";
+  if (input.next.length < PASSWORD_MIN) return `Your new password needs at least ${PASSWORD_MIN} characters.`;
+  if (input.next === input.current) return "Your new password is the same as the current one. Choose a different one.";
+  return null;
+}
+
+export const PASSWORD_CHANGED_MESSAGE = "Your password is changed. Use the new one the next time you sign in.";

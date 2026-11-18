@@ -50,6 +50,12 @@ export default async function AccountPage() {
           </Group>
         )}
 
+        {!viewer.demo && (
+          <Group title="Sign-in">
+            <Row href="/account/password" label="Change password" />
+          </Group>
+        )}
+
         <Group title="This phone">
           <DeviceSettings showNotifications={isPlayer && !viewer.demo} />
         </Group>

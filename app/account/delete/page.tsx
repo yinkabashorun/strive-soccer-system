@@ -83,7 +83,7 @@ export default async function DeleteAccountPage() {
             </div>
 
             <div className="mt-5 text-center">
-              <Link href="/account" className="text-[15px] font-medium text-white/70 underline-offset-4 hover:underline">
+              <Link href="/account" className="tap text-[15px] font-medium text-white/70 underline-offset-4 hover:underline">
                 Keep my account
               </Link>
             </div>

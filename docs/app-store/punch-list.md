@@ -52,24 +52,24 @@ poster image on any drill video, so a slow connection shows a black box.
 
 | ID | Item | Status |
 |---|---|---|
-| A1 | Home is one screen: the session card, then one quiet row. Time trained once, the week once. Achievements move to Progress. Extra Work and the coach's note stay but fold. | TODO |
-| A2 | Type floor: nothing under 11 px on any member screen; secondary text 13 px or more. A test holds the floor. | TODO |
-| A3 | Tap targets: every button, link and control on a member screen is at least 44 x 44 (bell, message box, send, "How to do it", session progress marks, support links). | TODO |
-| A4 | Phone feel: no page bounce, no text selection or long-press menu on buttons and pictures, no zoom on a field. | TODO |
-| A5 | Fresh on reopen: when the app comes back from the background after a minute or more, the screen refreshes itself. | TODO |
-| A6 | Drill video posters: every clip on our own domain shows its first frame at once; the next drill's clip loads ahead. (Manus-hosted clips get theirs when they move, see D7.) | TODO |
-| A7 | Badges match the rule "a break never costs": "3 Perfect Weeks, three straight weeks at 100%" becomes three full weeks, any three; the example player's "7-Day Streak" goes. A badge already earned is never taken away. | TODO |
-| A8 | Notifications are asked for once, on the finish screen of the first completed session, with the reason. The card no longer sits at the top of every page. The Account switch stays. | TODO |
-| A9 | Change password inside Account (current password, new password). | TODO |
-| A10 | Sign-in inside the iPhone app: no link to another website, the example tour offered once. The website's sign-in is unchanged. | TODO |
-| A11 | First run, start to finish at phone size: sign in, the agreement, the five onboarding steps, the first dashboard. Same floors as A2 and A3. | TODO |
-| A12 | Every state that is not the happy path, at phone size: no week built yet, membership paused, on a break, week finished, no Film Room announced, no messages, offline, the error page. Each says what is happening and what happens next. | TODO |
-| A13 | The bell: the red count clears when the list is opened; old notes do not pile up. | TODO |
-| A14 | Film page with a real member's shape of data: one Film Room card, short. | TODO |
-| A15 | Screen readers and contrast: every icon-only button has a name; grey text passes contrast on black. | TODO |
+| A1 | Home is one screen: the session card, then one quiet row. Time trained once, the week once. Achievements move to Progress. Extra Work and the coach's note stay but fold. | DONE Nov 18. Home is 844 px, one screen: greeting, the session card, one quiet row (Extra work, Coach's note, Take a break). Achievements and the stats strip live on Progress. |
+| A2 | Type floor: nothing under 11 px on any member screen; secondary text 13 px or more. A test holds the floor. | DONE Nov 18 (`tests/member-surface.test.ts`) |
+| A3 | Tap targets: every button, link and control on a member screen is at least 44 x 44 (bell, message box, send, "How to do it", session progress marks, support links). | DONE Nov 18 (`tests/tap-targets.test.ts`). Session progress marks are about 40 px wide when a session has six or more drills. |
+| A4 | Phone feel: no page bounce, no text selection or long-press menu on buttons and pictures, no zoom on a field. | DONE Nov 18 (`tests/phone-feel.test.ts`). Not yet felt on a real iPhone (C8). |
+| A5 | Fresh on reopen: when the app comes back from the background after a minute or more, the screen refreshes itself. | DONE Nov 18. Held while the session player is open; that an in-progress upload also holds it was not re-confirmed. |
+| A6 | Drill video posters: every clip on our own domain shows its first frame at once; the next drill's clip loads ahead. (Manus-hosted clips get theirs when they move, see D7.) | DONE for the 59 clips on our own domain (posters, next clip fetched ahead). Manus-hosted clips get theirs when they move (D7). |
+| A7 | Badges match the rule "a break never costs": "3 Perfect Weeks, three straight weeks at 100%" becomes three full weeks, any three; the example player's "7-Day Streak" goes. A badge already earned is never taken away. | DONE Nov 18: "3 Full Weeks", any three; a stored "7-Day Streak" shows as "7 Days Trained"; no earned badge is lost. |
+| A8 | Notifications are asked for once, on the finish screen of the first completed session, with the reason. The card no longer sits at the top of every page. The Account switch stays. | DONE Nov 18, as its own screen after Done on the first finished session, once per phone. Seen only with the browser permission stubbed. |
+| A9 | Change password inside Account (current password, new password). | DONE Nov 18 at /account/password. Not tried against the live sign-in service. |
+| A10 | Sign-in inside the iPhone app: no link to another website, the example tour offered once. The website's sign-in is unchanged. | DONE Nov 18. |
+| A11 | First run, start to finish at phone size: sign in, the agreement, the five onboarding steps, the first dashboard. Same floors as A2 and A3. | DONE Nov 18. |
+| A12 | Every state that is not the happy path, at phone size: no week built yet, membership paused, on a break, week finished, no Film Room announced, no messages, offline, the error page. Each says what is happening and what happens next. | DONE Nov 18. A new family whose membership is not on yet now reads "One step left", not "paused". |
+| A13 | The bell: the red count clears when the list is opened; old notes do not pile up. | DONE Nov 18: opening it marks everything read; newest 12 shown. |
+| A14 | Film page with a real member's shape of data: one Film Room card, short. | DONE for a member (one Film Room card and a folded games line). The example player still shows the old long film page. |
+| A15 | Screen readers and contrast: every icon-only button has a name; grey text passes contrast on black. | DONE Nov 18 (`tests/named-controls.test.ts`, contrast in `tests/member-surface.test.ts`) |
 | A16 | App icon at 1024 px from a sharp source, and the launch screen matched to the first frame of the app so there is no flash. | BLOCKED on D6 (the logo file) |
 | A17 | New App Store screenshots once A1 to A10 land (the five in `screenshots/` were taken before this pass). | TODO, after A1-A10 |
-| A18 | Sign-in on the server, so the session cookie is set by the server and the iPhone keeps it (a script-written cookie is capped at 7 days by WebKit, so a member who skips a week gets signed out). Same for the reset-password form. | TODO, after the A1-A15 branch lands (same files) |
+| A18 | Sign-in on the server, so the session cookie is set by the server and the iPhone keeps it (a script-written cookie is capped at 7 days by WebKit, so a member who skips a week gets signed out). Same for the reset-password form. | TODO, next |
 | A19 | The session is refreshed on every member page: `/film`, `/courses`, `/messages`, `/onboarding` and `/` were missing from the middleware. | DONE Nov 18 (`tests/session-refresh.test.ts`) |
 | A20 | Nothing bounces to Safari: Terms and Privacy links on the agreement and sign-up screens open in place inside the app; "your clip from two weeks ago", film links and course downloads play in the app. Zoom and mail links leave on purpose. | TODO |
 | A21 | Quiet while the app is open: no banner, no sound; the Coach tab and the bell show what arrived. | DONE Nov 18 (`native/capacitor.config.ts`, test) |
@@ -137,8 +137,7 @@ how sure it is. What each answer turned into:
 
 ## Order
 
-A1 to A15 run now on a branch that is not live. A18 to A30 follow in
-that order once the branch lands. A17 follows A. C starts the day the
+A1 to A15 landed Nov 18. A18, A20, A23 to A30 are next, in that order. A17 follows A. C starts the day the
 account is active. D items are asked for one at a time as each becomes
 the thing in the way.
 
@@ -147,3 +146,9 @@ the thing in the way.
 - Nov 18 2026: list opened from the walk of every member screen.
 - Nov 18 2026: research B1 to B11 back and saved. A19, A21, A22 done the
   same hour. A18 to A30, C7, C8 and D11 to D14 added from it.
+- Nov 18 2026: A1 to A15 merged and live (11 commits, 399 tests). Checked
+  in a desktop browser at phone size with the example player only;
+  nothing has been felt on a real iPhone yet. Left for Coach Yinka to
+  rule on: the example Film banner and the game schedule card still say
+  Northern Virginia games and "Coach might pull up", though in-person is
+  off the offer.

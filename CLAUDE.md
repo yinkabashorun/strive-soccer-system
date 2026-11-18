@@ -19,12 +19,12 @@ commit.
 ### OPEN
 
 - [ ] Waiver form in GHL - real liability gap, top priority
-- [ ] SUPABASE AUTH URLS, HALF DONE Nov 18 2026 (Coach Yinka set the
-      Site URL to https://thestriveapp.com and added
-      https://thestriveapp.com/** to Redirect URLs; the old vercel.app
-      redirect is still listed, harmless). LEFT: the Reset password email
-      template line below, then one test of Forgot your password on his
-      own phone. Original item
+- [ ] SUPABASE AUTH URLS, SET Nov 18 2026, NOT YET TESTED (Coach Yinka
+      set the Site URL to https://thestriveapp.com, added
+      https://thestriveapp.com/** to Redirect URLs, and saved the Reset
+      password template with the /auth/confirm link; the old vercel.app
+      redirect is still listed, harmless). LEFT: one test of Forgot your
+      password on his own phone, then tell Bryan. Original item
       (found Oct 20 2026, Bryan locked out since Oct 19, see RECORD):
       in Supabase Dashboard > Authentication > URL Configuration set
       Site URL to https://thestriveapp.com (it is still
@@ -253,10 +253,11 @@ commit.
       RECORD); (5) the old $97 /dribbling-course page is RETIRED (Nov 18,
       see RECORD); inside the iPhone app the Dribbling Transformation
       card opens its in-app pages (DONE Nov 18, see RECORD); (6) one player and one
-      coach login for the reviewer; (7) PUSH KEYS: the /coach card read Off on Nov 18
-      (the two VAPID keys were never set in Vercel); a pair was generated
-      and given to him in chat only. His: paste both into Vercel, redeploy,
-      re-read the card, then confirm a push arrives on his own phone. NOTHING IN native/ HAS EVER BEEN COMPILED; the first
+      coach login for the reviewer; (7) PUSH KEYS SET Nov 18: both VAPID keys are in
+      Vercel (Production), redeployed, and the /coach card reads "Ready,
+      but none of your 7 active players has turned notifications on yet".
+      LEFT: he turns notifications on from his own iPhone (home-screen
+      app), tells me, then one test notification to confirm it arrives. NOTHING IN native/ HAS EVER BEEN COMPILED; the first
       TestFlight run will need fixes.
 ### RECORD (chronological)
 
@@ -4102,6 +4103,7 @@ commit.
       THEN Nov 18 2026 (Coach Yinka, asked whether the iPhone app should show the in-app version of the Dribbling Transformation course instead of the password site: "yes do that"): INSIDE THE APP STORE APP A COURSE NEVER OPENS ANOTHER WEBSITE. Rule in lib/elite/courses.ts (courseForApp, coursesForApp), applied on all four course pages (member and coach, list and course) through inNativeApp(): a link course whose address is on another domain shows its own in-app pages there, with no address and without its intro (on a link course the intro is where the password is written); a link course with no pages of its own is left out of the tab inside the app; a link to a path on our own domain, every other course, and THE WEBSITE are unchanged. Checked read-only in prod: the Dribbling Transformation row is still a link course, active, with all 27 pages from migration 060 on it (14 with video), so inside the iPhone app it opens as those 27 pages in six parts, and on thestriveapp.com the card still shows the password and opens his site exactly as before. No database change was needed. tests/courses.test.ts +6; 319 tests, verify green. NOT SEEN in a real app (no build yet). TO KNOW: the 14 drill videos on those pages stream from Manus like the bank's; the two versions of the course are separate copies, so an edit to his site does not change the in-app pages (those are edited at /coach/drills only while the course kind is lesson; say the word and I change a page). No player data touched.
       THEN Nov 18 2026 (Coach Yinka, walking the Apple steps one at a time, step 1: "The account shows as Pending: Purchase your membership ... I still need to pay the membership fee. What can we get done in the meantime"): CORRECTION to the line above that says the account exists: it is enrolled but UNPAID, so there is no Team ID yet; Apple says the purchase may take up to 48 hours to process. Nothing on the Apple side can move until then. DONE MEANWHILE, mine: docs/app-store/listing.md, a DRAFT of every App Store Connect field (name Strive Elite, subtitle "Personalized soccer training", categories Sports and Health & Fitness, keywords, promotional text, description with no prices, guarantee, results claims or unbuilt courses, the age-rating and privacy answers, the notes for the reviewer describing 1:1 coaching with no purchase in the app, and a text to current families about the agreement screen), and five App Store screenshots at 1320 x 2868 from the example player in docs/app-store/screenshots/. All of it his to approve; nothing submitted. GIVEN TO HIM as the meantime list: pay the fee; fix the Supabase sign-in addresses (the OPEN top-priority item: every password reset is still broken, and a reviewer or a member who taps Forgot your password hits it); read the Push notifications card on /coach; send the agreement heads-up text; pick the retention number; send a sharper logo for the app icon; say go on moving the Manus-hosted drill videos to our own storage.
       THEN Nov 18 2026 (Coach Yinka's update on the list): (2) SUPABASE: Site URL is now https://thestriveapp.com and https://thestriveapp.com/** is in Redirect URLs (the old vercel.app redirect still listed, left alone); the Reset password template line was given to him ({{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/reset, the route shipped Oct 20). Not confirmed yet: the template pasted and a reset tested end to end. (3) PUSH: the /coach card reads "Off. The two push keys are not set in Vercel", which CONFIRMS web push has never been able to send for anyone since Sept 26. On his "Go ahead and generate the keys" one VAPID pair was generated here and given to him IN CHAT ONLY; neither key is in this file or anywhere in the repository. NEXT_PUBLIC_VAPID_PUBLIC_KEY is read at build time, so the keys only take effect after a redeploy. (1) Apple's $99 not paid yet; (4) the families' heads-up text, (5) the retention number and (6) a sharper logo are still his.
+      THEN Nov 18 2026 (Coach Yinka's second update): THE RESET PASSWORD TEMPLATE IS SAVED with the /auth/confirm link (token_hash, type=recovery, next=/reset); not tested on a phone yet. BOTH VAPID KEYS ARE IN VERCEL for Production (the private one as a Secret; the public one as a plain value because Vercel refuses a Secret under a NEXT_PUBLIC_ name, which is right: that key is meant to be public and ships in the page), the production build was redeployed, and the /coach Push notifications card now reads "Ready, but none of your 7 active players has turned notifications on yet". So web push can send for the first time since it shipped Sept 26. On his word the test notification is HELD until he has turned notifications on from his iPhone. The test itself needs no code: a message from the coach to a player sends that player a push, so he sends one line to his own test player from /coach.
 
 ## Skills (use them without being asked)
 

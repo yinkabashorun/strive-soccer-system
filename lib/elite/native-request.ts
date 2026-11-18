@@ -7,13 +7,14 @@
 // does not allow an app to send people elsewhere to get what the app
 // unlocks, so the sign-in screen there is sign-in only (accounts are
 // created by invite, on the web, after the family has spoken to a coach).
+//
+// The token and the user-agent check themselves live in app-links.ts,
+// which is pure, so a browser component can use them too; this file adds
+// the server's own way of asking.
 import { headers } from "next/headers";
+import { NATIVE_UA_TOKEN, isNativeUserAgent } from "./app-links";
 
-export const NATIVE_UA_TOKEN = "StriveEliteApp/";
-
-export function isNativeUserAgent(userAgent: string | null | undefined): boolean {
-  return typeof userAgent === "string" && userAgent.includes(NATIVE_UA_TOKEN);
-}
+export { NATIVE_UA_TOKEN, isNativeUserAgent };
 
 export function inNativeApp(): boolean {
   try {

@@ -8,6 +8,7 @@
 import { createServiceClient } from "./supabase/server";
 import { sendPlayerEmail } from "./email";
 import { sendPushToPlayer } from "./push";
+import { weekUnlockedPush } from "./push-texts";
 import { sendPlayerSMS } from "./sms";
 import { buildParentRecap } from "./parent-recap";
 import { SESSIONS_PER_WEEK, sessionsWord } from "./training";
@@ -91,11 +92,10 @@ export async function unlockDueWeeks(): Promise<void> {
       subject: first ? `Week ${plan.week} is live, ${first}` : `Week ${plan.week} is live`,
       body: `The new training week just unlocked.\n\nThis week's focus: ${plan.focus}\n\n${sessionsSaid} sessions, plyo warm-up first, every time. Open the app and start Session 1.`,
     }).catch(() => undefined);
-    await sendPushToPlayer(plan.player_id, {
-      title: first ? `Week ${plan.week} is live, ${first}` : `Week ${plan.week} is live`,
-      body: plan.focus || "Your new training week just unlocked.",
-      url: "/dashboard",
-    }).catch(() => undefined);
+    await sendPushToPlayer(
+      plan.player_id,
+      weekUnlockedPush({ first, week: plan.week, focus: plan.focus })
+    ).catch(() => undefined);
     await sendPlayerSMS(plan.player_id, {
       event: "new_week",
       message: `${greeting}${first || "Your player"}'s week ${plan.week} just went live. This week: ${plan.focus} Let's have ${first || "them"} open the app and get started on Session 1: ${APP_URL}/dashboard`,

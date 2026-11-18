@@ -69,18 +69,18 @@ poster image on any drill video, so a slow connection shows a black box.
 | A15 | Screen readers and contrast: every icon-only button has a name; grey text passes contrast on black. | DONE Nov 18 (`tests/named-controls.test.ts`, contrast in `tests/member-surface.test.ts`) |
 | A16 | App icon at 1024 px from a sharp source, and the launch screen matched to the first frame of the app so there is no flash. | BLOCKED on D6 (the logo file) |
 | A17 | New App Store screenshots once A1 to A10 land (the five in `screenshots/` were taken before this pass). | TODO, after A1-A10 |
-| A18 | Sign-in on the server, so the session cookie is set by the server and the iPhone keeps it (a script-written cookie is capped at 7 days by WebKit, so a member who skips a week gets signed out). Same for the reset-password form. | TODO, next |
+| A18 | Sign-in on the server, so the session cookie is set by the server and the iPhone keeps it (a script-written cookie is capped at 7 days by WebKit, so a member who skips a week gets signed out). Same for the reset-password form. | DONE Nov 18 (`lib/elite/sign-in.ts`, `tests/sign-in.test.ts`). NOT PROVEN against the live sign-in service: Coach Yinka signs in once after the deploy. New accounts and the reset form sign in on the server too; 20 tries per 10 minutes per caller |
 | A19 | The session is refreshed on every member page: `/film`, `/courses`, `/messages`, `/onboarding` and `/` were missing from the middleware. | DONE Nov 18 (`tests/session-refresh.test.ts`) |
-| A20 | Nothing bounces to Safari: Terms and Privacy links on the agreement and sign-up screens open in place inside the app; "your clip from two weeks ago", film links and course downloads play in the app. Zoom and mail links leave on purpose. | TODO |
+| A20 | Nothing bounces to Safari: Terms and Privacy links on the agreement and sign-up screens open in place inside the app; "your clip from two weeks ago", film links and course downloads play in the app. Zoom and mail links leave on purpose. | DONE Nov 18 for our own pages, clips, YouTube and Vimeo (`lib/elite/app-links.ts`, `AppLink.tsx`, `tests/app-links.test.ts`). LEFT: a Hudl, Veo or Drive film link still opens Safari; coach-side links are untouched |
 | A21 | Quiet while the app is open: no banner, no sound; the Coach tab and the bell show what arrived. | DONE Nov 18 (`native/capacitor.config.ts`, test) |
 | A22 | App-level privacy manifest in the app target (no tracking). | DONE Nov 18; the collected-data list is filled on the first build (C5) |
-| A23 | Saved passwords offered on the sign-in screen: the email field marked as the user name; the association file on the site and the entitlement in the app. | Field: TODO. File and entitlement: BLOCKED on the Team ID |
-| A24 | The screen stays on during a session on every iPhone the app allows: raise the minimum to iOS 16.4 or add the keep-awake plugin. | TODO |
+| A23 | Saved passwords offered on the sign-in screen: the email field marked as the user name; the association file on the site and the entitlement in the app. | Field: DONE Nov 18. File and entitlement: BLOCKED on the Team ID |
+| A24 | The screen stays on during a session on every iPhone the app allows: raise the minimum to iOS 16.4 or add the keep-awake plugin. | DONE Nov 18: minimum is iOS 16.4, no plugin (never compiled) |
 | A25 | A guard for guideline 2.5.19: a new member-facing feature stays hidden inside the app until a reviewed build describes it. One list, one test. | TODO |
 | A26 | Uploads that survive real life: progress for each clip, the screen kept awake, and large Film Room clips sent in resumable pieces. One line on where to turn the camera back on if it was refused. | TODO |
-| A27 | The public /demo page (it carries the Meta pixel) can never load inside the app. | TODO |
-| A28 | Launch screen is plain black matching the first screen, with no logo (Apple's launch guidance). Changes A16: the icon still needs the sharp logo, the launch screen does not. | TODO |
-| A29 | Every push text re-read against Apple's rules: it informs, never orders, never sells; one per event. | TODO |
+| A27 | The public /demo page (it carries the Meta pixel) can never load inside the app. | DONE Nov 18: three guards (`tests/demo-never-in-app.test.ts`) |
+| A28 | Launch screen is plain black matching the first screen, with no logo (Apple's launch guidance). Changes A16: the icon still needs the sharp logo, the launch screen does not. | DONE Nov 18 (never compiled) |
+| A29 | Every push text re-read against Apple's rules: it informs, never orders, never sells; one per event. | DONE Nov 18 as an audit: every push text is in `lib/elite/push-texts.ts` under a test, wording unchanged. His to rule on: see the log |
 | A30 | Stop nudging a member who has ignored several nudges in a row. | TODO, needs his word on the number |
 
 ## B. Research to settle before the first build
@@ -152,3 +152,18 @@ the thing in the way.
   rule on: the example Film banner and the game schedule card still say
   Northern Virginia games and "Coach might pull up", though in-person is
   off the offer.
+- Nov 18 2026: A18, A20, A23 (the field), A24, A27, A28, A29 merged and
+  live (455 tests). Sign-in now runs on the server and could not be
+  tested against the live service from here; nothing in `native/` has
+  been compiled. From the push audit, not changed, his call: the Film
+  Room and check-in pushes end on an instruction ("Upload 3 to 5 clips
+  by ...", "Pick your 30-minute time ..."); a new week reads "just
+  dropped" from one sender and "is live" from the other; a coach
+  message shows its first 140 characters on a locked phone; "send
+  again" on a check-in day sends a second push. Found outside the
+  items: "Apply to join" on sign-up links to another site; the forgot
+  password form, clip upload and the drill bank still use the
+  browser's database client (none signs in; belongs with A26). Before
+  a big sign-up day: every sign-in now reaches the sign-in service
+  from our server's addresses, so its per-address limit is shared.
+  Next: A25, A26, then A17.

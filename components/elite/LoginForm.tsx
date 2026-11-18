@@ -1,14 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { useFormState, useFormStatus } from "react-dom";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Loader2, Lock, Mail } from "lucide-react";
-import { createClient } from "@/lib/elite/supabase/client";
-import { enterDemoPlayer, enterDemoCoach } from "@/lib/elite/auth-actions";
+import { enterDemoPlayer, enterDemoCoach, signIn } from "@/lib/elite/auth-actions";
 import { INVITE_USED_MESSAGE, INVITE_USED_NOTICE } from "@/lib/elite/invite-link";
 import { ACCOUNT_DELETED_MESSAGE, ACCOUNT_DELETED_NOTICE } from "@/lib/elite/account";
 
+// The sign-in screen. The form posts to a server action (signIn in
+// auth-actions.ts): the server signs in and sends the session back in a
+// cookie it sets itself, which is the kind the iPhone keeps. Nothing here
+// talks to the sign-in service from the browser (lib/elite/sign-in.ts).
 export function LoginForm({
   configured,
   native = false,
@@ -16,7 +20,6 @@ export function LoginForm({
   configured: boolean;
   native?: boolean; // inside the App Store app: sign-in only
 }) {
-  const router = useRouter();
   const params = useSearchParams();
   const next = params.get("next");
   // A used invite link lands here with a plain explanation, not an error.
@@ -29,38 +32,9 @@ export function LoginForm({
         : null;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(params.get("error"));
-
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    const supabase = createClient();
-    if (!supabase) {
-      setError("Sign-in isn't configured yet. Try a demo account below.");
-      return;
-    }
-    setLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-      return;
-    }
-    // Route by role - coaches and admins go to the coach app.
-    const { data: profile } = await supabase
-      .from("elite_profiles")
-      .select("role")
-      .eq("id", data.user.id)
-      .maybeSingle();
-    const isStaff = profile?.role === "coach" || profile?.role === "admin";
-    const dest = next || (isStaff ? "/coach" : "/dashboard");
-    router.push(dest);
-    router.refresh();
-  }
+  // An error an auth link brought with it shows until the first try.
+  const [state, action] = useFormState(signIn, { error: params.get("error") });
+  const error = state.error;
 
   return (
     <div className="elite-card p-7 sm:p-8">
@@ -76,17 +50,23 @@ export function LoginForm({
         </p>
       )}
 
-      <form onSubmit={onSubmit} className="mt-7 space-y-4">
+      <form action={action} className="mt-7 space-y-4">
+        {next && <input type="hidden" name="next" value={next} />}
         <label className="block">
           <span className="mb-2 flex items-center gap-2 text-sm font-medium text-white/70">
             <Mail className="h-4 w-4" /> Email
           </span>
+          {/* autoComplete "username" on an email field is what lets the
+              iPhone offer the saved password (Apple's own guidance). */}
           <input
             type="email"
+            name="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
+            autoComplete="username"
+            autoCapitalize="none"
+            autoCorrect="off"
             placeholder="you@example.com"
             className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-bone placeholder:text-white/30 focus:border-accent/40 focus:outline-none"
           />
@@ -97,6 +77,7 @@ export function LoginForm({
           </span>
           <input
             type="password"
+            name="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -106,15 +87,13 @@ export function LoginForm({
           />
         </label>
 
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && (
+          <p role="alert" className="text-sm text-red-400">
+            {error}
+          </p>
+        )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="btn-accent w-full px-6 py-3.5 text-base"
-        >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
-        </button>
+        <SignInButton />
 
         <p className="text-center text-[13px]">
           <Link href="/forgot" className="tap text-white/60 hover:text-accent">
@@ -165,5 +144,19 @@ export function LoginForm({
         </div>
       )}
     </div>
+  );
+}
+
+function SignInButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      aria-label={pending ? "Signing in" : undefined}
+      className="btn-accent w-full px-6 py-3.5 text-base"
+    >
+      {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
+    </button>
   );
 }

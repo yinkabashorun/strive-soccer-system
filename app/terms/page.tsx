@@ -1,16 +1,31 @@
 import Link from "next/link";
 import { Wordmark } from "@/components/elite/Wordmark";
+import { SHEET_PARAM, shownInSheet } from "@/lib/elite/app-links";
 
 export const metadata = { title: "Terms of Service · Strive Elite" };
 
 const UPDATED = "November 18, 2026";
 const CONTACT_EMAIL = "coach@strivesoccer100x.com";
 
-export default function TermsPage() {
+export default function TermsPage({
+  searchParams,
+}: {
+  searchParams?: { [SHEET_PARAM]?: string | string[] };
+}) {
+  // Inside the iPhone app this page opens in a sheet over the screen the
+  // person was on (components/elite/AppLink.tsx). There it carries no
+  // link that would walk the sheet off to another part of the app.
+  const sheet = shownInSheet(searchParams?.[SHEET_PARAM]);
   return (
     <div className="min-h-[100svh] bg-black text-bone">
-      <div className="mx-auto w-full max-w-2xl px-5 pb-10 pt-[calc(2.5rem+env(safe-area-inset-top))] sm:px-6">
-        <Wordmark href="/" />
+      <div
+        className={
+          sheet
+            ? "mx-auto w-full max-w-2xl px-5 pb-10 pt-6 sm:px-6"
+            : "mx-auto w-full max-w-2xl px-5 pb-10 pt-[calc(2.5rem+env(safe-area-inset-top))] sm:px-6"
+        }
+      >
+        <Wordmark href={sheet ? null : "/"} />
         <h1 className="mt-8 font-display text-3xl font-black uppercase tracking-tight sm:text-4xl">
           Terms of Service
         </h1>
@@ -135,7 +150,7 @@ export default function TermsPage() {
               You can stop your membership at any time by contacting Coach
               Yinka directly. Your account and training history stay
               intact unless you separately request deletion (see our{" "}
-              <Link href="/privacy" className="tap text-accent hover:underline">
+              <Link href={sheet ? `/privacy?${SHEET_PARAM}=1` : "/privacy"} className="tap text-accent hover:underline">
                 Privacy Policy
               </Link>
               ).
@@ -199,12 +214,14 @@ export default function TermsPage() {
         </div>
 
         <div className="mt-10 flex items-center gap-4 border-t border-white/8 pt-6 text-sm text-white/50">
-          <Link href="/privacy" className="tap hover:text-white">
+          <Link href={sheet ? `/privacy?${SHEET_PARAM}=1` : "/privacy"} className="tap hover:text-white">
             Privacy Policy
           </Link>
-          <Link href="/login" className="tap hover:text-white">
-            Back to sign in
-          </Link>
+          {!sheet && (
+            <Link href="/login" className="tap hover:text-white">
+              Back to sign in
+            </Link>
+          )}
         </div>
       </div>
     </div>

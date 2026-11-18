@@ -5,6 +5,7 @@
 // quietly does nothing and the app is fully functional without it.
 import webpush from "web-push";
 import { createServiceClient } from "./supabase/server";
+import type { PushStatus } from "./install";
 
 const PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 const PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
@@ -19,6 +20,31 @@ function ensureConfigured() {
   if (configured || !isPushConfigured()) return;
   webpush.setVapidDetails(SUBJECT, PUBLIC_KEY!, PRIVATE_KEY!);
   configured = true;
+}
+
+// What the coach dashboard shows about push: are the keys set, and how many
+// active players have a device on file. Before Nov 18 2026 nothing showed
+// this, and push sat at zero devices for seven weeks without anyone knowing.
+export async function getPushStatus(): Promise<PushStatus> {
+  const status: PushStatus = {
+    configured: isPushConfigured(),
+    devices: 0,
+    playersOn: 0,
+    playersTotal: 0,
+  };
+  const admin = createServiceClient();
+  if (!admin) return status;
+  const [{ data: subs }, { count }] = await Promise.all([
+    admin.from("elite_push_subscriptions").select("player_id"),
+    admin
+      .from("elite_players")
+      .select("id", { count: "exact", head: true })
+      .in("subscription_status", ["active", "trialing"]),
+  ]);
+  status.devices = subs?.length ?? 0;
+  status.playersOn = new Set((subs ?? []).map((s) => s.player_id as string)).size;
+  status.playersTotal = count ?? 0;
+  return status;
 }
 
 export type PushPayload = { title: string; body: string; url?: string };

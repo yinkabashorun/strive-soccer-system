@@ -14,7 +14,7 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
-      icon: "/strive-logo-512.png",
+      icon: "/icon-192.png",
       badge: "/strive-logo-512.png",
       data: { url: data.url || "/dashboard" },
     })

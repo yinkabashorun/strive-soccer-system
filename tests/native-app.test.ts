@@ -172,6 +172,21 @@ describe("the native shell (native/)", () => {
     expect(plist).not.toContain("NSContacts");
   });
 
+  it("installs only on iOS 16.4 or later, where the screen can be kept awake (A24)", () => {
+    // The session keeps the screen on with the browser's wake lock, which
+    // the iPhone web view has from iOS 16.4. An older iPhone would dim
+    // mid-drill, so the app does not install there.
+    const targets = [...project.matchAll(/IPHONEOS_DEPLOYMENT_TARGET = ([^;]+);/g)].map((m) => m[1]);
+    expect(targets).toEqual(["16.4", "16.4", "16.4", "16.4"]);
+    // the Swift package the CLI writes from that number (major version)
+    expect(read("native/ios/App/CapApp-SPM/Package.swift")).toContain("platforms: [.iOS(.v16)]");
+    // no keep-awake plugin: the wake lock in lib/elite/native.ts is the one way
+    expect(read("native/package.json")).not.toMatch(/keep-awake/);
+    expect(read("lib/elite/native.ts")).toContain('wl.request("screen")');
+    expect(read("docs/app-store/README.md")).toContain("iOS 16.4 or later");
+    expect(read("docs/app-store/README.md")).not.toContain("iOS 15 or later");
+  });
+
   it("is set up for native push", () => {
     expect(read("native/ios/App/App/App.entitlements")).toContain("aps-environment");
     expect(project).toContain("CODE_SIGN_ENTITLEMENTS = App/App.entitlements;");

@@ -178,7 +178,8 @@ compiled or installed on a phone):
   agent `StriveEliteApp/1`, bundled offline page, the native bridge given
   to no other site.
 - `native/ios/`: the Xcode project, generated on Linux. iPhone only,
-  portrait, iOS 15 or later. Permission texts for camera, microphone and
+  portrait, iOS 16.4 or later (the first version whose web view keeps
+  the screen awake). Permission texts for camera, microphone and
   photo library. Push entitlement and the two AppDelegate hooks. App icon
   and launch image made from the 512 px logo (a sharper source would be
   better).
@@ -204,9 +205,10 @@ Known gaps to close on the first real build:
   native features above are the answer to it.
 - Keeping the screen awake during a session uses the browser's wake lock,
   CONFIRMED Nov 18 from WebKit's source: on by default in the iPhone web
-  view from iOS 16.4. The shell allows iOS 15, where there is none:
-  raise the minimum to 16.4 or add the keep-awake plugin (punch list
-  A24). Prove on a phone.
+  view from iOS 16.4. DONE Nov 18 (punch list A24): the shell's minimum
+  is iOS 16.4 (the four deployment-target lines of the Xcode project and
+  the Swift package file), so every iPhone the app installs on has the
+  wake lock; no plugin added. Prove on a phone.
 - Android: not started. The same shell can be built for Google Play
   (account deletion on the web is already at /support#delete).
 

@@ -72,6 +72,14 @@ summary,
   touch-action: manipulation;
 }
 
+/* A text link inside a line of words: its hit area grows to a full
+   44 px finger target without moving the line it sits in (A3). */
+.tap {
+  display: inline-block;
+  padding: 14px 6px;
+  margin: -14px -6px;
+}
+
 .pt-safe {
   padding-top: env(safe-area-inset-top);
 }

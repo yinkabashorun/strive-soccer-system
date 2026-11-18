@@ -20,7 +20,7 @@ export default function SupportPage() {
             <h2 className="font-display text-xl font-bold uppercase text-bone">Talk to us</h2>
             <p className="mt-2">
               Email{" "}
-              <a href={`mailto:${SUPPORT_EMAIL}`} className="text-accent hover:underline">
+              <a href={`mailto:${SUPPORT_EMAIL}`} className="tap text-accent hover:underline">
                 {SUPPORT_EMAIL}
               </a>
               . Members can also message their coach inside the app, on the Coach tab.
@@ -46,12 +46,12 @@ export default function SupportPage() {
             </p>
             <p className="mt-2">
               Cannot sign in? Email{" "}
-              <a href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Delete my account")}`} className="text-accent hover:underline">
+              <a href={`mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent("Delete my account")}`} className="tap text-accent hover:underline">
                 {SUPPORT_EMAIL}
               </a>{" "}
               from the address on the account and we will delete it for you. Payment records
               are kept as long as tax and accounting rules require. The{" "}
-              <Link href="/privacy" className="text-accent hover:underline">
+              <Link href="/privacy" className="tap text-accent hover:underline">
                 privacy policy
               </Link>{" "}
               has the details.
@@ -62,7 +62,7 @@ export default function SupportPage() {
             <h2 className="font-display text-xl font-bold uppercase text-bone">Report a concern</h2>
             <p className="mt-2">
               If anything in the app worries you, a message, a clip, anything at all,{" "}
-              <a href={concernMailto("")} className="text-accent hover:underline">
+              <a href={concernMailto("")} className="tap text-accent hover:underline">
                 tell us
               </a>
               . We read every report and act on it.
@@ -71,13 +71,13 @@ export default function SupportPage() {
         </div>
 
         <div className="mt-10 flex items-center gap-4 border-t border-white/8 pt-6 text-sm text-white/50">
-          <Link href="/privacy" className="hover:text-white">
+          <Link href="/privacy" className="tap hover:text-white">
             Privacy Policy
           </Link>
-          <Link href="/terms" className="hover:text-white">
+          <Link href="/terms" className="tap hover:text-white">
             Terms of Service
           </Link>
-          <Link href="/login" className="hover:text-white">
+          <Link href="/login" className="tap hover:text-white">
             Sign in
           </Link>
         </div>

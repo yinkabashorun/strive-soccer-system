@@ -74,6 +74,7 @@ export function ForgotForm({ configured }: { configured: boolean }) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           autoComplete="email"
+          aria-label="Your account email"
           placeholder="you@example.com"
           className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-bone placeholder:text-white/30 focus:border-accent/40 focus:outline-none"
         />
@@ -93,7 +94,7 @@ export function ForgotForm({ configured }: { configured: boolean }) {
 
       <p className="mt-5 text-center text-sm text-white/50">
         Remembered it?{" "}
-        <Link href="/login" className="text-accent hover:underline">
+        <Link href="/login" className="tap text-accent hover:underline">
           Sign in
         </Link>
       </p>

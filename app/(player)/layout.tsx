@@ -108,7 +108,7 @@ function GateScreen({ title, body }: { title: string; body: string }) {
       <form action={signOut} className="mt-8">
         <button className="btn px-6 py-3">Sign out</button>
       </form>
-      <Link href="/account" className="mt-4 text-sm text-white/55 underline-offset-4 hover:underline">
+      <Link href="/account" className="mt-2 inline-flex min-h-[44px] items-center px-3 text-sm text-white/60 underline-offset-4 hover:underline">
         Account
       </Link>
     </div>

@@ -128,7 +128,7 @@ export default function TermsPage() {
               You can stop your membership at any time by contacting Coach
               Yinka directly. Your account and training history stay
               intact unless you separately request deletion (see our{" "}
-              <Link href="/privacy" className="text-accent hover:underline">
+              <Link href="/privacy" className="tap text-accent hover:underline">
                 Privacy Policy
               </Link>
               ).
@@ -183,7 +183,7 @@ export default function TermsPage() {
           <Section title="Contact">
             <p>
               Questions about these terms? Email{" "}
-              <a href={`mailto:${CONTACT_EMAIL}`} className="text-accent hover:underline">
+              <a href={`mailto:${CONTACT_EMAIL}`} className="tap text-accent hover:underline">
                 {CONTACT_EMAIL}
               </a>
               .
@@ -192,10 +192,10 @@ export default function TermsPage() {
         </div>
 
         <div className="mt-10 flex items-center gap-4 border-t border-white/8 pt-6 text-sm text-white/50">
-          <Link href="/privacy" className="hover:text-white">
+          <Link href="/privacy" className="tap hover:text-white">
             Privacy Policy
           </Link>
-          <Link href="/login" className="hover:text-white">
+          <Link href="/login" className="tap hover:text-white">
             Back to sign in
           </Link>
         </div>

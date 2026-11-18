@@ -163,7 +163,7 @@ export function SignupForm({
             {codeUsed && (
               <>
                 {" "}
-                <Link href="/login" className="font-semibold text-accent underline-offset-2 hover:underline">
+                <Link href="/login" className="tap font-semibold text-accent underline-offset-2 hover:underline">
                   Sign in
                 </Link>
               </>
@@ -182,7 +182,7 @@ export function SignupForm({
                   </li>
                 ))}
               </ul>
-              <label className="flex items-start gap-3 text-sm leading-snug text-bone">
+              <label className="flex min-h-[44px] items-start gap-3 py-1 text-sm leading-snug text-bone">
                 <input
                   type="checkbox"
                   required
@@ -194,7 +194,7 @@ export function SignupForm({
               </label>
             </>
           )}
-          <label className="flex items-start gap-3 text-sm leading-snug text-bone">
+          <label className="flex min-h-[44px] items-start gap-3 py-1 text-sm leading-snug text-bone">
             <input
               type="checkbox"
               required
@@ -204,11 +204,11 @@ export function SignupForm({
             />
             <span>
               I agree to the{" "}
-              <Link href="/terms" target="_blank" className="underline underline-offset-2">
+              <Link href="/terms" target="_blank" className="tap underline underline-offset-2">
                 Terms of Service
               </Link>{" "}
               and the{" "}
-              <Link href="/privacy" target="_blank" className="underline underline-offset-2">
+              <Link href="/privacy" target="_blank" className="tap underline underline-offset-2">
                 Privacy Policy
               </Link>
               .
@@ -231,7 +231,7 @@ export function SignupForm({
 
       <p className="mt-5 text-center text-sm text-white/50">
         Already have an account?{" "}
-        <Link href="/login" className="text-accent hover:underline">
+        <Link href="/login" className="tap text-accent hover:underline">
           Sign in
         </Link>
       </p>
@@ -240,7 +240,7 @@ export function SignupForm({
           Don&apos;t have a code?{" "}
           <a
             href="https://strivesoccer100x.com"
-            className="text-white/50 hover:text-accent"
+            className="tap text-white/60 hover:text-accent"
           >
             Apply to join
           </a>

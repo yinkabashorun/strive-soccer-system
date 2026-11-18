@@ -216,23 +216,8 @@ export async function addGame(input: {
   return { ok: true as const };
 }
 
-// Mark a single notification read.
-export async function markNotificationRead(id: string) {
-  const viewer = await getViewer();
-  if (!viewer?.playerId) return { ok: false };
-  const supabase = createClient();
-  if (supabase) {
-    await supabase
-      .from("elite_notifications")
-      .update({ read: true })
-      .eq("id", id)
-      .eq("player_id", viewer.playerId);
-    revalidatePath("/dashboard");
-  }
-  return { ok: true };
-}
-
-// Mark all of the current player's notifications read.
+// Mark all of the current player's notifications read. Called when the
+// bell is opened: opening the list is reading it (lib/elite/bell.ts).
 export async function markAllNotificationsRead() {
   const viewer = await getViewer();
   if (!viewer?.playerId) return { ok: false };

@@ -76,7 +76,7 @@ export default async function AccountPage() {
 
         {canDelete && (
           <div className="mt-6 text-center">
-            <Link href="/account/delete" className="text-sm font-medium text-red-300 underline-offset-4 hover:underline">
+            <Link href="/account/delete" className="tap text-sm font-medium text-red-300 underline-offset-4 hover:underline">
               Delete my account
             </Link>
           </div>

@@ -117,7 +117,7 @@ export function LoginForm({
         </button>
 
         <p className="text-center text-[13px]">
-          <Link href="/forgot" className="text-white/50 hover:text-accent">
+          <Link href="/forgot" className="tap text-white/60 hover:text-accent">
             Forgot your password?
           </Link>
         </p>
@@ -126,7 +126,7 @@ export function LoginForm({
       {!native && (
         <p className="mt-5 text-center text-sm text-white/50">
           New here?{" "}
-          <Link href="/signup" className="text-accent hover:underline">
+          <Link href="/signup" className="tap text-accent hover:underline">
             Create an account
           </Link>
         </p>
@@ -135,15 +135,18 @@ export function LoginForm({
       {/* The sales door: anyone can walk through a fully-loaded player
           experience - no account, no friction. */}
       <form action={enterDemoPlayer} className="mt-6 border-t border-white/8 pt-5">
-        <button className="btn w-full py-3 text-sm">
+        <button className="btn min-h-[48px] w-full py-3 text-sm">
           See the app as a player →
         </button>
-        <p className="mt-2 text-center text-[13px] text-white/50">
+        <p className="mt-2 text-center text-[13px] text-white/60">
           No account needed.
         </p>
       </form>
 
-      {!configured && (
+      {/* Local set-up only (no database configured). Inside the App Store
+          app the example tour is offered once, above, and there is no
+          coach tour. */}
+      {!configured && !native && (
         <div className="mt-7 border-t border-white/8 pt-6">
           <div className="mb-3 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
             Explore the demo

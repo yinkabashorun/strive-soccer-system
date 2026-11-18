@@ -175,7 +175,7 @@ export default function PrivacyPage() {
               information for advertising. If
               you have questions about your child&apos;s information, or
               want it corrected or removed, contact us at{" "}
-              <a href={`mailto:${CONTACT_EMAIL}`} className="text-accent hover:underline">
+              <a href={`mailto:${CONTACT_EMAIL}`} className="tap text-accent hover:underline">
                 {CONTACT_EMAIL}
               </a>
               .
@@ -199,7 +199,7 @@ export default function PrivacyPage() {
               <strong className="text-bone">Delete my account</strong>. You
               will be asked for your password to confirm. If you can&apos;t
               sign in, email us at{" "}
-              <a href={`mailto:${CONTACT_EMAIL}`} className="text-accent hover:underline">
+              <a href={`mailto:${CONTACT_EMAIL}`} className="tap text-accent hover:underline">
                 {CONTACT_EMAIL}
               </a>{" "}
               from the address on the account and we will delete it for
@@ -247,7 +247,7 @@ export default function PrivacyPage() {
             <p>
               Questions about privacy, or a request about your data?
               Email{" "}
-              <a href={`mailto:${CONTACT_EMAIL}`} className="text-accent hover:underline">
+              <a href={`mailto:${CONTACT_EMAIL}`} className="tap text-accent hover:underline">
                 {CONTACT_EMAIL}
               </a>
               .
@@ -256,10 +256,10 @@ export default function PrivacyPage() {
         </div>
 
         <div className="mt-10 flex items-center gap-4 border-t border-white/8 pt-6 text-sm text-white/50">
-          <Link href="/terms" className="hover:text-white">
+          <Link href="/terms" className="tap hover:text-white">
             Terms of Service
           </Link>
-          <Link href="/login" className="hover:text-white">
+          <Link href="/login" className="tap hover:text-white">
             Back to sign in
           </Link>
         </div>

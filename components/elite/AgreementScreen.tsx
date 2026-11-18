@@ -48,22 +48,22 @@ export function AgreementScreen({ signOut }: { signOut: () => Promise<void> }) {
 
         <p className="mt-4 text-sm text-white/65">
           Read them in full:{" "}
-          <Link href="/terms" target="_blank" className="font-semibold text-bone underline underline-offset-4">
+          <Link href="/terms" target="_blank" className="tap font-semibold text-bone underline underline-offset-4">
             Terms of Service
           </Link>{" "}
           and{" "}
-          <Link href="/privacy" target="_blank" className="font-semibold text-bone underline underline-offset-4">
+          <Link href="/privacy" target="_blank" className="tap font-semibold text-bone underline underline-offset-4">
             Privacy Policy
           </Link>
           .
         </p>
 
         <form action={action} className="mt-6 space-y-4">
-          <label className="flex items-start gap-3 text-[15px] leading-snug text-bone">
+          <label className="flex min-h-[44px] items-start gap-3 py-1 text-[15px] leading-snug text-bone">
             <input type="checkbox" name="guardian" required className="mt-0.5 h-6 w-6 shrink-0 accent-white" />
             <span>{GUARDIAN_STATEMENT}</span>
           </label>
-          <label className="flex items-start gap-3 text-[15px] leading-snug text-bone">
+          <label className="flex min-h-[44px] items-start gap-3 py-1 text-[15px] leading-snug text-bone">
             <input type="checkbox" name="terms" required className="mt-0.5 h-6 w-6 shrink-0 accent-white" />
             <span>{TERMS_STATEMENT}</span>
           </label>
@@ -93,11 +93,11 @@ export function AgreementScreen({ signOut }: { signOut: () => Promise<void> }) {
         </form>
 
         <div className="mt-6 flex items-center justify-center gap-6 text-sm text-white/55">
-          <Link href="/account" className="underline-offset-4 hover:underline">
+          <Link href="/account" className="tap underline-offset-4 hover:underline">
             Account
           </Link>
           <form action={signOut}>
-            <button className="underline-offset-4 hover:underline">Sign out</button>
+            <button className="tap underline-offset-4 hover:underline">Sign out</button>
           </form>
         </div>
       </div>

@@ -51,10 +51,12 @@ export function DrillVideo({ src, label = "Watch demo" }: { src: string; label?:
       />
       <button
         onClick={() => setOpen(false)}
-        className="absolute right-2 top-2 grid h-8 w-8 place-items-center rounded-full bg-black/60 text-white/80 hover:text-white"
+        className="absolute right-1 top-1 grid h-11 w-11 place-items-center rounded-full text-white/80 hover:text-white"
         aria-label="Close video"
       >
-        <X className="h-4 w-4" />
+        <span className="grid h-8 w-8 place-items-center rounded-full bg-black/60">
+          <X className="h-4 w-4" />
+        </span>
       </button>
     </div>
   );

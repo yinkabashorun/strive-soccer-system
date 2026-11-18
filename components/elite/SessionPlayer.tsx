@@ -218,12 +218,15 @@ export function SessionPlayer({
                 {drill.exercise}
               </p>
               {drill.exercise.length > 90 && (
-                <button
-                  onClick={() => setShowHow((v) => !v)}
-                  className="mt-1 text-sm font-semibold text-white/60 underline-offset-4 hover:underline"
-                >
-                  {showHow ? "Show less" : "How to do it"}
-                </button>
+                <div className="mt-1">
+                  <button
+                    onClick={() => setShowHow((v) => !v)}
+                    aria-expanded={showHow}
+                    className="tap text-sm font-semibold text-white/60 underline-offset-4 hover:underline"
+                  >
+                    {showHow ? "Show less" : "How to do it"}
+                  </button>
+                </div>
               )}
             </div>
           )}
@@ -281,7 +284,7 @@ export function SessionPlayer({
         </div>
         {drillDone && !justTicked && (
           <div className="mx-auto max-w-md pb-3 text-center">
-            <button onClick={undo} className="text-sm text-white/50 underline-offset-4 hover:underline">
+            <button onClick={undo} className="tap text-sm text-white/50 underline-offset-4 hover:underline">
               Not done yet? Untick it
             </button>
           </div>
@@ -323,7 +326,8 @@ function Segments({
           key={d.id}
           onClick={() => onPick(i)}
           aria-label={`Drill ${i + 1}`}
-          className="group flex-1 py-1.5"
+          aria-current={i === current ? "step" : undefined}
+          className="group relative flex-1 py-1.5 before:absolute before:inset-x-0 before:-inset-y-[13px] before:content-['']"
         >
           <span
             className={cn(

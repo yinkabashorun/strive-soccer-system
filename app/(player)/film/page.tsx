@@ -1,18 +1,20 @@
-import { CalendarDays, Clapperboard } from "lucide-react";
+import { Clapperboard } from "lucide-react";
 import { getViewer } from "@/lib/elite/session";
 import { getFilm, getGames, getPlayer } from "@/lib/elite/data";
-import { liveWeekFor, monthFromWeek } from "@/lib/elite/time";
+import { liveWeekFor, monthFromWeek, nyToday } from "@/lib/elite/time";
 import { getNextFilmRoom, getPlayerFilmRoomClips } from "@/lib/elite/film-room-data";
 import { FilmRoomCard } from "@/components/elite/FilmRoomCard";
 import { FilmTimeline } from "@/components/elite/FilmTimeline";
 import { GameSchedule } from "@/components/elite/GameSchedule";
+import { Fold } from "@/components/elite/Fold";
 import { TourGuide } from "@/components/elite/TourGuide";
 
 export const metadata = { title: "Film · Strive Elite" };
 
 // The weekly Film Room (062): when it is, the Zoom link and the place to
-// upload three to five clips. Below it, the monthly film timeline for a
-// Complete member (retired tier, kept as it was) and the game schedule.
+// upload three to five clips. For most members that one card is the whole
+// page. Below it, the monthly film timeline for a Complete member (retired
+// tier, kept as it was), and the game schedule folded into one line.
 export default async function FilmPage() {
   const viewer = await getViewer();
   if (!viewer?.playerId) return null;
@@ -27,6 +29,8 @@ export default async function FilmPage() {
 
   const currentMonth = monthFromWeek(liveWeekFor(player.week1_monday, player.current_week));
   const firstName = player.full_name.split(" ")[0];
+  const comingUp = games.filter((g) => g.game_date >= nyToday()).length;
+  const gamesHint = comingUp === 0 ? "Add a game" : comingUp === 1 ? "1 coming up" : `${comingUp} coming up`;
 
   return (
     <div className="space-y-5">
@@ -39,10 +43,6 @@ export default async function FilmPage() {
         <h1 className="mt-1 font-display text-3xl font-black sm:text-4xl">
           Film Room
         </h1>
-        <p className="mt-2 text-white/50">
-          Coach Yinka and Coach Gary go through your clips on Zoom: what&apos;s
-          working, what&apos;s next.
-        </p>
       </header>
 
       <FilmRoomCard
@@ -60,13 +60,11 @@ export default async function FilmPage() {
         />
       )}
 
-      {/* Game schedule - Coach shows up to NoVA games */}
-      <section className="pt-2">
-        <h2 className="mb-3 flex items-center gap-2 font-display text-xl font-bold uppercase tracking-tight">
-          <CalendarDays className="h-4 w-4 text-accent" /> Your games
-        </h2>
+      {/* Game schedule - Coach shows up to NoVA games. One line until
+          opened, so the Film Room card is the page. */}
+      <Fold title="Your games" hint={gamesHint}>
         <GameSchedule games={games} />
-      </section>
+      </Fold>
     </div>
   );
 }

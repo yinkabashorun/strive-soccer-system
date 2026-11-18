@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { AGREEMENT_POINTS, GUARDIAN_STATEMENT } from "@/lib/elite/legal";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { KeyRound, Loader2 } from "lucide-react";
@@ -34,6 +35,9 @@ export function SignupForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [codeUsed, setCodeUsed] = useState(false);
+  // The agreement: ticked by the person, never by default (068).
+  const [guardian, setGuardian] = useState(false);
+  const [terms, setTerms] = useState(false);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -49,7 +53,16 @@ export function SignupForm({
     const res = await fetch("/api/elite/auth/redeem", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code, fullName, email, phone, playerPhone, password }),
+      body: JSON.stringify({
+        code,
+        fullName,
+        email,
+        phone,
+        playerPhone,
+        password,
+        // a coach is an adult signing for themselves: one box
+        agreed: { guardian: coach ? true : guardian, terms },
+      }),
     });
     const data = await res.json();
     if (!res.ok) {
@@ -158,6 +171,51 @@ export function SignupForm({
           </p>
         )}
 
+        <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+          {!coach && (
+            <>
+              <ul className="space-y-2">
+                {AGREEMENT_POINTS.map((point) => (
+                  <li key={point} className="flex gap-2.5 text-xs leading-relaxed text-white/60">
+                    <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-accent" />
+                    {point}
+                  </li>
+                ))}
+              </ul>
+              <label className="flex items-start gap-3 text-sm leading-snug text-bone">
+                <input
+                  type="checkbox"
+                  required
+                  checked={guardian}
+                  onChange={(e) => setGuardian(e.target.checked)}
+                  className="mt-0.5 h-5 w-5 shrink-0 accent-white"
+                />
+                <span>{GUARDIAN_STATEMENT}</span>
+              </label>
+            </>
+          )}
+          <label className="flex items-start gap-3 text-sm leading-snug text-bone">
+            <input
+              type="checkbox"
+              required
+              checked={terms}
+              onChange={(e) => setTerms(e.target.checked)}
+              className="mt-0.5 h-5 w-5 shrink-0 accent-white"
+            />
+            <span>
+              I agree to the{" "}
+              <Link href="/terms" target="_blank" className="underline underline-offset-2">
+                Terms of Service
+              </Link>{" "}
+              and the{" "}
+              <Link href="/privacy" target="_blank" className="underline underline-offset-2">
+                Privacy Policy
+              </Link>
+              .
+            </span>
+          </label>
+        </div>
+
         <button
           type="submit"
           disabled={loading}
@@ -188,18 +246,6 @@ export function SignupForm({
           </a>
         </p>
       )}
-      <p className="mt-4 text-center text-[11px] text-white/25">
-        By creating an account you agree to our{" "}
-        <Link href="/terms" className="hover:text-white/50">
-          Terms
-        </Link>{" "}
-        and{" "}
-        <Link href="/privacy" className="hover:text-white/50">
-          Privacy Policy
-        </Link>
-        .
-      </p>
-
       {!configured && (
         <div className="mt-7 border-t border-white/8 pt-6">
           <div className="mb-3 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">

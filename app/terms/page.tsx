@@ -3,7 +3,7 @@ import { Wordmark } from "@/components/elite/Wordmark";
 
 export const metadata = { title: "Terms of Service · Strive Elite" };
 
-const UPDATED = "September 26, 2026";
+const UPDATED = "November 18, 2026";
 const CONTACT_EMAIL = "coach@strivesoccer100x.com";
 
 export default function TermsPage() {
@@ -27,10 +27,18 @@ export default function TermsPage() {
           <Section title="Who can join">
             <p>
               Strive Elite accounts are invite-only and are created by a
-              parent or guardian on behalf of a youth player. The account
-              holder (the adult) is responsible for the accuracy of the
-              information provided and for their player&apos;s use of the
-              app.
+              parent or legal guardian on behalf of a youth player, or by
+              a player who is 18 or older. The account holder (the adult)
+              is responsible for the accuracy of the information provided
+              and for their player&apos;s use of the app. A player under
+              13 uses Strive Elite only through an account their parent or
+              guardian created and agreed to.
+            </p>
+            <p className="mt-3">
+              When the account is created the adult ticks a box to accept
+              these terms and our Privacy Policy, and we keep a record of
+              that. If the terms change in a way that matters, the app
+              asks the adult to accept them again before training goes on.
             </p>
           </Section>
 
@@ -66,6 +74,44 @@ export default function TermsPage() {
             </p>
           </Section>
 
+          <Section title="Not medical advice">
+            <p>
+              Training plans, strength and speed work, and the General
+              Nutrition Guide are general guidance for healthy youth
+              players. None of it is medical advice, and none of it
+              replaces a doctor, a physical therapist or an athletic
+              trainer. A player who is injured or returning from injury
+              trains only as far as their doctor or physical therapist has
+              cleared them, and tells their coach what those limits are.
+            </p>
+          </Section>
+
+          <Section title="Clips and messages">
+            <p>
+              Clips, photos and messages you send through the app stay
+              yours. By sending them you allow us to store them and to
+              view them so we can coach your player. They are seen
+              by the Strive coaches. Clips you add to a Film Room are
+              watched in that session by the members who join it. We do
+              not post a
+              player&apos;s clip publicly unless a parent or guardian has
+              said yes to that clip. Send only clips of your own player,
+              and nothing unlawful, abusive or unrelated to training. To
+              report something that concerns you, use Report a concern on
+              the Account page or email us.
+            </p>
+          </Section>
+
+          <Section title="Texts and notifications">
+            <p>
+              We text the phone numbers you give us about your
+              player&apos;s training: a new week, a message from a coach,
+              a Film Room or a call. Message and data rates may apply.
+              Reply STOP to any text to end them. Push notifications are
+              optional and can be turned on or off on the Account page.
+            </p>
+          </Section>
+
           <Section title="Acceptable use">
             <p>
               The app is for your player&apos;s training and your family&apos;s
@@ -89,6 +135,25 @@ export default function TermsPage() {
             </p>
           </Section>
 
+          <Section title="Deleting your account">
+            <p>
+              You can delete your account yourself at any time: open the
+              app, go to Account, then Delete my account. What is removed
+              and what we must keep is set out in our Privacy Policy.
+              Deleting the account does not by itself stop a membership
+              that is billed outside the app, so tell your coach too.
+            </p>
+          </Section>
+
+          <Section title="The iPhone app">
+            <p>
+              If you use Strive Elite through the app from Apple&apos;s App
+              Store, these terms are between you and Strive Elite, not
+              Apple. Apple is not responsible for the app, its content or
+              its support. No purchase is made inside the app.
+            </p>
+          </Section>
+
           <Section title="No guarantee of results">
             <p>
               Every player develops at their own pace. We&apos;re
@@ -109,10 +174,9 @@ export default function TermsPage() {
 
           <Section title="Changes to these terms">
             <p>
-              We may update these terms as the program evolves. Continued
-              use of the app after an update means you accept the revised
-              terms. For significant changes, we&apos;ll let current
-              families know directly.
+              We may update these terms as the program evolves. When a
+              change matters to your family, the app asks the account
+              holder to accept the new terms before training continues.
             </p>
           </Section>
 

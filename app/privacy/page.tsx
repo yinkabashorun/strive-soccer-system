@@ -142,6 +142,27 @@ export default function PrivacyPage() {
             </ul>
           </Section>
 
+          <Section title="Your agreement and advertising">
+            <p>
+              When an account is created, and again if our terms change,
+              the adult on the account accepts our Terms and this policy.
+              We keep a record of that acceptance: the version, the date
+              and time, the device&apos;s browser type, and the name typed
+              if one was asked for.
+            </p>
+            <p className="mt-3">
+              Our public information page (thestriveapp.com/demo) uses an
+              advertising pixel from Meta to measure visits from our ads.
+              It is not used anywhere inside the member app, and we do not
+              use a player&apos;s training information for advertising.
+            </p>
+            <p className="mt-3">
+              Clips you add to a weekly Film Room are watched in that
+              session by the coaches and the members who join it. Every
+              other clip is seen only by the coaches.
+            </p>
+          </Section>
+
           <Section title="Children's information">
             <p>
               Strive Elite is a training program for youth players, most of

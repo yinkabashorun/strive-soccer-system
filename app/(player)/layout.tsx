@@ -7,6 +7,8 @@ import { getViewer } from "@/lib/elite/session";
 import { getNotifications, getPlayer } from "@/lib/elite/data";
 import { signOut } from "@/lib/elite/auth-actions";
 import { unlockDueWeeks } from "@/lib/elite/unlock";
+import { AgreementScreen } from "@/components/elite/AgreementScreen";
+import { consentDue } from "@/lib/elite/legal-server";
 
 // Five tabs, the most an iPhone tab bar should carry (Apple HIG). Progress
 // lives one tap away: the time-trained strip on Home and the Account page.
@@ -39,6 +41,15 @@ export default async function PlayerLayout({
         body="Your coach is setting up your development profile. You'll get an email the moment your first week is ready."
       />
     );
+  }
+
+  // Agreement gate (068): a member who has not accepted the current Terms
+  // and Privacy Policy does that first, once. New accounts accept at
+  // sign-up; this catches everyone who joined before, and everyone again
+  // when the terms change. The Account page (and deleting the account)
+  // stays reachable without it.
+  if (!viewer.demo && (await consentDue(viewer.profile.id))) {
+    return <AgreementScreen signOut={signOut} />;
   }
 
   const player = await getPlayer(viewer.playerId);

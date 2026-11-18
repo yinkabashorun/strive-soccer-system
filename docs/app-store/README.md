@@ -74,7 +74,7 @@ COACH YINKA, before submitting:
 | 4.5.4 | Push never required, an opt-out inside the app | BUILT: Account > Notifications on/off (web and native). |
 | 5.1.1(i) | Privacy policy linked inside the app, with retention and deletion | BUILT: /privacy from the Account page. The policy states no retention periods yet (COACH YINKA, see section 6). Not lawyer-reviewed. |
 | 5.1.1(v) | Account deletion inside the app, easy to find | BUILT: Account > Delete my account (password, then everything is removed, files included). Also explained at /support#delete for the web. |
-| 5.1.2(i) | Sharing personal data with a third-party AI must be disclosed, with explicit permission | COACH YINKA: the plan builder sends training data to an outside AI service. The privacy policy discloses automated tools. Apple's wording asks for explicit permission; how to ask without breaking the no-"AI" copy rule is his call. |
+| 5.1.2(i) | Sharing personal data with a third-party AI must be disclosed, with explicit permission | BUILT: the agreement every account accepts (sign-up, and a one-time screen for existing members) states that some information is handled by the service providers named in the Privacy Policy, "including automated tools that help our coaches prepare training plans"; the policy names the provider. The acceptance is recorded (`elite_consents`, migration 068). |
 | 1.2 | User content needs a way to report and a published contact | BUILT: Account > Report a concern, /support. Clips are private between a family and the coaches, there is no public feed. |
 | 5.1.4 / 2.3.8 | Do not present the app as made for children, do not choose the Kids Category | Category: Sports (or Health & Fitness). Never Kids. |
 | 4.8 | Sign in with Apple if third-party sign-in is offered | Not applicable: email and password only. |
@@ -83,10 +83,13 @@ COACH YINKA, before submitting:
 
 - COPPA (amended rule, compliance date April 22 2026): one member is 12.
   A child under 13 who uploads clips, chats, or has a push token needs
-  verifiable parental consent on file. Today the parent signs up and
-  holds the account, which is the right shape, but no consent record is
-  kept. NOT BUILT: a dated consent line at sign-up, stored. COACH YINKA:
-  confirm with a lawyer.
+  verifiable parental consent on file. BUILT: the adult ticks "I am this
+  player's parent or legal guardian, or I am the player and I am 18 or
+  older" and accepts the Terms and the Privacy Policy; the acceptance is
+  recorded with version, time and, in the app, the adult's typed name.
+  Existing members are asked once on their next visit. Whether a ticked
+  box plus the parent's own card payment meets the "verifiable" standard
+  is a lawyer's call (COACH YINKA).
 - Posting a player's clip publicly (Instagram, the community) needs its
   own parent consent. The progress-clip tick exists; its wording is
   still parked.

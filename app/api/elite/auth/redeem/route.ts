@@ -4,6 +4,8 @@ import { sendPlayerEmail } from "@/lib/elite/email";
 import { normalizePhone } from "@/lib/elite/sms";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { inviteRoleOf, redeemFieldsComplete } from "@/lib/elite/invite-link";
+import { AGREEMENT_REQUIRED_MESSAGE, agreementComplete } from "@/lib/elite/legal";
+import { recordConsent } from "@/lib/elite/legal-server";
 
 export const runtime = "nodejs";
 
@@ -33,6 +35,7 @@ export async function POST(req: Request) {
     phone?: string;
     playerPhone?: string;
     password?: string;
+    agreed?: { guardian?: unknown; terms?: unknown };
   };
   try {
     body = await req.json();
@@ -48,6 +51,11 @@ export async function POST(req: Request) {
   const password = body.password ?? "";
 
   if (!code) return NextResponse.json({ error: "An invite code is required." }, { status: 400 });
+  // No account without the agreement (068): both boxes, ticked by the
+  // person. Checked before anything is created.
+  if (!agreementComplete(body.agreed ?? {})) {
+    return NextResponse.json({ error: AGREEMENT_REQUIRED_MESSAGE }, { status: 400 });
+  }
   if (!fullName || !email || password.length < 8) {
     return NextResponse.json(
       { error: "Enter your name, email, phone, and a password of at least 8 characters." },
@@ -119,6 +127,13 @@ export async function POST(req: Request) {
     role,
     full_name: fullName,
     email,
+  });
+
+  // Record the agreement the person just gave (version, time, where).
+  await recordConsent({
+    profileId: userId,
+    source: "signup",
+    userAgent: req.headers.get("user-agent"),
   });
 
   // A coach is a profile, nothing more: no player row, no membership

@@ -28,7 +28,7 @@ export default async function MessagesPage() {
         <h1 className="mt-1 font-display text-3xl font-black sm:text-4xl">
           Your coach
         </h1>
-        <p className="mt-2 text-white/50">
+        <p className="mt-2 text-[15px] leading-relaxed text-white/65">
           Questions, wins, clips to talk through. Message your coach directly.
         </p>
       </header>
@@ -40,6 +40,7 @@ export default async function MessagesPage() {
           meName={viewer.profile.full_name}
           send={send}
           placeholder="Message your coach…"
+          emptyLine="No messages yet. Ask your coach anything about your training, and the answer comes back right here."
         />
       </div>
     </div>

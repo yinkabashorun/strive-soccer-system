@@ -70,6 +70,8 @@ export function SendClip({
         accept="video/*"
         capture="environment"
         className="hidden"
+        aria-hidden
+        tabIndex={-1}
         onChange={(e) => {
           const f = e.target.files?.[0];
           if (f) void onFile(f);
@@ -77,7 +79,7 @@ export function SendClip({
         }}
       />
       {state === "sent" ? (
-        <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-accent">
+        <span role="status" className="inline-flex min-h-[44px] items-center gap-1.5 text-[13px] font-semibold text-accent">
           <Check className="h-3.5 w-3.5" /> Clip sent. Your coach will take a look.
         </span>
       ) : (
@@ -85,7 +87,7 @@ export function SendClip({
           type="button"
           disabled={state === "uploading" || state === "checking"}
           onClick={() => void onTap()}
-          className="inline-flex items-center gap-1.5 rounded-full border border-white/12 px-3 py-1.5 text-xs font-semibold text-white/70 transition-colors hover:border-accent/50 hover:text-bone disabled:opacity-60"
+          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full border border-white/12 px-4 text-[13px] font-semibold text-white/70 transition-colors hover:border-accent/50 hover:text-bone disabled:opacity-60"
           aria-label={`Send a clip of ${title}`}
         >
           {state === "uploading" || state === "checking" ? (

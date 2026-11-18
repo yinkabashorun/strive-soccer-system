@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Timer } from "lucide-react";
 import { getViewer } from "@/lib/elite/session";
 import {
   getCheckins,
@@ -125,7 +124,7 @@ export default async function DashboardPage() {
       {/* Greeting, and time trained once: the pill opens Progress (034: no
           streak, no percentage, nothing that counts what was missed) */}
       <header className="flex items-center justify-between gap-3 animate-fade-up">
-        <h1 className="min-w-0 font-display text-2xl font-black leading-none">
+        <h1 className="min-w-0 font-display text-[22px] font-black leading-none">
           {greeting()}, {firstName}
         </h1>
         {time.minutes > 0 && (
@@ -134,7 +133,6 @@ export default async function DashboardPage() {
             aria-label={`${fmtDuration(time.minutes)} trained. Open your progress`}
             className="flex min-h-[44px] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-accent/30 bg-accent/[0.07] px-3.5"
           >
-            <Timer className="h-4 w-4 text-accent" />
             <span className="font-display text-lg font-black leading-none text-accent">
               {fmtDuration(time.minutes)}
             </span>

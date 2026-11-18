@@ -63,7 +63,7 @@ export function CheckinCard({
             {firstName ? `${firstName}, how` : "How"} did week {week} really
             go? Two minutes for your coach. It shapes your next plan.
           </p>
-          <button onClick={() => setOpen(true)} className="btn mt-3 w-full py-2.5">
+          <button onClick={() => setOpen(true)} className="btn mt-3 min-h-[44px] w-full py-2.5">
             Start check-in
           </button>
         </>

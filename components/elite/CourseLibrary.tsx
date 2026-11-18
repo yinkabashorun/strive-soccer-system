@@ -44,7 +44,9 @@ export function CourseList({
       </header>
 
       {courses.length === 0 ? (
-        <div className="elite-card p-6 text-sm text-white/50">The first course is on its way.</div>
+        <div className="elite-card p-6 text-[15px] leading-relaxed text-white/65">
+          The first course is on its way. It shows up here the moment it is ready.
+        </div>
       ) : (
         <div className="space-y-2.5">
           {courses.map((c) => {
@@ -122,7 +124,7 @@ export function LinkCourseGate({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
           href={basePath}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-white/50 hover:text-bone"
+          className="inline-flex min-h-[44px] items-center gap-1.5 pr-3 text-xs font-semibold uppercase tracking-wider text-white/60 hover:text-bone"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Courses
         </Link>
@@ -194,7 +196,7 @@ export function CourseView({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
           href={basePath}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-white/50 hover:text-bone"
+          className="inline-flex min-h-[44px] items-center gap-1.5 pr-3 text-xs font-semibold uppercase tracking-wider text-white/60 hover:text-bone"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Courses
         </Link>

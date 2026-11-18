@@ -100,7 +100,7 @@ export function CheckinBooking({ checkin, firstName }: { checkin: PlayerCheckin;
                       key={slot.id}
                       onClick={() => book(slot.id, slot.starts_at)}
                       disabled={pending}
-                      className="rounded-full border border-white/15 px-3.5 py-1.5 text-sm text-bone transition-colors hover:border-accent/50 hover:text-accent disabled:opacity-60"
+                      className="min-h-[44px] min-w-[84px] rounded-full border border-white/15 px-3.5 text-sm text-bone transition-colors hover:border-accent/50 hover:text-accent disabled:opacity-60"
                     >
                       {pending ? <Loader2 className="inline h-3.5 w-3.5 animate-spin" /> : time(slot.starts_at)}
                     </button>

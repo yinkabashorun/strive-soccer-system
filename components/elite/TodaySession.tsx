@@ -181,7 +181,7 @@ export function VictoryLap({
           <Stat label="All time" value={fmtDuration(totalMinutes)} />
         </div>
         <p className="mt-5 text-[15px] leading-relaxed text-white/75">
-          Want more? Add an extra session below. Every minute goes on your total.
+          Want more? Tap Extra work below to add a session. Every minute goes on your total.
         </p>
         <p className="mt-2 text-[15px] font-medium text-bone">{nextWeekLine}</p>
       </div>

@@ -13,12 +13,14 @@ export function MessageThread({
   meName,
   send,
   placeholder = "Write a message…",
+  emptyLine = "No messages yet. Say hello.",
 }: {
   messages: Message[];
   meRole: Role;
   meName: string;
   send: (body: string) => Promise<{ ok: boolean }>;
   placeholder?: string;
+  emptyLine?: string; // shown before the first message
 }) {
   // incoming is newest-first; show oldest-first for a natural chat flow.
   const [local, setLocal] = useState<Message[]>(() => [...messages].reverse());
@@ -61,9 +63,7 @@ export function MessageThread({
     <div className="flex flex-col">
       <div className="max-h-[320px] space-y-2 overflow-y-auto pr-1">
         {optimistic.length === 0 && (
-          <p className="py-6 text-center text-sm text-white/50">
-            No messages yet. Say hello.
-          </p>
+          <p className="py-6 text-center text-sm leading-relaxed text-white/60">{emptyLine}</p>
         )}
         {optimistic.map((m) => {
           const mine = m.from_role === meRole;

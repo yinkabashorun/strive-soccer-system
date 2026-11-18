@@ -53,10 +53,10 @@ COACH YINKA, before submitting:
 - DONE Nov 18: the old public $97 page at /dribbling-course is retired
   (page, checkout and buyer route deleted; the address redirects to
   /demo; a test keeps it gone).
-- The Dribbling Transformation card opens a password-gated site on
-  another domain. In review this reads as unfinished or as content
-  unlocked elsewhere. Decide: switch that course back to the in-app
-  pages (they are still on the row), or hide the card inside the app.
+- DONE Nov 18: inside the app a course never opens another website. The
+  Dribbling Transformation card shows its 27 in-app pages there
+  (`courseForApp` in `lib/elite/courses.ts`); the website still opens the
+  password site.
 - Fallback if Apple refuses: sell the subscription through in-app
   purchase on iPhone (Apple keeps 15% under the Small Business Program,
   UNCONFIRMED for this account until enrolled), or publish for the United

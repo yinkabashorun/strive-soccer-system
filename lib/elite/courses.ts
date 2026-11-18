@@ -182,6 +182,36 @@ export function stepIsUsable(step: CourseStep): boolean {
   return Boolean(step.title && step.body);
 }
 
+// Inside the App Store app a member is never sent to another website
+// (Nov 18 2026; App Review reads an outside site behind a password as
+// content unlocked elsewhere). A link course whose address is on another
+// domain is shown there through its own pages in the app when it has
+// them, and is left out when it has none. Its intro is dropped with the
+// address: on a link course the intro is where the coach writes that
+// site's password. A link to a path on our own domain is left alone, and
+// so is everything outside the App Store app.
+export function courseForApp(course: Course, native: boolean): Course | null {
+  if (!native || course.kind !== "link") return course;
+  const href = externalHref(course);
+  if (href && isInternalHref(href)) return course;
+  const steps = course.steps.filter(stepIsUsable);
+  if (steps.length === 0) return null;
+  return {
+    ...course,
+    kind: steps.some((s) => s.drill_id) ? "drill" : "lesson",
+    external_url: null,
+    intro: null,
+    steps,
+  };
+}
+
+export function coursesForApp(courses: Course[], native: boolean): Course[] {
+  return courses.flatMap((c) => {
+    const shown = courseForApp(c, native);
+    return shown ? [shown] : [];
+  });
+}
+
 export function visibleCourses(courses: Course[]): Course[] {
   return courses
     .filter((c) => c.active)

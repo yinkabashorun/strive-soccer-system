@@ -1,6 +1,7 @@
 import { getViewer } from "@/lib/elite/session";
 import { getCourses } from "@/lib/elite/data";
-import { libraryCourses } from "@/lib/elite/courses";
+import { coursesForApp, libraryCourses } from "@/lib/elite/courses";
+import { inNativeApp } from "@/lib/elite/native-request";
 import { CourseList } from "@/components/elite/CourseLibrary";
 
 export const metadata = { title: "Courses · Strive Elite" };
@@ -11,6 +12,8 @@ export const metadata = { title: "Courses · Strive Elite" };
 export default async function CoursesPage() {
   const viewer = await getViewer();
   if (!viewer?.playerId) return null;
-  const courses = libraryCourses(await getCourses(), { staff: false });
+  // Inside the App Store app a course never opens another website: a link
+  // course shows its own in-app pages there (courseForApp).
+  const courses = libraryCourses(coursesForApp(await getCourses(), inNativeApp()), { staff: false });
   return <CourseList courses={courses} basePath="/courses" />;
 }

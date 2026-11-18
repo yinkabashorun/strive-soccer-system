@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import {
   cleanExternalUrl,
+  courseForApp,
+  coursesForApp,
   isInternalHref,
   courseIsUsable,
   courseNotice,
@@ -253,5 +257,73 @@ describe("link courses", () => {
   it("a link course takes no steps", () => {
     const v = validateStepInput("link", { course_id: "c", level_no: 1, title: "T", body: "B" });
     expect(v.ok).toBe(false);
+  });
+});
+
+// Inside the App Store app (Nov 18 2026) a member is never sent to
+// another website: a link course shows its own pages there.
+describe("link courses inside the App Store app", () => {
+  const lesson = (n: number) => step({ title: `Page ${n}`, body: "Words.", sort: n });
+  const site = course({
+    slug: "dribbling-transformation",
+    kind: "link",
+    external_url: "https://example.netlify.app/",
+    intro: "The password is on this line.",
+    steps: [lesson(1), lesson(2)],
+  });
+
+  it("on the web nothing changes: the link course stays a link course", () => {
+    expect(courseForApp(site, false)).toBe(site);
+    expect(coursesForApp([site], false)).toEqual([site]);
+  });
+
+  it("in the app it opens its own pages, with no address and no password line", () => {
+    const shown = courseForApp(site, true)!;
+    expect(shown.kind).toBe("lesson");
+    expect(shown.external_url).toBeNull();
+    expect(shown.intro).toBeNull();
+    expect(shown.steps).toHaveLength(2);
+    expect(externalHref(shown)).toBeNull();
+    // and it is still on the tab
+    expect(libraryCourses(coursesForApp([site], true), { staff: false })).toHaveLength(1);
+  });
+
+  it("in the app a link course with no pages of its own is left out", () => {
+    const bare = course({ kind: "link", external_url: "https://example.com/x", steps: [] });
+    expect(courseForApp(bare, true)).toBeNull();
+    expect(coursesForApp([bare, site], true)).toHaveLength(1);
+    // pages that cannot be used do not count
+    const empty = course({ kind: "link", external_url: "https://example.com/x", steps: [step({ title: "T" })] });
+    expect(courseForApp(empty, true)).toBeNull();
+  });
+
+  it("a link to our own domain and every other kind of course are left alone", () => {
+    const ours = course({ kind: "link", external_url: "/learn/x/index.html", steps: [] });
+    expect(courseForApp(ours, true)).toBe(ours);
+    const drills = course({ kind: "drill", steps: [lesson(1)] });
+    expect(courseForApp(drills, true)).toBe(drills);
+  });
+
+  it("a link course built from bank drills opens as a drill course", () => {
+    const d = drill("Juggling: one touch, catch");
+    const c = course({
+      kind: "link",
+      external_url: "https://example.com/",
+      steps: [step({ drill_id: d.id, drill: d })],
+    });
+    expect(courseForApp(c, true)?.kind).toBe("drill");
+  });
+
+  it("all four course pages apply the rule", () => {
+    for (const p of [
+      "app/(player)/courses/page.tsx",
+      "app/(player)/courses/[slug]/page.tsx",
+      "app/(coach)/coach/courses/page.tsx",
+      "app/(coach)/coach/courses/[slug]/page.tsx",
+    ]) {
+      const src = readFileSync(join(__dirname, "..", p), "utf8");
+      expect(src, p).toMatch(/courses?ForApp\(/);
+      expect(src, p).toContain("inNativeApp()");
+    }
   });
 });

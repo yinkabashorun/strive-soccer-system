@@ -111,7 +111,7 @@ export function SessionRows({
                 <span
                   className={cn(
                     "block text-[15px] font-semibold leading-snug",
-                    ticked ? "text-white/45" : "text-bone"
+                    ticked ? "text-white/50" : "text-bone"
                   )}
                 >
                   {drillName(d.title)}
@@ -126,7 +126,7 @@ export function SessionRows({
                   {d.reps}
                 </span>
               </span>
-              <ChevronRight className="h-4 w-4 shrink-0 text-white/30" />
+              <ChevronRight className="h-4 w-4 shrink-0 text-white/50" />
             </button>
           </li>
         );

@@ -132,7 +132,7 @@ export function PushOptIn() {
       <div className="flex shrink-0 items-center gap-2">
         <button
           onClick={() => dismiss(DISMISS_KEY)}
-          className="rounded-xl px-3 py-2 text-sm text-white/40 hover:text-white/70"
+          className="rounded-xl px-3 py-2 text-sm text-white/50 hover:text-white/70"
         >
           Not now
         </button>

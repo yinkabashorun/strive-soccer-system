@@ -17,7 +17,7 @@ export function ProgressPanel({ progress }: { progress: Progress[] }) {
         <div className="font-display text-lg font-bold uppercase tracking-tight text-white/70">
           Your baseline is coming
         </div>
-        <p className="mx-auto mt-2 max-w-sm text-sm text-white/45">
+        <p className="mx-auto mt-2 max-w-sm text-sm text-white/50">
           Your coach rates the seven pillars from your actual training. The
           first ratings land with your first training week, then you watch
           them climb.
@@ -41,7 +41,7 @@ export function ProgressPanel({ progress }: { progress: Progress[] }) {
         <div className="elite-card flex items-center gap-5 p-6 sm:col-span-1">
           <ProgressRing value={overall} size={96} stroke={9} sublabel="Overall" />
           <div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
               Development score
             </div>
             <div className="mt-1 text-sm text-white/55">
@@ -52,7 +52,7 @@ export function ProgressPanel({ progress }: { progress: Progress[] }) {
 
         {biggestGain && (
           <div className="elite-card flex flex-col justify-center p-6 sm:col-span-2">
-            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
+            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
               <TrendingUp className="h-3.5 w-3.5" /> Biggest gain
             </div>
             <div className="mt-2 font-display text-2xl font-black">

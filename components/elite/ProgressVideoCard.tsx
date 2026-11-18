@@ -57,7 +57,7 @@ export function ProgressVideoCard({
 
   return (
     <section className="rounded-3xl border border-accent/30 bg-accent/[0.05] p-5 sm:p-6">
-      <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-accent">
+      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-accent">
         <Video className="h-3.5 w-3.5" /> {week === 1 ? "Your first clip" : `Week ${week} clip`}
       </div>
       {state === "sent" ? (

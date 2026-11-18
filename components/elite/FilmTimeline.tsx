@@ -77,7 +77,7 @@ function MonthCard({
 
   const label = (
     <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-white/40">
+      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-white/50">
         <Clapperboard className="h-3.5 w-3.5 text-accent" /> Month {month}
       </div>
       {film?.status === "Reviewed" ? (
@@ -85,9 +85,9 @@ function MonthCard({
           <CheckCircle2 className="h-3.5 w-3.5" /> Reviewed
         </span>
       ) : film || done ? (
-        <span className="text-[11px] text-white/45">With your coach</span>
+        <span className="text-[11px] text-white/50">With your coach</span>
       ) : locked ? (
-        <span className="flex items-center gap-1 text-[11px] text-white/30">
+        <span className="flex items-center gap-1 text-[11px] text-white/50">
           <Lock className="h-3 w-3" /> Unlocks month {month}
         </span>
       ) : null}
@@ -98,7 +98,7 @@ function MonthCard({
     return (
       <section className="rounded-3xl border border-white/6 bg-white/[0.01] p-5 opacity-60">
         {label}
-        <p className="mt-2 text-sm text-white/35">Keep stacking weeks.</p>
+        <p className="mt-2 text-sm text-white/50">Keep stacking weeks.</p>
       </section>
     );
   }
@@ -127,14 +127,14 @@ function MonthCard({
         )}
         {film?.review ? (
           <div className="mt-3 rounded-2xl border border-white/8 bg-black/40 p-4 sm:p-5">
-            <div className="mb-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/40">
+            <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/50">
               Coach&apos;s breakdown
             </div>
             <FilmReviewView review={film.review} />
           </div>
         ) : film?.coach_notes ? (
           <div className="mt-3 rounded-2xl border border-white/8 bg-black/40 p-4">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-accent">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-accent">
               Coach&apos;s review
             </div>
             <p className="mt-1.5 whitespace-pre-line text-sm leading-relaxed text-white/80">

@@ -96,7 +96,7 @@ export function SendClip({
           {state === "uploading" ? "Sending…" : "Send a clip"}
         </button>
       )}
-      {error && <p className="mt-1.5 text-xs text-red-400">{error}</p>}
+      {error && <p className="mt-1.5 text-[13px] text-red-400">{error}</p>}
     </div>
   );
 }

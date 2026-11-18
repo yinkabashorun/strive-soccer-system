@@ -116,8 +116,8 @@ export function LoginForm({
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
         </button>
 
-        <p className="text-center text-xs">
-          <Link href="/forgot" className="text-white/40 hover:text-accent">
+        <p className="text-center text-[13px]">
+          <Link href="/forgot" className="text-white/50 hover:text-accent">
             Forgot your password?
           </Link>
         </p>
@@ -138,14 +138,14 @@ export function LoginForm({
         <button className="btn w-full py-3 text-sm">
           See the app as a player →
         </button>
-        <p className="mt-2 text-center text-xs text-white/30">
+        <p className="mt-2 text-center text-[13px] text-white/50">
           No account needed.
         </p>
       </form>
 
       {!configured && (
         <div className="mt-7 border-t border-white/8 pt-6">
-          <div className="mb-3 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
+          <div className="mb-3 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
             Explore the demo
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -156,7 +156,7 @@ export function LoginForm({
               <button className="btn w-full py-3">Enter as Coach</button>
             </form>
           </div>
-          <p className="mt-3 text-center text-xs text-white/30">
+          <p className="mt-3 text-center text-[13px] text-white/50">
             No account needed. Tour the full experience.
           </p>
         </div>

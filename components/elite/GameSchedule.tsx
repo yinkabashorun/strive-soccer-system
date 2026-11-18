@@ -102,14 +102,14 @@ export function GameSchedule({ games }: { games: Game[] }) {
       )}
 
       {upcoming.length === 0 && !open && !added && (
-        <p className="text-sm text-white/40">
+        <p className="text-sm text-white/50">
           Drop your game schedule. If it&apos;s in Northern Virginia, Coach
           might pull up.
         </p>
       )}
 
       {past.length > 0 && (
-        <p className="text-xs text-white/30">{past.length} past game{past.length === 1 ? "" : "s"}</p>
+        <p className="text-xs text-white/50">{past.length} past game{past.length === 1 ? "" : "s"}</p>
       )}
     </div>
   );
@@ -141,7 +141,7 @@ function GameCard({ game }: { game: Game }) {
           <div className="mt-0.5 truncate text-sm text-white/60">
             {game.opponent ? `vs ${game.opponent}` : "Game"}
             {game.location && (
-              <span className="text-white/40">
+              <span className="text-white/50">
                 {" "}
                 · <MapPin className="inline h-3 w-3" /> {game.location}
               </span>

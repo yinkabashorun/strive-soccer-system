@@ -24,7 +24,7 @@ export default async function ProgressPage() {
       {viewer.demo && <TourGuide page="progress" />}
 
       <header className="animate-fade-up">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
           {player?.position} · {player?.level}
         </div>
         <h1 className="mt-1 flex items-center gap-2.5 font-display text-3xl font-black sm:text-4xl">
@@ -74,7 +74,7 @@ export default async function ProgressPage() {
             {notes.map((n) => (
               <div key={n.id} className="elite-card p-5">
                 <p className="text-sm leading-relaxed text-white/75">{n.body}</p>
-                <div className="mt-2 text-xs text-white/35">
+                <div className="mt-2 text-xs text-white/50">
                   {timeAgo(n.created_at)}
                 </div>
               </div>

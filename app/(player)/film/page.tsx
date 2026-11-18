@@ -33,7 +33,7 @@ export default async function FilmPage() {
       {viewer.demo && <TourGuide page="film" />}
 
       <header className="animate-fade-up">
-        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
+        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
           <Clapperboard className="h-3.5 w-3.5 text-accent" /> Every week
         </div>
         <h1 className="mt-1 font-display text-3xl font-black sm:text-4xl">

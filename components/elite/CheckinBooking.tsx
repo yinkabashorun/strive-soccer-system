@@ -50,7 +50,7 @@ export function CheckinBooking({ checkin, firstName }: { checkin: PlayerCheckin;
 
   return (
     <div className="rounded-3xl border border-accent/20 bg-accent/[0.05] p-5">
-      <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
+      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
         <CalendarClock className="h-3.5 w-3.5" /> Monthly check-in call
       </div>
 
@@ -67,13 +67,13 @@ export function CheckinBooking({ checkin, firstName }: { checkin: PlayerCheckin;
                 <Video className="mr-1.5 h-4 w-4" /> Join on Zoom
               </a>
             ) : (
-              <span className="text-sm text-white/45">The Zoom link will show up here before the call.</span>
+              <span className="text-sm text-white/50">The Zoom link will show up here before the call.</span>
             )}
             {canCancelSlot(booked.slot.starts_at) && (
               <button
                 onClick={() => giveBack(booked.slot.id)}
                 disabled={pending}
-                className="text-xs font-semibold text-white/50 underline-offset-2 hover:text-bone hover:underline disabled:opacity-60"
+                className="text-[13px] font-semibold text-white/50 underline-offset-2 hover:text-bone hover:underline disabled:opacity-60"
               >
                 Give it back
               </button>
@@ -87,11 +87,11 @@ export function CheckinBooking({ checkin, firstName }: { checkin: PlayerCheckin;
           <p className="text-sm font-medium text-bone">
             {booked ? "Book another month" : `Pick a time for ${firstName}`}
           </p>
-          <p className="mt-0.5 text-xs text-white/50">One call a month. Tap a time to book it.</p>
+          <p className="mt-0.5 text-[13px] text-white/50">One call a month. Tap a time to book it.</p>
           <div className="mt-3 space-y-3">
             {[...byDay.values()].map((slots) => (
               <div key={slots[0].day.id}>
-                <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/45">
+                <div className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/50">
                   {fmtDayWindow(slots[0].day.starts_at, slots[0].day.ends_at)}
                 </div>
                 <div className="mt-1.5 flex flex-wrap gap-2">
@@ -111,7 +111,7 @@ export function CheckinBooking({ checkin, firstName }: { checkin: PlayerCheckin;
           </div>
         </div>
       )}
-      {error && <p className="mt-3 text-xs text-red-400">{error}</p>}
+      {error && <p className="mt-3 text-[13px] text-red-400">{error}</p>}
     </div>
   );
 }

@@ -33,7 +33,7 @@ export function FilmRoomCard({
   if (!room) {
     return (
       <div className="elite-card p-6">
-        <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
+        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
           <Clapperboard className="h-3.5 w-3.5" /> Film Room
         </div>
         <p className="mt-2 text-white/70">
@@ -86,7 +86,7 @@ export function FilmRoomCard({
 
   return (
     <div className="rounded-3xl border border-accent/20 bg-accent/[0.05] p-5">
-      <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
+      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
         <Clapperboard className="h-3.5 w-3.5" /> This week&apos;s Film Room
       </div>
       <p className="mt-1.5 font-display text-2xl font-bold text-bone">{fmtWhen(room.scheduled_at)}</p>
@@ -99,14 +99,14 @@ export function FilmRoomCard({
           <Video className="mr-1.5 h-4 w-4" /> Join on Zoom
         </a>
       ) : (
-        <p className="mt-3 text-sm text-white/45">The Zoom link will show up here before the session.</p>
+        <p className="mt-3 text-sm text-white/50">The Zoom link will show up here before the session.</p>
       )}
 
       <div className="mt-5 border-t border-white/10 pt-4">
         <div className="text-sm font-semibold text-bone">
           Upload {FILM_CLIPS_MIN} to {FILM_CLIPS_MAX} clips of {firstName}
         </div>
-        <p className="mt-0.5 text-xs text-white/50">
+        <p className="mt-0.5 text-[13px] text-white/50">
           From games or training. Send them by {fmtWhen(room.clips_due_at)} so we can watch them first.
         </p>
 
@@ -125,7 +125,7 @@ export function FilmRoomCard({
                     onClick={() => remove(c.id)}
                     disabled={busy !== null}
                     aria-label={`Remove clip ${i + 1}`}
-                    className="text-white/40 hover:text-red-300 disabled:opacity-50"
+                    className="text-white/50 hover:text-red-300 disabled:opacity-50"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -158,15 +158,15 @@ export function FilmRoomCard({
           </button>
         )}
         {remaining === 0 && !started && (
-          <p className="mt-3 text-xs text-white/50">That&apos;s {FILM_CLIPS_MAX} clips. Remove one to swap it.</p>
+          <p className="mt-3 text-[13px] text-white/50">That&apos;s {FILM_CLIPS_MAX} clips. Remove one to swap it.</p>
         )}
         {clips.length > 0 && !enough && (
-          <p className="mt-2 text-xs text-white/50">
+          <p className="mt-2 text-[13px] text-white/50">
             {FILM_CLIPS_MIN - clips.length} more makes it a full set.
           </p>
         )}
-        {enough && <p className="mt-2 text-xs text-accent">That&apos;s a full set. We&apos;ll go through them on the call.</p>}
-        {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
+        {enough && <p className="mt-2 text-[13px] text-accent">That&apos;s a full set. We&apos;ll go through them on the call.</p>}
+        {error && <p className="mt-2 text-[13px] text-red-400">{error}</p>}
       </div>
     </div>
   );

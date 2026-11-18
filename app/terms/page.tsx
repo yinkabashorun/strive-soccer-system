@@ -14,7 +14,7 @@ export default function TermsPage() {
         <h1 className="mt-8 font-display text-3xl font-black uppercase tracking-tight sm:text-4xl">
           Terms of Service
         </h1>
-        <p className="mt-2 text-sm text-white/40">Last updated {UPDATED}</p>
+        <p className="mt-2 text-sm text-white/50">Last updated {UPDATED}</p>
 
         <div className="mt-8 space-y-6 text-[15px] leading-relaxed text-white/75">
           <p>
@@ -191,7 +191,7 @@ export default function TermsPage() {
           </Section>
         </div>
 
-        <div className="mt-10 flex items-center gap-4 border-t border-white/8 pt-6 text-sm text-white/40">
+        <div className="mt-10 flex items-center gap-4 border-t border-white/8 pt-6 text-sm text-white/50">
           <Link href="/privacy" className="hover:text-white">
             Privacy Policy
           </Link>

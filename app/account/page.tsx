@@ -106,7 +106,7 @@ function Row({ href, label, detail }: { href: string; label: string; detail?: st
         <span className="block text-[15px] font-semibold text-bone">{label}</span>
         {detail && <span className="mt-0.5 block truncate text-sm text-white/60">{detail}</span>}
       </span>
-      <ChevronRight className="h-4 w-4 shrink-0 text-white/30" />
+      <ChevronRight className="h-4 w-4 shrink-0 text-white/50" />
     </>
   );
   const cls = "flex min-h-[56px] items-center gap-3 p-4";

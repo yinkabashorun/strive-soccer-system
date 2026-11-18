@@ -138,7 +138,7 @@ export function WeekList({
                 </span>
               </span>
               <ChevronDown
-                className={cn("h-5 w-5 shrink-0 text-white/40 transition-transform", isOpen && "rotate-180")}
+                className={cn("h-5 w-5 shrink-0 text-white/50 transition-transform", isOpen && "rotate-180")}
               />
             </button>
 
@@ -215,7 +215,7 @@ function PastWeek({ week, list }: { week: number; list: Homework[] }) {
             {done}/{list.length} done
           </span>
           <ChevronDown
-            className={cn("h-4 w-4 text-white/40 transition-transform", open && "rotate-180")}
+            className={cn("h-4 w-4 text-white/50 transition-transform", open && "rotate-180")}
           />
         </span>
       </button>
@@ -224,11 +224,11 @@ function PastWeek({ week, list }: { week: number; list: Homework[] }) {
           {ordered.map((h) => (
             <li key={h.id} className="flex items-center gap-2.5 text-sm text-white/70">
               <Check
-                className={cn("h-4 w-4 shrink-0", h.completed ? "text-accent" : "text-white/20")}
+                className={cn("h-4 w-4 shrink-0", h.completed ? "text-accent" : "text-white/50")}
                 strokeWidth={3}
               />
               <span className="min-w-0 flex-1 truncate">{h.title}</span>
-              <span className="shrink-0 text-xs text-white/40">{h.reps}</span>
+              <span className="shrink-0 text-xs text-white/50">{h.reps}</span>
             </li>
           ))}
         </ul>

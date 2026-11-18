@@ -31,7 +31,7 @@ export function DrillVideo({ src, label = "Watch demo" }: { src: string; label?:
             <Play className="ml-0.5 h-4 w-4 text-white" fill="currentColor" />
           </span>
         </span>
-        <span className="pointer-events-none absolute bottom-1.5 left-2 text-[10px] font-semibold uppercase tracking-wider text-white/85">
+        <span className="pointer-events-none absolute bottom-1.5 left-2 text-[11px] font-semibold uppercase tracking-wider text-white/85">
           {label}
         </span>
       </button>

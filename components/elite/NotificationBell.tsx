@@ -49,7 +49,7 @@ export function NotificationBell({
       >
         <Bell className="h-[18px] w-[18px]" />
         {unread > 0 && (
-          <span className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
+          <span className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[11px] font-bold text-white">
             {unread}
           </span>
         )}
@@ -70,7 +70,7 @@ export function NotificationBell({
               {unread > 0 && (
                 <button
                   onClick={readAll}
-                  className="text-xs font-medium text-accent hover:underline"
+                  className="text-[13px] font-medium text-accent hover:underline"
                 >
                   Mark all read
                 </button>
@@ -78,7 +78,7 @@ export function NotificationBell({
             </div>
             <div className="max-h-80 overflow-y-auto">
               {items.length === 0 ? (
-                <div className="p-6 text-center text-sm text-white/45">
+                <div className="p-6 text-center text-sm text-white/50">
                   You&apos;re all caught up.
                 </div>
               ) : (
@@ -101,15 +101,15 @@ export function NotificationBell({
                       <span className="block text-sm font-semibold text-bone">
                         {n.title}
                       </span>
-                      <span className="mt-0.5 block text-xs leading-relaxed text-white/55">
+                      <span className="mt-0.5 block text-[13px] leading-relaxed text-white/55">
                         {n.body}
                       </span>
-                      <span className="mt-1 block text-[10px] text-white/30">
+                      <span className="mt-1 block text-[11px] text-white/50">
                         {timeAgo(n.created_at)}
                       </span>
                     </span>
                     {n.read && (
-                      <Check className="mt-1 h-3.5 w-3.5 shrink-0 text-white/25" />
+                      <Check className="mt-1 h-3.5 w-3.5 shrink-0 text-white/50" />
                     )}
                   </button>
                 ))

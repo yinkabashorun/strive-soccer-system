@@ -140,7 +140,7 @@ export default async function DashboardPage() {
           percentage, nothing that counts what was missed) */}
       <header className="flex items-end justify-between gap-4 animate-fade-up">
         <div>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
             Week {contentWeek} · {player.level}
           </div>
           <h1 className="mt-1 font-display text-3xl font-black leading-none sm:text-4xl">
@@ -153,7 +153,7 @@ export default async function DashboardPage() {
             <span className="font-display text-xl font-black text-accent">
               {fmtDuration(time.minutes)}
             </span>
-            <span className="text-[10px] uppercase tracking-wider text-white/50">
+            <span className="text-[11px] uppercase tracking-wider text-white/50">
               trained
             </span>
           </div>
@@ -273,13 +273,13 @@ export default async function DashboardPage() {
       {latestMessage && (
         <Link href="/messages" className="block">
           <section className="elite-card p-5 transition-colors hover:border-white/15">
-            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
+            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
               <MessageSquare className="h-3.5 w-3.5" /> From your coach
             </div>
             <p className="mt-2 text-sm leading-relaxed text-white/75">
               “{latestMessage.body}”
             </p>
-            <div className="mt-2 text-xs text-white/35">
+            <div className="mt-2 text-xs text-white/50">
               {timeAgo(latestMessage.created_at)} · Reply →
             </div>
           </section>
@@ -301,7 +301,7 @@ export default async function DashboardPage() {
                     <Icon className="h-5 w-5" />
                   </div>
                   <div className="mt-3 font-semibold text-bone">{a.title}</div>
-                  <div className="mt-0.5 text-xs text-white/45">{a.detail}</div>
+                  <div className="mt-0.5 text-xs text-white/50">{a.detail}</div>
                 </div>
               );
             })}

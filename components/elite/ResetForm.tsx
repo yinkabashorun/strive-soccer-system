@@ -57,7 +57,7 @@ export function ResetForm() {
   if (ready === "checking") {
     return (
       <div className="elite-card grid place-items-center p-10">
-        <Loader2 className="h-5 w-5 animate-spin text-white/40" />
+        <Loader2 className="h-5 w-5 animate-spin text-white/50" />
       </div>
     );
   }

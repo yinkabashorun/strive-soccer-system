@@ -23,7 +23,7 @@ export function CoachingCallsCard({ calls }: { calls: CoachingCall[] }) {
 
   return (
     <div className="rounded-3xl border border-accent/20 bg-accent/[0.05] p-5">
-      <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
+      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
         <Video className="h-3.5 w-3.5" /> Your coaching call
       </div>
       {next ? (
@@ -51,7 +51,7 @@ export function CoachingCallsCard({ calls }: { calls: CoachingCall[] }) {
         </p>
       )}
       {done > 0 && (
-        <p className="mt-3 text-xs text-white/35">
+        <p className="mt-3 text-xs text-white/50">
           {done} call{done === 1 ? "" : "s"} completed so far.
         </p>
       )}

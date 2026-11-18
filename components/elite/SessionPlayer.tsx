@@ -178,7 +178,7 @@ export function SessionPlayer({
           <div className="mt-4 flex items-center gap-2">
             <span
               className={cn(
-                "rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.16em]",
+                "rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.16em]",
                 kind === "finisher"
                   ? "bg-accent/15 text-accent"
                   : "bg-white/[0.08] text-white/75"
@@ -186,7 +186,7 @@ export function SessionPlayer({
             >
               {KIND_LABEL[kind]}
             </span>
-            <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/45">
+            <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/50">
               {index + 1} of {drills.length}
             </span>
           </div>
@@ -387,7 +387,7 @@ function DrillClip({
           </span>
         </button>
       ) : (
-        <div className="grid h-full w-full place-items-center text-sm text-white/40">
+        <div className="grid h-full w-full place-items-center text-sm text-white/50">
           The demo for this drill is on its way.
         </div>
       )}
@@ -514,7 +514,7 @@ function Finish({
         <div className="mt-6 flex w-full max-w-xs items-stretch justify-center gap-3 animate-rise [animation-delay:460ms]">
           <div className="flex-1 rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-3">
             <div className="font-display text-2xl font-black tabular-nums">{fmtDuration(total)}</div>
-            <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/50">
+            <div className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/50">
               All time
             </div>
           </div>
@@ -522,7 +522,7 @@ function Finish({
             <div className="font-display text-2xl font-black tabular-nums">
               {Math.max(0, sessionsTotal - sessionsLeftAfter)}/{sessionsTotal}
             </div>
-            <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/50">
+            <div className="mt-0.5 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/50">
               Sessions this week
             </div>
           </div>
@@ -530,7 +530,7 @@ function Finish({
 
         {milestone !== null && (
           <div className="mt-5 w-full max-w-xs rounded-2xl border border-accent/40 bg-accent/[0.08] px-4 py-3 animate-rise [animation-delay:620ms]">
-            <div className="text-[10px] font-semibold uppercase tracking-[0.22em] text-accent">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-accent">
               Milestone
             </div>
             <div className="mt-0.5 font-display text-2xl font-black uppercase leading-none text-bone">

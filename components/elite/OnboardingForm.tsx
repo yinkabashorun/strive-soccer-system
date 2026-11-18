@@ -165,7 +165,7 @@ export function OnboardingForm({
 
       {/* Self assessment */}
       <Section title="Rate yourself" step="3">
-        <p className="-mt-2 mb-4 text-sm text-white/45">
+        <p className="-mt-2 mb-4 text-sm text-white/50">
           Be honest. This is your starting line. Your coach will re-rate you as
           you grow, and you&apos;ll watch these climb.
         </p>
@@ -196,7 +196,7 @@ export function OnboardingForm({
 
       {/* Training space */}
       <Section title="Your training space" step="4">
-        <p className="-mt-2 mb-4 text-sm text-white/45">
+        <p className="-mt-2 mb-4 text-sm text-white/50">
           Your plan only uses what you actually have. Answer honestly and
           every drill will make sense.
         </p>
@@ -211,13 +211,13 @@ export function OnboardingForm({
         <div className="mt-4 grid gap-4">
           <Field label="Where will you train most days?">
             <Segmented options={SPACE_OPTIONS} value={space} onChange={setSpace} />
-            <p className="mt-1.5 text-xs text-white/40">
+            <p className="mt-1.5 text-[13px] text-white/50">
               A ball and a few yards is enough. Pick that and every drill you get fits the space.
             </p>
           </Field>
           <Field label="How much are you training with a team right now?">
             <Segmented options={LOAD_OPTIONS} value={load} onChange={setLoad} />
-            <p className="mt-1.5 text-xs text-white/40">
+            <p className="mt-1.5 text-[13px] text-white/50">
               {load === LOAD_OPTIONS[1]
                 ? "Off-Season plan: 6 sessions a week, about 40 minutes each."
                 : "In-Season plan: 4 sessions a week, about 40 minutes each, on top of team practice."}
@@ -254,7 +254,7 @@ export function OnboardingForm({
               <button
                 type="button"
                 onClick={() => setEditingPhone(true)}
-                className="text-xs font-semibold text-accent hover:underline"
+                className="text-[13px] font-semibold text-accent hover:underline"
               >
                 Change
               </button>
@@ -286,7 +286,7 @@ export function OnboardingForm({
           "Finish & enter my dashboard"
         )}
       </button>
-      <p className="pb-8 text-center text-xs text-white/30">
+      <p className="pb-8 text-center text-[13px] text-white/50">
         Signed in as {defaultName}
       </p>
     </form>

@@ -37,14 +37,14 @@ export function ExtraWork({ hasWall, blocked }: { hasWall: boolean; blocked?: st
 
   return (
     <section className="elite-card p-5">
-      <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
+      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
         <Plus className="h-3.5 w-3.5" /> Extra Work
       </div>
       <p className="mt-2 text-sm text-white/60">
         Got more today? Add a session: warm-up plus three drills you haven&apos;t done yet.
       </p>
       {blocked ? (
-        <p className="mt-3 text-sm text-white/40">{blocked}</p>
+        <p className="mt-3 text-sm text-white/50">{blocked}</p>
       ) : (
         <div className="mt-3 grid gap-2 sm:grid-cols-3">
           {shelves.map((s) => (
@@ -62,7 +62,7 @@ export function ExtraWork({ hasWall, blocked }: { hasWall: boolean; blocked?: st
                 {EXTRA_SHELVES[s].label}
                 {pending && picked === s && <Loader2 className="h-4 w-4 animate-spin text-accent" />}
               </div>
-              <div className="mt-1 text-xs text-white/45">{EXTRA_SHELVES[s].blurb}</div>
+              <div className="mt-1 text-[13px] text-white/50">{EXTRA_SHELVES[s].blurb}</div>
             </button>
           ))}
         </div>

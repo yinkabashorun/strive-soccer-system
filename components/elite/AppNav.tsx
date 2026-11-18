@@ -60,7 +60,7 @@ export function AppNav({
         <div className="flex items-start justify-between px-2">
           <div>
             <Wordmark size="md" />
-            <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-white/30">
+            <div className="mt-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-white/50">
               {roleLabel}
             </div>
           </div>
@@ -85,7 +85,7 @@ export function AppNav({
                 <Icon
                   className={cn(
                     "h-[18px] w-[18px]",
-                    active ? "text-accent" : "text-white/40 group-hover:text-bone"
+                    active ? "text-accent" : "text-white/50 group-hover:text-bone"
                   )}
                 />
                 <span className="font-medium">{item.label}</span>
@@ -100,13 +100,13 @@ export function AppNav({
               <Avatar name={name} color={color} size={38} />
               <span className="min-w-0 flex-1">
                 <span className="block truncate text-sm font-semibold text-bone">{name}</span>
-                <span className="block text-[11px] text-white/40">{roleLabel}</span>
+                <span className="block text-[11px] text-white/50">{roleLabel}</span>
               </span>
             </Link>
             <form action={signOut}>
               <button
                 type="submit"
-                className="grid h-8 w-8 place-items-center rounded-lg text-white/40 transition-colors hover:bg-white/5 hover:text-white"
+                className="grid h-8 w-8 place-items-center rounded-lg text-white/50 transition-colors hover:bg-white/5 hover:text-white"
                 aria-label="Sign out"
               >
                 <LogOut className="h-4 w-4" />

@@ -35,7 +35,7 @@ export function TourGuide({ page }: { page: keyof typeof COPY | string }) {
   return (
     <section className="rounded-3xl border border-accent/30 bg-accent/[0.06] p-4 sm:p-5">
       <div className="flex items-center gap-2">
-        <span className="rounded bg-accent px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-black">
+        <span className="rounded bg-accent px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-black">
           Live demo
         </span>
         <span className="font-display text-sm font-bold uppercase tracking-tight text-bone sm:text-base">

@@ -176,7 +176,7 @@ export function SignupForm({
             <>
               <ul className="space-y-2">
                 {AGREEMENT_POINTS.map((point) => (
-                  <li key={point} className="flex gap-2.5 text-xs leading-relaxed text-white/60">
+                  <li key={point} className="flex gap-2.5 text-[13px] leading-relaxed text-white/60">
                     <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-accent" />
                     {point}
                   </li>
@@ -236,7 +236,7 @@ export function SignupForm({
         </Link>
       </p>
       {!coach && (
-        <p className="mt-2 text-center text-xs text-white/30">
+        <p className="mt-2 text-center text-[13px] text-white/50">
           Don&apos;t have a code?{" "}
           <a
             href="https://strivesoccer100x.com"
@@ -248,7 +248,7 @@ export function SignupForm({
       )}
       {!configured && (
         <div className="mt-7 border-t border-white/8 pt-6">
-          <div className="mb-3 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
+          <div className="mb-3 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
             Explore the demo
           </div>
           <div className="grid grid-cols-2 gap-3">

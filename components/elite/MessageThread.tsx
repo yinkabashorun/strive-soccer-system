@@ -61,7 +61,7 @@ export function MessageThread({
     <div className="flex flex-col">
       <div className="max-h-[320px] space-y-2 overflow-y-auto pr-1">
         {optimistic.length === 0 && (
-          <p className="py-6 text-center text-sm text-white/30">
+          <p className="py-6 text-center text-sm text-white/50">
             No messages yet. Say hello.
           </p>
         )}
@@ -81,7 +81,7 @@ export function MessageThread({
                 )}
               >
                 {!mine && (
-                  <div className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/40">
+                  <div className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-white/50">
                     {m.from_name || "Coach"}
                   </div>
                 )}
@@ -97,7 +97,7 @@ export function MessageThread({
                   />
                 )}
                 {m.clip_path && !m.clip_url && (
-                  <div className={cn("mt-1 text-xs", mine ? "text-black/60" : "text-white/40")}>
+                  <div className={cn("mt-1 text-[13px]", mine ? "text-black/60" : "text-white/50")}>
                     Clip unavailable right now.
                   </div>
                 )}

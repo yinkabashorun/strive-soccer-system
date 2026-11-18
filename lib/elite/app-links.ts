@@ -20,6 +20,23 @@ export function isNativeUserAgent(userAgent: string | null | undefined): boolean
   return typeof userAgent === "string" && userAgent.includes(NATIVE_UA_TOKEN);
 }
 
+// The app's front door: signed in it opens the dashboard or the coach
+// side, signed out the sign-in screen (app/page.tsx).
+export const APP_FRONT_DOOR = "/";
+
+// The public /demo page is an ad landing page and carries the Meta pixel.
+// The App Store listing says the app does no tracking, so that page must
+// never be drawn inside the app (punch list A27). Two guards read these:
+// the page sends the app to the front door, and the pixel component
+// refuses to load for the app's user agent even if the page were reached.
+export function demoRedirectFor(userAgent: string | null | undefined): string | null {
+  return isNativeUserAgent(userAgent) ? APP_FRONT_DOOR : null;
+}
+
+export function pixelAllowed(userAgent: string | null | undefined): boolean {
+  return !isNativeUserAgent(userAgent);
+}
+
 // Our own site, by name. A path ("/terms") is ours without asking.
 export const OWN_HOSTS = ["thestriveapp.com", "www.thestriveapp.com"];
 

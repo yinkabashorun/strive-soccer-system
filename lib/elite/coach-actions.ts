@@ -7,6 +7,7 @@ import { removePlayerFiles } from "./account-server";
 import { getViewer } from "./session";
 import { sendPlayerEmail } from "./email";
 import { sendPushToPlayer } from "./push";
+import { coachMessagePush, newWeekPush } from "./push-texts";
 import { normalizePhone, sendPlayerSMS } from "./sms";
 import { isSundayEveNY, liveWeekFor, mondayOfWeekNY, nextMondayNY, unlockInstant } from "./time";
 import { getDrillBank, loadProgramWeek, loadTemplateContext, normalizeTitle } from "./data";
@@ -328,11 +329,7 @@ export async function sendCoachMessage(playerId: string, body: string) {
       subject: "Your coach sent you a message",
       body: `${viewer.profile.full_name}: "${body}"`,
     }).catch(() => undefined);
-    await sendPushToPlayer(playerId, {
-      title: "Message from your coach",
-      body: body.slice(0, 140),
-      url: "/messages",
-    }).catch(() => undefined);
+    await sendPushToPlayer(playerId, coachMessagePush(body)).catch(() => undefined);
     await sendPlayerSMS(playerId, {
       event: "coach_message",
       message: `${viewer.profile.full_name}: "${body}"`,
@@ -887,13 +884,10 @@ export async function applyGeneratedPlanCore(
         ? `Your Strive Elite training starts now.\n\nThis week's focus: ${plan.weekly_focus}\n\n${SessionsSaid} sessions, each opening with your plyometric warm-up. Open the app and start Session 1.`
         : `Your new training week is live.\n\nThis week's focus: ${plan.weekly_focus}\n\n${SessionsSaid} sessions, plyo warm-up first. Open the app and start Session 1.`,
     }).catch(() => undefined);
-    await sendPushToPlayer(playerId, {
-      title: firstWeek
-        ? (first ? `${first}, your first week is live` : "Your first week is live")
-        : (first ? `${first}, week ${week} just dropped` : `Week ${week} just dropped`),
-      body: plan.weekly_focus || "Your new training week is live.",
-      url: "/dashboard",
-    }).catch(() => undefined);
+    await sendPushToPlayer(
+      playerId,
+      newWeekPush({ first, week, firstWeek, focus: plan.weekly_focus })
+    ).catch(() => undefined);
     const greeting = parentFirst ? `Hey ${parentFirst}, ` : "";
     await sendPlayerSMS(playerId, {
       event: "new_week",

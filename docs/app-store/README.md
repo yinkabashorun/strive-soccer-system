@@ -181,8 +181,9 @@ compiled or installed on a phone):
   portrait, iOS 16.4 or later (the first version whose web view keeps
   the screen awake). Permission texts for camera, microphone and
   photo library. Push entitlement and the two AppDelegate hooks. App icon
-  and launch image made from the 512 px logo (a sharper source would be
-  better).
+  made from the 512 px logo (a sharper source would be better). The
+  launch screen is plain black with no logo (punch list A28, Apple's
+  launch guidance: it should look like the app's first screen).
 - Native push: the app asks, the phone returns a device token, the site
   saves it (`elite_native_push_tokens`, migration 067, applied), and every
   notification the app already sends also goes to Apple's push service

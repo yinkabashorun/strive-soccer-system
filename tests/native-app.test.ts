@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { generateKeyPairSync, verify } from "node:crypto";
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { inflateSync } from "node:zlib";
 import {
   DEFAULT_BUNDLE_ID,
   apnsBody,
@@ -185,6 +186,54 @@ describe("the native shell (native/)", () => {
     expect(read("lib/elite/native.ts")).toContain('wl.request("screen")');
     expect(read("docs/app-store/README.md")).toContain("iOS 16.4 or later");
     expect(read("docs/app-store/README.md")).not.toContain("iOS 15 or later");
+  });
+
+  it("opens on plain black, like the first screen, with no logo (A28)", () => {
+    // Apple's launch guidance: the launch screen looks like the app's first
+    // screen and is not a branding moment. The first screen is black.
+    const dir = "native/ios/App/App/Assets.xcassets/Splash.imageset";
+    const set = JSON.parse(read(`${dir}/Contents.json`)) as {
+      images: { idiom: string; filename: string; scale: string }[];
+    };
+    expect(set.images.map((i) => i.scale).sort()).toEqual(["1x", "2x", "3x"]);
+    for (const image of set.images) {
+      expect(image.idiom).toBe("universal");
+      const file = join(__dirname, "..", dir, image.filename);
+      expect(existsSync(file), image.filename).toBe(true);
+      const png = readFileSync(file);
+      // a PNG, 2732 x 2732 (the size the image set has always carried),
+      // 8-bit RGB with no alpha: a launch image must be opaque
+      expect(png.subarray(0, 8).toString("hex")).toBe("89504e470d0a1a0a");
+      expect(png.readUInt32BE(16)).toBe(2732);
+      expect(png.readUInt32BE(20)).toBe(2732);
+      expect([png[24], png[25]]).toEqual([8, 2]);
+      // every pixel is black: the picture data inflates to nothing but zeros
+      const idat: Buffer[] = [];
+      for (let at = 8; at < png.length; ) {
+        const size = png.readUInt32BE(at);
+        if (png.subarray(at + 4, at + 8).toString("latin1") === "IDAT") {
+          idat.push(png.subarray(at + 8, at + 8 + size));
+        }
+        at += 12 + size;
+      }
+      const pixels = inflateSync(Buffer.concat(idat));
+      expect(pixels.length).toBe(2732 * (1 + 2732 * 3));
+      expect(pixels.equals(Buffer.alloc(pixels.length)), image.filename).toBe(true);
+    }
+
+    // the storyboard shows that image on a black ground, never white
+    const launch = read("native/ios/App/App/Base.lproj/LaunchScreen.storyboard");
+    expect(launch).toContain('image="Splash"');
+    expect(launch).toContain(
+      '<color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>'
+    );
+    expect(launch).not.toContain("systemBackgroundColor");
+    expect(launch).not.toMatch(/white="1"/);
+    expect(read("native/capacitor.config.ts")).toContain('backgroundColor: "#000000"');
+
+    // the app icon is a different thing and still carries the logo
+    const icon = join(__dirname, "..", "native/ios/App/App/Assets.xcassets/AppIcon.appiconset/AppIcon-512@2x.png");
+    expect(statSync(icon).size).toBeGreaterThan(50_000);
   });
 
   it("is set up for native push", () => {

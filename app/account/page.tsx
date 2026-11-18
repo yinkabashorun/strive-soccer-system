@@ -9,7 +9,7 @@ import { deleteGate } from "@/lib/elite/account";
 import { SUPPORT_EMAIL, concernMailto } from "@/lib/elite/support";
 import { fmtDuration } from "@/lib/elite/time-trained";
 import { trackerFor } from "@/lib/elite/tracker-server";
-import { FREE_HOME } from "@/lib/elite/tracker";
+import { FREE_HOME, FREE_QUIZ } from "@/lib/elite/tracker";
 
 export const metadata = { title: "Account · Strive Elite" };
 
@@ -59,12 +59,12 @@ export default async function AccountPage() {
         {tracker && (
           <Group title="Your training">
             <Row
-              href={`${FREE_HOME}/quiz`}
+              href={FREE_QUIZ}
               label="Weekly target"
               detail={
                 tracker.target_minutes
                   ? `${fmtDuration(tracker.target_minutes)} a week. Change it here.`
-                  : "Answer three questions to set it"
+                  : "Answer four questions to set it"
               }
             />
           </Group>

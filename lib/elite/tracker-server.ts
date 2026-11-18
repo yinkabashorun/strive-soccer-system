@@ -4,6 +4,7 @@
 //
 // With no database configured (a local build), the example data below
 // stands in so the screens can be seen. Nothing is saved in that mode.
+import { cookies } from "next/headers";
 import { createServiceClient, isSupabaseConfigured } from "./supabase/server";
 import type { Viewer } from "./session";
 import { nyToday, shiftDay } from "./time";
@@ -11,8 +12,12 @@ import {
   DEFAULT_TARGETS,
   allTimeMinutes,
   homeFor,
+  tracksGym,
+  validateQuiz,
+  cleanTarget,
   weekOf,
   type Goal,
+  type Grade,
   type Kind,
   type Level,
   type Season,
@@ -23,6 +28,7 @@ import {
 export type Tracker = {
   profile_id: string;
   phone: string | null;
+  grade: Grade | null;
   level: Level | null;
   season: Season | null;
   goal: Goal | null;
@@ -34,7 +40,7 @@ export type Tracker = {
 };
 
 const TRACKER_COLUMNS =
-  "profile_id, phone, level, season, goal, target_minutes, quiz_done_at, referral_code, referred_by, created_at";
+  "profile_id, phone, grade, level, season, goal, target_minutes, quiz_done_at, referral_code, referred_by, created_at";
 
 // ---- The example account (no database) --------------------------------
 
@@ -42,7 +48,8 @@ export function demoTracker(profileId: string): Tracker {
   return {
     profile_id: profileId,
     phone: null,
-    level: "high_school",
+    grade: "high_school",
+    level: "elite",
     season: "in_season",
     goal: "college",
     target_minutes: 240,
@@ -146,30 +153,74 @@ export async function isFreeSignupOpen(): Promise<boolean> {
 export async function homePathFor(viewer: Viewer): Promise<string> {
   const hasPlayer = Boolean(viewer.playerId);
   const needsLookup = viewer.role === "player" && !hasPlayer && !viewer.demo;
+  const tracker = needsLookup ? await getTracker(viewer.profile.id) : null;
   return homeFor({
     role: viewer.role,
     hasPlayer,
-    hasTracker: needsLookup ? await hasTracker(viewer.profile.id) : false,
+    tracker: tracker ? { quizDone: quizDone(tracker) } : null,
   });
+}
+
+// The four questions are answered and a target is set.
+export function quizDone(tracker: Pick<Tracker, "quiz_done_at" | "target_minutes">): boolean {
+  return Boolean(tracker.quiz_done_at && tracker.target_minutes);
+}
+
+// The example account (no database) remembers the quiz a visitor takes in
+// a cookie, so the example week matches the answers they gave.
+export const DEMO_QUIZ_COOKIE = "strive_demo_quiz";
+
+function demoTrackerFromCookie(profileId: string): Tracker {
+  const base = demoTracker(profileId);
+  try {
+    const raw = cookies().get(DEMO_QUIZ_COOKIE)?.value;
+    if (!raw) return base;
+    const saved = JSON.parse(raw) as Record<string, unknown>;
+    const answers = validateQuiz(saved);
+    const target = cleanTarget(saved.target);
+    if (!answers || target === null) return base;
+    return { ...base, ...answers, target_minutes: target };
+  } catch {
+    return base;
+  }
 }
 
 // The free account behind this viewer, or null when they do not have one.
 // The example player stands in only when there is no database at all.
 export async function trackerFor(viewer: Viewer): Promise<Tracker | null> {
   if (viewer.role !== "player") return null;
-  if (viewer.demo) return isSupabaseConfigured() ? null : demoTracker(viewer.profile.id);
+  if (viewer.demo) return isSupabaseConfigured() ? null : demoTrackerFromCookie(viewer.profile.id);
   if (viewer.playerId) return null;
   return getTracker(viewer.profile.id);
 }
 
-export async function weekLogsFor(viewer: Viewer, today: string): Promise<TrainingLog[]> {
+export async function weekLogsFor(
+  viewer: Viewer,
+  tracker: Pick<Tracker, "grade">,
+  today: string
+): Promise<TrainingLog[]> {
   if (viewer.demo) {
     const { monday } = weekOf(today);
     return demoLogs(today)
       .filter((l) => l.trained_on >= monday)
+      .filter((l) => l.kind === "training" || tracksGym(tracker.grade))
       .reverse();
   }
   return getWeekLogs(viewer.profile.id, today);
+}
+
+// Does this email belong to a free account? Asked by the invite route so
+// its "already exists" answer can say what is true.
+export async function emailHasFreeAccount(email: string): Promise<boolean> {
+  const admin = createServiceClient();
+  if (!admin || !email) return false;
+  const { data: profile } = await admin
+    .from("elite_profiles")
+    .select("id")
+    .eq("email", email.trim().toLowerCase())
+    .maybeSingle();
+  if (!profile?.id) return false;
+  return (await getTracker(profile.id as string)) !== null;
 }
 
 // ---- The coach's list -------------------------------------------------
@@ -178,6 +229,7 @@ export type FreeAccount = {
   profile_id: string;
   name: string;
   phone: string | null;
+  grade: Grade | null;
   level: Level | null;
   goal: Goal | null;
   week_minutes: number; // training this week
@@ -210,7 +262,8 @@ export function demoOverview(today: string): FreeOverview {
         profile_id: "demo-free-1",
         name: "Example Player",
         phone: null,
-        level: "high_school",
+        grade: "high_school",
+        level: "elite",
         goal: "college",
         week_minutes: week,
         gym_week_minutes: gym,
@@ -297,6 +350,7 @@ export async function getFreeOverview(): Promise<FreeOverview> {
     profile_id: r.profile_id,
     name: nameOf.get(r.profile_id) ?? "",
     phone: r.phone,
+    grade: r.grade,
     level: r.level,
     goal: r.goal,
     week_minutes: weekBy.get(r.profile_id) ?? 0,

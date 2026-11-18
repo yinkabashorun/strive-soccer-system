@@ -5,7 +5,7 @@ import { APP_URL } from "@/lib/elite/app-url";
 import { nyToday } from "@/lib/elite/time";
 import { fmtDuration } from "@/lib/elite/time-trained";
 import { demoOverview, getFreeOverview } from "@/lib/elite/tracker-server";
-import { GOALS, LEVELS, labelOf } from "@/lib/elite/tracker";
+import { GOALS, GRADES, LEVELS, labelOf } from "@/lib/elite/tracker";
 
 export const metadata = { title: "Free training log · Strive Elite" };
 export const dynamic = "force-dynamic";
@@ -48,10 +48,10 @@ export default async function CoachFreePage() {
       </div>
 
       <div className="mt-6 overflow-x-auto rounded-2xl border border-white/[0.08]">
-        <table className="w-full min-w-[820px] text-left text-sm">
+        <table className="w-full min-w-[920px] text-left text-sm">
           <thead className="text-xs uppercase tracking-[0.14em] text-white/50">
             <tr className="border-b border-white/[0.08]">
-              {["Name", "Phone", "Level", "Goal", "This week", "Gym this week", "All time", "Joined", "Referrals"].map((h) => (
+              {["Name", "Phone", "Grade", "Level", "Goal", "This week", "Gym this week", "All time", "Joined", "Referrals"].map((h) => (
                 <th key={h} className="px-4 py-3 font-semibold">
                   {h}
                 </th>
@@ -61,7 +61,7 @@ export default async function CoachFreePage() {
           <tbody>
             {data.accounts.length === 0 && (
               <tr>
-                <td colSpan={9} className="px-4 py-6 text-white/60">
+                <td colSpan={10} className="px-4 py-6 text-white/60">
                   Nobody has a free account yet.
                 </td>
               </tr>
@@ -70,6 +70,7 @@ export default async function CoachFreePage() {
               <tr key={a.profile_id} className="border-b border-white/[0.05] last:border-0">
                 <td className="px-4 py-3 font-semibold text-bone">{a.name || "No name"}</td>
                 <td className="px-4 py-3 text-white/70">{a.phone || ""}</td>
+                <td className="px-4 py-3 text-white/70">{labelOf(GRADES, a.grade)}</td>
                 <td className="px-4 py-3 text-white/70">{labelOf(LEVELS, a.level)}</td>
                 <td className="px-4 py-3 text-white/70">{labelOf(GOALS, a.goal)}</td>
                 <td className="px-4 py-3 tabular-nums text-bone">{fmtDuration(a.week_minutes)}</td>

@@ -35,11 +35,11 @@ export async function GET() {
   if (!tracker) return new Response("Not found.", { status: 404 });
 
   const today = nyToday();
-  // Gym shows only for a player who tracks it (high school or college).
-  const week = await weekLogsFor(viewer, today);
+  // Gym shows only for a player who tracks it (in high school or older).
+  const week = await weekLogsFor(viewer, tracker, today);
   const facts = cardFacts({
     fullName: viewer.profile.full_name,
-    logs: tracksGym(tracker.level) ? week : week.filter((l) => l.kind !== "gym"),
+    logs: tracksGym(tracker.grade) ? week : week.filter((l) => l.kind !== "gym"),
     today,
   });
   const { black, semi } = await loadFonts();

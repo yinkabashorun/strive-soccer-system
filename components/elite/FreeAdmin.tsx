@@ -89,7 +89,7 @@ export function FreeAdmin({
       <div className="elite-card p-5">
         <div className="text-[15px] font-semibold text-bone">Recommended weekly target</div>
         <div className="mt-0.5 text-sm text-white/60">
-          What a player is told after the three questions. Hours, in half-hour steps. Leave
+          What a player is told after the four questions. Hours, in half-hour steps. Leave
           &quot;up to&quot; empty for a single number.
         </div>
         <div className="mt-4 space-y-4">

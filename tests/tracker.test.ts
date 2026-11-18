@@ -6,8 +6,13 @@ import {
   DEFAULT_TARGETS,
   FREE_AGREEMENT_POINTS,
   FREE_HOME,
+  FREE_ACCOUNT_EXISTS_MESSAGE,
+  FREE_QUIZ,
   GOALS,
+  GRADES,
+  GYM_REFUSED_MESSAGE,
   LEVELS,
+  QUIZ_QUESTIONS,
   LOG_CHIPS,
   SEASONS,
   TARGET_MAX,
@@ -19,6 +24,9 @@ import {
   cleanReferralCode,
   cleanTarget,
   dayLabel,
+  freeLanding,
+  labelOf,
+  programLink,
   gymThisWeekLine,
   homeFor,
   joinLink,
@@ -54,25 +62,47 @@ const log = (trained_on: string, minutes: number, kind: "training" | "gym" = "tr
 
 // The free training log (migration 069): the pure rules.
 
-describe("the three questions", () => {
-  it("asks level, season and goal, and nothing else", () => {
+describe("the four questions", () => {
+  it("asks grade first, then team, season and goal, and nothing else", () => {
+    expect([...QUIZ_QUESTIONS]).toEqual(["grade", "level", "season", "goal"]);
+    expect(GRADES.map((g) => g.id)).toEqual(["middle_or_younger", "high_school", "college_or_older"]);
+    expect(GRADES.map((g) => g.label)).toEqual(["Middle school or younger", "High school", "College or older"]);
     expect(LEVELS.map((l) => l.id)).toEqual(["rec", "travel", "elite", "high_school", "college"]);
     expect(SEASONS.map((s) => s.id)).toEqual(["in_season", "off_season"]);
     expect(GOALS.map((g) => g.id)).toEqual(["start", "higher_team", "college", "pro"]);
     const quiz = code("components/elite/TrackerQuiz.tsx");
-    expect(quiz).toContain('type Step = "level" | "season" | "goal" | "target"');
+    expect(quiz).toContain('useState<Step>("grade")');
+    expect(quiz).toContain("What grade are you in?");
+    expect(quiz).toContain("${at + 1} of ${QUIZ_QUESTIONS.length}");
   });
 
-  it("takes three real answers and refuses anything else", () => {
-    expect(validateQuiz({ level: "elite", season: "in_season", goal: "college" })).toEqual({
-      level: "elite",
-      season: "in_season",
-      goal: "college",
-    });
-    expect(validateQuiz({ level: "elite", season: "in_season" })).toBeNull();
-    expect(validateQuiz({ level: "pro", season: "in_season", goal: "college" })).toBeNull();
-    expect(validateQuiz({ level: "elite", season: "winter", goal: "college" })).toBeNull();
-    expect(validateQuiz({ level: 1, season: null, goal: {} })).toBeNull();
+  it("the team options are about the team, never the age", () => {
+    expect(LEVELS.map((l) => l.label)).toEqual([
+      "Rec or town team",
+      "Travel or club team",
+      "ECNL, MLS NEXT or similar",
+      "High school team only",
+      "College team",
+    ]);
+    expect(labelOf(LEVELS, "high_school")).toBe("High school team only");
+    expect(labelOf(GRADES, "high_school")).toBe("High school");
+  });
+
+  it("takes four real answers and refuses anything else", () => {
+    const good = { grade: "high_school", level: "elite", season: "in_season", goal: "college" };
+    expect(validateQuiz(good)).toEqual(good);
+    expect(validateQuiz({ ...good, grade: undefined })).toBeNull();
+    expect(validateQuiz({ ...good, grade: "ninth" })).toBeNull();
+    expect(validateQuiz({ ...good, level: "pro" })).toBeNull();
+    expect(validateQuiz({ ...good, season: "winter" })).toBeNull();
+    expect(validateQuiz({ ...good, goal: undefined })).toBeNull();
+    expect(validateQuiz({ grade: 9, level: 1, season: null, goal: {} })).toBeNull();
+  });
+
+  it("the database holds the same three grades", () => {
+    const sql = read("supabase/migrations/069_free_training_log.sql");
+    expect(sql).toContain("grade in ('middle_or_younger', 'high_school', 'college_or_older')");
+    expect(code("lib/elite/tracker-actions.ts")).toContain("grade: answers.grade,");
   });
 
   it("promises nothing in a goal", () => {
@@ -201,15 +231,29 @@ describe("gym work is tracked apart", () => {
     expect(allTimeMinutes([log("2026-11-01", 60), log("2026-11-02", 500, "gym")])).toBe(60);
   });
 
-  it("is for high school and college players only", () => {
+  it("is for players in high school or older, read from the grade and never from the team", () => {
     expect(tracksGym("high_school")).toBe(true);
-    expect(tracksGym("college")).toBe(true);
-    for (const l of ["rec", "travel", "elite", null, undefined, ""]) expect(tracksGym(l)).toBe(false);
-    expect(mayLog("training", "rec")).toBe(true);
+    expect(tracksGym("college_or_older")).toBe(true);
+    for (const g of ["middle_or_younger", null, undefined, ""]) expect(tracksGym(g)).toBe(false);
+    // a team answer is not a grade: none of them switches gym on
+    for (const team of ["rec", "travel", "elite", "college"]) expect(tracksGym(team)).toBe(false);
+    expect(mayLog("training", "middle_or_younger")).toBe(true);
     expect(mayLog("training", null)).toBe(true);
-    expect(mayLog("gym", "college")).toBe(true);
-    expect(mayLog("gym", "elite")).toBe(false);
+    expect(mayLog("gym", "high_school")).toBe(true);
+    expect(mayLog("gym", "college_or_older")).toBe(true);
+    expect(mayLog("gym", "middle_or_younger")).toBe(false);
     expect(mayLog("gym", null)).toBe(false);
+  });
+
+  it("a high school player on an ECNL team sees the gym switch; a middle school player on one does not", () => {
+    // the Dec 19 players: the team answer is "ECNL, MLS NEXT or similar" for both
+    const home = code("app/(free)/log/page.tsx");
+    expect(home).toContain("gym={tracksGym(tracker.grade)}");
+    expect(home).not.toContain("tracksGym(tracker.level)");
+    expect(code("app/api/elite/tracker/card/route.tsx")).toContain("tracksGym(tracker.grade)");
+    for (const f of ["lib/elite/tracker-actions.ts", "lib/elite/tracker-server.ts", "app/(free)/log/page.tsx"]) {
+      expect(code(f), f).not.toMatch(/tracksGym\([^)]*level|mayLog\([^)]*level/);
+    }
   });
 
   it("there are two kinds and nothing else", () => {
@@ -223,11 +267,12 @@ describe("gym work is tracked apart", () => {
 
   it("the server refuses a gym log from a player who does not track gym, before writing", () => {
     const actions = code("lib/elite/tracker-actions.ts");
-    const refuse = actions.indexOf("if (!mayLog(kind, o.level)) return fail(");
+    const refuse = actions.indexOf("if (!mayLog(kind, o.grade)) return fail(GYM_REFUSED_MESSAGE);");
     expect(refuse).toBeGreaterThan(-1);
     expect(refuse).toBeLessThan(actions.indexOf('.from("elite_training_logs")\n    .insert('));
-    // the level comes from the player's own saved row, never from the browser
-    expect(actions).toContain("level: tracker.level");
+    // the grade comes from the player's own saved row, never from the browser
+    expect(actions).toContain("grade: tracker.grade");
+    expect(GYM_REFUSED_MESSAGE).toBe("Gym work is logged by players in high school or older.");
   });
 
   it("has no target and shows one quiet line, only when there is gym this week", () => {
@@ -239,7 +284,7 @@ describe("gym work is tracked apart", () => {
     // the switch is drawn only for a player who tracks gym, and resets after a log
     expect(home).toMatch(/\{gym && \(\s*<div\s+role="radiogroup"/);
     expect(home).toContain('setKind("training");');
-    expect(code("app/(free)/log/page.tsx")).toContain("gym={tracksGym(tracker.level)}");
+    expect(code("app/(free)/log/page.tsx")).toContain("gym={tracksGym(tracker.grade)}");
   });
 });
 
@@ -356,32 +401,83 @@ describe("joining", () => {
 });
 
 describe("where a signed-in person belongs", () => {
+  const done = { quizDone: true };
+  const fresh = { quizDone: false };
+
   it("staff to the coach side, a member to the member app, a free account to the log", () => {
-    expect(homeFor({ role: "admin", hasPlayer: false, hasTracker: false })).toBe("/coach");
-    expect(homeFor({ role: "coach", hasPlayer: false, hasTracker: true })).toBe("/coach");
-    expect(homeFor({ role: "player", hasPlayer: true, hasTracker: false })).toBe("/dashboard");
-    expect(homeFor({ role: "player", hasPlayer: false, hasTracker: true })).toBe(FREE_HOME);
+    expect(homeFor({ role: "admin", hasPlayer: false, tracker: null })).toBe("/coach");
+    expect(homeFor({ role: "coach", hasPlayer: false, tracker: done })).toBe("/coach");
+    expect(homeFor({ role: "player", hasPlayer: true, tracker: null })).toBe("/dashboard");
+    expect(homeFor({ role: "player", hasPlayer: false, tracker: done })).toBe(FREE_HOME);
     expect(FREE_HOME).toBe("/log");
   });
 
+  it("a free account that has not answered the four questions opens on them, in one step", () => {
+    expect(FREE_QUIZ).toBe("/log/quiz");
+    expect(freeLanding(true)).toBe("/log");
+    expect(freeLanding(false)).toBe("/log/quiz");
+    expect(homeFor({ role: "player", hasPlayer: false, tracker: fresh })).toBe("/log/quiz");
+  });
+
   it("a member never lands in the free log, even with an old free account behind them", () => {
-    expect(homeFor({ role: "player", hasPlayer: true, hasTracker: true })).toBe("/dashboard");
+    expect(homeFor({ role: "player", hasPlayer: true, tracker: done })).toBe("/dashboard");
   });
 
   it("a player with neither waits on the member side", () => {
-    expect(homeFor({ role: "player", hasPlayer: false, hasTracker: false })).toBe("/dashboard");
+    expect(homeFor({ role: "player", hasPlayer: false, tracker: null })).toBe("/dashboard");
   });
 
   it("is the rule the front door, the member shell and the free shell all use", () => {
     expect(code("app/page.tsx")).toContain("homePathFor(viewer)");
-    const member = code("app/(player)/layout.tsx");
-    expect(member).toMatch(/hasTracker\(viewer\.profile\.id\)\)\) redirect\(FREE_HOME\)/);
     const free = code("app/(free)/layout.tsx");
     expect(free).toContain('if (viewer.role !== "player") redirect("/coach")');
     expect(free).toContain('if (!tracker) redirect("/dashboard")');
     expect(free).toMatch(/!viewer\.demo && \(await consentDue/);
     // a member has a player record, so trackerFor answers null for them
     expect(code("lib/elite/tracker-server.ts")).toContain("if (viewer.playerId) return null;");
+  });
+
+  it("signing in takes a free account to its screen in one redirect after /dashboard", () => {
+    // sign-in lands every player on /dashboard (lib/elite/sign-in.ts)...
+    expect(code("lib/elite/sign-in.ts")).toContain('safeNext(input.next, staff ? "/coach" : "/dashboard")');
+    // ...and the member shell sends a free account straight to where it
+    // opens (the week, or the four questions), not to /log to be sent on.
+    const member = code("app/(player)/layout.tsx");
+    expect(member).toContain("if (tracker) redirect(freeLanding(quizDone(tracker)));");
+    expect(member.indexOf("redirect(freeLanding(")).toBeLessThan(member.indexOf("NO_PROFILE_GATE} />"));
+    // the free shell and its two pages never send a free account anywhere
+    // else: the only redirects left are for people who are not one, and
+    // the week page's own check for an unanswered quiz
+    const page = code("app/(free)/log/page.tsx");
+    expect(page).toContain("redirect(FREE_QUIZ)");
+    expect((page.match(/redirect\(/g) ?? []).length).toBe(3);
+    expect(code("app/(free)/log/quiz/page.tsx")).not.toContain("redirect(FREE_HOME)");
+    // a brand-new account is sent to the questions by the route itself
+    expect(code("app/api/elite/auth/join/route.ts")).toContain("next: freeLanding(false)");
+  });
+});
+
+describe("the line about the coached program", () => {
+  it("leads to the public page on the website and is not drawn inside the App Store app", () => {
+    expect(programLink(false)).toBe("/demo");
+    expect(programLink(true)).toBeNull();
+  });
+});
+
+describe("an invite for an email that already has a free account", () => {
+  it("says what is true instead of only 'try signing in'", () => {
+    expect(FREE_ACCOUNT_EXISTS_MESSAGE).toContain("already has a free training log account");
+    expect(FREE_ACCOUNT_EXISTS_MESSAGE).toContain("Tell your coach");
+    expect(FREE_ACCOUNT_EXISTS_MESSAGE).not.toMatch(/—|!/);
+    const route = code("app/api/elite/auth/redeem/route.ts");
+    const check = route.indexOf("await emailHasFreeAccount(email)");
+    expect(check).toBeGreaterThan(route.indexOf("auth.admin.createUser("));
+    expect(check).toBeLessThan(route.indexOf("An account with that email already exists. Try signing in."));
+    expect(route).toContain('{ error: FREE_ACCOUNT_EXISTS_MESSAGE, reason: "free_account" }');
+    // only when the sign-in service said the email is taken, and never for a coach invite
+    expect(route).toMatch(/if \(exists && role === "player" && \(await emailHasFreeAccount\(email\)\)\)/);
+    // the lookup lives with the other free-account reads
+    expect(code("lib/elite/tracker-server.ts")).toContain("export async function emailHasFreeAccount(");
   });
 });
 
@@ -429,8 +525,8 @@ describe("the free log stays what it is", () => {
   });
 
   it("the line about the coached program is hidden inside the App Store app", () => {
-    expect(code("app/(free)/log/page.tsx")).toContain("showProgramLine={!inNativeApp()}");
-    expect(code("components/elite/TrackerHome.tsx")).toMatch(/\{showProgramLine && \(/);
+    expect(code("app/(free)/log/page.tsx")).toContain("programHref={programLink(inNativeApp())}");
+    expect(code("components/elite/TrackerHome.tsx")).toMatch(/\{programHref && \(/);
     expect(code("app/(auth)/join/page.tsx")).toContain('if (inNativeApp()) redirect("/login")');
   });
 });

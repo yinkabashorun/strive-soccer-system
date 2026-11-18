@@ -27,7 +27,7 @@ export function TrackerHome({
   week,
   inviteLink,
   joined,
-  showProgramLine,
+  programHref,
 }: {
   logs: TrainingLog[]; // this week's, newest first
   target: number; // training minutes a week
@@ -35,7 +35,9 @@ export function TrackerHome({
   week: string; // "Nov 16 to Nov 22"
   inviteLink: string;
   joined: string;
-  showProgramLine: boolean;
+  // Where the one line about the coached program leads; null inside the
+  // App Store app, where the line is not drawn (programLink in tracker.ts).
+  programHref: string | null;
 }) {
   const [logs, setLogs] = useState<TrainingLog[]>(serverLogs);
   const [kind, setKind] = useState<Kind>("training");
@@ -248,10 +250,10 @@ export function TrackerHome({
 
       <InviteRow link={inviteLink} joined={joined} />
 
-      {showProgramLine && (
+      {programHref && (
         <p className="mt-8 text-center text-sm leading-relaxed text-white/60">
           Want to know exactly what to do in those hours? Coach Gary and I build a week around you.{" "}
-          <Link href="/demo" className="tap text-bone underline underline-offset-4">
+          <Link href={programHref} className="tap text-bone underline underline-offset-4">
             See how it works
           </Link>
         </p>

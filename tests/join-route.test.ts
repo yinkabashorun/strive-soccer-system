@@ -18,6 +18,7 @@ const state = {
   trackerInsertFails: 0,
   createError: null as string | null,
   signInError: false,
+  signIns: [] as Row[],
   consents: [] as Row[],
   rateOk: true,
 };
@@ -66,11 +67,14 @@ function admin() {
 
 vi.mock("@/lib/elite/supabase/server", () => ({
   createServiceClient: () => (state.serviceClient ? admin() : null),
-  createClient: () => ({
-    auth: {
-      signInWithPassword: async () => ({ error: state.signInError ? { message: "no" } : null }),
-    },
-  }),
+}));
+// The one server helper that signs a brand-new account in (the invite
+// route uses the same one). Called with what the person typed.
+vi.mock("@/lib/elite/session-start", () => ({
+  establishSession: async (email: string, password: string) => {
+    state.signIns.push({ email, password });
+    return !state.signInError;
+  },
 }));
 vi.mock("@/lib/elite/tracker-server", () => ({ isFreeSignupOpen: async () => state.open }));
 vi.mock("@/lib/elite/legal-server", () => ({
@@ -114,6 +118,7 @@ beforeEach(() => {
     trackerInsertFails: 0,
     createError: null,
     signInError: false,
+    signIns: [],
     consents: [],
     rateOk: true,
   });
@@ -129,6 +134,7 @@ describe("free sign-up", () => {
     expect(body.error).toContain("not open yet");
     expect(state.created).toHaveLength(0);
     expect(state.inserts).toHaveLength(0);
+    expect(state.signIns).toHaveLength(0);
   });
 
   it("refuses without both boxes ticked for real", async () => {
@@ -163,7 +169,9 @@ describe("free sign-up", () => {
   it("makes the login, the profile and the free account, signs in, and never a player record", async () => {
     const res = await post(good);
     expect(res.status).toBe(200);
-    expect(await res.json()).toEqual({ ok: true, signedIn: true, next: "/log" });
+    // signed in by the server, and sent straight to the four questions
+    expect(await res.json()).toEqual({ ok: true, signedIn: true, next: "/log/quiz" });
+    expect(state.signIns).toEqual([{ email: "a@example.com", password: "longenough" }]);
 
     expect(state.created).toHaveLength(1);
     expect(state.created[0]).toMatchObject({
@@ -239,6 +247,6 @@ describe("free sign-up", () => {
   it("still succeeds when the sign-in does not take: the form sends them to sign in", async () => {
     state.signInError = true;
     const res = await post(good);
-    expect(await res.json()).toEqual({ ok: true, signedIn: false, next: "/log" });
+    expect(await res.json()).toEqual({ ok: true, signedIn: false, next: "/log/quiz" });
   });
 });

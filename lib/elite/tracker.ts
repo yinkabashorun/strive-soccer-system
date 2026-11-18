@@ -12,13 +12,23 @@ import { fmtDuration } from "./time-trained";
 import { shiftDay } from "./time";
 import type { Role } from "./types";
 
-// ---- The three quiz answers -------------------------------------------
+// ---- The four quiz answers --------------------------------------------
+
+// Asked first. It is the player's age band, and the one thing that
+// decides whether they log gym work (tracksGym). Level is about the team
+// and never about age: an ECNL player in high school picks "High school"
+// here and "ECNL, MLS NEXT or similar" there.
+export const GRADES = [
+  { id: "middle_or_younger", label: "Middle school or younger" },
+  { id: "high_school", label: "High school" },
+  { id: "college_or_older", label: "College or older" },
+] as const;
 
 export const LEVELS = [
   { id: "rec", label: "Rec or town team" },
   { id: "travel", label: "Travel or club team" },
   { id: "elite", label: "ECNL, MLS NEXT or similar" },
-  { id: "high_school", label: "High school team" },
+  { id: "high_school", label: "High school team only" },
   { id: "college", label: "College team" },
 ] as const;
 
@@ -34,25 +44,35 @@ export const GOALS = [
   { id: "pro", label: "Go pro" },
 ] as const;
 
+export type Grade = (typeof GRADES)[number]["id"];
 export type Level = (typeof LEVELS)[number]["id"];
 export type Season = (typeof SEASONS)[number]["id"];
 export type Goal = (typeof GOALS)[number]["id"];
 
-export type QuizAnswers = { level: Level; season: Season; goal: Goal };
+export type QuizAnswers = { grade: Grade; level: Level; season: Season; goal: Goal };
+
+// The questions, in the order they are asked.
+export const QUIZ_QUESTIONS = ["grade", "level", "season", "goal"] as const;
 
 const idIn = <T extends { id: string }>(list: readonly T[], v: unknown): v is T["id"] =>
   typeof v === "string" && list.some((x) => x.id === v);
 
-// The quiz is three taps. Anything else is refused.
+// The quiz is four taps. Anything else is refused.
 export function validateQuiz(input: {
+  grade?: unknown;
   level?: unknown;
   season?: unknown;
   goal?: unknown;
 }): QuizAnswers | null {
-  if (!idIn(LEVELS, input.level) || !idIn(SEASONS, input.season) || !idIn(GOALS, input.goal)) {
+  if (
+    !idIn(GRADES, input.grade) ||
+    !idIn(LEVELS, input.level) ||
+    !idIn(SEASONS, input.season) ||
+    !idIn(GOALS, input.goal)
+  ) {
     return null;
   }
-  return { level: input.level, season: input.season, goal: input.goal };
+  return { grade: input.grade, level: input.level, season: input.season, goal: input.goal };
 }
 
 export const labelOf = <T extends { id: string; label: string }>(
@@ -141,16 +161,20 @@ export function cleanKind(raw: unknown): Kind | null {
   return raw === "training" || raw === "gym" ? raw : null;
 }
 
-// Gym is for older players only: high school and college.
-export function tracksGym(level: string | null | undefined): boolean {
-  return level === "high_school" || level === "college";
+// Gym is for older players only: in high school, or in college or older.
+// It is read from the GRADE the player gave, never from the team they
+// play for (a high school player on an ECNL team tracks gym).
+export function tracksGym(grade: string | null | undefined): boolean {
+  return grade === "high_school" || grade === "college_or_older";
 }
 
 // May this player log this kind? Training, always. Gym, only an older
 // player. The server action asks this before anything is written.
-export function mayLog(kind: Kind, level: string | null | undefined): boolean {
-  return kind === "training" || tracksGym(level);
+export function mayLog(kind: Kind, grade: string | null | undefined): boolean {
+  return kind === "training" || tracksGym(grade);
 }
+
+export const GYM_REFUSED_MESSAGE = "Gym work is logged by players in high school or older.";
 
 export type TrainingLog = {
   id: string;
@@ -328,19 +352,46 @@ export function cleanJoin(input: {
 // log and never sees the member app. A player with neither waits on the
 // member side, where the "Almost there" screen is.
 export const FREE_HOME = "/log";
+export const FREE_QUIZ = "/log/quiz";
 
-export function homeFor(input: { role: Role; hasPlayer: boolean; hasTracker: boolean }): string {
+// Where a free account opens: the week, or the four questions when they
+// have not been answered yet. Sign-in, the front door and a brand-new
+// account all use this, so getting there is a single redirect.
+export function freeLanding(quizDone: boolean): string {
+  return quizDone ? FREE_HOME : FREE_QUIZ;
+}
+
+export function homeFor(input: {
+  role: Role;
+  hasPlayer: boolean;
+  // The free account behind this login, when there is one.
+  tracker: { quizDone: boolean } | null;
+}): string {
   if (input.role === "coach" || input.role === "admin") return "/coach";
   if (input.hasPlayer) return "/dashboard";
-  return input.hasTracker ? FREE_HOME : "/dashboard";
+  return input.tracker ? freeLanding(input.tracker.quizDone) : "/dashboard";
 }
+
+// The one line at the bottom of the log about the coached program links
+// to the public page about it. That page is never opened inside the App
+// Store app, so there the line is not drawn at all.
+export const PROGRAM_PAGE = "/demo";
+export function programLink(inApp: boolean): string | null {
+  return inApp ? null : PROGRAM_PAGE;
+}
+
+// An invite for an email that already holds a free account cannot make a
+// second account, and there is no button yet that turns one into a
+// membership. So the answer says what is true and who can sort it out.
+export const FREE_ACCOUNT_EXISTS_MESSAGE =
+  "This email already has a free training log account, so the invite cannot create a second one. Tell your coach and we will move you over.";
 
 // What a free account agrees to, in three plain lines above the two
 // boxes (the boxes themselves are the same as every account's:
 // lib/elite/legal.ts). Written to the player, about what a free account
 // actually stores.
 export const FREE_AGREEMENT_POINTS: string[] = [
-  "We store your profile, your three quiz answers and the training you log.",
+  "We store your profile, your quiz answers and the training you log.",
   "Some of that information is handled by the service providers named in the Privacy Policy.",
   "A coach may text or call the number you give us. Message and data rates may apply. Reply STOP to any text to end them.",
 ];

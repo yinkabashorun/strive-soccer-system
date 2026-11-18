@@ -98,6 +98,20 @@ describe("guard three: the pixel itself", () => {
     expect(using).toEqual([]);
   });
 
+  it("the free log's one line about the coached program is never drawn inside the app", () => {
+    // A free account is not a member: on the website its week ends with one
+    // plain line that leads to the public page. The address lives in the
+    // rule (lib/elite/tracker.ts programLink), which answers null inside
+    // the app, and the screen draws nothing without an address.
+    const rules = readFileSync(join(__dirname, "..", "lib/elite/tracker.ts"), "utf8");
+    expect(rules).toMatch(/export function programLink\(inApp: boolean\): string \| null \{\s*return inApp \? null : PROGRAM_PAGE;/);
+    const page = readFileSync(join(__dirname, "..", "app/(free)/log/page.tsx"), "utf8");
+    expect(page).toContain("programHref={programLink(inNativeApp())}");
+    const home = readFileSync(join(__dirname, "..", "components/elite/TrackerHome.tsx"), "utf8");
+    expect(home).toMatch(/\{programHref && \(/);
+    expect(home).toContain("<Link href={programHref}");
+  });
+
   it("nothing a member can reach links to /demo", () => {
     const linking = memberFiles()
       .filter((f) => /["'`]\/demo["'`/?#]/.test(readFileSync(f, "utf8")))

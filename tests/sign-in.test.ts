@@ -107,14 +107,36 @@ describe("one path: the browser never signs in", () => {
       .map((f) => f.replace(root + "/", ""))
       .sort();
     expect(callers).toEqual([
-      "app/api/elite/auth/redeem/route.ts", // a brand-new account, signed in by the server
       "lib/elite/auth-actions.ts", // the sign-in screen
+      "lib/elite/session-start.ts", // a brand-new account, signed in by the server
       "lib/elite/supabase/server.ts", // verifyPassword: a throwaway check, no session kept
     ]);
   });
 
+  it("both routes that create an account sign it in through the one server helper", () => {
+    for (const route of ["app/api/elite/auth/redeem/route.ts", "app/api/elite/auth/join/route.ts"]) {
+      const src = read(route);
+      expect(src, route).toContain('import { establishSession } from "@/lib/elite/session-start"');
+      expect(src, route).toContain("signedIn");
+      expect(src, route).toContain("await establishSession(");
+      // and never a client of its own for it
+      expect(src, route).not.toMatch(/import \{[^}]*\bcreateClient\b[^}]*\} from "@\/lib\/elite\/supabase\/server"/);
+    }
+    const helper = read("lib/elite/session-start.ts");
+    expect(helper).toContain('from "./supabase/server"');
+    expect(helper).not.toMatch(/^\s*["']use client["']/);
+  });
+
+  it("the free sign-up form follows the invite form: the server signed them in, or they go to sign in", () => {
+    const form = read("components/elite/JoinForm.tsx");
+    expect(form).toContain("if (!data.signedIn) {");
+    expect(form).toContain('router.push("/login")');
+    expect(form).not.toContain("sessionStorage");
+    expect(form).not.toContain("window.location");
+  });
+
   it("the sign-in, sign-up and reset forms do not load the browser database client", () => {
-    for (const form of ["LoginForm", "SignupForm", "ResetForm", "ChangePasswordForm"]) {
+    for (const form of ["LoginForm", "SignupForm", "JoinForm", "ResetForm", "ChangePasswordForm"]) {
       expect(read(`components/elite/${form}.tsx`), form).not.toContain("supabase/client");
     }
   });
@@ -148,5 +170,7 @@ describe("saved passwords on the sign-in screen (A23, the field)", () => {
   it("forms that set a password say it is a new one", () => {
     expect(read("components/elite/ResetForm.tsx")).toContain('autoComplete="new-password"');
     expect(read("components/elite/SignupForm.tsx")).toContain('autoComplete="new-password"');
+    expect(read("components/elite/JoinForm.tsx")).toContain('autoComplete="new-password"');
+    expect(read("components/elite/JoinForm.tsx")).toMatch(/type="email"[\s\S]{0,200}autoComplete="username"/);
   });
 });

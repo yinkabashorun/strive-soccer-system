@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { JoinForm } from "@/components/elite/JoinForm";
 import { getViewer } from "@/lib/elite/session";
+import { isSupabaseConfigured } from "@/lib/elite/supabase/server";
 import { inNativeApp } from "@/lib/elite/native-request";
 import { homePathFor, isFreeSignupOpen } from "@/lib/elite/tracker-server";
 import { JOIN_CLOSED_MESSAGE, cleanReferralCode } from "@/lib/elite/tracker";
@@ -28,7 +29,11 @@ export default async function JoinPage({
   const viewer = await getViewer();
   if (viewer && !viewer.demo) redirect(await homePathFor(viewer));
 
-  if (!(await isFreeSignupOpen())) {
+  // With no database at all (a local build) the form is shown so it can
+  // be looked at; it cannot create anything and says so, like the invite
+  // form does.
+  const configured = isSupabaseConfigured();
+  if (configured && !(await isFreeSignupOpen())) {
     return (
       <div className="elite-card p-7 sm:p-8">
         <h1 className="font-display text-3xl font-black uppercase tracking-tight">
@@ -42,5 +47,5 @@ export default async function JoinPage({
     );
   }
 
-  return <JoinForm referral={cleanReferralCode(searchParams?.ref) ?? ""} />;
+  return <JoinForm configured={configured} referral={cleanReferralCode(searchParams?.ref) ?? ""} />;
 }

@@ -1,16 +1,17 @@
 import { NextResponse } from "next/server";
-import { createClient, createServiceClient } from "@/lib/elite/supabase/server";
+import { createServiceClient } from "@/lib/elite/supabase/server";
+import { establishSession } from "@/lib/elite/session-start";
 import { normalizePhone } from "@/lib/elite/sms";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { AGREEMENT_REQUIRED_MESSAGE, agreementComplete } from "@/lib/elite/legal";
 import { recordConsent } from "@/lib/elite/legal-server";
 import { isFreeSignupOpen } from "@/lib/elite/tracker-server";
 import {
-  FREE_HOME,
   JOIN_CLOSED_MESSAGE,
   JOIN_FIELDS_MESSAGE,
   cleanJoin,
   cleanReferralCode,
+  freeLanding,
   newReferralCode,
 } from "@/lib/elite/tracker";
 
@@ -134,19 +135,10 @@ export async function POST(req: Request) {
     userAgent: req.headers.get("user-agent"),
   });
 
-  // 6) sign them in here, on the server, so the session cookie is one the
-  // server set (the iPhone keeps those; a cookie written by script is
-  // capped at 7 days). If it does not take, the account still exists and
-  // the form sends them to sign in.
-  let signedIn = false;
-  const supabase = createClient();
-  if (supabase) {
-    const { error } = await supabase.auth.signInWithPassword({
-      email: fields.email,
-      password: fields.password,
-    });
-    signedIn = !error;
-  }
-
-  return NextResponse.json({ ok: true, signedIn, next: FREE_HOME });
+  // 6) sign them in here, on the server, the same way an invite does
+  // (lib/elite/session-start.ts). If it does not take, the account still
+  // exists and the form sends them to sign in. A new account has not
+  // answered the four questions yet, so it opens on them.
+  const signedIn = await establishSession(fields.email, fields.password);
+  return NextResponse.json({ ok: true, signedIn, next: freeLanding(false) });
 }

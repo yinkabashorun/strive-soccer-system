@@ -1,12 +1,14 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createServiceClient } from "./supabase/server";
 import { getViewer } from "./session";
 import { nyToday } from "./time";
-import { getTracker } from "./tracker-server";
+import { DEMO_QUIZ_COOKIE, getTracker, trackerFor } from "./tracker-server";
 import {
   FREE_HOME,
+  GYM_REFUSED_MESSAGE,
   cleanKind,
   cleanTarget,
   mayLog,
@@ -29,27 +31,29 @@ const OFFLINE = "We could not reach the server. Try again in a minute.";
 // The signed-in free account, or why not.
 type Owner =
   | { kind: "no"; error: string }
-  | { kind: "demo" }
+  | { kind: "demo"; grade: string | null }
   | {
       kind: "ok";
       admin: NonNullable<ReturnType<typeof createServiceClient>>;
       profileId: string;
-      level: string | null;
+      grade: string | null;
     };
 
 async function owner(): Promise<Owner> {
   const viewer = await getViewer();
   if (!viewer || viewer.role !== "player") return { kind: "no", error: "Sign in first." };
-  if (viewer.demo) return { kind: "demo" };
+  // The example account: nothing is saved, but the same rules apply.
+  if (viewer.demo) return { kind: "demo", grade: (await trackerFor(viewer))?.grade ?? null };
   const admin = createServiceClient();
-  if (!admin) return { kind: "demo" };
+  if (!admin) return { kind: "demo", grade: null };
   const tracker = await getTracker(viewer.profile.id);
   if (!tracker) return { kind: "no", error: "Sign in first." };
-  return { kind: "ok", admin, profileId: viewer.profile.id, level: tracker.level };
+  return { kind: "ok", admin, profileId: viewer.profile.id, grade: tracker.grade };
 }
 
-// Save the three quiz answers and the weekly target the player chose.
+// Save the four quiz answers and the weekly target the player chose.
 export async function saveQuiz(input: {
+  grade: string;
   level: string;
   season: string;
   goal: string;
@@ -57,13 +61,24 @@ export async function saveQuiz(input: {
 }): Promise<{ ok: true } | Fail> {
   const answers = validateQuiz(input);
   const target = cleanTarget(input.target);
-  if (!answers || target === null) return fail("Answer all three questions, then pick a target.");
+  if (!answers || target === null) return fail("Answer all four questions, then pick a target.");
   const o = await owner();
   if (o.kind === "no") return fail(o.error);
-  if (o.kind === "demo") return { ok: true };
+  if (o.kind === "demo") {
+    // The example account keeps the answers for this browser only.
+    cookies().set(DEMO_QUIZ_COOKIE, JSON.stringify({ ...answers, target }), {
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 60 * 24,
+    });
+    return { ok: true };
+  }
   const { error } = await o.admin
     .from("elite_trackers")
     .update({
+      grade: answers.grade,
       level: answers.level,
       season: answers.season,
       goal: answers.goal,
@@ -78,8 +93,9 @@ export async function saveQuiz(input: {
 }
 
 // One tap: log minutes for today (New York date), as training or as gym
-// work. Gym is for a high school or college player only (mayLog); anyone
-// else asking to log gym is refused before anything is written.
+// work. Gym is for a player in high school or older only (mayLog, read
+// from the grade on their own saved row); anyone else asking to log gym
+// is refused before anything is written.
 export async function logTraining(
   minutesInput: number,
   kindInput: string = "training"
@@ -90,8 +106,8 @@ export async function logTraining(
   const trained_on = nyToday();
   const o = await owner();
   if (o.kind === "no") return fail(o.error);
+  if (!mayLog(kind, o.grade)) return fail(GYM_REFUSED_MESSAGE);
   if (o.kind === "demo") return { ok: true, id: `demo-${Date.now()}`, trained_on, minutes, kind };
-  if (!mayLog(kind, o.level)) return fail("Gym work is logged by high school and college players.");
   const { data, error } = await o.admin
     .from("elite_training_logs")
     .insert({ profile_id: o.profileId, trained_on, minutes, kind })

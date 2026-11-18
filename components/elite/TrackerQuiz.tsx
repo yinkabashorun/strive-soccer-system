@@ -8,7 +8,9 @@ import { fmtDuration } from "@/lib/elite/time-trained";
 import {
   FREE_HOME,
   GOALS,
+  GRADES,
   LEVELS,
+  QUIZ_QUESTIONS,
   SEASONS,
   TARGET_MAX,
   TARGET_MIN,
@@ -16,15 +18,16 @@ import {
   recommendation,
   stepTarget,
   type Goal,
+  type Grade,
   type Level,
   type Season,
   type TargetRow,
 } from "@/lib/elite/tracker";
 
-type Step = "level" | "season" | "goal" | "target";
-const ORDER: Step[] = ["level", "season", "goal", "target"];
+type Step = (typeof QUIZ_QUESTIONS)[number] | "target";
+const ORDER: Step[] = [...QUIZ_QUESTIONS, "target"];
 
-// Three questions, one a screen, then the weekly target. A tap answers a
+// Four questions, one a screen, then the weekly target. A tap answers a
 // question and moves on; nothing is saved until the target is chosen.
 export function TrackerQuiz({
   targets,
@@ -32,11 +35,12 @@ export function TrackerQuiz({
   currentTarget,
 }: {
   targets: TargetRow[];
-  initial: { level: Level | null; season: Season | null; goal: Goal | null };
+  initial: { grade: Grade | null; level: Level | null; season: Season | null; goal: Goal | null };
   // Set when the player has a target already and is here to change it.
   currentTarget: number | null;
 }) {
-  const [step, setStep] = useState<Step>("level");
+  const [step, setStep] = useState<Step>("grade");
+  const [grade, setGrade] = useState<Grade | null>(initial.grade);
   const [level, setLevel] = useState<Level | null>(initial.level);
   const [season, setSeason] = useState<Season | null>(initial.season);
   const [goal, setGoal] = useState<Goal | null>(initial.goal);
@@ -52,10 +56,10 @@ export function TrackerQuiz({
   };
 
   function save(target: number) {
-    if (!level || !season || !goal) return;
+    if (!grade || !level || !season || !goal) return;
     setError(null);
     startSaving(async () => {
-      const res = await saveQuiz({ level, season, goal, target });
+      const res = await saveQuiz({ grade, level, season, goal, target });
       if (!res.ok) return setError(res.error);
       // A full load, so the week opens on what was just saved.
       window.location.assign(FREE_HOME);
@@ -86,12 +90,28 @@ export function TrackerQuiz({
           <span />
         )}
         <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
-          {step === "target" ? "Your target" : `${at + 1} of 3`}
+          {step === "target" ? "Your target" : `${at + 1} of ${QUIZ_QUESTIONS.length}`}
         </span>
       </div>
 
+      {step === "grade" && (
+        <Question title="What grade are you in?">
+          {GRADES.map((o) => (
+            <Option
+              key={o.id}
+              label={o.label}
+              picked={grade === o.id}
+              onPick={() => {
+                setGrade(o.id);
+                setStep("level");
+              }}
+            />
+          ))}
+        </Question>
+      )}
+
       {step === "level" && (
-        <Question title="What level do you play at?">
+        <Question title="What team do you play for?">
           {LEVELS.map((o) => (
             <Option
               key={o.id}

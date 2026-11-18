@@ -1,59 +1,37 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { GUARDIAN_STATEMENT } from "@/lib/elite/legal";
-import { FREE_AGREEMENT_POINTS, FREE_HOME } from "@/lib/elite/tracker";
-
-// The four typed fields are kept for this tab only, so reading the Terms
-// and coming back does not empty the form. The password is never kept.
-const DRAFT_KEY = "strive_join_draft";
-type Draft = { firstName: string; lastName: string; email: string; phone: string };
-
-function readDraft(): Draft | null {
-  try {
-    const raw = sessionStorage.getItem(DRAFT_KEY);
-    return raw ? (JSON.parse(raw) as Draft) : null;
-  } catch {
-    return null;
-  }
-}
+import { FREE_AGREEMENT_POINTS, FREE_QUIZ } from "@/lib/elite/tracker";
+import { AppLink } from "./AppLink";
 
 // Create a free account: the training log (migration 069). The server
-// creates the account and signs the person in; this form only collects
-// the fields and the two ticked boxes.
-export function JoinForm({ referral }: { referral: string }) {
+// creates the account and signs the person in (the session cookie is one
+// the server set, lib/elite/session-start.ts); this form only collects
+// the fields and the two ticked boxes. Nothing here signs anyone in.
+export function JoinForm({ configured, referral }: { configured: boolean; referral: string }) {
+  const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  // The agreement: ticked by the person, never by default (068).
   const [guardian, setGuardian] = useState(false);
   const [terms, setTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const d = readDraft();
-    if (!d) return;
-    setFirstName(d.firstName ?? "");
-    setLastName(d.lastName ?? "");
-    setEmail(d.email ?? "");
-    setPhone(d.phone ?? "");
-  }, []);
-
-  useEffect(() => {
-    try {
-      sessionStorage.setItem(DRAFT_KEY, JSON.stringify({ firstName, lastName, email, phone }));
-    } catch {
-      // a private window with storage off: the form still works
-    }
-  }, [firstName, lastName, email, phone]);
-
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (!configured) {
+      setError("Sign-up isn't configured yet.");
+      return;
+    }
     setLoading(true);
     let res: Response;
     try {
@@ -81,13 +59,17 @@ export function JoinForm({ referral }: { referral: string }) {
       setLoading(false);
       return;
     }
-    try {
-      sessionStorage.removeItem(DRAFT_KEY);
-    } catch {
-      // nothing to clear
+
+    // The route signed the new account in on the server. If that one step
+    // failed the account still exists: send them to sign in.
+    if (!data.signedIn) {
+      setError("Account created. Please sign in.");
+      setLoading(false);
+      router.push("/login");
+      return;
     }
-    // A full page load, so the session cookie the server just set is used.
-    window.location.assign(data.signedIn ? data.next || FREE_HOME : "/login");
+    router.push(typeof data.next === "string" ? data.next : FREE_QUIZ);
+    router.refresh();
   }
 
   return (
@@ -160,13 +142,13 @@ export function JoinForm({ referral }: { referral: string }) {
             />
             <span>
               I agree to the{" "}
-              <Link href="/terms" className="tap underline underline-offset-2">
+              <AppLink href="/terms" title="Terms of Service" className="tap underline underline-offset-2">
                 Terms of Service
-              </Link>{" "}
+              </AppLink>{" "}
               and the{" "}
-              <Link href="/privacy" className="tap underline underline-offset-2">
+              <AppLink href="/privacy" title="Privacy Policy" className="tap underline underline-offset-2">
                 Privacy Policy
-              </Link>
+              </AppLink>
               .
             </span>
           </label>

@@ -73,9 +73,9 @@ export default function PrivacyPage({
               </li>
               <li>
                 <strong className="text-bone">A free training log account:</strong>{" "}
-                your name, email and phone number, the three answers you
-                give when you set it up (playing level, in season or off
-                season, and your goal), and each entry you log (the date,
+                your name, email and phone number, the answers you give
+                when you set it up (your grade, playing level, in season or
+                off season, and your goal), and each entry you log (the date,
                 the minutes, and whether it was training or gym work).
               </li>
               <li>

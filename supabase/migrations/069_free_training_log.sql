@@ -21,11 +21,13 @@
 
 set lock_timeout = '8s';
 
--- 1) The free account: the three quiz answers, the weekly target, and the
---    link the player shares.
+-- 1) The free account: the four quiz answers (grade, level, season,
+--    goal), the weekly target, and the link the player shares. Grade is
+--    what decides whether a player logs gym work: high school and older.
 create table if not exists public.elite_trackers (
   profile_id     uuid primary key references public.elite_profiles(id) on delete cascade,
   phone          text,
+  grade          text check (grade is null or grade in ('middle_or_younger', 'high_school', 'college_or_older')),
   level          text check (level is null or level in ('rec', 'travel', 'elite', 'high_school', 'college')),
   season         text check (season is null or season in ('in_season', 'off_season')),
   goal           text check (goal is null or goal in ('start', 'higher_team', 'college', 'pro')),
@@ -64,8 +66,8 @@ end $$;
 
 -- 2) One row per thing logged: the day (New York date), the minutes, and
 --    whether it was training or gym work. Gym is kept apart: it never
---    counts toward the weekly target, and only a high school or college
---    player can log it (the server action refuses anyone else).
+--    counts toward the weekly target, and only a player in high school
+--    or older can log it (the server action refuses anyone else).
 create table if not exists public.elite_training_logs (
   id         uuid primary key default gen_random_uuid(),
   profile_id uuid not null references public.elite_trackers(profile_id) on delete cascade,

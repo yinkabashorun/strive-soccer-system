@@ -2,6 +2,7 @@ import { isSundayEveNY, liveWeekFor, nyToday } from "./time";
 import { resolveWeekTarget } from "./week-target";
 import { cleanFocuses, cleanQuiz, cleanThreads, programWeekFor, type Program, type ProgramWeek } from "./program";
 import { CLIP_BUCKET } from "./clips";
+import { presentAchievements } from "./achievement-rules";
 import { DEFAULT_BENCHMARK_TITLE, fallbackBenchmark, type Benchmark } from "./progress-video";
 import type { TemplateContext, TemplateUsage } from "./bank-conform";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -630,15 +631,15 @@ export async function getMessages(playerId: string): Promise<Message[]> {
 export async function getAchievements(playerId: string): Promise<Achievement[]> {
   const supabase = createClient();
   if (!supabase || isDemo(playerId))
-    return DEMO_ACHIEVEMENTS.filter((a) => a.player_id === playerId).sort(
-      (a, b) => b.earned_at.localeCompare(a.earned_at)
-    );
+    return presentAchievements(DEMO_ACHIEVEMENTS.filter((a) => a.player_id === playerId));
   const { data } = await supabase
     .from("elite_achievements")
     .select("*")
     .eq("player_id", playerId)
     .order("earned_at", { ascending: false });
-  return (data as Achievement[] | null) ?? [];
+  // Shown in today's words: a badge stored before a wording change keeps
+  // its place and loses only the old name (achievement-rules.ts).
+  return presentAchievements((data as Achievement[] | null) ?? []);
 }
 
 export async function getParentReports(

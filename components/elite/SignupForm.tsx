@@ -5,7 +5,6 @@ import { AGREEMENT_POINTS, GUARDIAN_STATEMENT } from "@/lib/elite/legal";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { KeyRound, Loader2 } from "lucide-react";
-import { createClient } from "@/lib/elite/supabase/client";
 import { enterDemoPlayer, enterDemoCoach } from "@/lib/elite/auth-actions";
 import { signupLanding, type InviteRole } from "@/lib/elite/invite-link";
 
@@ -72,19 +71,14 @@ export function SignupForm({
       return;
     }
 
-    // 2) sign in to establish the session, then into the app
-    const supabase = createClient();
-    if (supabase) {
-      const { error: signInErr } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (signInErr) {
-        setError("Account created. Please sign in.");
-        setLoading(false);
-        router.push("/login");
-        return;
-      }
+    // 2) the redeem route signed the new account in on the server, so the
+    // session cookie is one the server set (lib/elite/sign-in.ts). If that
+    // one step failed the account still exists: send them to sign in.
+    if (!data.signedIn) {
+      setError("Account created. Please sign in.");
+      setLoading(false);
+      router.push("/login");
+      return;
     }
     router.push(signupLanding(data.role === "coach" ? "coach" : "player"));
     router.refresh();

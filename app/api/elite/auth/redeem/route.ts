@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/elite/supabase/server";
+import { createClient, createServiceClient } from "@/lib/elite/supabase/server";
 import { sendPlayerEmail } from "@/lib/elite/email";
 import { normalizePhone } from "@/lib/elite/sms";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
@@ -8,6 +8,22 @@ import { AGREEMENT_REQUIRED_MESSAGE, agreementComplete } from "@/lib/elite/legal
 import { recordConsent } from "@/lib/elite/legal-server";
 
 export const runtime = "nodejs";
+
+// Signs the brand-new account in HERE, on the server, so the session
+// comes back in a cookie the server sets (lib/elite/sign-in.ts: a cookie
+// the browser writes itself is capped at 7 days on an iPhone). Returns
+// whether it worked; when it did not, the account still exists and the
+// form sends the person to the sign-in screen.
+async function establishSession(email: string, password: string): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!supabase) return false;
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    return !error && Boolean(data.session);
+  } catch {
+    return false;
+  }
+}
 
 // Redeem an invite code and create a fully-provisioned account: a player
 // (the default) or, for a coach code (054), a coach profile with no player
@@ -143,7 +159,7 @@ export async function POST(req: Request) {
       .from("elite_invite_codes")
       .update({ used_by: userId, used_at: new Date().toISOString() })
       .eq("id", invite.id);
-    return NextResponse.json({ ok: true, role });
+    return NextResponse.json({ ok: true, role, signedIn: await establishSession(email, password) });
   }
 
   // 4) provision the player linked to the inviting coach. subscription_status
@@ -206,5 +222,5 @@ export async function POST(req: Request) {
     }).catch(() => undefined);
   }
 
-  return NextResponse.json({ ok: true, role });
+  return NextResponse.json({ ok: true, role, signedIn: await establishSession(email, password) });
 }

@@ -50,9 +50,9 @@ What is already done to lower the risk (BUILT):
 COACH YINKA, before submitting:
 - The review notes should describe the product as 1:1 remote coaching
   sold on a call, with the app as the tool the coach and player use.
-- The old public $97 page at /dribbling-course is a price page for
-  digital content on the same domain. A reviewer has cited a website
-  pricing page in a rejection of a similar app. Decide whether it stays.
+- DONE Nov 18: the old public $97 page at /dribbling-course is retired
+  (page, checkout and buyer route deleted; the address redirects to
+  /demo; a test keeps it gone).
 - The Dribbling Transformation card opens a password-gated site on
   another domain. In review this reads as unfinished or as content
   unlocked elsewhere. Decide: switch that course back to the in-app

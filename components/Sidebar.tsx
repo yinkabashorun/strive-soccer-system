@@ -3,9 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BookOpen,
   CalendarRange,
-  ExternalLink,
   GraduationCap,
   Home,
   Megaphone,
@@ -74,21 +72,6 @@ export function Sidebar() {
             </Link>
           );
         })}
-
-        {/* External: the live public VSL */}
-        <div className="mt-4 px-2 pb-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted">
-          Live funnel
-        </div>
-        <Link
-          href="/dribbling-course"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-muted transition-all hover:bg-white/[0.03] hover:text-bone"
-        >
-          <BookOpen className="h-[18px] w-[18px] text-accent" />
-          <span className="font-medium">Dribbling Course</span>
-          <ExternalLink className="ml-auto h-3 w-3" />
-        </Link>
       </nav>
 
       <div className="mt-auto flex flex-col gap-3">

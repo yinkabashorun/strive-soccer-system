@@ -1,7 +1,7 @@
 // Strive Elite player/parent SMS via GoHighLevel. Chosen over Twilio
 // directly because A2P 10DLC registration takes weeks and GHL already has
 // a registered sending number. Goes straight through the GHL API (same
-// auth as lib/ghl.ts's Social Planner + lib/ghl-buyer.ts's contact
+// auth as lib/ghl.ts's Social Planner contact
 // upsert) rather than an Inbound Webhook - GHL_API_KEY already
 // authenticates this app to GHL, so no extra workflow to build.
 // Best-effort and no-op-safe the same way as lib/elite/email.ts and
@@ -15,7 +15,7 @@ const GHL_BASE = "https://services.leadconnectorhq.com";
 const GHL_VERSION = "2021-07-28";
 
 // Strive Soccer's GHL location. GHL_LOCATION_ID is already used elsewhere
-// (Social Planner, dribbling-course buyer upsert) but wasn't guaranteed to
+// (Social Planner) but wasn't guaranteed to
 // be set for this feature, so fall back to the known literal rather than
 // silently no-op.
 const DEFAULT_LOCATION_ID = "SjVsI2ZXLXjBrWGA0VfI";

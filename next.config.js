@@ -4,6 +4,14 @@ const nextConfig = {
   images: {
     remotePatterns: [{ protocol: "https", hostname: "**" }],
   },
+  // The old $97 dribbling course sales page was retired Nov 18 2026. Any
+  // old link or ad that still points at it lands on the Strive Elite page.
+  async redirects() {
+    return [
+      { source: "/dribbling-course", destination: "/demo", permanent: true },
+      { source: "/dribbling-course/:path*", destination: "/demo", permanent: true },
+    ];
+  },
 };
 
 module.exports = nextConfig;

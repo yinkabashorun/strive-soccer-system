@@ -1,7 +1,9 @@
 "use client";
 
 import Script from "next/script";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { pixelAllowed } from "@/lib/elite/app-links";
+import { isNativeApp } from "@/lib/elite/native";
 
 // Meta Pixel for the ad landing page only (/demo). Fires PageView on load
 // and a Lead event when the embedded GHL survey reports a submission.
@@ -14,8 +16,18 @@ declare global {
 }
 
 export function MetaPixel({ id }: { id: string }) {
+  // The pixel never loads inside the App Store app (the listing says the
+  // app does no tracking). The /demo page already sends the app away and
+  // leaves this component out for the app's user agent; this is the last
+  // guard, decided in the browser itself before any script is added.
+  // null = not known yet (first paint), so nothing loads until it is.
+  const [allowed, setAllowed] = useState<boolean | null>(null);
   useEffect(() => {
-    if (!id) return;
+    setAllowed(pixelAllowed(navigator.userAgent) && !isNativeApp());
+  }, []);
+
+  useEffect(() => {
+    if (!id || !allowed) return;
     // GHL's embed posts messages from the survey iframe. The exact event
     // names vary by widget version, so match broadly on "submit" coming
     // from a leadconnector origin. Best-effort: a miss just means the
@@ -36,14 +48,16 @@ export function MetaPixel({ id }: { id: string }) {
     };
     window.addEventListener("message", onMessage);
     return () => window.removeEventListener("message", onMessage);
-  }, [id]);
+  }, [id, allowed]);
 
-  if (!id) return null;
+  if (!id || allowed === false) return null;
   return (
     <>
-      <Script id="meta-pixel" strategy="afterInteractive">
-        {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${id}');fbq('track','PageView');`}
-      </Script>
+      {allowed && (
+        <Script id="meta-pixel" strategy="afterInteractive">
+          {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','${id}');fbq('track','PageView');`}
+        </Script>
+      )}
       <noscript>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img

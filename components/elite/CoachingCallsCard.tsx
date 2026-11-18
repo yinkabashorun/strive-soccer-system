@@ -1,5 +1,6 @@
 import { Video } from "lucide-react";
 import type { CoachingCall } from "@/lib/elite/types";
+import { AppLink } from "./AppLink";
 
 function fmt(iso: string) {
   return new Date(iso).toLocaleString("en-US", {
@@ -33,14 +34,13 @@ export function CoachingCallsCard({ calls }: { calls: CoachingCall[] }) {
             With {next.coach_name || "Coach"}. Come with your questions.
           </p>
           {next.join_url && (
-            <a
+            <AppLink
               href={next.join_url}
-              target="_blank"
-              rel="noreferrer"
+              title="Join on Zoom"
               className="btn mt-3 inline-flex px-5 py-2 text-sm"
             >
               Join on Zoom
-            </a>
+            </AppLink>
           )}
         </>
       ) : (

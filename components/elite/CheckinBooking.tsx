@@ -6,6 +6,7 @@ import { CalendarClock, Loader2, Video } from "lucide-react";
 import { bookCheckinSlot, cancelCheckinSlot } from "@/lib/elite/film-room-actions";
 import { canCancelSlot, fmtDayWindow, fmtWhen } from "@/lib/elite/film-room";
 import type { PlayerCheckin } from "@/lib/elite/film-room-data";
+import { AppLink } from "./AppLink";
 
 function time(iso: string) {
   return new Date(iso).toLocaleTimeString("en-US", {
@@ -63,9 +64,9 @@ export function CheckinBooking({ checkin, firstName }: { checkin: PlayerCheckin;
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-3">
             {booked.day.zoom_url ? (
-              <a href={booked.day.zoom_url} target="_blank" rel="noreferrer" className="btn inline-flex px-5 py-2 text-sm">
+              <AppLink href={booked.day.zoom_url} title="Join on Zoom" className="btn inline-flex px-5 py-2 text-sm">
                 <Video className="mr-1.5 h-4 w-4" /> Join on Zoom
-              </a>
+              </AppLink>
             ) : (
               <span className="text-sm text-white/50">The Zoom link will show up here before the call.</span>
             )}

@@ -5,6 +5,7 @@ import { Reveal } from "@/components/elite/Reveal";
 import { VslPlayer } from "@/components/elite/VslPlayer";
 import { VslFilePlayer } from "@/components/elite/VslFilePlayer";
 import { MetaPixel } from "@/components/elite/MetaPixel";
+import { pixelAllowed } from "@/lib/elite/app-links";
 
 // Meta Pixel for the ad funnel (Coach Yinka, Oct 10 2026). This page only.
 const META_PIXEL_ID = "1655175349021847";
@@ -29,10 +30,12 @@ const VSL_PORTRAIT = true;
 // talking and the call does the selling. Do not add a section back
 // without his word. Copy rules still apply to the one line: "we" (Coach
 // Gary is in the video), "your player", never "AI", no em dashes.
-export function DemoLanding() {
+export function DemoLanding({ userAgent = null }: { userAgent?: string | null }) {
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
-      <MetaPixel id={META_PIXEL_ID} />
+      {/* Never for the App Store app (the page already sends the app away;
+          this is the second guard, and the component holds a third). */}
+      {pixelAllowed(userAgent) && <MetaPixel id={META_PIXEL_ID} />}
       <div className="rise-in">
         <Wordmark href={null} size="lg" />
       </div>

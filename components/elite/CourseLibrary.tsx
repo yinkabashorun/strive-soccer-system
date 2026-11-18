@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, BookOpen, ChevronRight, Download, ExternalLink, PencilLine } from "lucide-react";
 import type { Course } from "@/lib/elite/types";
 import { courseNotice, externalHref, isInternalHref, levelsOf, stepTitle, stepVideo } from "@/lib/elite/courses";
+import { AppLink } from "@/components/elite/AppLink";
 import { DrillVideo } from "@/components/elite/DrillVideo";
 import { cn } from "@/lib/utils";
 
@@ -161,15 +162,26 @@ export function LinkCourseGate({
         </div>
       )}
 
-      {out && (
-        <a
-          href={out}
-          {...(sameTab ? {} : { target: "_blank", rel: "noopener noreferrer" })}
-          className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wider text-ink hover:opacity-90"
-        >
-          Open the course <ExternalLink className="h-4 w-4" />
-        </a>
-      )}
+      {out &&
+        (sameTab ? (
+          <a
+            href={out}
+            className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wider text-ink hover:opacity-90"
+          >
+            Open the course <ExternalLink className="h-4 w-4" />
+          </a>
+        ) : (
+          // Another site: a new tab on the website. Inside the iPhone app
+          // a course with an outside address is shown as its own pages
+          // instead (courseForApp), so this button is never drawn there.
+          <AppLink
+            href={out}
+            title={course.name}
+            className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wider text-ink hover:opacity-90"
+          >
+            Open the course <ExternalLink className="h-4 w-4" />
+          </AppLink>
+        ))}
     </div>
   );
 }
@@ -272,14 +284,13 @@ export function CourseView({
                       </div>
                     )}
                     {s.download_url && (
-                      <a
+                      <AppLink
                         href={s.download_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-accent hover:underline"
+                        title={stepTitle(s)}
+                        className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-accent hover:underline"
                       >
                         <Download className="h-3.5 w-3.5" /> Download
-                      </a>
+                      </AppLink>
                     )}
                   </article>
                 );

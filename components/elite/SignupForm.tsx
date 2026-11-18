@@ -5,9 +5,9 @@ import { AGREEMENT_POINTS, GUARDIAN_STATEMENT } from "@/lib/elite/legal";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { KeyRound, Loader2 } from "lucide-react";
-import { createClient } from "@/lib/elite/supabase/client";
 import { enterDemoPlayer, enterDemoCoach } from "@/lib/elite/auth-actions";
 import { signupLanding, type InviteRole } from "@/lib/elite/invite-link";
+import { AppLink } from "./AppLink";
 
 // Signup gated by a single-use invite code. A player code (the default)
 // creates a family's account; a coach code (054, admin-generated) creates a
@@ -72,19 +72,14 @@ export function SignupForm({
       return;
     }
 
-    // 2) sign in to establish the session, then into the app
-    const supabase = createClient();
-    if (supabase) {
-      const { error: signInErr } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (signInErr) {
-        setError("Account created. Please sign in.");
-        setLoading(false);
-        router.push("/login");
-        return;
-      }
+    // 2) the redeem route signed the new account in on the server, so the
+    // session cookie is one the server set (lib/elite/sign-in.ts). If that
+    // one step failed the account still exists: send them to sign in.
+    if (!data.signedIn) {
+      setError("Account created. Please sign in.");
+      setLoading(false);
+      router.push("/login");
+      return;
     }
     router.push(signupLanding(data.role === "coach" ? "coach" : "player"));
     router.refresh();
@@ -204,13 +199,13 @@ export function SignupForm({
             />
             <span>
               I agree to the{" "}
-              <Link href="/terms" target="_blank" className="tap underline underline-offset-2">
+              <AppLink href="/terms" title="Terms of Service" className="tap underline underline-offset-2">
                 Terms of Service
-              </Link>{" "}
+              </AppLink>{" "}
               and the{" "}
-              <Link href="/privacy" target="_blank" className="tap underline underline-offset-2">
+              <AppLink href="/privacy" title="Privacy Policy" className="tap underline underline-offset-2">
                 Privacy Policy
-              </Link>
+              </AppLink>
               .
             </span>
           </label>

@@ -4,7 +4,7 @@ import { getViewer } from "@/lib/elite/session";
 import { inNativeApp } from "@/lib/elite/native-request";
 import { APP_URL } from "@/lib/elite/app-url";
 import { nyToday } from "@/lib/elite/time";
-import { friendsWeekFor, quizDone, trackerFor, weekLogsFor } from "@/lib/elite/tracker-server";
+import { friendsWeekFor, myClubsFor, quizDone, trackerFor, weekLogsFor } from "@/lib/elite/tracker-server";
 import {
   FREE_WEEK,
   FREE_QUIZ,
@@ -28,7 +28,11 @@ export default async function MyWeekPage() {
   if (!quizDone(tracker) || !tracker.target_minutes) redirect(FREE_QUIZ);
 
   const today = nyToday();
-  const [logs, friends] = await Promise.all([weekLogsFor(viewer, tracker, today), friendsWeekFor(viewer, today)]);
+  const [logs, friends, clubs] = await Promise.all([
+    weekLogsFor(viewer, tracker, today),
+    friendsWeekFor(viewer, today),
+    myClubsFor(viewer),
+  ]);
   const name = shortName(viewer.profile.full_name);
 
   return (
@@ -41,6 +45,8 @@ export default async function MyWeekPage() {
       week={weekLabel(today)}
       me={{ id: viewer.profile.id, name, initials: initialsOf(name) }}
       friends={friends}
+      clubs={clubs}
+      appUrl={APP_URL}
       inviteLink={joinLink(APP_URL, tracker.referral_code)}
       programHref={programLink(inNativeApp())}
     />

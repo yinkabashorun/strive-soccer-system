@@ -18,6 +18,8 @@
 import { createServiceClient, isSupabaseConfigured } from "./supabase/server";
 import type { Viewer } from "./session";
 import {
+  CLUB_CAP,
+  CLUB_REFUSED,
   DEFAULT_TARGETS,
   POST_BUCKET,
   POST_URL_SECONDS,
@@ -29,11 +31,20 @@ import {
   homeFor,
   postPath,
   postedPhotoToday,
+  clubJoinDecision,
+  clubPairs,
+  initialsOf,
+  mayViewProfile,
+  newReferralCode,
   shortName,
   timeSince,
   tracksGym,
   weekOf,
   type Block,
+  type ClubJoin,
+  type ClubKind,
+  type MyClub,
+  type Profile,
   type BoardEntry,
   type Face,
   type Goal,
@@ -50,6 +61,9 @@ import {
 } from "./tracker";
 import {
   demoBlocked,
+  demoClubAsk,
+  demoClubsOf,
+  demoMyClubs,
   demoFriendAsk,
   demoFriends,
   demoLogs,
@@ -574,4 +588,241 @@ export async function removeTrackerFiles(profileId: string): Promise<number> {
     if (data.length < 1000) break;
   }
   return removed;
+}
+
+
+// ---- Clubs ------------------------------------------------------------
+
+export type ClubRow = {
+  id: string;
+  name: string;
+  join_code: string;
+  kind: ClubKind;
+  captain_id: string | null;
+  archived_at: string | null;
+};
+const CLUB_COLUMNS = "id, name, join_code, kind, captain_id, archived_at";
+type MemberRow = { club_id: string; profile_id: string; joined_at: string };
+
+async function clubByCode(admin: Admin, code: string): Promise<ClubRow | null> {
+  const { data } = await admin.from("elite_tracker_clubs").select(CLUB_COLUMNS).eq("join_code", code).maybeSingle();
+  return (data as ClubRow | null) ?? null;
+}
+
+export async function clubById(admin: Admin, id: string): Promise<ClubRow | null> {
+  const { data } = await admin.from("elite_tracker_clubs").select(CLUB_COLUMNS).eq("id", id).maybeSingle();
+  return (data as ClubRow | null) ?? null;
+}
+
+// The clubs a player is on.
+export async function clubIdsOf(admin: Admin, profileId: string): Promise<string[]> {
+  const { data } = await admin.from("elite_tracker_club_members").select("club_id").eq("profile_id", profileId);
+  return ((data as { club_id: string }[] | null) ?? []).map((r) => r.club_id);
+}
+
+// Everyone on a club, the longest-standing first.
+export async function membersOf(admin: Admin, clubId: string): Promise<MemberRow[]> {
+  const { data } = await admin
+    .from("elite_tracker_club_members")
+    .select("club_id, profile_id, joined_at")
+    .eq("club_id", clubId)
+    .order("joined_at")
+    .order("profile_id");
+  return (data as MemberRow[] | null) ?? [];
+}
+
+// Make a club with a fresh link code. NOT a server action: called by the
+// player's Start a club and the coach's create, each after its own check.
+export async function newClub(input: {
+  name: string;
+  kind: ClubKind;
+  captainId: string | null;
+  createdBy: string;
+}): Promise<ClubRow | null> {
+  const admin = createServiceClient();
+  if (!admin) return null;
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const { data, error } = await admin
+      .from("elite_tracker_clubs")
+      .insert({
+        name: input.name,
+        join_code: newReferralCode(),
+        kind: input.kind,
+        captain_id: input.captainId,
+        created_by: input.createdBy,
+      })
+      .select(CLUB_COLUMNS)
+      .single();
+    if (!error && data) return data as ClubRow;
+  }
+  return null;
+}
+
+// Put a free account on a club and make it friends with every member
+// already on it (both ways, one stored pair each), skipping anyone a
+// block stands between. Never past either cap, never an ended club. NOT a
+// server action: called only by the sign-up route (the account it just
+// made), the confirm action and Start a club (the signed-in viewer), each
+// with an id it established for itself.
+export async function joinClub(profileId: string, club: ClubRow): Promise<ClubJoin | "error"> {
+  const admin = createServiceClient();
+  if (!admin) return "error";
+  const members = await membersOf(admin, club.id);
+  const decision = clubJoinDecision({
+    clubId: club.id,
+    archived: Boolean(club.archived_at),
+    memberCount: members.length,
+    myClubIds: await clubIdsOf(admin, profileId),
+  });
+  if (decision !== "ok") return decision;
+
+  const { error } = await admin.from("elite_tracker_club_members").insert({ club_id: club.id, profile_id: profileId });
+  if (error) return "error";
+  // Two players joining at the same moment can pass the count together:
+  // the later one steps back out so a club never goes past the cap.
+  const after = await membersOf(admin, club.id);
+  if (after.length > CLUB_CAP && !after.slice(0, CLUB_CAP).some((m) => m.profile_id === profileId)) {
+    await admin.from("elite_tracker_club_members").delete().eq("club_id", club.id).eq("profile_id", profileId);
+    return "full";
+  }
+
+  const others = after.map((m) => m.profile_id).filter((id) => id !== profileId);
+  const blocks: Block[] = [];
+  for (let i = 0; i < others.length; i += 200) {
+    const some = others.slice(i, i + 200);
+    const [mine, theirs] = await Promise.all([
+      admin.from("elite_tracker_blocks").select("blocker, blocked").eq("blocker", profileId).in("blocked", some),
+      admin.from("elite_tracker_blocks").select("blocker, blocked").eq("blocked", profileId).in("blocker", some),
+    ]);
+    blocks.push(...((mine.data as Block[] | null) ?? []), ...((theirs.data as Block[] | null) ?? []));
+  }
+  const pairs = clubPairs(profileId, others, blocks);
+  if (pairs.length > 0) {
+    await admin.from("elite_tracker_friends").upsert(pairs, { onConflict: "a,b", ignoreDuplicates: true });
+  }
+  return "ok";
+}
+
+export async function joinClubByCode(profileId: string, code: string): Promise<ClubJoin | "none" | "error"> {
+  const admin = createServiceClient();
+  if (!admin) return "error";
+  const club = await clubByCode(admin, code);
+  return club ? joinClub(profileId, club) : "none";
+}
+
+// The club behind a link, asked about once on the Friends tab. A club the
+// player is already on, or no club at all, asks nothing; a club they
+// cannot join says why in plain words.
+export async function clubAskFor(
+  viewer: Viewer,
+  code: string | null
+): Promise<{ code: string; name: string; problem: string | null } | null> {
+  if (!code) return null;
+  if (viewer.demo) {
+    const c = demoClubAsk(code);
+    return c ? { code, name: c.name, problem: null } : null;
+  }
+  const admin = createServiceClient();
+  if (!admin) return null;
+  const club = await clubByCode(admin, code);
+  if (!club) return null;
+  const decision = clubJoinDecision({
+    clubId: club.id,
+    archived: Boolean(club.archived_at),
+    memberCount: (await membersOf(admin, club.id)).length,
+    myClubIds: await clubIdsOf(admin, viewer.profile.id),
+  });
+  if (decision === "already") return null;
+  return { code, name: club.name, problem: decision === "ok" ? null : CLUB_REFUSED[decision] };
+}
+
+// This viewer's own clubs, with their rosters (first name and last
+// initial). Only ever the viewer's own clubs.
+export async function myClubsFor(viewer: Viewer): Promise<MyClub[]> {
+  const me = { id: viewer.profile.id, name: shortName(viewer.profile.full_name) };
+  if (viewer.demo) return demoMyClubs(me);
+  const admin = createServiceClient();
+  if (!admin) return [];
+  const ids = await clubIdsOf(admin, me.id);
+  const out: MyClub[] = [];
+  for (const id of ids) {
+    const [club, members] = await Promise.all([clubById(admin, id), membersOf(admin, id)]);
+    if (!club) continue;
+    const names = await namesOf(admin, members.map((m) => m.profile_id));
+    out.push({
+      id: club.id,
+      name: club.name,
+      code: club.join_code,
+      kind: club.kind,
+      captain: club.captain_id === me.id && !club.archived_at,
+      ended: Boolean(club.archived_at),
+      members: members.map((m) => ({
+        id: m.profile_id,
+        name: m.profile_id === me.id ? me.name : names.get(m.profile_id) ?? "A teammate",
+        captain: club.captain_id === m.profile_id,
+        you: m.profile_id === me.id,
+      })),
+    });
+  }
+  return out;
+}
+
+// A player's profile: only for that player, their friends, and coaches,
+// and never across a block. Anyone else gets nothing back at all.
+export async function profileFor(viewer: Viewer, targetId: string, today: string): Promise<Profile | null> {
+  const meId = viewer.profile.id;
+  const staff = viewer.role !== "player";
+  const you = targetId === meId;
+
+  if (viewer.demo) {
+    const friends = demoFriends();
+    const friend = friends.find((f) => f.id === targetId);
+    if (!you && !friend && !staff) return null;
+    const name = you ? shortName(viewer.profile.full_name) : friend?.name ?? "A teammate";
+    const myLogs = you ? demoLogs(today).filter((l) => l.trained_on >= weekOf(today).monday) : [];
+    return {
+      id: targetId,
+      name,
+      initials: initialsOf(name),
+      clubs: you ? demoMyClubs({ id: meId, name }).map((c) => c.name) : demoClubsOf(name),
+      weekMinutes: you
+        ? myLogs.reduce((s, l) => (l.kind === "training" ? s + l.minutes : s), 0)
+        : friend?.minutes ?? 0,
+      you,
+    };
+  }
+
+  const admin = createServiceClient();
+  if (!admin) return null;
+  const friendIds = new Set(you || staff ? [] : await friendIdsOf(admin, meId));
+  const blocks = you || staff ? [] : await blocksBetween(admin, meId, targetId);
+  if (!mayViewProfile({ viewerId: meId, staff, targetId, friendIds, blocks })) return null;
+  if (!(await hasTracker(targetId))) return null;
+
+  const { monday, sunday } = weekOf(today);
+  const [names, clubIds, logs] = await Promise.all([
+    namesOf(admin, [targetId]),
+    clubIdsOf(admin, targetId),
+    admin
+      .from("elite_training_logs")
+      .select("minutes")
+      .eq("profile_id", targetId)
+      .eq("kind", "training")
+      .gte("trained_on", monday)
+      .lte("trained_on", sunday),
+  ]);
+  const clubs: string[] = [];
+  for (const id of clubIds) {
+    const club = await clubById(admin, id);
+    if (club && !club.archived_at) clubs.push(club.name);
+  }
+  const name = names.get(targetId) ?? "A teammate";
+  return {
+    id: targetId,
+    name,
+    initials: initialsOf(name),
+    clubs,
+    weekMinutes: ((logs.data as { minutes: number }[] | null) ?? []).reduce((s, l) => s + l.minutes, 0),
+    you,
+  };
 }

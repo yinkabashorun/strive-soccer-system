@@ -7,17 +7,39 @@ import { getViewer } from "./session";
 import { nyToday } from "./time";
 import { APP_URL } from "./app-url";
 import { textCoaches } from "./coach-alerts";
-import { getTracker, makeFriends, postForViewer, trackerFor } from "./tracker-server";
-import { DEMO_ASK, readDemoState, writeDemoState } from "./tracker-demo";
+import {
+  clubById,
+  clubIdsOf,
+  getTracker,
+  joinClub,
+  joinClubByCode,
+  makeFriends,
+  membersOf,
+  newClub,
+  postForViewer,
+  profileFor,
+  trackerFor,
+} from "./tracker-server";
+import { DEMO_ASK, DEMO_CLUB_ASK, demoClubs, readDemoState, writeDemoState } from "./tracker-demo";
 import {
   BIRTH_REQUIRED_MESSAGE,
   BLOCKED_LINK_MESSAGE,
+  CLUB_CAP_MESSAGE,
+  CLUB_NAME_MESSAGE,
+  CLUB_REFUSED,
   FREE_HOME,
   FREE_WEEK,
   GYM_REFUSED_MESSAGE,
   JOIN_AGE_COOKIE,
   POST_BUCKET,
   cleanBirth,
+  cleanClubCode,
+  cleanClubName,
+  clubReportText,
+  isCaptain,
+  mayRemoveMember,
+  mayStartClub,
+  nextCaptain,
   cleanKind,
   cleanPlanDays,
   cleanReason,
@@ -34,6 +56,7 @@ import {
   validateMinutes,
   validateQuiz,
   type Kind,
+  type Profile,
   type Season,
 } from "./tracker";
 
@@ -45,8 +68,8 @@ import {
 // did in a cookie only.
 //
 // Nothing here sends anything to a player: no texts, no pushes, no notes.
-// The one text in this file goes to the coaches, once, when a post is
-// reported.
+// The texts in this file go to the coaches, once, when a post or a club
+// name is first reported.
 
 type Fail = { ok: false; error: string };
 const fail = (error: string): Fail => ({ ok: false, error });
@@ -407,6 +430,185 @@ export async function reportPost(logId: string, reasonInput: string): Promise<{ 
   return { ok: true };
 }
 
+// ---- Clubs -------------------------------------------------------------
+
+type ClubOk = { ok: true; code: string };
+const NOT_A_CLUB = "That club is not there any more.";
+
+// "Yes" on "Join <club>?", from a club's link opened while signed in.
+export async function confirmClub(codeInput: string): Promise<{ ok: true } | Fail> {
+  const code = cleanClubCode(codeInput);
+  if (!code) return fail("That link is not one of ours.");
+  const o = await owner();
+  if (o.kind === "no") return fail(o.error);
+  if (o.kind === "demo") {
+    const mine = demoClubs();
+    if (code === DEMO_CLUB_ASK.code && !mine.some((c) => c.id === DEMO_CLUB_ASK.id)) {
+      if (!mayStartClub(mine.length)) return fail(CLUB_CAP_MESSAGE);
+      writeDemoState({ clubs: [...mine, DEMO_CLUB_ASK] });
+    }
+    return { ok: true };
+  }
+  const res = await joinClubByCode(o.profileId, code);
+  if (res === "none") return fail("That link is not one of ours.");
+  if (res === "error") return fail(OFFLINE);
+  if (res !== "ok" && res !== "already") return fail(CLUB_REFUSED[res]);
+  touch();
+  return { ok: true };
+}
+
+// "Start a club": any free player, up to their cap. They are its captain
+// and its first member, and get its link to send.
+export async function startClub(nameInput: string): Promise<ClubOk | Fail> {
+  const name = cleanClubName(nameInput);
+  if (!name) return fail(CLUB_NAME_MESSAGE);
+  const o = await owner();
+  if (o.kind === "no") return fail(o.error);
+  if (o.kind === "demo") {
+    const mine = demoClubs();
+    if (!mayStartClub(mine.length)) return fail(CLUB_CAP_MESSAGE);
+    const code = "NEWCLUBX";
+    writeDemoState({ clubs: [...mine, { id: `demo-club-new-${Date.now()}`, name, code, captain: true, kind: "player" }] });
+    return { ok: true, code };
+  }
+  if (!mayStartClub((await clubIdsOf(o.admin, o.profileId)).length)) return fail(CLUB_CAP_MESSAGE);
+  const club = await newClub({ name, kind: "player", captainId: o.profileId, createdBy: o.profileId });
+  if (!club) return fail(OFFLINE);
+  if ((await joinClub(o.profileId, club)) !== "ok") {
+    await o.admin.from("elite_tracker_clubs").delete().eq("id", club.id);
+    return fail(OFFLINE);
+  }
+  touch();
+  return { ok: true, code: club.join_code };
+}
+
+// Leave a club. Friendships made through it stay as they are: a block is
+// the way to cut one. A captain who leaves hands the club to the member
+// who has been on it longest; with nobody left, the club ends.
+export async function leaveClub(clubId: string): Promise<{ ok: true } | Fail> {
+  if (typeof clubId !== "string" || !clubId) return fail(NOT_A_CLUB);
+  const o = await owner();
+  if (o.kind === "no") return fail(o.error);
+  if (o.kind === "demo") {
+    writeDemoState({ clubs: demoClubs().filter((c) => c.id !== clubId) });
+    return { ok: true };
+  }
+  const club = await clubById(o.admin, clubId);
+  if (!club) return fail(NOT_A_CLUB);
+  const members = await membersOf(o.admin, clubId);
+  if (!members.some((m) => m.profile_id === o.profileId)) return fail(NOT_A_CLUB);
+  const { error } = await o.admin
+    .from("elite_tracker_club_members")
+    .delete()
+    .eq("club_id", clubId)
+    .eq("profile_id", o.profileId);
+  if (error) return fail(OFFLINE);
+  if (club.captain_id === o.profileId) {
+    const next = nextCaptain(members, o.profileId);
+    await o.admin
+      .from("elite_tracker_clubs")
+      .update(next ? { captain_id: next } : { captain_id: null, archived_at: new Date().toISOString() })
+      .eq("id", clubId);
+  }
+  touch();
+  return { ok: true };
+}
+
+// The captain's three: rename, take a member off, end the club.
+async function captainOf(clubId: string): Promise<{ o: Extract<Owner, { kind: "ok" }>; club: NonNullable<Awaited<ReturnType<typeof clubById>>> } | Fail | "demo"> {
+  const o = await owner();
+  if (o.kind === "no") return fail(o.error);
+  if (o.kind === "demo") return "demo";
+  const club = typeof clubId === "string" && clubId ? await clubById(o.admin, clubId) : null;
+  if (!club) return fail(NOT_A_CLUB);
+  if (!isCaptain(club, o.profileId)) return fail("Only the club's captain can do that.");
+  return { o, club };
+}
+
+export async function renameMyClub(clubId: string, nameInput: string): Promise<{ ok: true } | Fail> {
+  const name = cleanClubName(nameInput);
+  if (!name) return fail(CLUB_NAME_MESSAGE);
+  const c = await captainOf(clubId);
+  if (c === "demo") {
+    writeDemoState({ clubs: demoClubs().map((x) => (x.id === clubId && x.captain ? { ...x, name } : x)) });
+    return { ok: true };
+  }
+  if ("ok" in c) return c;
+  const { error } = await c.o.admin.from("elite_tracker_clubs").update({ name }).eq("id", clubId);
+  if (error) return fail(OFFLINE);
+  touch();
+  return { ok: true };
+}
+
+// Take a member off the club. Their friendships stay, as when they leave.
+export async function removeClubMember(clubId: string, memberId: string): Promise<{ ok: true } | Fail> {
+  const c = await captainOf(clubId);
+  if (c === "demo") return { ok: true };
+  if ("ok" in c) return c;
+  if (typeof memberId !== "string" || !mayRemoveMember(c.club, c.o.profileId, memberId)) {
+    return fail("Only the club's captain can do that.");
+  }
+  const { error } = await c.o.admin
+    .from("elite_tracker_club_members")
+    .delete()
+    .eq("club_id", clubId)
+    .eq("profile_id", memberId);
+  if (error) return fail(OFFLINE);
+  touch();
+  return { ok: true };
+}
+
+// End the club: no new joins; the roster stays.
+export async function endMyClub(clubId: string): Promise<{ ok: true } | Fail> {
+  const c = await captainOf(clubId);
+  if (c === "demo") {
+    writeDemoState({ clubs: demoClubs().filter((x) => !(x.id === clubId && x.captain)) });
+    return { ok: true };
+  }
+  if ("ok" in c) return c;
+  const { error } = await c.o.admin
+    .from("elite_tracker_clubs")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("id", clubId);
+  if (error) return fail(OFFLINE);
+  touch();
+  return { ok: true };
+}
+
+// Report a club's name, from its roster, by a member who is not its
+// captain. It waits in the coach queue; the coaches get one text a club.
+export async function reportClub(clubId: string): Promise<{ ok: true } | Fail> {
+  const o = await owner();
+  if (o.kind === "no") return fail(o.error);
+  if (o.kind === "demo") return { ok: true };
+  const club = typeof clubId === "string" && clubId ? await clubById(o.admin, clubId) : null;
+  if (!club) return fail(NOT_A_CLUB);
+  const members = await membersOf(o.admin, clubId);
+  if (!members.some((m) => m.profile_id === o.profileId) || club.captain_id === o.profileId) return fail(NOT_A_CLUB);
+  const { count } = await o.admin
+    .from("elite_club_reports")
+    .select("id", { count: "exact", head: true })
+    .eq("club_id", clubId);
+  const { error } = await o.admin
+    .from("elite_club_reports")
+    .upsert({ club_id: clubId, reporter_id: o.profileId }, { onConflict: "club_id,reporter_id", ignoreDuplicates: true });
+  if (error) return fail(OFFLINE);
+  if (!count) await textCoaches(clubReportText(club.name, `${APP_URL}/coach/free`)).catch(() => 0);
+  return { ok: true };
+}
+
+// ---- Profiles ----------------------------------------------------------
+
+// A player's profile, for the sheet that opens from a face, a name on the
+// board or a post. Only the player, their friends and coaches get one.
+export async function loadProfile(targetId: string): Promise<Profile | null> {
+  if (typeof targetId !== "string" || !targetId) return null;
+  const viewer = await getViewer();
+  if (!viewer) return null;
+  if (viewer.role === "player" && !viewer.demo && !(await getTracker(viewer.profile.id))) return null;
+  return profileFor(viewer, targetId, nyToday());
+}
+
 // ---- Coach side (/coach/free) -----------------------------------------
 
 type Coach =
@@ -515,6 +717,69 @@ export async function dismissReports(logId: string): Promise<{ ok: true } | Fail
   if (c.kind === "no") return fail("Only a coach can do this.");
   if (c.kind === "demo") return { ok: true };
   const { error } = await closeReports(c, logId, "none");
+  if (error) return fail(OFFLINE);
+  revalidatePath("/coach/free");
+  return { ok: true };
+}
+
+// ---- Coach side: clubs --------------------------------------------------
+
+// A coach-made club (the Dec 19 5v5 ones): no captain, the coaches look
+// after it here.
+export async function createClub(nameInput: string): Promise<ClubOk | Fail> {
+  const name = cleanClubName(nameInput);
+  if (!name) return fail(CLUB_NAME_MESSAGE);
+  const c = await coach();
+  if (c.kind === "no") return fail("Only a coach can do this.");
+  if (c.kind === "demo") return { ok: true, code: "NEWCLUBX" };
+  const club = await newClub({ name, kind: "coach", captainId: null, createdBy: c.profileId });
+  if (!club) return fail(OFFLINE);
+  revalidatePath("/coach/free");
+  return { ok: true, code: club.join_code };
+}
+
+async function closeClubReports(c: { admin: Admin; profileId: string }, clubId: string, action: "renamed" | "archived" | "none") {
+  return c.admin
+    .from("elite_club_reports")
+    .update({ resolved_at: new Date().toISOString(), resolved_by: c.profileId, action })
+    .eq("club_id", clubId)
+    .is("resolved_at", null);
+}
+
+// A coach renames any club (a reported name, or a 5v5 club).
+export async function renameClub(clubId: string, nameInput: string): Promise<{ ok: true } | Fail> {
+  const name = cleanClubName(nameInput);
+  if (!name) return fail(CLUB_NAME_MESSAGE);
+  const c = await coach();
+  if (c.kind === "no") return fail("Only a coach can do this.");
+  if (c.kind === "demo") return { ok: true };
+  const { error } = await c.admin.from("elite_tracker_clubs").update({ name }).eq("id", clubId);
+  if (error) return fail(OFFLINE);
+  await closeClubReports(c, clubId, "renamed");
+  revalidatePath("/coach/free");
+  return { ok: true };
+}
+
+// A coach archives any club: no new joins, the roster stays.
+export async function archiveClub(clubId: string): Promise<{ ok: true } | Fail> {
+  const c = await coach();
+  if (c.kind === "no") return fail("Only a coach can do this.");
+  if (c.kind === "demo") return { ok: true };
+  const { error } = await c.admin
+    .from("elite_tracker_clubs")
+    .update({ archived_at: new Date().toISOString() })
+    .eq("id", clubId);
+  if (error) return fail(OFFLINE);
+  await closeClubReports(c, clubId, "archived");
+  revalidatePath("/coach/free");
+  return { ok: true };
+}
+
+export async function dismissClubReports(clubId: string): Promise<{ ok: true } | Fail> {
+  const c = await coach();
+  if (c.kind === "no") return fail("Only a coach can do this.");
+  if (c.kind === "demo") return { ok: true };
+  const { error } = await closeClubReports(c, clubId, "none");
   if (error) return fail(OFFLINE);
   revalidatePath("/coach/free");
   return { ok: true };

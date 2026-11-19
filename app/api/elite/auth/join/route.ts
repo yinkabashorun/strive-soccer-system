@@ -6,7 +6,7 @@ import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { AGREEMENT_REQUIRED_MESSAGE, agreementComplete } from "@/lib/elite/legal";
 import { recordConsent } from "@/lib/elite/legal-server";
 import { nyToday } from "@/lib/elite/time";
-import { isFreeSignupOpen, makeFriends } from "@/lib/elite/tracker-server";
+import { isFreeSignupOpen, joinClubByCode, makeFriends } from "@/lib/elite/tracker-server";
 import {
   BIRTH_REQUIRED_MESSAGE,
   JOIN_AGE_COOKIE,
@@ -14,6 +14,7 @@ import {
   JOIN_FIELDS_MESSAGE,
   UNDER_AGE_LINE,
   cleanBirth,
+  cleanClubCode,
   cleanJoin,
   cleanReferralCode,
   freeLanding,
@@ -33,7 +34,7 @@ export const dynamic = "force-dynamic";
 // elite_trackers row. Never an elite_players row, so a free account is
 // invisible to the plan builder, the roster and every other member query.
 //
-// POST { birth: { month, year }, firstName, lastName, email, phone, password, ref?, agreed }
+// POST { birth: { month, year }, firstName, lastName, email, phone, password, ref?, club?, agreed }
 //   -> { ok, signedIn, next } | { error, reason? }
 export async function POST(req: Request) {
   if (!rateLimit(`join:${clientIp(req)}`, 10, 10 * 60_000)) {
@@ -50,6 +51,7 @@ export async function POST(req: Request) {
     phone?: unknown;
     password?: unknown;
     ref?: unknown;
+    club?: unknown;
     birth?: { month?: unknown; year?: unknown };
     agreed?: { guardian?: unknown; terms?: unknown };
   };
@@ -156,6 +158,11 @@ export async function POST(req: Request) {
   // ways (referred_by above stays as the count the coach sees). Best
   // effort: a failure here never undoes the account.
   if (referredBy) await makeFriends(userId, referredBy).catch(() => "error");
+
+  // 4c) a club's link: the new player joins the club, and with it is
+  // friends with everyone already on it. Best effort, like the friendship.
+  const club = cleanClubCode(body.club);
+  if (club) await joinClubByCode(userId, club).catch(() => "error");
 
   // 5) the agreement the person just gave (version, time, where).
   await recordConsent({

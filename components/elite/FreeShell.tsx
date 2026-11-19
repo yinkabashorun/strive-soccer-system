@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { Clock, Plus, Users } from "lucide-react";
 import { FREE_HOME, FREE_WEEK } from "@/lib/elite/tracker";
 import { PostComposer } from "./PostComposer";
+import { ProfileSheet } from "./ProfileSheet";
 
 // The free app's frame: the two tabs and the plus between them (the
 // approved mock, marketing/free-log/mock), and the posting screen that
@@ -17,24 +18,40 @@ type Launcher = {
   post: () => void;
   // The posting screen with no photo: for "Log it without a photo".
   logOnly: () => void;
+  // A player's profile sheet (a friend's, or your own).
+  profile: (id: string) => void;
 };
 
-const LauncherContext = createContext<Launcher>({ post: () => undefined, logOnly: () => undefined });
+const LauncherContext = createContext<Launcher>({
+  post: () => undefined,
+  logOnly: () => undefined,
+  profile: () => undefined,
+});
 export const usePostLauncher = () => useContext(LauncherContext);
 
-export function FreeShell({ gym, children }: { gym: boolean; children: ReactNode }) {
+export function FreeShell({
+  gym,
+  inviteLink,
+  children,
+}: {
+  gym: boolean;
+  inviteLink: string; // the player's own link, shown on their own profile
+  children: ReactNode;
+}) {
   const pathname = usePathname();
   const input = useRef<HTMLInputElement>(null);
   const [composer, setComposer] = useState<{ photo: File | null } | null>(null);
+  const [profileId, setProfileId] = useState<string | null>(null);
 
   const post = useCallback(() => input.current?.click(), []);
   const logOnly = useCallback(() => setComposer({ photo: null }), []);
+  const profile = useCallback((id: string) => setProfileId(id), []);
 
   // The set-up screens (the four questions, the days) have no tab bar.
   const tabs = pathname === FREE_HOME || pathname === FREE_WEEK;
 
   return (
-    <LauncherContext.Provider value={{ post, logOnly }}>
+    <LauncherContext.Provider value={{ post, logOnly, profile }}>
       {children}
 
       <input
@@ -75,6 +92,8 @@ export function FreeShell({ gym, children }: { gym: boolean; children: ReactNode
           </div>
         </nav>
       )}
+
+      {profileId && <ProfileSheet targetId={profileId} inviteLink={inviteLink} onClose={() => setProfileId(null)} />}
 
       {composer && (
         <PostComposer

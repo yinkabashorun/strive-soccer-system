@@ -16,7 +16,10 @@ import {
   type Goal,
   type Grade,
   type Kind,
+  type ClubKind,
+  type CoachClub,
   type Level,
+  type ReportedClub,
   type ReportedPost,
   type TargetRow,
 } from "./tracker";
@@ -47,6 +50,8 @@ export type FreeOverview = {
   week_minutes: number; // training, every account, this week
   posts_week: number; // photos posted this week, every account
   reports: ReportedPost[]; // open, oldest first
+  clubs: CoachClub[]; // newest first
+  clubReports: ReportedClub[]; // open
 };
 
 export function demoOverview(today: string): FreeOverview {
@@ -72,6 +77,27 @@ export function demoOverview(today: string): FreeOverview {
         reports: [{ reporter: "Leo King", reason: "It is not training", at: new Date().toISOString() }],
       },
     ],
+    clubs: [
+      {
+        id: "demo-club-1",
+        name: "Strive Elite 5v5: Team 7",
+        kind: "coach",
+        code: "STRVTEAM",
+        captain: null,
+        members: ["Example Player", "Gary Grigoryan", "Yinka Bashorun", "Dani Ramos", "Leo King"],
+        ended: false,
+      },
+      {
+        id: "demo-club-2",
+        name: "Bull Run 2010s",
+        kind: "player",
+        code: "BULLRUNX",
+        captain: "Example Player",
+        members: ["Example Player", "Dani Ramos", "Jalen Tate"],
+        ended: false,
+      },
+    ],
+    clubReports: [],
     accounts: [
       {
         profile_id: "demo-free-1",
@@ -125,7 +151,17 @@ export async function getFreeOverview(): Promise<FreeOverview> {
   };
   type PairRow = { a: string; b: string };
   type ReportRow = { log_id: string; reporter_id: string; reason: string; created_at: string };
-  const [rows, logs, pairs, openReports, open, targets] = await Promise.all([
+  type ClubRow = {
+    id: string;
+    name: string;
+    kind: ClubKind;
+    join_code: string;
+    captain_id: string | null;
+    archived_at: string | null;
+  };
+  type MemberRow = { club_id: string; profile_id: string };
+  type ClubReportRow = { club_id: string; reporter_id: string; created_at: string };
+  const [rows, logs, pairs, openReports, open, targets, clubRows, memberRows, clubReportRows] = await Promise.all([
     everyRow<Tracker>((from, to) =>
       admin
         .from("elite_trackers")
@@ -156,6 +192,31 @@ export async function getFreeOverview(): Promise<FreeOverview> {
     ),
     isFreeSignupOpen(),
     getTargetTable(),
+    everyRow<ClubRow>((from, to) =>
+      admin
+        .from("elite_tracker_clubs")
+        .select("id, name, kind, join_code, captain_id, archived_at")
+        .order("created_at", { ascending: false })
+        .order("id")
+        .range(from, to)
+    ),
+    everyRow<MemberRow>((from, to) =>
+      admin
+        .from("elite_tracker_club_members")
+        .select("club_id, profile_id")
+        .order("joined_at")
+        .order("profile_id")
+        .range(from, to)
+    ),
+    everyRow<ClubReportRow>((from, to) =>
+      admin
+        .from("elite_club_reports")
+        .select("club_id, reporter_id, created_at")
+        .is("resolved_at", null)
+        .order("created_at")
+        .order("id")
+        .range(from, to)
+    ),
   ]);
   const ids = rows.map((r) => r.profile_id);
   // Names, a few hundred ids at a time (an id list rides in the address).
@@ -240,6 +301,35 @@ export async function getFreeOverview(): Promise<FreeOverview> {
     };
   });
 
+  const membersBy = new Map<string, string[]>();
+  for (const m of memberRows) membersBy.set(m.club_id, [...(membersBy.get(m.club_id) ?? []), m.profile_id]);
+  const nameOrNone = (id: string) => nameOf.get(id) || "No name";
+  const clubs: CoachClub[] = clubRows.map((c) => ({
+    id: c.id,
+    name: c.name,
+    kind: c.kind,
+    code: c.join_code,
+    captain: c.captain_id ? nameOrNone(c.captain_id) : null,
+    members: (membersBy.get(c.id) ?? []).map(nameOrNone),
+    ended: Boolean(c.archived_at),
+  }));
+  const clubById = new Map(clubRows.map((c) => [c.id, c]));
+  const reportsByClub = new Map<string, ClubReportRow[]>();
+  for (const r of clubReportRows) reportsByClub.set(r.club_id, [...(reportsByClub.get(r.club_id) ?? []), r]);
+  const clubReports: ReportedClub[] = [...reportsByClub.entries()]
+    .filter(([id]) => clubById.has(id))
+    .map(([id, list]) => {
+      const c = clubById.get(id)!;
+      return {
+        club_id: id,
+        name: c.name,
+        kind: c.kind,
+        captain: c.captain_id ? nameOrNone(c.captain_id) : null,
+        members: (membersBy.get(id) ?? []).length,
+        reports: list.map((r) => ({ reporter: nameOrNone(r.reporter_id), at: r.created_at })),
+      };
+    });
+
   return {
     open,
     targets,
@@ -247,5 +337,7 @@ export async function getFreeOverview(): Promise<FreeOverview> {
     week_minutes: accounts.reduce((s, a) => s + a.week_minutes, 0),
     posts_week: accounts.reduce((s, a) => s + a.posts_week, 0),
     reports,
+    clubs,
+    clubReports,
   };
 }

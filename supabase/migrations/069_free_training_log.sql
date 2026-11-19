@@ -346,7 +346,126 @@ insert into public.elite_target_table (season, minutes, minutes_max)
 values ('in_season', 240, null), ('off_season', 360, 720)
 on conflict (season) do nothing;
 
--- 9) App-wide switches a coach flips. First one: whether anyone can make
+-- 9) Clubs. Any free player can start one (their club teammates, a new
+--    tournament team) and is its captain; a coach can make one too (the
+--    Dec 19 Strive Elite 5v5 teams, kind 'coach', no captain). A club
+--    has its own link, and joining it makes the player friends with every
+--    member already on it, both ways, as ordinary pairs in
+--    elite_tracker_friends, so the feed and the week board work with
+--    nothing new; a blocked pair is never paired by a club. Leaving a club
+--    takes the player off the roster and leaves every friendship as it is.
+--    At most 20 members a club and 3 clubs a player (the server's rules).
+--    A player's clubs show on their profile, to their friends and coaches.
+--    Rosters stay; ending a club (its captain) or archiving it (a coach)
+--    sets archived_at, which stops new joins and keeps the roster.
+create table if not exists public.elite_tracker_clubs (
+  id          uuid primary key default gen_random_uuid(),
+  name        text not null check (char_length(name) between 1 and 40),
+  join_code   text not null unique,
+  kind        text not null default 'player' check (kind in ('player', 'coach')),
+  captain_id  uuid references public.elite_trackers(profile_id) on delete set null,
+  created_by  uuid references public.elite_profiles(id) on delete set null,
+  created_at  timestamptz not null default now(),
+  archived_at timestamptz
+);
+
+create index if not exists elite_tracker_clubs_captain_idx
+  on public.elite_tracker_clubs (captain_id);
+
+alter table public.elite_tracker_clubs enable row level security;
+
+create table if not exists public.elite_tracker_club_members (
+  club_id    uuid not null references public.elite_tracker_clubs(id) on delete cascade,
+  profile_id uuid not null references public.elite_trackers(profile_id) on delete cascade,
+  joined_at  timestamptz not null default now(),
+  primary key (club_id, profile_id)
+);
+
+create index if not exists elite_tracker_club_members_profile_idx
+  on public.elite_tracker_club_members (profile_id);
+
+alter table public.elite_tracker_club_members enable row level security;
+
+-- Is the signed-in player on this club? Read with the definer's rights so
+-- the roster policy below can ask it without reading its own table
+-- through itself.
+create or replace function public.elite_is_club_member(p_club uuid)
+returns boolean language sql stable security definer set search_path = public as $$
+  select exists (
+    select 1 from public.elite_tracker_club_members
+    where club_id = p_club and profile_id = auth.uid()
+  );
+$$;
+
+-- A club's name reported by one of its members. It waits in the coach
+-- queue at /coach/free until a coach renames the club, archives it, or
+-- says no action.
+create table if not exists public.elite_club_reports (
+  id          uuid primary key default gen_random_uuid(),
+  club_id     uuid not null references public.elite_tracker_clubs(id) on delete cascade,
+  reporter_id uuid not null references public.elite_trackers(profile_id) on delete cascade,
+  created_at  timestamptz not null default now(),
+  resolved_at timestamptz,
+  resolved_by uuid references public.elite_profiles(id) on delete set null,
+  action      text check (action is null or action in ('renamed', 'archived', 'none')),
+  unique (club_id, reporter_id)
+);
+
+alter table public.elite_club_reports enable row level security;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'elite_tracker_clubs'
+      and policyname = 'elite_tracker_clubs_member_read'
+  ) then
+    create policy elite_tracker_clubs_member_read on public.elite_tracker_clubs
+      for select using (public.elite_is_club_member(id));
+  end if;
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'elite_tracker_clubs'
+      and policyname = 'elite_tracker_clubs_coach_read'
+  ) then
+    create policy elite_tracker_clubs_coach_read on public.elite_tracker_clubs
+      for select using (public.elite_is_coach());
+  end if;
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'elite_tracker_club_members'
+      and policyname = 'elite_tracker_club_members_member_read'
+  ) then
+    create policy elite_tracker_club_members_member_read on public.elite_tracker_club_members
+      for select using (public.elite_is_club_member(club_id));
+  end if;
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'elite_tracker_club_members'
+      and policyname = 'elite_tracker_club_members_coach_read'
+  ) then
+    create policy elite_tracker_club_members_coach_read on public.elite_tracker_club_members
+      for select using (public.elite_is_coach());
+  end if;
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'elite_club_reports'
+      and policyname = 'elite_club_reports_own_read'
+  ) then
+    create policy elite_club_reports_own_read on public.elite_club_reports
+      for select using (reporter_id = auth.uid());
+  end if;
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'elite_club_reports'
+      and policyname = 'elite_club_reports_coach_read'
+  ) then
+    create policy elite_club_reports_coach_read on public.elite_club_reports
+      for select using (public.elite_is_coach());
+  end if;
+end $$;
+
+-- 10) App-wide switches a coach flips. First one: whether anyone can make
 --    a free account. CLOSED until a coach opens it at /coach/free.
 create table if not exists public.elite_settings (
   key        text primary key,

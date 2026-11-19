@@ -448,6 +448,185 @@ export function initialsOf(name: string): string {
   return (first + last).toUpperCase();
 }
 
+// ---- Clubs ------------------------------------------------------------
+
+// A club is a roster with its own link. Any free player can start one
+// (their club teammates, a new tournament team) and is its captain; a
+// coach makes the Dec 19 5v5 ones. A player's clubs show on their
+// profile. It is nothing new in the app: joining a club makes the player
+// friends with every member already on it, so the feed and the week board
+// just work. Clubs are found by link only: there is no list of
+// clubs, no search and no ranking between clubs.
+export const CLUB_CAP = 20; // members a club
+export const CLUBS_PER_PLAYER = 3; // clubs a player can be on
+export const CLUB_NAME_MAX = 40;
+
+export type ClubKind = "player" | "coach";
+
+// A club name: plain text, one line, 40 characters, and never something
+// that reads as a link or a handle.
+export function cleanClubName(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const name = raw.replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim();
+  if (!name || name.length > CLUB_NAME_MAX) return null;
+  if (/https?:|www\.|:\/\/|@\w|\.(com|net|org|io|co|gg|me|ly|app|link|tv)\b/i.test(name)) return null;
+  return name;
+}
+
+export const CLUB_NAME_MESSAGE = "Give the club a name of up to 40 letters, with no links.";
+
+// A club's code has the same shape as a player's link code.
+export const cleanClubCode = (raw: unknown): string | null => cleanReferralCode(raw);
+
+export function clubLink(appUrl: string, code: string): string {
+  return `${appUrl.replace(/\/+$/, "")}/join?club=${code}`;
+}
+
+// A signed-in free account that opens a club's link: its Friends tab with
+// the code along, where one sheet asks "Join <club>?".
+export function clubAskPath(code: string): string {
+  return `/log?club=${code}`;
+}
+
+export function clubAskQuestion(name: string): string {
+  return `Join ${name}?`;
+}
+
+// May this player join this club? Never past either cap, never an ended
+// club, never twice.
+export type ClubJoin = "ok" | "already" | "too_many" | "full" | "archived";
+
+export function clubJoinDecision(input: {
+  clubId: string;
+  archived: boolean;
+  memberCount: number;
+  myClubIds: string[]; // the clubs this player is on now
+}): ClubJoin {
+  if (input.myClubIds.includes(input.clubId)) return "already";
+  if (input.archived) return "archived";
+  if (input.myClubIds.length >= CLUBS_PER_PLAYER) return "too_many";
+  if (input.memberCount >= CLUB_CAP) return "full";
+  return "ok";
+}
+
+// May this player start a club? Starting one puts them on it.
+export function mayStartClub(myClubCount: number): boolean {
+  return myClubCount < CLUBS_PER_PLAYER;
+}
+
+// What a player at the cap is told, on Start a club and on a join link.
+export const CLUB_CAP_MESSAGE = `You're in ${CLUBS_PER_PLAYER} clubs. Leave one to join another.`;
+
+export const CLUB_REFUSED: Record<Exclude<ClubJoin, "ok" | "already">, string> = {
+  too_many: CLUB_CAP_MESSAGE,
+  full: `That club is full. A club holds ${CLUB_CAP} players.`,
+  archived: "That club has ended.",
+};
+
+// The pairs that joining makes: the new player and every member already on
+// the club, one stored pair each, skipping anyone a block stands between.
+export function clubPairs(newId: string, memberIds: string[], blocks: Block[]): { a: string; b: string }[] {
+  const out: { a: string; b: string }[] = [];
+  const seen = new Set<string>();
+  for (const id of memberIds) {
+    if (seen.has(id) || !canBefriend(newId, id, blocks)) continue;
+    seen.add(id);
+    out.push(friendPair(newId, id)!);
+  }
+  return out;
+}
+
+// What the captain may do: rename, remove a member, end the club. Only on
+// a club that has not ended, and only the captain (a coach's club has
+// none; coaches act from /coach/free).
+export function isCaptain(club: { captain_id: string | null; archived_at: string | null }, viewerId: string): boolean {
+  return club.captain_id !== null && club.captain_id === viewerId && !club.archived_at;
+}
+
+// A captain removes anyone but themselves; a captain leaves by ending the
+// club or by leaving, which hands the club to the member who joined
+// first after them.
+export function mayRemoveMember(
+  club: { captain_id: string | null; archived_at: string | null },
+  viewerId: string,
+  memberId: string
+): boolean {
+  return isCaptain(club, viewerId) && memberId !== viewerId;
+}
+
+// Who captains the club when its captain leaves: the member who has been on
+// it longest. Nobody left: no captain (the club ends).
+export function nextCaptain(members: { profile_id: string; joined_at: string }[], leavingId: string): string | null {
+  const rest = members
+    .filter((m) => m.profile_id !== leavingId)
+    .sort((x, y) => x.joined_at.localeCompare(y.joined_at) || x.profile_id.localeCompare(y.profile_id));
+  return rest[0]?.profile_id ?? null;
+}
+
+// The one text the coaches get for a reported club name.
+export function clubReportText(club: string, url: string): string {
+  return `A club name in the free app was reported: "${club}". Look at it here: ${url}`;
+}
+
+// A player's profile, as their friends and coaches see it: initials, first
+// name and last initial, their clubs, and their training time this week.
+// Nothing else: no photo, no bio, no counts, no age or grade.
+export type Profile = {
+  id: string;
+  name: string; // "Gary G."
+  initials: string;
+  clubs: string[]; // up to CLUBS_PER_PLAYER names
+  weekMinutes: number; // training this week
+  you: boolean;
+};
+
+// Who may open a profile: the player, their friends, and coaches. A block
+// either way closes it, whatever else is true.
+export function mayViewProfile(input: {
+  viewerId: string;
+  staff: boolean;
+  targetId: string;
+  friendIds: ReadonlySet<string>;
+  blocks: Block[];
+}): boolean {
+  if (input.staff) return true;
+  if (input.viewerId === input.targetId) return true;
+  if (blockedEitherWay(input.blocks, input.viewerId, input.targetId)) return false;
+  return input.friendIds.has(input.targetId);
+}
+
+// One reported club, waiting for a coach.
+export type ReportedClub = {
+  club_id: string;
+  name: string;
+  kind: ClubKind;
+  captain: string | null;
+  members: number;
+  reports: { reporter: string; at: string }[];
+};
+
+// Every club, for the Clubs card: its link, who joined, who captains it.
+export type CoachClub = {
+  id: string;
+  name: string;
+  kind: ClubKind;
+  code: string;
+  captain: string | null;
+  members: string[];
+  ended: boolean;
+};
+
+// A club as its members see it (Your clubs on My week).
+export type MyClub = {
+  id: string;
+  name: string;
+  code: string;
+  kind: ClubKind;
+  captain: boolean; // the viewer is its captain
+  ended: boolean;
+  members: { id: string; name: string; captain: boolean; you: boolean }[];
+};
+
 // ---- Blocking ---------------------------------------------------------
 
 // A block is one-sided to make and two-sided in effect: once either of

@@ -428,7 +428,7 @@ describe("blocking", () => {
     expect(ask).toContain("blockedEitherWay(await blocksBetween(admin, viewer.profile.id, ownerId)");
     // every read of the blocks is tied to named accounts
     for (const m of server.matchAll(/\.from\("elite_tracker_blocks"\)\.select\([^)]*\)([\s\S]{0,30})/g)) {
-      expect(m[1]).toMatch(/^\.eq\("blocker", /);
+      expect(m[1]).toMatch(/^\.eq\("(blocker|blocked)", /);
     }
   });
 
@@ -525,7 +525,7 @@ describe("the coach queue and taking a block back", () => {
     const page = code("app/(coach)/coach/free/page.tsx");
     expect(page).toContain("<ReportsQueue reports={data.reports} />");
     expect(page).toContain("{data.posts_week}");
-    expect(page).toContain("{data.reports.length}");
+    expect(page).toContain("{data.reports.length + data.clubReports.length}");
     expect(page).toContain('"Posts this week"');
     const queue = code("components/elite/ReportsQueue.tsx");
     expect(queue).toContain("removePost(r.log_id)");

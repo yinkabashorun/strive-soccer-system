@@ -13,7 +13,9 @@ import {
   JOIN_AGE_COOKIE,
   JOIN_CLOSED_MESSAGE,
   birthYears,
+  cleanClubCode,
   cleanReferralCode,
+  clubAskPath,
   friendAskPath,
 } from "@/lib/elite/tracker";
 
@@ -30,15 +32,19 @@ export const dynamic = "force-dynamic";
 export default async function JoinPage({
   searchParams,
 }: {
-  searchParams?: { ref?: string };
+  searchParams?: { ref?: string; club?: string };
 }) {
   // Inside the App Store app, accounts are not created (the existing
   // rule, lib/elite/native-request.ts): the screen there is sign-in only.
   if (inNativeApp()) redirect("/login");
 
   const ref = cleanReferralCode(searchParams?.ref);
+  const club = cleanClubCode(searchParams?.club);
   const viewer = await getViewer();
   if (viewer) {
+    // Already has a free account and opened a club's link: their Friends
+    // tab, where one sheet asks "Join <club>?".
+    if (club && (await trackerFor(viewer))) redirect(clubAskPath(club));
     // Already has a free account and opened a teammate's link: their own
     // week, where one sheet asks whether to add that teammate as a friend.
     if (ref && (await trackerFor(viewer))) redirect(friendAskPath(ref));
@@ -67,5 +73,5 @@ export default async function JoinPage({
   // no way to try again with another date until the browser is closed.
   if (cookies().get(JOIN_AGE_COOKIE)) return <UnderAge />;
 
-  return <JoinForm configured={configured} referral={ref ?? ""} years={birthYears(nyToday())} />;
+  return <JoinForm configured={configured} referral={ref ?? ""} club={club ?? ""} years={birthYears(nyToday())} />;
 }

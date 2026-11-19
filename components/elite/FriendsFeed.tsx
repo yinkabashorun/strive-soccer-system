@@ -1,17 +1,17 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Camera, MoreHorizontal, Zap } from "lucide-react";
 import { blockPlayer, deleteLog, reportPost, toggleProps } from "@/lib/elite/tracker-actions";
 import { fmtDuration } from "@/lib/elite/time-trained";
 import { feel } from "@/lib/elite/native";
-import { FREE_WEEK, REPORT_REASONS, lockedHeadline, lockedLine } from "@/lib/elite/tracker";
+import { REPORT_REASONS, lockedHeadline, lockedLine } from "@/lib/elite/tracker";
 import type { FeedView, OpenCardView } from "@/lib/elite/tracker-server";
 import type { LockedCard } from "@/lib/elite/tracker";
 import { usePostLauncher } from "./FreeShell";
 import { FriendAsk } from "./FriendAsk";
+import { ClubAsk } from "./ClubAsk";
 import { TrackerSheet } from "./TrackerSheet";
 import { sendLink } from "./send-link";
 
@@ -24,18 +24,20 @@ export function FriendsFeed({
   date,
   feed,
   week,
-  initials,
+  me,
   friendAsk,
+  clubAsk,
   inviteLink,
 }: {
   date: string; // "Wednesday, Nov 18"
   feed: FeedView;
   week: { minutes: number; target: number; percent: number };
-  initials: string;
+  me: { id: string; initials: string };
   friendAsk: { code: string; name: string } | null;
+  clubAsk: { code: string; name: string; problem: string | null } | null;
   inviteLink: string;
 }) {
-  const { post } = usePostLauncher();
+  const { post, profile } = usePostLauncher();
   const [hidden, setHidden] = useState<Set<string>>(new Set());
   const cards = feed.cards.filter((c) => !hidden.has(c.id));
   const locked = cards.filter((c): c is LockedCard => c.state === "locked");
@@ -49,13 +51,19 @@ export function FriendsFeed({
           <h1 className="font-display text-[44px] font-black uppercase leading-[0.9] tracking-[-0.5px]">Today</h1>
           <p className="mt-1.5 text-[13px] tracking-[0.2px] text-white/60">{date}</p>
         </div>
-        <WeekRing initials={initials} {...week} />
+        <WeekRing initials={me.initials} onOpen={() => profile(me.id)} {...week} />
       </header>
 
       {faces.length > 0 && (
         <ul className="no-scrollbar flex gap-3.5 overflow-x-auto px-[18px] pb-1.5 pt-5" aria-label="Who trained today">
           {faces.map((f) => (
             <li key={f.id} className="w-[58px] shrink-0 text-center">
+              <button
+                type="button"
+                onClick={() => profile(f.id)}
+                aria-label={`${f.you ? "Your" : `${f.first}'s`} profile${f.active ? ", trained today" : ""}`}
+                className="block w-full"
+              >
               <span
                 className={
                   "mx-auto grid h-[54px] w-[54px] place-items-center rounded-full text-[17px] font-bold " +
@@ -68,8 +76,8 @@ export function FriendsFeed({
               </span>
               <span className={"mt-2 block truncate text-[11.5px] " + (f.active ? "text-bone" : "text-white/60")}>
                 {f.first}
-                <span className="sr-only">{f.active ? ", trained today" : ""}</span>
               </span>
+              </button>
             </li>
           ))}
         </ul>
@@ -116,26 +124,32 @@ export function FriendsFeed({
       )}
 
       <FriendAsk ask={friendAsk} />
+      <ClubAsk ask={clubAsk} />
     </div>
   );
 }
 
+// Your initials in the week's ring: how far the week has come, and the
+// way to your own profile.
 function WeekRing({
   initials,
+  onOpen,
   minutes,
   target,
   percent,
 }: {
   initials: string;
+  onOpen: () => void;
   minutes: number;
   target: number;
   percent: number;
 }) {
   const C = 2 * Math.PI * 21;
   return (
-    <Link
-      href={FREE_WEEK}
-      aria-label={`My week: ${fmtDuration(minutes)} of ${fmtDuration(target)}`}
+    <button
+      type="button"
+      onClick={onOpen}
+      aria-label={`Your profile. This week: ${fmtDuration(minutes)} of ${fmtDuration(target)}`}
       className="relative grid h-[46px] w-[46px] place-items-center"
     >
       <svg viewBox="0 0 46 46" className="absolute inset-0" aria-hidden>
@@ -155,7 +169,7 @@ function WeekRing({
       <span className="grid h-[34px] w-[34px] place-items-center rounded-full bg-[#2a2a2a] text-[13px] font-bold">
         {initials}
       </span>
-    </Link>
+    </button>
   );
 }
 
@@ -208,6 +222,7 @@ function LockedPost({ card, first, friendsToday }: { card: LockedCard; first: bo
 
 function OpenPost({ card, onGone }: { card: OpenCardView; onGone: () => void }) {
   const router = useRouter();
+  const { profile } = usePostLauncher();
   const [props, setProps] = useState({ count: card.props, on: card.propped });
   const [menu, setMenu] = useState<null | "menu" | "report" | "block" | "delete">(null);
   const [error, setError] = useState<string | null>(null);
@@ -239,7 +254,12 @@ function OpenPost({ card, onGone }: { card: OpenCardView; onGone: () => void }) 
       <img src={card.photoUrl} alt={`${card.name}'s training`} className="absolute inset-0 h-full w-full object-cover" />
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,.5)_0%,rgba(0,0,0,0)_22%,rgba(0,0,0,0)_52%,rgba(0,0,0,.86)_100%)]" />
 
-      <div className="absolute left-3.5 top-3.5 z-10 flex items-center gap-2.5">
+      <button
+        type="button"
+        onClick={() => profile(card.ownerId)}
+        aria-label={`${card.mine ? "Your" : `${card.first}'s`} profile`}
+        className="absolute left-3.5 top-3.5 z-10 flex min-h-[44px] items-center gap-2.5 text-left"
+      >
         <span className="grid h-9 w-9 place-items-center rounded-full border-[1.5px] border-white/90 bg-[#222] text-[13px] font-bold" aria-hidden>
           {card.initials}
         </span>
@@ -247,7 +267,7 @@ function OpenPost({ card, onGone }: { card: OpenCardView; onGone: () => void }) 
           <b className="block text-[15px] font-bold leading-[1.1]">{card.name}</b>
           <span className="text-[12px] text-white/80">{card.ago}</span>
         </div>
-      </div>
+      </button>
       <button
         type="button"
         onClick={() => setMenu("menu")}

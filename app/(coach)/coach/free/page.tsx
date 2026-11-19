@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { FreeAdmin } from "@/components/elite/FreeAdmin";
 import { ReportsQueue } from "@/components/elite/ReportsQueue";
+import { ClubsAdmin } from "@/components/elite/ClubsAdmin";
 import { getViewer } from "@/lib/elite/session";
 import { APP_URL } from "@/lib/elite/app-url";
 import { nyToday } from "@/lib/elite/time";
@@ -40,6 +41,8 @@ export default async function CoachFreePage() {
 
       <ReportsQueue reports={data.reports} />
 
+      <ClubsAdmin clubs={data.clubs} reports={data.clubReports} appUrl={APP_URL} />
+
       <FreeAdmin open={data.open} joinUrl={`${APP_URL}/join`} targets={data.targets} />
 
       <div className="mt-8 grid max-w-2xl grid-cols-2 gap-3 sm:grid-cols-4">
@@ -56,8 +59,13 @@ export default async function CoachFreePage() {
           <div className="mt-1 text-xs uppercase tracking-[0.16em] text-white/50">Posts this week</div>
         </div>
         <div className="elite-card p-4">
-          <div className={"font-display text-3xl font-black tabular-nums" + (data.reports.length ? " text-red-400" : "")}>
-            {data.reports.length}
+          <div
+            className={
+              "font-display text-3xl font-black tabular-nums" +
+              (data.reports.length + data.clubReports.length ? " text-red-400" : "")
+            }
+          >
+            {data.reports.length + data.clubReports.length}
           </div>
           <div className="mt-1 text-xs uppercase tracking-[0.16em] text-white/50">Open reports</div>
         </div>

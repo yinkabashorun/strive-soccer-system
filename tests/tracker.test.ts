@@ -307,7 +307,7 @@ describe("gym work is tracked apart", () => {
     // player's post is always training
     expect(composer).toMatch(/\{gym && \(\s*<div role="radiogroup"/);
     expect(composer).toContain('form.set("kind", gym ? kind : "training");');
-    expect(code("app/(free)/layout.tsx")).toContain("<FreeShell gym={tracksGym(tracker.grade)}>");
+    expect(code("app/(free)/layout.tsx")).toContain("<FreeShell gym={tracksGym(tracker.grade)}");
     expect(code("app/(free)/log/week/page.tsx")).toContain("gym={tracksGym(tracker.grade)}");
   });
 });
@@ -574,7 +574,9 @@ describe("the free log stays what it is", () => {
     // the one text goes to the coaches, once, when a post is first reported
     expect(code("lib/elite/tracker-server.ts")).not.toContain("textCoaches");
     const acts = code("lib/elite/tracker-actions.ts");
-    expect((acts.match(/textCoaches\(/g) ?? []).length).toBe(1);
+    // (and once when a club's name is first reported)
+    expect((acts.match(/textCoaches\(/g) ?? []).length).toBe(2);
+    expect(acts).toMatch(/if \(!count\) await textCoaches\(clubReportText\(/);
     const report = acts.slice(acts.indexOf("export async function reportPost("), acts.indexOf("type Coach ="));
     expect(report).toMatch(/if \(!count\) \{[\s\S]*?await textCoaches\(reportText\(/);
   });
@@ -639,7 +641,7 @@ describe("free accounts are invisible to everything a member query reads", () =>
 
   it("the tables are read-only to the browser and leave with the account", () => {
     const sql = read("supabase/migrations/069_free_training_log.sql");
-    expect((sql.match(/enable row level security/g) ?? []).length).toBe(8);
+    expect((sql.match(/enable row level security/g) ?? []).length).toBe(11);
     expect(sql).toContain("references public.elite_profiles(id) on delete cascade");
     expect(sql).toContain("references public.elite_trackers(profile_id) on delete cascade");
     // owners read; only a coach writes, and only the target table and the switches
@@ -898,19 +900,31 @@ describe("friends", () => {
     // the only functions a browser can call
     const exported = [...actions.matchAll(/export async function (\w+)/g)].map((m) => m[1]).sort();
     expect(exported).toEqual([
+      "archiveClub",
       "blockPlayer",
       "checkJoinAge",
+      "confirmClub",
       "confirmFriend",
+      "createClub",
       "deleteLog",
+      "dismissClubReports",
       "dismissReports",
+      "endMyClub",
+      "leaveClub",
+      "loadProfile",
       "logTraining",
+      "removeClubMember",
       "removeFriend",
       "removePost",
+      "renameClub",
+      "renameMyClub",
+      "reportClub",
       "reportPost",
       "saveQuiz",
       "saveTargetRow",
       "setFreeSignupOpen",
       "setPlanDays",
+      "startClub",
       "toggleProps",
       "unblockPlayer",
     ]);
@@ -919,13 +933,14 @@ describe("friends", () => {
     expect(server).toContain("export async function makeFriends(");
   });
 
-  it("a friend can be taken off from their row, quietly", () => {
-    const board = code("components/elite/FriendsBoard.tsx");
+  it("a friend can be taken off from their profile, quietly", () => {
+    expect(code("components/elite/FriendsBoard.tsx")).toContain("onClick={() => profile(r.id)}");
+    const board = code("components/elite/ProfileSheet.tsx");
     expect(board).toContain("Remove from my friends");
-    expect(board).toContain("act(() => removeFriend(open.id))");
-    expect(board).toContain("act(() => blockPlayer(open.id))");
-    // your own row is not a button
-    expect(board).toMatch(/\{r\.me \? \(\s*<div/);
+    expect(board).toContain("act(() => removeFriend(profile.id))");
+    expect(board).toContain("act(() => blockPlayer(profile.id))");
+    // your own profile offers your link and Account instead
+    expect(board).toMatch(/\{profile\.you \? \(\s*<>\s*<button/);
   });
 
   it("members still have no list of other players", () => {

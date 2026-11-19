@@ -20,10 +20,12 @@ import { UnderAge } from "./UnderAge";
 export function JoinForm({
   configured,
   referral,
+  club,
   years,
 }: {
   configured: boolean;
   referral: string;
+  club: string; // a club's link code, joined with the account
   years: number[]; // the birth years offered, newest first
 }) {
   const router = useRouter();
@@ -61,6 +63,7 @@ export function JoinForm({
           phone,
           password,
           ref: referral,
+          club,
           birth: { month: Number(month), year: Number(year) },
           agreed: { guardian, terms },
         }),

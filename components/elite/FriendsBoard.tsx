@@ -1,26 +1,16 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { blockPlayer, removeFriend } from "@/lib/elite/tracker-actions";
-import {
-  BOARD_EMPTY_LINE,
-  BOARD_TITLE,
-  firstNameOf,
-  friendsBoard,
-  initialsOf,
-  type BoardEntry,
-  type BoardRow,
-} from "@/lib/elite/tracker";
-import { TrackerSheet } from "./TrackerSheet";
+import { useState } from "react";
+import { BOARD_EMPTY_LINE, BOARD_TITLE, friendsBoard, initialsOf, type BoardEntry } from "@/lib/elite/tracker";
+import { usePostLauncher } from "./FreeShell";
 import { sendLink } from "./send-link";
 
 // The week next to your friends (mock screen 4): you and the friends you
 // added, in order of training time this week. It starts again every
 // Monday. Friends are made by the link only: there is no search, no list
-// of other players and no requests. Tapping a friend offers two things,
-// taking them off or blocking them. Nothing here announces a change of
-// place.
+// of other players and no requests. Tapping a name opens that friend's
+// profile, where they can be taken off or blocked. Nothing here announces
+// a change of place.
 export function FriendsBoard({
   me,
   myMinutes,
@@ -32,13 +22,8 @@ export function FriendsBoard({
   friends: BoardEntry[];
   inviteLink: string;
 }) {
-  const router = useRouter();
+  const { profile } = usePostLauncher();
   const [copied, setCopied] = useState(false);
-  const [open, setOpen] = useState<BoardRow | null>(null);
-  const [blocking, setBlocking] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [busy, start] = useTransition();
-
   const rows = friendsBoard([{ id: me.id, name: me.name, minutes: myMinutes }, ...friends], me.id);
 
   async function send() {
@@ -48,19 +33,6 @@ export function FriendsBoard({
     }
   }
 
-  function act(run: () => Promise<{ ok: boolean; error?: string }>) {
-    setError(null);
-    start(async () => {
-      const res = await run();
-      if (!res.ok) return setError(res.error ?? null);
-      setOpen(null);
-      setBlocking(false);
-      router.refresh();
-    });
-  }
-
-  const first = open ? firstNameOf(open.name) : "";
-
   return (
     <section className="mx-[18px] mt-[18px]">
       <h2 className="mb-1.5 text-[11px] font-bold uppercase tracking-[2.6px] text-white/60">{BOARD_TITLE}</h2>
@@ -69,9 +41,14 @@ export function FriendsBoard({
         <p className="py-2 text-[15px] leading-relaxed text-white/70">{BOARD_EMPTY_LINE}</p>
       ) : (
         <ol>
-          {rows.map((r) => {
-            const inner = (
-              <>
+          {rows.map((r) => (
+            <li key={r.id} className="border-b border-white/[0.09] last:border-0">
+              <button
+                type="button"
+                onClick={() => profile(r.id)}
+                aria-label={`${r.me ? "Your" : `${r.name}'s`} profile, place ${r.place}, ${r.time} this week`}
+                className="flex h-[50px] w-full items-center gap-3"
+              >
                 <span className={"w-[18px] shrink-0 font-display text-[22px] font-black " + (r.me ? "text-accent" : "text-white/60")}>
                   {r.place}
                 </span>
@@ -88,27 +65,9 @@ export function FriendsBoard({
                   {r.me ? "You" : r.name}
                 </span>
                 <span className="font-display text-[24px] font-black tabular-nums text-bone">{r.time}</span>
-              </>
-            );
-            return (
-              <li key={r.id} className="border-b border-white/[0.09] last:border-0">
-                {r.me ? (
-                  <div className="flex h-[50px] items-center gap-3">{inner}</div>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setError(null);
-                      setOpen(r);
-                    }}
-                    className="flex h-[50px] w-full items-center gap-3"
-                  >
-                    {inner}
-                  </button>
-                )}
-              </li>
-            );
-          })}
+              </button>
+            </li>
+          ))}
         </ol>
       )}
 
@@ -119,48 +78,6 @@ export function FriendsBoard({
       >
         {copied ? "Link copied" : "Send my link"}
       </button>
-
-      {open && !blocking && (
-        <TrackerSheet title={open.name} onClose={() => setOpen(null)}>
-          <p className="text-[15px] leading-relaxed text-white/70">{open.time} trained this week.</p>
-          {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
-          <div className="mt-5 space-y-2.5">
-            <button
-              type="button"
-              disabled={busy}
-              onClick={() => act(() => removeFriend(open.id))}
-              className="flex h-14 w-full items-center justify-center rounded-2xl border border-white/15 text-[15px] font-semibold text-bone disabled:opacity-60"
-            >
-              Remove from my friends
-            </button>
-            <button
-              type="button"
-              onClick={() => setBlocking(true)}
-              className="flex h-14 w-full items-center justify-center rounded-2xl border border-white/15 text-[15px] font-semibold text-bone"
-            >
-              Block {first}
-            </button>
-          </div>
-        </TrackerSheet>
-      )}
-
-      {open && blocking && (
-        <TrackerSheet title={`Block ${first}?`} onClose={() => setBlocking(false)}>
-          <p className="text-[15px] leading-relaxed text-white/70">
-            You stop being friends and you stop seeing each other&apos;s training. {first} is not told, and their link
-            will not add you again. You can unblock them in Account.
-          </p>
-          {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
-          <button
-            type="button"
-            disabled={busy}
-            onClick={() => act(() => blockPlayer(open.id))}
-            className="mt-5 flex h-14 w-full items-center justify-center rounded-2xl border border-white/15 text-[15px] font-semibold text-bone disabled:opacity-60"
-          >
-            Block {first}
-          </button>
-        </TrackerSheet>
-      )}
     </section>
   );
 }

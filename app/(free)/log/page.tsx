@@ -3,10 +3,11 @@ import { FriendsFeed } from "@/components/elite/FriendsFeed";
 import { getViewer } from "@/lib/elite/session";
 import { APP_URL } from "@/lib/elite/app-url";
 import { nyToday } from "@/lib/elite/time";
-import { feedFor, friendAskFor, quizDone, trackerFor, weekLogsFor } from "@/lib/elite/tracker-server";
+import { clubAskFor, feedFor, friendAskFor, quizDone, trackerFor, weekLogsFor } from "@/lib/elite/tracker-server";
 import {
   FREE_HOME,
   FREE_QUIZ,
+  cleanClubCode,
   cleanReferralCode,
   initialsOf,
   joinLink,
@@ -25,7 +26,7 @@ export const dynamic = "force-dynamic";
 export default async function FriendsPage({
   searchParams,
 }: {
-  searchParams?: { friend?: string };
+  searchParams?: { friend?: string; club?: string };
 }) {
   const viewer = await getViewer();
   if (!viewer) redirect(`/login?next=${FREE_HOME}`);
@@ -35,11 +36,13 @@ export default async function FriendsPage({
   if (!quizDone(tracker) || !tracker.target_minutes) redirect(FREE_QUIZ);
 
   const today = nyToday();
-  const [feed, logs, friendAsk] = await Promise.all([
+  const [feed, logs, friendAsk, clubAsk] = await Promise.all([
     feedFor(viewer, today),
     weekLogsFor(viewer, tracker, today),
     // a teammate's link, opened while signed in: asked about once
     friendAskFor(viewer, cleanReferralCode(searchParams?.friend)),
+    // a club's link, opened while signed in: asked about once
+    clubAskFor(viewer, cleanClubCode(searchParams?.club)),
   ]);
   const week = weekProgress(logs, tracker.target_minutes, today);
 
@@ -48,8 +51,9 @@ export default async function FriendsPage({
       date={longDayLabel(today)}
       feed={feed}
       week={{ minutes: week.minutes, target: week.target, percent: week.percent }}
-      initials={initialsOf(shortName(viewer.profile.full_name))}
+      me={{ id: viewer.profile.id, initials: initialsOf(shortName(viewer.profile.full_name)) }}
       friendAsk={friendAsk}
+      clubAsk={clubAsk}
       inviteLink={joinLink(APP_URL, tracker.referral_code)}
     />
   );

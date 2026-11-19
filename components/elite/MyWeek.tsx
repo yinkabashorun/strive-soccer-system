@@ -13,9 +13,11 @@ import {
   todayLine,
   weekStrip,
   type BoardEntry,
+  type MyClub,
   type TrainingLog,
 } from "@/lib/elite/tracker";
 import { FriendsBoard } from "./FriendsBoard";
+import { ClubsSection } from "./ClubsSection";
 import { ShareWeek } from "./ShareWeek";
 import { TrackerSheet } from "./TrackerSheet";
 import { usePostLauncher } from "./FreeShell";
@@ -34,6 +36,8 @@ export function MyWeek({
   week,
   me,
   friends,
+  clubs,
+  appUrl,
   inviteLink,
   programHref,
 }: {
@@ -45,13 +49,15 @@ export function MyWeek({
   week: string; // "Nov 16 to Nov 22"
   me: { id: string; name: string; initials: string };
   friends: BoardEntry[];
+  clubs: MyClub[];
+  appUrl: string;
   inviteLink: string;
   // Where the one line about the coached program leads; null inside the
   // App Store app, where the line is not drawn (programLink in tracker.ts).
   programHref: string | null;
 }) {
   const router = useRouter();
-  const { logOnly } = usePostLauncher();
+  const { logOnly, profile } = usePostLauncher();
   const [logs, setLogs] = useState(serverLogs);
   const [openDay, setOpenDay] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -87,13 +93,14 @@ export function MyWeek({
           <h1 className="font-display text-[44px] font-black uppercase leading-[0.9] tracking-[-0.5px]">My week</h1>
           <p className="mt-1.5 text-[13px] tracking-[0.2px] text-white/60">{week}</p>
         </div>
-        <Link
-          href="/account"
-          aria-label="Account"
+        <button
+          type="button"
+          onClick={() => profile(me.id)}
+          aria-label="Your profile"
           className="grid h-[46px] w-[46px] place-items-center rounded-full bg-[#2a2a2a] text-[13px] font-bold"
         >
           {me.initials}
-        </Link>
+        </button>
       </header>
 
       <div className="relative mx-auto mt-[18px] h-[204px] w-[204px]">
@@ -147,6 +154,8 @@ export function MyWeek({
       {gymLine && <p className="mt-1.5 text-center text-[13px] text-white/60">{gymLine}</p>}
 
       <FriendsBoard me={me} myMinutes={minutes} friends={friends} inviteLink={inviteLink} />
+
+      <ClubsSection clubs={clubs} appUrl={appUrl} />
 
       <div className="mx-[18px] mt-3">
         <ShareWeek stamp={`${minutes}:${logs.length}`} />

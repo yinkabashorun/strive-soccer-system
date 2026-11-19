@@ -16,6 +16,7 @@ import {
   validateQuiz,
   weekOf,
   type BoardEntry,
+  type MyClub,
   type Kind,
   type PostRow,
   type QuizAnswers,
@@ -37,7 +38,10 @@ export type DemoState = {
   today?: DemoEntry[]; // what was logged or posted (kept for the day)
   reported?: string[]; // example posts reported, so hidden
   props?: string[]; // example posts given props
+  clubs?: DemoClub[]; // the example player's clubs, once they change them
 };
+
+export type DemoClub = { id: string; name: string; code: string; captain: boolean; kind: "player" | "coach" };
 
 export function readDemoState(): DemoState {
   try {
@@ -146,6 +150,57 @@ export function demoFriendAsk(code: string): { code: string; name: string } | nu
   const state = readDemoState();
   if (code !== DEMO_ASK.code || state.added || (state.blocked ?? []).includes(DEMO_ASK.id)) return null;
   return { code, name: shortName(DEMO_ASK.name) };
+}
+
+// ---- Clubs
+
+// The example player starts in two clubs: the coach-made 5v5 one and one
+// they captain. The club whose link the example player can open is a third.
+const DEMO_CLUB_MEMBERS: Record<string, string[]> = {
+  "demo-club-1": ["Gary Grigoryan", "Yinka Bashorun", "Dani Ramos", "Leo King"],
+  "demo-club-2": ["Dani Ramos", "Jalen Tate"],
+  "demo-club-3": ["Gary Grigoryan", "Sam Okafor"],
+};
+const DEMO_CLUBS_START: DemoClub[] = [
+  { id: "demo-club-1", name: "Strive Elite 5v5: Team 7", code: "STRVTEAM", captain: false, kind: "coach" },
+  { id: "demo-club-2", name: "Bull Run 2010s", code: "BULLRUNX", captain: true, kind: "player" },
+];
+export const DEMO_CLUB_ASK: DemoClub = { id: "demo-club-3", name: "Saturday Pickup", code: "STRVCLUB", captain: false, kind: "player" };
+
+export function demoClubs(): DemoClub[] {
+  return readDemoState().clubs ?? DEMO_CLUBS_START;
+}
+
+export function demoMyClubs(me: { id: string; name: string }): MyClub[] {
+  return demoClubs().map((c) => ({
+    id: c.id,
+    name: c.name,
+    code: c.code,
+    kind: c.kind,
+    captain: c.captain,
+    ended: false,
+    members: [
+      { id: me.id, name: me.name, captain: c.captain, you: true },
+      ...(DEMO_CLUB_MEMBERS[c.id] ?? []).map((n, i) => ({
+        id: `${c.id}-m${i}`,
+        name: shortName(n),
+        captain: false,
+        you: false,
+      })),
+    ],
+  }));
+}
+
+export function demoClubAsk(code: string): DemoClub | null {
+  return code === DEMO_CLUB_ASK.code && !demoClubs().some((c) => c.id === DEMO_CLUB_ASK.id) ? DEMO_CLUB_ASK : null;
+}
+
+// The example friends' clubs, for their profiles.
+export function demoClubsOf(friendName: string): string[] {
+  const full = [...DEMO_FRIENDS, DEMO_ASK].find((f) => shortName(f.name) === friendName)?.name;
+  if (!full) return [];
+  const all = [...DEMO_CLUBS_START, DEMO_CLUB_ASK];
+  return all.filter((c) => (DEMO_CLUB_MEMBERS[c.id] ?? []).includes(full)).map((c) => c.name);
 }
 
 // The example players this visitor blocked, for the Account page.

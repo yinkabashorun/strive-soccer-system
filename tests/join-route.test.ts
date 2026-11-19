@@ -20,6 +20,7 @@ const state = {
   signInError: false,
   signIns: [] as Row[],
   friends: [] as [string, string][],
+  clubs: [] as [string, string][],
   consents: [] as Row[],
   rateOk: true,
 };
@@ -83,6 +84,10 @@ vi.mock("@/lib/elite/tracker-server", () => ({
     state.friends.push([x, y]);
     return "ok";
   },
+  joinClubByCode: async (id: string, code: string) => {
+    state.clubs.push([id, code]);
+    return "ok";
+  },
 }));
 vi.mock("@/lib/elite/legal-server", () => ({
   recordConsent: async (row: Row) => {
@@ -132,6 +137,7 @@ beforeEach(() => {
     signInError: false,
     signIns: [],
     friends: [],
+    clubs: [],
     consents: [],
     rateOk: true,
   });
@@ -288,6 +294,23 @@ describe("free sign-up", () => {
     const ok = await post(good);
     expect(ok.status).toBe(200);
     expect(state.inserts[0].row).toMatchObject({ birth_year: 2008, birth_month: 3 });
+  });
+
+  it("a club's link puts the new player in the club; a bad code is ignored", async () => {
+    let res = await post({ ...good, club: "bullrunx" });
+    expect(res.status).toBe(200);
+    expect(state.clubs).toEqual([["user-1", "BULLRUNX"]]);
+    state.clubs = [];
+    res = await post({ ...good, club: "not a code" });
+    expect(res.status).toBe(200);
+    expect(state.clubs).toEqual([]);
+  });
+
+  it("no club is joined when the age or the agreement stops the sign-up", async () => {
+    const thisYear = new Date().getUTCFullYear();
+    await post({ ...good, club: "BULLRUNX", birth: { month: 1, year: thisYear - 10 } });
+    await post({ ...good, club: "BULLRUNX", agreed: {} });
+    expect(state.clubs).toEqual([]);
   });
 
   it("still succeeds when the sign-in does not take: the form sends them to sign in", async () => {

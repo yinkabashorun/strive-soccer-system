@@ -1,15 +1,24 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { JoinForm } from "@/components/elite/JoinForm";
+import { UnderAge } from "@/components/elite/UnderAge";
+import { nyToday } from "@/lib/elite/time";
 import { getViewer } from "@/lib/elite/session";
 import { isSupabaseConfigured } from "@/lib/elite/supabase/server";
 import { inNativeApp } from "@/lib/elite/native-request";
 import { homePathFor, isFreeSignupOpen, trackerFor } from "@/lib/elite/tracker-server";
-import { JOIN_CLOSED_MESSAGE, cleanReferralCode, friendAskPath } from "@/lib/elite/tracker";
+import {
+  JOIN_AGE_COOKIE,
+  JOIN_CLOSED_MESSAGE,
+  birthYears,
+  cleanReferralCode,
+  friendAskPath,
+} from "@/lib/elite/tracker";
 
 export const metadata: Metadata = {
-  title: "Start your training log · Strive Elite",
+  title: "Join your friends · Strive Elite",
 };
 
 export const dynamic = "force-dynamic";
@@ -54,5 +63,9 @@ export default async function JoinPage({
     );
   }
 
-  return <JoinForm configured={configured} referral={ref ?? ""} />;
+  // An answer under 13 earlier in this visit: the same plain screen, and
+  // no way to try again with another date until the browser is closed.
+  if (cookies().get(JOIN_AGE_COOKIE)) return <UnderAge />;
+
+  return <JoinForm configured={configured} referral={ref ?? ""} years={birthYears(nyToday())} />;
 }

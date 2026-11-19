@@ -5,15 +5,31 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { GUARDIAN_STATEMENT } from "@/lib/elite/legal";
-import { FREE_AGREEMENT_POINTS, FREE_QUIZ } from "@/lib/elite/tracker";
+import { checkJoinAge } from "@/lib/elite/tracker-actions";
+import { FREE_AGREEMENT_POINTS, FREE_QUIZ, MONTH_NAMES } from "@/lib/elite/tracker";
 import { AppLink } from "./AppLink";
+import { UnderAge } from "./UnderAge";
 
-// Create a free account: the training log (migration 069). The server
-// creates the account and signs the person in (the session cookie is one
-// the server set, lib/elite/session-start.ts); this form only collects
-// the fields and the two ticked boxes. Nothing here signs anyone in.
-export function JoinForm({ configured, referral }: { configured: boolean; referral: string }) {
+// Create a free account (migration 069). The month and year of birth come
+// first, before anything else is typed: the free app is for players 13 and
+// older, and an answer under 13 ends the visit on one plain screen with
+// nothing stored. Then the server creates the account and signs the person
+// in (the session cookie is one the server set, lib/elite/session-start.ts);
+// this form only collects the fields and the two ticked boxes. Nothing
+// here signs anyone in.
+export function JoinForm({
+  configured,
+  referral,
+  years,
+}: {
+  configured: boolean;
+  referral: string;
+  years: number[]; // the birth years offered, newest first
+}) {
   const router = useRouter();
+  const [step, setStep] = useState<"age" | "form" | "young">("age");
+  const [month, setMonth] = useState("");
+  const [year, setYear] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -45,6 +61,7 @@ export function JoinForm({ configured, referral }: { configured: boolean; referr
           phone,
           password,
           ref: referral,
+          birth: { month: Number(month), year: Number(year) },
           agreed: { guardian, terms },
         }),
       });
@@ -54,6 +71,11 @@ export function JoinForm({ configured, referral }: { configured: boolean; referr
       return;
     }
     const data = await res.json().catch(() => ({}));
+    if (data.reason === "age") {
+      setLoading(false);
+      setStep("young");
+      return;
+    }
     if (!res.ok) {
       setError(data.error || "Something went wrong. Please try again.");
       setLoading(false);
@@ -72,13 +94,83 @@ export function JoinForm({ configured, referral }: { configured: boolean; referr
     router.refresh();
   }
 
+  async function checkAge(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+    const res = await checkJoinAge(Number(month), Number(year)).catch(() => null);
+    setLoading(false);
+    if (!res) return setError("We could not reach the server. Check your connection and try again.");
+    if (!res.ok) return setError(res.error);
+    setStep(res.allowed ? "form" : "young");
+  }
+
+  if (step === "young") return <UnderAge />;
+
+  if (step === "age") {
+    return (
+      <div className="elite-card p-7 sm:p-8">
+        <h1 className="font-display text-3xl font-black uppercase tracking-tight">When were you born?</h1>
+        <p className="mt-1.5 text-[15px] leading-relaxed text-white/70">
+          The free app is for players 13 and older. We keep the month and year only.
+        </p>
+        <form onSubmit={checkAge} className="mt-6 space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-white/70">Month</span>
+              <select
+                required
+                value={month}
+                onChange={(e) => setMonth(e.target.value)}
+                className="h-12 w-full rounded-xl border border-white/10 bg-[#101010] px-3 text-[16px] text-bone focus:border-accent/40 focus:outline-none"
+              >
+                <option value="">Month</option>
+                {MONTH_NAMES.map((m, i) => (
+                  <option key={m} value={i + 1}>
+                    {m}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="block">
+              <span className="mb-2 block text-sm font-medium text-white/70">Year</span>
+              <select
+                required
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+                className="h-12 w-full rounded-xl border border-white/10 bg-[#101010] px-3 text-[16px] text-bone focus:border-accent/40 focus:outline-none"
+              >
+                <option value="">Year</option>
+                {years.map((y) => (
+                  <option key={y} value={y}>
+                    {y}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          {error && <p className="text-sm text-red-400">{error}</p>}
+          <button type="submit" disabled={loading} className="btn-accent w-full px-6 py-3.5 text-base">
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Continue"}
+          </button>
+        </form>
+        <p className="mt-5 text-center text-sm text-white/60">
+          Already have an account?{" "}
+          <Link href="/login" className="tap text-accent hover:underline">
+            Sign in
+          </Link>
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="elite-card p-7 sm:p-8">
       <h1 className="font-display text-3xl font-black uppercase tracking-tight">
-        Start your training log
+        Join your friends
       </h1>
       <p className="mt-1.5 text-[15px] leading-relaxed text-white/70">
-        Log the training you do on your own, watch your week add up, and share it.
+        Post your training, see your friends post theirs, and keep your week on track.
       </p>
 
       <form onSubmit={onSubmit} className="mt-6 space-y-4">

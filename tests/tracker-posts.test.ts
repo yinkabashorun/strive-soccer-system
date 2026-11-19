@@ -478,7 +478,7 @@ describe("13 and older", () => {
     expect(cleanBirth({}, today)).toBeNull();
   });
 
-  it.skip("is asked before anything else is typed, and cannot be answered twice in a visit", () => {
+  it("is asked before anything else is typed, and cannot be answered twice in a visit", () => {
     const form = code("components/elite/JoinForm.tsx");
     expect(form.indexOf("When were you born?")).toBeGreaterThan(-1);
     expect(form).toContain("await checkJoinAge(");

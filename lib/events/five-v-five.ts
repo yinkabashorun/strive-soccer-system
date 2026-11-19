@@ -16,7 +16,9 @@ export const FIVE_V_FIVE = {
   shortDate: "Sat, Dec 19",
   venue: "SoFive Columbia",
   prize: 3000,
-  teams: 16,
+  teams: 32, // Coach Yinka, Nov 19 (was 16)
+  minGroupGames: 3, // every team plays at least three group games
+  coverage: "@yslofficial", // the event is picked up by YSL Official
   earlyBird: 450,
   standard: 550,
   // Early bird ends the instant Nov 26 starts in New York.

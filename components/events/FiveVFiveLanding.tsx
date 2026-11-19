@@ -15,6 +15,13 @@ export function FiveVFiveLanding() {
   const standardFrom = dayOf(E.earlyBirdEndsIso);
   const finalDay = lastDayBefore(E.registrationClosesIso);
 
+  const included: [string, string][] = [
+    [`${E.minGroupGames} games minimum`, `Every team plays at least ${E.minGroupGames} games in the group stage.`],
+    ["Every game recorded", "Every game on the day is filmed."],
+    [`Picked up by ${E.coverage}`, `The event is covered by ${E.coverage}.`],
+    [`${money(E.prize)} to the winner`, "Cash to the team that wins it all."],
+  ];
+
   const steps: [string, string][] = [
     ["Lock your spot", "Registration is payment. Your team is in the moment the entry fee is paid."],
     ["Send your roster", "Team name, captain and players. We send every captain the schedule before game day."],
@@ -89,6 +96,17 @@ export function FiveVFiveLanding() {
           </>
         )}
       </Reveal>
+
+      {/* What every team gets */}
+      <h2 className="mb-2.5 mt-9 font-display text-sm font-bold uppercase tracking-wider text-white/50">Every team gets</h2>
+      <div className="grid grid-cols-2 gap-2">
+        {included.map(([title, body], i) => (
+          <Reveal key={title} variant="build" delay={i * 80} className="rounded-2xl border border-accent/15 bg-accent/[0.03] p-4">
+            <div className="font-display text-sm font-bold">{title}</div>
+            <p className="mt-1 text-xs leading-relaxed text-white/50">{body}</p>
+          </Reveal>
+        ))}
+      </div>
 
       {/* How it works */}
       <h2 className="mb-2.5 mt-9 font-display text-sm font-bold uppercase tracking-wider text-white/50">How it works</h2>

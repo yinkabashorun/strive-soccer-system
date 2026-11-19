@@ -61,7 +61,7 @@ export function FriendsBoard({
                   <span className="truncate">{r.me ? "You" : r.name}</span>
                   {r.starred && <StarMark size={15} />}
                 </span>
-                <span className="font-display text-[24px] font-black tabular-nums text-bone">{r.time}</span>
+                <span className="font-display text-[24px] font-black text-bone">{r.time}</span>
               </button>
               <div className="ml-12 mr-[18px] h-[3px] overflow-hidden rounded-sm bg-[#1f1f1f]" aria-hidden>
                 <i className={"block h-full " + (r.me ? "bg-accent" : "bg-[#3a3a3a]")} style={{ width: `${Math.round((r.minutes / most) * 100)}%` }} />

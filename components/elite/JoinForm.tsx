@@ -41,7 +41,8 @@ export function JoinForm({
   const [step, setStep] = useState<Step>("landing");
   const oldestFirst = [...years].sort((a, b) => a - b);
   const [month, setMonth] = useState(1);
-  const [year, setYear] = useState(oldestFirst[Math.max(0, oldestFirst.length - 4)] ?? years[0]);
+  // The wheel starts on a typical age (15); the player turns it to their own.
+  const [year, setYear] = useState(years.includes(years[0] - 10) ? years[0] - 10 : years[0]);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");

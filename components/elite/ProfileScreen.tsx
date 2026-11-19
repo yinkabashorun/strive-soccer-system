@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { blockPlayer, removeFriend, reportLine, toggleProps } from "@/lib/elite/tracker-actions";
 import { fmtDuration } from "@/lib/elite/time-trained";
-import { FREE_HOME, auraLabel, chipLabel, firstNameOf, longDayLabel, type Profile } from "@/lib/elite/tracker";
+import { FREE_HOME, auraLabel, firstNameOf, longDayLabel, type Profile } from "@/lib/elite/tracker";
 import { ActionSheet } from "./ActionSheet";
 import { AuraRing, Crest, FreeAvatar } from "./FreeAvatar";
 import { FreeTopBar } from "./FreeTopBar";
@@ -98,10 +98,7 @@ export function ProfileScreen({
       </div>
 
       <div className="px-[18px] pt-4">
-        <p className="flex items-center gap-1.5 text-[16px] font-bold">
-          {profile.name}
-          {profile.starred && <StarMark size={15} />}
-        </p>
+        <p className="text-[16px] font-bold">{profile.name}</p>
         {profile.levelName && <p className="mt-[3px] text-[14px] text-white/60">{profile.levelName}</p>}
         {profile.playingFor && (
           <p className="mt-0.5 text-[14px]">
@@ -211,9 +208,9 @@ export function ProfileScreen({
             {profile.posts.map((p) => (
               <div key={p.id} className="relative aspect-square overflow-hidden bg-[#111]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={p.photoUrl} alt={`${profile.you ? "Your" : `${first}'s`} training, ${chipLabel(p.minutes)}`} className="h-full w-full object-cover" />
+                <img src={p.photoUrl} alt={`${profile.you ? "Your" : `${first}'s`} training, ${fmtDuration(p.minutes)}`} className="h-full w-full object-cover" />
                 <span className="absolute bottom-1.5 left-[7px] font-display text-[17px] font-black [text-shadow:0_1px_6px_rgba(0,0,0,.8)]">
-                  {chipLabel(p.minutes)}
+                  {fmtDuration(p.minutes)}
                 </span>
               </div>
             ))}

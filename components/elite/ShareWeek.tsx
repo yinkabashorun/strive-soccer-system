@@ -120,7 +120,7 @@ export function ShareWeek({
             </span>
           ))}
         </b>
-        <span className="absolute bottom-[5px] left-[5px] origin-bottom-left scale-[.6] text-[11px] font-bold leading-none tracking-[0.5px] text-accent">
+        <span className="absolute bottom-[5px] left-[5px] origin-bottom-left scale-[.55] whitespace-nowrap text-[11px] font-bold leading-none tracking-[1px] text-accent">
           STRIVE ELITE
         </span>
       </div>

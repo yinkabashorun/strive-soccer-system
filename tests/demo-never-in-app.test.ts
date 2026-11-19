@@ -105,9 +105,9 @@ describe("guard three: the pixel itself", () => {
     // the app, and the screen draws nothing without an address.
     const rules = readFileSync(join(__dirname, "..", "lib/elite/tracker.ts"), "utf8");
     expect(rules).toMatch(/export function programLink\(inApp: boolean\): string \| null \{\s*return inApp \? null : PROGRAM_PAGE;/);
-    const page = readFileSync(join(__dirname, "..", "app/(free)/log/page.tsx"), "utf8");
+    const page = readFileSync(join(__dirname, "..", "app/(free)/log/week/page.tsx"), "utf8");
     expect(page).toContain("programHref={programLink(inNativeApp())}");
-    const home = readFileSync(join(__dirname, "..", "components/elite/TrackerHome.tsx"), "utf8");
+    const home = readFileSync(join(__dirname, "..", "components/elite/MyWeek.tsx"), "utf8");
     expect(home).toMatch(/\{programHref && \(/);
     expect(home).toContain("<Link href={programHref}");
   });

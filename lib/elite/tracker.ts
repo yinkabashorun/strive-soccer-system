@@ -150,6 +150,15 @@ export function recommendLine(row: TargetRow): string {
 
 // One tap logs one of these.
 export const LOG_CHIPS = [15, 30, 45, 60, 90] as const;
+
+// The label on a length button: "45m", "1h", "1h 30". Short enough that
+// five fit across a phone.
+export function chipLabel(minutes: number): string {
+  if (minutes < 60) return `${minutes}m`;
+  const h = Math.floor(minutes / 60);
+  const rest = minutes % 60;
+  return rest ? `${h}h ${rest}` : `${h}h`;
+}
 export const LOG_MAX_MINUTES = 300;
 
 // Gym work is tracked apart from training (Coach Yinka, Nov 18 2026). The

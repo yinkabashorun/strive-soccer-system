@@ -1,34 +1,28 @@
 import { redirect } from "next/navigation";
-import { TrackerHome } from "@/components/elite/TrackerHome";
+import { FriendsFeed } from "@/components/elite/FriendsFeed";
 import { getViewer } from "@/lib/elite/session";
-import { inNativeApp } from "@/lib/elite/native-request";
 import { APP_URL } from "@/lib/elite/app-url";
 import { nyToday } from "@/lib/elite/time";
-import {
-  friendAskFor,
-  friendsWeekFor,
-  quizDone,
-  trackerFor,
-  weekLogsFor,
-} from "@/lib/elite/tracker-server";
+import { feedFor, friendAskFor, quizDone, trackerFor, weekLogsFor } from "@/lib/elite/tracker-server";
 import {
   FREE_HOME,
   FREE_QUIZ,
   cleanReferralCode,
+  initialsOf,
   joinLink,
-  programLink,
+  longDayLabel,
   shortName,
-  tracksGym,
-  weekLabel,
+  weekProgress,
 } from "@/lib/elite/tracker";
 
-export const metadata = { title: "Your week · Strive Elite" };
+export const metadata = { title: "Today · Strive Elite" };
 export const dynamic = "force-dynamic";
 
-// The whole free training log: the week, the days, the five buttons that
-// log, share it, and the week next to your friends. Nothing else lives
-// here.
-export default async function LogPage({
+// The Friends tab (mock screens 1 and 3): who trained today, and the last
+// seven days of posts from the friends this player added and from the
+// player. Today's posts from friends stay locked until the player posts a
+// photo of their own today; a locked post is never sent its photo.
+export default async function FriendsPage({
   searchParams,
 }: {
   searchParams?: { friend?: string };
@@ -41,26 +35,22 @@ export default async function LogPage({
   if (!quizDone(tracker) || !tracker.target_minutes) redirect(FREE_QUIZ);
 
   const today = nyToday();
-  const [logs, friends, friendAsk] = await Promise.all([
+  const [feed, logs, friendAsk] = await Promise.all([
+    feedFor(viewer, today),
     weekLogsFor(viewer, tracker, today),
-    friendsWeekFor(viewer, today),
     // a teammate's link, opened while signed in: asked about once
     friendAskFor(viewer, cleanReferralCode(searchParams?.friend)),
   ]);
+  const week = weekProgress(logs, tracker.target_minutes, today);
 
   return (
-    <TrackerHome
-      logs={logs}
-      target={tracker.target_minutes}
-      planDays={tracker.plan_days}
-      today={today}
-      gym={tracksGym(tracker.grade)}
-      week={weekLabel(today)}
-      me={{ id: viewer.profile.id, name: shortName(viewer.profile.full_name) }}
-      friends={friends}
+    <FriendsFeed
+      date={longDayLabel(today)}
+      feed={feed}
+      week={{ minutes: week.minutes, target: week.target, percent: week.percent }}
+      initials={initialsOf(shortName(viewer.profile.full_name))}
       friendAsk={friendAsk}
       inviteLink={joinLink(APP_URL, tracker.referral_code)}
-      programHref={programLink(inNativeApp())}
     />
   );
 }

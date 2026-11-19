@@ -267,11 +267,13 @@ describe("gym work is tracked apart", () => {
 
   it("a high school player on an ECNL team sees the gym switch; a middle school player on one does not", () => {
     // the Dec 19 players: the team answer is "ECNL, MLS NEXT or similar" for both
-    const home = code("app/(free)/log/page.tsx");
-    expect(home).toContain("gym={tracksGym(tracker.grade)}");
-    expect(home).not.toContain("tracksGym(tracker.level)");
+    for (const f of ["app/(free)/layout.tsx", "app/(free)/log/week/page.tsx"]) {
+      expect(code(f), f).toContain("gym={tracksGym(tracker.grade)}");
+      expect(code(f), f).not.toContain("tracksGym(tracker.level)");
+    }
+    expect(code("app/api/elite/tracker/post/route.ts")).toContain("mayLog(kind, tracker.grade)");
     expect(code("app/api/elite/tracker/card/route.tsx")).toContain("tracksGym(tracker.grade)");
-    for (const f of ["lib/elite/tracker-actions.ts", "lib/elite/tracker-server.ts", "app/(free)/log/page.tsx"]) {
+    for (const f of ["lib/elite/tracker-actions.ts", "lib/elite/tracker-server.ts", "app/(free)/layout.tsx", "app/api/elite/tracker/post/route.ts"]) {
       expect(code(f), f).not.toMatch(/tracksGym\([^)]*level|mayLog\([^)]*level/);
     }
   });
@@ -300,11 +302,13 @@ describe("gym work is tracked apart", () => {
     expect(gymThisWeekLine(90)).toBe("Gym this week: 1h 30m");
     const sql = read("supabase/migrations/069_free_training_log.sql");
     expect(sql).not.toMatch(/gym_target|gym_minutes/);
-    const home = code("components/elite/TrackerHome.tsx");
-    // the switch is drawn only for a player who tracks gym, and resets after a log
-    expect(home).toMatch(/\{gym && \(\s*<div\s+role="radiogroup"/);
-    expect(home).toContain('setKind("training");');
-    expect(code("app/(free)/log/page.tsx")).toContain("gym={tracksGym(tracker.grade)}");
+    const composer = code("components/elite/PostComposer.tsx");
+    // the switch is drawn only for a player who tracks gym, and a younger
+    // player's post is always training
+    expect(composer).toMatch(/\{gym && \(\s*<div role="radiogroup"/);
+    expect(composer).toContain('form.set("kind", gym ? kind : "training");');
+    expect(code("app/(free)/layout.tsx")).toContain("<FreeShell gym={tracksGym(tracker.grade)}>");
+    expect(code("app/(free)/log/week/page.tsx")).toContain("gym={tracksGym(tracker.grade)}");
   });
 });
 
@@ -521,7 +525,12 @@ const FREE_FILES = [
   "app/(auth)/join/page.tsx",
   "app/api/elite/auth/join/route.ts",
   "app/api/elite/tracker/card/route.tsx",
-  "components/elite/TrackerHome.tsx",
+  "components/elite/FreeShell.tsx",
+  "components/elite/PostComposer.tsx",
+  "components/elite/FriendsFeed.tsx",
+  "components/elite/FriendAsk.tsx",
+  "components/elite/MyWeek.tsx",
+  "components/elite/send-link.ts",
   "components/elite/TrackerQuiz.tsx",
   "components/elite/ShareWeek.tsx",
   "components/elite/FriendsBoard.tsx",
@@ -554,7 +563,12 @@ describe("the free log stays what it is", () => {
     }
     // the friends list sends nothing: no texts, no pushes, no in-app notes
     // nothing is ever sent to a player: no texts, no pushes, no in-app notes
-    for (const f of ["lib/elite/tracker-actions.ts", "lib/elite/tracker-server.ts", "components/elite/FriendsBoard.tsx"]) {
+    for (const f of [
+      "lib/elite/tracker-actions.ts",
+      "lib/elite/tracker-server.ts",
+      "components/elite/FriendsBoard.tsx",
+      "components/elite/FriendsFeed.tsx",
+    ]) {
       expect(code(f), f).not.toMatch(/sendSms|sendPush|elite_notifications|sendPlayerEmail/);
     }
     // the one text goes to the coaches, once, when a post is first reported
@@ -565,15 +579,17 @@ describe("the free log stays what it is", () => {
     expect(report).toMatch(/if \(!count\) \{[\s\S]*?await textCoaches\(reportText\(/);
   });
 
-  it("the home screen has no timer and no milestone", () => {
-    const home = code("components/elite/TrackerHome.tsx");
-    expect(home).not.toMatch(/timer|stopwatch|milestone/i);
-    // the entries list left the home screen: the strip replaced it, and a
-    // day's entries open in a sheet
+  it("two tabs and the plus: Friends, then My week; no timer and no milestone anywhere", () => {
+    const shell = code("components/elite/FreeShell.tsx");
+    expect(shell).toMatch(/<Tab href=\{FREE_HOME\} label="Friends"[\s\S]*aria-label="Post my training"[\s\S]*<Tab href=\{FREE_WEEK\} label="My week"/);
+    for (const f of ["components/elite/MyWeek.tsx", "components/elite/FriendsFeed.tsx", "components/elite/PostComposer.tsx"]) {
+      expect(code(f), f).not.toMatch(/timer|stopwatch|milestone/i);
+    }
+    const home = code("components/elite/MyWeek.tsx");
+    // a day's entries open in a sheet
     expect(home).toContain("<TrackerSheet title={dayLabel(openDay)}");
-    expect(home).not.toContain("Nothing logged yet this week");
-    // top to bottom: ring, days, the buttons, share, friends, the one line
-    const order = ["<svg viewBox", "strip.map(", "LOG_CHIPS.map(", "<ShareWeek", "<FriendsBoard", "{programHref && ("].map(
+    // top to bottom: ring, days, the line, friends, share, the one line
+    const order = ["<svg viewBox", "strip.map(", "{guide && (", "<FriendsBoard", "<ShareWeek", "{programHref && ("].map(
       (mark) => home.indexOf(mark)
     );
     expect(order.every((n) => n > -1)).toBe(true);
@@ -583,8 +599,8 @@ describe("the free log stays what it is", () => {
   });
 
   it("the line about the coached program is hidden inside the App Store app", () => {
-    expect(code("app/(free)/log/page.tsx")).toContain("programHref={programLink(inNativeApp())}");
-    expect(code("components/elite/TrackerHome.tsx")).toMatch(/\{programHref && \(/);
+    expect(code("app/(free)/log/week/page.tsx")).toContain("programHref={programLink(inNativeApp())}");
+    expect(code("components/elite/MyWeek.tsx")).toMatch(/\{programHref && \(/);
     expect(code("app/(auth)/join/page.tsx")).toContain('if (inNativeApp()) redirect("/login")');
   });
 });
@@ -821,7 +837,7 @@ describe("friends", () => {
     const fn = server.slice(server.indexOf("export async function friendsWeekFor("), server.indexOf("export async function friendAskFor("));
     expect(fn).toContain('.eq("kind", "training")');
     // and your own row is the ring's number: training only
-    expect(code("components/elite/TrackerHome.tsx")).toMatch(/<FriendsBoard\s+me=\{me\}\s+myMinutes=\{minutes\}/);
+    expect(code("components/elite/MyWeek.tsx")).toMatch(/<FriendsBoard\s+me=\{me\}\s+myMinutes=\{minutes\}/);
   });
 
   it("the list only ever reads the viewer's own friends: no function reads across all players", () => {
@@ -863,13 +879,16 @@ describe("friends", () => {
     expect(join).toContain("if (ref && (await trackerFor(viewer))) redirect(friendAskPath(ref));");
     const page = code("app/(free)/log/page.tsx");
     expect(page).toContain("friendAskFor(viewer, cleanReferralCode(searchParams?.friend))");
+    expect(code("components/elite/FriendsFeed.tsx")).toContain("<FriendAsk ask={friendAsk} />");
     // nothing is added without the tap on Yes
-    const board = code("components/elite/FriendsBoard.tsx");
-    expect(board).toContain("addFriendQuestion(asking.name)");
-    expect(board).toMatch(/onClick=\{\(\) => answer\(true\)\}[\s\S]{0,260}Yes/);
-    expect((board.match(/confirmFriend\(/g) ?? []).length).toBe(1);
-    // no search, no browsing, no requests
-    expect(board).not.toMatch(/<input|search|request/i);
+    const ask = code("components/elite/FriendAsk.tsx");
+    expect(ask).toContain("addFriendQuestion(asking.name)");
+    expect(ask).toMatch(/onClick=\{\(\) => answer\(true\)\}[\s\S]{0,260}Yes/);
+    expect((ask.match(/confirmFriend\(/g) ?? []).length).toBe(1);
+    // no search, no browsing, no requests, anywhere in the free app
+    for (const f of ["components/elite/FriendAsk.tsx", "components/elite/FriendsBoard.tsx", "components/elite/FriendsFeed.tsx"]) {
+      expect(code(f), f).not.toMatch(/<input|search|request/i);
+    }
   });
 
   it("the server only pairs the signed-in player, and making friends is not callable from a browser", () => {
@@ -903,7 +922,8 @@ describe("friends", () => {
   it("a friend can be taken off from their row, quietly", () => {
     const board = code("components/elite/FriendsBoard.tsx");
     expect(board).toContain("Remove from my friends");
-    expect(board).toContain("await removeFriend(row.id)");
+    expect(board).toContain("act(() => removeFriend(open.id))");
+    expect(board).toContain("act(() => blockPlayer(open.id))");
     // your own row is not a button
     expect(board).toMatch(/\{r\.me \? \(\s*<div/);
   });

@@ -16,5 +16,9 @@ export default async function DaysPage() {
   if (!tracker) redirect("/dashboard");
   if (!quizDone(tracker) || !tracker.target_minutes) redirect(FREE_QUIZ);
 
-  return <TrackerDays target={tracker.target_minutes} initial={tracker.plan_days} />;
+  return (
+    <div className="px-4 pt-4">
+      <TrackerDays target={tracker.target_minutes} initial={tracker.plan_days} />
+    </div>
+  );
 }

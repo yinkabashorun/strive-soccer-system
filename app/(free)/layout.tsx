@@ -1,20 +1,19 @@
 import { redirect } from "next/navigation";
-import { AppNav, type NavItem } from "@/components/elite/AppNav";
 import { FreshOnReturn } from "@/components/elite/FreshOnReturn";
+import { FreeShell } from "@/components/elite/FreeShell";
 import { AgreementScreen } from "@/components/elite/AgreementScreen";
 import { getViewer } from "@/lib/elite/session";
 import { signOut } from "@/lib/elite/auth-actions";
 import { consentDue } from "@/lib/elite/legal-server";
 import { trackerFor } from "@/lib/elite/tracker-server";
-import { FREE_HOME } from "@/lib/elite/tracker";
+import { FREE_HOME, tracksGym } from "@/lib/elite/tracker";
 
-// One screen, so one tab: the bottom bar is not drawn for a single item.
-// Account (password, sign out, delete account) is behind the initials.
-const FREE_NAV: NavItem[] = [{ href: FREE_HOME, label: "Home", icon: "Home" }];
-
-// The free training log's shell (migration 069). Only a free account gets
-// in: a coach goes to the coach side, and a member (or a player still
+// The free app's shell (migration 069): two tabs, Friends and My week, and
+// the plus between them that posts today's training. Only a free account
+// gets in: a coach goes to the coach side, and a member (or a player still
 // waiting on a profile) goes to the member side, which knows what to show.
+// Account (password, blocked players, sign out, delete account) is behind
+// the initials on My week.
 export default async function FreeLayout({ children }: { children: React.ReactNode }) {
   const viewer = await getViewer();
   if (!viewer) redirect(`/login?next=${FREE_HOME}`);
@@ -30,17 +29,13 @@ export default async function FreeLayout({ children }: { children: React.ReactNo
   }
 
   return (
-    <div className="min-h-[100svh] bg-black text-bone lg:flex">
+    <div className="min-h-[100svh] bg-black text-bone">
       <FreshOnReturn />
-      <AppNav
-        items={FREE_NAV}
-        name={viewer.profile.full_name}
-        color={viewer.profile.avatar_color}
-        roleLabel="Player"
-      />
-      <main className="mx-auto w-full max-w-xl flex-1 px-4 pb-[calc(2rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 lg:pt-8">
-        {children}
-      </main>
+      <FreeShell gym={tracksGym(tracker.grade)}>
+        <main className="mx-auto w-full max-w-md pb-[calc(120px+env(safe-area-inset-bottom))] pt-[env(safe-area-inset-top)]">
+          {children}
+        </main>
+      </FreeShell>
     </div>
   );
 }

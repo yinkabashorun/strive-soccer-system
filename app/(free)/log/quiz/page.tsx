@@ -16,11 +16,18 @@ export default async function QuizPage() {
   if (!tracker) redirect("/dashboard");
 
   return (
-    <TrackerQuiz
-      targets={await getTargetTable()}
-      initial={{ grade: tracker.grade, level: tracker.level, season: tracker.season, goal: tracker.goal }}
-      initialDays={tracker.plan_days}
-      currentTarget={tracker.quiz_done_at ? tracker.target_minutes : null}
-    />
+    <div className="px-4 pt-4">
+      <TrackerQuiz
+        targets={await getTargetTable()}
+        initial={{
+          grade: tracker.grade,
+          level: tracker.level,
+          season: tracker.season,
+          goal: tracker.goal,
+        }}
+        initialDays={tracker.plan_days}
+        currentTarget={tracker.quiz_done_at ? tracker.target_minutes : null}
+      />
+    </div>
   );
 }

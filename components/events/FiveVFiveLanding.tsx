@@ -1,0 +1,121 @@
+import { Reveal } from "@/components/elite/Reveal";
+import { MetaPixel } from "@/components/elite/MetaPixel";
+import { FIVE_V_FIVE as E, money, phaseAt, priceAt, registerTarget } from "@/lib/events/five-v-five";
+
+// Same pixel as /demo, so 5v5 visitors can be retargeted. Public page,
+// no app data, nothing about members.
+const META_PIXEL_ID = "1655175349021847";
+
+const GOLD = "bg-gradient-to-b from-[#fff6d8] via-[#efd287] to-[#c39a3c] bg-clip-text text-transparent";
+
+function fmtNY(iso: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    weekday: "long",
+    month: "short",
+    day: "numeric",
+  }).format(new Date(Date.parse(iso) - 1));
+}
+
+export function FiveVFiveLanding() {
+  const now = Date.now();
+  const phase = phaseAt(now);
+  const price = priceAt(now);
+  const target = registerTarget(now);
+  const earlyLast = fmtNY(E.earlyBirdEndsIso);
+
+  const steps: [string, string][] = [
+    ["Lock your spot", "Registration is payment. Your team is in the moment the entry fee is paid."],
+    ["Send your roster", "Team name, captain and players. We send every captain the schedule before game day."],
+    ["Show up and win it", `${E.shortDate} at ${E.venue}. ${money(E.prize)} goes to the winning team.`],
+  ];
+
+  const questions: [string, string][] = [
+    ["How many teams get in?", `${E.teams}. When ${E.teams} teams have paid, registration closes.`],
+    ["Is the price per player?", `No, per team. ${money(E.earlyBird)} for the whole team through ${earlyLast}, ${money(E.standard)} from Dec 5.`],
+    ["Is my spot held if I sign up and pay later?", "No. A spot is held only once the entry fee is paid."],
+    ["When do we get the schedule?", "Every captain gets the start time and the game schedule before game day."],
+  ];
+
+  return (
+    <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
+      <MetaPixel id={META_PIXEL_ID} />
+
+      {/* Hero */}
+      <div className="rise-in text-center">
+        <div className="text-[11px] font-semibold uppercase tracking-[0.35em] text-accent">
+          {E.shortDate} <span className="mx-2 text-accent/60">•</span> {E.venue}
+        </div>
+        <h1 className="mt-4 font-display text-5xl font-black uppercase leading-none sm:text-7xl">
+          Strive Elite <span className={GOLD}>5v5</span>
+        </h1>
+        <div className={`mt-6 font-display text-7xl font-black leading-none sm:text-8xl ${GOLD}`}>{money(E.prize)}</div>
+        <div className="mt-2 font-display text-lg font-bold uppercase tracking-[0.5em] text-white/85">Cash prize</div>
+        <p className="mx-auto mt-6 max-w-md text-sm leading-relaxed text-white/60">
+          The most competitive players in the DMV, {E.teams} teams, one day. Maryland or Virginia, who really runs the DMV?
+        </p>
+      </div>
+
+      {/* Price + register */}
+      <Reveal variant="build" className="mt-9 rounded-2xl border border-accent/30 bg-accent/[0.06] p-5 text-center">
+        {phase === "closed" || price === null || !target ? (
+          <div className="font-display text-xl font-bold">Registration is closed.</div>
+        ) : (
+          <>
+            <div className="text-[11px] font-semibold uppercase tracking-[0.3em] text-accent">
+              {phase === "early" ? "Early bird" : "Team entry"}
+            </div>
+            <div className="mt-1 font-display text-4xl font-black">
+              {money(price)}
+              <span className="text-base font-semibold text-white/60"> per team</span>
+            </div>
+            <div className="mx-auto mt-3 h-px w-16 bg-accent/70" />
+            <p className="mt-3 text-sm text-white/65">
+              {phase === "early"
+                ? `Early bird ends ${earlyLast} at midnight. ${money(E.standard)} per team from Dec 5.`
+                : `Early bird has ended. ${E.teams} teams total, registration closes when they are full.`}
+            </p>
+            <a
+              href={target.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-5 inline-block w-full rounded-full bg-accent px-6 py-3.5 font-display text-lg font-black uppercase tracking-wider text-black transition-opacity hover:opacity-90 sm:w-auto"
+            >
+              {target.kind === "pay" ? `Register your team, ${money(price)}` : `DM “${E.dmWord}” to register`}
+            </a>
+            {target.kind === "dm" && (
+              <p className="mt-2 text-xs text-white/45">Opens Instagram. Send “{E.dmWord}” and we reply with the payment link.</p>
+            )}
+          </>
+        )}
+      </Reveal>
+
+      {/* How it works */}
+      <h2 className="mb-2.5 mt-9 font-display text-sm font-bold uppercase tracking-wider text-white/50">How it works</h2>
+      <div className="grid gap-2 sm:grid-cols-3">
+        {steps.map(([title, body], i) => (
+          <Reveal key={title} variant="build" delay={i * 90} className="rounded-2xl border border-white/8 bg-white/[0.02] p-4">
+            <div className="font-display text-xs font-bold text-accent">0{i + 1}</div>
+            <div className="mt-1 font-display text-sm font-bold">{title}</div>
+            <p className="mt-1 text-xs leading-relaxed text-white/50">{body}</p>
+          </Reveal>
+        ))}
+      </div>
+
+      {/* Questions */}
+      <h2 className="mb-2.5 mt-9 font-display text-sm font-bold uppercase tracking-wider text-white/50">Questions</h2>
+      <div className="space-y-2">
+        {questions.map(([q, a], i) => (
+          <Reveal key={q} variant="build" delay={i * 80} className="rounded-2xl border border-white/8 bg-white/[0.02] p-4">
+            <div className="font-display text-sm font-bold">{q}</div>
+            <p className="mt-1 text-xs leading-relaxed text-white/50">{a}</p>
+          </Reveal>
+        ))}
+      </div>
+
+      <p className="mt-10 text-center text-xs text-white/35">
+        Strive Soccer <span className="mx-1.5">•</span> @strivesoccerfc
+      </p>
+    </div>
+  );
+}

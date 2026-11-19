@@ -69,7 +69,7 @@ poster image on any drill video, so a slow connection shows a black box.
 | A15 | Screen readers and contrast: every icon-only button has a name; grey text passes contrast on black. | DONE Nov 18 (`tests/named-controls.test.ts`, contrast in `tests/member-surface.test.ts`) |
 | A16 | App icon at 1024 px from a sharp source, and the launch screen matched to the first frame of the app so there is no flash. | BLOCKED on D6 (the logo file) |
 | A17 | New App Store screenshots once A1 to A10 land (the five in `screenshots/` were taken before this pass). | TODO, after A1-A10 |
-| A18 | Sign-in on the server, so the session cookie is set by the server and the iPhone keeps it (a script-written cookie is capped at 7 days by WebKit, so a member who skips a week gets signed out). Same for the reset-password form. | DONE Nov 18 (`lib/elite/sign-in.ts`, `tests/sign-in.test.ts`). NOT PROVEN against the live sign-in service: Coach Yinka signs in once after the deploy. New accounts and the reset form sign in on the server too; 20 tries per 10 minutes per caller |
+| A18 | Sign-in on the server, so the session cookie is set by the server and the iPhone keeps it (a script-written cookie is capped at 7 days by WebKit, so a member who skips a week gets signed out). Same for the reset-password form. | DONE Nov 18 (`lib/elite/sign-in.ts`, `tests/sign-in.test.ts`). PROVEN Nov 19: Coach Yinka signed out and back in on his phone on the live app. New accounts and the reset form sign in on the server too; 20 tries per 10 minutes per caller |
 | A19 | The session is refreshed on every member page: `/film`, `/courses`, `/messages`, `/onboarding` and `/` were missing from the middleware. | DONE Nov 18 (`tests/session-refresh.test.ts`) |
 | A20 | Nothing bounces to Safari: Terms and Privacy links on the agreement and sign-up screens open in place inside the app; "your clip from two weeks ago", film links and course downloads play in the app. Zoom and mail links leave on purpose. | DONE Nov 18 for our own pages, clips, YouTube and Vimeo (`lib/elite/app-links.ts`, `AppLink.tsx`, `tests/app-links.test.ts`). LEFT: a Hudl, Veo or Drive film link still opens Safari; coach-side links are untouched |
 | A21 | Quiet while the app is open: no banner, no sound; the Coach tab and the bell show what arrived. | DONE Nov 18 (`native/capacitor.config.ts`, test) |
@@ -167,3 +167,4 @@ the thing in the way.
   a big sign-up day: every sign-in now reaches the sign-in service
   from our server's addresses, so its per-address limit is shared.
   Next: A25, A26, then A17.
+- Nov 19 2026: A18 proven on the live app (Coach Yinka signed out and back in on his phone).

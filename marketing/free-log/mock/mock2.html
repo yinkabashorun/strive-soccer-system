@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Strive free app, the rest of the screens (mock-up)</title>
+<style>
+@font-face{font-family:"BC";src:url(BarlowCondensed-900.ttf);font-weight:900}
+@font-face{font-family:"BC";src:url(BarlowCondensed-800.ttf);font-weight:800}
+@font-face{font-family:"B";src:url(Barlow-500.ttf);font-weight:500}
+@font-face{font-family:"B";src:url(Barlow-600.ttf);font-weight:600}
+@font-face{font-family:"B";src:url(Barlow-700.ttf);font-weight:700}
+:root{--ink:#000;--line:rgba(255,255,255,.08);--bone:#f4f1ea;--dim:rgba(244,241,234,.56);--faint:rgba(244,241,234,.34);--gold:#d4af37;--red:#ff5a4e;--fill:#141414;--fill2:#1e1e1e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1b1b1b;font-family:"B",sans-serif;font-weight:500;color:var(--bone);display:flex;flex-wrap:wrap;gap:28px;padding:28px;width:1780px}
+body.one{padding:0;gap:0;background:#000;width:auto}
+.phone{width:390px;height:844px;background:var(--ink);position:relative;overflow:hidden;flex:none}
+body:not(.one) .phone{border-radius:44px;outline:1px solid #2a2a2a}
+.bc{font-family:"BC";font-weight:900;text-transform:uppercase}
+svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* top bar (inner pages) */
+.bar{height:44px;margin-top:50px;padding:0 10px;display:flex;align-items:center;justify-content:space-between}
+.bar .t{font-weight:700;font-size:17px;display:flex;align-items:center;gap:6px}
+.ib{width:44px;height:44px;display:grid;place-items:center}
+
+/* avatars */
+.av{border-radius:50%;object-fit:cover;display:block;flex:none}
+.ini{border-radius:50%;display:grid;place-items:center;font-weight:700;color:#ddd;background:linear-gradient(145deg,#2c2c2c,#1a1a1a);flex:none}
+.star{width:15px;height:15px;fill:var(--gold);flex:none}
+
+/* tab bar */
+.tabs{position:absolute;z-index:5;left:0;right:0;bottom:0;height:88px;padding:0 44px 22px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(180deg,rgba(0,0,0,0),#000 38%)}
+.tab{font-size:12px;font-weight:600;color:var(--dim);text-align:center;width:72px}
+.tab svg{display:block;margin:0 auto 5px}
+.tab.on{color:var(--bone)}
+.plus{width:62px;height:62px;border-radius:50%;background:var(--bone);display:grid;place-items:center;box-shadow:0 0 0 5px #000;color:#000}
+.plus svg{width:28px;height:28px;stroke-width:2.6}
+
+/* buttons */
+.btn{height:44px;border-radius:12px;background:var(--fill2);display:flex;align-items:center;justify-content:center;gap:7px;font-weight:700;font-size:15px}
+.btn.white{background:var(--bone);color:#000}
+.big{height:58px;border-radius:18px;background:var(--bone);color:#000;display:grid;place-items:center;font-family:"BC";font-weight:900;font-size:23px;letter-spacing:.5px;text-transform:uppercase}
+
+/* ---------- 5. profile ---------- */
+.ph{display:flex;align-items:center;gap:22px;padding:6px 18px 0}
+.ring{position:relative;width:96px;height:96px;flex:none}
+.ring svg{position:absolute;inset:0}
+.ring img,.ring .ini{position:absolute;inset:7px;width:82px;height:82px}
+.lvl{position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);background:var(--gold);color:#000;font-family:"BC";font-weight:900;font-size:15px;padding:2px 9px 1px;border-radius:9px;border:2.5px solid #000;white-space:nowrap}
+.stats{flex:1;display:flex;justify-content:space-between}
+.stats div{text-align:center}
+.stats b{display:block;font-family:"BC";font-weight:900;font-size:26px;line-height:1}
+.stats span{font-size:12.5px;color:var(--dim)}
+.who{padding:16px 18px 0}
+.who .n{font-weight:700;font-size:16px;display:flex;align-items:center;gap:5px}
+.who .l{font-size:14px;color:var(--dim);margin-top:3px}
+.who .pf{font-size:14px;margin-top:2px}
+.btns{display:flex;gap:8px;padding:14px 18px 0}
+.btns .btn{flex:1}
+.hl{display:flex;gap:16px;padding:18px 18px 0}
+.hl div{width:68px;text-align:center;font-size:11.5px;color:var(--bone);font-weight:600;line-height:1.2}
+.crest{width:64px;height:64px;border-radius:50%;margin:0 auto 7px;display:grid;place-items:center;box-shadow:0 0 0 1.5px #000,0 0 0 3px #333}
+.crest svg{width:34px;height:38px}
+.crest.add{background:#000;box-shadow:0 0 0 1.5px #333 inset}
+.gtabs{display:flex;margin-top:18px;border-bottom:1px solid var(--line)}
+.gtabs div{flex:1;height:44px;display:grid;place-items:center;color:var(--faint)}
+.gtabs .on{color:var(--bone);box-shadow:inset 0 -1.5px 0 var(--bone)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5px}
+.grid div{aspect-ratio:1;position:relative;overflow:hidden}
+.grid img{width:100%;height:100%;object-fit:cover;display:block}
+.grid span{position:absolute;left:7px;bottom:6px;font-family:"BC";font-weight:900;font-size:17px;text-shadow:0 1px 6px rgba(0,0,0,.8)}
+
+/* ---------- 6. action sheet ---------- */
+.dimmed{position:absolute;inset:0;filter:brightness(.35)}
+.dimmed img{width:100%;height:100%;object-fit:cover}
+.as{position:absolute;left:0;right:0;bottom:0;background:#1a1a1a;border-radius:26px 26px 0 0;padding:10px 0 34px;z-index:4}
+.grab{width:38px;height:5px;border-radius:3px;background:#444;margin:0 auto 14px}
+.asrow{display:flex;align-items:center;gap:14px;height:56px;padding:0 22px;font-size:16.5px;font-weight:600}
+.asrow svg{opacity:.9}
+.asrow.red{color:var(--red)}
+.sep{height:1px;background:var(--line);margin:6px 0}
+.askey{display:flex;gap:10px;padding:2px 16px 12px}
+.askey div{flex:1;height:82px;border-radius:16px;background:#242424;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:600}
+
+/* ---------- 7. club ---------- */
+.hero{height:290px;position:relative;overflow:hidden}
+.hero>img{width:100%;height:100%;object-fit:cover;filter:brightness(.55) saturate(.9)}
+.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,0) 30%,rgba(0,0,0,.2) 55%,#000 100%)}
+.hero .bar{position:absolute;top:0;left:0;right:0;z-index:2;margin-top:50px}
+.hero .ib{background:rgba(0,0,0,.4);border-radius:50%;width:40px;height:40px;margin:0 4px}
+.cname{position:absolute;z-index:2;left:18px;right:18px;bottom:16px;display:flex;align-items:flex-end;gap:14px}
+.cname .crest{margin:0;width:70px;height:70px;box-shadow:0 0 0 3px #000}
+.cname .crest svg{width:38px;height:42px}
+.cname .bc{font-size:34px;line-height:.92}
+.cname .m{font-size:13.5px;color:var(--dim);margin-top:5px}
+.cstat{display:flex;margin:6px 18px 0;background:var(--fill);border-radius:18px;padding:16px 0}
+.cstat div{flex:1;text-align:center;border-right:1px solid var(--line)}
+.cstat div:last-child{border:0}
+.cstat b{display:block;font-family:"BC";font-weight:900;font-size:30px;line-height:1}
+.cstat span{font-size:12px;color:var(--dim)}
+.sec{font-size:11px;letter-spacing:2.4px;text-transform:uppercase;color:var(--dim);font-weight:700;padding:22px 18px 8px}
+.mem{display:flex;align-items:center;gap:12px;height:58px;padding:0 18px}
+.mem .av,.mem .ini{width:42px;height:42px;font-size:14px}
+.mem .nm{font-weight:600;font-size:15.5px;display:flex;align-items:center;gap:5px}
+.mem .sb{font-size:12.5px;color:var(--dim);margin-top:1px}
+.mem .tm{margin-left:auto;font-family:"BC";font-weight:900;font-size:22px}
+.mem.you .nm,.mem.you .tm{color:var(--gold)}
+.mem.you .ini{background:var(--gold);color:#000}
+.tag{font-size:10.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#000;background:var(--bone);border-radius:6px;padding:2px 6px 1px}
+
+/* ---------- 8. ranking ---------- */
+.ptitle{padding:58px 18px 0}
+.ptitle .bc{font-size:44px;line-height:.9}
+.ptitle .sub{font-size:13px;color:var(--dim);margin-top:6px}
+.pill{display:inline-flex;gap:4px;background:var(--fill);border-radius:12px;padding:4px;margin:16px 18px 6px}
+.pill div{height:34px;padding:0 14px;border-radius:9px;display:grid;place-items:center;font-weight:700;font-size:14px;color:var(--dim)}
+.pill .on{background:var(--fill2);color:var(--bone)}
+.top3{display:flex;gap:8px;padding:10px 18px 4px;align-items:flex-end}
+.top3>div{flex:1;border-radius:20px;background:var(--fill);padding:16px 8px 14px;text-align:center}
+.top3 .crest{width:58px;height:58px;margin:0 auto 10px}
+.top3 .r{font-family:"BC";font-weight:900;font-size:15px;color:var(--dim)}
+.top3 .cn{font-weight:700;font-size:13px;line-height:1.2;height:32px;margin-top:2px}
+.top3 b{display:block;font-family:"BC";font-weight:900;font-size:25px;margin-top:6px;line-height:1}
+.top3 small{font-size:11px;color:var(--dim)}
+.top3 .first{padding-top:24px;background:linear-gradient(180deg,#26210f,#141414)}
+.top3 .mine{box-shadow:inset 0 0 0 1.5px var(--gold)}
+.rk{display:flex;align-items:center;gap:12px;height:62px;padding:0 18px;border-bottom:1px solid var(--line)}
+.rk .p{font-family:"BC";font-weight:900;font-size:20px;width:20px;color:var(--dim)}
+.rk .crest{width:40px;height:40px;margin:0;box-shadow:none}
+.rk .crest svg{width:22px;height:25px}
+.rk .nm{font-weight:600;font-size:15px}
+.rk .sb{font-size:12px;color:var(--dim);margin-top:2px}
+.rk .tm{margin-left:auto;text-align:right;font-family:"BC";font-weight:900;font-size:22px;line-height:1}
+.rk .tm small{display:block;font-family:"B";font-weight:500;font-size:11px;color:var(--dim);text-transform:none}
+.rk.mine .nm{color:var(--gold)}
+.note{font-size:12.5px;color:var(--faint);text-align:center;padding:16px 30px 0;line-height:1.4}
+
+/* ---------- 9. welcome ---------- */
+.full{position:absolute;inset:0}
+.full img{width:100%;height:100%;object-fit:cover}
+.full:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.6) 0,rgba(0,0,0,0) 22%,rgba(0,0,0,0) 38%,rgba(0,0,0,.92) 66%,#000)}
+.inv{position:absolute;z-index:2;top:60px;left:18px;right:18px;display:flex;justify-content:center}
+.inv div{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.45);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.14);border-radius:30px;padding:6px 16px 6px 6px;font-size:14px;font-weight:600}
+.inv img{width:34px;height:34px}
+.wel{position:absolute;z-index:2;left:22px;right:22px;bottom:40px}
+.wm{font-family:"BC";font-weight:900;font-size:15px;letter-spacing:3px;color:var(--bone)}
+.wm em{font-style:normal;color:var(--gold)}
+.wel .bc{font-size:56px;line-height:.86;margin-top:12px;letter-spacing:-.5px}
+.wel p{font-size:16px;color:rgba(255,255,255,.8);margin-top:14px;line-height:1.4}
+.wel .big{margin-top:24px}
+.wel .sec2{text-align:center;font-size:15px;font-weight:600;margin-top:18px;color:var(--dim)}
+.wel .sec2 b{color:var(--bone)}
+
+/* ---------- 10. age step ---------- */
+.steps{display:flex;gap:6px;padding:0 18px}
+.steps i{flex:1;height:4px;border-radius:2px;background:#262626}
+.steps .on{background:var(--bone)}
+.q{padding:30px 22px 0}
+.q .bc{font-size:46px;line-height:.9}
+.q p{font-size:15.5px;color:var(--dim);margin-top:12px;line-height:1.4}
+.wheel{display:flex;gap:10px;margin:40px 22px 0;position:relative;height:250px}
+.wheel:before{content:"";position:absolute;left:0;right:0;top:100px;height:50px;border-radius:14px;background:var(--fill2)}
+.wcol{flex:1;position:relative;text-align:center;font-size:22px;font-weight:600;color:var(--faint);overflow:hidden}
+.wcol div{height:50px;line-height:50px}
+.wcol .on{color:var(--bone);font-weight:700}
+.wcol .f1{opacity:.55;font-size:19px}
+.wcol .f2{opacity:.25;font-size:16px}
+.foot{position:absolute;left:22px;right:22px;bottom:40px}
+.priv{display:flex;align-items:center;gap:8px;justify-content:center;font-size:13px;color:var(--dim);margin-bottom:14px}
+
+/* ---------- 11. settings ---------- */
+.set{padding:0 0 0 18px}
+.sr{display:flex;align-items:center;gap:16px;height:54px;padding-right:18px;font-size:16px;font-weight:600}
+.sr .ch{margin-left:auto;color:var(--faint);width:18px;height:18px}
+.sr .val{margin-left:auto;font-size:14px;color:var(--dim);font-weight:500}
+.sr.red{color:var(--red)}
+.sh{font-size:13px;color:var(--dim);font-weight:600;padding:20px 0 4px}
+.meh{display:flex;align-items:center;gap:14px;margin:6px 18px 0;padding:14px;background:var(--fill);border-radius:18px}
+.meh .ring{width:64px;height:64px}
+.meh .ring .ini{inset:5px;width:54px;height:54px;font-size:17px;background:var(--gold);color:#000}
+.meh .lvl{font-size:12px;padding:1px 7px 0}
+.meh b{font-weight:700;font-size:17px;display:block}
+.meh span{font-size:13px;color:var(--dim)}
+
+/* ---------- 12. my week, scrolled ---------- */
+.row{display:flex;align-items:center;gap:12px;height:54px;padding:0 18px}
+.row .p{font-family:"BC";font-weight:900;font-size:22px;width:18px;color:var(--dim)}
+.row .av,.row .ini{width:38px;height:38px;font-size:13px}
+.row .nm{font-weight:600;font-size:15.5px;display:flex;align-items:center;gap:5px}
+.row .tm{margin-left:auto;font-family:"BC";font-weight:900;font-size:24px}
+.row.you .p,.row.you .nm{color:var(--gold)}
+.row.you .ini{background:var(--gold);color:#000}
+.bar2{height:3px;border-radius:2px;background:#1f1f1f;margin:0 18px 0 48px;overflow:hidden}
+.bar2 i{display:block;height:100%;background:#3a3a3a}
+.row.you+.bar2 i{background:var(--gold)}
+.invite{display:flex;align-items:center;gap:12px;height:54px;padding:0 18px;color:var(--bone);font-weight:600;font-size:15px}
+.invite i{width:38px;height:38px;border-radius:50%;border:1.5px dashed #444;display:grid;place-items:center}
+.cards{display:flex;gap:10px;padding:0 18px;overflow:hidden}
+.cc{width:152px;flex:none;border-radius:20px;background:var(--fill);padding:14px}
+.cc .crest{width:46px;height:46px;margin:0 0 12px;box-shadow:none}
+.cc .crest svg{width:25px;height:28px}
+.cc .nm{font-weight:700;font-size:14px;line-height:1.2;height:34px}
+.cc .rkn{font-family:"BC";font-weight:900;font-size:24px;margin-top:8px;line-height:1}
+.cc .sb{font-size:11.5px;color:var(--dim);margin-top:3px}
+.cc.new{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-weight:600;font-size:14px;color:var(--dim);background:transparent;border:1.5px dashed #2c2c2c}
+.share{display:flex;align-items:center;gap:14px;margin:22px 18px 0;padding:12px;border-radius:20px;background:var(--fill)}
+.story{width:62px;height:110px;border-radius:10px;overflow:hidden;position:relative;flex:none;background:#000}
+.story img{width:100%;height:100%;object-fit:cover;filter:brightness(.6)}
+.story b{position:absolute;left:5px;bottom:18px;font-family:"BC";font-weight:900;font-size:20px;line-height:.9}
+.story s{position:absolute;left:5px;bottom:7px;text-decoration:none;font-size:6.5px;letter-spacing:1px;color:var(--gold);font-weight:700}
+.share .tx b{font-weight:700;font-size:16px;display:block}
+.share .tx span{font-size:13px;color:var(--dim);display:block;margin-top:3px;line-height:1.3}
+.share .btn{margin-top:10px;height:38px;font-size:14px;padding:0 16px;display:inline-flex}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="shield" viewBox="0 0 34 38"><path d="M17 1l15 5v12c0 9.5-6.4 16.2-15 19C8.4 34.2 2 27.5 2 18V6z"/></symbol>
+    <symbol id="starp" viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6L2.5 9.4l6.6-.8z"/></symbol>
+  </defs>
+</svg>
+
+<!-- 5. A friend's profile -->
+<section class="phone" id="s5">
+  <div class="bar">
+    <div class="ib"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></div>
+    <div class="t">Gary G.<svg class="star" viewBox="0 0 24 24"><use href="#starp"/></svg></div>
+    <div class="ib"><svg class="i" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/></svg></div>
+  </div>
+  <div class="ph">
+    <div class="ring">
+      <svg viewBox="0 0 96 96"><circle cx="48" cy="48" r="45" fill="none" stroke="#262626" stroke-width="3"/><circle cx="48" cy="48" r="45" fill="none" stroke="#d4af37" stroke-width="3" stroke-linecap="round" stroke-dasharray="190 283" transform="rotate(-90 48 48)"/></svg>
+      <img class="av" src="av-gary.jpg">
+      <div class="lvl">LVL 9</div>
+    </div>
+    <div class="stats">
+      <div><b>4h 30m</b><span>this week</span></div>
+      <div><b>68h</b><span>all time</span></div>
+      <div><b>2</b><span>clubs</span></div>
+    </div>
+  </div>
+  <div class="who">
+    <div class="n">Gary G.</div>
+    <div class="l">ECNL, MLS NEXT or similar</div>
+    <div class="pf">Playing for <b>Fortuna Koln U19</b></div>
+  </div>
+  <div class="btns">
+    <div class="btn"><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Friends</div>
+    <div class="btn"><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H12z"/></svg>Props</div>
+  </div>
+  <div class="hl">
+    <div><div class="crest" style="background:linear-gradient(150deg,#d4af37,#7a6118)"><svg viewBox="0 0 34 38" fill="#000"><use href="#shield"/><text x="17" y="24" text-anchor="middle" font-family="BC" font-weight="900" font-size="15" fill="#d4af37">T7</text></svg></div>5v5 Team 7</div>
+    <div><div class="crest" style="background:linear-gradient(150deg,#2f6bd6,#132d63)"><svg viewBox="0 0 34 38" fill="#fff"><use href="#shield"/><text x="17" y="24" text-anchor="middle" font-family="BC" font-weight="900" font-size="15" fill="#132d63">SP</text></svg></div>Saturday Pickup</div>
+  </div>
+  <div class="gtabs">
+    <div class="on"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="1.5"/><path d="M4 9.5h16M4 14.5h16M9.5 4v16M14.5 4v16"/></svg></div>
+    <div><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></div>
+  </div>
+  <div class="grid">
+    <div><img src="sq-post-gary-1.jpg"><span>1h 15m</span></div>
+    <div><img src="grid-1.jpg"><span>45m</span></div>
+    <div><img src="sq-post-gary-2.jpg"><span>1h</span></div>
+    <div><img src="grid-2.jpg"><span>30m</span></div>
+    <div><img src="sq-post-gary-3.jpg"><span>1h 30</span></div>
+    <div><img src="grid-3.jpg"><span>45m</span></div>
+  </div>
+  <div class="tabs">
+    <div class="tab on"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="9" r="3.2"/><path d="M3 19c.6-3.2 2.9-5 6-5s5.4 1.8 6 5"/><circle cx="17" cy="8" r="2.4"/><path d="M16.5 13.2c2.4.2 4 1.8 4.5 4.3"/></svg>Friends</div>
+    <div class="plus"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+    <div class="tab"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>My week</div>
+  </div>
+</section>
+
+<!-- 6. The menu on a post -->
+<section class="phone" id="s6">
+  <div class="dimmed"><img src="3-friends.png"></div>
+  <div class="as">
+    <div class="grab"></div>
+    <div class="askey">
+      <div><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20c1-4 4-6 8-6s7 2 8 6"/></svg>Profile</div>
+      <div><svg class="i" viewBox="0 0 24 24"><path d="M13 2L4.5 13.5H11L10 22l8.5-11.5H12z"/></svg>Props</div>
+      <div><svg class="i" viewBox="0 0 24 24"><path d="M4 12v7h16v-7M12 3v12M7.5 7.5L12 3l4.5 4.5"/></svg>Share</div>
+    </div>
+    <div class="sep"></div>
+    <div class="asrow red"><svg class="i" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg>Report this post</div>
+    <div class="asrow red"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></svg>Block Gary</div>
+    <div class="sep"></div>
+    <div class="asrow" style="color:var(--dim);font-size:14px;font-weight:500;height:auto;padding-top:6px;padding-bottom:4px">Gary is not told if you report or block him.</div>
+  </div>
+</section>
+
+<!-- 7. A club -->
+<section class="phone" id="s7">
+  <div class="hero">
+    <img src="post-yinka-1.jpg" style="object-position:50% 25%">
+    <div class="bar">
+      <div class="ib"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></div>
+      <div class="ib"><svg class="i" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/></svg></div>
+    </div>
+    <div class="cname">
+      <div class="crest" style="background:linear-gradient(150deg,#d4af37,#7a6118)"><svg viewBox="0 0 34 38" fill="#000"><use href="#shield"/><text x="17" y="24" text-anchor="middle" font-family="BC" font-weight="900" font-size="15" fill="#d4af37">T7</text></svg></div>
+      <div><div class="bc">Strive Elite 5v5<br>Team 7</div><div class="m">5 players. Started by Coach Yinka.</div></div>
+    </div>
+  </div>
+  <div class="cstat">
+    <div><b>#2</b><span>of 24 clubs</span></div>
+    <div><b>2h 45m</b><span>per player</span></div>
+    <div><b>13h 45m</b><span>this week</span></div>
+  </div>
+  <div class="btns"><div class="btn white"><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M12 5v14M5 12h14"/></svg>Invite to the club</div></div>
+  <div class="sec">This week</div>
+  <div class="mem"><img class="av" src="av-gary.jpg" style="width:42px;height:42px"><div><div class="nm">Gary G.<svg class="star" viewBox="0 0 24 24"><use href="#starp"/></svg></div><div class="sb">Trained today</div></div><div class="tm">4h 30m</div></div>
+  <div class="mem you"><div class="ini">MB</div><div><div class="nm">You</div><div class="sb">Trained today</div></div><div class="tm">3h 15m</div></div>
+  <div class="mem"><img class="av" src="av-yinka.jpg" style="width:42px;height:42px"><div><div class="nm">Yinka B. <span class="tag">Captain</span></div><div class="sb">Yesterday</div></div><div class="tm">2h 45m</div></div>
+  <div class="mem"><div class="ini">DR</div><div><div class="nm">Dani R.</div><div class="sb">Monday</div></div><div class="tm">1h 15m</div></div>
+  <div class="tabs">
+    <div class="tab"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="9" r="3.2"/><path d="M3 19c.6-3.2 2.9-5 6-5s5.4 1.8 6 5"/><circle cx="17" cy="8" r="2.4"/><path d="M16.5 13.2c2.4.2 4 1.8 4.5 4.3"/></svg>Friends</div>
+    <div class="plus"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+    <div class="tab on"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>My week</div>
+  </div>
+</section>
+
+<!-- 8. Club ranking -->
+<section class="phone" id="s8">
+  <div class="bar" style="margin-top:50px">
+    <div class="ib"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></div>
+    <div class="t"></div>
+    <div class="ib"></div>
+  </div>
+  <div class="ptitle" style="padding-top:8px"><div class="bc">Top clubs</div><div class="sub">This week, by training per player. Starts again Monday.</div></div>
+  <div class="top3">
+    <div><div class="crest" style="background:linear-gradient(150deg,#e8e4da,#8d8a82)"><svg viewBox="0 0 34 38" fill="#000"><use href="#shield"/><text x="17" y="24" text-anchor="middle" font-family="BC" font-weight="900" font-size="15" fill="#e8e4da">T3</text></svg></div><div class="r">2</div><div class="cn">5v5 Team 3</div><b>3h 43m</b><small>per player</small></div>
+    <div class="first"><div class="crest" style="background:linear-gradient(150deg,#d4af37,#7a6118)"><svg viewBox="0 0 34 38" fill="#000"><use href="#shield"/><text x="17" y="24" text-anchor="middle" font-family="BC" font-weight="900" font-size="15" fill="#d4af37">12</text></svg></div><div class="r" style="color:var(--gold)">1</div><div class="cn">5v5 Team 12</div><b>4h 02m</b><small>per player</small></div>
+    <div class="mine"><div class="crest" style="background:linear-gradient(150deg,#d4af37,#7a6118)"><svg viewBox="0 0 34 38" fill="#000"><use href="#shield"/><text x="17" y="24" text-anchor="middle" font-family="BC" font-weight="900" font-size="15" fill="#d4af37">T7</text></svg></div><div class="r">3</div><div class="cn">5v5 Team 7<br><span style="color:var(--gold);font-size:11px">Your club</span></div><b>2h 45m</b><small>per player</small></div>
+  </div>
+  <div style="height:8px"></div>
+  <div class="rk"><span class="p">4</span><div class="crest" style="background:linear-gradient(150deg,#c43d3d,#5a1515)"><svg viewBox="0 0 34 38" fill="#fff"><use href="#shield"/><text x="17" y="24" text-anchor="middle" font-family="BC" font-weight="900" font-size="15" fill="#5a1515">10</text></svg></div><div><div class="nm">2010 Boys</div><div class="sb">8 players</div></div><div class="tm">2h 20m<small>per player</small></div></div>
+  <div class="rk mine"><span class="p">5</span><div class="crest" style="background:linear-gradient(150deg,#2a9d6b,#0f3f2a)"><svg viewBox="0 0 34 38" fill="#fff"><use href="#shield"/><text x="17" y="24" text-anchor="middle" font-family="BC" font-weight="900" font-size="15" fill="#0f3f2a">WF</text></svg></div><div><div class="nm">Weak Foot Gang</div><div class="sb">3 players. Your club</div></div><div class="tm">1h 25m<small>per player</small></div></div>
+  <div class="rk"><span class="p">6</span><div class="crest" style="background:linear-gradient(150deg,#2f6bd6,#132d63)"><svg viewBox="0 0 34 38" fill="#fff"><use href="#shield"/><text x="17" y="24" text-anchor="middle" font-family="BC" font-weight="900" font-size="15" fill="#132d63">SP</text></svg></div><div><div class="nm">Saturday Pickup</div><div class="sb">11 players</div></div><div class="tm">50m<small>per player</small></div></div>
+  <div class="note">Clubs with 3 or more players.</div>
+  <div class="tabs">
+    <div class="tab"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="9" r="3.2"/><path d="M3 19c.6-3.2 2.9-5 6-5s5.4 1.8 6 5"/><circle cx="17" cy="8" r="2.4"/><path d="M16.5 13.2c2.4.2 4 1.8 4.5 4.3"/></svg>Friends</div>
+    <div class="plus"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+    <div class="tab on"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>My week</div>
+  </div>
+</section>
+
+<!-- 9. Opening a friend's invite -->
+<section class="phone" id="s9">
+  <div class="full"><img src="post-gary-1.jpg" style="object-position:50% 20%"></div>
+  <div class="inv"><div><img class="av" src="av-gary.jpg">Gary invited you</div></div>
+  <div class="wel">
+    <div class="wm">STRIVE <em>ELITE</em></div>
+    <div class="bc">Train.<br>Post it.<br>Compete with<br>your friends.</div>
+    <p>Log the work you put in on your own, see your friends' training, and see who put in the most work this week.</p>
+    <div class="big">Join Gary</div>
+    <div class="sec2">Already on Strive Elite? <b>Sign in</b></div>
+  </div>
+</section>
+
+<!-- 10. Sign-up, one question a screen -->
+<section class="phone" id="s10">
+  <div class="bar">
+    <div class="ib"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></div>
+    <div class="ib"></div>
+  </div>
+  <div class="steps"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></div>
+  <div class="q">
+    <div class="bc">When were<br>you born?</div>
+    <p>Month and year only. It's never shown to anyone.</p>
+  </div>
+  <div class="wheel">
+    <div class="wcol"><div class="f2">January</div><div class="f1">February</div><div class="on">March</div><div class="f1">April</div><div class="f2">May</div></div>
+    <div class="wcol" style="flex:.7"><div class="f2">2008</div><div class="f1">2009</div><div class="on">2010</div><div class="f1">2011</div><div class="f2">2012</div></div>
+  </div>
+  <div class="foot">
+    <div class="priv"><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>For players 13 and older</div>
+    <div class="big">Next</div>
+  </div>
+</section>
+
+<!-- 11. Settings -->
+<section class="phone" id="s11">
+  <div class="bar">
+    <div class="ib"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></div>
+    <div class="t">Settings</div>
+    <div class="ib"></div>
+  </div>
+  <div class="meh">
+    <div class="ring"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="30" fill="none" stroke="#262626" stroke-width="2.5"/><circle cx="32" cy="32" r="30" fill="none" stroke="#d4af37" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="40 189" transform="rotate(-90 32 32)"/></svg><div class="ini">MB</div><div class="lvl">LVL 3</div></div>
+    <div><b>Marcus B.</b><span>Edit profile, photo and Playing for</span></div>
+    <svg class="i" viewBox="0 0 24 24" style="margin-left:auto;width:18px;height:18px;color:var(--faint)"><path d="M9 5l7 7-7 7"/></svg>
+  </div>
+  <div class="set">
+    <div class="sh">Your training</div>
+    <div class="sr"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>Weekly target<span class="val">4h, in season</span></div>
+    <div class="sr"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>My training days<span class="val">Mon, Wed, Fri</span></div>
+    <div class="sh">Friends</div>
+    <div class="sr"><svg class="i" viewBox="0 0 24 24"><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 00-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 005.7 5.7l1-1"/></svg>Send my link<svg class="i ch" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>
+    <div class="sr"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M6 6l12 12"/></svg>Blocked<span class="val">0</span></div>
+    <div class="sh">Help</div>
+    <div class="sr"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.5 9.5a2.5 2.5 0 114 2c-.9.6-1.5 1.1-1.5 2.2M12 17h.01"/></svg>Support<svg class="i ch" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>
+    <div class="sr"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.4 8.4-8 9-4.6-.6-8-4-8-9V6z"/></svg>Privacy and terms<svg class="i ch" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></div>
+    <div class="sh"></div>
+    <div class="sr">Sign out</div>
+    <div class="sr red">Delete my account</div>
+  </div>
+</section>
+
+<!-- 12. My week, scrolled down -->
+<section class="phone" id="s12">
+  <div class="sec" style="padding-top:58px">This week with your friends</div>
+  <div class="row"><span class="p">1</span><img class="av" src="av-gary.jpg" style="width:38px;height:38px"><span class="nm">Gary G.<svg class="star" viewBox="0 0 24 24"><use href="#starp"/></svg></span><span class="tm">4h 30m</span></div>
+  <div class="bar2"><i style="width:100%"></i></div>
+  <div class="row you"><span class="p">2</span><div class="ini">MB</div><span class="nm">You</span><span class="tm">3h 15m</span></div>
+  <div class="bar2"><i style="width:72%"></i></div>
+  <div class="row"><span class="p">3</span><img class="av" src="av-yinka.jpg" style="width:38px;height:38px"><span class="nm">Yinka B.</span><span class="tm">2h 45m</span></div>
+  <div class="bar2"><i style="width:61%"></i></div>
+  <div class="row"><span class="p">4</span><div class="ini">DR</div><span class="nm">Dani R.</span><span class="tm">1h 15m</span></div>
+  <div class="bar2"><i style="width:28%"></i></div>
+  <div class="invite"><i><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M12 5v14M5 12h14"/></svg></i>Add a friend</div>
+  <div class="sec">Your clubs</div>
+  <div class="cards">
+    <div class="cc"><div class="crest" style="background:linear-gradient(150deg,#d4af37,#7a6118)"><svg viewBox="0 0 34 38" fill="#000"><use href="#shield"/><text x="17" y="24" text-anchor="middle" font-family="BC" font-weight="900" font-size="15" fill="#d4af37">T7</text></svg></div><div class="nm">Strive Elite 5v5: Team 7</div><div class="rkn">#2</div><div class="sb">of 24 clubs</div></div>
+    <div class="cc"><div class="crest" style="background:linear-gradient(150deg,#2a9d6b,#0f3f2a)"><svg viewBox="0 0 34 38" fill="#fff"><use href="#shield"/><text x="17" y="24" text-anchor="middle" font-family="BC" font-weight="900" font-size="15" fill="#0f3f2a">WF</text></svg></div><div class="nm">Weak Foot Gang</div><div class="rkn">#5</div><div class="sb">of 24 clubs</div></div>
+    <div class="cc new"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Start a club</div>
+  </div>
+  <div class="share">
+    <div class="story"><img src="post-gary-1.jpg"><b>3H<br>15M</b><s>STRIVE ELITE</s></div>
+    <div class="tx"><b>Your week, ready to post</b><span>3h 15m so far. Put it on your story.</span><div class="btn white">Share to my story</div></div>
+  </div>
+  <div class="tabs">
+    <div class="tab"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="9" r="3.2"/><path d="M3 19c.6-3.2 2.9-5 6-5s5.4 1.8 6 5"/><circle cx="17" cy="8" r="2.4"/><path d="M16.5 13.2c2.4.2 4 1.8 4.5 4.3"/></svg>Friends</div>
+    <div class="plus"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+    <div class="tab on"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>My week</div>
+  </div>
+</section>
+
+<script>
+const s=new URLSearchParams(location.search).get("s");
+if(s){document.body.classList.add("one");document.querySelectorAll(".phone").forEach(p=>{if(p.id!=="s"+s)p.remove()})}
+</script>
+</body>
+</html>

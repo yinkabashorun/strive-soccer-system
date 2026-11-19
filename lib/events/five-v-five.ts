@@ -25,12 +25,11 @@ export const FIVE_V_FIVE = {
   registrationClosesIso: nyLocalToIso("2026-12-06", "00:00"),
   dmWord: "5V5",
   instagramDm: "https://ig.me/m/strivesoccerfc",
-  // Stripe Payment Links, one per price, created by Coach Yinka. Empty =
-  // the button falls back to the Instagram DM so nothing fake is shown.
-  paymentLinks: {
-    earlyBird: "",
-    standard: "",
-  },
+  // The team registration Google Form (Coach Yinka, Nov 19: "we will send
+  // them to a google form"). One form for both prices; the page shows the
+  // price that applies today. Empty = the button falls back to the
+  // Instagram DM so nothing fake is shown.
+  registrationForm: "",
 } as const;
 
 export type FiveV5Phase = "early" | "standard" | "closed";
@@ -48,14 +47,20 @@ export function priceAt(ms: number): number | null {
   return null;
 }
 
-// Where the register button goes right now: the Stripe link for the live
-// price when it exists, else the Instagram DM.
-export function registerTarget(ms: number): { href: string; kind: "pay" | "dm" } | null {
-  const phase = phaseAt(ms);
-  if (phase === "closed") return null;
-  const link = phase === "early" ? FIVE_V_FIVE.paymentLinks.earlyBird : FIVE_V_FIVE.paymentLinks.standard;
-  const clean = typeof link === "string" && /^https:\/\/(buy|checkout)\.stripe\.com\//.test(link) ? link : "";
-  return clean ? { href: clean, kind: "pay" } : { href: FIVE_V_FIVE.instagramDm, kind: "dm" };
+// Only a real Google Forms address can become the button's href.
+export function cleanFormUrl(url: string): string {
+  return /^https:\/\/(docs\.google\.com\/forms\/|forms\.gle\/)/.test(url) ? url : "";
+}
+
+// Where the register button goes right now: the Google Form when it is
+// set, else the Instagram DM; nothing once registration has closed.
+export function registerTarget(
+  ms: number,
+  form: string = FIVE_V_FIVE.registrationForm,
+): { href: string; kind: "form" | "dm" } | null {
+  if (phaseAt(ms) === "closed") return null;
+  const clean = cleanFormUrl(form);
+  return clean ? { href: clean, kind: "form" } : { href: FIVE_V_FIVE.instagramDm, kind: "dm" };
 }
 
 export function money(n: number): string {

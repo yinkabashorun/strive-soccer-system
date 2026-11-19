@@ -23,8 +23,14 @@ describe("5v5 pricing", () => {
     expect(dayOf(FIVE_V_FIVE.earlyBirdEndsIso)).toBe("Nov 26");
     expect(lastDayBefore(FIVE_V_FIVE.registrationClosesIso)).toBe("Saturday, Dec 5");
   });
-  it("falls back to the Instagram DM until a Stripe link is set", () => {
-    expect(registerTarget(at("2026-11-19T15:00:00Z"))).toEqual({ href: FIVE_V_FIVE.instagramDm, kind: "dm" });
+  it("sends teams to the Google Form, the DM until it is set, nothing when closed", () => {
+    const now = at("2026-11-19T15:00:00Z");
+    expect(registerTarget(now, "")).toEqual({ href: FIVE_V_FIVE.instagramDm, kind: "dm" });
+    expect(registerTarget(now, "https://forms.gle/abc123")).toEqual({ href: "https://forms.gle/abc123", kind: "form" });
+    expect(registerTarget(now, "https://docs.google.com/forms/d/e/x/viewform")?.kind).toBe("form");
+    expect(registerTarget(now, "javascript:alert(1)")?.kind).toBe("dm");
+    expect(registerTarget(now, "https://evil.example/forms.gle/x")?.kind).toBe("dm");
+    expect(registerTarget(at("2026-12-06T05:00:00Z"), "https://forms.gle/abc123")).toBeNull();
   });
   it("formats money", () => {
     expect(money(3000)).toBe("$3,000");

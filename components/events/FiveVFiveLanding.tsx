@@ -6,8 +6,6 @@ import { FIVE_V_FIVE as E, dayOf, lastDayBefore, money, phaseAt, priceAt, regist
 // no app data, nothing about members.
 const META_PIXEL_ID = "1655175349021847";
 
-const GOLD = "bg-gradient-to-b from-[#fff6d8] via-[#efd287] to-[#c39a3c] bg-clip-text text-transparent";
-
 export function FiveVFiveLanding() {
   const now = Date.now();
   const phase = phaseAt(now);
@@ -35,20 +33,25 @@ export function FiveVFiveLanding() {
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6">
       <MetaPixel id={META_PIXEL_ID} />
 
-      {/* Hero */}
-      <div className="rise-in text-center">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.35em] text-accent">
-          {E.shortDate} <span className="mx-2 text-accent/60">•</span> {E.venue}
-        </div>
-        <h1 className="mt-4 font-display text-5xl font-black uppercase leading-none sm:text-7xl">
-          Strive Elite <span className={GOLD}>5v5</span>
-        </h1>
-        <div className={`mt-6 font-display text-7xl font-black leading-none sm:text-8xl ${GOLD}`}>{money(E.prize)}</div>
-        <div className="mt-2 font-display text-lg font-bold uppercase tracking-[0.5em] text-white/85">Cash prize</div>
-        <p className="mx-auto mt-6 max-w-md text-sm leading-relaxed text-white/60">
-          The most competitive players in the DMV, {E.teams} teams, one day. Maryland or Virginia, who really runs the DMV?
-        </p>
+      {/* Hero: the event poster (marketing/graphics/strive-elite-collage,
+          exported to public/events). It carries the date, the venue and
+          the prize, so the h1 is for screen readers and search only. */}
+      <h1 className="sr-only">
+        {E.name}, {money(E.prize)} cash prize, {E.dateLabel} at {E.venue}
+      </h1>
+      <div className="rise-in overflow-hidden rounded-2xl border border-white/8">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/events/strive-elite-5v5.jpg"
+          width={1080}
+          height={1350}
+          alt={`${E.name}. ${money(E.prize)} cash prize. ${E.shortDate} at ${E.venue}.`}
+          className="block h-auto w-full"
+        />
       </div>
+      <p className="mx-auto mt-6 max-w-md text-center text-sm leading-relaxed text-white/60">
+        The most competitive players in the DMV, {E.teams} teams, one day. Maryland or Virginia, who really runs the DMV?
+      </p>
 
       {/* Price + register */}
       <Reveal variant="build" className="mt-9 rounded-2xl border border-accent/30 bg-accent/[0.06] p-5 text-center">
@@ -75,10 +78,13 @@ export function FiveVFiveLanding() {
               rel="noopener noreferrer"
               className="mt-5 inline-block w-full rounded-full bg-accent px-6 py-3.5 font-display text-lg font-black uppercase tracking-wider text-black transition-opacity hover:opacity-90 sm:w-auto"
             >
-              {target.kind === "pay" ? `Register your team, ${money(price)}` : `DM “${E.dmWord}” to register`}
+              {target.kind === "form" ? "Register your team" : `DM “${E.dmWord}” to register`}
             </a>
+            {target.kind === "form" && (
+              <p className="mt-2 text-xs text-white/45">Opens the registration form. Your spot is held once the {money(price)} entry fee is paid.</p>
+            )}
             {target.kind === "dm" && (
-              <p className="mt-2 text-xs text-white/45">Opens Instagram. Send “{E.dmWord}” and we reply with the payment link.</p>
+              <p className="mt-2 text-xs text-white/45">Opens Instagram. Send “{E.dmWord}” and we reply with the registration form.</p>
             )}
           </>
         )}

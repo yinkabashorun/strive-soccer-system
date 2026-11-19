@@ -194,3 +194,33 @@ level, tag, cue, pass mark, up/down, on/off. Player pages /courses and
 /courses/[slug]. Keep It Up is seeded by the migration exactly as the
 preview page read on Oct 25 2026: seven levels, fourteen drills, pass
 marks on the beginner drills only.
+
+## The 3-month program (migration 065, Nov 11 2026)
+
+Coach Yinka's own comeback structure. A player with a program gets twelve
+weeks in three monthly blocks; each block has two focus pillars, one per
+half-month. Rules, all enforced in `lib/elite/bank-conform.ts` at both
+gates (generation and publish) and pinned by `tests/program.test.ts`:
+
+- The focus gets two of each session's three skill drills. The third is a
+  maintenance drill from another area, rotated so every other area gets
+  reps. The plan's own drill from another area is kept as that third.
+- The second week on a focus leads with the harder drills (drill `level`
+  1 to 3). A drill's "make it harder" line is shown with its cue.
+- Threads run for whole months and never take a skill-drill slot: the
+  strength thread makes the finisher required in every session; the speed
+  thread fills the slot after the warm-up with speed drills.
+- A course-only drill enters the week without a per-player tick only when
+  it belongs to that week's focus pillar, or is a speed drill on a month
+  with the speed thread.
+- Program weeks follow the player's own week numbers, so a break moves the
+  program with the player. A week already built is never rewritten; a
+  program starts with the first week not yet built.
+- No program, or a focus with no drills the player can do: the week
+  builds exactly as it did before.
+
+Pillars and their names live in `lib/elite/program.ts`. The coach sets a
+program in the 3-month program panel on the player page (the quiz, the
+draft, six focuses, the threads). Not built yet: the conditioning target
+(a weekly run goal), clearance stages for injured players, programs for
+few-yards players, and a player-facing view of the program.

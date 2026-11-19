@@ -53,7 +53,7 @@ export function GameSchedule({ games }: { games: Game[] }) {
       )}
 
       {!open ? (
-        <button onClick={() => setOpen(true)} className="btn w-full py-3">
+        <button onClick={() => setOpen(true)} className="btn min-h-[48px] w-full py-3">
           <CalendarPlus className="h-4 w-4" /> Add a game
         </button>
       ) : (
@@ -64,37 +64,41 @@ export function GameSchedule({ games }: { games: Game[] }) {
               value={date}
               min={today}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-sm text-bone focus:border-accent/40 focus:outline-none"
+              aria-label="Game date"
+              className="h-11 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 text-sm text-bone focus:border-accent/40 focus:outline-none"
             />
             <input
               value={kickoff}
               onChange={(e) => setKickoff(e.target.value)}
               placeholder="Kickoff (e.g. 10:30 AM)"
-              className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-sm text-bone placeholder:text-white/25 focus:border-accent/40 focus:outline-none"
+              aria-label="Kickoff time"
+              className="h-11 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 text-sm text-bone placeholder:text-white/25 focus:border-accent/40 focus:outline-none"
             />
           </div>
           <input
             value={opponent}
             onChange={(e) => setOpponent(e.target.value)}
             placeholder="Opponent"
-            className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-sm text-bone placeholder:text-white/25 focus:border-accent/40 focus:outline-none"
+            aria-label="Opponent"
+            className="h-11 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 text-sm text-bone placeholder:text-white/25 focus:border-accent/40 focus:outline-none"
           />
           <input
             value={location}
             onChange={(e) => setLocation(e.target.value)}
             placeholder="Field / city (NoVA games especially)"
-            className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5 text-sm text-bone placeholder:text-white/25 focus:border-accent/40 focus:outline-none"
+            aria-label="Field or city"
+            className="h-11 w-full rounded-xl border border-white/10 bg-white/[0.03] px-3 text-sm text-bone placeholder:text-white/25 focus:border-accent/40 focus:outline-none"
           />
           {error && <p className="text-sm text-red-400">{error}</p>}
           <div className="flex gap-2">
             <button
               onClick={submit}
               disabled={pending || !date}
-              className="btn-accent flex-1 py-2.5"
+              className="btn-accent min-h-[44px] flex-1 py-2.5"
             >
               {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Add game"}
             </button>
-            <button onClick={() => setOpen(false)} className="btn px-4 py-2.5">
+            <button onClick={() => setOpen(false)} className="btn min-h-[44px] px-4 py-2.5">
               Cancel
             </button>
           </div>
@@ -102,14 +106,14 @@ export function GameSchedule({ games }: { games: Game[] }) {
       )}
 
       {upcoming.length === 0 && !open && !added && (
-        <p className="text-sm text-white/40">
+        <p className="text-sm text-white/50">
           Drop your game schedule. If it&apos;s in Northern Virginia, Coach
           might pull up.
         </p>
       )}
 
       {past.length > 0 && (
-        <p className="text-xs text-white/30">{past.length} past game{past.length === 1 ? "" : "s"}</p>
+        <p className="text-xs text-white/50">{past.length} past game{past.length === 1 ? "" : "s"}</p>
       )}
     </div>
   );
@@ -141,7 +145,7 @@ function GameCard({ game }: { game: Game }) {
           <div className="mt-0.5 truncate text-sm text-white/60">
             {game.opponent ? `vs ${game.opponent}` : "Game"}
             {game.location && (
-              <span className="text-white/40">
+              <span className="text-white/50">
                 {" "}
                 · <MapPin className="inline h-3 w-3" /> {game.location}
               </span>

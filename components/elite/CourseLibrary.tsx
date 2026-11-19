@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft, BookOpen, ChevronRight, Download, ExternalLink, PencilLine } from "lucide-react";
 import type { Course } from "@/lib/elite/types";
 import { courseNotice, externalHref, isInternalHref, levelsOf, stepTitle, stepVideo } from "@/lib/elite/courses";
+import { AppLink } from "@/components/elite/AppLink";
 import { DrillVideo } from "@/components/elite/DrillVideo";
 import { cn } from "@/lib/utils";
 
@@ -24,7 +25,7 @@ export function CourseList({
   return (
     <div className="space-y-6">
       <header className="animate-fade-up">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">Library</div>
+        <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">Library</div>
         <h1 className="mt-1 flex items-center gap-2.5 font-display text-3xl font-black sm:text-4xl">
           <BookOpen className="h-7 w-7 text-accent" /> Courses
         </h1>
@@ -44,7 +45,9 @@ export function CourseList({
       </header>
 
       {courses.length === 0 ? (
-        <div className="elite-card p-6 text-sm text-white/45">The first course is on its way.</div>
+        <div className="elite-card p-6 text-[15px] leading-relaxed text-white/65">
+          The first course is on its way. It shows up here the moment it is ready.
+        </div>
       ) : (
         <div className="space-y-2.5">
           {courses.map((c) => {
@@ -69,13 +72,13 @@ export function CourseList({
                   <div className="flex flex-wrap items-center gap-2">
                     <div className="font-display text-xl font-bold uppercase tracking-tight">{c.name}</div>
                     {staff && !c.active && (
-                      <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-white/50">
+                      <span className="rounded-full border border-white/15 px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.14em] text-white/50">
                         Off
                       </span>
                     )}
                   </div>
                   {c.subtitle && <div className="mt-0.5 text-sm text-white/55">{c.subtitle}</div>}
-                  <div className="mt-1.5 text-xs text-white/35">
+                  <div className="mt-1.5 text-xs text-white/50">
                     {c.kind === "link"
                       ? "Opens the course site"
                       : c.kind === "drill"
@@ -85,9 +88,9 @@ export function CourseList({
                   {notice && <div className="mt-1.5 text-xs text-amber-300/80">{notice}</div>}
                 </div>
                 {out && !isInternalHref(out) ? (
-                  <ExternalLink className="h-5 w-5 shrink-0 text-white/30" />
+                  <ExternalLink className="h-5 w-5 shrink-0 text-white/50" />
                 ) : (
-                  <ChevronRight className="h-5 w-5 shrink-0 text-white/30" />
+                  <ChevronRight className="h-5 w-5 shrink-0 text-white/50" />
                 )}
               </Card>
             );
@@ -122,7 +125,7 @@ export function LinkCourseGate({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
           href={basePath}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-white/40 hover:text-bone"
+          className="inline-flex min-h-[44px] items-center gap-1.5 pr-3 text-xs font-semibold uppercase tracking-wider text-white/60 hover:text-bone"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Courses
         </Link>
@@ -144,7 +147,7 @@ export function LinkCourseGate({
 
       <header className="animate-fade-up">
         {course.subtitle && (
-          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">{course.subtitle}</div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">{course.subtitle}</div>
         )}
         <h1 className="mt-1 font-display text-3xl font-black uppercase tracking-tight sm:text-4xl">{course.name}</h1>
       </header>
@@ -159,15 +162,26 @@ export function LinkCourseGate({
         </div>
       )}
 
-      {out && (
-        <a
-          href={out}
-          {...(sameTab ? {} : { target: "_blank", rel: "noopener noreferrer" })}
-          className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wider text-ink hover:opacity-90"
-        >
-          Open the course <ExternalLink className="h-4 w-4" />
-        </a>
-      )}
+      {out &&
+        (sameTab ? (
+          <a
+            href={out}
+            className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wider text-ink hover:opacity-90"
+          >
+            Open the course <ExternalLink className="h-4 w-4" />
+          </a>
+        ) : (
+          // Another site: a new tab on the website. Inside the iPhone app
+          // a course with an outside address is shown as its own pages
+          // instead (courseForApp), so this button is never drawn there.
+          <AppLink
+            href={out}
+            title={course.name}
+            className="inline-flex items-center gap-2 rounded-full bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wider text-ink hover:opacity-90"
+          >
+            Open the course <ExternalLink className="h-4 w-4" />
+          </AppLink>
+        ))}
     </div>
   );
 }
@@ -194,7 +208,7 @@ export function CourseView({
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
           href={basePath}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-white/40 hover:text-bone"
+          className="inline-flex min-h-[44px] items-center gap-1.5 pr-3 text-xs font-semibold uppercase tracking-wider text-white/60 hover:text-bone"
         >
           <ArrowLeft className="h-3.5 w-3.5" /> Courses
         </Link>
@@ -216,7 +230,7 @@ export function CourseView({
 
       <header className="animate-fade-up">
         {course.subtitle && (
-          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">{course.subtitle}</div>
+          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">{course.subtitle}</div>
         )}
         <h1 className="mt-1 font-display text-3xl font-black uppercase tracking-tight sm:text-4xl">{course.name}</h1>
         {intro.length > 0 && (
@@ -247,7 +261,7 @@ export function CourseView({
                     {s.tag && (
                       <span
                         className={cn(
-                          "rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em]",
+                          "rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.14em]",
                           s.tag === "beginner" ? "border border-white/15 text-white/60" : "border border-accent/40 text-accent"
                         )}
                       >
@@ -270,14 +284,13 @@ export function CourseView({
                       </div>
                     )}
                     {s.download_url && (
-                      <a
+                      <AppLink
                         href={s.download_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-accent hover:underline"
+                        title={stepTitle(s)}
+                        className="mt-3 inline-flex min-h-[44px] items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-accent hover:underline"
                       >
                         <Download className="h-3.5 w-3.5" /> Download
-                      </a>
+                      </AppLink>
                     )}
                   </article>
                 );

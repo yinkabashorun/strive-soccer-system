@@ -1,13 +1,16 @@
 import { notFound } from "next/navigation";
 import { getCourse } from "@/lib/elite/data";
-import { stepIsUsable } from "@/lib/elite/courses";
+import { courseForApp, stepIsUsable } from "@/lib/elite/courses";
+import { inNativeApp } from "@/lib/elite/native-request";
 import { CourseView, LinkCourseGate } from "@/components/elite/CourseLibrary";
 
 // One course from the coach shell: rendered exactly as a member sees it,
 // but an off course or one with nothing usable still opens (with the
 // notice) so the coach can read it before switching it on.
 export default async function CoachCoursePage({ params }: { params: { slug: string } }) {
-  const course = await getCourse(params.slug);
+  const found = await getCourse(params.slug);
+  if (!found) notFound();
+  const course = courseForApp(found, inNativeApp());
   if (!course) notFound();
   if (course.kind === "link") return <LinkCourseGate course={course} basePath="/coach/courses" staff />;
   const steps = course.steps.filter(stepIsUsable);

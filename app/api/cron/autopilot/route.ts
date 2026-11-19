@@ -10,6 +10,10 @@ import {
 export const runtime = "nodejs";
 export const maxDuration = 300;
 export const dynamic = "force-dynamic";
+// force-dynamic alone does NOT stop Next caching this route's database
+// reads (see lib/elite/supabase/fresh-fetch.ts). This does, for every
+// fetch the route makes, whichever client makes it.
+export const fetchCache = "force-no-store";
 
 // GET — called by Vercel cron (requires CRON_SECRET)
 // POST — called by the dashboard "Run autopilot now" button (no auth needed)

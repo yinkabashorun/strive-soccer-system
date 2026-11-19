@@ -19,6 +19,7 @@
 
 import type { Drill, GeneratedDrill, GeneratedSession, Player, SessionTemplate, TrainingSpace } from "./types";
 import { PLYO_PILLAR, STRENGTH_PILLAR } from "./types";
+import { FOCUS_DRILLS_PER_SESSION, levelOf, type ProgramWeek } from "./program";
 
 // What the builder knows about where a player trains (019 wall, 033 space)
 // and which course drills the coach has offered them (040).
@@ -51,13 +52,31 @@ export function isOffered(d: Drill, env?: PlayerEnv | null): boolean {
   return env?.offer_opt_in === true && (env.opt_in_drill_ids ?? []).includes(d.id);
 }
 
+// The 3-month program (065) may bring a course drill into the week
+// without a per-drill tick: when the drill belongs to this week's focus
+// pillar, or when it is a speed drill and the speed thread is on this
+// month (Coach Yinka, Nov 11 2026: speed drills may enter a week when
+// speed is that player's focus or thread). Wall, goal and space rules
+// still apply to it.
+export const SPEED_PILLAR = "Speed";
+
+export function programAllows(d: Drill, program?: ProgramWeek | null): boolean {
+  if (!program || !d.opt_in) return false;
+  if (d.focus_pillar && d.focus_pillar === program.focus) return true;
+  return program.speed && d.pillar === SPEED_PILLAR;
+}
+
+function fitsWithProgram(d: Drill, env?: PlayerEnv | null, program?: ProgramWeek | null): boolean {
+  return programAllows(d, program) ? drillFitsPlayer({ ...d, opt_in: false }, env) : drillFitsPlayer(d, env);
+}
+
 // The bank as this player may see it: every ordinary drill, plus only the
 // opt-in course drills the coach offered them. Applied before the AI is
 // shown the menu, before the fallback composes, at the publish gate and
 // in Extra Work, so an unoffered course drill is never on the menu, never
 // matched by title, never placed.
-export function offeredBank(bank: Drill[], env?: PlayerEnv | null): Drill[] {
-  return bank.filter((d) => !d.opt_in || isOffered(d, env));
+export function offeredBank(bank: Drill[], env?: PlayerEnv | null, program?: ProgramWeek | null): Drill[] {
+  return bank.filter((d) => !d.opt_in || isOffered(d, env) || programAllows(d, program));
 }
 
 // Course drills are a SLOT, not skill drills (Coach Yinka, Oct 24 2026:
@@ -202,8 +221,35 @@ function fromBank(d: Drill): GeneratedDrill {
     exercise: d.how,
     reps: d.reps,
     minutes: d.minutes,
-    notes: d.cues || undefined,
+    // 065: the coach's "make it harder" line rides with the cue, so the
+    // player sees how to progress the drill without a new column on the
+    // homework row.
+    notes: [d.cues, d.harder ? `Make it harder: ${d.harder}` : ""].filter(Boolean).join(" ") || undefined,
   };
+}
+
+// How many filmed, active drills this player can do in each focus pillar
+// (wall, goal and space rules applied; the course tick is not, because a
+// program brings its own focus drills into the week). The coach's program
+// panel shows these so a thin or empty focus is seen before it is picked.
+export function focusCounts(bank: Drill[], env?: PlayerEnv | null): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const d of bank) {
+    if (!d.focus_pillar || !d.active || !d.video_url || !isSkillPillar(d.pillar)) continue;
+    if (!drillFitsPlayer({ ...d, opt_in: false }, env)) continue;
+    out[d.focus_pillar] = (out[d.focus_pillar] ?? 0) + 1;
+  }
+  return out;
+}
+
+// Focus drills in the order the fortnight uses them: easier first in the
+// first week of a focus, harder first in the second (progressive overload
+// by harder drills, Coach Yinka, Nov 11 2026), bank order inside a level.
+export function orderFocusPool(pool: Drill[], weekInHalf: 1 | 2): Drill[] {
+  const dir = weekInHalf === 2 ? -1 : 1;
+  return [...pool].sort(
+    (a, b) => dir * (levelOf(a) - levelOf(b)) || a.sort - b.sort || a.title.localeCompare(b.title)
+  );
 }
 
 // Pick a skill drill for a pillar from a pool, avoiding what's already
@@ -235,9 +281,13 @@ export function conformSessionsToBank(
   player?: PlayerEnv | null,
   weeklyFocus = "",
   strength: StrengthMode = "optional",
-  tpl?: TemplateContext | null
+  tpl?: TemplateContext | null,
+  program?: ProgramWeek | null
 ): GeneratedSession[] {
   if (!bank || bank.length === 0) return sessions;
+  // Program months with the strength thread end every session with a
+  // finisher, the same mode an injury note switches on.
+  if (program?.strength) strength = "required";
 
   // Few-yards players (035): the week IS the coach's hand-built templates,
   // whatever the AI or the studio wrote. Same gate, both call sites.
@@ -262,9 +312,32 @@ export function conformSessionsToBank(
   // recognised by title so one the AI or the studio wrote is never kept
   // as a skill drill (offered: the slot already places it; unoffered: it
   // does not exist for this player).
-  const coursePool = coursePoolFor(bank, player);
   const courseTitles = bank.filter(isCourseDrill);
-  if (skillsPool.length === 0) return sessions;
+  // Program (065): this week's focus pool (two of the three skill drills
+  // come from it), the maintenance pool (everything else the player can
+  // do), and the speed thread's drills for the slot after the warm-up.
+  const focusPool = program
+    ? orderFocusPool(
+        bank.filter(
+          (d) => d.focus_pillar === program.focus && isSkillPillar(d.pillar) && fitsWithProgram(d, player, program)
+        ),
+        program.weekInHalf
+      )
+    : [];
+  const programOn = Boolean(program) && focusPool.length > 0;
+  const maintenancePool = programOn ? skillsPool.filter((d) => d.focus_pillar !== program!.focus) : [];
+  const maintenancePillars = [...new Set(maintenancePool.map((d) => d.pillar as string))];
+  const speedPool =
+    program?.speed === true
+      ? orderFocusPool(
+          bank.filter((d) => d.pillar === SPEED_PILLAR && fitsWithProgram(d, player, program)),
+          program.weekInHalf
+        )
+      : [];
+  // The slot after the warm-up carries the speed thread on its months;
+  // otherwise the course drills the coach offered this player (040).
+  const coursePool = speedPool.length > 0 ? speedPool : coursePoolFor(bank, player);
+  if (skillsPool.length === 0 && !programOn) return sessions;
 
   // Titles already placed this week - replacements avoid repeats while the
   // pool allows it.
@@ -272,6 +345,8 @@ export function conformSessionsToBank(
   let plyoSpin = 0;
   let strengthSpin = 0;
   let courseSpin = 0;
+  let focusSpin = 0;
+  let maintSpin = 0;
   const isStrengthDrill = (d: GeneratedDrill) =>
     isStrengthTitle(d.title) || Boolean(matchBankDrill(d.title, strengthPool));
   const isCourseTitle = (d: GeneratedDrill) =>
@@ -296,6 +371,10 @@ export function conformSessionsToBank(
     // the AI or the studio wrote them in.
     const warm: GeneratedDrill[] = [];
     const skills: GeneratedDrill[] = [];
+    // Program week: the one drill outside the focus that the plan wrote
+    // is kept as the maintenance drill (the notes chose it); the focus
+    // drills are placed by the system below.
+    let keptMaintenance: GeneratedDrill | null = null;
     // Strengthening finishers are handled apart from the skill drills:
     // matched to the filmed strengthening pool (or replaced from it),
     // capped at one, and appended LAST after the skill fill below.
@@ -320,6 +399,13 @@ export function conformSessionsToBank(
       // A course drill written as a skill drill: the slot below places the
       // offered ones; an unoffered one does not exist for this player.
       if (isCourseTitle(d)) continue;
+      if (programOn) {
+        const kept = matchBankDrill(d.title, maintenancePool);
+        if (kept && !keptMaintenance) {
+          keptMaintenance = { ...fromBank(kept), ...keepTailoring(d), title: kept.title };
+        }
+        continue;
+      }
       const hit = matchBankDrill(d.title, skillsPool);
       if (hit && !usedSession.has(hit.title)) {
         usedSession.add(hit.title);
@@ -339,7 +425,34 @@ export function conformSessionsToBank(
     // invented padding drill (the old "Apply under pressure" / "Focus
     // block" rows reached real players with no video). Course drills are
     // not skill drills and never count here.
-    while (skills.length < MIN_SKILLS) {
+    if (programOn) {
+      // Two of the three skill drills are this fortnight's focus, rotated
+      // through the pool in level order across the week.
+      const want = Math.min(FOCUS_DRILLS_PER_SESSION, focusPool.length);
+      for (let tries = 0; skills.length < want && tries < focusPool.length * 2; tries++) {
+        const pick = focusPool[focusSpin++ % focusPool.length];
+        if (usedSession.has(pick.title)) continue;
+        usedSession.add(pick.title);
+        skills.push(fromBank(pick));
+      }
+      // The third keeps the rest alive: the plan's own pick when it wrote
+      // one, else the next pillar in turn so every other area gets reps.
+      const pool = maintenancePool.length > 0 ? maintenancePool : skillsPool;
+      if (keptMaintenance && !usedSession.has(keptMaintenance.title)) {
+        usedSession.add(keptMaintenance.title);
+        usedWeek.add(keptMaintenance.title);
+        skills.push(keptMaintenance);
+      }
+      while (skills.length < MIN_SKILLS && pool.length > 0) {
+        const pillar = maintenancePillars.length ? maintenancePillars[maintSpin++ % maintenancePillars.length] : null;
+        const sub = pickSkillFrom(pool, pillar, usedWeek, usedSession);
+        if (!sub || usedSession.has(sub.title)) break;
+        usedSession.add(sub.title);
+        usedWeek.add(sub.title);
+        skills.push(fromBank(sub));
+      }
+    }
+    while (!programOn && skills.length < MIN_SKILLS) {
       const sub = pickSkill(sessionPillar, usedSession);
       if (usedSession.has(sub.title)) break; // bank exhausted for this session
       usedSession.add(sub.title);

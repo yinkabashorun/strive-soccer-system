@@ -1,20 +1,35 @@
 import Link from "next/link";
 import { Wordmark } from "@/components/elite/Wordmark";
+import { SHEET_PARAM, shownInSheet } from "@/lib/elite/app-links";
 
 export const metadata = { title: "Privacy Policy · Strive Elite" };
 
-const UPDATED = "September 26, 2026";
+const UPDATED = "November 18, 2026";
 const CONTACT_EMAIL = "coach@strivesoccer100x.com";
 
-export default function PrivacyPage() {
+export default function PrivacyPage({
+  searchParams,
+}: {
+  searchParams?: { [SHEET_PARAM]?: string | string[] };
+}) {
+  // Inside the iPhone app this page opens in a sheet over the screen the
+  // person was on (components/elite/AppLink.tsx). There it carries no
+  // link that would walk the sheet off to another part of the app.
+  const sheet = shownInSheet(searchParams?.[SHEET_PARAM]);
   return (
     <div className="min-h-[100svh] bg-black text-bone">
-      <div className="mx-auto w-full max-w-2xl px-5 py-10 sm:px-6">
-        <Wordmark href="/" />
+      <div
+        className={
+          sheet
+            ? "mx-auto w-full max-w-2xl px-5 pb-10 pt-6 sm:px-6"
+            : "mx-auto w-full max-w-2xl px-5 pb-10 pt-[calc(2.5rem+env(safe-area-inset-top))] sm:px-6"
+        }
+      >
+        <Wordmark href={sheet ? null : "/"} />
         <h1 className="mt-8 font-display text-3xl font-black uppercase tracking-tight sm:text-4xl">
           Privacy Policy
         </h1>
-        <p className="mt-2 text-sm text-white/40">Last updated {UPDATED}</p>
+        <p className="mt-2 text-sm text-white/50">Last updated {UPDATED}</p>
 
         <div className="mt-8 space-y-6 text-[15px] leading-relaxed text-white/75">
           <p>
@@ -37,14 +52,24 @@ export default function PrivacyPage() {
               <li>
                 <strong className="text-bone">Parent/guardian contact info:</strong>{" "}
                 name, email address, and phone number, used to send you
-                updates about your player&apos;s training.
+                updates about your player&apos;s training. A player&apos;s
+                own phone number is optional and only used for training
+                texts if you add it.
               </li>
               <li>
                 <strong className="text-bone">Training data:</strong> weekly
                 homework completion, self-reported check-ins (energy,
-                rating, notes), progress ratings, and links to any film you
-                or your player submit (we store the link, e.g. to Hudl or
-                YouTube - we don&apos;t host the video file itself).
+                rating, notes), progress ratings, time trained, and links to
+                any game film you or your player submit (e.g. to Hudl or
+                YouTube).
+              </li>
+              <li>
+                <strong className="text-bone">Videos your player uploads:</strong>{" "}
+                clips of a drill sent to the coach, progress videos, and
+                clips added for a Film Room session. These files are stored
+                privately. Only your family and the coaches can open them.
+                A clip is never posted publicly unless a parent or guardian
+                has said yes to that specific clip.
               </li>
               <li>
                 <strong className="text-bone">Messages:</strong> any message
@@ -56,7 +81,8 @@ export default function PrivacyPage() {
                 your login email, a securely hashed password (we never see
                 or store your actual password), and, if you enable push
                 notifications, the technical subscription details needed to
-                send them.
+                send them. If the app shows an error page, we record which
+                page it was and what went wrong so we can fix it.
               </li>
             </ul>
           </Section>
@@ -91,7 +117,22 @@ export default function PrivacyPage() {
             <ul className="list-disc space-y-1.5 pl-5">
               <li>
                 <strong className="text-bone">Supabase</strong> stores our
-                database (everything listed above) and handles login.
+                database and uploaded videos (everything listed above) and
+                handles login.
+              </li>
+              <li>
+                <strong className="text-bone">Vercel</strong> hosts the app
+                itself.
+              </li>
+              <li>
+                <strong className="text-bone">Zoom</strong> hosts Film Room
+                sessions and coaching calls. Joining one is subject to
+                Zoom&apos;s own terms.
+              </li>
+              <li>
+                <strong className="text-bone">Apple and Google</strong>{" "}
+                deliver push notifications to your phone if you turn them
+                on.
               </li>
               <li>
                 <strong className="text-bone">GoHighLevel</strong> sends
@@ -116,15 +157,40 @@ export default function PrivacyPage() {
             </ul>
           </Section>
 
+          <Section title="Your agreement and advertising">
+            <p>
+              When an account is created, and again if our terms change,
+              the adult on the account accepts our Terms and this policy.
+              We keep a record of that acceptance: the version, the date
+              and time, the device&apos;s browser type, and the name typed
+              if one was asked for.
+            </p>
+            <p className="mt-3">
+              Our public information page (thestriveapp.com/demo) uses an
+              advertising pixel from Meta to measure visits from our ads.
+              It is not used anywhere inside the member app, and we do not
+              use a player&apos;s training information for advertising.
+            </p>
+            <p className="mt-3">
+              Clips you add to a weekly Film Room are watched in that
+              session by the coaches and the members who join it. Every
+              other clip is seen only by the coaches.
+            </p>
+          </Section>
+
           <Section title="Children's information">
             <p>
-              Strive Elite is a program for youth players, most of whom are
-              under 13. Accounts are created and controlled by a parent or
-              guardian, not the child, and all communications about the
-              program go to the parent/guardian contact info on file. If
+              Strive Elite is a training program for youth players, most of
+              whom are between 12 and 15. Accounts are created and
+              controlled by a parent or guardian, and a player under 13
+              takes part only through an account their parent or guardian
+              set up and agreed to. Communications about the program go to
+              the parent/guardian contact info on file. We do not show
+              advertising in the app and we do not use your player&apos;s
+              information for advertising. If
               you have questions about your child&apos;s information, or
               want it corrected or removed, contact us at{" "}
-              <a href={`mailto:${CONTACT_EMAIL}`} className="text-accent hover:underline">
+              <a href={`mailto:${CONTACT_EMAIL}`} className="tap text-accent hover:underline">
                 {CONTACT_EMAIL}
               </a>
               .
@@ -134,12 +200,43 @@ export default function PrivacyPage() {
           <Section title="Your choices">
             <p>
               You can ask us at any time to see what information we have on
-              file for your player, correct anything that&apos;s wrong, or
-              delete your account. Deleting an account removes the
-              player&apos;s training history, messages, and progress data.
-              We keep information only as long as your player is an active
-              member, plus a reasonable period afterward for our own
-              records, unless you ask us to delete it sooner.
+              file for your player or to correct anything that&apos;s wrong.
+              You can turn push notifications off on the Account page in
+              the app, and stop text messages by replying STOP to one or
+              by asking us.
+            </p>
+          </Section>
+
+          <Section title="Deleting your account">
+            <p>
+              You can delete your account yourself, at any time, inside the
+              app: open <strong className="text-bone">Account</strong>, then{" "}
+              <strong className="text-bone">Delete my account</strong>. You
+              will be asked for your password to confirm. If you can&apos;t
+              sign in, email us at{" "}
+              <a href={`mailto:${CONTACT_EMAIL}`} className="tap text-accent hover:underline">
+                {CONTACT_EMAIL}
+              </a>{" "}
+              from the address on the account and we will delete it for
+              you.
+            </p>
+            <p>
+              Deleting an account is permanent and takes effect right away.
+              It removes the login, the player&apos;s profile, training
+              plans and history, progress data, messages, and every video
+              the player uploaded. What it does not remove: records of
+              payments, which are held by our payment processor and which we
+              keep as long as tax and accounting rules require, and text
+              messages already delivered to your phone. Backup copies held
+              by our hosting provider are overwritten on their regular
+              schedule. Deleting an account does not by itself stop a
+              monthly payment. We are told when an account is deleted and
+              stop the billing; you can also ask us directly.
+            </p>
+            <p>
+              While an account is open we keep its information so the
+              program can work. If a membership ends and the account is
+              left open, you can delete it the same way or ask us to.
             </p>
           </Section>
 
@@ -165,7 +262,7 @@ export default function PrivacyPage() {
             <p>
               Questions about privacy, or a request about your data?
               Email{" "}
-              <a href={`mailto:${CONTACT_EMAIL}`} className="text-accent hover:underline">
+              <a href={`mailto:${CONTACT_EMAIL}`} className="tap text-accent hover:underline">
                 {CONTACT_EMAIL}
               </a>
               .
@@ -173,13 +270,15 @@ export default function PrivacyPage() {
           </Section>
         </div>
 
-        <div className="mt-10 flex items-center gap-4 border-t border-white/8 pt-6 text-sm text-white/40">
-          <Link href="/terms" className="hover:text-white">
+        <div className="mt-10 flex items-center gap-4 border-t border-white/8 pt-6 text-sm text-white/50">
+          <Link href={sheet ? `/terms?${SHEET_PARAM}=1` : "/terms"} className="tap hover:text-white">
             Terms of Service
           </Link>
-          <Link href="/login" className="hover:text-white">
-            Back to sign in
-          </Link>
+          {!sheet && (
+            <Link href="/login" className="tap hover:text-white">
+              Back to sign in
+            </Link>
+          )}
         </div>
       </div>
     </div>

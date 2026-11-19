@@ -18,7 +18,7 @@ export function FilmReviewView({
       {/* The big picture */}
       {review.summary && (
         <div>
-          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
             The big picture
           </div>
           <p className="mt-1.5 text-sm leading-relaxed text-white/85">
@@ -30,7 +30,7 @@ export function FilmReviewView({
       {/* Timestamped key moments */}
       {review.moments.length > 0 && (
         <div>
-          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/50">
             Key moments
           </div>
           <ul className="mt-2 space-y-2">
@@ -51,7 +51,7 @@ export function FilmReviewView({
                 </span>
                 <span
                   className={cn(
-                    "mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[8px] font-bold uppercase tracking-wider",
+                    "mt-0.5 shrink-0 rounded px-1.5 py-0.5 text-[11px] font-bold uppercase tracking-wider",
                     m.kind === "good"
                       ? "bg-accent/90 text-black"
                       : "bg-red-500/85 text-white"
@@ -70,7 +70,7 @@ export function FilmReviewView({
         <div className="grid gap-4 sm:grid-cols-2">
           {review.strengths.length > 0 && (
             <div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
                 What&apos;s working
               </div>
               <ul className="mt-2 space-y-1.5">
@@ -85,13 +85,13 @@ export function FilmReviewView({
           )}
           {review.fixes.length > 0 && (
             <div>
-              <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-white/40">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/50">
                 What we&apos;re fixing
               </div>
               <ul className="mt-2 space-y-1.5">
                 {review.fixes.map((s, i) => (
                   <li key={i} className="flex items-start gap-2 text-sm text-white/75">
-                    <Wrench className="mt-0.5 h-3.5 w-3.5 shrink-0 text-white/40" />
+                    <Wrench className="mt-0.5 h-3.5 w-3.5 shrink-0 text-white/50" />
                     <span className="leading-snug">{s}</span>
                   </li>
                 ))}
@@ -104,7 +104,7 @@ export function FilmReviewView({
       {/* Marching orders */}
       {review.next_steps.length > 0 && (
         <div className="rounded-2xl border border-accent/20 bg-accent/[0.05] p-4">
-          <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-accent">
+          <div className="text-[11px] font-semibold uppercase tracking-[0.18em] text-accent">
             Next steps
           </div>
           <ol className="mt-2 space-y-2">

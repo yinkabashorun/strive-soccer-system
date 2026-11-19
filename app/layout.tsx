@@ -8,6 +8,13 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL || "https://thestriveapp.com"
   ),
+  // Installed from the home screen it opens as its own app (see
+  // app/manifest.ts). "black" keeps the page below the iPhone status bar.
+  appleWebApp: {
+    capable: true,
+    title: "Strive Elite",
+    statusBarStyle: "black",
+  },
   openGraph: {
     title: "Strive Elite · Premium Player Development",
     description:

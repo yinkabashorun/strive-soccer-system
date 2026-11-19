@@ -44,7 +44,7 @@ export default function ErrorPage({
           </Link>
         </div>
         {reference && (
-          <p className="mt-5 text-[11px] text-white/30">Reference {reference}</p>
+          <p className="mt-5 text-[11px] text-white/50">Reference {reference}</p>
         )}
       </div>
     </div>

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { APP_URL } from "@/lib/elite/app-url";
 import { createServiceClient } from "@/lib/elite/supabase/server";
 import { sendPlayerSMS } from "@/lib/elite/sms";
 
@@ -10,6 +11,10 @@ export const runtime = "nodejs";
 // handler touched request headers used to depend on CRON_SECRET being set,
 // so the route was only dynamic by accident. Now it's dynamic on purpose.
 export const dynamic = "force-dynamic";
+// force-dynamic alone does NOT stop Next caching this route's database
+// reads (see lib/elite/supabase/fresh-fetch.ts). This does, for every
+// fetch the route makes, whichever client makes it.
+export const fetchCache = "force-no-store";
 export const maxDuration = 60;
 
 // Nudges families who redeemed an invite code but never finished the
@@ -28,7 +33,7 @@ export async function GET(req: Request) {
 
   const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
   const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://thestriveapp.com";
+  const appUrl = APP_URL;
 
   const { data: stale } = await admin
     .from("elite_players")

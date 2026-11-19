@@ -1,5 +1,6 @@
 import { getCourses } from "@/lib/elite/data";
-import { libraryCourses } from "@/lib/elite/courses";
+import { coursesForApp, libraryCourses } from "@/lib/elite/courses";
+import { inNativeApp } from "@/lib/elite/native-request";
 import { CourseList } from "@/components/elite/CourseLibrary";
 
 export const metadata = { title: "Courses · Strive Elite" };
@@ -10,6 +11,11 @@ export const metadata = { title: "Courses · Strive Elite" };
 // every course listed (an off or empty one carries a notice) and a link
 // to the editor in the drill bank.
 export default async function CoachCoursesPage() {
-  const courses = libraryCourses(await getCourses({ includeInactive: true }), { staff: true });
+  // Inside the App Store app the coach sees a link course the way a member
+  // does there: its in-app pages, never another website.
+  const courses = libraryCourses(
+    coursesForApp(await getCourses({ includeInactive: true }), inNativeApp()),
+    { staff: true }
+  );
   return <CourseList courses={courses} basePath="/coach/courses" staff />;
 }

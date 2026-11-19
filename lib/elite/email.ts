@@ -12,7 +12,7 @@ import { liveWeekFor } from "./time";
 import { createServiceClient } from "./supabase/server";
 
 const FROM = process.env.RESEND_FROM || "Strive Elite <coach@strivesoccer100x.com>";
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://thestriveapp.com";
+import { APP_URL } from "./app-url";
 
 export function isEmailConfigured(): boolean {
   return Boolean(process.env.RESEND_API_KEY);

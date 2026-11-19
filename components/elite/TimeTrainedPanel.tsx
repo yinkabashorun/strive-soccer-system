@@ -13,7 +13,7 @@ export function TimeTrainedPanel({ time }: { time: TimeTrained }) {
         <div className="font-display text-lg font-bold uppercase tracking-tight text-white/70">
           Your first minutes are coming
         </div>
-        <p className="mx-auto mt-2 max-w-sm text-sm text-white/45">
+        <p className="mx-auto mt-2 max-w-sm text-sm text-white/50">
           Every drill you check off adds to your total. It only ever goes up.
         </p>
       </div>
@@ -29,7 +29,7 @@ export function TimeTrainedPanel({ time }: { time: TimeTrained }) {
       </div>
       {time.byPillar.length > 0 && (
         <div className="elite-card space-y-3 p-6">
-          <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
+          <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
             <Clock className="h-3.5 w-3.5" /> Where the time went
           </div>
           {time.byPillar.map((p) => (

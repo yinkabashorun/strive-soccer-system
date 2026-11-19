@@ -1,17 +1,24 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AppNav, type NavItem } from "@/components/elite/AppNav";
 import { Wordmark } from "@/components/elite/Wordmark";
-import { PushOptIn } from "@/components/elite/PushOptIn";
+import { FreshOnReturn } from "@/components/elite/FreshOnReturn";
+import { PushKeepAlive } from "@/components/elite/PushOptIn";
 import { getViewer } from "@/lib/elite/session";
 import { getNotifications, getPlayer } from "@/lib/elite/data";
 import { signOut } from "@/lib/elite/auth-actions";
 import { unlockDueWeeks } from "@/lib/elite/unlock";
+import { AgreementScreen } from "@/components/elite/AgreementScreen";
+import { consentDue } from "@/lib/elite/legal-server";
+import { NO_PROFILE_GATE, membershipGate, type GateCopy } from "@/lib/elite/gates";
+import { SUPPORT_EMAIL } from "@/lib/elite/support";
 
+// Five tabs, the most an iPhone tab bar should carry (Apple HIG). Progress
+// lives one tap away: the time-trained strip on Home and the Account page.
 const PLAYER_NAV: NavItem[] = [
   { href: "/dashboard", label: "Home", icon: "Home" },
   { href: "/homework", label: "Training", icon: "Clipboard" },
   { href: "/courses", label: "Courses", icon: "BookOpen" },
-  { href: "/progress", label: "Progress", icon: "BarChart3" },
   { href: "/film", label: "Film", icon: "Film" },
   { href: "/messages", label: "Coach", icon: "MessageSquare" },
 ];
@@ -31,12 +38,16 @@ export default async function PlayerLayout({
 
   // Authenticated player whose coach hasn't set up their profile yet.
   if (!viewer.playerId) {
-    return (
-      <GateScreen
-        title="Almost there"
-        body="Your coach is setting up your development profile. You'll get an email the moment your first week is ready."
-      />
-    );
+    return <GateScreen gate={NO_PROFILE_GATE} />;
+  }
+
+  // Agreement gate (068): a member who has not accepted the current Terms
+  // and Privacy Policy does that first, once. New accounts accept at
+  // sign-up; this catches everyone who joined before, and everyone again
+  // when the terms change. The Account page (and deleting the account)
+  // stays reachable without it.
+  if (!viewer.demo && (await consentDue(viewer.profile.id))) {
+    return <AgreementScreen signOut={signOut} />;
   }
 
   const player = await getPlayer(viewer.playerId);
@@ -50,21 +61,20 @@ export default async function PlayerLayout({
   }
 
   // Membership gate: access requires an active/trialing subscription. This
-  // lets the coach revoke access by flipping a player to inactive.
-  const status = player?.subscription_status ?? "none";
-  if (status !== "active" && status !== "trialing") {
-    return (
-      <GateScreen
-        title="Membership paused"
-        body="Your Strive Elite membership isn't active right now. Reach out to your coach to reactivate and pick your training back up."
-      />
-    );
-  }
+  // lets the coach revoke access by flipping a player to inactive. A
+  // membership that was never switched on and one that was paused read
+  // differently (lib/elite/gates.ts).
+  const gate = membershipGate(player?.subscription_status ?? "none");
+  if (gate) return <GateScreen gate={gate} />;
 
   const notifications = await getNotifications(viewer.playerId);
 
   return (
     <div className="min-h-[100svh] bg-black text-bone lg:flex">
+      <FreshOnReturn />
+      {/* A phone that already said yes to notifications stays on file.
+          The ask itself is on the finish screen of a session (A8). */}
+      {!viewer.demo && <PushKeepAlive />}
       <AppNav
         items={PLAYER_NAV}
         name={viewer.profile.full_name}
@@ -72,29 +82,35 @@ export default async function PlayerLayout({
         roleLabel="Player"
         notifications={notifications}
       />
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-28 pt-5 sm:px-6 lg:pb-12 lg:pt-8">
-        {!viewer.demo && (
-          <div className="mb-4">
-            <PushOptIn />
-          </div>
-        )}
+      <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-[calc(4.75rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 lg:pb-12 lg:pt-8">
         {children}
       </main>
     </div>
   );
 }
 
-function GateScreen({ title, body }: { title: string; body: string }) {
+function GateScreen({ gate }: { gate: GateCopy }) {
   return (
-    <div className="flex min-h-[100svh] flex-col items-center justify-center bg-black px-6 text-center text-bone">
+    <div className="flex min-h-[100svh] flex-col items-center justify-center bg-black px-6 py-10 text-center text-bone">
       <Wordmark href={null} size="lg" />
       <h1 className="mt-8 font-display text-3xl font-black uppercase tracking-tight">
-        {title}
+        {gate.title}
       </h1>
-      <p className="mt-3 max-w-sm text-white/55">{body}</p>
-      <form action={signOut} className="mt-8">
-        <button className="btn px-6 py-3">Sign out</button>
+      <p className="mt-3 max-w-sm text-[15px] leading-relaxed text-white/70">{gate.body}</p>
+      {gate.emailCoach && (
+        <a
+          href={`mailto:${SUPPORT_EMAIL}`}
+          className="mt-7 flex h-14 w-full max-w-xs items-center justify-center rounded-2xl bg-white font-display text-xl font-black uppercase tracking-wide text-black"
+        >
+          Email your coach
+        </a>
+      )}
+      <form action={signOut} className={gate.emailCoach ? "mt-3" : "mt-8"}>
+        <button className="btn min-h-[44px] px-6 py-3">Sign out</button>
       </form>
+      <Link href="/account" className="mt-2 inline-flex min-h-[44px] items-center px-3 text-sm text-white/60 underline-offset-4 hover:underline">
+        Account
+      </Link>
     </div>
   );
 }

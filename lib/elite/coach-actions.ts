@@ -3,19 +3,22 @@
 import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient, createServiceClient } from "./supabase/server";
+import { removePlayerFiles } from "./account-server";
 import { getViewer } from "./session";
 import { sendPlayerEmail } from "./email";
 import { sendPushToPlayer } from "./push";
+import { coachMessagePush, newWeekPush } from "./push-texts";
 import { normalizePhone, sendPlayerSMS } from "./sms";
 import { isSundayEveNY, liveWeekFor, mondayOfWeekNY, nextMondayNY, unlockInstant } from "./time";
-import { getDrillBank, loadTemplateContext, normalizeTitle } from "./data";
+import { getDrillBank, loadProgramWeek, loadTemplateContext, normalizeTitle } from "./data";
 import { conformSessionsToBank, offeredBank, strengthRequired } from "./bank-conform";
 import { sessionsWord, TRAINING_LOADS } from "./training";
 import { resolveWeekTarget } from "./week-target";
 import { buildParentRecap } from "./parent-recap";
 import type { FilmReview, GeneratedPlan, TrainingLoad, TrainingSpace } from "./types";
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://thestriveapp.com";
+import { APP_URL } from "./app-url";
+import { claimWeekAnnouncement, maySend, mustRefuseRebuild, weekWasAnnounced } from "./announce";
 
 async function requireCoach() {
   const viewer = await getViewer();
@@ -218,6 +221,9 @@ export async function deletePlayer(playerId: string) {
 
   const admin = player?.profile_id ? createServiceClient() : null;
   if (admin && player?.profile_id) {
+    // Their uploaded clips first (the same step the family's own "Delete
+    // my account" takes): deleting the row does not remove files.
+    await removePlayerFiles(admin, playerId);
     const { error } = await admin.auth.admin.deleteUser(player.profile_id);
     if (error) return { ok: false as const };
   } else {
@@ -323,11 +329,7 @@ export async function sendCoachMessage(playerId: string, body: string) {
       subject: "Your coach sent you a message",
       body: `${viewer.profile.full_name}: "${body}"`,
     }).catch(() => undefined);
-    await sendPushToPlayer(playerId, {
-      title: "Message from your coach",
-      body: body.slice(0, 140),
-      url: "/messages",
-    }).catch(() => undefined);
+    await sendPushToPlayer(playerId, coachMessagePush(body)).catch(() => undefined);
     await sendPlayerSMS(playerId, {
       event: "coach_message",
       message: `${viewer.profile.full_name}: "${body}"`,
@@ -625,6 +627,24 @@ export async function applyGeneratedPlanCore(
   const goesLiveNow = target.goesLiveNow;
   const unlocksAt = goesLiveNow ? new Date().toISOString() : unlockInstant(nextMondayNY());
 
+  // A week that is already live is never rebuilt (announce.ts). Publishing
+  // "live now" replaces that week's drills, so doing it to a week the
+  // family was already told about would wipe the player's checkmarks and
+  // announce it again. Nov 2026: a cached read made the hourly builder do
+  // exactly that, every hour. Checked here against the announcement
+  // ledger, before a single row is touched; the builder logs the throw
+  // and the coach is texted.
+  if (goesLiveNow && (await weekWasAnnounced(supabase, playerId, week))) {
+    const { count } = await supabase
+      .from("elite_homework")
+      .select("id", { count: "exact", head: true })
+      .eq("player_id", playerId)
+      .eq("week", week);
+    if (mustRefuseRebuild({ announced: true, drillsInWeek: count ?? 0 })) {
+      throw new Error(`Refusing to rebuild week ${week}: it is already live with ${count} drills`);
+    }
+  }
+
   // 1) record the session
   await supabase.from("elite_sessions").insert({
     player_id: playerId,
@@ -661,16 +681,19 @@ export async function applyGeneratedPlanCore(
   // Course drills (040): an opt-in drill the coach has not offered this
   // player is not in the bank as far as this publish is concerned, so a
   // hand-edited studio plan naming it gets a replacement, not a link.
-  const bank = offeredBank(wholeBank, player as PlayerEnvRow | null);
+  // The 3-month program (065): this week's focus and threads, read here
+  // again so a hand-edited studio plan still publishes as a program week.
+  const program = await loadProgramWeek(playerId, week, supabase);
+  const bank = offeredBank(wholeBank, player as PlayerEnvRow | null, program);
   // Same strengthening rule as generation: a player whose note (or these
   // notes) mentions an injury / rehab / core / hip / strength work ends
   // every session with one filmed finisher, enforced here too so a
   // hand-edited studio plan can't drop it.
-  const strength = strengthRequired(
-    `${rawNotes}\n${(player as { coach_memory?: string | null } | null)?.coach_memory ?? ""}`
-  )
-    ? "required"
-    : "optional";
+  const strength =
+    program?.strength ||
+    strengthRequired(`${rawNotes}\n${(player as { coach_memory?: string | null } | null)?.coach_memory ?? ""}`)
+      ? "required"
+      : "optional";
   const env = player as PlayerEnvRow | null;
   // Few-yards players (035): the publish gate loads the coach's templates
   // and this player's rotation itself, so a hand-edited studio plan for a
@@ -690,7 +713,8 @@ export async function applyGeneratedPlanCore(
       : null,
     plan.weekly_focus,
     strength,
-    tpl
+    tpl,
+    program
   );
   const sessionCount = sessionsToPublish.length;
   const sessionsSaid = sessionsWord(sessionCount);
@@ -813,6 +837,9 @@ export async function applyGeneratedPlanCore(
     .update({ last_session_at: new Date().toISOString() })
     .eq("id", playerId);
 
+  // Whether this publish told the family. Stays true for a held week
+  // (Monday's unlock does the telling).
+  let announced = true;
   if (goesLiveNow) {
     // Live immediately: a player's first week (anchor the program clock
     // to this NY week's Monday - next Monday if today is Sunday, so week
@@ -828,6 +855,16 @@ export async function applyGeneratedPlanCore(
         ...(firstWeek ? { week1_monday: mondayOfWeekNY(target.anchorOffsetWeeks) } : {}),
       })
       .eq("id", playerId);
+    // One announcement per player per week, enforced by the database
+    // (announce.ts, migration 066). Everything below this line - the note,
+    // the email, the push, the text, the parent report - goes out only if
+    // this claim is the first for this week.
+    const claim = await claimWeekAnnouncement(supabase, playerId, week);
+    announced = claim !== "failed";
+    if (!maySend(claim)) {
+      revalidatePath(`/coach/players/${playerId}`);
+      return { ok: true, week, goesLiveNow, unlocksAt, announced };
+    }
     await supabase.from("elite_notifications").insert({
       player_id: playerId,
       kind: "new_week",
@@ -847,13 +884,10 @@ export async function applyGeneratedPlanCore(
         ? `Your Strive Elite training starts now.\n\nThis week's focus: ${plan.weekly_focus}\n\n${SessionsSaid} sessions, each opening with your plyometric warm-up. Open the app and start Session 1.`
         : `Your new training week is live.\n\nThis week's focus: ${plan.weekly_focus}\n\n${SessionsSaid} sessions, plyo warm-up first. Open the app and start Session 1.`,
     }).catch(() => undefined);
-    await sendPushToPlayer(playerId, {
-      title: firstWeek
-        ? (first ? `${first}, your first week is live` : "Your first week is live")
-        : (first ? `${first}, week ${week} just dropped` : `Week ${week} just dropped`),
-      body: plan.weekly_focus || "Your new training week is live.",
-      url: "/dashboard",
-    }).catch(() => undefined);
+    await sendPushToPlayer(
+      playerId,
+      newWeekPush({ first, week, firstWeek, focus: plan.weekly_focus })
+    ).catch(() => undefined);
     const greeting = parentFirst ? `Hey ${parentFirst}, ` : "";
     await sendPlayerSMS(playerId, {
       event: "new_week",
@@ -888,7 +922,7 @@ export async function applyGeneratedPlanCore(
   // flips them live and notifies then.
 
   revalidatePath(`/coach/players/${playerId}`);
-  return { ok: true, week, goesLiveNow, unlocksAt };
+  return { ok: true, week, goesLiveNow, unlocksAt, announced };
 }
 
 // Opening a player's thread marks their messages and clips read, the way a

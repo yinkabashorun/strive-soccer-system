@@ -1,5 +1,8 @@
-import { nyToday } from "./time";
+import { isSundayEveNY, liveWeekFor, nyToday } from "./time";
+import { resolveWeekTarget } from "./week-target";
+import { cleanFocuses, cleanQuiz, cleanThreads, programWeekFor, type Program, type ProgramWeek } from "./program";
 import { CLIP_BUCKET } from "./clips";
+import { presentAchievements } from "./achievement-rules";
 import { DEFAULT_BENCHMARK_TITLE, fallbackBenchmark, type Benchmark } from "./progress-video";
 import type { TemplateContext, TemplateUsage } from "./bank-conform";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -365,6 +368,69 @@ export async function loadTemplateContext(
   return { templates, usage };
 }
 
+// The 3-month program (065). The active program for a player, or null.
+// Service client first: the hourly builder has no login, and the builder
+// must see the same program the coach saved.
+export async function getProgram(playerId: string, client?: SupabaseClient): Promise<Program | null> {
+  const supabase = client ?? createServiceClient() ?? createClient();
+  if (!supabase || isDemo(playerId)) return null;
+  const { data, error } = await supabase
+    .from("elite_programs")
+    .select("*")
+    .eq("player_id", playerId)
+    .eq("status", "active")
+    .maybeSingle();
+  if (error || !data) return null;
+  const row = data as Program;
+  const focuses = cleanFocuses(row.focuses);
+  if (!focuses) return null;
+  return { ...row, focuses, threads: cleanThreads(row.threads), quiz: cleanQuiz(row.quiz) };
+}
+
+// What the two builder gates need for one week of one player: the
+// program's focus and threads for that week, or null (no program, the
+// program has not started, or it has finished) so the week builds as
+// it always has.
+export async function loadProgramWeek(
+  playerId: string | null | undefined,
+  week: number,
+  client?: SupabaseClient
+): Promise<ProgramWeek | null> {
+  if (!playerId) return null;
+  return programWeekFor(await getProgram(playerId, client), week);
+}
+
+// The week a plan generated right now will be written to, by the same
+// rule the publish step uses (week-target.ts). The studio preview asks
+// this so it shows the program week the publish gate will build.
+export async function targetWeekFor(
+  player: { id: string; week1_monday?: string | null; current_week?: number | null },
+  client?: SupabaseClient
+): Promise<number> {
+  const supabase = client ?? createServiceClient() ?? createClient();
+  const liveWeek = liveWeekFor(player.week1_monday, player.current_week ?? 1);
+  if (!supabase || isDemo(player.id)) return liveWeek;
+  const [{ data: latest }, { data: pending }] = await Promise.all([
+    supabase.from("elite_homework").select("week").eq("player_id", player.id).order("week", { ascending: false }).limit(1).maybeSingle(),
+    supabase
+      .from("elite_weekly_plans")
+      .select("week")
+      .eq("player_id", player.id)
+      .eq("notified", false)
+      .gt("unlocks_at", new Date().toISOString())
+      .order("week", { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+  ]);
+  return resolveWeekTarget({
+    firstWeek: !player.week1_monday,
+    liveWeek,
+    maxBuilt: (latest as { week: number } | null)?.week ?? 0,
+    sundayEve: isSundayEveNY(),
+    pendingWeek: (pending as { week: number } | null)?.week ?? null,
+  }).week;
+}
+
 // Bi-weekly progress videos (037): newest first, each with a one-hour
 // signed URL for whoever is reading (storage RLS decides).
 export async function getProgressVideos(playerId: string, client?: SupabaseClient): Promise<ProgressVideo[]> {
@@ -565,15 +631,15 @@ export async function getMessages(playerId: string): Promise<Message[]> {
 export async function getAchievements(playerId: string): Promise<Achievement[]> {
   const supabase = createClient();
   if (!supabase || isDemo(playerId))
-    return DEMO_ACHIEVEMENTS.filter((a) => a.player_id === playerId).sort(
-      (a, b) => b.earned_at.localeCompare(a.earned_at)
-    );
+    return presentAchievements(DEMO_ACHIEVEMENTS.filter((a) => a.player_id === playerId));
   const { data } = await supabase
     .from("elite_achievements")
     .select("*")
     .eq("player_id", playerId)
     .order("earned_at", { ascending: false });
-  return (data as Achievement[] | null) ?? [];
+  // Shown in today's words: a badge stored before a wording change keeps
+  // its place and loses only the old name (achievement-rules.ts).
+  return presentAchievements((data as Achievement[] | null) ?? []);
 }
 
 export async function getParentReports(

@@ -1,7 +1,7 @@
-import { Dumbbell } from "lucide-react";
 import { getViewer } from "@/lib/elite/session";
 import { getHomework, getPlayer } from "@/lib/elite/data";
 import { liveWeekFor } from "@/lib/elite/time";
+import { timeTrained } from "@/lib/elite/time-trained";
 import { WeekList } from "@/components/elite/WeekList";
 import { TourGuide } from "@/components/elite/TourGuide";
 
@@ -23,19 +23,20 @@ export default async function HomeworkPage() {
       {viewer.demo && <TourGuide page="training" />}
 
       <header className="animate-fade-up">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
-          Week {contentWeek} · Your workout
-        </div>
-        <h1 className="mt-1 flex items-center gap-2.5 font-display text-3xl font-black sm:text-4xl">
-          <Dumbbell className="h-7 w-7 text-accent" /> Homework
-        </h1>
-        <p className="mt-2 text-white/50">
-          Knock out each drill and check it off. Start with{" "}
-          <span className="text-red-400">Next up</span>.
+        <h1 className="font-display text-4xl font-black uppercase leading-none">Your week</h1>
+        <p className="mt-2 text-[15px] text-white/65">
+          Open a session and work through it one drill at a time.
         </p>
       </header>
 
-      <WeekList items={homework} currentWeek={contentWeek} playerId={viewer.playerId} />
+      <WeekList
+        items={homework}
+        currentWeek={contentWeek}
+        playerId={viewer.playerId}
+        example={viewer.demo}
+        firstName={(player?.full_name ?? "").split(" ")[0]}
+        totalMinutes={timeTrained(all).minutes}
+      />
     </div>
   );
 }

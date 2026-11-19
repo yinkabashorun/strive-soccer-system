@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
+import { freshFetch } from "./fresh-fetch";
 
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
@@ -21,6 +22,7 @@ export function createClient() {
 
   const cookieStore = cookies();
   return createServerClient(url, key, {
+    global: { fetch: freshFetch }, // never Next's fetch cache (fresh-fetch.ts)
     cookies: {
       getAll() {
         return cookieStore.getAll();
@@ -47,6 +49,25 @@ export function createServiceClient() {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !serviceKey) return null;
   return createAdminClient(url, serviceKey, {
+    global: { fetch: freshFetch }, // never Next's fetch cache (fresh-fetch.ts)
     auth: { autoRefreshToken: false, persistSession: false },
   });
+}
+
+// Checks a password without touching the signed-in session: a throwaway
+// client with no cookies signs in, then signs straight back out. Used
+// before something that cannot be undone (deleting an account), so a
+// phone left unlocked is not enough to do it.
+export async function verifyPassword(email: string, password: string): Promise<boolean> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key || !email || !password) return false;
+  const probe = createAdminClient(url, key, {
+    global: { fetch: freshFetch }, // never Next's fetch cache (fresh-fetch.ts)
+    auth: { autoRefreshToken: false, persistSession: false },
+  });
+  const { data, error } = await probe.auth.signInWithPassword({ email, password });
+  if (error || !data.session) return false;
+  await probe.auth.signOut({ scope: "local" }).catch(() => undefined);
+  return true;
 }

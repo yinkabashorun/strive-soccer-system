@@ -25,7 +25,7 @@
 import { createServiceClient } from "./supabase/server";
 import { generatePlanFromNotes } from "./ai-coach";
 import { applyGeneratedPlanCore } from "./coach-actions";
-import { getDrillBank, latestCoachingCallNotes, loadTemplateContext } from "./data";
+import { getDrillBank, latestCoachingCallNotes, loadTemplateContext, loadProgramWeek } from "./data";
 import { isSundayEveNY, liveWeekFor } from "./time";
 import { alertCoach, latestCronRun, PLAN_BUILDER_JOB, startCronRun, updateCronRun } from "./cron-log";
 import { auditLiveWeeks, type HealthIssue } from "./health";
@@ -179,9 +179,24 @@ export async function runAutoWeeklyPlans(
         .join("\n");
       // Few-yards players (035): their week is the coach's templates.
       const tpl = await loadTemplateContext(player, admin);
-      const { plan } = await generatePlanFromNotes(notes, player, player.coach_memory, bank, tpl);
+      // The 3-month program (065): the focus and threads of the week
+      // this run is building, or null for a player with no program.
+      const program = await loadProgramWeek(player.id, target, admin);
+      const { plan } = await generatePlanFromNotes(notes, player, player.coach_memory, bank, tpl, program);
       const applied = await applyGeneratedPlanCore(player.id, notes, plan, coach.id, admin);
-      results.push({ playerId: player.id, name: player.full_name, ok: true, week: applied.week });
+      if (applied.announced === false) {
+        // The week is live but the announcement ledger could not be
+        // written, so nothing was sent (announce.ts). Loud on purpose:
+        // an error on the run row, and a text to the coach.
+        results.push({
+          playerId: player.id,
+          name: player.full_name,
+          ok: false,
+          error: `week ${applied.week} is live but the family was not told (the announcement could not be recorded)`,
+        });
+      } else {
+        results.push({ playerId: player.id, name: player.full_name, ok: true, week: applied.week });
+      }
     } catch (err) {
       results.push({
         playerId: player.id,

@@ -13,12 +13,14 @@ export function MessageThread({
   meName,
   send,
   placeholder = "Write a message…",
+  emptyLine = "No messages yet. Say hello.",
 }: {
   messages: Message[];
   meRole: Role;
   meName: string;
   send: (body: string) => Promise<{ ok: boolean }>;
   placeholder?: string;
+  emptyLine?: string; // shown before the first message
 }) {
   // incoming is newest-first; show oldest-first for a natural chat flow.
   const [local, setLocal] = useState<Message[]>(() => [...messages].reverse());
@@ -61,9 +63,7 @@ export function MessageThread({
     <div className="flex flex-col">
       <div className="max-h-[320px] space-y-2 overflow-y-auto pr-1">
         {optimistic.length === 0 && (
-          <p className="py-6 text-center text-sm text-white/30">
-            No messages yet. Say hello.
-          </p>
+          <p className="py-6 text-center text-sm leading-relaxed text-white/60">{emptyLine}</p>
         )}
         {optimistic.map((m) => {
           const mine = m.from_role === meRole;
@@ -81,7 +81,7 @@ export function MessageThread({
                 )}
               >
                 {!mine && (
-                  <div className="mb-0.5 text-[10px] font-semibold uppercase tracking-wider text-white/40">
+                  <div className="mb-0.5 text-[11px] font-semibold uppercase tracking-wider text-white/50">
                     {m.from_name || "Coach"}
                   </div>
                 )}
@@ -97,7 +97,7 @@ export function MessageThread({
                   />
                 )}
                 {m.clip_path && !m.clip_url && (
-                  <div className={cn("mt-1 text-xs", mine ? "text-black/60" : "text-white/40")}>
+                  <div className={cn("mt-1 text-[13px]", mine ? "text-black/60" : "text-white/50")}>
                     Clip unavailable right now.
                   </div>
                 )}
@@ -119,12 +119,14 @@ export function MessageThread({
             }
           }}
           placeholder={placeholder}
-          className="flex-1 rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-sm text-bone placeholder:text-white/25 focus:border-accent/40 focus:outline-none"
+          aria-label={placeholder}
+          enterKeyHint="send"
+          className="h-11 min-w-0 flex-1 rounded-xl border border-white/10 bg-white/[0.03] px-3.5 text-sm text-bone placeholder:text-white/25 focus:border-accent/40 focus:outline-none"
         />
         <button
           onClick={submit}
           disabled={pending || !draft.trim()}
-          className="btn-accent px-3.5 py-2.5"
+          className="btn-accent h-11 w-11 shrink-0 p-0"
           aria-label="Send"
         >
           {pending ? (

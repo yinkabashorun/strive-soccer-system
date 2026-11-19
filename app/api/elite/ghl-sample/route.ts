@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { APP_URL } from "@/lib/elite/app-url";
 import { getViewer } from "@/lib/elite/session";
 
 export const runtime = "nodejs";
@@ -64,7 +65,7 @@ export async function GET(req: Request) {
         to_name: "Test Parent",
         to_email: "test@thestriveapp.com",
         emails: ["test@thestriveapp.com"],
-        app_url: process.env.NEXT_PUBLIC_APP_URL || "https://thestriveapp.com",
+        app_url: APP_URL,
         source: "strive-elite",
       }),
     });

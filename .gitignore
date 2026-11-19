@@ -149,3 +149,6 @@ marketing/reels/**/audio/
 
 # learn skill: verbatim transcripts stay local (public repo, owners hold the copyright); notes.md is committed
 learned/**/transcript.md
+
+# Background agents work in their own git worktrees here; never part of the repo
+.claude/worktrees/

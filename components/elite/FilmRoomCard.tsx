@@ -8,6 +8,7 @@ import { clipExtension, filmRoomPath } from "@/lib/elite/clips";
 import { uploadClip } from "@/lib/elite/clip-upload";
 import { FILM_CLIPS_MAX, FILM_CLIPS_MIN, fmtWhen } from "@/lib/elite/film-room";
 import type { FilmRoom, FilmRoomClip } from "@/lib/elite/types";
+import { AppLink } from "./AppLink";
 
 // The member side of the weekly Film Room (062): when it is, the Zoom
 // link, and the place to upload three to five clips for Coach Yinka and
@@ -33,12 +34,13 @@ export function FilmRoomCard({
   if (!room) {
     return (
       <div className="elite-card p-6">
-        <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
+        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
           <Clapperboard className="h-3.5 w-3.5" /> Film Room
         </div>
-        <p className="mt-2 text-white/70">
-          Every week, Coach Yinka and Coach Gary go through your clips on Zoom. The next one hasn&apos;t been
-          announced yet. You and your parent will get a text the moment it is.
+        <p className="mt-2 text-[15px] leading-relaxed text-white/75">
+          Every week, Coach Yinka and Coach Gary go through your clips on Zoom: what is working
+          and what comes next. The next Film Room has not been announced yet. You and your parent
+          get a text the moment it is, and this page shows where to upload your clips.
         </p>
       </div>
     );
@@ -86,7 +88,7 @@ export function FilmRoomCard({
 
   return (
     <div className="rounded-3xl border border-accent/20 bg-accent/[0.05] p-5">
-      <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
+      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
         <Clapperboard className="h-3.5 w-3.5" /> This week&apos;s Film Room
       </div>
       <p className="mt-1.5 font-display text-2xl font-bold text-bone">{fmtWhen(room.scheduled_at)}</p>
@@ -95,18 +97,18 @@ export function FilmRoomCard({
         {room.topic ? `. ${room.topic}` : "."}
       </p>
       {room.zoom_url ? (
-        <a href={room.zoom_url} target="_blank" rel="noreferrer" className="btn mt-3 inline-flex px-5 py-2 text-sm">
+        <AppLink href={room.zoom_url} title="Join on Zoom" className="btn mt-3 inline-flex min-h-[44px] px-5 py-2 text-sm">
           <Video className="mr-1.5 h-4 w-4" /> Join on Zoom
-        </a>
+        </AppLink>
       ) : (
-        <p className="mt-3 text-sm text-white/45">The Zoom link will show up here before the session.</p>
+        <p className="mt-3 text-sm text-white/50">The Zoom link will show up here before the session.</p>
       )}
 
       <div className="mt-5 border-t border-white/10 pt-4">
         <div className="text-sm font-semibold text-bone">
           Upload {FILM_CLIPS_MIN} to {FILM_CLIPS_MAX} clips of {firstName}
         </div>
-        <p className="mt-0.5 text-xs text-white/50">
+        <p className="mt-0.5 text-[13px] text-white/50">
           From games or training. Send them by {fmtWhen(room.clips_due_at)} so we can watch them first.
         </p>
 
@@ -115,7 +117,7 @@ export function FilmRoomCard({
             {clips.map((c, i) => (
               <li
                 key={c.id}
-                className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-sm"
+                className="flex min-h-[44px] items-center justify-between gap-3 rounded-xl border border-white/10 bg-white/[0.03] pl-3 text-sm"
               >
                 <span className="flex items-center gap-2 text-white/80">
                   <Check className="h-3.5 w-3.5 text-accent" /> Clip {i + 1} sent
@@ -125,7 +127,7 @@ export function FilmRoomCard({
                     onClick={() => remove(c.id)}
                     disabled={busy !== null}
                     aria-label={`Remove clip ${i + 1}`}
-                    className="text-white/40 hover:text-red-300 disabled:opacity-50"
+                    className="grid h-11 w-11 shrink-0 place-items-center text-white/60 hover:text-red-300 disabled:opacity-50"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -141,6 +143,8 @@ export function FilmRoomCard({
           accept="video/*"
           multiple
           className="hidden"
+          aria-hidden
+          tabIndex={-1}
           onChange={(e) => {
             if (e.target.files && e.target.files.length > 0) void onFiles(e.target.files);
             e.target.value = "";
@@ -151,22 +155,22 @@ export function FilmRoomCard({
             type="button"
             disabled={busy !== null}
             onClick={() => fileRef.current?.click()}
-            className="btn mt-3 inline-flex px-5 py-2 text-sm disabled:opacity-60"
+            className="btn mt-3 inline-flex min-h-[44px] px-5 py-2 text-sm disabled:opacity-60"
           >
             {busy ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Upload className="mr-1.5 h-4 w-4" />}
             {busy ?? (clips.length === 0 ? "Choose clips" : "Add more clips")}
           </button>
         )}
         {remaining === 0 && !started && (
-          <p className="mt-3 text-xs text-white/50">That&apos;s {FILM_CLIPS_MAX} clips. Remove one to swap it.</p>
+          <p className="mt-3 text-[13px] text-white/50">That&apos;s {FILM_CLIPS_MAX} clips. Remove one to swap it.</p>
         )}
         {clips.length > 0 && !enough && (
-          <p className="mt-2 text-xs text-white/50">
+          <p className="mt-2 text-[13px] text-white/50">
             {FILM_CLIPS_MIN - clips.length} more makes it a full set.
           </p>
         )}
-        {enough && <p className="mt-2 text-xs text-accent">That&apos;s a full set. We&apos;ll go through them on the call.</p>}
-        {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
+        {enough && <p className="mt-2 text-[13px] text-accent">That&apos;s a full set. We&apos;ll go through them on the call.</p>}
+        {error && <p className="mt-2 text-[13px] text-red-400">{error}</p>}
       </div>
     </div>
   );

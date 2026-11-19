@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import { DemoLanding } from "@/components/elite/DemoLanding";
+import { demoRedirectFor } from "@/lib/elite/app-links";
 
 export const dynamic = "force-dynamic";
 
@@ -13,8 +16,15 @@ export const metadata: Metadata = {
   },
 };
 
-// /demo is the address the ads and the Instagram bio point at. The same
-// page is also the site's front door at / (app/page.tsx).
+// /demo is the address the ads and the Instagram bio point at. It is the
+// only place the landing page lives (the site's root is the app's door).
+//
+// It is never drawn inside the App Store app: it carries the Meta pixel,
+// and the app's listing says the app does no tracking. A request from the
+// app goes to the app's front door instead (lib/elite/app-links.ts).
 export default function DemoPage() {
-  return <DemoLanding />;
+  const userAgent = headers().get("user-agent");
+  const door = demoRedirectFor(userAgent);
+  if (door) redirect(door);
+  return <DemoLanding userAgent={userAgent} />;
 }

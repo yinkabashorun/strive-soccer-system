@@ -1,103 +1,175 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Bell } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { Bell, Share } from "lucide-react";
+import {
+  PUSH_ASKED_KEY,
+  PUSH_ASKED_LEGACY_KEYS,
+  finishAsk,
+  type FinishAsk,
+  type NotifyStep,
+} from "@/lib/elite/install";
+import { VAPID_PUBLIC_KEY, readStep, saveSubscription } from "@/lib/elite/push-client";
+import { isNativeApp } from "@/lib/elite/native";
+import {
+  enableNativePush,
+  readNativePushStep,
+  registerNativePush,
+} from "@/lib/elite/native-push-client";
 
-const VAPID_PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-const DISMISS_KEY = "strive_push_dismissed";
-
-function urlBase64ToUint8Array(base64String: string) {
-  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
-  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
-  const raw = atob(base64);
-  return Uint8Array.from([...raw].map((c) => c.charCodeAt(0)));
+function wasAsked(): boolean {
+  try {
+    return [PUSH_ASKED_KEY, ...PUSH_ASKED_LEGACY_KEYS].some((k) => Boolean(localStorage.getItem(k)));
+  } catch {
+    // Storage unavailable (private mode): the ask cannot be remembered, so
+    // it is not made at all rather than made on every finish.
+    return true;
+  }
 }
 
-// A small, dismissible prompt to turn on real push notifications (new week
-// live, coach messages) instead of the player only finding out by opening
-// the app. Shown once per browser until they either enable it or dismiss
-// it - never nags on every visit. Renders nothing if push isn't configured
-// (no VAPID key) or the browser doesn't support it (no silent errors, no
-// broken button).
-export function PushOptIn() {
-  const [visible, setVisible] = useState(false);
-  const [busy, setBusy] = useState(false);
+function markAsked() {
+  try {
+    localStorage.setItem(PUSH_ASKED_KEY, "1");
+  } catch {
+    // nothing to do
+  }
+}
+
+// Where this phone stands, as one NotifyStep. In a browser that is
+// notifyStep (lib/elite/install.ts) and it is "none" when push is not
+// configured. Inside the App Store app notifications are the phone's own
+// (Apple's push service): "enable" when the phone has not been asked yet,
+// "resync" when it has said yes.
+async function currentStep(): Promise<NotifyStep> {
+  if (isNativeApp()) {
+    const step = await readNativePushStep();
+    return step === "enable" ? "enable" : step === "resync" ? "resync" : "none";
+  }
+  if (!VAPID_PUBLIC_KEY) return "none";
+  return readStep();
+}
+
+// Renders nothing. A phone that has already said yes is put back on file
+// quietly on every visit, so a subscription the phone replaced finds its
+// way back to the server. Mounted once in the player shell.
+export function PushKeepAlive() {
+  useEffect(() => {
+    void currentStep()
+      .then((step) => {
+        if (step !== "resync") return;
+        if (isNativeApp()) return registerNativePush();
+        return saveSubscription();
+      })
+      .catch(() => undefined);
+  }, []);
+  return null;
+}
+
+// The one ask (A8). It is made once, right after the finish screen of a
+// completed session: the moment a member can see why they would want to
+// hear that the next week is live. What there is to ask is decided by
+// finishAsk:
+//   - a phone that can be asked: "Turn on notifications", one tap;
+//   - an iPhone or iPad in a browser tab: how to add the app to the home
+//     screen, the only place Apple offers push;
+//   - asked before, already on, blocked, or the example player: nothing.
+// `shown()` marks it asked, so it is never made twice. The Account page is
+// where a member turns notifications on later.
+export function useNotificationsAsk(enabled: boolean): { ask: FinishAsk; shown: () => void } {
+  const [ask, setAsk] = useState<FinishAsk>(null);
 
   useEffect(() => {
-    if (!VAPID_PUBLIC_KEY) return;
-    if (typeof window === "undefined") return;
-    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
-    if (Notification.permission !== "default") return;
-    try {
-      if (localStorage.getItem(DISMISS_KEY)) return;
-    } catch {
-      // localStorage unavailable (private mode, etc.) - show the prompt anyway
-    }
-    setVisible(true);
-  }, []);
+    if (!enabled || typeof window === "undefined") return;
+    let live = true;
+    void currentStep()
+      .then((step) => {
+        if (live) setAsk(finishAsk({ step, asked: wasAsked(), example: false }));
+      })
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
+  }, [enabled]);
+
+  const shown = useCallback(() => markAsked(), []);
+  return { ask, shown };
+}
+
+// The ask itself: one screen, one plain line of why, one button. Shown in
+// place of the finish screen after the member taps Done there, then the
+// session closes whatever they choose.
+export function PushOptIn({ ask, onDone }: { ask: Exclude<FinishAsk, null>; onDone: () => void }) {
+  const [busy, setBusy] = useState(false);
 
   async function enable() {
     setBusy(true);
     try {
-      const permission = await Notification.requestPermission();
-      if (permission !== "granted") {
-        setVisible(false);
-        return;
+      if (isNativeApp()) {
+        await enableNativePush();
+      } else {
+        const permission = await Notification.requestPermission();
+        if (permission === "granted") await saveSubscription();
       }
-      const reg = await navigator.serviceWorker.register("/sw.js");
-      const sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY!),
-      });
-      await fetch("/api/elite/push/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(sub.toJSON()),
-      });
     } catch {
       // best-effort: a failed subscribe just means no push, not a broken app
     } finally {
       setBusy(false);
-      setVisible(false);
+      onDone();
     }
   }
 
-  function dismiss() {
-    setVisible(false);
-    try {
-      localStorage.setItem(DISMISS_KEY, "1");
-    } catch {
-      // fine to skip persisting the dismissal
-    }
-  }
-
-  if (!visible) return null;
+  const install = ask === "install_ios";
+  const Icon = install ? Share : Bell;
 
   return (
-    <div className="elite-card flex items-center gap-3 p-4">
-      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-accent/10 text-accent">
-        <Bell className="h-5 w-5" />
-      </span>
-      <div className="min-w-0 flex-1">
-        <div className="font-semibold text-bone">Turn on notifications</div>
-        <div className="text-sm text-white/50">
-          Get alerted the moment your new week drops or your coach messages you.
+    <div className="flex min-h-0 flex-1 flex-col pt-safe">
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 text-center">
+        <div className="flex min-h-full flex-col items-center justify-center py-6">
+          <span className="grid h-20 w-20 place-items-center rounded-full bg-accent/10 text-accent animate-rise">
+            <Icon className="h-9 w-9" />
+          </span>
+          <h2 className="mt-6 font-display text-4xl font-black uppercase leading-[0.95] animate-rise [animation-delay:80ms]">
+            {install ? "Add Strive Elite to your home screen" : "Turn on notifications"}
+          </h2>
+          <p className="mt-4 max-w-xs text-[15px] leading-relaxed text-white/75 animate-rise [animation-delay:160ms]">
+            {install
+              ? "Tap the Share button in your browser, then tap Add to Home Screen. Open Strive Elite from your home screen and turn on notifications, so you know the moment your new week is live or your coach messages you."
+              : "So you know the moment your new week is live, your coach messages you, or a Film Room is announced. Nothing else."}
+          </p>
+          <p className="mt-3 max-w-xs text-[13px] leading-relaxed text-white/60 animate-rise [animation-delay:220ms]">
+            You can change this any time on your Account page.
+          </p>
         </div>
       </div>
-      <div className="flex shrink-0 items-center gap-2">
-        <button
-          onClick={dismiss}
-          className="rounded-xl px-3 py-2 text-sm text-white/40 hover:text-white/70"
-        >
-          Not now
-        </button>
-        <button
-          onClick={enable}
-          disabled={busy}
-          className="rounded-xl bg-accent px-3.5 py-2 text-sm font-semibold text-black disabled:opacity-60"
-        >
-          {busy ? "..." : "Enable"}
-        </button>
+
+      <div className="px-4 pt-3 pb-safe">
+        <div className="mx-auto max-w-md pb-3">
+          {install ? (
+            <button
+              onClick={onDone}
+              className="flex h-14 w-full items-center justify-center rounded-2xl bg-white font-display text-xl font-black uppercase tracking-wide text-black active:scale-[0.98]"
+            >
+              Got it
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={enable}
+                disabled={busy}
+                className="flex h-14 w-full items-center justify-center rounded-2xl bg-white font-display text-xl font-black uppercase tracking-wide text-black active:scale-[0.98] disabled:opacity-60"
+              >
+                {busy ? "One moment" : "Turn on notifications"}
+              </button>
+              <button
+                onClick={onDone}
+                disabled={busy}
+                className="mt-1 flex h-12 w-full items-center justify-center text-[15px] font-medium text-white/65"
+              >
+                Not now
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );

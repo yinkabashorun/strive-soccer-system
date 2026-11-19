@@ -6,6 +6,7 @@ import { Check, Loader2, Video } from "lucide-react";
 import { submitProgressVideo } from "@/lib/elite/player-actions";
 import { clipExtension, progressPath } from "@/lib/elite/clips";
 import { uploadClip } from "@/lib/elite/clip-upload";
+import { AppLink } from "./AppLink";
 import { DrillVideo } from "./DrillVideo";
 
 // Bi-weekly progress video (offer stack item 7): every second week the
@@ -57,7 +58,7 @@ export function ProgressVideoCard({
 
   return (
     <section className="rounded-3xl border border-accent/30 bg-accent/[0.05] p-5 sm:p-6">
-      <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-accent">
+      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-accent">
         <Video className="h-3.5 w-3.5" /> {week === 1 ? "Your first clip" : `Week ${week} clip`}
       </div>
       {state === "sent" ? (
@@ -82,14 +83,14 @@ export function ProgressVideoCard({
           </p>
           {benchmark.video_url && <DrillVideo src={benchmark.video_url} label="Watch the demo" />}
           {previousUrl && (
-            <a
+            <AppLink
               href={previousUrl}
-              target="_blank"
-              rel="noreferrer"
+              media="video"
+              title="Your clip from two weeks ago"
               className="mt-2 inline-block text-xs text-white/50 underline-offset-2 hover:text-bone hover:underline"
             >
               Your clip from two weeks ago
-            </a>
+            </AppLink>
           )}
           <label className="mt-4 flex items-start gap-2.5 text-sm text-white/70">
             <input

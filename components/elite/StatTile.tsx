@@ -22,7 +22,7 @@ export function StatTile({
         className
       )}
     >
-      <div className="text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
+      <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
         {label}
       </div>
       <div
@@ -33,7 +33,7 @@ export function StatTile({
       >
         {value}
       </div>
-      {sub && <div className="mt-1.5 text-xs text-white/45">{sub}</div>}
+      {sub && <div className="mt-1.5 text-xs text-white/50">{sub}</div>}
     </div>
   );
 }

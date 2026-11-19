@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getViewer } from "@/lib/elite/session";
-import { getDrillBank, getPlayer, loadTemplateContext } from "@/lib/elite/data";
+import { getDrillBank, getPlayer, loadProgramWeek, loadTemplateContext, targetWeekFor } from "@/lib/elite/data";
 import { generatePlanFromNotes } from "@/lib/elite/ai-coach";
 import { buildPlayerMemory } from "@/lib/elite/memory";
 
@@ -50,12 +50,17 @@ export async function POST(req: Request) {
   // publish gate will use, not a composed week that would be replaced.
   const tpl = await loadTemplateContext(player);
 
+  // The 3-month program (065): the studio preview shows the program week
+  // the publish gate will build, not a week it would then rewrite.
+  const program = player ? await loadProgramWeek(player.id, await targetWeekFor(player)) : null;
+
   const { plan, source, reason, reasonKind } = await generatePlanFromNotes(
     notes,
     player,
     memory,
     drills,
-    tpl
+    tpl,
+    program
   );
   return NextResponse.json({ plan, source, reason, reasonKind });
 }

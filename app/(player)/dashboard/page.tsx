@@ -1,18 +1,6 @@
 import Link from "next/link";
-import {
-  Flame,
-  MessageSquare,
-  Sparkles,
-  Trophy,
-  type LucideIcon,
-  Eye,
-  CheckCircle2,
-  Target,
-  Zap,
-} from "lucide-react";
 import { getViewer } from "@/lib/elite/session";
 import {
-  getAchievements,
   getCheckins,
   getCoachingCalls,
   getHomework,
@@ -23,35 +11,28 @@ import {
   getTrainingBreaks,
   getWeeklyPlans,
 } from "@/lib/elite/data";
-import { TodaySession, VictoryLap } from "@/components/elite/TodaySession";
-import { ExtraWork } from "@/components/elite/ExtraWork";
+import { TodaySession } from "@/components/elite/TodaySession";
+import { HomeMore } from "@/components/elite/HomeMore";
 import { BreakCard } from "@/components/elite/BreakCard";
 import { ProgressVideoCard } from "@/components/elite/ProgressVideoCard";
 import { previousProgressVideo, progressVideoDue } from "@/lib/elite/progress-video";
 import { currentBreak } from "@/lib/elite/breaks";
 import { settleBreaksForPlayer } from "@/lib/elite/breaks-server";
-import { fmtDuration, timeTrained, weekMinutes } from "@/lib/elite/time-trained";
+import { fmtDuration, timeTrained } from "@/lib/elite/time-trained";
 import { CoachingCallsCard } from "@/components/elite/CoachingCallsCard";
 import { CheckinBooking } from "@/components/elite/CheckinBooking";
 import { getPlayerCheckin } from "@/lib/elite/film-room-data";
 import { CheckinCard } from "@/components/elite/CheckinCard";
-import { StatTile } from "@/components/elite/StatTile";
 import { fmtMonday, liveWeekFor, nextMondayNY, nyToday } from "@/lib/elite/time";
 import { greeting, timeAgo } from "@/lib/utils";
 import { TourGuide } from "@/components/elite/TourGuide";
 
-const ICONS: Record<string, LucideIcon> = {
-  Eye,
-  CheckCircle2,
-  Flame,
-  Zap,
-  Trophy,
-  Sparkles,
-  Target,
-};
-
-// The player's home: one thing on screen - today's session. Everything
-// else earns its place below or lives behind a tab.
+// The player's home: one thing on screen - today's session. Under it,
+// one quiet row (Extra work, the coach's note, Take a break), each folded
+// until asked for (lib/elite/home.ts). Time trained shows once, beside the
+// greeting; the week shows once, on the session card. A card that only
+// sometimes applies (the progress clip, a call to book, the weekly
+// check-in) appears between the two when it does.
 export default async function DashboardPage() {
   const viewer = await getViewer();
   if (!viewer?.playerId) return null; // layout renders the "almost there" state
@@ -66,10 +47,9 @@ export default async function DashboardPage() {
     player.week1_monday = week1Monday;
   }
 
-  const [allHomework, achievements, messages, checkins, plans, calls, breaks, progressVideos, monthlyCheckin] =
+  const [allHomework, messages, checkins, plans, calls, breaks, progressVideos, monthlyCheckin] =
     await Promise.all([
       getHomework(player.id),
-      getAchievements(player.id),
       getMessages(player.id),
       getCheckins(player.id),
       getWeeklyPlans(player.id),
@@ -122,7 +102,6 @@ export default async function DashboardPage() {
       ? `Your coach is building week ${live}. It lands the moment it's ready.`
       : `Your coach is building week ${live + 1}. It drops Monday.`;
 
-  const latestMessage = messages[0];
   const checkedInThisWeek = checkins.some((c) => c.week === contentWeek);
 
   // Bi-weekly progress video (037): every second week, the same drill.
@@ -132,80 +111,65 @@ export default async function DashboardPage() {
   const benchmark = videoDue ? await getBenchmark(player, allHomework) : null;
   const previousVideo = previousProgressVideo(contentWeek, progressVideos);
 
+  // The coach's latest word to the player (their own messages are not it).
+  const coachNote = messages.find((m) => m.from_role !== "player") ?? null;
+  const extraOpen = sessions.some(
+    (s) => s.list.some((h) => h.is_extra) && s.list.some((h) => !h.completed)
+  );
+
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
       {viewer.demo && <TourGuide page="home" />}
 
-      {/* Header - name + time trained, nothing else (034: no streak, no
-          percentage, nothing that counts what was missed) */}
-      <header className="flex items-end justify-between gap-4 animate-fade-up">
-        <div>
-          <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
-            Week {contentWeek} · {player.level}
-          </div>
-          <h1 className="mt-1 font-display text-3xl font-black leading-none sm:text-4xl">
-            {greeting()}, {firstName}
-          </h1>
-        </div>
+      {/* Greeting, and time trained once: the pill opens Progress (034: no
+          streak, no percentage, nothing that counts what was missed) */}
+      <header className="flex items-center justify-between gap-3 animate-fade-up">
+        <h1 className="min-w-0 font-display text-[22px] font-black leading-none">
+          {greeting()}, {firstName}
+        </h1>
         {time.minutes > 0 && (
-          <div className="flex items-center gap-1.5 rounded-full border border-accent/30 bg-accent/[0.07] px-3.5 py-2">
-            <Flame className="h-4 w-4 text-accent" />
-            <span className="font-display text-xl font-black text-accent">
+          <Link
+            href="/progress"
+            aria-label={`${fmtDuration(time.minutes)} trained. Open your progress`}
+            className="flex min-h-[44px] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-accent/30 bg-accent/[0.07] px-3.5"
+          >
+            <span className="font-display text-lg font-black leading-none text-accent">
               {fmtDuration(time.minutes)}
             </span>
-            <span className="text-[10px] uppercase tracking-wider text-white/50">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-white/60">
               trained
             </span>
-          </div>
+          </Link>
         )}
       </header>
 
       {/* THE thing: today's session (or the victory lap, or the break) */}
       {onBreak ? (
         <BreakCard current={onBreak} firstName={firstName} today={today} />
-      ) : weekDone ? (
-        <VictoryLap
+      ) : sessions.length > 0 ? (
+        // One client card for the whole week: the next session with its
+        // Start button, or the week-complete card once every session is
+        // done. It stays mounted across both, so the finish screen of the
+        // last session is never cut off by the page refreshing behind it.
+        <TodaySession
           week={contentWeek}
+          rows={thisWeek}
           firstName={firstName}
-          minutes={weekMinutes(allHomework, contentWeek)}
           totalMinutes={time.minutes}
           nextWeekLine={nextWeekLine}
-          totalSessions={sessions.length}
-        />
-      ) : current ? (
-        <TodaySession
-          session={current.n}
-          totalSessions={sessions.length || 4}
-          drills={current.list}
-          firstName={firstName}
-          extra={current.list.some((h) => h.is_extra)}
           playerId={player.id}
+          example={viewer.demo}
         />
       ) : (
         <section className="elite-card p-6 text-center">
-          <p className="font-display text-xl font-black uppercase">
+          <p className="font-display text-2xl font-black uppercase leading-tight">
             Your first week is coming, {firstName}
           </p>
-          <p className="mx-auto mt-2 max-w-sm text-sm text-white/50">
-            Your coach is building it around your profile right now. You&apos;ll
-            get a notification the moment it&apos;s live.
+          <p className="mx-auto mt-2 max-w-sm text-[15px] leading-relaxed text-white/65">
+            Your coach is building it around your profile right now. It shows up here the
+            moment it is ready, and you get a notification when it does.
           </p>
         </section>
-      )}
-
-      {/* Full week, one tap away */}
-      {sessions.length > 0 && (
-        <Link
-          href="/homework"
-          className="flex items-center justify-between rounded-2xl border border-white/8 bg-white/[0.02] px-4 py-3 text-sm text-white/60 transition-colors hover:border-white/15 hover:text-bone"
-        >
-          <span>
-            Full week ·{" "}
-            {sessions.filter((s) => s.list.every((h) => h.completed)).length}/
-            {sessions.length} sessions done
-          </span>
-          <span className="text-accent">→</span>
-        </Link>
       )}
 
       {/* Progress video (037): asked once per even week, same drill */}
@@ -217,20 +181,6 @@ export default async function DashboardPage() {
           parentFirst={(player.parent_name || "").trim().split(" ")[0]}
           benchmark={{ title: benchmark.title, video_url: benchmark.video_url }}
           previousUrl={previousVideo?.clip_url ?? null}
-        />
-      )}
-
-      {/* Extra Work (033): add a session from the bank, never a repeat.
-          Only once the week exists; one open extra at a time (enforced
-          server-side). */}
-      {sessions.length > 0 && (
-        <ExtraWork
-          hasWall={player.has_wall === true}
-          blocked={
-            sessions.some((s) => s.list.some((h) => h.is_extra) && s.list.some((h) => !h.completed))
-              ? "Finish the extra session you already added, then grab another."
-              : null
-          }
         />
       )}
 
@@ -253,60 +203,24 @@ export default async function DashboardPage() {
         />
       )}
 
-      {/* Compact truth strip: time trained, sessions, weeks (034) */}
-      {homework.length > 0 && (
-        <section className="grid grid-cols-3 gap-3">
-          <StatTile label="Time" value={fmtDuration(time.minutes)} sub="Trained" />
-          <StatTile label="Sessions" value={time.sessions} sub="Done" />
-          <StatTile label="Weeks" value={time.weeks} sub="Trained" />
-        </section>
-      )}
-
-      {/* A break is a date, not a penalty (034). Only the quiet one-liner
-          here; on a break the card above is the hero. */}
-      {!onBreak && !viewer.demo && (
-        <BreakCard current={null} firstName={firstName} today={today} />
-      )}
-
-      {/* Coach's latest word */}
-      {latestMessage && (
-        <Link href="/messages" className="block">
-          <section className="elite-card p-5 transition-colors hover:border-white/15">
-            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
-              <MessageSquare className="h-3.5 w-3.5" /> From your coach
-            </div>
-            <p className="mt-2 text-sm leading-relaxed text-white/75">
-              “{latestMessage.body}”
-            </p>
-            <div className="mt-2 text-xs text-white/35">
-              {timeAgo(latestMessage.created_at)} · Reply →
-            </div>
-          </section>
-        </Link>
-      )}
-
-      {/* Earned, in gold */}
-      {achievements.length > 0 && (
-        <section>
-          <h2 className="mb-3 flex items-center gap-2 font-display text-xl font-bold uppercase tracking-tight">
-            <Trophy className="h-4 w-4 text-accent" /> Recent achievements
-          </h2>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {achievements.slice(0, 3).map((a) => {
-              const Icon = ICONS[a.icon] ?? Trophy;
-              return (
-                <div key={a.id} className="elite-card p-4">
-                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-accent/10 text-accent">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <div className="mt-3 font-semibold text-bone">{a.title}</div>
-                  <div className="mt-0.5 text-xs text-white/45">{a.detail}</div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
+      {/* The one quiet row: Extra work (033: a session from the bank,
+          never a repeat, one open extra at a time, enforced server-side),
+          the coach's latest note, and Take a break (034: a date, not a
+          penalty). Each opens in place. */}
+      <HomeMore
+        extra={
+          sessions.length > 0
+            ? {
+                hasWall: player.has_wall === true,
+                blocked: extraOpen
+                  ? "Finish the extra session you already added, then add another."
+                  : null,
+              }
+            : null
+        }
+        note={coachNote ? { body: coachNote.body, when: timeAgo(coachNote.created_at) } : null}
+        breakFrom={!onBreak && !viewer.demo ? { firstName, today } : null}
+      />
     </div>
   );
 }

@@ -42,7 +42,11 @@ export function Wordmark({
   );
   if (!href) return inner;
   return (
-    <Link href={href} className="inline-flex items-center">
+    <Link
+      href={href}
+      aria-label="Strive Elite, home"
+      className="relative inline-flex items-center before:absolute before:inset-x-0 before:-inset-y-2 before:content-['']"
+    >
       {inner}
     </Link>
   );

@@ -1,11 +1,29 @@
 import { NextResponse } from "next/server";
-import { createServiceClient } from "@/lib/elite/supabase/server";
+import { createClient, createServiceClient } from "@/lib/elite/supabase/server";
 import { sendPlayerEmail } from "@/lib/elite/email";
 import { normalizePhone } from "@/lib/elite/sms";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { inviteRoleOf, redeemFieldsComplete } from "@/lib/elite/invite-link";
+import { AGREEMENT_REQUIRED_MESSAGE, agreementComplete } from "@/lib/elite/legal";
+import { recordConsent } from "@/lib/elite/legal-server";
 
 export const runtime = "nodejs";
+
+// Signs the brand-new account in HERE, on the server, so the session
+// comes back in a cookie the server sets (lib/elite/sign-in.ts: a cookie
+// the browser writes itself is capped at 7 days on an iPhone). Returns
+// whether it worked; when it did not, the account still exists and the
+// form sends the person to the sign-in screen.
+async function establishSession(email: string, password: string): Promise<boolean> {
+  try {
+    const supabase = createClient();
+    if (!supabase) return false;
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    return !error && Boolean(data.session);
+  } catch {
+    return false;
+  }
+}
 
 // Redeem an invite code and create a fully-provisioned account: a player
 // (the default) or, for a coach code (054), a coach profile with no player
@@ -33,6 +51,7 @@ export async function POST(req: Request) {
     phone?: string;
     playerPhone?: string;
     password?: string;
+    agreed?: { guardian?: unknown; terms?: unknown };
   };
   try {
     body = await req.json();
@@ -48,6 +67,11 @@ export async function POST(req: Request) {
   const password = body.password ?? "";
 
   if (!code) return NextResponse.json({ error: "An invite code is required." }, { status: 400 });
+  // No account without the agreement (068): both boxes, ticked by the
+  // person. Checked before anything is created.
+  if (!agreementComplete(body.agreed ?? {})) {
+    return NextResponse.json({ error: AGREEMENT_REQUIRED_MESSAGE }, { status: 400 });
+  }
   if (!fullName || !email || password.length < 8) {
     return NextResponse.json(
       { error: "Enter your name, email, phone, and a password of at least 8 characters." },
@@ -121,6 +145,13 @@ export async function POST(req: Request) {
     email,
   });
 
+  // Record the agreement the person just gave (version, time, where).
+  await recordConsent({
+    profileId: userId,
+    source: "signup",
+    userAgent: req.headers.get("user-agent"),
+  });
+
   // A coach is a profile, nothing more: no player row, no membership
   // gate, no welcome text. Burn the code and send them to the dashboard.
   if (role === "coach") {
@@ -128,7 +159,7 @@ export async function POST(req: Request) {
       .from("elite_invite_codes")
       .update({ used_by: userId, used_at: new Date().toISOString() })
       .eq("id", invite.id);
-    return NextResponse.json({ ok: true, role });
+    return NextResponse.json({ ok: true, role, signedIn: await establishSession(email, password) });
   }
 
   // 4) provision the player linked to the inviting coach. subscription_status
@@ -191,5 +222,5 @@ export async function POST(req: Request) {
     }).catch(() => undefined);
   }
 
-  return NextResponse.json({ ok: true, role });
+  return NextResponse.json({ ok: true, role, signedIn: await establishSession(email, password) });
 }

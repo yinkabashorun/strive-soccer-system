@@ -41,7 +41,7 @@ export function CheckinCard({
   if (done) {
     return (
       <section className="rounded-3xl border border-accent/20 bg-accent/[0.05] p-5">
-        <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-accent">
+        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-accent">
           <CheckCircle2 className="h-3.5 w-3.5" /> Checked in
         </div>
         <p className="mt-2 text-sm text-white/70">
@@ -54,7 +54,7 @@ export function CheckinCard({
 
   return (
     <section className="elite-card p-5">
-      <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-white/40">
+      <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
         <ClipboardCheck className="h-3.5 w-3.5 text-accent" /> Weekly check-in
       </div>
       {!open ? (
@@ -63,7 +63,7 @@ export function CheckinCard({
             {firstName ? `${firstName}, how` : "How"} did week {week} really
             go? Two minutes for your coach. It shapes your next plan.
           </p>
-          <button onClick={() => setOpen(true)} className="btn mt-3 w-full py-2.5">
+          <button onClick={() => setOpen(true)} className="btn mt-3 min-h-[44px] w-full py-2.5">
             Start check-in
           </button>
         </>
@@ -128,7 +128,7 @@ function Scale({
               "h-10 flex-1 rounded-xl border font-display text-lg font-bold transition-all",
               value >= n
                 ? "border-accent/40 bg-accent/[0.1] text-accent"
-                : "border-white/10 bg-white/[0.02] text-white/40 hover:border-white/20"
+                : "border-white/10 bg-white/[0.02] text-white/50 hover:border-white/20"
             )}
           >
             {n}

@@ -1,16 +1,17 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Bell, Check } from "lucide-react";
+import { Bell } from "lucide-react";
 import type { EliteNotification } from "@/lib/elite/types";
-import {
-  markAllNotificationsRead,
-  markNotificationRead,
-} from "@/lib/elite/player-actions";
+import { markAllNotificationsRead } from "@/lib/elite/player-actions";
+import { badgeText, bellList, openBell, unreadCount } from "@/lib/elite/bell";
 import { cn, timeAgo } from "@/lib/utils";
 
-// In-app notification bell for the player. Shows unread count and a
-// dropdown; marking read persists (no-op in demo).
+// In-app notification bell for the player. Opening the list is reading
+// it: everything is marked read (saved behind the screen; a no-op for the
+// example player) and the red count clears at once. The notes that were
+// new stay marked with a gold dot until the list is closed. Rules in
+// lib/elite/bell.ts.
 export function NotificationBell({
   initial,
 }: {
@@ -18,101 +19,102 @@ export function NotificationBell({
 }) {
   const [items, setItems] = useState(initial);
   const [open, setOpen] = useState(false);
+  const [fresh, setFresh] = useState<string[]>([]);
   const [, start] = useTransition();
 
-  const unread = items.filter((n) => !n.read).length;
+  const unread = unreadCount(items);
+  const badge = badgeText(unread);
+  const shown = bellList(items);
 
-  function openMenu() {
-    setOpen((v) => !v);
+  function toggle() {
+    if (open) {
+      setOpen(false);
+      setFresh([]);
+      return;
+    }
+    const next = openBell(items);
+    setItems(next.items);
+    setFresh(next.fresh);
+    setOpen(true);
+    if (next.fresh.length > 0) {
+      start(() => {
+        void markAllNotificationsRead();
+      });
+    }
   }
 
-  function readOne(id: string) {
-    setItems((s) => s.map((n) => (n.id === id ? { ...n, read: true } : n)));
-    start(() => {
-      markNotificationRead(id);
-    });
-  }
-
-  function readAll() {
-    setItems((s) => s.map((n) => ({ ...n, read: true })));
-    start(() => {
-      markAllNotificationsRead();
-    });
+  function close() {
+    setOpen(false);
+    setFresh([]);
   }
 
   return (
     <div className="relative">
       <button
-        onClick={openMenu}
-        aria-label="Notifications"
-        className="relative grid h-9 w-9 place-items-center rounded-lg text-white/60 transition-colors hover:bg-white/5 hover:text-white"
+        onClick={toggle}
+        aria-label={unread > 0 ? `Notifications, ${unread} new` : "Notifications"}
+        aria-expanded={open}
+        className="relative grid h-11 w-11 place-items-center rounded-xl text-white/60 transition-colors hover:bg-white/5 hover:text-white"
       >
-        <Bell className="h-[18px] w-[18px]" />
-        {unread > 0 && (
-          <span className="absolute right-1 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
-            {unread}
+        <Bell className="h-5 w-5" />
+        {badge && (
+          <span className="absolute right-1 top-1 grid h-[18px] min-w-[18px] place-items-center rounded-full bg-red-500 px-1 text-[11px] font-bold leading-none text-white">
+            {badge}
           </span>
         )}
       </button>
 
       {open && (
         <>
+          <div className="fixed inset-0 z-40" onClick={close} aria-hidden />
           <div
-            className="fixed inset-0 z-40"
-            onClick={() => setOpen(false)}
-            aria-hidden
-          />
-          <div className="absolute right-0 z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-white/10 bg-ink-100 shadow-lift">
-            <div className="flex items-center justify-between border-b border-white/6 px-4 py-3">
+            role="dialog"
+            aria-label="Notifications"
+            className="fixed inset-x-4 top-[calc(env(safe-area-inset-top)+4.5rem)] z-50 overflow-hidden rounded-2xl border border-white/10 bg-ink-100 shadow-lift lg:absolute lg:inset-x-auto lg:left-0 lg:top-auto lg:mt-2 lg:w-80"
+          >
+            <div className="border-b border-white/[0.06] px-4 py-3">
               <span className="font-display text-sm font-bold uppercase tracking-tight">
                 Notifications
               </span>
-              {unread > 0 && (
-                <button
-                  onClick={readAll}
-                  className="text-xs font-medium text-accent hover:underline"
-                >
-                  Mark all read
-                </button>
-              )}
             </div>
-            <div className="max-h-80 overflow-y-auto">
-              {items.length === 0 ? (
-                <div className="p-6 text-center text-sm text-white/45">
-                  You&apos;re all caught up.
+            <div className="max-h-[60svh] overflow-y-auto">
+              {shown.length === 0 ? (
+                <div className="p-6 text-center text-sm text-white/60">
+                  Nothing new. Your coach&apos;s messages and each new week show up here.
                 </div>
               ) : (
-                items.map((n) => (
-                  <button
-                    key={n.id}
-                    onClick={() => readOne(n.id)}
-                    className={cn(
-                      "flex w-full gap-3 border-b border-white/5 px-4 py-3 text-left transition-colors hover:bg-white/[0.03]",
-                      !n.read && "bg-accent/[0.04]"
-                    )}
-                  >
-                    <span
+                shown.map((n) => {
+                  const isFresh = fresh.includes(n.id);
+                  return (
+                    <div
+                      key={n.id}
                       className={cn(
-                        "mt-1.5 h-2 w-2 shrink-0 rounded-full",
-                        n.read ? "bg-transparent" : "bg-accent"
+                        "flex gap-3 border-b border-white/5 px-4 py-3 last:border-b-0",
+                        isFresh && "bg-accent/[0.04]"
                       )}
-                    />
-                    <span className="min-w-0 flex-1">
-                      <span className="block text-sm font-semibold text-bone">
-                        {n.title}
+                    >
+                      <span
+                        aria-hidden
+                        className={cn(
+                          "mt-1.5 h-2 w-2 shrink-0 rounded-full",
+                          isFresh ? "bg-accent" : "bg-transparent"
+                        )}
+                      />
+                      <span className="min-w-0 flex-1 select-text">
+                        <span className="block text-sm font-semibold text-bone">
+                          {isFresh && <span className="sr-only">New: </span>}
+                          {n.title}
+                        </span>
+                        <span className="mt-0.5 block text-[13px] leading-relaxed text-white/60">
+                          {n.body}
+                        </span>
+                        <span className="mt-1 block text-[11px] text-white/50">
+                          {timeAgo(n.created_at)}
+                        </span>
                       </span>
-                      <span className="mt-0.5 block text-xs leading-relaxed text-white/55">
-                        {n.body}
-                      </span>
-                      <span className="mt-1 block text-[10px] text-white/30">
-                        {timeAgo(n.created_at)}
-                      </span>
-                    </span>
-                    {n.read && (
-                      <Check className="mt-1 h-3.5 w-3.5 shrink-0 text-white/25" />
-                    )}
-                  </button>
-                ))
+                    </div>
+                  );
+                })
               )}
             </div>
           </div>

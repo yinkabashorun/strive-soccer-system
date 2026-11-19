@@ -1,53 +1,40 @@
 "use client";
 
 import { useState } from "react";
+import { useFormState, useFormStatus } from "react-dom";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Loader2, Lock, Mail } from "lucide-react";
-import { createClient } from "@/lib/elite/supabase/client";
-import { enterDemoPlayer, enterDemoCoach } from "@/lib/elite/auth-actions";
+import { enterDemoPlayer, enterDemoCoach, signIn } from "@/lib/elite/auth-actions";
 import { INVITE_USED_MESSAGE, INVITE_USED_NOTICE } from "@/lib/elite/invite-link";
+import { ACCOUNT_DELETED_MESSAGE, ACCOUNT_DELETED_NOTICE } from "@/lib/elite/account";
 
-export function LoginForm({ configured }: { configured: boolean }) {
-  const router = useRouter();
+// The sign-in screen. The form posts to a server action (signIn in
+// auth-actions.ts): the server signs in and sends the session back in a
+// cookie it sets itself, which is the kind the iPhone keeps. Nothing here
+// talks to the sign-in service from the browser (lib/elite/sign-in.ts).
+export function LoginForm({
+  configured,
+  native = false,
+}: {
+  configured: boolean;
+  native?: boolean; // inside the App Store app: sign-in only
+}) {
   const params = useSearchParams();
   const next = params.get("next");
   // A used invite link lands here with a plain explanation, not an error.
-  const notice = params.get("notice") === INVITE_USED_NOTICE ? INVITE_USED_MESSAGE : null;
+  const noticeKey = params.get("notice");
+  const notice =
+    noticeKey === INVITE_USED_NOTICE
+      ? INVITE_USED_MESSAGE
+      : noticeKey === ACCOUNT_DELETED_NOTICE
+        ? ACCOUNT_DELETED_MESSAGE
+        : null;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(params.get("error"));
-
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    const supabase = createClient();
-    if (!supabase) {
-      setError("Sign-in isn't configured yet. Try a demo account below.");
-      return;
-    }
-    setLoading(true);
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-      return;
-    }
-    // Route by role - coaches and admins go to the coach app.
-    const { data: profile } = await supabase
-      .from("elite_profiles")
-      .select("role")
-      .eq("id", data.user.id)
-      .maybeSingle();
-    const isStaff = profile?.role === "coach" || profile?.role === "admin";
-    const dest = next || (isStaff ? "/coach" : "/dashboard");
-    router.push(dest);
-    router.refresh();
-  }
+  // An error an auth link brought with it shows until the first try.
+  const [state, action] = useFormState(signIn, { error: params.get("error") });
+  const error = state.error;
 
   return (
     <div className="elite-card p-7 sm:p-8">
@@ -63,17 +50,23 @@ export function LoginForm({ configured }: { configured: boolean }) {
         </p>
       )}
 
-      <form onSubmit={onSubmit} className="mt-7 space-y-4">
+      <form action={action} className="mt-7 space-y-4">
+        {next && <input type="hidden" name="next" value={next} />}
         <label className="block">
           <span className="mb-2 flex items-center gap-2 text-sm font-medium text-white/70">
             <Mail className="h-4 w-4" /> Email
           </span>
+          {/* autoComplete "username" on an email field is what lets the
+              iPhone offer the saved password (Apple's own guidance). */}
           <input
             type="email"
+            name="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            autoComplete="email"
+            autoComplete="username"
+            autoCapitalize="none"
+            autoCorrect="off"
             placeholder="you@example.com"
             className="w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-bone placeholder:text-white/30 focus:border-accent/40 focus:outline-none"
           />
@@ -84,6 +77,7 @@ export function LoginForm({ configured }: { configured: boolean }) {
           </span>
           <input
             type="password"
+            name="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -93,44 +87,47 @@ export function LoginForm({ configured }: { configured: boolean }) {
           />
         </label>
 
-        {error && <p className="text-sm text-red-400">{error}</p>}
+        {error && (
+          <p role="alert" className="text-sm text-red-400">
+            {error}
+          </p>
+        )}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="btn-accent w-full px-6 py-3.5 text-base"
-        >
-          {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
-        </button>
+        <SignInButton />
 
-        <p className="text-center text-xs">
-          <Link href="/forgot" className="text-white/40 hover:text-accent">
+        <p className="text-center text-[13px]">
+          <Link href="/forgot" className="tap text-white/60 hover:text-accent">
             Forgot your password?
           </Link>
         </p>
       </form>
 
-      <p className="mt-5 text-center text-sm text-white/50">
-        New here?{" "}
-        <Link href="/signup" className="text-accent hover:underline">
-          Create an account
-        </Link>
-      </p>
+      {!native && (
+        <p className="mt-5 text-center text-sm text-white/50">
+          New here?{" "}
+          <Link href="/signup" className="tap text-accent hover:underline">
+            Create an account
+          </Link>
+        </p>
+      )}
 
       {/* The sales door: anyone can walk through a fully-loaded player
           experience - no account, no friction. */}
       <form action={enterDemoPlayer} className="mt-6 border-t border-white/8 pt-5">
-        <button className="btn w-full py-3 text-sm">
+        <button className="btn min-h-[48px] w-full py-3 text-sm">
           See the app as a player →
         </button>
-        <p className="mt-2 text-center text-xs text-white/30">
+        <p className="mt-2 text-center text-[13px] text-white/60">
           No account needed.
         </p>
       </form>
 
-      {!configured && (
+      {/* Local set-up only (no database configured). Inside the App Store
+          app the example tour is offered once, above, and there is no
+          coach tour. */}
+      {!configured && !native && (
         <div className="mt-7 border-t border-white/8 pt-6">
-          <div className="mb-3 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
+          <div className="mb-3 text-center text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
             Explore the demo
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -141,11 +138,25 @@ export function LoginForm({ configured }: { configured: boolean }) {
               <button className="btn w-full py-3">Enter as Coach</button>
             </form>
           </div>
-          <p className="mt-3 text-center text-xs text-white/30">
+          <p className="mt-3 text-center text-[13px] text-white/50">
             No account needed. Tour the full experience.
           </p>
         </div>
       )}
     </div>
+  );
+}
+
+function SignInButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      aria-label={pending ? "Signing in" : undefined}
+      className="btn-accent w-full px-6 py-3.5 text-base"
+    >
+      {pending ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
+    </button>
   );
 }

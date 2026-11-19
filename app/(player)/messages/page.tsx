@@ -22,13 +22,13 @@ export default async function MessagesPage() {
       {viewer.demo && <TourGuide page="coach" />}
 
       <header className="animate-fade-up">
-        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/40">
+        <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
           <MessageSquare className="h-3.5 w-3.5 text-accent" /> Direct line
         </div>
         <h1 className="mt-1 font-display text-3xl font-black sm:text-4xl">
           Your coach
         </h1>
-        <p className="mt-2 text-white/50">
+        <p className="mt-2 text-[15px] leading-relaxed text-white/65">
           Questions, wins, clips to talk through. Message your coach directly.
         </p>
       </header>
@@ -40,6 +40,7 @@ export default async function MessagesPage() {
           meName={viewer.profile.full_name}
           send={send}
           placeholder="Message your coach…"
+          emptyLine="No messages yet. Ask your coach anything about your training, and the answer comes back right here."
         />
       </div>
     </div>

@@ -25,8 +25,8 @@ export function FiveVFiveLanding() {
   ];
 
   const steps: [string, string][] = [
-    ["Lock your spot", "Fill out the form, then pay with the link we send. Your team is in the moment the entry fee is paid."],
-    ["Send your roster", `Team name, captain and players. Then follow ${E.handle} on Instagram, that is where the schedule drops.`],
+    ["Register your team", "Fill out the form with your team name, captain and roster."],
+    ["Make payment", `Pay with the link we send. Your spot is locked the moment the entry fee is paid. Then follow ${E.handle} on Instagram, that is where the schedule drops.`],
     ["Show up and win it", `${E.shortDate} at ${E.venue}. ${money(E.prize)} goes to the winning team.`],
   ];
 

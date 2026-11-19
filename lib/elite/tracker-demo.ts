@@ -79,6 +79,8 @@ export function demoTracker(profileId: string): Tracker {
     quiz_done_at: "2026-11-02T15:00:00.000Z",
     referral_code: "STRV2EXM",
     referred_by: null,
+    playing_for: "NVA 2010 Boys ECNL",
+    starred_at: null,
     created_at: "2026-11-02T15:00:00.000Z",
   };
   const state = readDemoState();
@@ -201,6 +203,19 @@ export function demoClubsOf(friendName: string): string[] {
   if (!full) return [];
   const all = [...DEMO_CLUBS_START, DEMO_CLUB_ASK];
   return all.filter((c) => (DEMO_CLUB_MEMBERS[c.id] ?? []).includes(full)).map((c) => c.name);
+}
+
+// What the example friends' profiles carry beyond the board: aura points
+// (shown only as a level), the level they play at from their quiz, their line,
+// and whether a coach starred them.
+const DEMO_PROFILE: Record<string, { points: number; level: string; playingFor: string | null; starred: boolean }> = {
+  "Gary G.": { points: 4620, level: "elite", playingFor: "Armenia U19, Fortuna Koln", starred: true },
+  "Yinka B.": { points: 3150, level: "college", playingFor: null, starred: false },
+  "Dani R.": { points: 640, level: "travel", playingFor: "Bull Run 2010s", starred: false },
+};
+
+export function demoAuraOf(name: string): { points: number; level: string | null; playingFor: string | null; starred: boolean } {
+  return DEMO_PROFILE[name] ?? { points: 120, level: null, playingFor: null, starred: false };
 }
 
 // The example players this visitor blocked, for the Account page.

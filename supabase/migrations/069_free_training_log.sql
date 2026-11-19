@@ -36,7 +36,11 @@ set lock_timeout = '8s';
 --    answers (grade, level, season, goal), the weekly target, the days of
 --    the week the player plans to train (0 = Monday ... 6 = Sunday), and
 --    the link the player shares. Grade is what decides whether a player
---    logs gym work: high school and older.
+--    logs gym work: high school and older. playing_for is the one line a
+--    player writes for their profile (40 characters, no links; a coach
+--    can clear it). starred_at and starred_by are the coaches' star: set
+--    and taken back by a coach only (the server action checks, and no
+--    browser can write this table at all: there is no write policy).
 create table if not exists public.elite_trackers (
   profile_id     uuid primary key references public.elite_profiles(id) on delete cascade,
   phone          text,
@@ -52,6 +56,9 @@ create table if not exists public.elite_trackers (
   quiz_done_at   timestamptz,
   referral_code  text not null unique,
   referred_by    uuid references public.elite_profiles(id) on delete set null,
+  playing_for    text check (playing_for is null or char_length(playing_for) between 1 and 40),
+  starred_at     timestamptz,
+  starred_by     uuid references public.elite_profiles(id) on delete set null,
   created_at     timestamptz not null default now()
 );
 
@@ -465,7 +472,65 @@ begin
   end if;
 end $$;
 
--- 10) App-wide switches a coach flips. First one: whether anyone can make
+-- 10) The coaches' private note on a starred player. Its own table, read
+--     and written by coaches only, so a player can never read it, even
+--     their own (the player's row in elite_trackers is readable by them).
+create table if not exists public.elite_tracker_star_notes (
+  profile_id uuid primary key references public.elite_trackers(profile_id) on delete cascade,
+  note       text not null default '' check (char_length(note) <= 280),
+  updated_at timestamptz not null default now()
+);
+
+alter table public.elite_tracker_star_notes enable row level security;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'elite_tracker_star_notes'
+      and policyname = 'elite_tracker_star_notes_coach_read'
+  ) then
+    create policy elite_tracker_star_notes_coach_read on public.elite_tracker_star_notes
+      for select using (public.elite_is_coach());
+  end if;
+end $$;
+
+-- 11) A player's "Playing for" line reported by a friend. It waits in the
+--     coach queue until a coach clears the line or says no action.
+create table if not exists public.elite_line_reports (
+  id          uuid primary key default gen_random_uuid(),
+  profile_id  uuid not null references public.elite_trackers(profile_id) on delete cascade,
+  reporter_id uuid not null references public.elite_trackers(profile_id) on delete cascade,
+  created_at  timestamptz not null default now(),
+  resolved_at timestamptz,
+  resolved_by uuid references public.elite_profiles(id) on delete set null,
+  action      text check (action is null or action in ('cleared', 'none')),
+  unique (profile_id, reporter_id)
+);
+
+alter table public.elite_line_reports enable row level security;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'elite_line_reports'
+      and policyname = 'elite_line_reports_own_read'
+  ) then
+    create policy elite_line_reports_own_read on public.elite_line_reports
+      for select using (reporter_id = auth.uid());
+  end if;
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'elite_line_reports'
+      and policyname = 'elite_line_reports_coach_read'
+  ) then
+    create policy elite_line_reports_coach_read on public.elite_line_reports
+      for select using (public.elite_is_coach());
+  end if;
+end $$;
+
+-- 12) App-wide switches a coach flips. First one: whether anyone can make
 --    a free account. CLOSED until a coach opens it at /coach/free.
 create table if not exists public.elite_settings (
   key        text primary key,

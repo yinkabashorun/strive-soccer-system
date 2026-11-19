@@ -27,6 +27,7 @@ import {
   CLUB_CAP_MESSAGE,
   CLUB_NAME_MESSAGE,
   CLUB_REFUSED,
+  PLAYING_FOR_MESSAGE,
   FREE_HOME,
   FREE_WEEK,
   GYM_REFUSED_MESSAGE,
@@ -35,6 +36,7 @@ import {
   cleanBirth,
   cleanClubCode,
   cleanClubName,
+  cleanPlayingFor,
   clubReportText,
   isCaptain,
   mayRemoveMember,
@@ -68,8 +70,8 @@ import {
 // did in a cookie only.
 //
 // Nothing here sends anything to a player: no texts, no pushes, no notes.
-// The texts in this file go to the coaches, once, when a post or a club
-// name is first reported.
+// The texts in this file go to the coaches, once, when a post, a club
+// name or a profile's line is first reported.
 
 type Fail = { ok: false; error: string };
 const fail = (error: string): Fail => ({ ok: false, error });
@@ -609,6 +611,48 @@ export async function loadProfile(targetId: string): Promise<Profile | null> {
   return profileFor(viewer, targetId, nyToday());
 }
 
+// ---- The line on your profile -----------------------------------------
+
+// "Playing for": one plain line on your profile, or nothing.
+export async function setPlayingFor(lineInput: string): Promise<{ ok: true } | Fail> {
+  const blank = typeof lineInput === "string" && lineInput.trim() === "";
+  const line = blank ? null : cleanPlayingFor(lineInput);
+  if (!blank && !line) return fail(PLAYING_FOR_MESSAGE);
+  const o = await owner();
+  if (o.kind === "no") return fail(o.error);
+  if (o.kind === "demo") return { ok: true };
+  const { error } = await o.admin.from("elite_trackers").update({ playing_for: line }).eq("profile_id", o.profileId);
+  if (error) return fail(OFFLINE);
+  revalidatePath("/account");
+  return { ok: true };
+}
+
+// Report a friend's line from their profile. It waits in the coach queue;
+// the coaches get one text for a line, the first time.
+export async function reportLine(targetId: string): Promise<{ ok: true } | Fail> {
+  if (typeof targetId !== "string" || !targetId) return fail("That profile is not there any more.");
+  const o = await owner();
+  if (o.kind === "no") return fail(o.error);
+  if (o.kind === "demo") return { ok: true };
+  const viewer = await getViewer();
+  const profile = viewer ? await profileFor(viewer, targetId, nyToday()) : null;
+  if (!profile || profile.you || !profile.playingFor) return fail("That profile is not there any more.");
+  const { count } = await o.admin
+    .from("elite_line_reports")
+    .select("id", { count: "exact", head: true })
+    .eq("profile_id", targetId);
+  const { error } = await o.admin
+    .from("elite_line_reports")
+    .upsert({ profile_id: targetId, reporter_id: o.profileId }, { onConflict: "profile_id,reporter_id", ignoreDuplicates: true });
+  if (error) return fail(OFFLINE);
+  if (!count) {
+    await textCoaches(
+      `A profile line in the free app was reported: "${profile.playingFor}". Look at it here: ${APP_URL}/coach/free`
+    ).catch(() => 0);
+  }
+  return { ok: true };
+}
+
 // ---- Coach side (/coach/free) -----------------------------------------
 
 type Coach =
@@ -780,6 +824,59 @@ export async function dismissClubReports(clubId: string): Promise<{ ok: true } |
   if (c.kind === "no") return fail("Only a coach can do this.");
   if (c.kind === "demo") return { ok: true };
   const { error } = await closeClubReports(c, clubId, "none");
+  if (error) return fail(OFFLINE);
+  revalidatePath("/coach/free");
+  return { ok: true };
+}
+
+// ---- Coach side: the star and the line ---------------------------------
+
+// Give or take back the star, with the coaches' private note. A coach
+// only; a player can never set it.
+export async function setStar(profileId: string, on: boolean, noteInput: string): Promise<{ ok: true } | Fail> {
+  if (typeof profileId !== "string" || !profileId) return fail("Pick a player.");
+  const note = typeof noteInput === "string" ? noteInput.replace(/\s+/g, " ").trim().slice(0, 280) : "";
+  const c = await coach();
+  if (c.kind === "no") return fail("Only a coach can do this.");
+  if (c.kind === "demo") return { ok: true };
+  const { error } = await c.admin
+    .from("elite_trackers")
+    .update(on ? { starred_at: new Date().toISOString(), starred_by: c.profileId } : { starred_at: null, starred_by: null })
+    .eq("profile_id", profileId);
+  if (error) return fail(OFFLINE);
+  await c.admin
+    .from("elite_tracker_star_notes")
+    .upsert({ profile_id: profileId, note: on ? note : "", updated_at: new Date().toISOString() }, { onConflict: "profile_id" });
+  revalidatePath("/coach/free");
+  touch();
+  return { ok: true };
+}
+
+async function closeLineReports(c: { admin: Admin; profileId: string }, profileId: string, action: "cleared" | "none") {
+  return c.admin
+    .from("elite_line_reports")
+    .update({ resolved_at: new Date().toISOString(), resolved_by: c.profileId, action })
+    .eq("profile_id", profileId)
+    .is("resolved_at", null);
+}
+
+// Clear a player's line (a reported one, or any).
+export async function clearPlayingFor(profileId: string): Promise<{ ok: true } | Fail> {
+  const c = await coach();
+  if (c.kind === "no") return fail("Only a coach can do this.");
+  if (c.kind === "demo") return { ok: true };
+  const { error } = await c.admin.from("elite_trackers").update({ playing_for: null }).eq("profile_id", profileId);
+  if (error) return fail(OFFLINE);
+  await closeLineReports(c, profileId, "cleared");
+  revalidatePath("/coach/free");
+  return { ok: true };
+}
+
+export async function dismissLineReports(profileId: string): Promise<{ ok: true } | Fail> {
+  const c = await coach();
+  if (c.kind === "no") return fail("Only a coach can do this.");
+  if (c.kind === "demo") return { ok: true };
+  const { error } = await closeLineReports(c, profileId, "none");
   if (error) return fail(OFFLINE);
   revalidatePath("/coach/free");
   return { ok: true };

@@ -538,7 +538,13 @@ const FREE_FILES = [
   "components/elite/TrackerDays.tsx",
   "components/elite/TrackerSheet.tsx",
   "components/elite/JoinForm.tsx",
+  "components/elite/ProfileSheet.tsx",
+  "components/elite/ClubsSection.tsx",
+  "components/elite/ClubAsk.tsx",
+  "components/elite/StarMark.tsx",
+  "components/elite/PlayingForField.tsx",
   "lib/elite/tracker.ts",
+  "lib/elite/tracker-ranking.ts",
   "lib/elite/tracker-server.ts",
   "lib/elite/tracker-demo.ts",
   "lib/elite/tracker-actions.ts",
@@ -546,11 +552,17 @@ const FREE_FILES = [
 
 describe("the free log stays what it is", () => {
   it("no streaks, no scores, no prizes, no prices, nothing that sounds like a machine", () => {
+    // Aura, a level, a club's rank and the coaches' star are allowed; the
+    // points behind aura stay inside the rules and are never on a screen.
     const banned =
-      /\b(streak|leaderboard|points?|score|badge|medal|crown|trophy|podium|price|guarantee|AI|automated|algorithm)\b|\$\d|—/i;
+      /\b(streak|leaderboard|score|badge|medal|crown|trophy|podium|price|guarantee|AI|automated|algorithm)\b|\$\d|—/i;
     for (const f of FREE_FILES) {
       const src = code(f);
       const hit = src.match(banned);
+      expect(hit, `${f}: ${hit?.[0]}`).toBeNull();
+    }
+    for (const f of FREE_FILES.filter((f) => !f.startsWith("lib/"))) {
+      const hit = code(f).match(/\bpoints?\b/i);
       expect(hit, `${f}: ${hit?.[0]}`).toBeNull();
     }
   });
@@ -574,8 +586,8 @@ describe("the free log stays what it is", () => {
     // the one text goes to the coaches, once, when a post is first reported
     expect(code("lib/elite/tracker-server.ts")).not.toContain("textCoaches");
     const acts = code("lib/elite/tracker-actions.ts");
-    // (and once when a club's name is first reported)
-    expect((acts.match(/textCoaches\(/g) ?? []).length).toBe(2);
+    // (and once when a club's name, or a profile's line, is first reported)
+    expect((acts.match(/textCoaches\(/g) ?? []).length).toBe(3);
     expect(acts).toMatch(/if \(!count\) await textCoaches\(clubReportText\(/);
     const report = acts.slice(acts.indexOf("export async function reportPost("), acts.indexOf("type Coach ="));
     expect(report).toMatch(/if \(!count\) \{[\s\S]*?await textCoaches\(reportText\(/);
@@ -613,6 +625,7 @@ describe("free accounts are invisible to everything a member query reads", () =>
     "lib/elite/tracker-coach.ts",
     "lib/elite/tracker-actions.ts",
     "app/api/elite/auth/join/route.ts",
+    "lib/elite/tracker-ranking.ts", // the club ranking: club names and averages only
   ]);
   // (the post route stores nothing itself: it hands a checked photo to
   // savePost in tracker-server.ts)
@@ -623,7 +636,7 @@ describe("free accounts are invisible to everything a member query reads", () =>
       .filter((f) => /\.(ts|tsx)$/.test(f));
     const touching = files
       .filter((f) =>
-        /elite_trackers|elite_training_logs|elite_tracker_friends|elite_tracker_blocks|elite_log_props|elite_post_reports|elite_target_table|elite_settings|tracker-posts/.test(
+        /elite_trackers|elite_training_logs|elite_tracker_friends|elite_tracker_blocks|elite_log_props|elite_post_reports|elite_target_table|elite_settings|tracker-posts|elite_tracker_clubs|elite_tracker_club_members|elite_club_reports|elite_tracker_star_notes|elite_line_reports/.test(
           readFileSync(f, "utf8")
         )
       )
@@ -641,7 +654,7 @@ describe("free accounts are invisible to everything a member query reads", () =>
 
   it("the tables are read-only to the browser and leave with the account", () => {
     const sql = read("supabase/migrations/069_free_training_log.sql");
-    expect((sql.match(/enable row level security/g) ?? []).length).toBe(11);
+    expect((sql.match(/enable row level security/g) ?? []).length).toBe(13);
     expect(sql).toContain("references public.elite_profiles(id) on delete cascade");
     expect(sql).toContain("references public.elite_trackers(profile_id) on delete cascade");
     // owners read; only a coach writes, and only the target table and the switches
@@ -903,11 +916,13 @@ describe("friends", () => {
       "archiveClub",
       "blockPlayer",
       "checkJoinAge",
+      "clearPlayingFor",
       "confirmClub",
       "confirmFriend",
       "createClub",
       "deleteLog",
       "dismissClubReports",
+      "dismissLineReports",
       "dismissReports",
       "endMyClub",
       "leaveClub",
@@ -919,11 +934,14 @@ describe("friends", () => {
       "renameClub",
       "renameMyClub",
       "reportClub",
+      "reportLine",
       "reportPost",
       "saveQuiz",
       "saveTargetRow",
       "setFreeSignupOpen",
       "setPlanDays",
+      "setPlayingFor",
+      "setStar",
       "startClub",
       "toggleProps",
       "unblockPlayer",

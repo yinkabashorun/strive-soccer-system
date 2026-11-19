@@ -11,6 +11,8 @@ import {
   POST_URL_SECONDS,
   REPORT_REASONS,
   allTimeMinutes,
+  auraLevel,
+  auraPoints,
   labelOf,
   weekOf,
   type Goal,
@@ -19,7 +21,9 @@ import {
   type ClubKind,
   type CoachClub,
   type Level,
+  type AuraLog,
   type ReportedClub,
+  type ReportedLine,
   type ReportedPost,
   type TargetRow,
 } from "./tracker";
@@ -40,6 +44,10 @@ export type FreeAccount = {
   referrals: number; // joined with this player's link
   friends: number;
   posts_week: number; // photos posted this week that are still up
+  aura_level: number; // 1 to 11
+  playing_for: string | null;
+  starred: boolean;
+  star_note: string; // the coaches' private note, never shown to a player
 };
 
 
@@ -52,6 +60,7 @@ export type FreeOverview = {
   reports: ReportedPost[]; // open, oldest first
   clubs: CoachClub[]; // newest first
   clubReports: ReportedClub[]; // open
+  lineReports: ReportedLine[]; // open
 };
 
 export function demoOverview(today: string): FreeOverview {
@@ -98,6 +107,7 @@ export function demoOverview(today: string): FreeOverview {
       },
     ],
     clubReports: [],
+    lineReports: [],
     accounts: [
       {
         profile_id: "demo-free-1",
@@ -113,6 +123,10 @@ export function demoOverview(today: string): FreeOverview {
         referrals: 1,
         friends: 5,
         posts_week: 2,
+        aura_level: auraLevel(auraPoints(logs.map((l) => ({ ...l, photo: Boolean(l.photo) })), 240)).level,
+        playing_for: "NVA 2010 Boys ECNL",
+        starred: false,
+        star_note: "",
       },
     ],
   };
@@ -161,7 +175,10 @@ export async function getFreeOverview(): Promise<FreeOverview> {
   };
   type MemberRow = { club_id: string; profile_id: string };
   type ClubReportRow = { club_id: string; reporter_id: string; created_at: string };
-  const [rows, logs, pairs, openReports, open, targets, clubRows, memberRows, clubReportRows] = await Promise.all([
+  type LineReportRow = { profile_id: string; reporter_id: string; created_at: string };
+  type NoteRow = { profile_id: string; note: string };
+  const [rows, logs, pairs, openReports, open, targets, clubRows, memberRows, clubReportRows, lineReportRows, noteRows] =
+    await Promise.all([
     everyRow<Tracker>((from, to) =>
       admin
         .from("elite_trackers")
@@ -217,6 +234,18 @@ export async function getFreeOverview(): Promise<FreeOverview> {
         .order("id")
         .range(from, to)
     ),
+    everyRow<LineReportRow>((from, to) =>
+      admin
+        .from("elite_line_reports")
+        .select("profile_id, reporter_id, created_at")
+        .is("resolved_at", null)
+        .order("created_at")
+        .order("id")
+        .range(from, to)
+    ),
+    everyRow<NoteRow>((from, to) =>
+      admin.from("elite_tracker_star_notes").select("profile_id, note").order("profile_id").range(from, to)
+    ),
   ]);
   const ids = rows.map((r) => r.profile_id);
   // Names, a few hundred ids at a time (an id list rides in the address).
@@ -246,6 +275,14 @@ export async function getFreeOverview(): Promise<FreeOverview> {
   }
   const referralsBy = new Map<string, number>();
   for (const r of rows) if (r.referred_by) add(referralsBy, r.referred_by, 1);
+  const auraLogsBy = new Map<string, AuraLog[]>();
+  for (const l of logs) {
+    auraLogsBy.set(l.profile_id, [
+      ...(auraLogsBy.get(l.profile_id) ?? []),
+      { trained_on: l.trained_on, minutes: l.minutes, kind: l.kind, photo: Boolean(l.photo_path) && !l.removed_at },
+    ]);
+  }
+  const noteBy = new Map(noteRows.map((n) => [n.profile_id, n.note]));
   const friendsBy = new Map<string, number>();
   for (const p of pairs) {
     add(friendsBy, p.a, 1);
@@ -266,6 +303,10 @@ export async function getFreeOverview(): Promise<FreeOverview> {
     referrals: referralsBy.get(r.profile_id) ?? 0,
     friends: friendsBy.get(r.profile_id) ?? 0,
     posts_week: postsBy.get(r.profile_id) ?? 0,
+    aura_level: auraLevel(auraPoints(auraLogsBy.get(r.profile_id) ?? [], r.target_minutes ?? 0)).level,
+    playing_for: r.playing_for,
+    starred: Boolean(r.starred_at),
+    star_note: noteBy.get(r.profile_id) ?? "",
   }));
 
   // The queue: one item per reported post that is still up, oldest report
@@ -330,6 +371,18 @@ export async function getFreeOverview(): Promise<FreeOverview> {
       };
     });
 
+  const trackerById = new Map(rows.map((t) => [t.profile_id, t]));
+  const linesBy = new Map<string, LineReportRow[]>();
+  for (const l of lineReportRows) linesBy.set(l.profile_id, [...(linesBy.get(l.profile_id) ?? []), l]);
+  const lineReports: ReportedLine[] = [...linesBy.entries()]
+    .filter(([id]) => trackerById.get(id)?.playing_for)
+    .map(([id, list]) => ({
+      profile_id: id,
+      player: nameOrNone(id),
+      line: trackerById.get(id)!.playing_for as string,
+      reports: list.map((l) => ({ reporter: nameOrNone(l.reporter_id), at: l.created_at })),
+    }));
+
   return {
     open,
     targets,
@@ -339,5 +392,6 @@ export async function getFreeOverview(): Promise<FreeOverview> {
     reports,
     clubs,
     clubReports,
+    lineReports,
   };
 }

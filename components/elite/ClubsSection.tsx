@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronRight, MoreHorizontal, Plus, X } from "lucide-react";
+import { ChevronRight, ListOrdered, MoreHorizontal, Plus, X } from "lucide-react";
 import {
   endMyClub,
   leaveClub,
@@ -16,12 +16,17 @@ import {
   CLUB_NAME_MAX,
   CLUBS_PER_PLAYER,
   clubLink,
+  RANKING_MIN_MEMBERS,
+  RANKING_TITLE,
   mayStartClub,
   type MyClub,
+  type RankingRow,
 } from "@/lib/elite/tracker";
+import { fmtDuration } from "@/lib/elite/time-trained";
 import { TrackerSheet } from "./TrackerSheet";
 import { sendLink } from "./send-link";
 import { usePostLauncher } from "./FreeShell";
+import { StarMark } from "./StarMark";
 
 type Sheet =
   | { kind: "club"; id: string }
@@ -30,13 +35,14 @@ type Sheet =
   | { kind: "end"; id: string }
   | { kind: "report"; id: string }
   | { kind: "start" }
-  | { kind: "started"; name: string; code: string };
+  | { kind: "started"; name: string; code: string }
+  | { kind: "ranking" };
 
 // Your clubs, on My week: each club a row with its name and how many are
 // in it; a tap opens its roster with Send the club's link and Leave, and
 // the captain's three (rename, take a member off, end the club). Start a
 // club sits under them until the cap. Clubs are found by link only.
-export function ClubsSection({ clubs, appUrl }: { clubs: MyClub[]; appUrl: string }) {
+export function ClubsSection({ clubs, ranking, appUrl }: { clubs: MyClub[]; ranking: RankingRow[]; appUrl: string }) {
   const router = useRouter();
   const { profile } = usePostLauncher();
   const [sheet, setSheet] = useState<Sheet | null>(null);
@@ -95,6 +101,17 @@ export function ClubsSection({ clubs, appUrl }: { clubs: MyClub[]; appUrl: strin
           </li>
         ))}
       </ul>
+      {ranking.length > 0 && (
+        <button
+          type="button"
+          onClick={() => open({ kind: "ranking" })}
+          className="flex h-[52px] w-full items-center gap-3 border-b border-white/[0.09] text-left"
+        >
+          <ListOrdered className="h-5 w-5 shrink-0 text-accent" />
+          <span className="min-w-0 flex-1 text-[15px] font-semibold text-bone">{RANKING_TITLE}</span>
+          <ChevronRight className="h-4 w-4 shrink-0 text-white/60" />
+        </button>
+      )}
       {canStart ? (
         <button
           type="button"
@@ -146,6 +163,29 @@ export function ClubsSection({ clubs, appUrl }: { clubs: MyClub[]; appUrl: strin
         </TrackerSheet>
       )}
 
+      {sheet?.kind === "ranking" && (
+        <TrackerSheet title={RANKING_TITLE} onClose={() => open(null)}>
+          <p className="text-[14px] leading-relaxed text-white/70">
+            Clubs of {RANKING_MIN_MEMBERS} or more, by the average training a member logged this week. It starts again
+            on Monday.
+          </p>
+          <ol className="mt-3">
+            {ranking.map((r) => (
+              <li key={r.id} className="flex min-h-[52px] items-center gap-3 border-b border-white/[0.09]">
+                <span className="w-7 shrink-0 font-display text-[20px] font-black tabular-nums text-white/60">{r.place}</span>
+                <span className={"min-w-0 flex-1 truncate text-[15px] font-semibold " + (r.mine ? "text-accent" : "text-bone")}>
+                  {r.name}
+                </span>
+                <span className="shrink-0 text-right text-[13px] text-white/70">
+                  <b className="font-display text-[20px] font-black tabular-nums text-bone">{fmtDuration(r.average)}</b>
+                  <span className="block text-[11px]">a player</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+        </TrackerSheet>
+      )}
+
       {sheet?.kind === "started" && (
         <TrackerSheet title={sheet.name} onClose={() => open(null)}>
           <p className="text-[15px] leading-relaxed text-white/70">
@@ -186,8 +226,9 @@ export function ClubsSection({ clubs, appUrl }: { clubs: MyClub[]; appUrl: strin
                   }}
                   className="flex min-h-[48px] min-w-0 flex-1 items-center gap-3 text-left"
                 >
-                  <span className="min-w-0 flex-1 truncate text-[15px] text-bone">
-                    {m.you ? "You" : m.name}
+                  <span className="flex min-w-0 flex-1 items-center gap-1.5 text-[15px] text-bone">
+                    <span className="truncate">{m.you ? "You" : m.name}</span>
+                    {m.starred && <StarMark size={13} />}
                   </span>
                   {m.captain && <span className="text-[12px] font-semibold uppercase tracking-[1.5px] text-accent">Captain</span>}
                 </button>

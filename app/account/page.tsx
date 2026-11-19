@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Avatar } from "@/components/Avatar";
 import { DeviceSettings } from "@/components/elite/DeviceSettings";
 import { BlockedList } from "@/components/elite/BlockedList";
+import { PlayingForField } from "@/components/elite/PlayingForField";
 import { getViewer } from "@/lib/elite/session";
 import { signOut } from "@/lib/elite/auth-actions";
 import { deleteGate } from "@/lib/elite/account";
@@ -76,6 +77,12 @@ export default async function AccountPage() {
                 detail={`${planDaysLabel(tracker.plan_days)}. Change them here.`}
               />
             )}
+          </Group>
+        )}
+
+        {tracker && (
+          <Group title="Your profile">
+            <PlayingForField initial={tracker.playing_for} />
           </Group>
         )}
 

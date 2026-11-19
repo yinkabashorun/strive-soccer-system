@@ -410,7 +410,7 @@ export function shortName(fullName: string): string {
 // link, ordered by TRAINING time this week (gym never counts). It starts
 // again every Monday with the week. People on the same time share a
 // place. Only the top ten are listed, and you are always on it.
-export type BoardEntry = { id: string; name: string; minutes: number };
+export type BoardEntry = { id: string; name: string; minutes: number; starred?: boolean };
 export type BoardRow = BoardEntry & { place: number; time: string; me: boolean };
 export const BOARD_CAP = 10;
 export const BOARD_TITLE = "This week with your friends";
@@ -578,6 +578,10 @@ export type Profile = {
   clubs: string[]; // up to CLUBS_PER_PLAYER names
   weekMinutes: number; // training this week
   you: boolean;
+  aura: AuraLevel;
+  levelName: string | null; // the level they play at, from the quiz, in its own words
+  playingFor: string | null; // the player's own line
+  starred: boolean; // a coach gave them the star
 };
 
 // Who may open a profile: the player, their friends, and coaches. A block
@@ -624,8 +628,132 @@ export type MyClub = {
   kind: ClubKind;
   captain: boolean; // the viewer is its captain
   ended: boolean;
-  members: { id: string; name: string; captain: boolean; you: boolean }[];
+  members: { id: string; name: string; captain: boolean; you: boolean; starred?: boolean }[];
 };
+
+// ---- Aura ---------------------------------------------------------------
+
+// Aura is earned by training and only by training, and it only goes up:
+// a break never takes any away. A player sees it as a level, never as a
+// number. The weights and the level table are a default, one place each.
+//   1 a minute of training logged (gym does not count)
+//   15 for a day with a photo posted (one a day, New York days)
+//   60 for a week (Monday to Sunday) that reached the target
+export const AURA_PER_MINUTE = 1;
+export const AURA_PHOTO_DAY = 15;
+export const AURA_WEEK_HIT = 60;
+// Level 1 starts at 0; Level 11 at 7,500.
+export const AURA_LEVELS = [0, 100, 300, 600, 1000, 1500, 2200, 3000, 4000, 5500, 7500] as const;
+
+export type AuraLog = { trained_on: string; minutes: number; kind: Kind; photo: boolean };
+
+// The points behind a level. Internal: never shown to a player.
+export function auraPoints(logs: AuraLog[], target: number): number {
+  let total = 0;
+  const photoDays = new Set<string>();
+  const weeks = new Map<string, number>();
+  for (const l of logs) {
+    if (l.kind === "training") {
+      total += l.minutes * AURA_PER_MINUTE;
+      const { monday } = weekOf(l.trained_on);
+      weeks.set(monday, (weeks.get(monday) ?? 0) + l.minutes);
+    }
+    if (l.photo) photoDays.add(l.trained_on);
+  }
+  total += photoDays.size * AURA_PHOTO_DAY;
+  if (target > 0) for (const m of weeks.values()) if (m >= target) total += AURA_WEEK_HIT;
+  return total;
+}
+
+export type AuraLevel = {
+  level: number; // 1 to 11
+  progress: number; // 0 to 1, toward the next level (1 at the top)
+  toNext: number | null; // what is left to the next level; null at the top
+};
+
+export function auraLevel(points: number): AuraLevel {
+  let i = 0;
+  while (i + 1 < AURA_LEVELS.length && points >= AURA_LEVELS[i + 1]) i++;
+  const floor = AURA_LEVELS[i];
+  const next = AURA_LEVELS[i + 1];
+  if (next === undefined) return { level: i + 1, progress: 1, toNext: null };
+  return { level: i + 1, progress: (points - floor) / (next - floor), toNext: next - points };
+}
+
+// "Aura Level 4"
+export function auraLabel(level: number): string {
+  return `Aura Level ${level}`;
+}
+
+// The line on your own profile. Training is the only way up, so the line
+// says how much: one minute of training is one toward the next level.
+export function auraNextLine(a: AuraLevel): string | null {
+  return a.toNext === null ? null : `${fmtDuration(a.toNext)} of training to Level ${a.level + 1}`;
+}
+
+// ---- The line on a profile ----------------------------------------------
+
+// "Playing for": one plain line a player writes about who they play for, 40
+// characters, no links. Friends and coaches see it on the profile; a
+// friend can report it and a coach can clear it.
+export const PLAYING_FOR_MAX = 40;
+export const cleanPlayingFor = (raw: unknown): string | null => cleanClubName(raw);
+export const PLAYING_FOR_MESSAGE = "Up to 40 letters, with no links.";
+
+// One reported line, waiting for a coach.
+export type ReportedLine = {
+  profile_id: string;
+  player: string;
+  line: string;
+  reports: { reporter: string; at: string }[];
+};
+
+// ---- This week's club ranking ---------------------------------------------
+
+// Clubs across the whole app, ranked by the average training a member
+// logged this week (gym does not count), clubs of at least three only. It
+// carries club names and nothing about any player: no names, no lists.
+// The top ten, and the places of your own clubs. It starts again every
+// Monday.
+export const RANKING_MIN_MEMBERS = 3;
+export const RANKING_TOP = 10;
+
+export type RankingRow = { id: string; place: number; name: string; average: number; mine: boolean };
+
+export function clubRanking(input: {
+  clubs: { id: string; name: string; memberIds: string[] }[];
+  weekMinutes: ReadonlyMap<string, number>; // profile id -> training this week
+  myClubIds: ReadonlySet<string>;
+}): RankingRow[] {
+  const scored = input.clubs
+    .filter((c) => c.memberIds.length >= RANKING_MIN_MEMBERS)
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      average: Math.round(c.memberIds.reduce((s, id) => s + (input.weekMinutes.get(id) ?? 0), 0) / c.memberIds.length),
+      mine: input.myClubIds.has(c.id),
+    }))
+    .sort((x, y) => y.average - x.average || x.name.localeCompare(y.name) || x.id.localeCompare(y.id));
+  let place = 0;
+  let last = Number.NaN;
+  const rows = scored.map((c, i) => {
+    if (c.average !== last) {
+      place = i + 1;
+      last = c.average;
+    }
+    return { ...c, place };
+  });
+  return rows.filter((r, i) => i < RANKING_TOP || r.mine);
+}
+
+export const RANKING_TITLE = "This week's club ranking";
+
+// ---- The star -------------------------------------------------------------
+
+// A gold star a coach gives a player ("a star on the crazy players").
+// Given and taken back by a coach only; a player can never earn or ask
+// for it. Shown next to their name wherever it appears.
+export const STAR_LABEL = "Starred by the coaches";
 
 // ---- Blocking ---------------------------------------------------------
 
@@ -791,6 +919,7 @@ export type OpenCard = {
   day: string;
   createdAt: string;
   photoPath: string;
+  starred?: boolean;
 };
 export type LockedCard = {
   state: "locked";
@@ -845,7 +974,7 @@ export function buildFeed(input: {
 // The row of faces: you, then the friends who trained today, then the
 // rest. Lit when that person logged anything today, with or without a
 // photo.
-export type Face = { id: string; first: string; initials: string; you: boolean; active: boolean };
+export type Face = { id: string; first: string; initials: string; you: boolean; active: boolean; starred?: boolean };
 
 export function facesRow(input: {
   me: { id: string; name: string };

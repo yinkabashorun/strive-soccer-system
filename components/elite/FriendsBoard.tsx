@@ -4,6 +4,7 @@ import { useState } from "react";
 import { BOARD_EMPTY_LINE, BOARD_TITLE, friendsBoard, initialsOf, type BoardEntry } from "@/lib/elite/tracker";
 import { usePostLauncher } from "./FreeShell";
 import { sendLink } from "./send-link";
+import { StarMark } from "./StarMark";
 
 // The week next to your friends (mock screen 4): you and the friends you
 // added, in order of training time this week. It starts again every
@@ -61,8 +62,9 @@ export function FriendsBoard({
                 >
                   {initialsOf(r.name)}
                 </span>
-                <span className={"min-w-0 flex-1 truncate text-left text-[15.5px] font-semibold " + (r.me ? "text-accent" : "text-bone")}>
-                  {r.me ? "You" : r.name}
+                <span className={"flex min-w-0 flex-1 items-center gap-1.5 text-left text-[15.5px] font-semibold " + (r.me ? "text-accent" : "text-bone")}>
+                  <span className="truncate">{r.me ? "You" : r.name}</span>
+                  {r.starred && <StarMark size={13} />}
                 </span>
                 <span className="font-display text-[24px] font-black tabular-nums text-bone">{r.time}</span>
               </button>

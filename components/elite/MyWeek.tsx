@@ -14,6 +14,7 @@ import {
   weekStrip,
   type BoardEntry,
   type MyClub,
+  type RankingRow,
   type TrainingLog,
 } from "@/lib/elite/tracker";
 import { FriendsBoard } from "./FriendsBoard";
@@ -37,6 +38,7 @@ export function MyWeek({
   me,
   friends,
   clubs,
+  ranking,
   appUrl,
   inviteLink,
   programHref,
@@ -50,6 +52,7 @@ export function MyWeek({
   me: { id: string; name: string; initials: string };
   friends: BoardEntry[];
   clubs: MyClub[];
+  ranking: RankingRow[];
   appUrl: string;
   inviteLink: string;
   // Where the one line about the coached program leads; null inside the
@@ -155,7 +158,7 @@ export function MyWeek({
 
       <FriendsBoard me={me} myMinutes={minutes} friends={friends} inviteLink={inviteLink} />
 
-      <ClubsSection clubs={clubs} appUrl={appUrl} />
+      <ClubsSection clubs={clubs} ranking={ranking} appUrl={appUrl} />
 
       <div className="mx-[18px] mt-3">
         <ShareWeek stamp={`${minutes}:${logs.length}`} />

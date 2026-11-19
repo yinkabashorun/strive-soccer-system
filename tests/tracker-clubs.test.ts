@@ -248,12 +248,34 @@ describe("the profile", () => {
     expect(code("lib/elite/tracker-actions.ts")).toContain("return profileFor(viewer, targetId, nyToday());");
   });
 
-  it("is small: initials, name, clubs, this week's training. No photo, bio, counts, age or grade", () => {
-    const keys: (keyof Profile)[] = ["id", "name", "initials", "clubs", "weekMinutes", "you"];
-    const sample: Profile = { id: "f", name: "Gary G.", initials: "GG", clubs: [], weekMinutes: 0, you: false };
+  it("is small: initials, name, clubs, this week, aura level, the level they play at, their line, the star. No photo, bio, counts, age or grade", () => {
+    const keys: (keyof Profile)[] = [
+      "id",
+      "name",
+      "initials",
+      "clubs",
+      "weekMinutes",
+      "you",
+      "aura",
+      "levelName",
+      "playingFor",
+      "starred",
+    ];
+    const sample: Profile = {
+      id: "f",
+      name: "Gary G.",
+      initials: "GG",
+      clubs: [],
+      weekMinutes: 0,
+      you: false,
+      aura: { level: 1, progress: 0, toNext: 100 },
+      levelName: null,
+      playingFor: null,
+      starred: false,
+    };
     expect(Object.keys(sample).sort()).toEqual([...keys].sort());
     const sheet = code("components/elite/ProfileSheet.tsx");
-    expect(sheet).not.toMatch(/grade|birth|age\b|level|follower|bio|all time|allTime/i);
+    expect(sheet).not.toMatch(/grade|birth|age\b|follower|bio|all time|allTime|points/i);
     expect(sheet).not.toMatch(/<img/);
     // it opens from a face, a post's name, a name on the board, and your own initials
     expect(code("components/elite/FriendsFeed.tsx")).toContain("onClick={() => profile(f.id)}");

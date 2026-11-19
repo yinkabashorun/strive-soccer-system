@@ -14,6 +14,7 @@ import { FriendAsk } from "./FriendAsk";
 import { ClubAsk } from "./ClubAsk";
 import { TrackerSheet } from "./TrackerSheet";
 import { sendLink } from "./send-link";
+import { StarMark } from "./StarMark";
 
 // The Friends tab, as the approved mock draws it: TODAY and the date, the
 // week ring in the corner, the row of faces (lit when that friend trained
@@ -74,8 +75,9 @@ export function FriendsFeed({
               >
                 {f.initials}
               </span>
-              <span className={"mt-2 block truncate text-[11.5px] " + (f.active ? "text-bone" : "text-white/60")}>
-                {f.first}
+              <span className={"mt-2 flex items-center justify-center gap-0.5 text-[11.5px] " + (f.active ? "text-bone" : "text-white/60")}>
+                <span className="truncate">{f.first}</span>
+                {f.starred && <StarMark size={11} />}
               </span>
               </button>
             </li>
@@ -264,7 +266,10 @@ function OpenPost({ card, onGone }: { card: OpenCardView; onGone: () => void }) 
           {card.initials}
         </span>
         <div className="[text-shadow:0_1px_8px_rgba(0,0,0,.6)]">
-          <b className="block text-[15px] font-bold leading-[1.1]">{card.name}</b>
+          <b className="flex items-center gap-1.5 text-[15px] font-bold leading-[1.1]">
+            {card.name}
+            {card.starred && <StarMark size={14} />}
+          </b>
           <span className="text-[12px] text-white/80">{card.ago}</span>
         </div>
       </button>

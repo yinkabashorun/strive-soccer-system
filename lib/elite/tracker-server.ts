@@ -31,8 +31,12 @@ import {
   homeFor,
   postPath,
   postedPhotoToday,
+  LEVELS,
+  auraLevel,
+  auraPoints,
   clubJoinDecision,
   clubPairs,
+  labelOf,
   initialsOf,
   mayViewProfile,
   newReferralCode,
@@ -41,6 +45,7 @@ import {
   tracksGym,
   weekOf,
   type Block,
+  type AuraLog,
   type ClubJoin,
   type ClubKind,
   type MyClub,
@@ -61,6 +66,7 @@ import {
 } from "./tracker";
 import {
   demoBlocked,
+  demoAuraOf,
   demoClubAsk,
   demoClubsOf,
   demoMyClubs,
@@ -87,11 +93,13 @@ export type Tracker = {
   quiz_done_at: string | null;
   referral_code: string;
   referred_by: string | null;
+  playing_for: string | null;
+  starred_at: string | null;
   created_at: string;
 };
 
 export const TRACKER_COLUMNS =
-  "profile_id, phone, birth_year, birth_month, grade, level, season, goal, target_minutes, plan_days, quiz_done_at, referral_code, referred_by, created_at";
+  "profile_id, phone, birth_year, birth_month, grade, level, season, goal, target_minutes, plan_days, quiz_done_at, referral_code, referred_by, playing_for, starred_at, created_at";
 
 type Admin = NonNullable<ReturnType<typeof createServiceClient>>;
 
@@ -267,10 +275,12 @@ export async function friendsWeekFor(viewer: Viewer, today: string): Promise<Boa
       if (rows.length < 1000) break;
     }
   }
+  const starred = await starredAmong(admin, ids);
   return ids.map((id) => ({
     id,
     name: shortName(names.get(id) ?? ""),
     minutes: minutes.get(id) ?? 0,
+    starred: starred.has(id),
   }));
 }
 
@@ -340,6 +350,22 @@ export async function blockedFor(viewer: Viewer): Promise<{ id: string; name: st
   if (ids.length === 0) return [];
   const names = await namesOf(admin, ids);
   return ids.map((id) => ({ id, name: names.get(id) ?? "A teammate" }));
+}
+
+// ---- The star -----------------------------------------------------------
+
+// Which of these accounts carry the coaches' star.
+export async function starredAmong(admin: Admin, ids: string[]): Promise<Set<string>> {
+  const out = new Set<string>();
+  for (let i = 0; i < ids.length; i += 200) {
+    const { data } = await admin
+      .from("elite_trackers")
+      .select("profile_id")
+      .in("profile_id", ids.slice(i, i + 200))
+      .not("starred_at", "is", null);
+    for (const r of (data as { profile_id: string }[] | null) ?? []) out.add(r.profile_id);
+  }
+  return out;
 }
 
 // ---- Posts and the feed -----------------------------------------------
@@ -422,6 +448,7 @@ export async function feedFor(viewer: Viewer, today: string): Promise<FeedView> 
   let reported: Set<string>;
   let propsOf: (ids: string[]) => Promise<Map<string, { count: number; mine: boolean }>>;
   let sign: (paths: string[]) => Promise<Map<string, string>>;
+  let starred = new Set<string>();
 
   const admin = viewer.demo ? null : createServiceClient();
   if (!admin) {
@@ -456,6 +483,7 @@ export async function feedFor(viewer: Viewer, today: string): Promise<FeedView> 
       return out;
     };
     sign = (paths) => signPhotos(admin, paths);
+    starred = await starredAmong(admin, [me.id, ...ids]);
   }
 
   const friendIds = new Set(friends.map((f) => f.id));
@@ -473,7 +501,7 @@ export async function feedFor(viewer: Viewer, today: string): Promise<FeedView> 
   const activeToday = new Set(rows.filter((r) => r.trained_on === today).map((r) => r.profile_id));
   return {
     unlocked,
-    faces: facesRow({ me, friends, activeToday }),
+    faces: facesRow({ me, friends, activeToday }).map((f) => ({ ...f, starred: starred.has(f.id) })),
     friendCount: friends.length,
     friendsToday: friends.filter((f) => activeToday.has(f.id)).length,
     cards: cards.flatMap((c): FeedCardView[] => {
@@ -489,6 +517,7 @@ export async function feedFor(viewer: Viewer, today: string): Promise<FeedView> 
           ago: timeSince({ day: c.day, createdAt }, nowMs, today),
           props: props.get(c.id)?.count ?? 0,
           propped: props.get(c.id)?.mine ?? false,
+          starred: starred.has(c.ownerId),
         },
       ];
     }),
@@ -749,6 +778,7 @@ export async function myClubsFor(viewer: Viewer): Promise<MyClub[]> {
     const [club, members] = await Promise.all([clubById(admin, id), membersOf(admin, id)]);
     if (!club) continue;
     const names = await namesOf(admin, members.map((m) => m.profile_id));
+    const starred = await starredAmong(admin, members.map((m) => m.profile_id));
     out.push({
       id: club.id,
       name: club.name,
@@ -761,6 +791,7 @@ export async function myClubsFor(viewer: Viewer): Promise<MyClub[]> {
         name: m.profile_id === me.id ? me.name : names.get(m.profile_id) ?? "A teammate",
         captain: club.captain_id === m.profile_id,
         you: m.profile_id === me.id,
+        starred: starred.has(m.profile_id),
       })),
     });
   }
@@ -779,16 +810,27 @@ export async function profileFor(viewer: Viewer, targetId: string, today: string
     const friend = friends.find((f) => f.id === targetId);
     if (!you && !friend && !staff) return null;
     const name = you ? shortName(viewer.profile.full_name) : friend?.name ?? "A teammate";
-    const myLogs = you ? demoLogs(today).filter((l) => l.trained_on >= weekOf(today).monday) : [];
+    const tracker = you ? demoTracker(meId) : null;
+    const logs = demoLogs(today);
+    const thisWeek = logs.filter((l) => l.trained_on >= weekOf(today).monday);
+    const extra = demoAuraOf(name);
     return {
       id: targetId,
       name,
       initials: initialsOf(name),
       clubs: you ? demoMyClubs({ id: meId, name }).map((c) => c.name) : demoClubsOf(name),
       weekMinutes: you
-        ? myLogs.reduce((s, l) => (l.kind === "training" ? s + l.minutes : s), 0)
+        ? thisWeek.reduce((s, l) => (l.kind === "training" ? s + l.minutes : s), 0)
         : friend?.minutes ?? 0,
       you,
+      aura: auraLevel(
+        you
+          ? auraPoints(logs.map((l) => ({ ...l, photo: Boolean(l.photo) })), tracker?.target_minutes ?? 0)
+          : extra.points
+      ),
+      levelName: labelOf(LEVELS, you ? tracker?.level : extra.level) || null,
+      playingFor: you ? tracker?.playing_for ?? null : extra.playingFor,
+      starred: !you && extra.starred,
     };
   }
 
@@ -797,19 +839,14 @@ export async function profileFor(viewer: Viewer, targetId: string, today: string
   const friendIds = new Set(you || staff ? [] : await friendIdsOf(admin, meId));
   const blocks = you || staff ? [] : await blocksBetween(admin, meId, targetId);
   if (!mayViewProfile({ viewerId: meId, staff, targetId, friendIds, blocks })) return null;
-  if (!(await hasTracker(targetId))) return null;
+  const tracker = await getTracker(targetId);
+  if (!tracker) return null;
 
-  const { monday, sunday } = weekOf(today);
+  const { monday } = weekOf(today);
   const [names, clubIds, logs] = await Promise.all([
     namesOf(admin, [targetId]),
     clubIdsOf(admin, targetId),
-    admin
-      .from("elite_training_logs")
-      .select("minutes")
-      .eq("profile_id", targetId)
-      .eq("kind", "training")
-      .gte("trained_on", monday)
-      .lte("trained_on", sunday),
+    auraLogsOf(admin, targetId),
   ]);
   const clubs: string[] = [];
   for (const id of clubIds) {
@@ -822,7 +859,31 @@ export async function profileFor(viewer: Viewer, targetId: string, today: string
     name,
     initials: initialsOf(name),
     clubs,
-    weekMinutes: ((logs.data as { minutes: number }[] | null) ?? []).reduce((s, l) => s + l.minutes, 0),
+    weekMinutes: logs.reduce((s, l) => (l.kind === "training" && l.trained_on >= monday ? s + l.minutes : s), 0),
     you,
+    aura: auraLevel(auraPoints(logs, tracker.target_minutes ?? 0)),
+    levelName: labelOf(LEVELS, tracker.level) || null,
+    playingFor: tracker.playing_for,
+    starred: Boolean(tracker.starred_at),
   };
+}
+
+// Every entry an account ever logged, as aura reads it: the minutes, the
+// kind, the day, and whether it is a photo still up.
+export async function auraLogsOf(admin: Admin, profileId: string): Promise<AuraLog[]> {
+  const out: AuraLog[] = [];
+  for (let from = 0; ; from += 1000) {
+    const { data } = await admin
+      .from("elite_training_logs")
+      .select("id, trained_on, minutes, kind, photo_path, removed_at")
+      .eq("profile_id", profileId)
+      .order("id")
+      .range(from, from + 999);
+    const rows = (data as (TrainingLog & { photo_path: string | null; removed_at: string | null })[] | null) ?? [];
+    for (const r of rows) {
+      out.push({ trained_on: r.trained_on, minutes: r.minutes, kind: r.kind, photo: Boolean(r.photo_path) && !r.removed_at });
+    }
+    if (rows.length < 1000) break;
+  }
+  return out;
 }

@@ -1,10 +1,12 @@
 -- =====================================================================
--- Strive Elite - the free training log (Nov 18 2026)
+-- Strive Elite - the free app (Nov 18 2026)
 -- =====================================================================
--- A free account logs the training a player does on their own, against a
--- weekly target, on the days they chose, shares the week, and sees how
--- the week went next to the friends they connected with by link. No
--- drills, no courses, no plan from us.
+-- Coach Yinka's words: "a BeReal app for soccer players to share
+-- training to friends they have added on the app, then also the
+-- accountability piece". A free account posts a photo of today's
+-- training with how long it was, sees the friends it added do the same,
+-- and keeps a week against a target on the days it planned. No drills,
+-- no courses, no plan from us. 13 and older.
 --
 -- ISOLATED FROM MEMBERS ON PURPOSE: a free account is an elite_profiles
 -- row (role 'player') with a row in elite_trackers and NO row in
@@ -17,20 +19,29 @@
 -- reads all, nobody writes directly. Rows leave with the account (on
 -- delete cascade from elite_profiles).
 --
+-- PHOTOS live in a private bucket that no browser can read or write: the
+-- server uploads after it has checked who is signed in, and hands out a
+-- short-lived signed address only to the player who posted it, to a
+-- friend the feed rule allows (lib/elite/tracker.ts mayViewPhoto), and
+-- to coaches.
+--
 -- Written so each statement can be run on its own, in this order. No
 -- DROP anywhere. Safe to run twice.
 -- =====================================================================
 
 set lock_timeout = '8s';
 
--- 1) The free account: the four quiz answers (grade, level, season,
---    goal), the weekly target, the days of the week the player plans to
---    train (0 = Monday ... 6 = Sunday), and the link the player shares.
---    Grade is what decides whether a player logs gym work: high school
---    and older.
+-- 1) The free account: the month and year the player was born (asked
+--    first; under 13 is turned away and nothing is stored), the four quiz
+--    answers (grade, level, season, goal), the weekly target, the days of
+--    the week the player plans to train (0 = Monday ... 6 = Sunday), and
+--    the link the player shares. Grade is what decides whether a player
+--    logs gym work: high school and older.
 create table if not exists public.elite_trackers (
   profile_id     uuid primary key references public.elite_profiles(id) on delete cascade,
   phone          text,
+  birth_year     smallint check (birth_year is null or (birth_year between 1900 and 2100)),
+  birth_month    smallint check (birth_month is null or (birth_month between 1 and 12)),
   grade          text check (grade is null or grade in ('middle_or_younger', 'high_school', 'college_or_older')),
   level          text check (level is null or level in ('rec', 'travel', 'elite', 'high_school', 'college')),
   season         text check (season is null or season in ('in_season', 'off_season')),
@@ -73,12 +84,23 @@ end $$;
 --    whether it was training or gym work. Gym is kept apart: it never
 --    counts toward the weekly target, and only a player in high school
 --    or older can log it (the server action refuses anyone else).
+--
+--    A POST is a row with a photo: photo_path is the object in the
+--    private bucket (<profile id>/<log id>.jpg) and caption is the one
+--    optional line. A row with no photo is a private entry: it counts
+--    for the week and shows no card. When a coach takes a post down,
+--    removed_at and removed_by are set and the file is deleted; the
+--    minutes stay.
 create table if not exists public.elite_training_logs (
   id         uuid primary key default gen_random_uuid(),
   profile_id uuid not null references public.elite_trackers(profile_id) on delete cascade,
   trained_on date not null,
   minutes    integer not null check (minutes between 1 and 300),
   kind       text not null default 'training' check (kind in ('training', 'gym')),
+  photo_path text,
+  caption    text check (caption is null or char_length(caption) <= 80),
+  removed_at timestamptz,
+  removed_by uuid references public.elite_profiles(id) on delete set null,
   created_at timestamptz not null default now()
 );
 
@@ -110,8 +132,8 @@ end $$;
 -- 3) Friends. Two free accounts are friends when one joined with the
 --    other's link, or opened it while signed in and said yes. One row per
 --    pair, the smaller id first, so a pair can never be stored twice.
---    Friends see each other's first name, last initial and training time
---    for the week. There is no board of all players: a player only ever
+--    Friends see each other's first name, last initial, training time
+--    and posts. There is no board of all players: a player only ever
 --    reads their own pairs.
 create table if not exists public.elite_tracker_friends (
   a          uuid not null references public.elite_trackers(profile_id) on delete cascade,
@@ -146,7 +168,146 @@ begin
   end if;
 end $$;
 
--- 4) The recommended weekly target, by season. A coach edits the two rows
+-- 4) Blocks. One row when a player blocks another. Making one ends the
+--    friendship (the server removes the pair), and while a row exists in
+--    EITHER direction the two cannot become friends again, by link or
+--    any other way. The player who blocked can take it back from
+--    Account; the player who was blocked is never told.
+create table if not exists public.elite_tracker_blocks (
+  blocker    uuid not null references public.elite_trackers(profile_id) on delete cascade,
+  blocked    uuid not null references public.elite_trackers(profile_id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (blocker, blocked),
+  check (blocker <> blocked)
+);
+
+create index if not exists elite_tracker_blocks_blocked_idx
+  on public.elite_tracker_blocks (blocked);
+
+alter table public.elite_tracker_blocks enable row level security;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'elite_tracker_blocks'
+      and policyname = 'elite_tracker_blocks_own_read'
+  ) then
+    create policy elite_tracker_blocks_own_read on public.elite_tracker_blocks
+      for select using (blocker = auth.uid());
+  end if;
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'elite_tracker_blocks'
+      and policyname = 'elite_tracker_blocks_coach_read'
+  ) then
+    create policy elite_tracker_blocks_coach_read on public.elite_tracker_blocks
+      for select using (public.elite_is_coach());
+  end if;
+end $$;
+
+-- 5) Props: one per player per post, given with one tap and taken back
+--    with another. Only a friend who can see the post can give them (the
+--    server checks before it writes). No comments, no messages.
+create table if not exists public.elite_log_props (
+  log_id     uuid not null references public.elite_training_logs(id) on delete cascade,
+  profile_id uuid not null references public.elite_trackers(profile_id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (log_id, profile_id)
+);
+
+create index if not exists elite_log_props_profile_idx
+  on public.elite_log_props (profile_id);
+
+alter table public.elite_log_props enable row level security;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'elite_log_props'
+      and policyname = 'elite_log_props_own_read'
+  ) then
+    create policy elite_log_props_own_read on public.elite_log_props
+      for select using (profile_id = auth.uid());
+  end if;
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'elite_log_props'
+      and policyname = 'elite_log_props_coach_read'
+  ) then
+    create policy elite_log_props_coach_read on public.elite_log_props
+      for select using (public.elite_is_coach());
+  end if;
+end $$;
+
+-- 6) Reports. A player reports a friend's post once, with a reason. The
+--    post leaves that player's feed at once, the coaches are texted once
+--    per post, and the report waits in the queue at /coach/free until a
+--    coach removes the post or marks it "no action".
+create table if not exists public.elite_post_reports (
+  id          uuid primary key default gen_random_uuid(),
+  log_id      uuid not null references public.elite_training_logs(id) on delete cascade,
+  reporter_id uuid not null references public.elite_trackers(profile_id) on delete cascade,
+  reason      text not null check (reason in ('not_training', 'inappropriate', 'bullying', 'other')),
+  created_at  timestamptz not null default now(),
+  resolved_at timestamptz,
+  resolved_by uuid references public.elite_profiles(id) on delete set null,
+  action      text check (action is null or action in ('removed', 'none')),
+  unique (log_id, reporter_id)
+);
+
+create index if not exists elite_post_reports_reporter_idx
+  on public.elite_post_reports (reporter_id);
+
+create index if not exists elite_post_reports_open_idx
+  on public.elite_post_reports (created_at) where resolved_at is null;
+
+alter table public.elite_post_reports enable row level security;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'elite_post_reports'
+      and policyname = 'elite_post_reports_own_read'
+  ) then
+    create policy elite_post_reports_own_read on public.elite_post_reports
+      for select using (reporter_id = auth.uid());
+  end if;
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'public' and tablename = 'elite_post_reports'
+      and policyname = 'elite_post_reports_coach_read'
+  ) then
+    create policy elite_post_reports_coach_read on public.elite_post_reports
+      for select using (public.elite_is_coach());
+  end if;
+end $$;
+
+-- 7) The photos. A PRIVATE bucket, JPEG only, 3 MB a file. There is no
+--    policy that lets a signed-in player read or write an object here,
+--    on purpose: the server uploads (service role, after the ownership
+--    check) and every read is a short-lived signed address the server
+--    made for someone the feed rule allows. The one policy lets a coach
+--    read, the same as every other free table.
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('tracker-posts', 'tracker-posts', false, 3000000, array['image/jpeg'])
+on conflict (id) do nothing;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_policies
+    where schemaname = 'storage' and tablename = 'objects'
+      and policyname = 'tracker_posts_coach_read'
+  ) then
+    create policy tracker_posts_coach_read on storage.objects
+      for select using (bucket_id = 'tracker-posts' and public.elite_is_coach());
+  end if;
+end $$;
+
+-- 8) The recommended weekly target, by season. A coach edits the two rows
 --    at /coach/free.
 create table if not exists public.elite_target_table (
   season      text primary key check (season in ('in_season', 'off_season')),
@@ -185,7 +346,7 @@ insert into public.elite_target_table (season, minutes, minutes_max)
 values ('in_season', 240, null), ('off_season', 360, 720)
 on conflict (season) do nothing;
 
--- 5) App-wide switches a coach flips. First one: whether anyone can make
+-- 9) App-wide switches a coach flips. First one: whether anyone can make
 --    a free account. CLOSED until a coach opens it at /coach/free.
 create table if not exists public.elite_settings (
   key        text primary key,

@@ -36,6 +36,7 @@ import {
   splitLine,
   stripDayLabel,
   todayLine,
+  longDayLabel,
   weekStrip,
   cleanReferralCode,
   cleanTarget,
@@ -549,9 +550,16 @@ describe("the free log stays what it is", () => {
       expect(hit, `${f}: ${hit?.[0]}`).toBeNull();
     }
     // the friends list sends nothing: no texts, no pushes, no in-app notes
+    // nothing is ever sent to a player: no texts, no pushes, no in-app notes
     for (const f of ["lib/elite/tracker-actions.ts", "lib/elite/tracker-server.ts", "components/elite/FriendsBoard.tsx"]) {
-      expect(code(f), f).not.toMatch(/sendSms|sendPush|textCoaches|elite_notifications|sendPlayerEmail/);
+      expect(code(f), f).not.toMatch(/sendSms|sendPush|elite_notifications|sendPlayerEmail/);
     }
+    // the one text goes to the coaches, once, when a post is first reported
+    expect(code("lib/elite/tracker-server.ts")).not.toContain("textCoaches");
+    const acts = code("lib/elite/tracker-actions.ts");
+    expect((acts.match(/textCoaches\(/g) ?? []).length).toBe(1);
+    const report = acts.slice(acts.indexOf("export async function reportPost("), acts.indexOf("type Coach ="));
+    expect(report).toMatch(/if \(!count\) \{[\s\S]*?await textCoaches\(reportText\(/);
   });
 
   it("the home screen has no timer and no milestone", () => {
@@ -585,6 +593,8 @@ describe("free accounts are invisible to everything a member query reads", () =>
     "lib/elite/tracker-actions.ts",
     "app/api/elite/auth/join/route.ts",
   ]);
+  // (the post route stores nothing itself: it hands a checked photo to
+  // savePost in tracker-server.ts)
 
   it("only the tracker files touch the free tables", () => {
     const files = ["app", "lib", "components"]
@@ -592,7 +602,7 @@ describe("free accounts are invisible to everything a member query reads", () =>
       .filter((f) => /\.(ts|tsx)$/.test(f));
     const touching = files
       .filter((f) =>
-        /elite_trackers|elite_training_logs|elite_tracker_friends|elite_target_table|elite_settings/.test(
+        /elite_trackers|elite_training_logs|elite_tracker_friends|elite_tracker_blocks|elite_log_props|elite_post_reports|elite_target_table|elite_settings|tracker-posts/.test(
           readFileSync(f, "utf8")
         )
       )
@@ -610,14 +620,16 @@ describe("free accounts are invisible to everything a member query reads", () =>
 
   it("the tables are read-only to the browser and leave with the account", () => {
     const sql = read("supabase/migrations/069_free_training_log.sql");
-    expect((sql.match(/enable row level security/g) ?? []).length).toBe(5);
+    expect((sql.match(/enable row level security/g) ?? []).length).toBe(8);
     expect(sql).toContain("references public.elite_profiles(id) on delete cascade");
     expect(sql).toContain("references public.elite_trackers(profile_id) on delete cascade");
     // owners read; only a coach writes, and only the target table and the switches
     expect(sql.replace(/--.*$/gm, "")).not.toMatch(/\bdrop\b/i);
     const ownerPolicies =
-      sql.match(/create policy elite_(trackers|training_logs|tracker_friends)_\w+ on[\s\S]*?;/g) ?? [];
-    expect(ownerPolicies.length).toBe(6);
+      sql.match(
+        /create policy elite_(trackers|training_logs|tracker_friends|tracker_blocks|log_props|post_reports)_\w+ on[\s\S]*?;/g
+      ) ?? [];
+    expect(ownerPolicies.length).toBe(12);
     for (const p of ownerPolicies) expect(p).toContain("for select");
     expect(sql).toContain("values ('free_signup_open', 'false'::jsonb)");
   });
@@ -686,10 +698,28 @@ describe("planning the week", () => {
     for (const d of strip) expect(stripDayLabel(d)).not.toMatch(/missed|skipped|late|behind/i);
   });
 
-  it("says one thing on a training day and nothing at all on any other day", () => {
-    expect(todayLine([0, 2, 4, 5], 240, today)).toBe("Today is a training day. About 1h.");
-    expect(todayLine([0, 1], 240, today)).toBeNull();
-    expect(todayLine([], 240, today)).toBeNull();
+  it("the line under the days looks at today and forward, never back", () => {
+    // a planned day, nothing logged yet
+    expect(todayLine([], [0, 2, 4, 5], 240, today)).toEqual({ strong: "Today is a training day.", rest: "About 1h." });
+    // trained today: the next planned day this week
+    expect(todayLine([log(today, 45)], [0, 2, 4, 5], 240, today)).toEqual({
+      strong: "Trained today.",
+      rest: "Next up: Friday, about 1h.",
+    });
+    // trained today and nothing else planned this week
+    expect(todayLine([log(today, 45)], [0, 2], 240, today)).toEqual({ strong: "Trained today.", rest: "" });
+    // gym alone is not training
+    expect(todayLine([log(today, 45, "gym")], [0, 4], 240, today)).toEqual({
+      strong: "",
+      rest: "Next up: Friday, about 2h.",
+    });
+    // not a planned day, nothing ahead this week, nothing logged: no line at all
+    expect(todayLine([], [0, 1], 240, today)).toBeNull();
+    expect(todayLine([], [], 240, today)).toBeNull();
+    // Monday and Tuesday were planned and are past: the line never says so
+    const line = todayLine([], [0, 1, 4], 240, today);
+    expect(`${line?.strong} ${line?.rest}`).not.toMatch(/Monday|Tuesday|missed|skipped|behind/i);
+    expect(longDayLabel(today)).toBe("Wednesday, Nov 18");
   });
 
   it("is asked at the end of the set-up and changed from Account", () => {
@@ -794,9 +824,11 @@ describe("friends", () => {
   it("the list only ever reads the viewer's own friends: no function reads across all players", () => {
     const server = code("lib/elite/tracker-server.ts");
     // every read of entries, anywhere a player's screens read, is tied to given ids
-    const reads = [...server.matchAll(/\.from\("elite_training_logs"\)[\s\S]{0,160}/g)].map((m) => m[0]);
-    expect(reads.length).toBeGreaterThanOrEqual(2);
+    const reads = [...server.matchAll(/\.from\("elite_training_logs"\)\s*\.select\([\s\S]{0,160}/g)].map((m) => m[0]);
+    expect(reads.length).toBeGreaterThanOrEqual(4);
     for (const r of reads) expect(r).toMatch(/\.(eq|in)\("profile_id",/);
+    // and the two writes in that file name the account they belong to
+    expect(server).toContain("profile_id: input.profileId,");
     // the ids of the friends list come from the viewer's own pairs
     const fn = server.slice(server.indexOf("export async function friendsWeekFor("), server.indexOf("export async function friendAskFor("));
     expect(fn).toContain("const ids = await friendIdsOf(admin, viewer.profile.id);");
@@ -844,14 +876,21 @@ describe("friends", () => {
     // the only functions a browser can call
     const exported = [...actions.matchAll(/export async function (\w+)/g)].map((m) => m[1]).sort();
     expect(exported).toEqual([
+      "blockPlayer",
+      "checkJoinAge",
       "confirmFriend",
       "deleteLog",
+      "dismissReports",
       "logTraining",
       "removeFriend",
+      "removePost",
+      "reportPost",
       "saveQuiz",
       "saveTargetRow",
       "setFreeSignupOpen",
       "setPlanDays",
+      "toggleProps",
+      "unblockPlayer",
     ]);
     const server = read("lib/elite/tracker-server.ts");
     expect(server).not.toMatch(/^\s*["']use server["']/m);

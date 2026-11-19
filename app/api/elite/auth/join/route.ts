@@ -5,27 +5,35 @@ import { normalizePhone } from "@/lib/elite/sms";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { AGREEMENT_REQUIRED_MESSAGE, agreementComplete } from "@/lib/elite/legal";
 import { recordConsent } from "@/lib/elite/legal-server";
+import { nyToday } from "@/lib/elite/time";
 import { isFreeSignupOpen, makeFriends } from "@/lib/elite/tracker-server";
 import {
+  BIRTH_REQUIRED_MESSAGE,
+  JOIN_AGE_COOKIE,
   JOIN_CLOSED_MESSAGE,
   JOIN_FIELDS_MESSAGE,
+  UNDER_AGE_LINE,
+  cleanBirth,
   cleanJoin,
   cleanReferralCode,
   freeLanding,
   newReferralCode,
+  oldEnough,
 } from "@/lib/elite/tracker";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-// Create a FREE account: the training log (migration 069). No invite
-// code. Refused unless a coach has opened free sign-up at /coach/free.
+// Create a FREE account: the free app (migration 069). No invite code.
+// Refused unless a coach has opened free sign-up at /coach/free, and
+// refused for anyone under 13 (the birth month and year come first; an
+// answer under 13 creates nothing and stores nothing).
 //
 // What is created: the login, the profile (role player) and one
 // elite_trackers row. Never an elite_players row, so a free account is
 // invisible to the plan builder, the roster and every other member query.
 //
-// POST { firstName, lastName, email, phone, password, ref?, agreed }
+// POST { birth: { month, year }, firstName, lastName, email, phone, password, ref?, agreed }
 //   -> { ok, signedIn, next } | { error, reason? }
 export async function POST(req: Request) {
   if (!rateLimit(`join:${clientIp(req)}`, 10, 10 * 60_000)) {
@@ -42,6 +50,7 @@ export async function POST(req: Request) {
     phone?: unknown;
     password?: unknown;
     ref?: unknown;
+    birth?: { month?: unknown; year?: unknown };
     agreed?: { guardian?: unknown; terms?: unknown };
   };
   try {
@@ -54,6 +63,19 @@ export async function POST(req: Request) {
   if (!(await isFreeSignupOpen())) {
     return NextResponse.json({ error: JOIN_CLOSED_MESSAGE, reason: "closed" }, { status: 403 });
   }
+  // 13 and older. The flag the age question left in this browser (an
+  // answer under 13 earlier in this visit) refuses on its own; so does a
+  // birth month and year under 13 sent here directly.
+  const today = nyToday();
+  const flagged = (req.headers.get("cookie") ?? "")
+    .split(/;\s*/)
+    .some((c) => c.startsWith(`${JOIN_AGE_COOKIE}=`));
+  const birth = cleanBirth(body.birth ?? {}, today);
+  if (flagged || (birth && !oldEnough(birth, today))) {
+    return NextResponse.json({ error: UNDER_AGE_LINE, reason: "age" }, { status: 403 });
+  }
+  if (!birth) return NextResponse.json({ error: BIRTH_REQUIRED_MESSAGE }, { status: 400 });
+
   // No account without the agreement (068): both boxes, ticked by the
   // person. Checked before anything is created.
   if (!agreementComplete(body.agreed ?? {})) {
@@ -113,6 +135,8 @@ export async function POST(req: Request) {
     const { error } = await admin.from("elite_trackers").insert({
       profile_id: userId,
       phone: normalizePhone(fields.phone) ?? fields.phone,
+      birth_year: birth.year,
+      birth_month: birth.month,
       referral_code: newReferralCode(),
       referred_by: referredBy,
     });
@@ -131,7 +155,7 @@ export async function POST(req: Request) {
   // 4b) joining with a teammate's link makes the two of them friends, both
   // ways (referred_by above stays as the count the coach sees). Best
   // effort: a failure here never undoes the account.
-  if (referredBy) await makeFriends(userId, referredBy).catch(() => false);
+  if (referredBy) await makeFriends(userId, referredBy).catch(() => "error");
 
   // 5) the agreement the person just gave (version, time, where).
   await recordConsent({

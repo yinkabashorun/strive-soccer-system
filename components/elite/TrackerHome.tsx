@@ -84,7 +84,7 @@ export function TrackerHome({
     : null;
   const percent = target > 0 ? Math.min(100, (minutes / target) * 100) : 0;
   const strip = weekStrip(logs, planDays, today);
-  const guide = todayLine(planDays, target, today);
+  const guide = todayLine(logs, planDays, target, today);
   const dayEntries = openDay ? logs.filter((l) => l.trained_on === openDay) : [];
 
   function log(amount: number) {
@@ -203,7 +203,11 @@ export function TrackerHome({
             </button>
           ))}
         </div>
-        {guide && <p className="mt-1 text-center text-[15px] text-white/70">{guide}</p>}
+        {guide && (
+          <p className="mt-1 text-center text-[15px] text-white/70">
+            {guide.strong} {guide.rest}
+          </p>
+        )}
       </section>
 
       {/* One tap logs it */}

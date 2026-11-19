@@ -1,12 +1,17 @@
-// The free training log: what one player's own screens read, and the one
-// write that is not a player's own tap (two accounts becoming friends).
-// Migration 069. Every call uses the service client AFTER the caller has
-// established who is signed in; the tables also carry owner-read RLS as a
-// second lock.
+// The free app: what one player's own screens read, and the writes that
+// are not a plain server action (two accounts becoming friends, a photo
+// being stored). Migration 069. Every call uses the service client AFTER
+// the caller has established who is signed in; the tables also carry
+// owner-read RLS as a second lock.
 //
 // Nothing in this file reads across all players. The only other people a
-// player is ever shown are their own friends (friendsWeekFor). The
-// coach's list of every free account lives apart, in tracker-coach.ts.
+// player is ever shown are their own friends (friendsWeekFor, feedFor).
+// The coach's list of every free account lives apart, in tracker-coach.ts.
+//
+// PHOTOS: the bucket is private and no browser can read it. A photo
+// leaves here only as a short-lived signed address, and only for a card
+// the feed rule opened for this viewer (lib/elite/tracker.ts buildFeed,
+// mayViewPhoto). A locked card is never given an address at all.
 //
 // With no database configured (a local build), the example data in
 // tracker-demo.ts stands in so the screens can be seen.
@@ -14,24 +19,51 @@ import { createServiceClient, isSupabaseConfigured } from "./supabase/server";
 import type { Viewer } from "./session";
 import {
   DEFAULT_TARGETS,
+  POST_BUCKET,
+  POST_URL_SECONDS,
+  blockedEitherWay,
+  buildFeed,
+  facesRow,
+  feedSince,
   friendPair,
   homeFor,
+  postPath,
+  postedPhotoToday,
   shortName,
+  timeSince,
   tracksGym,
   weekOf,
+  type Block,
   type BoardEntry,
+  type Face,
   type Goal,
   type Grade,
+  type Kind,
   type Level,
+  type LockedCard,
+  type OpenCard,
+  type PhotoViewer,
+  type PostRow,
   type Season,
   type TargetRow,
   type TrainingLog,
 } from "./tracker";
-import { demoFriendAsk, demoFriends, demoLogs, demoTracker } from "./tracker-demo";
+import {
+  demoBlocked,
+  demoFriendAsk,
+  demoFriends,
+  demoLogs,
+  demoPostRows,
+  demoProps,
+  demoTracker,
+  readDemoState,
+} from "./tracker-demo";
 
 export type Tracker = {
   profile_id: string;
   phone: string | null;
+  birth_year: number | null;
+  birth_month: number | null;
   grade: Grade | null;
   level: Level | null;
   season: Season | null;
@@ -45,7 +77,7 @@ export type Tracker = {
 };
 
 export const TRACKER_COLUMNS =
-  "profile_id, phone, grade, level, season, goal, target_minutes, plan_days, quiz_done_at, referral_code, referred_by, created_at";
+  "profile_id, phone, birth_year, birth_month, grade, level, season, goal, target_minutes, plan_days, quiz_done_at, referral_code, referred_by, created_at";
 
 type Admin = NonNullable<ReturnType<typeof createServiceClient>>;
 
@@ -76,13 +108,17 @@ export async function getWeekLogs(profileId: string, today: string): Promise<Tra
   const { monday, sunday } = weekOf(today);
   const { data } = await admin
     .from("elite_training_logs")
-    .select("id, trained_on, minutes, kind, created_at")
+    .select("id, trained_on, minutes, kind, created_at, photo_path, removed_at")
     .eq("profile_id", profileId)
     .gte("trained_on", monday)
     .lte("trained_on", sunday)
     .order("trained_on", { ascending: false })
     .order("created_at", { ascending: false });
-  return (data as TrainingLog[] | null) ?? [];
+  type Row = TrainingLog & { photo_path: string | null; removed_at: string | null };
+  return ((data as Row[] | null) ?? []).map(({ photo_path, removed_at, ...l }) => ({
+    ...l,
+    photo: Boolean(photo_path) && !removed_at,
+  }));
 }
 
 export async function getTargetTable(): Promise<TargetRow[]> {
@@ -243,6 +279,7 @@ export async function friendAskFor(
   const ownerId = owner?.profile_id as string | undefined;
   if (!ownerId || ownerId === viewer.profile.id) return null;
   if ((await friendIdsOf(admin, viewer.profile.id)).includes(ownerId)) return null;
+  if (blockedEitherWay(await blocksBetween(admin, viewer.profile.id, ownerId), viewer.profile.id, ownerId)) return null;
   const { data: profile } = await admin
     .from("elite_profiles")
     .select("full_name")
@@ -251,17 +288,290 @@ export async function friendAskFor(
   return { code, name: shortName((profile?.full_name as string) ?? "") };
 }
 
+// Every block between two accounts, in either direction.
+async function blocksBetween(admin: Admin, x: string, y: string): Promise<Block[]> {
+  const [one, two] = await Promise.all([
+    admin.from("elite_tracker_blocks").select("blocker, blocked").eq("blocker", x).eq("blocked", y),
+    admin.from("elite_tracker_blocks").select("blocker, blocked").eq("blocker", y).eq("blocked", x),
+  ]);
+  return [...((one.data as Block[] | null) ?? []), ...((two.data as Block[] | null) ?? [])];
+}
+
 // Make two free accounts friends, both ways, as one stored pair. Safe to
-// repeat. NOT a server action (this file is not one): it is called only
-// by code that has already established both ids for itself, the sign-up
-// route (who sent the link) and the confirm action (the signed-in viewer
-// and the owner of the code they opened).
-export async function makeFriends(x: string, y: string): Promise<boolean> {
+// repeat. Refused while either has blocked the other: the link can never
+// undo a block. NOT a server action (this file is not one): it is called
+// only by code that has already established both ids for itself, the
+// sign-up route (who sent the link) and the confirm action (the signed-in
+// viewer and the owner of the code they opened).
+export async function makeFriends(x: string, y: string): Promise<"ok" | "blocked" | "error"> {
   const pair = friendPair(x, y);
   const admin = createServiceClient();
-  if (!pair || !admin) return false;
+  if (!pair || !admin) return "error";
+  if (blockedEitherWay(await blocksBetween(admin, x, y), x, y)) return "blocked";
   const { error } = await admin
     .from("elite_tracker_friends")
     .upsert(pair, { onConflict: "a,b", ignoreDuplicates: true });
-  return !error;
+  return error ? "error" : "ok";
+}
+
+// The players this viewer has blocked, for the Account page, where a
+// block can be taken back. Only what a friend would see of each name.
+export async function blockedFor(viewer: Viewer): Promise<{ id: string; name: string }[]> {
+  if (viewer.demo) return demoBlocked();
+  const admin = createServiceClient();
+  if (!admin) return [];
+  const profileId = viewer.profile.id;
+  const { data } = await admin.from("elite_tracker_blocks").select("blocked").eq("blocker", profileId);
+  const ids = ((data as { blocked: string }[] | null) ?? []).map((r) => r.blocked);
+  if (ids.length === 0) return [];
+  const names = await namesOf(admin, ids);
+  return ids.map((id) => ({ id, name: names.get(id) ?? "A teammate" }));
+}
+
+// ---- Posts and the feed -----------------------------------------------
+
+const POST_COLUMNS = "id, profile_id, trained_on, minutes, kind, created_at, photo_path, caption, removed_at";
+
+// First name and last initial for a list of accounts.
+async function namesOf(admin: Admin, ids: string[]): Promise<Map<string, string>> {
+  const names = new Map<string, string>();
+  for (let i = 0; i < ids.length; i += 200) {
+    const { data } = await admin.from("elite_profiles").select("id, full_name").in("id", ids.slice(i, i + 200));
+    for (const p of data ?? []) names.set(p.id as string, shortName((p.full_name as string) ?? ""));
+  }
+  return names;
+}
+
+// Every entry these accounts logged between two days, photo or not.
+async function entriesOf(admin: Admin, ids: string[], since: string, until: string): Promise<PostRow[]> {
+  const out: PostRow[] = [];
+  for (let i = 0; i < ids.length; i += 200) {
+    const some = ids.slice(i, i + 200);
+    for (let from = 0; ; from += 1000) {
+      const { data } = await admin
+        .from("elite_training_logs")
+        .select(POST_COLUMNS)
+        .in("profile_id", some)
+        .gte("trained_on", since)
+        .lte("trained_on", until)
+        .order("id")
+        .range(from, from + 999);
+      const rows = (data as PostRow[] | null) ?? [];
+      out.push(...rows);
+      if (rows.length < 1000) break;
+    }
+  }
+  return out;
+}
+
+// The ids of the posts this viewer reported: gone from their feed.
+async function reportedBy(admin: Admin, profileId: string): Promise<Set<string>> {
+  const { data } = await admin.from("elite_post_reports").select("log_id").eq("reporter_id", profileId);
+  return new Set(((data as { log_id: string }[] | null) ?? []).map((r) => r.log_id));
+}
+
+// Signed addresses for stored photos, good for a few minutes. Asked for
+// open cards only; a path that could not be signed is simply left out.
+async function signPhotos(admin: Admin, paths: string[]): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  if (paths.length === 0) return out;
+  const { data } = await admin.storage.from(POST_BUCKET).createSignedUrls(paths, POST_URL_SECONDS);
+  for (const row of data ?? []) if (row.path && row.signedUrl) out.set(row.path, row.signedUrl);
+  return out;
+}
+
+// One card as the screen gets it. An open card carries the photo's
+// address; a locked card carries a name and a time and nothing else.
+export type OpenCardView = Omit<OpenCard, "photoPath" | "createdAt"> & {
+  photoUrl: string;
+  ago: string;
+  props: number;
+  propped: boolean;
+};
+export type FeedCardView = OpenCardView | LockedCard;
+export type FeedView = {
+  unlocked: boolean; // the viewer posted a photo today
+  faces: Face[];
+  friendCount: number;
+  friendsToday: number; // friends with anything logged today
+  cards: FeedCardView[];
+};
+
+// The Friends tab: who trained today, and the last seven days of posts
+// from this player's friends and from the player. Only ever the viewer's
+// own friends: the ids come from their own pairs.
+export async function feedFor(viewer: Viewer, today: string): Promise<FeedView> {
+  const me = { id: viewer.profile.id, name: shortName(viewer.profile.full_name) };
+  const nowMs = Date.now();
+  let friends: { id: string; name: string }[];
+  let rows: PostRow[];
+  let reported: Set<string>;
+  let propsOf: (ids: string[]) => Promise<Map<string, { count: number; mine: boolean }>>;
+  let sign: (paths: string[]) => Promise<Map<string, string>>;
+
+  const admin = viewer.demo ? null : createServiceClient();
+  if (!admin) {
+    // the example account: the same rules, example rows, photos that are
+    // plain files of the example
+    friends = demoFriends();
+    const mine = new Set(friends.map((f) => f.id));
+    rows = demoPostRows(me.id, today, nowMs).filter((r) => r.profile_id === me.id || mine.has(r.profile_id));
+    reported = new Set(readDemoState().reported ?? []);
+    propsOf = async () => demoProps();
+    sign = async (paths) => new Map(paths.map((p) => [p, p]));
+  } else {
+    const ids = await friendIdsOf(admin, me.id);
+    const names = await namesOf(admin, ids);
+    friends = ids.map((id) => ({ id, name: names.get(id) ?? "A teammate" }));
+    [rows, reported] = await Promise.all([
+      entriesOf(admin, [me.id, ...ids], feedSince(today), today),
+      reportedBy(admin, me.id),
+    ]);
+    propsOf = async (logIds) => {
+      const out = new Map<string, { count: number; mine: boolean }>();
+      for (let i = 0; i < logIds.length; i += 200) {
+        const { data } = await admin
+          .from("elite_log_props")
+          .select("log_id, profile_id")
+          .in("log_id", logIds.slice(i, i + 200));
+        for (const r of (data as { log_id: string; profile_id: string }[] | null) ?? []) {
+          const cur = out.get(r.log_id) ?? { count: 0, mine: false };
+          out.set(r.log_id, { count: cur.count + 1, mine: cur.mine || r.profile_id === me.id });
+        }
+      }
+      return out;
+    };
+    sign = (paths) => signPhotos(admin, paths);
+  }
+
+  const friendIds = new Set(friends.map((f) => f.id));
+  const unlocked = postedPhotoToday(rows, me.id, today);
+  const photoViewer: PhotoViewer = { id: me.id, staff: false, friendIds, unlocked, reported };
+  const names = new Map<string, string>([[me.id, me.name], ...friends.map((f) => [f.id, f.name] as const)]);
+  const cards = buildFeed({ rows, viewer: photoViewer, names, today });
+
+  const open = cards.filter((c): c is OpenCard => c.state === "open");
+  const [urls, props] = await Promise.all([
+    sign(open.map((c) => c.photoPath)),
+    propsOf(open.map((c) => c.id)),
+  ]);
+
+  const activeToday = new Set(rows.filter((r) => r.trained_on === today).map((r) => r.profile_id));
+  return {
+    unlocked,
+    faces: facesRow({ me, friends, activeToday }),
+    friendCount: friends.length,
+    friendsToday: friends.filter((f) => activeToday.has(f.id)).length,
+    cards: cards.flatMap((c): FeedCardView[] => {
+      if (c.state === "locked") return [c];
+      const photoUrl = urls.get(c.photoPath);
+      if (!photoUrl) return []; // the photo could not be reached: no card
+      const { photoPath: _path, createdAt, ...rest } = c;
+      void _path;
+      return [
+        {
+          ...rest,
+          photoUrl,
+          ago: timeSince({ day: c.day, createdAt }, nowMs, today),
+          props: props.get(c.id)?.count ?? 0,
+          propped: props.get(c.id)?.mine ?? false,
+        },
+      ];
+    }),
+  };
+}
+
+// One post, with what this viewer is to it, for the actions that act on
+// a single post (props, report). The post is only ever looked for among
+// the viewer's own entries and their friends'.
+export async function postForViewer(
+  admin: Admin,
+  profileId: string,
+  logId: string,
+  today: string
+): Promise<{ post: PostRow; viewer: PhotoViewer } | null> {
+  const friendIds = await friendIdsOf(admin, profileId);
+  const among = [profileId, ...friendIds];
+  let post: PostRow | null = null;
+  for (let i = 0; i < among.length && !post; i += 200) {
+    const { data } = await admin
+      .from("elite_training_logs")
+      .select(POST_COLUMNS)
+      .in("profile_id", among.slice(i, i + 200))
+      .eq("id", logId)
+      .maybeSingle();
+    post = (data as PostRow | null) ?? null;
+  }
+  if (!post) return null;
+  const [mine, reported] = await Promise.all([
+    admin.from("elite_training_logs").select(POST_COLUMNS).eq("profile_id", profileId).eq("trained_on", today),
+    reportedBy(admin, profileId),
+  ]);
+  return {
+    post,
+    viewer: {
+      id: profileId,
+      staff: false,
+      friendIds: new Set(friendIds),
+      unlocked: postedPhotoToday((mine.data as PostRow[] | null) ?? [], profileId, today),
+      reported,
+    },
+  };
+}
+
+// Store a post: the photo first, then the entry that points at it, so an
+// entry never names a photo that is not there. NOT a server action: it
+// is called only by the post route, with the id of the signed-in account
+// and a photo the route has already checked. If the entry cannot be
+// written, the photo is taken back out.
+export async function savePost(input: {
+  profileId: string;
+  today: string;
+  minutes: number;
+  kind: Kind;
+  caption: string | null;
+  photo: Uint8Array;
+}): Promise<{ ok: true; id: string } | { ok: false }> {
+  const admin = createServiceClient();
+  const id = crypto.randomUUID();
+  const path = postPath(input.profileId, id);
+  if (!admin || !path) return { ok: false };
+  const up = await admin.storage
+    .from(POST_BUCKET)
+    .upload(path, input.photo, { contentType: "image/jpeg", upsert: false });
+  if (up.error) return { ok: false };
+  const { error } = await admin.from("elite_training_logs").insert({
+    id,
+    profile_id: input.profileId,
+    trained_on: input.today,
+    minutes: input.minutes,
+    kind: input.kind,
+    photo_path: path,
+    caption: input.caption,
+  });
+  if (error) {
+    await admin.storage.from(POST_BUCKET).remove([path]).catch(() => undefined);
+    return { ok: false };
+  }
+  return { ok: true, id };
+}
+
+// Every photo an account ever posted, removed from storage. Called just
+// before the account itself is deleted (its rows leave by cascade; files
+// do not). Best effort: a storage hiccup never blocks the deletion.
+export async function removeTrackerFiles(profileId: string): Promise<number> {
+  const admin = createServiceClient();
+  if (!admin) return 0;
+  let removed = 0;
+  for (;;) {
+    const { data, error } = await admin.storage.from(POST_BUCKET).list(profileId, { limit: 1000 });
+    if (error || !data || data.length === 0) break;
+    const { error: rmError } = await admin.storage
+      .from(POST_BUCKET)
+      .remove(data.map((f) => `${profileId}/${f.name}`));
+    if (rmError) break;
+    removed += data.length;
+    if (data.length < 1000) break;
+  }
+  return removed;
 }

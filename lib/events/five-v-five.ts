@@ -27,6 +27,8 @@ export const FIVE_V_FIVE = {
   registrationClosesIso: nyLocalToIso("2026-12-06", "00:00"),
   dmWord: "5V5",
   instagramDm: "https://ig.me/m/strivesoccerfc",
+  instagram: "https://www.instagram.com/strivesoccerfc",
+  handle: "@strivesoccerfc",
   // The team registration Google Form (Coach Yinka, Nov 19: "we will send
   // them to a google form"). One form for both prices; the page shows the
   // price that applies today. Empty = the button falls back to the

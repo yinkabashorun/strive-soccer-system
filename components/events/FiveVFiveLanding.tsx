@@ -24,7 +24,7 @@ export function FiveVFiveLanding() {
 
   const steps: [string, string][] = [
     ["Lock your spot", "Registration is payment. Your team is in the moment the entry fee is paid."],
-    ["Send your roster", "Team name, captain and players. We send every captain the schedule before game day."],
+    ["Send your roster", `Team name, captain and players. Then follow ${E.handle} on Instagram, that is where the schedule drops.`],
     ["Show up and win it", `${E.shortDate} at ${E.venue}. ${money(E.prize)} goes to the winning team.`],
   ];
 
@@ -33,7 +33,7 @@ export function FiveVFiveLanding() {
     ["Is the price per player?", `No, per team. ${money(E.earlyBird)} for the whole team through ${earlyLast}, ${money(E.standard)} from ${standardFrom}.`],
     ["When is the last day to register?", `${finalDay}. Every team pays in full by then, or sooner if all ${E.teams} spots are taken.`],
     ["Is my spot held if I sign up and pay later?", "No. A spot is held only once the entry fee is paid."],
-    ["When do we get the schedule?", "Every captain gets the start time and the game schedule before game day."],
+    ["When do we get the schedule?", `We announce the schedule and the social media rollout a week before the event, on Instagram. Follow ${E.handle} so your team does not miss it.`],
   ];
 
   return (
@@ -131,8 +131,27 @@ export function FiveVFiveLanding() {
         ))}
       </div>
 
+      {/* Follow */}
+      <Reveal variant="build" className="mt-9 rounded-2xl border border-white/10 bg-white/[0.02] p-5 text-center">
+        <div className="font-display text-lg font-bold">The schedule drops on Instagram</div>
+        <p className="mt-1 text-sm text-white/55">
+          Schedule and social media rollout a week before the event. Follow us so your team sees it first.
+        </p>
+        <a
+          href={E.instagram}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 inline-block rounded-full border border-accent/60 px-6 py-3 font-display text-base font-bold uppercase tracking-wider text-accent transition-colors hover:bg-accent hover:text-black"
+        >
+          Follow {E.handle}
+        </a>
+      </Reveal>
+
       <p className="mt-10 text-center text-xs text-white/35">
-        Strive Soccer <span className="mx-1.5">•</span> @strivesoccerfc
+        Strive Soccer <span className="mx-1.5">•</span>{" "}
+        <a href={E.instagram} target="_blank" rel="noopener noreferrer" className="underline-offset-4 hover:text-white/70 hover:underline">
+          {E.handle}
+        </a>
       </p>
     </div>
   );

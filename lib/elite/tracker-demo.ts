@@ -145,7 +145,12 @@ export function demoFriends(): BoardEntry[] {
   const all = state.added ? [...DEMO_FRIENDS, DEMO_ASK] : DEMO_FRIENDS;
   return all
     .filter((f) => !gone.has(f.id))
-    .map((f) => ({ id: f.id, name: shortName(f.name), minutes: f.minutes }));
+    .map((f) => ({
+      id: f.id,
+      name: shortName(f.name),
+      minutes: f.minutes,
+      starred: demoAuraOf(shortName(f.name)).starred,
+    }));
 }
 
 export function demoFriendAsk(code: string): { code: string; name: string } | null {
@@ -186,6 +191,7 @@ export function demoMyClubs(me: { id: string; name: string }): MyClub[] {
       ...(DEMO_CLUB_MEMBERS[c.id] ?? []).map((n, i) => ({
         id: `${c.id}-m${i}`,
         name: shortName(n),
+        starred: demoAuraOf(shortName(n)).starred,
         captain: false,
         you: false,
       })),

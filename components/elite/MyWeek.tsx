@@ -123,7 +123,15 @@ export function MyWeek({
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <b className="font-display text-[68px] font-black leading-[0.85] tracking-[-1px] tabular-nums">{fmtDuration(minutes)}</b>
+          {/* "3h" fits the ring at the mock's size; "3h 15m" steps down so it stays inside */}
+          <b
+            className={
+              "font-display font-black leading-[0.85] tracking-[-1px] tabular-nums " +
+              (fmtDuration(minutes).length <= 3 ? "text-[68px]" : "text-[48px]")
+            }
+          >
+            {fmtDuration(minutes)}
+          </b>
           <span className="mt-2 text-[14px] text-white/60">of {fmtDuration(target)} this week</span>
         </div>
       </div>

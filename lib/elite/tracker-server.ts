@@ -454,7 +454,9 @@ export async function feedFor(viewer: Viewer, today: string): Promise<FeedView> 
   if (!admin) {
     // the example account: the same rules, example rows, photos that are
     // plain files of the example
-    friends = demoFriends();
+    const example = demoFriends();
+    friends = example;
+    starred = new Set(example.filter((f) => f.starred).map((f) => f.id));
     const mine = new Set(friends.map((f) => f.id));
     rows = demoPostRows(me.id, today, nowMs).filter((r) => r.profile_id === me.id || mine.has(r.profile_id));
     reported = new Set(readDemoState().reported ?? []);

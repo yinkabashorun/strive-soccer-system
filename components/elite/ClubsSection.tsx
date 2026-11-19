@@ -178,7 +178,7 @@ export function ClubsSection({ clubs, ranking, appUrl }: { clubs: MyClub[]; rank
                 </span>
                 <span className="shrink-0 text-right text-[13px] text-white/70">
                   <b className="font-display text-[20px] font-black tabular-nums text-bone">{fmtDuration(r.average)}</b>
-                  <span className="block text-[11px]">a player</span>
+                  <span className="block text-[11px]">per player</span>
                 </span>
               </li>
             ))}

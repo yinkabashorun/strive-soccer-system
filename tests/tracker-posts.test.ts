@@ -502,3 +502,39 @@ describe("13 and older", () => {
     expect(sql).not.toMatch(/birth_date|birthday|date_of_birth/);
   });
 });
+
+describe("the coach queue and taking a block back", () => {
+  it("the coach page leads with the reported posts, and counts posts and open reports", () => {
+    const page = code("app/(coach)/coach/free/page.tsx");
+    expect(page).toContain("<ReportsQueue reports={data.reports} />");
+    expect(page).toContain("{data.posts_week}");
+    expect(page).toContain("{data.reports.length}");
+    expect(page).toContain('"Posts this week"');
+    const queue = code("components/elite/ReportsQueue.tsx");
+    expect(queue).toContain("removePost(r.log_id)");
+    expect(queue).toContain("dismissReports(r.log_id)");
+    // the queue reads open reports only, and only posts still up
+    const coach = code("lib/elite/tracker-coach.ts");
+    expect(coach).toContain('.is("resolved_at", null)');
+    expect(coach).toContain("return l && l.photo_path && !l.removed_at;");
+  });
+
+  it("a blocked player can be taken back from Account, by the player who blocked them", () => {
+    const account = code("app/account/page.tsx");
+    expect(account).toContain("const blocked = tracker ? await blockedFor(viewer) : [];");
+    expect(account).toContain("<BlockedList blocked={blocked} />");
+    expect(code("components/elite/BlockedList.tsx")).toContain("await unblockPlayer(b.id)");
+  });
+
+  it("report and block are on every friend's post; delete is on your own", () => {
+    const feed = code("components/elite/FriendsFeed.tsx");
+    expect(feed).toContain('<SheetButton onClick={() => setMenu("delete")}>Delete my post</SheetButton>');
+    expect(feed).toContain('<SheetButton onClick={() => setMenu("report")}>Report this post</SheetButton>');
+    expect(feed).toContain('<SheetButton onClick={() => setMenu("block")}>Block {card.first}</SheetButton>');
+    expect(feed).toMatch(/\{card\.mine \? \(\s*<SheetButton onClick=\{\(\) => setMenu\("delete"\)\}/);
+    expect(feed).toContain("act(() => reportPost(card.id, r.id))");
+    expect(feed).toContain("act(() => blockPlayer(card.ownerId))");
+    // a reported or blocked post leaves the screen at once
+    expect(feed).toContain("onGone();");
+  });
+});

@@ -738,6 +738,19 @@ export function cleanReason(raw: unknown): ReportReason | null {
   return idIn(REPORT_REASONS, raw) ? raw : null;
 }
 
+// One reported post, waiting for a coach: the photo, who posted it, and
+// every player who reported it with their reason.
+export type ReportedPost = {
+  log_id: string;
+  poster: string;
+  day: string;
+  minutes: number;
+  kind: Kind;
+  caption: string | null;
+  photoUrl: string | null; // a signed address, good for a few minutes
+  reports: { reporter: string; reason: string; at: string }[];
+};
+
 // What a coach did with a reported post.
 export const REPORT_ACTIONS = ["removed", "none"] as const;
 export type ReportAction = (typeof REPORT_ACTIONS)[number];

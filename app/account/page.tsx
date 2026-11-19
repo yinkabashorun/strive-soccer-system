@@ -3,13 +3,14 @@ import { redirect } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Avatar } from "@/components/Avatar";
 import { DeviceSettings } from "@/components/elite/DeviceSettings";
+import { BlockedList } from "@/components/elite/BlockedList";
 import { getViewer } from "@/lib/elite/session";
 import { signOut } from "@/lib/elite/auth-actions";
 import { deleteGate } from "@/lib/elite/account";
 import { SUPPORT_EMAIL, concernMailto } from "@/lib/elite/support";
 import { fmtDuration } from "@/lib/elite/time-trained";
-import { trackerFor } from "@/lib/elite/tracker-server";
-import { FREE_DAYS, FREE_HOME, FREE_QUIZ, planDaysLabel } from "@/lib/elite/tracker";
+import { blockedFor, trackerFor } from "@/lib/elite/tracker-server";
+import { FREE_DAYS, FREE_QUIZ, FREE_WEEK, planDaysLabel } from "@/lib/elite/tracker";
 
 export const metadata = { title: "Account · Strive Elite" };
 
@@ -26,7 +27,8 @@ export default async function AccountPage() {
   // setting is the weekly target. The example player is never one here.
   const tracker = viewer.demo ? null : await trackerFor(viewer);
   const isMember = isPlayer && !tracker;
-  const home = !isPlayer ? "/coach" : tracker ? FREE_HOME : "/dashboard";
+  const home = !isPlayer ? "/coach" : tracker ? FREE_WEEK : "/dashboard";
+  const blocked = tracker ? await blockedFor(viewer) : [];
   const canDelete = deleteGate(viewer).allowed;
 
   return (
@@ -74,6 +76,12 @@ export default async function AccountPage() {
                 detail={`${planDaysLabel(tracker.plan_days)}. Change them here.`}
               />
             )}
+          </Group>
+        )}
+
+        {tracker && (
+          <Group title="Blocked players">
+            <BlockedList blocked={blocked} />
           </Group>
         )}
 

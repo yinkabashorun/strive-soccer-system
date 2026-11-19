@@ -8,7 +8,7 @@ const COACH_NAV: NavItem[] = [
   { href: "/coach/drills", label: "Drill bank", icon: "Dumbbell" },
   { href: "/coach/courses", label: "Courses", icon: "BookOpen" },
   { href: "/coach/calls", label: "Calls", icon: "Film" },
-  { href: "/coach/free", label: "Free log", icon: "BarChart3" },
+  { href: "/coach/free", label: "Free app", icon: "BarChart3" },
 ];
 
 export default async function CoachLayout({

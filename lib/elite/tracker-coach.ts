@@ -17,6 +17,7 @@ import {
   type Grade,
   type Kind,
   type Level,
+  type ReportedPost,
   type TargetRow,
 } from "./tracker";
 import { TRACKER_COLUMNS, getTargetTable, isFreeSignupOpen, type Tracker } from "./tracker-server";
@@ -38,18 +39,6 @@ export type FreeAccount = {
   posts_week: number; // photos posted this week that are still up
 };
 
-// One reported post, waiting for a coach: the photo, who posted it, and
-// every player who reported it with their reason.
-export type ReportedPost = {
-  log_id: string;
-  poster: string;
-  day: string;
-  minutes: number;
-  kind: Kind;
-  caption: string | null;
-  photoUrl: string | null; // a signed address, good for a few minutes
-  reports: { reporter: string; reason: string; at: string }[];
-};
 
 export type FreeOverview = {
   open: boolean;

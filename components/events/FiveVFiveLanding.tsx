@@ -19,7 +19,7 @@ export function FiveVFiveLanding() {
     [`${E.minGroupGames} games minimum`, `Every team plays at least ${E.minGroupGames} games in the group stage.`],
     ["Every game recorded", "Every game on the day is filmed."],
     [`Picked up by ${E.coverage}`, `The event is covered by ${E.coverage}.`],
-    [`${money(E.prize)} to the winner`, "Cash to the team that wins it all."],
+    [`${money(E.prize)} to the winner`, "Cash to the team that wins it all, and the winners are highlighted as the best players in the whole DMV."],
   ];
 
   const steps: [string, string][] = [

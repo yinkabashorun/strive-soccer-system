@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { FIVE_V_FIVE, dayOf, lastDayBefore, money, phaseAt, priceAt, registerTarget } from "@/lib/events/five-v-five";
+import { FIVE_V_FIVE, dayOf, ghlFormId, lastDayBefore, money, phaseAt, priceAt, registerTarget } from "@/lib/events/five-v-five";
 
 const at = (iso: string) => Date.parse(iso);
 
@@ -31,6 +31,15 @@ describe("5v5 pricing", () => {
     expect(registerTarget(now, "javascript:alert(1)")?.kind).toBe("dm");
     expect(registerTarget(now, "https://evil.example/forms.gle/x")?.kind).toBe("dm");
     expect(registerTarget(at("2026-12-06T05:00:00Z"), "https://forms.gle/abc123")).toBeNull();
+  });
+  it("embeds the GHL form on the page", () => {
+    const now = at("2026-11-19T15:00:00Z");
+    const ghl = "https://api.leadconnectorhq.com/widget/form/lHiFBnSdihwHaGDbeOBO";
+    expect(registerTarget(now, ghl)).toEqual({ href: "#register", kind: "embed" });
+    expect(ghlFormId(ghl)).toBe("lHiFBnSdihwHaGDbeOBO");
+    expect(ghlFormId("https://api.leadconnectorhq.com/widget/form/x/../y")).toBeNull();
+    expect(registerTarget(now, "https://api.leadconnectorhq.com/widget/form/a?b=1")?.kind).toBe("dm");
+    expect(registerTarget(now)?.kind).toBe("embed"); // the live config
   });
   it("formats money", () => {
     expect(money(3000)).toBe("$3,000");

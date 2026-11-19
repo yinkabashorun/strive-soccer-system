@@ -1,6 +1,7 @@
+import Script from "next/script";
 import { Reveal } from "@/components/elite/Reveal";
 import { MetaPixel } from "@/components/elite/MetaPixel";
-import { FIVE_V_FIVE as E, dayOf, lastDayBefore, money, phaseAt, priceAt, registerTarget } from "@/lib/events/five-v-five";
+import { FIVE_V_FIVE as E, dayOf, ghlFormId, lastDayBefore, money, phaseAt, priceAt, registerTarget } from "@/lib/events/five-v-five";
 
 // Same pixel as /demo, so 5v5 visitors can be retargeted. Public page,
 // no app data, nothing about members.
@@ -11,6 +12,7 @@ export function FiveVFiveLanding() {
   const phase = phaseAt(now);
   const price = priceAt(now);
   const target = registerTarget(now);
+  const formId = target?.kind === "embed" ? ghlFormId() : null;
   const earlyLast = lastDayBefore(E.earlyBirdEndsIso);
   const standardFrom = dayOf(E.earlyBirdEndsIso);
   const finalDay = lastDayBefore(E.registrationClosesIso);
@@ -23,13 +25,15 @@ export function FiveVFiveLanding() {
   ];
 
   const steps: [string, string][] = [
-    ["Lock your spot", "Registration is payment. Your team is in the moment the entry fee is paid."],
+    ["Lock your spot", "Fill out the form, then pay with the link we send. Your team is in the moment the entry fee is paid."],
     ["Send your roster", `Team name, captain and players. Then follow ${E.handle} on Instagram, that is where the schedule drops.`],
     ["Show up and win it", `${E.shortDate} at ${E.venue}. ${money(E.prize)} goes to the winning team.`],
   ];
 
   const questions: [string, string][] = [
     ["How many teams get in?", `${E.teams}. When ${E.teams} teams have paid, registration closes.`],
+    ["How many players on a team?", `Up to ${E.rosterMax}, all ${E.maxAge} and under. Bring two jerseys of contrasting colors.`],
+    ["How do we pay?", "Fill out the registration form and we send your payment link. Your spot is held once it is paid."],
     ["Is the price per player?", `No, per team. ${money(E.earlyBird)} for the whole team through ${earlyLast}, ${money(E.standard)} from ${standardFrom}.`],
     ["When is the last day to register?", `${finalDay}. Every team pays in full by then, or sooner if all ${E.teams} spots are taken.`],
     ["Is my spot held if I sign up and pay later?", "No. A spot is held only once the entry fee is paid."],
@@ -81,14 +85,15 @@ export function FiveVFiveLanding() {
             </p>
             <a
               href={target.href}
-              target="_blank"
-              rel="noopener noreferrer"
+              {...(target.kind === "embed" ? {} : { target: "_blank", rel: "noopener noreferrer" })}
               className="mt-5 inline-block w-full rounded-full bg-accent px-6 py-3.5 font-display text-lg font-black uppercase tracking-wider text-black transition-opacity hover:opacity-90 sm:w-auto"
             >
-              {target.kind === "form" ? "Register your team" : `DM “${E.dmWord}” to register`}
+              {target.kind === "dm" ? `DM “${E.dmWord}” to register` : "Register your team"}
             </a>
-            {target.kind === "form" && (
-              <p className="mt-2 text-xs text-white/45">Opens the registration form. Your spot is held once the {money(price)} entry fee is paid.</p>
+            {target.kind !== "dm" && (
+              <p className="mt-2 text-xs text-white/45">
+                Fill out the form and we send your {money(price)} payment link. Your spot is held once it is paid.
+              </p>
             )}
             {target.kind === "dm" && (
               <p className="mt-2 text-xs text-white/45">Opens Instagram. Send “{E.dmWord}” and we reply with the registration form.</p>
@@ -96,6 +101,29 @@ export function FiveVFiveLanding() {
           </>
         )}
       </Reveal>
+
+      {/* Registration form (GHL), embedded when registration is open */}
+      {formId && (
+        <section id="register" className="scroll-mt-6">
+          <h2 className="mb-2.5 mt-9 font-display text-sm font-bold uppercase tracking-wider text-white/50">Register your team</h2>
+          <p className="mb-3 text-xs leading-relaxed text-white/50">
+            Up to {E.rosterMax} players, all {E.maxAge} and under, and two jerseys of contrasting colors. After you submit, we send your payment link.
+          </p>
+          <div className="overflow-hidden rounded-2xl border border-white/8 bg-white">
+            <iframe
+              src={E.registrationForm}
+              style={{ border: "none", width: "100%", display: "block" }}
+              scrolling="no"
+              id={`inline-${formId}`}
+              title={`${E.name} registration`}
+              data-layout="{'id':'INLINE'}"
+              data-form-id={formId}
+              className="min-h-[1400px]"
+            />
+          </div>
+          <Script src="https://link.msgsndr.com/js/form_embed.js" strategy="afterInteractive" />
+        </section>
+      )}
 
       {/* What every team gets */}
       <h2 className="mb-2.5 mt-9 font-display text-sm font-bold uppercase tracking-wider text-white/50">Every team gets</h2>

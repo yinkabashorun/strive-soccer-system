@@ -29,11 +29,16 @@ export const FIVE_V_FIVE = {
   instagramDm: "https://ig.me/m/strivesoccerfc",
   instagram: "https://www.instagram.com/strivesoccerfc",
   handle: "@strivesoccerfc",
-  // The team registration Google Form (Coach Yinka, Nov 19: "we will send
-  // them to a google form"). One form for both prices; the page shows the
-  // price that applies today. Empty = the button falls back to the
+  // The team registration form (Coach Yinka, Nov 19: first "a google
+  // form", then he sent his GHL form). One form for both prices; the page
+  // shows the price that applies today. A GHL form is embedded on the page;
+  // a Google Form is linked. Empty = the button falls back to the
   // Instagram DM so nothing fake is shown.
-  registrationForm: "",
+  registrationForm: "https://api.leadconnectorhq.com/widget/form/lHiFBnSdihwHaGDbeOBO",
+  // From his form (read Nov 19): max 9 players, all 21 and under, two
+  // jerseys of contrasting colors.
+  rosterMax: 9,
+  maxAge: 21,
 } as const;
 
 export type FiveV5Phase = "early" | "standard" | "closed";
@@ -51,9 +56,19 @@ export function priceAt(ms: number): number | null {
   return null;
 }
 
-// Only a real Google Forms address can become the button's href.
+// Only a real Google Forms or GHL (LeadConnector) form address can become
+// the button's href or the embedded form.
 export function cleanFormUrl(url: string): string {
-  return /^https:\/\/(docs\.google\.com\/forms\/|forms\.gle\/)/.test(url) ? url : "";
+  return /^https:\/\/(docs\.google\.com\/forms\/|forms\.gle\/|api\.leadconnectorhq\.com\/widget\/form\/[A-Za-z0-9]+$)/.test(url)
+    ? url
+    : "";
+}
+
+// The GHL form id when the form is a GHL form (it is embedded on the
+// page), else null.
+export function ghlFormId(url: string = FIVE_V_FIVE.registrationForm): string | null {
+  const m = /^https:\/\/api\.leadconnectorhq\.com\/widget\/form\/([A-Za-z0-9]+)$/.exec(url);
+  return m ? m[1] : null;
 }
 
 // Where the register button goes right now: the Google Form when it is
@@ -61,10 +76,11 @@ export function cleanFormUrl(url: string): string {
 export function registerTarget(
   ms: number,
   form: string = FIVE_V_FIVE.registrationForm,
-): { href: string; kind: "form" | "dm" } | null {
+): { href: string; kind: "embed" | "form" | "dm" } | null {
   if (phaseAt(ms) === "closed") return null;
   const clean = cleanFormUrl(form);
-  return clean ? { href: clean, kind: "form" } : { href: FIVE_V_FIVE.instagramDm, kind: "dm" };
+  if (!clean) return { href: FIVE_V_FIVE.instagramDm, kind: "dm" };
+  return ghlFormId(clean) ? { href: "#register", kind: "embed" } : { href: clean, kind: "form" };
 }
 
 export function money(n: number): string {

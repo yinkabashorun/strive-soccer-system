@@ -13,7 +13,7 @@ import {
 } from "./account";
 import { removePlayerFiles } from "./account-server";
 import { textCoaches } from "./coach-alerts";
-import { hasTracker } from "./tracker-server";
+import { hasTracker, removeTrackerFiles } from "./tracker-server";
 
 // "Delete my account", from inside the app (App Review Guideline
 // 5.1.1(v)). The person re-enters their password, then everything goes:
@@ -52,6 +52,8 @@ export async function deleteMyAccount(
   // with the login (on delete cascade). Known now, while it still exists,
   // so the coaches' text says the right thing.
   const free = viewer.role === "player" && !viewer.playerId && (await hasTracker(user.id));
+  // and its posted photos, which do not leave by cascade
+  if (free) await removeTrackerFiles(user.id);
 
   const { error } = await admin.auth.admin.deleteUser(user.id);
   if (error) {

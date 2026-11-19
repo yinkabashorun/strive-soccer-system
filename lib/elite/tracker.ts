@@ -781,7 +781,9 @@ export function oldEnough(birth: Birth, today: string): boolean {
 // The years offered on the join form, newest first.
 export function birthYears(today: string): number[] {
   const thisYear = Number(today.slice(0, 4));
-  return Array.from({ length: 80 }, (_, i) => thisYear - 5 - i);
+  const years: number[] = [];
+  for (let i = 0; i < 80; i++) years.push(thisYear - 5 - i);
+  return years;
 }
 
 // ---- The weekly card --------------------------------------------------

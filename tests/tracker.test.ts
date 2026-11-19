@@ -414,8 +414,11 @@ describe("joining", () => {
     expect(all).toContain("the training you log");
     expect(all).toContain("the days you plan to train");
     // what a friend sees, said before the account exists
-    expect(all).toContain("Friends you connect with by link see your first name, last initial and your weekly training time.");
-    expect(read("app/privacy/page.tsx")).toMatch(/Friends you connect with by\s+link see your first name, last initial and your weekly\s+training time, and nobody else does\./);
+    expect(all).toContain("The free app is for players 13 and older.");
+    expect(all).toContain(
+      "The friends you added see your first name, last initial, your training time and the photos you post. So do our coaches."
+    );
+    expect(all).toContain("You can report a post or block a player. We can remove a post.");
     expect(all).toContain("service providers");
     expect(all).toContain("Reply STOP");
     expect(all).not.toContain("—");

@@ -81,7 +81,7 @@ vi.mock("@/lib/elite/tracker-server", () => ({
   isFreeSignupOpen: async () => state.open,
   makeFriends: async (x: string, y: string) => {
     state.friends.push([x, y]);
-    return true;
+    return "ok";
   },
 }));
 vi.mock("@/lib/elite/legal-server", () => ({
@@ -100,14 +100,19 @@ const good = {
   email: "A@Example.com",
   phone: "(703) 555-0100",
   password: "longenough",
+  birth: { month: 3, year: 2008 },
   agreed: { guardian: true, terms: true },
 };
 
-const post = (body: unknown) =>
+const post = (body: unknown, cookie?: string) =>
   POST(
     new Request("https://thestriveapp.com/api/elite/auth/join", {
       method: "POST",
-      headers: { "Content-Type": "application/json", "user-agent": "test" },
+      headers: {
+        "Content-Type": "application/json",
+        "user-agent": "test",
+        ...(cookie ? { cookie } : {}),
+      },
       body: typeof body === "string" ? body : JSON.stringify(body),
     })
   );
@@ -253,6 +258,36 @@ describe("free sign-up", () => {
     expect(res.status).toBe(400);
     expect((await res.json()).error).toContain("already exists");
     expect(state.inserts).toHaveLength(0);
+  });
+
+  it("is for players 13 and older: under 13 creates nothing and stores nothing", async () => {
+    const thisYear = new Date().getUTCFullYear();
+    const res = await post({ ...good, birth: { month: 1, year: thisYear - 10 } });
+    expect(res.status).toBe(403);
+    const body = await res.json();
+    expect(body.reason).toBe("age");
+    expect(body.error).toContain("13 and older");
+    expect(state.created).toHaveLength(0);
+    expect(state.inserts).toHaveLength(0);
+    expect(state.consents).toHaveLength(0);
+  });
+
+  it("refuses a second try in the same visit after an answer under 13, whatever date it sends", async () => {
+    const res = await post(good, "other=1; strive_join_young=1");
+    expect(res.status).toBe(403);
+    expect((await res.json()).reason).toBe("age");
+    expect(state.created).toHaveLength(0);
+  });
+
+  it("needs a month and year of birth, and keeps only those two", async () => {
+    for (const birth of [undefined, {}, { month: 13, year: 2008 }, { month: 3, year: 3000 }]) {
+      const res = await post({ ...good, birth });
+      expect(res.status, JSON.stringify(birth)).toBe(400);
+    }
+    expect(state.created).toHaveLength(0);
+    const ok = await post(good);
+    expect(ok.status).toBe(200);
+    expect(state.inserts[0].row).toMatchObject({ birth_year: 2008, birth_month: 3 });
   });
 
   it("still succeeds when the sign-in does not take: the form sends them to sign in", async () => {

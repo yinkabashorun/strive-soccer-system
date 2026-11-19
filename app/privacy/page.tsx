@@ -72,14 +72,22 @@ export default function PrivacyPage({
                 has said yes to that specific clip.
               </li>
               <li>
-                <strong className="text-bone">A free training log account:</strong>{" "}
-                your name, email and phone number, the answers you give
-                when you set it up (your grade, playing level, in season or
-                off season, and your goal), the days you plan to train, and
-                each entry you log (the date, the minutes, and whether it
-                was training or gym work). Friends you connect with by
-                link see your first name, last initial and your weekly
-                training time, and nobody else does.
+                <strong className="text-bone">A free account:</strong>{" "}
+                the free app is for players 13 and older. We keep your
+                name, email and phone number, the month and year you were
+                born (never the day), the answers you give when you set it
+                up (your grade, playing level, in season or off season, and
+                your goal), the days you plan to train, each entry you log
+                (the date, the minutes, and whether it was training or gym
+                work), the photos you post with their one line, the props
+                you give, and the players you block or report. Photos are
+                stored privately and shown only through short-lived links.
+                The friends you added by link see your first name, last
+                initial, your training time and the photos you post; our
+                coaches can see them too, and nobody else does. You can
+                report a post or block a player at any time, and we can
+                remove a post. Deleting a post or your account deletes its
+                photos.
               </li>
               <li>
                 <strong className="text-bone">Messages:</strong> any message

@@ -56,11 +56,18 @@ export default function TermsPage({
               asks the adult to accept them again before training goes on.
             </p>
             <p className="mt-3">
-              A free account is a training log only: a place to record the
-              training a player does on their own. It has no coaching plan,
-              no drills and no courses, and when free sign-up is open it is
-              created without an invite. Everything else in these terms
-              applies to it the same way.
+              A free account is for players 13 and older. It is a place to
+              post and log the training a player does on their own and to
+              see the friends they added do the same. It has no coaching
+              plan, no drills and no courses, and when free sign-up is open
+              it is created without an invite. Everything else in these
+              terms applies to it the same way.
+            </p>
+            <p className="mt-3">
+              Post photos of your own training only. The friends you added
+              see them, and so do our coaches. You can report a post or
+              block a player at any time. We can remove any post, and we
+              can close a free account that posts something it should not.
             </p>
           </Section>
 

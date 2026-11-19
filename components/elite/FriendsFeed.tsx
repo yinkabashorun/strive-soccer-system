@@ -6,7 +6,7 @@ import { Camera, MoreHorizontal, Zap } from "lucide-react";
 import { blockPlayer, deleteLog, reportPost, toggleProps } from "@/lib/elite/tracker-actions";
 import { fmtDuration } from "@/lib/elite/time-trained";
 import { feel } from "@/lib/elite/native";
-import { REPORT_REASONS, lockedHeadline, lockedLine } from "@/lib/elite/tracker";
+import { REPORT_REASONS, lockedHeadline, lockedHeadlineLines, lockedLine } from "@/lib/elite/tracker";
 import type { FeedView, OpenCardView } from "@/lib/elite/tracker-server";
 import type { LockedCard } from "@/lib/elite/tracker";
 import { usePostLauncher } from "./FreeShell";
@@ -213,8 +213,15 @@ function LockedPost({ card, first, friendsToday }: { card: LockedCard; first: bo
         <span className="grid h-16 w-16 place-items-center rounded-full border-2 border-bone bg-[#222] text-[20px] font-bold" aria-hidden>
           {card.initials}
         </span>
-        <p className={"mt-4 font-display font-black uppercase leading-[0.95] " + (first ? "text-[38px]" : "text-[26px]")}>
-          {lockedHeadline(card.first, card.minutes, card.kind)}
+        <p
+          aria-label={lockedHeadline(card.first, card.minutes, card.kind)}
+          className={"mt-4 font-display font-black uppercase leading-[0.95] " + (first ? "text-[38px]" : "text-[26px]")}
+        >
+          {lockedHeadlineLines(card.first, card.minutes, card.kind).map((line) => (
+            <span key={line} className="block" aria-hidden>
+              {line}
+            </span>
+          ))}
         </p>
         {first && <p className="mt-2.5 text-[15px] leading-[1.35] text-white/80">{lockedLine(friendsToday)}</p>}
       </div>

@@ -22,6 +22,7 @@ import {
   fitWithin,
   initialsOf,
   lockedHeadline,
+  lockedHeadlineLines,
   lockedLine,
   looksLikeJpeg,
   mayGiveProps,
@@ -268,6 +269,12 @@ describe("the feed", () => {
   it("the words on a locked card and the time on an open one", () => {
     expect(lockedHeadline("Gary", 75, "training")).toBe("Gary trained 1h 15m today");
     expect(lockedHeadline("Gary", 45, "gym")).toBe("Gary was in the gym 45m today");
+    // set as two lines on purpose, never broken in the middle of the time
+    expect(lockedHeadlineLines("Gary", 75, "training")).toEqual(["Gary trained", "1h 15m today"]);
+    expect(lockedHeadlineLines("Gary", 45, "gym")).toEqual(["Gary was in the gym", "45m today"]);
+    const feed = code("components/elite/FriendsFeed.tsx");
+    expect(feed).toContain("aria-label={lockedHeadline(card.first, card.minutes, card.kind)}");
+    expect(feed).toContain("lockedHeadlineLines(card.first, card.minutes, card.kind).map(");
     expect(lockedLine(3)).toBe("3 of your friends have trained today. Post yours to see theirs.");
     expect(lockedLine(1)).toBe("1 of your friends has trained today. Post yours to see theirs.");
     const now = new Date("2026-11-18T18:00:00Z").getTime();
@@ -317,7 +324,7 @@ describe("a post's photo and its one line", () => {
       "mayLog(kind, tracker.grade)",
       "file.size > POST_MAX_BYTES",
       "looksLikeJpeg(photo)",
-      "await savePost({ profileId: viewer.profile.id, today,",
+      "await savePost({\n    profileId: viewer.profile.id,",
     ].map((mark) => route.indexOf(mark));
     expect(order.every((i) => i > -1)).toBe(true);
     expect([...order].sort((x, y) => x - y)).toEqual(order);

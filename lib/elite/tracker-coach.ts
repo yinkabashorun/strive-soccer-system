@@ -162,6 +162,8 @@ export async function getFreeOverview(): Promise<FreeOverview> {
     photo_path: string | null;
     caption: string | null;
     removed_at: string | null;
+    week_target: number | null;
+    created_at: string;
   };
   type PairRow = { a: string; b: string };
   type ReportRow = { log_id: string; reporter_id: string; reason: string; created_at: string };
@@ -190,7 +192,7 @@ export async function getFreeOverview(): Promise<FreeOverview> {
     everyRow<LogRow>((from, to) =>
       admin
         .from("elite_training_logs")
-        .select("id, profile_id, trained_on, minutes, kind, photo_path, caption, removed_at")
+        .select("id, profile_id, trained_on, minutes, kind, photo_path, caption, removed_at, week_target, created_at")
         .order("created_at")
         .order("id")
         .range(from, to)
@@ -279,7 +281,14 @@ export async function getFreeOverview(): Promise<FreeOverview> {
   for (const l of logs) {
     auraLogsBy.set(l.profile_id, [
       ...(auraLogsBy.get(l.profile_id) ?? []),
-      { trained_on: l.trained_on, minutes: l.minutes, kind: l.kind, photo: Boolean(l.photo_path) && !l.removed_at },
+      {
+        trained_on: l.trained_on,
+        minutes: l.minutes,
+        kind: l.kind,
+        photo: Boolean(l.photo_path) && !l.removed_at,
+        week_target: l.week_target,
+        at: l.created_at,
+      },
     ]);
   }
   const noteBy = new Map(noteRows.map((n) => [n.profile_id, n.note]));

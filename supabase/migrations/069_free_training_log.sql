@@ -97,7 +97,10 @@ end $$;
 --    optional line. A row with no photo is a private entry: it counts
 --    for the week and shows no card. When a coach takes a post down,
 --    removed_at and removed_by are set and the file is deleted; the
---    minutes stay.
+--    minutes stay. week_target is the player's weekly target at the
+--    moment the entry was logged: a week's aura bonus is judged against
+--    the target on its latest entry, so changing the target later never
+--    re-judges a past week.
 create table if not exists public.elite_training_logs (
   id         uuid primary key default gen_random_uuid(),
   profile_id uuid not null references public.elite_trackers(profile_id) on delete cascade,
@@ -108,6 +111,7 @@ create table if not exists public.elite_training_logs (
   caption    text check (caption is null or char_length(caption) <= 80),
   removed_at timestamptz,
   removed_by uuid references public.elite_profiles(id) on delete set null,
+  week_target integer check (week_target is null or week_target between 1 and 1440),
   created_at timestamptz not null default now()
 );
 

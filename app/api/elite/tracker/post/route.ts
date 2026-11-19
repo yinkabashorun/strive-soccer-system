@@ -73,7 +73,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, id });
   }
 
-  const saved = await savePost({ profileId: viewer.profile.id, today, minutes, kind, caption, photo });
+  const saved = await savePost({
+    profileId: viewer.profile.id,
+    today,
+    minutes,
+    kind,
+    caption,
+    photo,
+    weekTarget: tracker.target_minutes,
+  });
   if (!saved.ok) return no("Your post was not saved. Check your connection and try again.", 502);
   revalidatePath(FREE_HOME);
   revalidatePath(FREE_WEEK);

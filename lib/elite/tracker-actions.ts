@@ -90,7 +90,7 @@ function touch() {
 type Owner =
   | { kind: "no"; error: string }
   | { kind: "demo"; grade: string | null }
-  | { kind: "ok"; admin: Admin; profileId: string; grade: string | null };
+  | { kind: "ok"; admin: Admin; profileId: string; grade: string | null; target: number | null };
 
 async function owner(): Promise<Owner> {
   const viewer = await getViewer();
@@ -101,7 +101,7 @@ async function owner(): Promise<Owner> {
   if (!admin) return { kind: "demo", grade: null };
   const tracker = await getTracker(viewer.profile.id);
   if (!tracker) return { kind: "no", error: "Sign in first." };
-  return { kind: "ok", admin, profileId: viewer.profile.id, grade: tracker.grade };
+  return { kind: "ok", admin, profileId: viewer.profile.id, grade: tracker.grade, target: tracker.target_minutes };
 }
 
 // ---- Joining ----------------------------------------------------------
@@ -219,7 +219,7 @@ export async function logTraining(
   }
   const { data, error } = await o.admin
     .from("elite_training_logs")
-    .insert({ profile_id: o.profileId, trained_on, minutes, kind })
+    .insert({ profile_id: o.profileId, trained_on, minutes, kind, week_target: o.target || null })
     .select("id")
     .single();
   if (error || !data) return fail(OFFLINE);

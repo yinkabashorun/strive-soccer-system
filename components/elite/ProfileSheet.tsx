@@ -77,7 +77,7 @@ export function ProfileSheet({
 
   if (step === "report" && profile.playingFor) {
     return (
-      <TrackerSheet title="Report this line?" onClose={() => setStep("view")}>
+      <TrackerSheet title={`Report ${first}'s Playing for line?`} onClose={() => setStep("view")}>
         <p className="text-[15px] leading-relaxed text-white/70">
           &ldquo;{profile.playingFor}&rdquo; goes to the coaches to look at. {first} is not told who reported it.
         </p>
@@ -234,7 +234,7 @@ export function ProfileSheet({
                   onClick={() => setStep("report")}
                   className="flex min-h-[44px] w-full items-center justify-center text-[14px] text-white/70 underline"
                 >
-                  Report this line
+                  Report the Playing for line
                 </button>
               ))}
           </>

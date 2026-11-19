@@ -13,6 +13,7 @@ import {
   auraPoints,
   cleanPlayingFor,
   clubRanking,
+  weekTargetOf,
   type AuraLog,
   type RankingRow,
 } from "@/lib/elite/tracker";
@@ -51,6 +52,39 @@ describe("aura", () => {
     expect(auraPoints([t("2026-11-15", 120), t("2026-11-16", 120)], 240)).toBe(240);
     // gym does not fill the target
     expect(auraPoints([t("2026-11-16", 200), gym("2026-11-17", 100)], 240)).toBe(200);
+  });
+
+  it("a week is judged on the target stored on its own latest entry", () => {
+    // Mon Nov 16 to Sun Nov 22 2026: the target was 240 when the week was logged
+    const at = (day: string, minutes: number, target: number, iso: string): AuraLog => ({
+      ...t(day, minutes),
+      week_target: target,
+      at: iso,
+    });
+    const week = [at("2026-11-16", 120, 300, "2026-11-16T20:00:00Z"), at("2026-11-18", 120, 240, "2026-11-18T20:00:00Z")];
+    expect(weekTargetOf(week, 999)).toBe(240);
+    expect(auraPoints(week, 999)).toBe(240 + AURA_WEEK_HIT);
+    // listed out of order, the latest entry still decides
+    expect(weekTargetOf([...week].reverse(), 999)).toBe(240);
+    // a week with no stored target falls back
+    expect(weekTargetOf([t("2026-11-16", 10)], 60)).toBe(60);
+  });
+
+  it("raising the target after a week it reached keeps that week's bonus", () => {
+    const hit: AuraLog[] = [
+      { ...t("2026-11-16", 240), week_target: 240, at: "2026-11-16T20:00:00Z" },
+    ];
+    const before = auraPoints(hit, 240);
+    // the player raises the target to 12 hours: the fallback changes, the stored one does not
+    expect(auraPoints(hit, 720)).toBe(before);
+    expect(before).toBe(240 + AURA_WEEK_HIT);
+    // every entry keeps the target at the moment it was logged
+    expect(code("lib/elite/tracker-actions.ts")).toContain("week_target: o.target || null");
+    expect(code("lib/elite/tracker-server.ts")).toContain("week_target: input.weekTarget || null");
+    expect(code("app/api/elite/tracker/post/route.ts")).toContain("weekTarget: tracker.target_minutes");
+    expect(read("supabase/migrations/069_free_training_log.sql")).toContain(
+      "week_target integer check (week_target is null or week_target between 1 and 1440)"
+    );
   });
 
   it("only goes up: old logs never lose anything as time passes", () => {
@@ -115,7 +149,12 @@ describe("the line on a profile", () => {
       expect(body, name).toContain("const c = await coach();");
       expect(body, name).toContain('if (c.kind === "no") return fail("Only a coach can do this.");');
     }
-    expect(code("components/elite/ProfileSheet.tsx")).toContain("reportLine(profile.id)");
+    const sheet = code("components/elite/ProfileSheet.tsx");
+    expect(sheet).toContain("reportLine(profile.id)");
+    // the copy says what is reported
+    expect(sheet).toContain("Report the Playing for line");
+    expect(sheet).toContain("title={`Report ${first}'s Playing for line?`}");
+    expect(sheet).not.toMatch(/Report this line/);
     expect(code("app/(coach)/coach/free/page.tsx")).toContain("<LineReports reports={data.lineReports} />");
   });
 });

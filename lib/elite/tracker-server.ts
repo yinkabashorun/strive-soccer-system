@@ -576,6 +576,7 @@ export async function savePost(input: {
   kind: Kind;
   caption: string | null;
   photo: Uint8Array;
+  weekTarget: number | null; // the player's target right now, kept on the entry
 }): Promise<{ ok: true; id: string } | { ok: false }> {
   const admin = createServiceClient();
   const id = crypto.randomUUID();
@@ -593,6 +594,7 @@ export async function savePost(input: {
     kind: input.kind,
     photo_path: path,
     caption: input.caption,
+    week_target: input.weekTarget || null,
   });
   if (error) {
     await admin.storage.from(POST_BUCKET).remove([path]).catch(() => undefined);
@@ -877,13 +879,28 @@ export async function auraLogsOf(admin: Admin, profileId: string): Promise<AuraL
   for (let from = 0; ; from += 1000) {
     const { data } = await admin
       .from("elite_training_logs")
-      .select("id, trained_on, minutes, kind, photo_path, removed_at")
+      .select("id, trained_on, minutes, kind, photo_path, removed_at, week_target, created_at")
       .eq("profile_id", profileId)
       .order("id")
       .range(from, from + 999);
-    const rows = (data as (TrainingLog & { photo_path: string | null; removed_at: string | null })[] | null) ?? [];
+    const rows =
+      (data as
+        | (TrainingLog & {
+            photo_path: string | null;
+            removed_at: string | null;
+            week_target: number | null;
+            created_at: string;
+          })[]
+        | null) ?? [];
     for (const r of rows) {
-      out.push({ trained_on: r.trained_on, minutes: r.minutes, kind: r.kind, photo: Boolean(r.photo_path) && !r.removed_at });
+      out.push({
+        trained_on: r.trained_on,
+        minutes: r.minutes,
+        kind: r.kind,
+        photo: Boolean(r.photo_path) && !r.removed_at,
+        week_target: r.week_target,
+        at: r.created_at,
+      });
     }
     if (rows.length < 1000) break;
   }

@@ -639,29 +639,53 @@ export type MyClub = {
 //   1 a minute of training logged (gym does not count)
 //   15 for a day with a photo posted (one a day, New York days)
 //   60 for a week (Monday to Sunday) that reached the target
+// The target a week is judged against is the one stored on that week's
+// latest entry (each entry keeps the player's target at the moment it was
+// logged), so changing the target later never re-judges a past week.
 export const AURA_PER_MINUTE = 1;
 export const AURA_PHOTO_DAY = 15;
 export const AURA_WEEK_HIT = 60;
 // Level 1 starts at 0; Level 11 at 7,500.
 export const AURA_LEVELS = [0, 100, 300, 600, 1000, 1500, 2200, 3000, 4000, 5500, 7500] as const;
 
-export type AuraLog = { trained_on: string; minutes: number; kind: Kind; photo: boolean };
+export type AuraLog = {
+  trained_on: string;
+  minutes: number;
+  kind: Kind;
+  photo: boolean;
+  week_target?: number | null; // the player's target when this entry was logged
+  at?: string; // when it was logged (ISO), to find a week's latest entry
+};
+
+// The target a week is judged against: the one on its latest entry that
+// carries one, else the fallback (entries from before targets were kept,
+// and the example account).
+export function weekTargetOf(entries: AuraLog[], fallback: number): number {
+  let latest: AuraLog | null = null;
+  for (const l of entries) {
+    if (l.week_target == null) continue;
+    if (!latest || (l.at ?? "") >= (latest.at ?? "")) latest = l;
+  }
+  return latest?.week_target ?? fallback;
+}
 
 // The points behind a level. Internal: never shown to a player.
-export function auraPoints(logs: AuraLog[], target: number): number {
+export function auraPoints(logs: AuraLog[], fallbackTarget: number): number {
   let total = 0;
   const photoDays = new Set<string>();
-  const weeks = new Map<string, number>();
+  const weeks = new Map<string, AuraLog[]>();
   for (const l of logs) {
-    if (l.kind === "training") {
-      total += l.minutes * AURA_PER_MINUTE;
-      const { monday } = weekOf(l.trained_on);
-      weeks.set(monday, (weeks.get(monday) ?? 0) + l.minutes);
-    }
+    if (l.kind === "training") total += l.minutes * AURA_PER_MINUTE;
     if (l.photo) photoDays.add(l.trained_on);
+    const { monday } = weekOf(l.trained_on);
+    weeks.set(monday, [...(weeks.get(monday) ?? []), l]);
   }
   total += photoDays.size * AURA_PHOTO_DAY;
-  if (target > 0) for (const m of weeks.values()) if (m >= target) total += AURA_WEEK_HIT;
+  for (const entries of weeks.values()) {
+    const target = weekTargetOf(entries, fallbackTarget);
+    const trained = entries.reduce((s, l) => (l.kind === "training" ? s + l.minutes : s), 0);
+    if (target > 0 && trained >= target) total += AURA_WEEK_HIT;
+  }
   return total;
 }
 
@@ -1006,6 +1030,13 @@ export function facesRow(input: {
 export function lockedHeadline(first: string, minutes: number, kind: Kind): string {
   const time = fmtDuration(minutes);
   return kind === "gym" ? `${first} was in the gym ${time} today` : `${first} trained ${time} today`;
+}
+
+// The same headline as the two lines the card sets it in, so it never
+// breaks in the middle of the time: "Gary trained" / "1h 15m today".
+export function lockedHeadlineLines(first: string, minutes: number, kind: Kind): [string, string] {
+  const time = fmtDuration(minutes);
+  return [kind === "gym" ? `${first} was in the gym` : `${first} trained`, `${time} today`];
 }
 
 export function lockedLine(friendsToday: number): string {

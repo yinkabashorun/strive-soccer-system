@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Strive Elite 5v5 · $3,000 cash prize",
-  description: "Sat, Dec 19 at SoFive Columbia. 16 teams. Early bird $450 per team through Dec 4, $550 from Dec 5.",
+  description: "Sat, Dec 19 at SoFive Columbia. 16 teams. Early bird $450 per team through Nov 25, $550 from Nov 26. Final deadline Dec 5.",
   openGraph: {
     title: "Strive Elite 5v5 · $3,000 cash prize",
     description: "Sat, Dec 19 at SoFive Columbia. 16 teams. Who runs the DMV?",

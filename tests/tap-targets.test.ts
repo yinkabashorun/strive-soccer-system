@@ -46,7 +46,7 @@ describe("finger targets", () => {
       "components/elite/ForgotForm.tsx",
       "components/elite/SignupForm.tsx",
       "components/elite/JoinForm.tsx",
-      "app/(auth)/join/page.tsx",
+      "app/(join)/join/page.tsx",
       "components/elite/AgreementScreen.tsx",
       "app/(auth)/layout.tsx",
     ]) {

@@ -119,10 +119,10 @@ describe("aura", () => {
     expect(auraLabel(4)).toBe("Aura Level 4");
     expect(auraNextLine(auraLevel(200))).toBe("1h 40m of training to Level 3");
     expect(auraNextLine(auraLevel(9000))).toBeNull();
-    // the sheet shows the level and the bar, never the points
-    const sheet = code("components/elite/ProfileSheet.tsx");
-    expect(sheet).toContain("auraLabel(profile.aura.level)");
-    expect(sheet).not.toMatch(/auraPoints|toNext\b/);
+    // the profile shows the level and the ring, never the points
+    const screen = code("components/elite/ProfileScreen.tsx");
+    expect(screen).toContain("auraLabel(profile.aura.level)");
+    expect(screen).not.toMatch(/auraPoints|toNext\b/);
   });
 });
 
@@ -149,12 +149,12 @@ describe("the line on a profile", () => {
       expect(body, name).toContain("const c = await coach();");
       expect(body, name).toContain('if (c.kind === "no") return fail("Only a coach can do this.");');
     }
-    const sheet = code("components/elite/ProfileSheet.tsx");
-    expect(sheet).toContain("reportLine(profile.id)");
+    const screen = code("components/elite/ProfileScreen.tsx");
+    expect(screen).toContain("reportLine(profile.id, reportStep)");
     // the copy says what is reported
-    expect(sheet).toContain("Report the Playing for line");
-    expect(sheet).toContain("title={`Report ${first}'s Playing for line?`}");
-    expect(sheet).not.toMatch(/Report this line/);
+    expect(screen).toContain("Report the Playing for line");
+    expect(screen).toContain("Report ${first}'s Playing for line?");
+    expect(screen).not.toMatch(/Report this line/);
     expect(code("app/(coach)/coach/free/page.tsx")).toContain("<LineReports reports={data.lineReports} />");
   });
 });
@@ -193,7 +193,7 @@ describe("the club ranking", () => {
     ]);
   });
 
-  it("ties share a place; the top ten, plus your own clubs wherever they are", () => {
+  it("ties get one place each, by name; the top ten, plus your own clubs wherever they are", () => {
     const list = clubs(14);
     const weekMinutes = new Map<string, number>();
     list.forEach((c, i) => c.memberIds.forEach((id) => weekMinutes.set(id, 140 - i * 10)));
@@ -202,22 +202,22 @@ describe("the club ranking", () => {
     expect(RANKING_TOP).toBe(10);
     expect(rows.length).toBe(11);
     expect(rows[0].place).toBe(1);
-    expect(rows[1].place).toBe(1);
+    expect(rows[1].place).toBe(2); // the tie: one place each, never two 1s
+    expect(rows[0].name < rows[1].name).toBe(true);
     expect(rows[2].place).toBe(3);
     expect(rows[10]).toMatchObject({ id: "c13", mine: true, place: 14 });
   });
 
   it("carries club names only: nothing about any player leaves the ranking", () => {
     const rows: RankingRow[] = clubRanking({ clubs: clubs(3), weekMinutes: new Map(), myClubIds: new Set() });
-    for (const r of rows) expect(Object.keys(r).sort()).toEqual(["average", "id", "mine", "name", "place"]);
+    for (const r of rows) expect(Object.keys(r).sort()).toEqual(["average", "id", "members", "mine", "name", "place"]);
     const ranking = code("lib/elite/tracker-ranking.ts");
     expect(ranking).not.toMatch(/elite_profiles|full_name|shortName|namesOf/);
-    expect(ranking).toMatch(/Promise<RankingRow\[\]>/);
-    // the sheet shows a club and its average, never a member
-    const section = code("components/elite/ClubsSection.tsx");
-    const sheet = section.slice(section.indexOf('sheet?.kind === "ranking"'), section.indexOf('sheet?.kind === "started"'));
-    expect(sheet).toContain("{r.name}");
-    expect(sheet).not.toMatch(/members|memberIds|profile\(/);
+    expect(ranking).toMatch(/Promise<ClubRankingView>/);
+    // the Top clubs screen shows a club, its size and its average, never a member's name
+    const top = code("app/(free)/log/clubs/page.tsx");
+    expect(top).toContain("{r.name}");
+    expect(top).not.toMatch(/memberIds|profile\(|namesOf|full_name/);
   });
 
   it("players are still only ever ranked next to their friends", () => {
@@ -245,7 +245,7 @@ describe("the star", () => {
     const part = sql.slice(sql.indexOf("create table if not exists public.elite_tracker_star_notes"), sql.indexOf("-- 11)"));
     expect(part).toContain("for select using (public.elite_is_coach())");
     expect(part).not.toMatch(/auth\.uid\(\)/);
-    for (const f of ["lib/elite/tracker-server.ts", "components/elite/ProfileSheet.tsx", "components/elite/FriendsFeed.tsx"]) {
+    for (const f of ["lib/elite/tracker-server.ts", "components/elite/ProfileScreen.tsx", "components/elite/ClubScreen.tsx", "components/elite/FriendsFeed.tsx"]) {
       expect(code(f), f).not.toMatch(/star_note|elite_tracker_star_notes/);
     }
   });
@@ -255,8 +255,8 @@ describe("the star", () => {
     expect(code("components/elite/FriendsFeed.tsx")).toContain("{card.starred && <StarMark");
     expect(code("components/elite/FriendsFeed.tsx")).toContain("{f.starred && <StarMark");
     expect(code("components/elite/FriendsBoard.tsx")).toContain("{r.starred && <StarMark");
-    expect(code("components/elite/ClubsSection.tsx")).toContain("{m.starred && <StarMark");
-    expect(code("components/elite/ProfileSheet.tsx")).toContain("{profile.starred && <StarMark");
+    expect(code("components/elite/ClubScreen.tsx")).toContain("{m.starred && <StarMark");
+    expect(code("components/elite/ProfileScreen.tsx")).toContain("{profile.starred && <StarMark");
     expect(code("app/(coach)/coach/free/page.tsx")).toContain("<StarToggle");
   });
 });

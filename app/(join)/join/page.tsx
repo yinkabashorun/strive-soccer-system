@@ -8,7 +8,7 @@ import { nyToday } from "@/lib/elite/time";
 import { getViewer } from "@/lib/elite/session";
 import { isSupabaseConfigured } from "@/lib/elite/supabase/server";
 import { inNativeApp } from "@/lib/elite/native-request";
-import { homePathFor, isFreeSignupOpen, trackerFor } from "@/lib/elite/tracker-server";
+import { homePathFor, inviteLandingFor, isFreeSignupOpen, trackerFor } from "@/lib/elite/tracker-server";
 import {
   JOIN_AGE_COOKIE,
   JOIN_CLOSED_MESSAGE,
@@ -57,12 +57,13 @@ export default async function JoinPage({
   const configured = isSupabaseConfigured();
   if (configured && !(await isFreeSignupOpen())) {
     return (
-      <div className="elite-card p-7 sm:p-8">
-        <h1 className="font-display text-3xl font-black uppercase tracking-tight">
-          Not open yet
-        </h1>
-        <p className="mt-2 text-[15px] leading-relaxed text-white/70">{JOIN_CLOSED_MESSAGE}</p>
-        <Link href="/login" className="btn-accent mt-6 w-full px-6 py-3.5 text-base">
+      <div className="mx-auto flex min-h-[100svh] w-full max-w-md flex-col px-[22px] pb-[calc(32px+env(safe-area-inset-bottom))] pt-[calc(96px+env(safe-area-inset-top))]">
+        <h1 className="font-display text-[46px] font-black uppercase leading-[0.9]">Not open yet</h1>
+        <p className="mt-3 text-[15.5px] leading-[1.4] text-white/70">{JOIN_CLOSED_MESSAGE}</p>
+        <Link
+          href="/login"
+          className="mt-auto flex h-[58px] w-full items-center justify-center rounded-[18px] bg-bone font-display text-[23px] font-black uppercase text-black"
+        >
           Sign in
         </Link>
       </div>
@@ -73,5 +74,16 @@ export default async function JoinPage({
   // no way to try again with another date until the browser is closed.
   if (cookies().get(JOIN_AGE_COOKIE)) return <UnderAge />;
 
-  return <JoinForm configured={configured} referral={ref ?? ""} club={club ?? ""} years={birthYears(nyToday())} />;
+  // Who sent the link: a friend's first name and initials, or a club's
+  // name and crest. Nothing more is shown to someone not signed in.
+  const invite = await inviteLandingFor(ref, club);
+  return (
+    <JoinForm
+      configured={configured}
+      referral={ref ?? ""}
+      club={club ?? ""}
+      years={birthYears(nyToday())}
+      invite={invite}
+    />
+  );
 }

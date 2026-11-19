@@ -6,8 +6,7 @@ import { getViewer } from "@/lib/elite/session";
 import { signOut } from "@/lib/elite/auth-actions";
 import { consentDue } from "@/lib/elite/legal-server";
 import { trackerFor } from "@/lib/elite/tracker-server";
-import { APP_URL } from "@/lib/elite/app-url";
-import { FREE_HOME, joinLink, tracksGym } from "@/lib/elite/tracker";
+import { FREE_HOME, tracksGym } from "@/lib/elite/tracker";
 
 // The free app's shell (migration 069): two tabs, Friends and My week, and
 // the plus between them that posts today's training. Only a free account
@@ -32,7 +31,7 @@ export default async function FreeLayout({ children }: { children: React.ReactNo
   return (
     <div className="min-h-[100svh] bg-black text-bone">
       <FreshOnReturn />
-      <FreeShell gym={tracksGym(tracker.grade)} inviteLink={joinLink(APP_URL, tracker.referral_code)}>
+      <FreeShell gym={tracksGym(tracker.grade)}>
         <main className="mx-auto w-full max-w-md pb-[calc(120px+env(safe-area-inset-bottom))] pt-[env(safe-area-inset-top)]">
           {children}
         </main>

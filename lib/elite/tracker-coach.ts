@@ -107,7 +107,16 @@ export function demoOverview(today: string): FreeOverview {
       },
     ],
     clubReports: [],
-    lineReports: [],
+    lineReports: [
+      {
+        profile_id: "demo-friend-3",
+        player: "Dani Ramos",
+        what: "photo",
+        line: "",
+        photoUrl: "/free-demo/grid-2.jpg",
+        reports: [{ reporter: "Example Player", at: "2026-11-18T22:10:00Z" }],
+      },
+    ],
     accounts: [
       {
         profile_id: "demo-free-1",
@@ -177,7 +186,7 @@ export async function getFreeOverview(): Promise<FreeOverview> {
   };
   type MemberRow = { club_id: string; profile_id: string };
   type ClubReportRow = { club_id: string; reporter_id: string; created_at: string };
-  type LineReportRow = { profile_id: string; reporter_id: string; created_at: string };
+  type LineReportRow = { profile_id: string; reporter_id: string; what: "line" | "photo"; created_at: string };
   type NoteRow = { profile_id: string; note: string };
   const [rows, logs, pairs, openReports, open, targets, clubRows, memberRows, clubReportRows, lineReportRows, noteRows] =
     await Promise.all([
@@ -239,7 +248,7 @@ export async function getFreeOverview(): Promise<FreeOverview> {
     everyRow<LineReportRow>((from, to) =>
       admin
         .from("elite_line_reports")
-        .select("profile_id, reporter_id, created_at")
+        .select("profile_id, reporter_id, what, created_at")
         .is("resolved_at", null)
         .order("created_at")
         .order("id")
@@ -381,16 +390,41 @@ export async function getFreeOverview(): Promise<FreeOverview> {
     });
 
   const trackerById = new Map(rows.map((t) => [t.profile_id, t]));
+  // Reported profiles, one card per player and per thing reported: the
+  // Playing for line while it is still there, the photo while it is still
+  // up (with a short-lived signed address, for the coach only).
   const linesBy = new Map<string, LineReportRow[]>();
-  for (const l of lineReportRows) linesBy.set(l.profile_id, [...(linesBy.get(l.profile_id) ?? []), l]);
-  const lineReports: ReportedLine[] = [...linesBy.entries()]
-    .filter(([id]) => trackerById.get(id)?.playing_for)
-    .map(([id, list]) => ({
-      profile_id: id,
-      player: nameOrNone(id),
-      line: trackerById.get(id)!.playing_for as string,
-      reports: list.map((l) => ({ reporter: nameOrNone(l.reporter_id), at: l.created_at })),
-    }));
+  for (const l of lineReportRows) {
+    const key = `${l.what}:${l.profile_id}`;
+    linesBy.set(key, [...(linesBy.get(key) ?? []), l]);
+  }
+  const photoPaths = [...linesBy.values()]
+    .filter((list) => list[0].what === "photo")
+    .map((list) => trackerById.get(list[0].profile_id)?.avatar_path)
+    .filter((p): p is string => Boolean(p));
+  const avatarUrl = new Map<string, string>();
+  if (photoPaths.length > 0) {
+    const { data } = await admin.storage.from(POST_BUCKET).createSignedUrls(photoPaths, POST_URL_SECONDS);
+    for (const row of data ?? []) if (row.path && row.signedUrl) avatarUrl.set(row.path, row.signedUrl);
+  }
+  const lineReports: ReportedLine[] = [...linesBy.values()]
+    .filter((list) => {
+      const t = trackerById.get(list[0].profile_id);
+      return list[0].what === "photo" ? Boolean(t?.avatar_path) : Boolean(t?.playing_for);
+    })
+    .map((list) => {
+      const id = list[0].profile_id;
+      const t = trackerById.get(id)!;
+      const photo = list[0].what === "photo";
+      return {
+        profile_id: id,
+        player: nameOrNone(id),
+        what: list[0].what,
+        line: photo ? "" : (t.playing_for as string),
+        photoUrl: photo ? avatarUrl.get(t.avatar_path as string) ?? null : null,
+        reports: list.map((l) => ({ reporter: nameOrNone(l.reporter_id), at: l.created_at })),
+      };
+    });
 
   return {
     open,

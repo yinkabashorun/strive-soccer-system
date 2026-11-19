@@ -11,6 +11,7 @@ export const MEMBER_ROOTS = [
   "app/(player)",
   "app/(free)",
   "app/(auth)",
+  "app/(join)",
   "app/account",
   "app/support",
   "app/onboarding",

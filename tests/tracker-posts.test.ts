@@ -207,12 +207,13 @@ describe("the feed", () => {
     expect(mine.state === "open" && mine.mine).toBe(true);
   });
 
-  it("a locked card carries a first name, the time and nothing else", () => {
+  it("a locked card carries a first name, the time and nothing else (the friend's own id, for their profile photo)", () => {
     const rows = [post(GARY, today, { caption: "Secret session" })];
     const [card] = buildFeed({ rows, viewer: viewer({ unlocked: false }), names, today });
     expect(card).toEqual({
       state: "locked",
       id: rows[0].id,
+      ownerId: GARY,
       first: "Gary",
       initials: "GG",
       kind: "training",
@@ -236,7 +237,8 @@ describe("the feed", () => {
     const fn = server.slice(server.indexOf("export async function feedFor("), server.indexOf("export async function postForViewer("));
     expect(fn).toContain('const open = cards.filter((c): c is OpenCard => c.state === "open");');
     expect(fn).toContain("sign(open.map((c) => c.photoPath))");
-    expect(fn).toContain('if (c.state === "locked") return [c];');
+    // a locked card gets the friend's profile photo (friends may see it), never the post's
+    expect(fn).toContain('if (c.state === "locked") return [{ ...c, photo: photos.get(c.ownerId) ?? null }];');
     // the stored path never reaches the screen, only the short-lived address
     expect(fn).toContain("const { photoPath: _path, createdAt, ...rest } = c;");
     expect((server.match(/createSignedUrls\(/g) ?? []).length).toBe(1);
@@ -497,7 +499,7 @@ describe("13 and older", () => {
     expect(fn).toContain("cookies().set(JOIN_AGE_COOKIE,");
     expect(fn).not.toMatch(/maxAge/); // it lasts the visit
     expect(fn).not.toMatch(/\.from\(/); // and the date is stored nowhere
-    const page = code("app/(auth)/join/page.tsx");
+    const page = code("app/(join)/join/page.tsx");
     expect(page).toContain("cookies().get(JOIN_AGE_COOKIE)");
     expect(page).toContain("<UnderAge />");
   });
@@ -543,20 +545,22 @@ describe("the coach queue and taking a block back", () => {
     expect(coach).toContain("return l && l.photo_path && !l.removed_at;");
   });
 
-  it("a blocked player can be taken back from Account, by the player who blocked them", () => {
-    const account = code("app/account/page.tsx");
-    expect(account).toContain("const blocked = tracker ? await blockedFor(viewer) : [];");
-    expect(account).toContain("<BlockedList blocked={blocked} />");
+  it("a blocked player can be taken back from Settings, by the player who blocked them", () => {
+    const page = code("app/(free)/log/settings/blocked/page.tsx");
+    expect(page).toContain("const blocked = await blockedFor(viewer);");
+    expect(page).toContain("<BlockedList blocked={blocked} />");
+    expect(code("components/elite/FreeSettings.tsx")).toContain('href="/log/settings/blocked"');
     expect(code("components/elite/BlockedList.tsx")).toContain("await unblockPlayer(b.id)");
   });
 
   it("report and block are on every friend's post; delete is on your own", () => {
     const feed = code("components/elite/FriendsFeed.tsx");
-    expect(feed).toContain('<SheetButton onClick={() => setMenu("delete")}>Delete my post</SheetButton>');
-    expect(feed).toContain('<SheetButton onClick={() => setMenu("report")}>Report this post</SheetButton>');
-    expect(feed).toContain('<SheetButton onClick={() => setMenu("block")}>Block {card.first}</SheetButton>');
-    expect(feed).toMatch(/\{card\.mine \? \(\s*<SheetButton onClick=\{\(\) => setMenu\("delete"\)\}/);
-    expect(feed).toContain("act(() => reportPost(card.id, r.id))");
+    expect(feed).toContain('label: "Delete my post", icon: <IconTrash />, red: true, onClick: () => setMenu("delete")');
+    expect(feed).toContain('label: "Report this post", icon: <IconFlag />, red: true');
+    expect(feed).toContain('label: `Block ${card.first}`, icon: <IconBlock />, red: true, onClick: () => setMenu("block")');
+    // your own post offers delete only; a friend's offers report and block
+    expect(feed).toMatch(/rows=\{\s*card\.mine\s*\? \[\{ label: "Delete my post"/);
+    expect(feed).toContain("act(() => reportPost(card.id, reason))");
     expect(feed).toContain("act(() => blockPlayer(card.ownerId))");
     // a reported or blocked post leaves the screen at once
     expect(feed).toContain("onGone();");

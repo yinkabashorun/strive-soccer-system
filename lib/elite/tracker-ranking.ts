@@ -6,14 +6,14 @@
 // ever ranked next to their friends.
 import { createServiceClient } from "./supabase/server";
 import type { Viewer } from "./session";
-import { clubRanking, weekOf, type RankingRow } from "./tracker";
+import { clubRanking, rankedClubCount, weekOf, type ClubRankingView } from "./tracker";
 
 const PAGE = 1000;
 
-export async function clubRankingFor(viewer: Viewer, today: string): Promise<RankingRow[]> {
+export async function clubRankingFor(viewer: Viewer, today: string): Promise<ClubRankingView> {
   if (viewer.demo) return demoRanking();
   const admin = createServiceClient();
-  if (!admin) return [];
+  if (!admin) return { rows: [], total: 0 };
 
   type Club = { id: string; name: string };
   type Member = { club_id: string; profile_id: string };
@@ -53,26 +53,27 @@ export async function clubRankingFor(viewer: Viewer, today: string): Promise<Ran
   for (const l of logs) weekMinutes.set(l.profile_id, (weekMinutes.get(l.profile_id) ?? 0) + l.minutes);
   const mine = new Set(members.filter((m) => m.profile_id === viewer.profile.id).map((m) => m.club_id));
 
-  return clubRanking({
-    clubs: clubs.map((c) => ({ id: c.id, name: c.name, memberIds: memberIds.get(c.id) ?? [] })),
-    weekMinutes,
-    myClubIds: mine,
-  });
+  const input = clubs.map((c) => ({ id: c.id, name: c.name, memberIds: memberIds.get(c.id) ?? [] }));
+  return { rows: clubRanking({ clubs: input, weekMinutes, myClubIds: mine }), total: rankedClubCount(input) };
 }
 
 // The example account's ranking: club names and averages, nothing else.
-function demoRanking(): RankingRow[] {
-  return clubRanking({
-    clubs: [
-      { id: "r1", name: "Strive Elite 5v5: Team 3", memberIds: ["a", "b", "c"] },
-      { id: "demo-club-1", name: "Strive Elite 5v5: Team 7", memberIds: ["d", "e", "f", "g"] },
-      { id: "r2", name: "Loudoun 2009 Pre-ECNL", memberIds: ["h", "i", "j"] },
-      { id: "demo-club-2", name: "Bull Run 2010s", memberIds: ["k", "l", "m"] },
-      { id: "r3", name: "Saturday Pickup", memberIds: ["n", "o", "p"] },
-    ],
-    weekMinutes: new Map(
-      Object.entries({ a: 260, b: 220, c: 190, d: 200, e: 180, f: 150, g: 130, h: 170, i: 160, j: 90, k: 120, l: 75, m: 60, n: 80, o: 40, p: 30 })
-    ),
-    myClubIds: new Set(["demo-club-1", "demo-club-2"]),
+function demoRanking(): ClubRankingView {
+  const club = (id: string, name: string, size: number, average: number) => ({ id, name, size, average });
+  const list = [
+    club("r1", "Strive Elite 5v5: Team 12", 9, 242),
+    club("r2", "Strive Elite 5v5: Team 3", 9, 223),
+    club("demo-club-1", "Strive Elite 5v5: Team 7", 5, 165),
+    club("r3", "2010 Boys", 8, 140),
+    club("demo-club-2", "Bull Run 2010s", 3, 85),
+    club("r4", "Saturday Pickup", 11, 50),
+  ];
+  const weekMinutes = new Map<string, number>();
+  const clubs = list.map((c) => {
+    const memberIds = [...Array(c.size).keys()].map((i) => `${c.id}-${i}`);
+    for (const m of memberIds) weekMinutes.set(m, c.average);
+    return { id: c.id, name: c.name, memberIds };
   });
+  const rows = clubRanking({ clubs, weekMinutes, myClubIds: new Set(["demo-club-1", "demo-club-2"]) });
+  return { rows, total: 24 };
 }

@@ -52,6 +52,13 @@ export type Level = (typeof LEVELS)[number]["id"];
 export type Season = (typeof SEASONS)[number]["id"];
 export type Goal = (typeof GOALS)[number]["id"];
 
+// The season in a sentence ("4h, in season" on Settings); null before the
+// quiz is answered.
+export function seasonWord(season: string | null | undefined): string | null {
+  const s = SEASONS.find((x) => x.id === season);
+  return s ? s.label.toLowerCase() : null;
+}
+
 export type QuizAnswers = { grade: Grade; level: Level; season: Season; goal: Goal };
 
 // The questions, in the order they are asked.
@@ -410,7 +417,7 @@ export function shortName(fullName: string): string {
 // link, ordered by TRAINING time this week (gym never counts). It starts
 // again every Monday with the week. People on the same time share a
 // place. Only the top ten are listed, and you are always on it.
-export type BoardEntry = { id: string; name: string; minutes: number; starred?: boolean };
+export type BoardEntry = { id: string; name: string; minutes: number; starred?: boolean; photo?: string | null };
 export type BoardRow = BoardEntry & { place: number; time: string; me: boolean };
 export const BOARD_CAP = 10;
 export const BOARD_TITLE = "This week with your friends";
@@ -420,15 +427,9 @@ export function friendsBoard(entries: BoardEntry[], meId: string): BoardRow[] {
   const sorted = [...entries].sort(
     (x, y) => y.minutes - x.minutes || x.name.localeCompare(y.name) || x.id.localeCompare(y.id)
   );
-  let place = 0;
-  let last = Number.NaN;
-  const rows = sorted.map((e, i) => {
-    if (e.minutes !== last) {
-      place = i + 1;
-      last = e.minutes;
-    }
-    return { ...e, place, time: fmtDuration(e.minutes), me: e.id === meId };
-  });
+  // One place each: a tie is broken by name, so two players never show
+  // the same number (Coach Yinka saw two 5s on the same board).
+  const rows = sorted.map((e, i) => ({ ...e, place: i + 1, time: fmtDuration(e.minutes), me: e.id === meId }));
   const top = rows.slice(0, BOARD_CAP);
   const mine = rows.find((r) => r.me);
   return mine && !top.includes(mine) ? [...top, mine] : top;
@@ -568,16 +569,23 @@ export function clubReportText(club: string, url: string): string {
   return `A club name in the free app was reported: "${club}". Look at it here: ${url}`;
 }
 
-// A player's profile, as their friends and coaches see it: initials, first
-// name and last initial, their clubs, and their training time this week.
-// Nothing else: no photo, no bio, no counts, no age or grade.
+// A player's profile, as their friends and coaches see it: their photo
+// (or initials), first name and last initial, their clubs, their training
+// this week and all time, and the posts the viewer may see. No bio, no
+// follower count, no age or grade.
 export type Profile = {
   id: string;
   name: string; // "Gary G."
   initials: string;
-  clubs: string[]; // up to CLUBS_PER_PLAYER names
+  photo: string | null; // a signed address, only for those who may see it
+  clubs: { id: string; name: string }[]; // up to CLUBS_PER_PLAYER
   weekMinutes: number; // training this week
+  allMinutes: number; // training, all time
   you: boolean;
+  friend: boolean; // the viewer and this player are friends
+  posts: GridPostView[]; // newest first, only the ones the viewer may see
+  week: { day: string; minutes: number; kind: Kind }[]; // this week's entries
+  propsPost: { id: string; propped: boolean } | null; // their latest post the viewer may give props on
   aura: AuraLevel;
   levelName: string | null; // the level they play at, from the quiz, in its own words
   playingFor: string | null; // the player's own line
@@ -628,7 +636,16 @@ export type MyClub = {
   kind: ClubKind;
   captain: boolean; // the viewer is its captain
   ended: boolean;
-  members: { id: string; name: string; captain: boolean; you: boolean; starred?: boolean }[];
+  members: {
+    id: string;
+    name: string;
+    captain: boolean;
+    you: boolean;
+    starred?: boolean;
+    photo?: string | null;
+    minutes?: number; // training this week
+    lastDay?: string | null; // the last day they logged anything
+  }[];
 };
 
 // ---- Aura ---------------------------------------------------------------
@@ -725,10 +742,13 @@ export const cleanPlayingFor = (raw: unknown): string | null => cleanClubName(ra
 export const PLAYING_FOR_MESSAGE = "Up to 40 letters, with no links.";
 
 // One reported line, waiting for a coach.
+// A reported profile: its Playing for line, or its photo (069 section 11).
 export type ReportedLine = {
   profile_id: string;
   player: string;
-  line: string;
+  what: "line" | "photo";
+  line: string; // the Playing for line ("" for a photo report)
+  photoUrl: string | null; // a short-lived signed address, photo reports only
   reports: { reporter: string; at: string }[];
 };
 
@@ -742,7 +762,7 @@ export type ReportedLine = {
 export const RANKING_MIN_MEMBERS = 3;
 export const RANKING_TOP = 10;
 
-export type RankingRow = { id: string; place: number; name: string; average: number; mine: boolean };
+export type RankingRow = { id: string; place: number; name: string; average: number; mine: boolean; members: number };
 
 export function clubRanking(input: {
   clubs: { id: string; name: string; memberIds: string[] }[];
@@ -756,18 +776,25 @@ export function clubRanking(input: {
       name: c.name,
       average: Math.round(c.memberIds.reduce((s, id) => s + (input.weekMinutes.get(id) ?? 0), 0) / c.memberIds.length),
       mine: input.myClubIds.has(c.id),
+      members: c.memberIds.length,
     }))
     .sort((x, y) => y.average - x.average || x.name.localeCompare(y.name) || x.id.localeCompare(y.id));
-  let place = 0;
-  let last = Number.NaN;
-  const rows = scored.map((c, i) => {
-    if (c.average !== last) {
-      place = i + 1;
-      last = c.average;
-    }
-    return { ...c, place };
-  });
+  // One place each, a tie broken by name, the same as the friends board.
+  const rows = scored.map((c, i) => ({ ...c, place: i + 1 }));
   return rows.filter((r, i) => i < RANKING_TOP || r.mine);
+}
+
+// How many clubs are ranked at all this week ("#2 of 24 clubs").
+export function rankedClubCount(clubs: { memberIds: string[] }[]): number {
+  return clubs.filter((c) => c.memberIds.length >= RANKING_MIN_MEMBERS).length;
+}
+
+export type ClubRankingView = { rows: RankingRow[]; total: number };
+
+// A club's place on the card and the club page: "#2" of N, or not ranked.
+export function clubPlaceLine(place: number | null, total: number): { big: string; small: string } {
+  if (place === null) return { big: "New", small: `Ranked at ${RANKING_MIN_MEMBERS} players` };
+  return { big: `#${place}`, small: `of ${total} ${total === 1 ? "club" : "clubs"}` };
 }
 
 export const RANKING_TITLE = "This week's club ranking";
@@ -778,6 +805,115 @@ export const RANKING_TITLE = "This week's club ranking";
 // Given and taken back by a coach only; a player can never earn or ask
 // for it. Shown next to their name wherever it appears.
 export const STAR_LABEL = "Starred by the coaches";
+
+// ---- Profile photos -------------------------------------------------------
+
+// One profile photo a player may add, change or take off: square, a JPEG,
+// small. It sits in the same private bucket as the posts, in the
+// player's own folder, so deleting the account takes it with everything
+// else. It is handed out only as a short-lived signed address, to the
+// people who may open that player's profile: the player, their friends
+// and the coaches (mayViewProfile). Initials stand in everywhere else.
+export const AVATAR_EDGE = 512;
+export const AVATAR_MAX_BYTES = 600_000;
+export const AVATAR_MESSAGE = "We could not use that photo. Try another one.";
+
+export function avatarPath(profileId: string, id: string): string | null {
+  return UUID.test(profileId) && UUID.test(id) ? `${profileId}/avatar-${id}.jpg` : null;
+}
+
+export function ownsAvatarPath(path: string, profileId: string): boolean {
+  const [folder, file, ...more] = path.split("/");
+  const m = /^avatar-([0-9a-f-]{36})\.jpg$/.exec(file ?? "");
+  return more.length === 0 && folder === profileId && UUID.test(folder) && Boolean(m) && UUID.test(m?.[1] ?? "");
+}
+
+// The middle square of a photo, the part a profile photo keeps.
+export function squareCrop(width: number, height: number): { sx: number; sy: number; size: number } {
+  const size = Math.max(0, Math.min(width, height));
+  return { sx: Math.round((width - size) / 2), sy: Math.round((height - size) / 2), size };
+}
+
+// Who may be handed a player's profile photo: exactly who may open their
+// profile. One rule, so the two can never drift apart.
+export function mayViewAvatar(input: Parameters<typeof mayViewProfile>[0]): boolean {
+  return mayViewProfile(input);
+}
+
+// ---- The profile's posts ----------------------------------------------------
+
+// The grid on a profile: that player's photo posts the viewer may see,
+// newest first. The feed's rules hold here too: a friend's post from
+// today stays locked until the viewer has posted today, a friend sees the
+// last seven days, a reported or removed post is gone.
+export const GRID_MAX = 30;
+export type GridPost = { id: string; day: string; minutes: number; kind: Kind; photoPath: string };
+export type GridPostView = Omit<GridPost, "photoPath"> & { photoUrl: string };
+
+export function profilePosts(rows: PostRow[], ownerId: string, viewer: PhotoViewer, today: string): GridPost[] {
+  return rows
+    .filter((r) => r.profile_id === ownerId && mayViewPhoto(r, viewer, today))
+    .sort((x, y) => y.created_at.localeCompare(x.created_at) || y.id.localeCompare(x.id))
+    .slice(0, GRID_MAX)
+    .map((r) => ({ id: r.id, day: r.trained_on, minutes: r.minutes, kind: r.kind, photoPath: r.photo_path as string }));
+}
+
+// ---- Club crests ------------------------------------------------------------
+
+// Every club gets a crest: a shield with two characters, in one of six
+// colour pairs picked from the club's id, so a club keeps its colours.
+export type Crest = { letters: string; from: string; to: string; shield: string; ink: string };
+
+export const CREST_COLOURS: ReadonlyArray<Omit<Crest, "letters">> = [
+  { from: "#d4af37", to: "#7a6118", shield: "#000000", ink: "#d4af37" }, // gold
+  { from: "#e8e4da", to: "#8d8a82", shield: "#000000", ink: "#e8e4da" }, // silver
+  { from: "#2f6bd6", to: "#132d63", shield: "#ffffff", ink: "#132d63" }, // blue
+  { from: "#c43d3d", to: "#5a1515", shield: "#ffffff", ink: "#5a1515" }, // red
+  { from: "#2a9d6b", to: "#0f3f2a", shield: "#ffffff", ink: "#0f3f2a" }, // green
+  { from: "#7b4fd0", to: "#2e1a5e", shield: "#ffffff", ink: "#2e1a5e" }, // purple
+];
+
+// "Strive Elite 5v5: Team 7" -> "T7", "5v5 Team 12" -> "12", "2010 Boys"
+// -> "10", "Weak Foot Gang" -> "WF", "Pickup" -> "PI".
+export function crestLetters(name: string): string {
+  const numbered = /\bteam\s*(\d+)/i.exec(name);
+  if (numbered) return numbered[1].length >= 2 ? numbered[1].slice(-2) : `T${numbered[1]}`;
+  const words = name
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .split(/\s+/)
+    .filter(Boolean);
+  if (words.length === 0) return "?";
+  if (/^\d{3,}$/.test(words[0])) return words[0].slice(-2);
+  const lettered = words.filter((w) => /^\p{L}/u.test(w));
+  if (lettered.length >= 2) return (lettered[0][0] + lettered[1][0]).toUpperCase();
+  const one = lettered[0] ?? words[0];
+  return one.slice(0, 2).toUpperCase();
+}
+
+// A small, stable hash of the club's id (FNV-1a), so the colour never
+// changes when the club is renamed.
+export function crestIndex(id: string): number {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < id.length; i++) {
+    h ^= id.charCodeAt(i);
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h % CREST_COLOURS.length;
+}
+
+export function crestOf(club: { id: string; name: string }): Crest {
+  return { letters: crestLetters(club.name), ...CREST_COLOURS[crestIndex(club.id)] };
+}
+
+// ---- When a club member last trained ------------------------------------------
+
+export function lastTrainedLabel(day: string | null | undefined, today: string): string {
+  if (!day) return "No training yet";
+  if (day === today) return "Trained today";
+  if (day === shiftDay(today, -1)) return "Yesterday";
+  if (day > shiftDay(today, -7) && day < today) return DAY_NAMES[dayIndexOf(day)];
+  return shortDate(day);
+}
 
 // ---- Blocking ---------------------------------------------------------
 
@@ -928,7 +1064,7 @@ export function mayGiveProps(post: PostRow, viewer: PhotoViewer, today: string):
 }
 
 // A card of the feed. A locked card carries the friend's first name, the
-// time and nothing else: no photo, no note, no way to reach either.
+// time and nothing else: no photo of the post, no note, no way to reach either (only the friend's profile photo).
 export type OpenCard = {
   state: "open";
   id: string;
@@ -944,10 +1080,15 @@ export type OpenCard = {
   createdAt: string;
   photoPath: string;
   starred?: boolean;
+  photo?: string | null; // the poster's profile photo
 };
+// A locked card says whose it is (a friend the viewer already has) and
+// nothing about the post: no photo of it, no note.
 export type LockedCard = {
   state: "locked";
   id: string;
+  ownerId: string;
+  photo?: string | null; // the friend's profile photo, never the post's
   first: string;
   initials: string;
   kind: Kind;
@@ -975,7 +1116,15 @@ export function buildFeed(input: {
       const name = names.get(r.profile_id) ?? "A teammate";
       const first = firstNameOf(name);
       if (!mayViewPhoto(r, viewer, today)) {
-        return { state: "locked", id: r.id, first, initials: initialsOf(name), kind: r.kind, minutes: r.minutes };
+        return {
+          state: "locked",
+          id: r.id,
+          ownerId: r.profile_id,
+          first,
+          initials: initialsOf(name),
+          kind: r.kind,
+          minutes: r.minutes,
+        };
       }
       return {
         state: "open",
@@ -998,7 +1147,15 @@ export function buildFeed(input: {
 // The row of faces: you, then the friends who trained today, then the
 // rest. Lit when that person logged anything today, with or without a
 // photo.
-export type Face = { id: string; first: string; initials: string; you: boolean; active: boolean; starred?: boolean };
+export type Face = {
+  id: string;
+  first: string;
+  initials: string;
+  you: boolean;
+  active: boolean;
+  starred?: boolean;
+  photo?: string | null;
+};
 
 export function facesRow(input: {
   me: { id: string; name: string };
@@ -1236,6 +1393,7 @@ export const FREE_HOME = "/log"; // the Friends tab: today, and the feed
 export const FREE_WEEK = "/log/week"; // the My week tab
 export const FREE_QUIZ = "/log/quiz";
 export const FREE_DAYS = "/log/days";
+export const FREE_SETTINGS = "/log/settings"; // a free account's Settings (the mock, screen 11)
 
 // A signed-in free account that opens a teammate's link is sent to its
 // week with the code along, where one sheet asks before anything is added.

@@ -14,7 +14,7 @@ import {
   weekStrip,
   type BoardEntry,
   type MyClub,
-  type RankingRow,
+  type ClubRankingView,
   type TrainingLog,
 } from "@/lib/elite/tracker";
 import { FriendsBoard } from "./FriendsBoard";
@@ -22,6 +22,7 @@ import { ClubsSection } from "./ClubsSection";
 import { ShareWeek } from "./ShareWeek";
 import { TrackerSheet } from "./TrackerSheet";
 import { usePostLauncher } from "./FreeShell";
+import { FreeAvatar } from "./FreeAvatar";
 
 // My week (mock screen 4), the accountability piece: the week's training
 // against the target, the seven days (planned outlined, trained filled,
@@ -39,6 +40,7 @@ export function MyWeek({
   friends,
   clubs,
   ranking,
+  preview,
   appUrl,
   inviteLink,
   programHref,
@@ -49,10 +51,11 @@ export function MyWeek({
   today: string;
   gym: boolean;
   week: string; // "Nov 16 to Nov 22"
-  me: { id: string; name: string; initials: string };
+  me: { id: string; name: string; initials: string; photo: string | null };
   friends: BoardEntry[];
   clubs: MyClub[];
-  ranking: RankingRow[];
+  ranking: ClubRankingView;
+  preview: string | null; // the player's latest photo this week
   appUrl: string;
   inviteLink: string;
   // Where the one line about the coached program leads; null inside the
@@ -96,13 +99,8 @@ export function MyWeek({
           <h1 className="font-display text-[44px] font-black uppercase leading-[0.9] tracking-[-0.5px]">My week</h1>
           <p className="mt-1.5 text-[13px] tracking-[0.2px] text-white/60">{week}</p>
         </div>
-        <button
-          type="button"
-          onClick={() => profile(me.id)}
-          aria-label="Your profile"
-          className="grid h-[46px] w-[46px] place-items-center rounded-full bg-[#2a2a2a] text-[13px] font-bold"
-        >
-          {me.initials}
+        <button type="button" onClick={() => profile(me.id)} aria-label="Your profile" className="grid h-[46px] w-[46px] place-items-center">
+          <FreeAvatar photo={me.photo} initials={me.initials} size={44} />
         </button>
       </header>
 
@@ -168,15 +166,15 @@ export function MyWeek({
 
       <ClubsSection clubs={clubs} ranking={ranking} appUrl={appUrl} />
 
-      <div className="mx-[18px] mt-3">
-        <ShareWeek stamp={`${minutes}:${logs.length}`} />
+      <div className="mx-[18px] mt-[22px]">
+        <ShareWeek stamp={`${minutes}:${logs.length}`} minutes={minutes} preview={preview} />
       </div>
 
       <div className="mt-2 text-center">
         <button
           type="button"
           onClick={logOnly}
-          className="inline-flex min-h-[44px] items-center px-3 text-[14px] font-semibold text-white/70 underline underline-offset-4"
+          className="inline-flex min-h-[44px] items-center px-3 text-[14px] font-semibold text-white/60 underline underline-offset-4"
         >
           Log training without a photo
         </button>

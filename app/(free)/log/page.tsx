@@ -51,7 +51,11 @@ export default async function FriendsPage({
       date={longDayLabel(today)}
       feed={feed}
       week={{ minutes: week.minutes, target: week.target, percent: week.percent }}
-      me={{ id: viewer.profile.id, initials: initialsOf(shortName(viewer.profile.full_name)) }}
+      me={{
+        id: viewer.profile.id,
+        initials: initialsOf(shortName(viewer.profile.full_name)),
+        photo: feed.faces.find((f) => f.you)?.photo ?? null,
+      }}
       friendAsk={friendAsk}
       clubAsk={clubAsk}
       inviteLink={joinLink(APP_URL, tracker.referral_code)}

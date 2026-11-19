@@ -17,6 +17,8 @@
 // tracker-demo.ts stands in so the screens can be seen.
 import { createServiceClient, isSupabaseConfigured } from "./supabase/server";
 import type { Viewer } from "./session";
+import { shiftDay } from "./time";
+import { clubRankingFor } from "./tracker-ranking";
 import {
   CLUB_CAP,
   CLUB_REFUSED,
@@ -32,6 +34,17 @@ import {
   postPath,
   postedPhotoToday,
   LEVELS,
+  AVATAR_MAX_BYTES,
+  avatarPath,
+  crestOf,
+  firstNameOf,
+  mayViewPhoto,
+  lastTrainedLabel,
+  looksLikeJpeg,
+  mayGiveProps,
+  ownsAvatarPath,
+  ownsPostPath,
+  profilePosts,
   auraLevel,
   auraPoints,
   clubJoinDecision,
@@ -66,7 +79,10 @@ import {
 } from "./tracker";
 import {
   demoBlocked,
+  DEMO_CLUB_ASK,
   demoAuraOf,
+  demoMyPhoto,
+  demoPhotoOf,
   demoClubAsk,
   demoClubsOf,
   demoMyClubs,
@@ -95,11 +111,12 @@ export type Tracker = {
   referred_by: string | null;
   playing_for: string | null;
   starred_at: string | null;
+  avatar_path: string | null;
   created_at: string;
 };
 
 export const TRACKER_COLUMNS =
-  "profile_id, phone, birth_year, birth_month, grade, level, season, goal, target_minutes, plan_days, quiz_done_at, referral_code, referred_by, playing_for, starred_at, created_at";
+  "profile_id, phone, birth_year, birth_month, grade, level, season, goal, target_minutes, plan_days, quiz_done_at, referral_code, referred_by, playing_for, starred_at, avatar_path, created_at";
 
 type Admin = NonNullable<ReturnType<typeof createServiceClient>>;
 
@@ -275,12 +292,13 @@ export async function friendsWeekFor(viewer: Viewer, today: string): Promise<Boa
       if (rows.length < 1000) break;
     }
   }
-  const starred = await starredAmong(admin, ids);
+  const [starred, photos] = await Promise.all([starredAmong(admin, ids), avatarsOf(admin, ids)]);
   return ids.map((id) => ({
     id,
     name: shortName(names.get(id) ?? ""),
     minutes: minutes.get(id) ?? 0,
     starred: starred.has(id),
+    photo: photos.get(id) ?? null,
   }));
 }
 
@@ -368,6 +386,117 @@ export async function starredAmong(admin: Admin, ids: string[]): Promise<Set<str
   return out;
 }
 
+// ---- Profile photos -------------------------------------------------------
+
+// Signed addresses for the profile photos of these accounts. A caller
+// passes only ids the viewer may see a photo of (mayViewAvatar: the
+// viewer, their friends, and every account for a coach); no id here is
+// ever taken from the browser.
+export async function avatarsOf(admin: Admin, ids: string[]): Promise<Map<string, string>> {
+  const paths = new Map<string, string>(); // path -> profile id
+  for (let i = 0; i < ids.length; i += 200) {
+    const { data } = await admin
+      .from("elite_trackers")
+      .select("profile_id, avatar_path")
+      .in("profile_id", ids.slice(i, i + 200))
+      .not("avatar_path", "is", null);
+    for (const r of (data as { profile_id: string; avatar_path: string }[] | null) ?? []) {
+      if (ownsAvatarPath(r.avatar_path, r.profile_id)) paths.set(r.avatar_path, r.profile_id);
+    }
+  }
+  const signed = await signPhotos(admin, [...paths.keys()]);
+  const out = new Map<string, string>();
+  for (const [path, url] of signed) {
+    const id = paths.get(path);
+    if (id) out.set(id, url);
+  }
+  return out;
+}
+
+// Store a new profile photo for the signed-in player, replacing the old
+// one. NOT a server action: called only by the photo route, with the id
+// it established from the session and a photo it already checked.
+export async function saveAvatar(profileId: string, photo: Uint8Array): Promise<boolean> {
+  const admin = createServiceClient();
+  if (!admin) return false;
+  if (!looksLikeJpeg(photo) || photo.length > AVATAR_MAX_BYTES) return false;
+  const path = avatarPath(profileId, crypto.randomUUID());
+  if (!path) return false;
+  const { data: before } = await admin.from("elite_trackers").select("avatar_path").eq("profile_id", profileId).maybeSingle();
+  const up = await admin.storage.from(POST_BUCKET).upload(path, photo, { contentType: "image/jpeg", upsert: false });
+  if (up.error) return false;
+  const { error } = await admin.from("elite_trackers").update({ avatar_path: path }).eq("profile_id", profileId);
+  if (error) {
+    await admin.storage.from(POST_BUCKET).remove([path]).catch(() => undefined);
+    return false;
+  }
+  const old = (before as { avatar_path: string | null } | null)?.avatar_path;
+  if (old && ownsAvatarPath(old, profileId)) await admin.storage.from(POST_BUCKET).remove([old]).catch(() => undefined);
+  return true;
+}
+
+// Take a player's profile photo off: the file and the pointer. Used by the
+// player for their own and by a coach from the queue.
+export async function clearAvatar(profileId: string): Promise<boolean> {
+  const admin = createServiceClient();
+  if (!admin) return false;
+  const { data } = await admin.from("elite_trackers").select("avatar_path").eq("profile_id", profileId).maybeSingle();
+  const old = (data as { avatar_path: string | null } | null)?.avatar_path;
+  const { error } = await admin.from("elite_trackers").update({ avatar_path: null }).eq("profile_id", profileId);
+  if (error) return false;
+  if (old && ownsAvatarPath(old, profileId)) await admin.storage.from(POST_BUCKET).remove([old]).catch(() => undefined);
+  return true;
+}
+
+// The viewer's own photo, for their own screens.
+export async function myPhotoFor(viewer: Viewer): Promise<string | null> {
+  if (viewer.demo) return demoMyPhoto();
+  const admin = createServiceClient();
+  if (!admin) return null;
+  return (await avatarsOf(admin, [viewer.profile.id])).get(viewer.profile.id) ?? null;
+}
+
+// The viewer's own newest photo post this week, for the little story on
+// the share card. Their own photo: no one else's is ever used for it.
+export async function myLatestPhotoFor(viewer: Viewer, today: string): Promise<string | null> {
+  const { monday } = weekOf(today);
+  if (viewer.demo) {
+    const mine = demoPostRows(viewer.profile.id, today, Date.now())
+      .filter((r) => r.profile_id === viewer.profile.id && r.photo_path && r.trained_on >= monday)
+      .sort((x, y) => y.created_at.localeCompare(x.created_at))[0];
+    return mine?.photo_path ?? null;
+  }
+  const admin = createServiceClient();
+  if (!admin) return null;
+  const { data } = await admin
+    .from("elite_training_logs")
+    .select("photo_path")
+    .eq("profile_id", viewer.profile.id)
+    .gte("trained_on", monday)
+    .not("photo_path", "is", null)
+    .is("removed_at", null)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const path = (data as { photo_path: string } | null)?.photo_path;
+  if (!path || !ownsPostPath(path, viewer.profile.id)) return null;
+  return (await signPhotos(admin, [path])).get(path) ?? null;
+}
+
+// Blocks either way between the viewer and any of these accounts.
+async function blocksWith(admin: Admin, profileId: string, ids: string[]): Promise<Block[]> {
+  const out: Block[] = [];
+  for (let i = 0; i < ids.length; i += 200) {
+    const some = ids.slice(i, i + 200);
+    const [mine, theirs] = await Promise.all([
+      admin.from("elite_tracker_blocks").select("blocker, blocked").eq("blocker", profileId).in("blocked", some),
+      admin.from("elite_tracker_blocks").select("blocker, blocked").eq("blocked", profileId).in("blocker", some),
+    ]);
+    out.push(...((mine.data as Block[] | null) ?? []), ...((theirs.data as Block[] | null) ?? []));
+  }
+  return out;
+}
+
 // ---- Posts and the feed -----------------------------------------------
 
 const POST_COLUMNS = "id, profile_id, trained_on, minutes, kind, created_at, photo_path, caption, removed_at";
@@ -449,6 +578,7 @@ export async function feedFor(viewer: Viewer, today: string): Promise<FeedView> 
   let propsOf: (ids: string[]) => Promise<Map<string, { count: number; mine: boolean }>>;
   let sign: (paths: string[]) => Promise<Map<string, string>>;
   let starred = new Set<string>();
+  let photos = new Map<string, string>();
 
   const admin = viewer.demo ? null : createServiceClient();
   if (!admin) {
@@ -457,6 +587,9 @@ export async function feedFor(viewer: Viewer, today: string): Promise<FeedView> 
     const example = demoFriends();
     friends = example;
     starred = new Set(example.filter((f) => f.starred).map((f) => f.id));
+    for (const f of example) if (f.photo) photos.set(f.id, f.photo);
+    const minePhoto = demoMyPhoto();
+    if (minePhoto) photos.set(me.id, minePhoto);
     const mine = new Set(friends.map((f) => f.id));
     rows = demoPostRows(me.id, today, nowMs).filter((r) => r.profile_id === me.id || mine.has(r.profile_id));
     reported = new Set(readDemoState().reported ?? []);
@@ -485,7 +618,7 @@ export async function feedFor(viewer: Viewer, today: string): Promise<FeedView> 
       return out;
     };
     sign = (paths) => signPhotos(admin, paths);
-    starred = await starredAmong(admin, [me.id, ...ids]);
+    [starred, photos] = await Promise.all([starredAmong(admin, [me.id, ...ids]), avatarsOf(admin, [me.id, ...ids])]);
   }
 
   const friendIds = new Set(friends.map((f) => f.id));
@@ -503,11 +636,15 @@ export async function feedFor(viewer: Viewer, today: string): Promise<FeedView> 
   const activeToday = new Set(rows.filter((r) => r.trained_on === today).map((r) => r.profile_id));
   return {
     unlocked,
-    faces: facesRow({ me, friends, activeToday }).map((f) => ({ ...f, starred: starred.has(f.id) })),
+    faces: facesRow({ me, friends, activeToday }).map((f) => ({
+      ...f,
+      starred: starred.has(f.id),
+      photo: photos.get(f.id) ?? null,
+    })),
     friendCount: friends.length,
     friendsToday: friends.filter((f) => activeToday.has(f.id)).length,
     cards: cards.flatMap((c): FeedCardView[] => {
-      if (c.state === "locked") return [c];
+      if (c.state === "locked") return [{ ...c, photo: photos.get(c.ownerId) ?? null }];
       const photoUrl = urls.get(c.photoPath);
       if (!photoUrl) return []; // the photo could not be reached: no card
       const { photoPath: _path, createdAt, ...rest } = c;
@@ -520,6 +657,7 @@ export async function feedFor(viewer: Viewer, today: string): Promise<FeedView> 
           props: props.get(c.id)?.count ?? 0,
           propped: props.get(c.id)?.mine ?? false,
           starred: starred.has(c.ownerId),
+          photo: photos.get(c.ownerId) ?? null,
         },
       ];
     }),
@@ -770,19 +908,45 @@ export async function clubAskFor(
 }
 
 // This viewer's own clubs, with their rosters (first name and last
-// initial). Only ever the viewer's own clubs.
-export async function myClubsFor(viewer: Viewer): Promise<MyClub[]> {
+// initial, a photo where the viewer may see it, this week's training and
+// the last day each logged anything). Only ever the viewer's own clubs.
+export async function myClubsFor(viewer: Viewer, today: string): Promise<MyClub[]> {
   const me = { id: viewer.profile.id, name: shortName(viewer.profile.full_name) };
-  if (viewer.demo) return demoMyClubs(me);
+  if (viewer.demo) {
+    const logs = demoLogs(today);
+    const { monday } = weekOf(today);
+    const mine = {
+      minutes: logs.reduce((s, l) => (l.kind === "training" && l.trained_on >= monday ? s + l.minutes : s), 0),
+      lastDay: logs.map((l) => l.trained_on).sort().pop() ?? null,
+    };
+    return demoMyClubs(me, mine, today);
+  }
   const admin = createServiceClient();
   if (!admin) return [];
   const ids = await clubIdsOf(admin, me.id);
   const out: MyClub[] = [];
+  const { monday } = weekOf(today);
   for (const id of ids) {
     const [club, members] = await Promise.all([clubById(admin, id), membersOf(admin, id)]);
     if (!club) continue;
-    const names = await namesOf(admin, members.map((m) => m.profile_id));
-    const starred = await starredAmong(admin, members.map((m) => m.profile_id));
+    const memberIds = members.map((m) => m.profile_id);
+    const others = memberIds.filter((x) => x !== me.id);
+    const [names, starred, blocks, recent] = await Promise.all([
+      namesOf(admin, memberIds),
+      starredAmong(admin, memberIds),
+      blocksWith(admin, me.id, others),
+      entriesOf(admin, memberIds, shiftDay(today, -60), today),
+    ]);
+    const blockedIds = new Set(blocks.flatMap((b) => [b.blocker, b.blocked]).filter((x) => x !== me.id));
+    // a photo only for the viewer and for members not behind a block
+    // (joining a club made every other member a friend)
+    const photos = await avatarsOf(admin, memberIds.filter((x) => !blockedIds.has(x)));
+    const minutes = new Map<string, number>();
+    const lastDay = new Map<string, string>();
+    for (const r of recent) {
+      if (r.kind === "training" && r.trained_on >= monday) minutes.set(r.profile_id, (minutes.get(r.profile_id) ?? 0) + r.minutes);
+      if ((lastDay.get(r.profile_id) ?? "") < r.trained_on) lastDay.set(r.profile_id, r.trained_on);
+    }
     out.push({
       id: club.id,
       name: club.name,
@@ -796,18 +960,116 @@ export async function myClubsFor(viewer: Viewer): Promise<MyClub[]> {
         captain: club.captain_id === m.profile_id,
         you: m.profile_id === me.id,
         starred: starred.has(m.profile_id),
+        photo: photos.get(m.profile_id) ?? null,
+        minutes: minutes.get(m.profile_id) ?? 0,
+        lastDay: lastDay.get(m.profile_id) ?? null,
       })),
     });
   }
   return out;
 }
 
+// One club's page: only for its members and coaches. The header photo is
+// the newest post from a member that the viewer may see (the feed's own
+// rules), else none; the rest is the roster and this week's numbers.
+export type ClubPage = {
+  club: MyClub;
+  startedBy: string | null;
+  place: number | null; // null while the club has fewer than 3 members
+  total: number; // clubs ranked this week
+  perPlayer: number;
+  weekTotal: number;
+  heroUrl: string | null;
+};
+
+export async function clubPageFor(viewer: Viewer, clubId: string, today: string): Promise<ClubPage | null> {
+  const staff = viewer.role !== "player";
+  const mine = await myClubsFor(viewer, today);
+  let club = mine.find((c) => c.id === clubId) ?? null;
+  if (!club && !staff) return null;
+  const { rows, total } = await clubRankingFor(viewer, today);
+  let startedBy: string | null = null;
+  let heroUrl: string | null = null;
+
+  if (viewer.demo) {
+    if (!club) return null;
+    startedBy = club.kind === "coach" ? "Coach Yinka" : club.captain ? "you" : null;
+    heroUrl = club.id === "demo-club-1" ? "/free-demo/post-yinka-1.jpg" : null;
+  } else {
+    const admin = createServiceClient();
+    if (!admin) return null;
+    const row = await clubById(admin, clubId);
+    if (!row) return null;
+    if (!club) {
+      // a coach opening a club they are not on: the roster, no photos of
+      // anyone's posts beyond what a coach already sees in the queue
+      const members = await membersOf(admin, clubId);
+      const names = await namesOf(admin, members.map((m) => m.profile_id));
+      club = {
+        id: row.id,
+        name: row.name,
+        code: row.join_code,
+        kind: row.kind,
+        captain: false,
+        ended: Boolean(row.archived_at),
+        members: members.map((m) => ({
+          id: m.profile_id,
+          name: names.get(m.profile_id) ?? "A teammate",
+          captain: row.captain_id === m.profile_id,
+          you: false,
+        })),
+      };
+    }
+    const { data: made } = await admin.from("elite_tracker_clubs").select("created_by").eq("id", clubId).maybeSingle();
+    const by = (made as { created_by: string | null } | null)?.created_by ?? null;
+    if (by) {
+      const { data: p } = await admin.from("elite_profiles").select("full_name, role").eq("id", by).maybeSingle();
+      const person = p as { full_name: string | null; role: string } | null;
+      if (person) {
+        startedBy =
+          by === viewer.profile.id
+            ? "you"
+            : person.role === "player"
+              ? shortName(person.full_name ?? "")
+              : `Coach ${firstNameOf(person.full_name ?? "")}`;
+      }
+    }
+    if (!staff) {
+      const memberIds = club.members.map((m) => m.id);
+      const [friendIds, posts, reported] = await Promise.all([
+        friendIdsOf(admin, viewer.profile.id),
+        entriesOf(admin, [...new Set([viewer.profile.id, ...memberIds])], feedSince(today), today),
+        reportedBy(admin, viewer.profile.id),
+      ]);
+      const photoViewer: PhotoViewer = {
+        id: viewer.profile.id,
+        staff: false,
+        friendIds: new Set(friendIds),
+        unlocked: postedPhotoToday(posts, viewer.profile.id, today),
+        reported,
+      };
+      const latest = posts
+        .filter((p) => memberIds.includes(p.profile_id) && mayViewPhoto(p, photoViewer, today))
+        .sort((x: PostRow, y: PostRow) => y.created_at.localeCompare(x.created_at))[0];
+      if (latest?.photo_path) heroUrl = (await signPhotos(admin, [latest.photo_path])).get(latest.photo_path) ?? null;
+    }
+  }
+
+  const weekTotal = club.members.reduce((s, m) => s + (m.minutes ?? 0), 0);
+  const perPlayer = club.members.length ? Math.round(weekTotal / club.members.length) : 0;
+  const ranked = rows.find((r) => r.id === club!.id);
+  return { club, startedBy, place: ranked ? ranked.place : null, total, perPlayer, weekTotal, heroUrl };
+}
+
 // A player's profile: only for that player, their friends, and coaches,
-// and never across a block. Anyone else gets nothing back at all.
+// and never across a block. Anyone else gets nothing back at all. The
+// grid holds only the posts the viewer may see (the feed's rules).
 export async function profileFor(viewer: Viewer, targetId: string, today: string): Promise<Profile | null> {
   const meId = viewer.profile.id;
   const staff = viewer.role !== "player";
   const you = targetId === meId;
+  const { monday } = weekOf(today);
+  const nowMs = Date.now();
 
   if (viewer.demo) {
     const friends = demoFriends();
@@ -816,17 +1078,40 @@ export async function profileFor(viewer: Viewer, targetId: string, today: string
     const name = you ? shortName(viewer.profile.full_name) : friend?.name ?? "A teammate";
     const tracker = you ? demoTracker(meId) : null;
     const logs = demoLogs(today);
-    const thisWeek = logs.filter((l) => l.trained_on >= weekOf(today).monday);
+    const thisWeek = logs.filter((l) => l.trained_on >= monday);
     const extra = demoAuraOf(name);
+    const rows = demoPostRows(meId, today, nowMs);
+    const state = readDemoState();
+    const photoViewer: PhotoViewer = {
+      id: meId,
+      staff,
+      friendIds: new Set(friends.map((f) => f.id)),
+      unlocked: postedPhotoToday(rows, meId, today),
+      reported: new Set(state.reported ?? []),
+    };
+    const grid = profilePosts(rows, targetId, photoViewer, today);
+    const props = demoProps();
+    const top = !you && !staff ? grid.find((g) => mayGiveProps(rows.find((r) => r.id === g.id)!, photoViewer, today)) : undefined;
+    const weekMinutes = you
+      ? thisWeek.reduce((s, l) => (l.kind === "training" ? s + l.minutes : s), 0)
+      : friend?.minutes ?? 0;
     return {
       id: targetId,
       name,
       initials: initialsOf(name),
-      clubs: you ? demoMyClubs({ id: meId, name }).map((c) => c.name) : demoClubsOf(name),
-      weekMinutes: you
-        ? thisWeek.reduce((s, l) => (l.kind === "training" ? s + l.minutes : s), 0)
-        : friend?.minutes ?? 0,
+      photo: you ? demoMyPhoto() : demoPhotoOf(name),
+      clubs: you ? demoMyClubs({ id: meId, name }).map((c) => ({ id: c.id, name: c.name })) : demoClubsOf(name),
+      weekMinutes,
+      allMinutes: you ? logs.reduce((s, l) => (l.kind === "training" ? s + l.minutes : s), 0) : Math.round(extra.points * 0.85),
       you,
+      friend: Boolean(friend),
+      posts: grid.map(({ photoPath, ...g }) => ({ ...g, photoUrl: photoPath })),
+      week: you
+        ? thisWeek.map((l) => ({ day: l.trained_on, minutes: l.minutes, kind: l.kind }))
+        : rows
+            .filter((r) => r.profile_id === targetId && r.trained_on >= monday)
+            .map((r) => ({ day: r.trained_on, minutes: r.minutes, kind: r.kind })),
+      propsPost: top ? { id: top.id, propped: props.get(top.id)?.mine ?? false } : null,
       aura: auraLevel(
         you
           ? auraPoints(logs.map((l) => ({ ...l, photo: Boolean(l.photo) })), tracker?.target_minutes ?? 0)
@@ -840,36 +1125,110 @@ export async function profileFor(viewer: Viewer, targetId: string, today: string
 
   const admin = createServiceClient();
   if (!admin) return null;
-  const friendIds = new Set(you || staff ? [] : await friendIdsOf(admin, meId));
+  const friendIdList = staff ? [] : await friendIdsOf(admin, meId);
+  const friendIds = new Set(friendIdList);
   const blocks = you || staff ? [] : await blocksBetween(admin, meId, targetId);
-  if (!mayViewProfile({ viewerId: meId, staff, targetId, friendIds, blocks })) return null;
+  if (!mayViewProfile({ viewerId: meId, staff, targetId, friendIds: you ? new Set() : friendIds, blocks })) return null;
   const tracker = await getTracker(targetId);
   if (!tracker) return null;
 
-  const { monday } = weekOf(today);
-  const [names, clubIds, logs] = await Promise.all([
+  const [names, clubIds, logs, photos, theirs, mineToday, reported] = await Promise.all([
     namesOf(admin, [targetId]),
     clubIdsOf(admin, targetId),
     auraLogsOf(admin, targetId),
+    avatarsOf(admin, [targetId]),
+    admin
+      .from("elite_training_logs")
+      .select(POST_COLUMNS)
+      .eq("profile_id", targetId)
+      .not("photo_path", "is", null)
+      .is("removed_at", null)
+      .order("created_at", { ascending: false })
+      .limit(GRID_FETCH),
+    admin.from("elite_training_logs").select(POST_COLUMNS).eq("profile_id", meId).eq("trained_on", today),
+    reportedBy(admin, meId),
   ]);
-  const clubs: string[] = [];
+  const clubs: { id: string; name: string }[] = [];
   for (const id of clubIds) {
     const club = await clubById(admin, id);
-    if (club && !club.archived_at) clubs.push(club.name);
+    if (club && !club.archived_at) clubs.push({ id: club.id, name: club.name });
+  }
+  const postRows = (theirs.data as PostRow[] | null) ?? [];
+  const photoViewer: PhotoViewer = {
+    id: meId,
+    staff,
+    friendIds,
+    unlocked: postedPhotoToday((mineToday.data as PostRow[] | null) ?? [], meId, today),
+    reported,
+  };
+  const grid = profilePosts(postRows, targetId, photoViewer, today);
+  const urls = await signPhotos(admin, grid.map((g) => g.photoPath));
+  const top = !you && !staff ? grid.find((g) => mayGiveProps(postRows.find((r) => r.id === g.id)!, photoViewer, today)) : undefined;
+  let propsPost: Profile["propsPost"] = null;
+  if (top) {
+    const { data } = await admin.from("elite_log_props").select("profile_id").eq("log_id", top.id).eq("profile_id", meId);
+    propsPost = { id: top.id, propped: ((data as unknown[] | null) ?? []).length > 0 };
   }
   const name = names.get(targetId) ?? "A teammate";
   return {
     id: targetId,
     name,
     initials: initialsOf(name),
+    photo: photos.get(targetId) ?? null,
     clubs,
     weekMinutes: logs.reduce((s, l) => (l.kind === "training" && l.trained_on >= monday ? s + l.minutes : s), 0),
+    allMinutes: logs.reduce((s, l) => (l.kind === "training" ? s + l.minutes : s), 0),
     you,
+    friend: friendIds.has(targetId),
+    posts: grid.flatMap(({ photoPath, ...g }) => {
+      const photoUrl = urls.get(photoPath);
+      return photoUrl ? [{ ...g, photoUrl }] : [];
+    }),
+    week: logs
+      .filter((l) => l.trained_on >= monday)
+      .map((l) => ({ day: l.trained_on, minutes: l.minutes, kind: l.kind }))
+      .sort((x, y) => y.day.localeCompare(x.day)),
+    propsPost,
     aura: auraLevel(auraPoints(logs, tracker.target_minutes ?? 0)),
     levelName: labelOf(LEVELS, tracker.level) || null,
     playingFor: tracker.playing_for,
     starred: Boolean(tracker.starred_at),
   };
+}
+
+// How many of a player's newest posts a profile reads before the rules
+// decide which the viewer may see.
+const GRID_FETCH = 60;
+
+// What a signed-out visitor sees on an invite link: who sent it, by first
+// name and initials. Never a photo of them or of their training: a
+// visitor is nobody's friend yet, and photos go to friends only.
+export type InviteLanding =
+  | { kind: "friend"; first: string; initials: string }
+  | { kind: "club"; name: string; letters: string; clubId: string };
+
+export async function inviteLandingFor(ref: string | null, club: string | null): Promise<InviteLanding | null> {
+  if (!isSupabaseConfigured()) {
+    if (club === DEMO_CLUB_ASK.code) return { kind: "club", name: "Saturday Pickup", letters: "SP", clubId: "demo-club-3" };
+    if (ref) return { kind: "friend", first: "Gary", initials: "GG" };
+    if (club) return { kind: "club", name: "Strive Elite 5v5: Team 7", letters: "T7", clubId: "demo-club-1" };
+    return null;
+  }
+  const admin = createServiceClient();
+  if (!admin) return null;
+  if (club) {
+    const row = await clubByCode(admin, club);
+    if (row && !row.archived_at) return { kind: "club", name: row.name, letters: crestOf(row).letters, clubId: row.id };
+  }
+  if (ref) {
+    const { data } = await admin.from("elite_trackers").select("profile_id").eq("referral_code", ref).maybeSingle();
+    const id = (data as { profile_id: string } | null)?.profile_id;
+    if (id) {
+      const name = (await namesOf(admin, [id])).get(id) ?? "";
+      if (name) return { kind: "friend", first: firstNameOf(name), initials: initialsOf(name) };
+    }
+  }
+  return null;
 }
 
 // Every entry an account ever logged, as aura reads it: the minutes, the

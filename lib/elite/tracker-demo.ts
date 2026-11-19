@@ -39,6 +39,8 @@ export type DemoState = {
   reported?: string[]; // example posts reported, so hidden
   props?: string[]; // example posts given props
   clubs?: DemoClub[]; // the example player's clubs, once they change them
+  avatar?: boolean; // the example player added a profile photo
+  lineReported?: string[]; // example profiles whose line or photo was reported
 };
 
 export type DemoClub = { id: string; name: string; code: string; captain: boolean; kind: "player" | "coach" };
@@ -81,6 +83,7 @@ export function demoTracker(profileId: string): Tracker {
     referred_by: null,
     playing_for: "NVA 2010 Boys ECNL",
     starred_at: null,
+    avatar_path: null,
     created_at: "2026-11-02T15:00:00.000Z",
   };
   const state = readDemoState();
@@ -150,7 +153,30 @@ export function demoFriends(): BoardEntry[] {
       name: shortName(f.name),
       minutes: f.minutes,
       starred: demoAuraOf(shortName(f.name)).starred,
+      photo: demoPhotoOf(shortName(f.name)),
     }));
+}
+
+// The example profile photos: the mock-up's own two faces. Everyone else
+// shows initials, the way a real player without a photo does.
+const DEMO_PHOTO: Record<string, string> = {
+  "Gary G.": "/free-demo/av-gary.jpg",
+  "Yinka B.": "/free-demo/av-yinka.jpg",
+};
+
+export function demoPhotoOf(name: string): string | null {
+  return DEMO_PHOTO[name] ?? null;
+}
+
+// The example player's own photo, once they add one.
+export function demoMyPhoto(): string | null {
+  return readDemoState().avatar ? "/free-demo/me.jpg" : null;
+}
+
+// The example friend behind a name on a club, so a tap opens their
+// profile; a club member who is no example friend keeps a made-up id.
+function demoMemberId(clubId: string, fullName: string, i: number): string {
+  return [...DEMO_FRIENDS, DEMO_ASK].find((f) => f.name === fullName)?.id ?? `${clubId}-m${i}`;
 }
 
 export function demoFriendAsk(code: string): { code: string; name: string } | null {
@@ -178,7 +204,12 @@ export function demoClubs(): DemoClub[] {
   return readDemoState().clubs ?? DEMO_CLUBS_START;
 }
 
-export function demoMyClubs(me: { id: string; name: string }): MyClub[] {
+export function demoMyClubs(
+  me: { id: string; name: string },
+  mine: { minutes: number; lastDay: string | null } = { minutes: 0, lastDay: null },
+  today?: string
+): MyClub[] {
+  const friendMinutes = new Map(DEMO_FRIENDS.map((f) => [f.name, f.minutes]));
   return demoClubs().map((c) => ({
     id: c.id,
     name: c.name,
@@ -187,14 +218,20 @@ export function demoMyClubs(me: { id: string; name: string }): MyClub[] {
     captain: c.captain,
     ended: false,
     members: [
-      { id: me.id, name: me.name, captain: c.captain, you: true },
-      ...(DEMO_CLUB_MEMBERS[c.id] ?? []).map((n, i) => ({
-        id: `${c.id}-m${i}`,
-        name: shortName(n),
-        starred: demoAuraOf(shortName(n)).starred,
-        captain: false,
-        you: false,
-      })),
+      { id: me.id, name: me.name, captain: c.captain, you: true, photo: demoMyPhoto(), ...mine },
+      ...(DEMO_CLUB_MEMBERS[c.id] ?? []).map((n, i) => {
+        const minutes = friendMinutes.get(n) ?? 40;
+        return {
+          id: demoMemberId(c.id, n, i),
+          name: shortName(n),
+          starred: demoAuraOf(shortName(n)).starred,
+          captain: false,
+          you: false,
+          photo: demoPhotoOf(shortName(n)),
+          minutes,
+          lastDay: today ? (minutes > 0 ? (n === "Dani Ramos" ? shiftDay(today, -1) : today) : null) : null,
+        };
+      }),
     ],
   }));
 }
@@ -204,11 +241,11 @@ export function demoClubAsk(code: string): DemoClub | null {
 }
 
 // The example friends' clubs, for their profiles.
-export function demoClubsOf(friendName: string): string[] {
+export function demoClubsOf(friendName: string): { id: string; name: string }[] {
   const full = [...DEMO_FRIENDS, DEMO_ASK].find((f) => shortName(f.name) === friendName)?.name;
   if (!full) return [];
   const all = [...DEMO_CLUBS_START, DEMO_CLUB_ASK];
-  return all.filter((c) => (DEMO_CLUB_MEMBERS[c.id] ?? []).includes(full)).map((c) => c.name);
+  return all.filter((c) => (DEMO_CLUB_MEMBERS[c.id] ?? []).includes(full)).map((c) => ({ id: c.id, name: c.name }));
 }
 
 // What the example friends' profiles carry beyond the board: aura points
@@ -284,6 +321,25 @@ export function demoPostRows(meId: string, today: string, nowMs: number): PostRo
       caption: "Weak foot, pop and juggle",
       removed_at: null,
     },
+    // more of Gary's week, for his profile's grid
+    ...[
+      { day: -2, minutes: 45, file: "grid-1.jpg", hours: 50 },
+      { day: -3, minutes: 60, file: "grid-2.jpg", hours: 74 },
+      { day: -4, minutes: 30, file: "grid-3.jpg", hours: 98 },
+      { day: -5, minutes: 90, file: "grid-5.jpg", hours: 122 },
+    ].map(
+      (p, i): PostRow => ({
+        id: `demo-post-g${i}`,
+        profile_id: "demo-friend-1",
+        trained_on: shiftDay(today, p.day),
+        minutes: p.minutes,
+        kind: "training",
+        created_at: ago(60 * p.hours),
+        photo_path: PHOTO(p.file),
+        caption: null,
+        removed_at: null,
+      })
+    ),
     {
       id: "demo-post-5",
       profile_id: "demo-friend-3",

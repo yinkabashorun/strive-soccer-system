@@ -3,15 +3,13 @@ import { redirect } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Avatar } from "@/components/Avatar";
 import { DeviceSettings } from "@/components/elite/DeviceSettings";
-import { BlockedList } from "@/components/elite/BlockedList";
-import { PlayingForField } from "@/components/elite/PlayingForField";
 import { getViewer } from "@/lib/elite/session";
 import { signOut } from "@/lib/elite/auth-actions";
 import { deleteGate } from "@/lib/elite/account";
 import { SUPPORT_EMAIL, concernMailto } from "@/lib/elite/support";
-import { fmtDuration } from "@/lib/elite/time-trained";
-import { blockedFor, trackerFor } from "@/lib/elite/tracker-server";
-import { FREE_DAYS, FREE_QUIZ, FREE_WEEK, planDaysLabel } from "@/lib/elite/tracker";
+import { consentDue } from "@/lib/elite/legal-server";
+import { trackerFor } from "@/lib/elite/tracker-server";
+import { FREE_SETTINGS, FREE_WEEK } from "@/lib/elite/tracker";
 
 export const metadata = { title: "Account · Strive Elite" };
 
@@ -24,12 +22,13 @@ export default async function AccountPage() {
   if (!viewer) redirect("/login?next=/account");
 
   const isPlayer = viewer.role === "player";
-  // A free account (069): the training log is its home, and its one
-  // setting is the weekly target. The example player is never one here.
+  // A free account (069) has its own Settings inside the free app. It
+  // lands here only while new terms wait for its yes (the free app shows
+  // the agreement until then), so it can still sign out or delete.
   const tracker = viewer.demo ? null : await trackerFor(viewer);
+  if (tracker && !(await consentDue(viewer.profile.id))) redirect(FREE_SETTINGS);
   const isMember = isPlayer && !tracker;
   const home = !isPlayer ? "/coach" : tracker ? FREE_WEEK : "/dashboard";
-  const blocked = tracker ? await blockedFor(viewer) : [];
   const canDelete = deleteGate(viewer).allowed;
 
   return (
@@ -59,39 +58,6 @@ export default async function AccountPage() {
             <Row href="/progress" label="Progress" detail="Time trained and your coach's ratings" />
           </Group>
         )}
-        {tracker && (
-          <Group title="Your training">
-            <Row
-              href={FREE_QUIZ}
-              label="Weekly target"
-              detail={
-                tracker.target_minutes
-                  ? `${fmtDuration(tracker.target_minutes)} a week. Change it here.`
-                  : "Answer four questions to set it"
-              }
-            />
-            {tracker.plan_days.length > 0 && (
-              <Row
-                href={FREE_DAYS}
-                label="Training days"
-                detail={`${planDaysLabel(tracker.plan_days)}. Change them here.`}
-              />
-            )}
-          </Group>
-        )}
-
-        {tracker && (
-          <Group title="Your profile">
-            <PlayingForField initial={tracker.playing_for} />
-          </Group>
-        )}
-
-        {tracker && (
-          <Group title="Blocked players">
-            <BlockedList blocked={blocked} />
-          </Group>
-        )}
-
         {!viewer.demo && (
           <Group title="Sign-in">
             <Row href="/account/password" label="Change password" />

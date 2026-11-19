@@ -522,7 +522,7 @@ const rel = (p: string) => p.slice(root.length + 1);
 
 const FREE_FILES = [
   ...walk(join(root, "app/(free)")).map(rel),
-  "app/(auth)/join/page.tsx",
+  "app/(join)/join/page.tsx",
   "app/api/elite/auth/join/route.ts",
   "app/api/elite/tracker/card/route.tsx",
   "components/elite/FreeShell.tsx",
@@ -538,7 +538,18 @@ const FREE_FILES = [
   "components/elite/TrackerDays.tsx",
   "components/elite/TrackerSheet.tsx",
   "components/elite/JoinForm.tsx",
-  "components/elite/ProfileSheet.tsx",
+  "components/elite/ProfileScreen.tsx",
+  "components/elite/ClubScreen.tsx",
+  "components/elite/ActionSheet.tsx",
+  "components/elite/FreeAvatar.tsx",
+  "components/elite/FreeIcons.tsx",
+  "components/elite/FreeTopBar.tsx",
+  "components/elite/FreeSettings.tsx",
+  "components/elite/ProfilePhotoPicker.tsx",
+  "components/elite/JoinLanding.tsx",
+  "components/elite/WheelPicker.tsx",
+  "components/elite/UnderAge.tsx",
+  "components/elite/BlockedList.tsx",
   "components/elite/ClubsSection.tsx",
   "components/elite/ClubAsk.tsx",
   "components/elite/StarMark.tsx",
@@ -615,7 +626,7 @@ describe("the free log stays what it is", () => {
   it("the line about the coached program is hidden inside the App Store app", () => {
     expect(code("app/(free)/log/week/page.tsx")).toContain("programHref={programLink(inNativeApp())}");
     expect(code("components/elite/MyWeek.tsx")).toMatch(/\{programHref && \(/);
-    expect(code("app/(auth)/join/page.tsx")).toContain('if (inNativeApp()) redirect("/login")');
+    expect(code("app/(join)/join/page.tsx")).toContain('if (inNativeApp()) redirect("/login")');
   });
 });
 
@@ -756,12 +767,12 @@ describe("planning the week", () => {
     expect(longDayLabel(today)).toBe("Wednesday, Nov 18");
   });
 
-  it("is asked at the end of the set-up and changed from Account", () => {
+  it("is asked at the end of the set-up and changed from Settings", () => {
     expect(FREE_DAYS).toBe("/log/days");
     const picker = code("components/elite/DaysPicker.tsx");
     expect(picker).toContain("Which days will you train?");
     expect(picker).toContain("disabled={saving || days.length === 0}");
-    expect(code("app/account/page.tsx")).toContain("href={FREE_DAYS}");
+    expect(code("components/elite/FreeSettings.tsx")).toContain('href="/log/days"');
     const actions = code("lib/elite/tracker-actions.ts");
     expect(actions).toContain("export async function setPlanDays(");
     // the set-up is not finished without at least one day
@@ -810,7 +821,7 @@ describe("friends", () => {
     ]);
   });
 
-  it("people on the same time share a place", () => {
+  it("people on the same time each get their own place, in name order (one rule, so no list shows two 2s)", () => {
     const rows = friendsBoard(
       [entry("me", "Anthony E.", 135), entry("f1", "Diego R.", 135), entry("f2", "Marcus B.", 190), entry("f3", "Jalen T.", 0), entry("f4", "Sam O.", 0)],
       "me"
@@ -818,10 +829,12 @@ describe("friends", () => {
     expect(rows.map((r) => [r.place, r.name])).toEqual([
       [1, "Marcus B."],
       [2, "Anthony E."],
-      [2, "Diego R."],
+      [3, "Diego R."],
       [4, "Jalen T."],
-      [4, "Sam O."],
+      [5, "Sam O."],
     ]);
+    // every place on the list is different
+    expect(new Set(rows.map((r) => r.place)).size).toBe(rows.length);
   });
 
   it("lists the top ten, and you are always on it with your real place", () => {
@@ -844,7 +857,7 @@ describe("friends", () => {
     expect(BOARD_EMPTY_LINE).toBe("Send your link to a teammate and see who trains more this week.");
     const board = code("components/elite/FriendsBoard.tsx");
     expect(board).toMatch(/friends\.length === 0 \? \(\s*<p[^>]*>\{BOARD_EMPTY_LINE\}<\/p>/);
-    expect(board).toContain('{copied ? "Link copied" : "Send my link"}');
+    expect(board).toContain('{copied ? "Link copied. Send it to a teammate." : "Add a friend"}');
   });
 
   it("gym never counts on it", () => {
@@ -890,7 +903,7 @@ describe("friends", () => {
     expect(friendAskPath("ABCDEFGH")).toBe("/log?friend=ABCDEFGH");
     const route = code("app/api/elite/auth/join/route.ts");
     expect(route).toContain("if (referredBy) await makeFriends(userId, referredBy)");
-    const join = code("app/(auth)/join/page.tsx");
+    const join = code("app/(join)/join/page.tsx");
     expect(join).toContain("if (ref && (await trackerFor(viewer))) redirect(friendAskPath(ref));");
     const page = code("app/(free)/log/page.tsx");
     expect(page).toContain("friendAskFor(viewer, cleanReferralCode(searchParams?.friend))");
@@ -926,11 +939,12 @@ describe("friends", () => {
       "dismissReports",
       "endMyClub",
       "leaveClub",
-      "loadProfile",
       "logTraining",
       "removeClubMember",
       "removeFriend",
+      "removeMyPhoto",
       "removePost",
+      "removeProfilePhoto",
       "renameClub",
       "renameMyClub",
       "reportClub",
@@ -953,12 +967,13 @@ describe("friends", () => {
 
   it("a friend can be taken off from their profile, quietly", () => {
     expect(code("components/elite/FriendsBoard.tsx")).toContain("onClick={() => profile(r.id)}");
-    const board = code("components/elite/ProfileSheet.tsx");
-    expect(board).toContain("Remove from my friends");
-    expect(board).toContain("act(() => removeFriend(profile.id))");
-    expect(board).toContain("act(() => blockPlayer(profile.id))");
-    // your own profile offers your link and Account instead
-    expect(board).toMatch(/\{profile\.you \? \(\s*<>\s*<button/);
+    const screen = code("components/elite/ProfileScreen.tsx");
+    expect(screen).toContain("Remove from my friends");
+    expect(screen).toContain("act(() => removeFriend(profile.id), () => router.push(FREE_HOME))");
+    expect(screen).toContain("act(() => blockPlayer(profile.id), () => router.push(FREE_HOME))");
+    // your own profile offers Edit profile and your link instead
+    expect(screen).toContain("Edit profile");
+    expect(screen).toContain("Share my link");
   });
 
   it("members still have no list of other players", () => {

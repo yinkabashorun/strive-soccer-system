@@ -17,6 +17,7 @@ import {
   membersOf,
   newClub,
   postForViewer,
+  clearAvatar,
   profileFor,
   trackerFor,
 } from "./tracker-server";
@@ -58,7 +59,6 @@ import {
   validateMinutes,
   validateQuiz,
   type Kind,
-  type Profile,
   type Season,
 } from "./tracker";
 
@@ -599,18 +599,6 @@ export async function reportClub(clubId: string): Promise<{ ok: true } | Fail> {
   return { ok: true };
 }
 
-// ---- Profiles ----------------------------------------------------------
-
-// A player's profile, for the sheet that opens from a face, a name on the
-// board or a post. Only the player, their friends and coaches get one.
-export async function loadProfile(targetId: string): Promise<Profile | null> {
-  if (typeof targetId !== "string" || !targetId) return null;
-  const viewer = await getViewer();
-  if (!viewer) return null;
-  if (viewer.role === "player" && !viewer.demo && !(await getTracker(viewer.profile.id))) return null;
-  return profileFor(viewer, targetId, nyToday());
-}
-
 // ---- The line on your profile -----------------------------------------
 
 // "Playing for": one plain line on your profile, or nothing.
@@ -629,27 +617,50 @@ export async function setPlayingFor(lineInput: string): Promise<{ ok: true } | F
 
 // Report a friend's line from their profile. It waits in the coach queue;
 // the coaches get one text for a line, the first time.
-export async function reportLine(targetId: string): Promise<{ ok: true } | Fail> {
+// The same for a friend's profile photo (what = "photo").
+export async function reportLine(targetId: string, whatInput: "line" | "photo" = "line"): Promise<{ ok: true } | Fail> {
   if (typeof targetId !== "string" || !targetId) return fail("That profile is not there any more.");
+  const what = whatInput === "photo" ? "photo" : "line";
   const o = await owner();
   if (o.kind === "no") return fail(o.error);
   if (o.kind === "demo") return { ok: true };
   const viewer = await getViewer();
   const profile = viewer ? await profileFor(viewer, targetId, nyToday()) : null;
-  if (!profile || profile.you || !profile.playingFor) return fail("That profile is not there any more.");
+  if (!profile || profile.you) return fail("That profile is not there any more.");
+  if (what === "line" ? !profile.playingFor : !profile.photo) return fail("That profile is not there any more.");
   const { count } = await o.admin
     .from("elite_line_reports")
     .select("id", { count: "exact", head: true })
-    .eq("profile_id", targetId);
+    .eq("profile_id", targetId)
+    .eq("what", what);
   const { error } = await o.admin
     .from("elite_line_reports")
-    .upsert({ profile_id: targetId, reporter_id: o.profileId }, { onConflict: "profile_id,reporter_id", ignoreDuplicates: true });
+    .upsert(
+      { profile_id: targetId, reporter_id: o.profileId, what },
+      { onConflict: "profile_id,reporter_id,what", ignoreDuplicates: true }
+    );
   if (error) return fail(OFFLINE);
   if (!count) {
     await textCoaches(
-      `A profile line in the free app was reported: "${profile.playingFor}". Look at it here: ${APP_URL}/coach/free`
+      what === "line"
+        ? `A profile line in the free app was reported: "${profile.playingFor}". Look at it here: ${APP_URL}/coach/free`
+        : `A profile photo in the free app was reported (${profile.name}). Look at it here: ${APP_URL}/coach/free`
     ).catch(() => 0);
   }
+  return { ok: true };
+}
+
+// Take your own profile photo off.
+export async function removeMyPhoto(): Promise<{ ok: true } | Fail> {
+  const o = await owner();
+  if (o.kind === "no") return fail(o.error);
+  if (o.kind === "demo") {
+    writeDemoState({ avatar: false });
+    touch();
+    return { ok: true };
+  }
+  if (!(await clearAvatar(o.profileId))) return fail(OFFLINE);
+  touch();
   return { ok: true };
 }
 
@@ -852,12 +863,29 @@ export async function setStar(profileId: string, on: boolean, noteInput: string)
   return { ok: true };
 }
 
-async function closeLineReports(c: { admin: Admin; profileId: string }, profileId: string, action: "cleared" | "none") {
+async function closeLineReports(
+  c: { admin: Admin; profileId: string },
+  profileId: string,
+  action: "cleared" | "none",
+  what: "line" | "photo" = "line"
+) {
   return c.admin
     .from("elite_line_reports")
     .update({ resolved_at: new Date().toISOString(), resolved_by: c.profileId, action })
     .eq("profile_id", profileId)
+    .eq("what", what)
     .is("resolved_at", null);
+}
+
+// Take a player's profile photo down (a reported one, or any).
+export async function removeProfilePhoto(profileId: string): Promise<{ ok: true } | Fail> {
+  const c = await coach();
+  if (c.kind === "no") return fail("Only a coach can do this.");
+  if (c.kind === "demo") return { ok: true };
+  if (!(await clearAvatar(profileId))) return fail(OFFLINE);
+  await closeLineReports(c, profileId, "cleared", "photo");
+  revalidatePath("/coach/free");
+  return { ok: true };
 }
 
 // Clear a player's line (a reported one, or any).
@@ -872,11 +900,11 @@ export async function clearPlayingFor(profileId: string): Promise<{ ok: true } |
   return { ok: true };
 }
 
-export async function dismissLineReports(profileId: string): Promise<{ ok: true } | Fail> {
+export async function dismissLineReports(profileId: string, whatInput: "line" | "photo" = "line"): Promise<{ ok: true } | Fail> {
   const c = await coach();
   if (c.kind === "no") return fail("Only a coach can do this.");
   if (c.kind === "demo") return { ok: true };
-  const { error } = await closeLineReports(c, profileId, "none");
+  const { error } = await closeLineReports(c, profileId, "none", whatInput === "photo" ? "photo" : "line");
   if (error) return fail(OFFLINE);
   revalidatePath("/coach/free");
   return { ok: true };

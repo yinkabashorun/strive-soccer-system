@@ -41,6 +41,10 @@ set lock_timeout = '8s';
 --    can clear it). starred_at and starred_by are the coaches' star: set
 --    and taken back by a coach only (the server action checks, and no
 --    browser can write this table at all: there is no write policy).
+--    avatar_path is the one profile photo, in the player's own folder of
+--    the private tracker-posts bucket (<profile id>/avatar-<id>.jpg),
+--    handed out only as a short-lived signed address to the player, their
+--    friends and the coaches.
 create table if not exists public.elite_trackers (
   profile_id     uuid primary key references public.elite_profiles(id) on delete cascade,
   phone          text,
@@ -59,6 +63,7 @@ create table if not exists public.elite_trackers (
   playing_for    text check (playing_for is null or char_length(playing_for) between 1 and 40),
   starred_at     timestamptz,
   starred_by     uuid references public.elite_profiles(id) on delete set null,
+  avatar_path    text check (avatar_path is null or avatar_path ~ '^[0-9a-f-]{36}/avatar-[0-9a-f-]{36}\.jpg$'),
   created_at     timestamptz not null default now()
 );
 
@@ -499,8 +504,9 @@ begin
   end if;
 end $$;
 
--- 11) A player's "Playing for" line reported by a friend. It waits in the
---     coach queue until a coach clears the line or says no action.
+-- 11) A player's "Playing for" line or profile photo reported by a
+--     friend (what = 'line' or 'photo'). It waits in the coach queue until
+--     a coach clears it or says no action.
 create table if not exists public.elite_line_reports (
   id          uuid primary key default gen_random_uuid(),
   profile_id  uuid not null references public.elite_trackers(profile_id) on delete cascade,
@@ -508,8 +514,9 @@ create table if not exists public.elite_line_reports (
   created_at  timestamptz not null default now(),
   resolved_at timestamptz,
   resolved_by uuid references public.elite_profiles(id) on delete set null,
+  what        text not null default 'line' check (what in ('line', 'photo')),
   action      text check (action is null or action in ('cleared', 'none')),
-  unique (profile_id, reporter_id)
+  unique (profile_id, reporter_id, what)
 );
 
 alter table public.elite_line_reports enable row level security;

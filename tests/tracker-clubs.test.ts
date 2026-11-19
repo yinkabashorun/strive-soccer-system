@@ -107,7 +107,7 @@ describe("links", () => {
     expect(route.indexOf("agreementComplete(")).toBeLessThan(route.indexOf("joinClubByCode("));
     expect(code("components/elite/JoinForm.tsx")).toMatch(/ref: referral,\s*club,/);
     // signed in: one sheet on the Friends tab
-    expect(code("app/(auth)/join/page.tsx")).toContain("if (club && (await trackerFor(viewer))) redirect(clubAskPath(club));");
+    expect(code("app/(join)/join/page.tsx")).toContain("if (club && (await trackerFor(viewer))) redirect(clubAskPath(club));");
     expect(code("app/(free)/log/page.tsx")).toContain("clubAskFor(viewer, cleanClubCode(searchParams?.club))");
     expect(code("components/elite/ClubAsk.tsx")).toContain("await confirmClub(code)");
   });
@@ -181,14 +181,14 @@ describe("leaving keeps friendships", () => {
       const body = fn(acts, `export async function ${name}(`, "export async function");
       expect(body, name).not.toContain("elite_tracker_friends");
     }
-    expect(code("components/elite/ClubsSection.tsx")).toContain("Leaving keeps the friends you made. To cut one off, block them.");
+    expect(code("components/elite/ClubScreen.tsx")).toContain("Leaving keeps the friends you made. To cut one off, block them.");
   });
 });
 
 describe("reporting a club's name", () => {
   it("a member who is not the captain reports it; the coaches hear once a club; it lands in the coach queue", () => {
     const acts = code("lib/elite/tracker-actions.ts");
-    const rep = fn(acts, "export async function reportClub(", "export async function loadProfile(");
+    const rep = fn(acts, "export async function reportClub(", "export async function setPlayingFor(");
     expect(rep).toContain("if (!members.some((m) => m.profile_id === o.profileId) || club.captain_id === o.profileId) return fail(NOT_A_CLUB);");
     expect(rep).toContain('onConflict: "club_id,reporter_id", ignoreDuplicates: true');
     expect(rep).toContain("if (!count) await textCoaches(clubReportText(club.name,");
@@ -206,7 +206,7 @@ describe("reporting a club's name", () => {
     const admin = code("components/elite/ClubsAdmin.tsx");
     expect(admin).toContain("Reported club names");
     expect(code("app/(coach)/coach/free/page.tsx")).toContain("<ClubsAdmin clubs={data.clubs} reports={data.clubReports} appUrl={APP_URL} />");
-    expect(code("components/elite/ClubsSection.tsx")).toContain("Report this club");
+    expect(code("components/elite/ClubScreen.tsx")).toContain("Report this club");
   });
 });
 
@@ -242,20 +242,32 @@ describe("the profile", () => {
   it("the server asks before it reads anything, and a non-friend gets nothing back", () => {
     const server = code("lib/elite/tracker-server.ts");
     const prof = fn(server, "export async function profileFor(", "\n}\n");
-    const ask = prof.indexOf("if (!mayViewProfile({ viewerId: meId, staff, targetId, friendIds, blocks })) return null;");
+    const ask = prof.indexOf(
+      "if (!mayViewProfile({ viewerId: meId, staff, targetId, friendIds: you ? new Set() : friendIds, blocks })) return null;"
+    );
     expect(ask).toBeGreaterThan(-1);
     expect(ask).toBeLessThan(prof.indexOf("namesOf(admin, [targetId])"));
-    expect(code("lib/elite/tracker-actions.ts")).toContain("return profileFor(viewer, targetId, nyToday());");
+    expect(ask).toBeLessThan(prof.indexOf("avatarsOf(admin, [targetId])"));
+    // the profile screen reads it through the same function, and a non-friend lands on "not there"
+    const page = code("app/(free)/log/u/[id]/page.tsx");
+    expect(page).toContain("profileFor(viewer, id, today)");
+    expect(page).toContain("if (!profile) notFound();");
   });
 
-  it("is small: initials, name, clubs, this week, aura level, the level they play at, their line, the star. No photo, bio, counts, age or grade", () => {
+  it("is small: photo, name, clubs, this week and all time, aura level, the level they play at, their line, the star, posts they may see. No bio, counts, age or grade", () => {
     const keys: (keyof Profile)[] = [
       "id",
       "name",
       "initials",
+      "photo",
       "clubs",
       "weekMinutes",
+      "allMinutes",
       "you",
+      "friend",
+      "posts",
+      "week",
+      "propsPost",
       "aura",
       "levelName",
       "playingFor",
@@ -265,19 +277,24 @@ describe("the profile", () => {
       id: "f",
       name: "Gary G.",
       initials: "GG",
+      photo: null,
       clubs: [],
       weekMinutes: 0,
+      allMinutes: 0,
       you: false,
+      friend: true,
+      posts: [],
+      week: [],
+      propsPost: null,
       aura: { level: 1, progress: 0, toNext: 100 },
       levelName: null,
       playingFor: null,
       starred: false,
     };
     expect(Object.keys(sample).sort()).toEqual([...keys].sort());
-    const sheet = code("components/elite/ProfileSheet.tsx");
-    expect(sheet).not.toMatch(/grade|birth|age\b|follower|bio|all time|allTime|points/i);
-    expect(sheet).not.toMatch(/<img/);
-    // it opens from a face, a post's name, a name on the board, and your own initials
+    const screen = code("components/elite/ProfileScreen.tsx");
+    expect(screen).not.toMatch(/grade|birth|age\b|follower|bio|points/i);
+    // it opens from a face, a post's name, a name on the board, and your own avatar
     expect(code("components/elite/FriendsFeed.tsx")).toContain("onClick={() => profile(f.id)}");
     expect(code("components/elite/FriendsFeed.tsx")).toContain("onClick={() => profile(card.ownerId)}");
     expect(code("components/elite/FriendsFeed.tsx")).toContain("onOpen={() => profile(me.id)}");
@@ -291,7 +308,9 @@ describe("the word", () => {
     const files = [
       "components/elite/ClubsSection.tsx",
       "components/elite/ClubAsk.tsx",
-      "components/elite/ProfileSheet.tsx",
+      "components/elite/ProfileScreen.tsx",
+      "components/elite/ClubScreen.tsx",
+      "components/elite/JoinLanding.tsx",
       "components/elite/ClubsAdmin.tsx",
       "components/elite/FriendsFeed.tsx",
       "components/elite/MyWeek.tsx",

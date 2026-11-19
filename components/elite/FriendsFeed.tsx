@@ -3,6 +3,9 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Camera, MoreHorizontal, Zap } from "lucide-react";
+import { ActionSheet } from "./ActionSheet";
+import { FreeAvatar } from "./FreeAvatar";
+import { IconBlock, IconBolt, IconFlag, IconPerson, IconTrash } from "./FreeIcons";
 import { blockPlayer, deleteLog, reportPost, toggleProps } from "@/lib/elite/tracker-actions";
 import { fmtDuration } from "@/lib/elite/time-trained";
 import { feel } from "@/lib/elite/native";
@@ -12,7 +15,6 @@ import type { LockedCard } from "@/lib/elite/tracker";
 import { usePostLauncher } from "./FreeShell";
 import { FriendAsk } from "./FriendAsk";
 import { ClubAsk } from "./ClubAsk";
-import { TrackerSheet } from "./TrackerSheet";
 import { sendLink } from "./send-link";
 import { StarMark } from "./StarMark";
 
@@ -33,7 +35,7 @@ export function FriendsFeed({
   date: string; // "Wednesday, Nov 18"
   feed: FeedView;
   week: { minutes: number; target: number; percent: number };
-  me: { id: string; initials: string };
+  me: { id: string; initials: string; photo: string | null };
   friendAsk: { code: string; name: string } | null;
   clubAsk: { code: string; name: string; problem: string | null } | null;
   inviteLink: string;
@@ -52,7 +54,7 @@ export function FriendsFeed({
           <h1 className="font-display text-[44px] font-black uppercase leading-[0.9] tracking-[-0.5px]">Today</h1>
           <p className="mt-1.5 text-[13px] tracking-[0.2px] text-white/60">{date}</p>
         </div>
-        <WeekRing initials={me.initials} onOpen={() => profile(me.id)} {...week} />
+        <WeekRing initials={me.initials} photo={me.photo} onOpen={() => profile(me.id)} {...week} />
       </header>
 
       {faces.length > 0 && (
@@ -65,16 +67,13 @@ export function FriendsFeed({
                 aria-label={`${f.you ? "Your" : `${f.first}'s`} profile${f.active ? ", trained today" : ""}`}
                 className="block w-full"
               >
-              <span
-                className={
-                  "mx-auto grid h-[54px] w-[54px] place-items-center rounded-full text-[17px] font-bold " +
-                  (f.you ? "bg-accent text-black" : "bg-[#222] text-[#ddd]") +
-                  (f.active ? " shadow-[0_0_0_2px_#000,0_0_0_4px_#D4AF37]" : " opacity-[0.42]")
-                }
-                aria-hidden
-              >
-                {f.initials}
-              </span>
+              <FreeAvatar
+                photo={f.photo}
+                initials={f.initials}
+                size={54}
+                you={f.you}
+                className={"mx-auto " + (f.active ? "shadow-[0_0_0_2px_#000,0_0_0_4px_#D4AF37]" : "opacity-[0.42]")}
+              />
               <span className={"mt-2 flex items-center justify-center gap-0.5 text-[11.5px] " + (f.active ? "text-bone" : "text-white/60")}>
                 <span className="truncate">{f.first}</span>
                 {f.starred && <StarMark size={11} />}
@@ -135,12 +134,14 @@ export function FriendsFeed({
 // way to your own profile.
 function WeekRing({
   initials,
+  photo,
   onOpen,
   minutes,
   target,
   percent,
 }: {
   initials: string;
+  photo: string | null;
   onOpen: () => void;
   minutes: number;
   target: number;
@@ -168,9 +169,7 @@ function WeekRing({
           transform="rotate(-90 23 23)"
         />
       </svg>
-      <span className="grid h-[34px] w-[34px] place-items-center rounded-full bg-[#2a2a2a] text-[13px] font-bold">
-        {initials}
-      </span>
+      <FreeAvatar photo={photo} initials={initials} size={34} />
     </button>
   );
 }
@@ -210,9 +209,7 @@ function LockedPost({ card, first, friendsToday }: { card: LockedCard; first: bo
       }
     >
       <div className="absolute inset-0 flex flex-col items-center justify-center px-[34px] text-center">
-        <span className="grid h-16 w-16 place-items-center rounded-full border-2 border-bone bg-[#222] text-[20px] font-bold" aria-hidden>
-          {card.initials}
-        </span>
+        <FreeAvatar photo={card.photo} initials={card.initials} size={64} className="border-2 border-bone" />
         <p
           aria-label={lockedHeadline(card.first, card.minutes, card.kind)}
           className={"mt-4 font-display font-black uppercase leading-[0.95] " + (first ? "text-[38px]" : "text-[26px]")}
@@ -234,6 +231,7 @@ function OpenPost({ card, onGone }: { card: OpenCardView; onGone: () => void }) 
   const { profile } = usePostLauncher();
   const [props, setProps] = useState({ count: card.props, on: card.propped });
   const [menu, setMenu] = useState<null | "menu" | "report" | "block" | "delete">(null);
+  const [reason, setReason] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, start] = useTransition();
 
@@ -269,9 +267,7 @@ function OpenPost({ card, onGone }: { card: OpenCardView; onGone: () => void }) 
         aria-label={`${card.mine ? "Your" : `${card.first}'s`} profile`}
         className="absolute left-3.5 top-3.5 z-10 flex min-h-[44px] items-center gap-2.5 text-left"
       >
-        <span className="grid h-9 w-9 place-items-center rounded-full border-[1.5px] border-white/90 bg-[#222] text-[13px] font-bold" aria-hidden>
-          {card.initials}
-        </span>
+        <FreeAvatar photo={card.photo} initials={card.initials} size={36} you={card.mine} className="border-[1.5px] border-white/90" />
         <div className="[text-shadow:0_1px_8px_rgba(0,0,0,.6)]">
           <b className="flex items-center gap-1.5 text-[15px] font-bold leading-[1.1]">
             {card.name}
@@ -325,87 +321,74 @@ function OpenPost({ card, onGone }: { card: OpenCardView; onGone: () => void }) 
       </div>
 
       {menu === "menu" && (
-        <TrackerSheet title={card.mine ? "Your post" : `${card.first}'s post`} onClose={() => setMenu(null)}>
-          <div className="space-y-2.5 pb-1">
-            {card.mine ? (
-              <SheetButton onClick={() => setMenu("delete")}>Delete my post</SheetButton>
-            ) : (
-              <>
-                <SheetButton onClick={() => setMenu("report")}>Report this post</SheetButton>
-                <SheetButton onClick={() => setMenu("block")}>Block {card.first}</SheetButton>
-              </>
-            )}
-          </div>
-        </TrackerSheet>
+        <ActionSheet
+          label={card.mine ? "Your post" : `${card.first}'s post`}
+          onClose={() => setMenu(null)}
+          keys={
+            card.mine
+              ? undefined
+              : [
+                  { label: "Profile", icon: <IconPerson />, onClick: () => { setMenu(null); profile(card.ownerId); } },
+                  { label: "Props", icon: <IconBolt />, on: props.on, onClick: () => { toggle(); setMenu(null); } },
+                ]
+          }
+          rows={
+            card.mine
+              ? [{ label: "Delete my post", icon: <IconTrash />, red: true, onClick: () => setMenu("delete") }]
+              : [
+                  { label: "Report this post", icon: <IconFlag />, red: true, onClick: () => { setReason(null); setMenu("report"); } },
+                  { label: `Block ${card.first}`, icon: <IconBlock />, red: true, onClick: () => setMenu("block") },
+                ]
+          }
+          note={card.mine ? undefined : `${card.first} is not told if you report or block them.`}
+        />
       )}
 
       {menu === "report" && (
-        <TrackerSheet title="What is wrong with it?" onClose={() => setMenu(null)}>
-          <p className="text-[15px] leading-relaxed text-white/70">
-            The post leaves your feed now and a coach looks at it. {card.first} is not told who reported it.
-          </p>
-          <div className="mt-4 space-y-2.5 pb-1">
-            {REPORT_REASONS.map((r) => (
-              <SheetButton key={r.id} disabled={busy} onClick={() => act(() => reportPost(card.id, r.id))}>
-                {r.label}
-              </SheetButton>
-            ))}
+        <ActionSheet
+          label="Report this post"
+          title="What is wrong with it?"
+          onClose={() => setMenu(null)}
+          rows={REPORT_REASONS.map((r) => ({ label: r.label, checked: reason === r.id, onClick: () => setReason(r.id) }))}
+          note={`The post leaves your feed and a coach looks at it. ${card.first} is not told who reported it.`}
+        >
+          <div className="px-4 pt-2">
+            {error && <p className="pb-2 text-sm text-red-400">{error}</p>}
+            <button
+              type="button"
+              disabled={busy || !reason}
+              onClick={() => reason && act(() => reportPost(card.id, reason))}
+              className="flex h-12 w-full items-center justify-center rounded-xl bg-bone text-[15px] font-bold text-black disabled:opacity-40"
+            >
+              Send the report
+            </button>
           </div>
-          {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
-        </TrackerSheet>
+        </ActionSheet>
       )}
 
       {menu === "block" && (
-        <TrackerSheet title={`Block ${card.first}?`} onClose={() => setMenu(null)}>
-          <p className="text-[15px] leading-relaxed text-white/70">
-            You stop being friends and you stop seeing each other&apos;s training. {card.first} is not told, and their
-            link will not add you again. You can unblock them in Account.
-          </p>
-          {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
-          <SheetButton className="mt-5" disabled={busy} onClick={() => act(() => blockPlayer(card.ownerId))}>
-            Block {card.first}
-          </SheetButton>
-        </TrackerSheet>
+        <ActionSheet
+          label={`Block ${card.first}`}
+          title={`Block ${card.first}?`}
+          onClose={() => setMenu(null)}
+          rows={[{ label: `Block ${card.first}`, icon: <IconBlock />, red: true, disabled: busy, onClick: () => act(() => blockPlayer(card.ownerId)) }]}
+          note={`You stop being friends and you stop seeing each other's training. ${card.first} is not told, and their link will not add you again. You can unblock them in Settings.`}
+        >
+          {error && <p className="px-[22px] pt-1 text-sm text-red-400">{error}</p>}
+        </ActionSheet>
       )}
 
       {menu === "delete" && (
-        <TrackerSheet title="Delete your post?" onClose={() => setMenu(null)}>
-          <p className="text-[15px] leading-relaxed text-white/70">
-            The photo is deleted and the time comes off your week.
-          </p>
-          {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
-          <SheetButton className="mt-5" disabled={busy} onClick={() => act(() => deleteLog(card.id))}>
-            Delete my post
-          </SheetButton>
-        </TrackerSheet>
+        <ActionSheet
+          label="Delete your post"
+          title="Delete your post?"
+          onClose={() => setMenu(null)}
+          rows={[{ label: "Delete my post", icon: <IconTrash />, red: true, disabled: busy, onClick: () => act(() => deleteLog(card.id)) }]}
+          note="The photo is deleted and the time comes off your week."
+        >
+          {error && <p className="px-[22px] pt-1 text-sm text-red-400">{error}</p>}
+        </ActionSheet>
       )}
     </article>
   );
 }
-
-function SheetButton({
-  children,
-  onClick,
-  disabled,
-  className = "",
-}: {
-  children: React.ReactNode;
-  onClick: () => void;
-  disabled?: boolean;
-  className?: string;
-}) {
-  return (
-    <button
-      type="button"
-      disabled={disabled}
-      onClick={onClick}
-      className={
-        "flex h-14 w-full items-center justify-center rounded-2xl border border-white/15 text-[16px] font-semibold text-bone disabled:opacity-60 " +
-        className
-      }
-    >
-      {children}
-    </button>
-  );
-}
-

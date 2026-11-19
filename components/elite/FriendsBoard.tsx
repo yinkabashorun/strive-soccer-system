@@ -3,29 +3,32 @@
 import { useState } from "react";
 import { BOARD_EMPTY_LINE, BOARD_TITLE, friendsBoard, initialsOf, type BoardEntry } from "@/lib/elite/tracker";
 import { usePostLauncher } from "./FreeShell";
+import { FreeAvatar } from "./FreeAvatar";
+import { IconPlus } from "./FreeIcons";
 import { sendLink } from "./send-link";
 import { StarMark } from "./StarMark";
 
-// The week next to your friends (mock screen 4): you and the friends you
-// added, in order of training time this week. It starts again every
-// Monday. Friends are made by the link only: there is no search, no list
-// of other players and no requests. Tapping a name opens that friend's
-// profile, where they can be taken off or blocked. Nothing here announces
-// a change of place.
+// The week next to your friends (the mock, screens 4 and 12): you and the
+// friends you added, in order of training time this week, each with their
+// photo and a thin bar against the week's leader (gold for you). It starts
+// again every Monday. Friends are made by the link only: there is no
+// search, no list of other players and no requests. Tapping a name opens
+// that friend's profile. Nothing here announces a change of place.
 export function FriendsBoard({
   me,
   myMinutes,
   friends,
   inviteLink,
 }: {
-  me: { id: string; name: string };
+  me: { id: string; name: string; photo?: string | null };
   myMinutes: number; // this week's training, as the screen shows it now
   friends: BoardEntry[];
   inviteLink: string;
 }) {
   const { profile } = usePostLauncher();
   const [copied, setCopied] = useState(false);
-  const rows = friendsBoard([{ id: me.id, name: me.name, minutes: myMinutes }, ...friends], me.id);
+  const rows = friendsBoard([{ id: me.id, name: me.name, minutes: myMinutes, photo: me.photo }, ...friends], me.id);
+  const most = Math.max(1, ...rows.map((r) => r.minutes));
 
   async function send() {
     if ((await sendLink(inviteLink)) === "copied") {
@@ -35,50 +38,44 @@ export function FriendsBoard({
   }
 
   return (
-    <section className="mx-[18px] mt-[18px]">
-      <h2 className="mb-1.5 text-[11px] font-bold uppercase tracking-[2.6px] text-white/60">{BOARD_TITLE}</h2>
+    <section className="mt-[22px]">
+      <h2 className="px-[18px] pb-2 text-[11px] font-bold uppercase tracking-[2.4px] text-white/60">{BOARD_TITLE}</h2>
 
       {friends.length === 0 ? (
-        <p className="py-2 text-[15px] leading-relaxed text-white/70">{BOARD_EMPTY_LINE}</p>
+        <p className="px-[18px] py-2 text-[15px] leading-relaxed text-white/70">{BOARD_EMPTY_LINE}</p>
       ) : (
         <ol>
           {rows.map((r) => (
-            <li key={r.id} className="border-b border-white/[0.09] last:border-0">
+            <li key={r.id}>
               <button
                 type="button"
                 onClick={() => profile(r.id)}
                 aria-label={`${r.me ? "Your" : `${r.name}'s`} profile, place ${r.place}, ${r.time} this week`}
-                className="flex h-[50px] w-full items-center gap-3"
+                className="flex h-[54px] w-full items-center gap-3 px-[18px]"
               >
                 <span className={"w-[18px] shrink-0 font-display text-[22px] font-black " + (r.me ? "text-accent" : "text-white/60")}>
                   {r.place}
                 </span>
-                <span
-                  className={
-                    "grid h-9 w-9 shrink-0 place-items-center rounded-full text-[13px] font-bold " +
-                    (r.me ? "bg-accent text-black" : "bg-[#222] text-bone")
-                  }
-                  aria-hidden
-                >
-                  {initialsOf(r.name)}
-                </span>
-                <span className={"flex min-w-0 flex-1 items-center gap-1.5 text-left text-[15.5px] font-semibold " + (r.me ? "text-accent" : "text-bone")}>
+                <FreeAvatar photo={r.photo} initials={initialsOf(r.name)} size={38} you={r.me} />
+                <span className={"flex min-w-0 flex-1 items-center gap-[5px] text-left text-[15.5px] font-semibold " + (r.me ? "text-accent" : "text-bone")}>
                   <span className="truncate">{r.me ? "You" : r.name}</span>
-                  {r.starred && <StarMark size={13} />}
+                  {r.starred && <StarMark size={15} />}
                 </span>
                 <span className="font-display text-[24px] font-black tabular-nums text-bone">{r.time}</span>
               </button>
+              <div className="ml-12 mr-[18px] h-[3px] overflow-hidden rounded-sm bg-[#1f1f1f]" aria-hidden>
+                <i className={"block h-full " + (r.me ? "bg-accent" : "bg-[#3a3a3a]")} style={{ width: `${Math.round((r.minutes / most) * 100)}%` }} />
+              </div>
             </li>
           ))}
         </ol>
       )}
 
-      <button
-        type="button"
-        onClick={send}
-        className="mt-4 flex h-12 w-full items-center justify-center rounded-2xl border border-white/20 text-[15px] font-semibold text-bone"
-      >
-        {copied ? "Link copied" : "Send my link"}
+      <button type="button" onClick={send} className="flex h-[54px] w-full items-center gap-3 px-[18px] text-[15px] font-semibold text-bone">
+        <span className="grid h-[38px] w-[38px] place-items-center rounded-full border-[1.5px] border-dashed border-[#444]">
+          <IconPlus size={18} />
+        </span>
+        {copied ? "Link copied. Send it to a teammate." : "Add a friend"}
       </button>
     </section>
   );

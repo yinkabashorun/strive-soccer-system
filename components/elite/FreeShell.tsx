@@ -2,11 +2,10 @@
 
 import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Clock, Plus, Users } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 import { FREE_HOME, FREE_WEEK } from "@/lib/elite/tracker";
 import { PostComposer } from "./PostComposer";
-import { ProfileSheet } from "./ProfileSheet";
+import { IconClock, IconFriends, IconPlus } from "./FreeIcons";
 
 // The free app's frame: the two tabs and the plus between them (the
 // approved mock, marketing/free-log/mock), and the posting screen that
@@ -18,7 +17,7 @@ type Launcher = {
   post: () => void;
   // The posting screen with no photo: for "Log it without a photo".
   logOnly: () => void;
-  // A player's profile sheet (a friend's, or your own).
+  // A player's profile (a friend's, or your own): a screen of its own.
   profile: (id: string) => void;
 };
 
@@ -31,24 +30,25 @@ export const usePostLauncher = () => useContext(LauncherContext);
 
 export function FreeShell({
   gym,
-  inviteLink,
   children,
 }: {
   gym: boolean;
-  inviteLink: string; // the player's own link, shown on their own profile
   children: ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const input = useRef<HTMLInputElement>(null);
   const [composer, setComposer] = useState<{ photo: File | null } | null>(null);
-  const [profileId, setProfileId] = useState<string | null>(null);
 
   const post = useCallback(() => input.current?.click(), []);
   const logOnly = useCallback(() => setComposer({ photo: null }), []);
-  const profile = useCallback((id: string) => setProfileId(id), []);
+  const profile = useCallback((id: string) => router.push(`/log/u/${id}`), [router]);
 
-  // The set-up screens (the four questions, the days) have no tab bar.
-  const tabs = pathname === FREE_HOME || pathname === FREE_WEEK;
+  // The set-up screens (the four questions, the days) and Settings have no
+  // tab bar. A profile sits under Friends; a club and Top clubs under My week.
+  const onFriends = pathname === FREE_HOME || pathname.startsWith("/log/u/");
+  const onWeek = pathname === FREE_WEEK || pathname.startsWith("/log/club");
+  const tabs = onFriends || onWeek;
 
   return (
     <LauncherContext.Provider value={{ post, logOnly, profile }}>
@@ -75,8 +75,8 @@ export function FreeShell({
           className="fixed inset-x-0 bottom-0 z-40 bg-gradient-to-b from-transparent via-black to-black pb-[env(safe-area-inset-bottom)]"
         >
           <div className="mx-auto flex h-[88px] max-w-md items-center justify-between px-11 pb-[18px] pt-3">
-            <Tab href={FREE_HOME} label="Friends" on={pathname === FREE_HOME}>
-              <Users className="h-6 w-6" strokeWidth={2} />
+            <Tab href={FREE_HOME} label="Friends" on={onFriends}>
+              <IconFriends />
             </Tab>
             <button
               type="button"
@@ -84,16 +84,15 @@ export function FreeShell({
               aria-label="Post my training"
               className="grid h-[62px] w-[62px] place-items-center rounded-full bg-bone text-black shadow-[0_0_0_5px_#000] active:scale-95"
             >
-              <Plus className="h-7 w-7" strokeWidth={2.6} />
+              <IconPlus size={28} />
             </button>
-            <Tab href={FREE_WEEK} label="My week" on={pathname === FREE_WEEK}>
-              <Clock className="h-6 w-6" strokeWidth={2} />
+            <Tab href={FREE_WEEK} label="My week" on={onWeek}>
+              <IconClock />
             </Tab>
           </div>
         </nav>
       )}
 
-      {profileId && <ProfileSheet targetId={profileId} inviteLink={inviteLink} onClose={() => setProfileId(null)} />}
 
       {composer && (
         <PostComposer

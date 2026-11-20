@@ -323,6 +323,14 @@ export async function friendAskFor(
   if (!ownerId || ownerId === viewer.profile.id) return null;
   if ((await friendIdsOf(admin, viewer.profile.id)).includes(ownerId)) return null;
   if (blockedEitherWay(await blocksBetween(admin, viewer.profile.id, ownerId), viewer.profile.id, ownerId)) return null;
+  // a request already on its way is not asked again
+  const { data: pending } = await admin
+    .from("elite_tracker_friend_requests")
+    .select("requester")
+    .eq("requester", viewer.profile.id)
+    .eq("recipient", ownerId)
+    .maybeSingle();
+  if (pending) return null;
   const { data: profile } = await admin
     .from("elite_profiles")
     .select("full_name")
@@ -341,11 +349,10 @@ async function blocksBetween(admin: Admin, x: string, y: string): Promise<Block[
 }
 
 // Make two free accounts friends, both ways, as one stored pair. Safe to
-// repeat. Refused while either has blocked the other: the link can never
-// undo a block. NOT a server action (this file is not one): it is called
-// only by code that has already established both ids for itself, the
-// sign-up route (who sent the link) and the confirm action (the signed-in
-// viewer and the owner of the code they opened).
+// repeat. Refused while either has blocked the other. NOT a server action
+// (this file is not one), and since 072 only ever reached through a
+// request both sides wanted: answerFriendRequest (the recipient accepted)
+// or requestFriend (each had asked the other).
 // x is the player who opened the link, y the link's owner. When y once
 // took x off, x cannot come straight back on y's link (071); y adding x
 // again from x's link clears that.
@@ -366,6 +373,95 @@ export async function makeFriends(x: string, y: string): Promise<"ok" | "blocked
     .from("elite_tracker_friends")
     .upsert(pair, { onConflict: "a,b", ignoreDuplicates: true });
   return error ? "error" : "ok";
+}
+
+// ---- Friend requests (072) ----------------------------------------------
+
+// Opening a player's link sends them a request; only their Accept makes the
+// two friends. "sent" is also what a requester hears when the link's owner
+// once took them off (071): the request is quietly not stored, so a removed
+// player cannot keep asking, and is never told.
+export const FRIEND_REQUESTS_PENDING_MAX = 30;
+export type FriendRequestResult = "sent" | "friends" | "already" | "blocked" | "too_many" | "error";
+
+export async function requestFriend(requester: string, recipient: string): Promise<FriendRequestResult> {
+  const pair = friendPair(requester, recipient);
+  const admin = createServiceClient();
+  if (!pair || !admin) return "error";
+  if ((await friendIdsOf(admin, requester)).includes(recipient)) return "already";
+  if (blockedEitherWay(await blocksBetween(admin, requester, recipient), requester, recipient)) return "blocked";
+  const { data: removed } = await admin
+    .from("elite_tracker_unfriends")
+    .select("remover")
+    .eq("remover", recipient)
+    .eq("removed", requester)
+    .maybeSingle();
+  if (removed) return "sent";
+  // they already asked us: both want it, so it is a pair now
+  const { data: reverse } = await admin
+    .from("elite_tracker_friend_requests")
+    .select("requester")
+    .eq("requester", recipient)
+    .eq("recipient", requester)
+    .maybeSingle();
+  if (reverse) return (await makeFriends(requester, recipient)) === "ok" ? "friends" : "error";
+  const { count } = await admin
+    .from("elite_tracker_friend_requests")
+    .select("requester", { count: "exact", head: true })
+    .eq("requester", requester);
+  if ((count ?? 0) >= FRIEND_REQUESTS_PENDING_MAX) return "too_many";
+  const { error } = await admin
+    .from("elite_tracker_friend_requests")
+    .upsert({ requester, recipient }, { onConflict: "requester,recipient", ignoreDuplicates: true });
+  return error ? "error" : "sent";
+}
+
+// The requests waiting on this viewer, newest first: first name and last
+// initial only. No photo until they are friends.
+export type FriendRequestView = { id: string; name: string; initials: string };
+
+export async function friendRequestsFor(viewer: Viewer): Promise<FriendRequestView[]> {
+  if (viewer.demo) return [];
+  const admin = createServiceClient();
+  if (!admin) return [];
+  const { data } = await admin
+    .from("elite_tracker_friend_requests")
+    .select("requester, created_at")
+    .eq("recipient", viewer.profile.id)
+    .order("created_at", { ascending: false })
+    .limit(FRIEND_REQUESTS_PENDING_MAX);
+  const ids = ((data as { requester: string }[] | null) ?? []).map((r) => r.requester);
+  if (ids.length === 0) return [];
+  const names = await namesOf(admin, ids);
+  return ids.map((id) => {
+    const name = names.get(id) ?? "A teammate";
+    return { id, name, initials: initialsOf(name) };
+  });
+}
+
+// The viewer's answer to one request waiting on them. Accept makes the
+// pair (a block still wins); either answer takes the request away.
+export async function answerFriendRequest(
+  recipient: string,
+  requester: string,
+  accept: boolean
+): Promise<"ok" | "none" | "blocked" | "error"> {
+  const admin = createServiceClient();
+  if (!admin || !friendPair(recipient, requester)) return "error";
+  const { data: request } = await admin
+    .from("elite_tracker_friend_requests")
+    .select("requester")
+    .eq("requester", requester)
+    .eq("recipient", recipient)
+    .maybeSingle();
+  if (!request) return "none";
+  await admin.from("elite_tracker_friend_requests").delete().eq("requester", requester).eq("recipient", recipient);
+  if (!accept) return "ok";
+  // accepting is choosing them again, so an old take-off by the one
+  // accepting no longer stands in the way
+  await admin.from("elite_tracker_unfriends").delete().eq("remover", recipient).eq("removed", requester);
+  const made = await makeFriends(requester, recipient);
+  return made === "ok" ? "ok" : made === "blocked" ? "blocked" : "error";
 }
 
 // The players this viewer has blocked, for the Account page, where a

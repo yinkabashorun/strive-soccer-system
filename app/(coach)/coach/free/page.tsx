@@ -37,7 +37,7 @@ export default async function CoachFreePage() {
       <h1 className="font-display text-4xl font-black uppercase tracking-tight">Free app</h1>
       <p className="mt-1 max-w-2xl text-sm text-white/60">
         A free account posts a photo of the training a player does on their own, sees the friends
-        it added by link do the same, and keeps a week against a target on the days it planned.
+        it accepted as friends do the same, and keeps a week against a target on the days it planned.
         No drills, no courses, no plan from us. 13 and older. Free accounts never appear on the
         roster.
       </p>

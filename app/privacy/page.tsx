@@ -82,7 +82,7 @@ export default function PrivacyPage({
                 work), the photos you post with their one line, the props
                 you give, and the players you block or report. Photos are
                 stored privately and shown only through short-lived links.
-                The friends you added by link see your first name, last
+                Your friends (added only by a request one of you accepts) see your first name, last
                 initial, your training time and the photos you post; our
                 coaches can see them too, and nobody else does. You can
                 report a post or block a player at any time, and we can

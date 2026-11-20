@@ -13,7 +13,8 @@ import {
   getTracker,
   joinClub,
   joinClubByCode,
-  makeFriends,
+  answerFriendRequest as answerFriendRequestFor,
+  requestFriend,
   membersOf,
   newClub,
   postForViewer,
@@ -63,6 +64,7 @@ import {
   DAY_CAP_MESSAGE,
   limitHit,
   newReferralCode,
+  FRIEND_REQUESTS_FULL_MESSAGE,
 } from "./tracker";
 
 // The free app: writing it (migration 069). Every write goes through
@@ -263,17 +265,18 @@ export async function deleteLog(id: string): Promise<{ ok: true } | Fail> {
 
 // ---- Friends ----------------------------------------------------------
 
-// "Yes" on the sheet a signed-in player sees after opening a teammate's
-// link. The teammate is found from the link's code; the other side of the
-// pair is always the signed-in player.
-export async function confirmFriend(codeInput: string): Promise<{ ok: true } | Fail> {
+// "Send request" on the sheet a signed-in player sees after opening a
+// teammate's link. The teammate is found from the link's code; the one
+// asking is always the signed-in player. Nobody is a friend until the
+// link's owner accepts (072).
+export async function confirmFriend(codeInput: string): Promise<{ ok: true; result: "sent" | "friends" } | Fail> {
   const code = cleanReferralCode(codeInput);
   if (!code) return fail("That link is not one of ours.");
   const o = await owner();
   if (o.kind === "no") return fail(o.error);
   if (o.kind === "demo") {
     if (code === DEMO_ASK.code) writeDemoState({ added: true });
-    return { ok: true };
+    return { ok: true, result: "friends" };
   }
   const { data: other } = await o.admin
     .from("elite_trackers")
@@ -282,9 +285,25 @@ export async function confirmFriend(codeInput: string): Promise<{ ok: true } | F
     .maybeSingle();
   const otherId = other?.profile_id as string | undefined;
   if (!otherId || otherId === o.profileId) return fail("That link is not one of ours.");
-  const made = await makeFriends(o.profileId, otherId);
-  if (made === "blocked") return fail(BLOCKED_LINK_MESSAGE);
-  if (made !== "ok") return fail(OFFLINE);
+  const res = await requestFriend(o.profileId, otherId);
+  if (res === "blocked") return fail(BLOCKED_LINK_MESSAGE);
+  if (res === "too_many") return fail(FRIEND_REQUESTS_FULL_MESSAGE);
+  if (res === "error") return fail(OFFLINE);
+  touch();
+  return { ok: true, result: res === "friends" || res === "already" ? "friends" : "sent" };
+}
+
+// Accept or Decline on a request waiting on the signed-in player. Only a
+// request addressed to them can be answered.
+export async function answerFriendRequest(requesterId: string, accept: boolean): Promise<{ ok: true } | Fail> {
+  if (typeof requesterId !== "string" || !requesterId) return fail("That request is gone.");
+  const o = await owner();
+  if (o.kind === "no") return fail(o.error);
+  if (o.kind === "demo") return { ok: true };
+  const res = await answerFriendRequestFor(o.profileId, requesterId, accept === true);
+  if (res === "none") return fail("That request is gone.");
+  if (res === "blocked") return fail(BLOCKED_LINK_MESSAGE);
+  if (res === "error") return fail(OFFLINE);
   touch();
   return { ok: true };
 }

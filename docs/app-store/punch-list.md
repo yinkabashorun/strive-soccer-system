@@ -134,7 +134,7 @@ how sure it is. What each answer turned into:
 | D12 | Book Apple's 30-minute "Meet with App Review" appointment once the account is active, and ask the payment question before submitting. |
 | D13 | Parental consent for a member under 13: tie the parent's payment and the sales call to the consent record (what is shown before payment, a short script on the call). A lawyer's call. |
 | D14 | The fallback order if Apple refuses on payment: appeal as 1:1 coaching; then take the course library out of the iPhone app; then Apple's in-app purchase. |
-| D15 | Does the free app (photo posts, clubs, rankings) go into the first App Store build, or stay on the website until a later one? Today it is website only: `lib/elite/app-review.ts`, one line per screen. |
+| D15 | Does the free app go into the first App Store build? ANSWERED Nov 20: yes ("App store asap"). Its screens are listed as first build in `lib/elite/app-review.ts`; Join free works inside the app; listing.md describes it. FOR REVIEW: free sign-up must be switched on at /coach/free, and a free reviewer login is made with the other two (D3). |
 
 ## Order
 
@@ -177,3 +177,10 @@ the thing in the way.
   review notes and the age rating answers (players share photos with
   each other, guideline 1.2) change with it. Next: A17 (screenshots),
   then the A20 leftover (Hudl, Veo, Drive links).
+- Nov 20 2026, later: the free app is IN the first build (D15, his word).
+  For guideline 1.2 (content shared between users) it now has, besides
+  report, block and the coach queue: friends by accepted request only
+  (072), a word filter on every typed line other players read
+  (lib/elite/text-filter.ts), and Terms with zero tolerance and a 24-hour
+  promise on reports. Listing, review notes and age rating answers updated
+  in listing.md (expect 12+ or 13+). 688 tests.

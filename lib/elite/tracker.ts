@@ -11,6 +11,7 @@
 // What this file will never grow: a streak, a count of days missed, a
 // score, or a board of all players. The one number is time trained, and
 // the only people a player is ever shown next to are their own friends.
+import { isOffensive } from "./text-filter";
 import { fmtDuration } from "./time-trained";
 import { shiftDay } from "./time";
 import type { Role } from "./types";
@@ -450,8 +451,17 @@ export function friendsBoard(entries: BoardEntry[], meId: string): BoardRow[] {
 }
 
 export function addFriendQuestion(name: string): string {
-  return `Add ${name} as a friend?`;
+  return `Send ${name} a friend request?`;
 }
+
+// Since 072 a link sends a request; the owner accepts it.
+export function friendRequestLine(name: string): string {
+  return `When ${name} accepts, you see each other's training and the photos you post.`;
+}
+export function requestSentLine(name: string): string {
+  return `Request sent. You and ${name} are friends once ${name} accepts.`;
+}
+export const FRIEND_REQUESTS_FULL_MESSAGE = "You have a lot of requests waiting already. Give your friends a little time to accept.";
 
 // "GG" for "Gary G.", "M" for "Marcus". The only picture of a person in
 // the free app: there are no profile photos.
@@ -485,10 +495,11 @@ export function cleanClubName(raw: unknown): string | null {
   const name = raw.replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim();
   if (!name || name.length > CLUB_NAME_MAX) return null;
   if (/https?:|www\.|:\/\/|@\w|\.(com|net|org|io|co|gg|me|ly|app|link|tv)\b/i.test(name)) return null;
+  if (isOffensive(name)) return null;
   return name;
 }
 
-export const CLUB_NAME_MESSAGE = "Give the club a name of up to 40 letters, with no links.";
+export const CLUB_NAME_MESSAGE = "Give the club a name of up to 40 letters, with no links and nothing offensive.";
 
 // A club's code has the same shape as a player's link code.
 export const cleanClubCode = (raw: unknown): string | null => cleanReferralCode(raw);
@@ -754,7 +765,7 @@ export function auraNextLine(a: AuraLevel): string | null {
 // friend can report it and a coach can clear it.
 export const PLAYING_FOR_MAX = 40;
 export const cleanPlayingFor = (raw: unknown): string | null => cleanClubName(raw);
-export const PLAYING_FOR_MESSAGE = "Up to 40 letters, with no links.";
+export const PLAYING_FOR_MESSAGE = "Up to 40 letters, with no links and nothing offensive.";
 
 // One reported line, waiting for a coach.
 // A reported profile: its Playing for line, or its photo (069 section 11).

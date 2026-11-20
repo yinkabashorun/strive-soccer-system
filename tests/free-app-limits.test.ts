@@ -111,3 +111,22 @@ describe("taking someone off sticks", () => {
     expect(read("components/elite/ClubScreen.tsx")).toContain('label: "Block a player"');
   });
 });
+
+describe("the word filter", () => {
+  it("stops offensive words, look-alike spellings included, in what other players read", async () => {
+    const { isOffensive } = await import("@/lib/elite/text-filter");
+    const { cleanClubName, cleanPlayingFor } = await import("@/lib/elite/tracker");
+    for (const bad of ["fuck this", "sh1t session", "b1tch"]) expect(isOffensive(bad), bad).toBe(true);
+    for (const fine of ["Weak foot work", "Scunthorpe United", "Arsenal", "Richard Dickson", "Cassandra Bass", "Sussex FC"]) {
+      expect(isOffensive(fine), fine).toBe(false);
+    }
+    expect(cleanClubName("Sh1t FC")).toBeNull();
+    expect(cleanClubName("Dickson Elite")).toBe("Dickson Elite");
+    expect(cleanPlayingFor("fuck it")).toBeNull();
+  });
+
+  it("guards a post's note on the server", () => {
+    const route = read("app/api/elite/tracker/post/route.ts");
+    expect(route).toContain('if (isOffensive(form.get("caption"))) return no(OFFENSIVE_MESSAGE, 400);');
+  });
+});

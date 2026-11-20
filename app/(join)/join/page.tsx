@@ -7,7 +7,6 @@ import { UnderAge } from "@/components/elite/UnderAge";
 import { nyToday } from "@/lib/elite/time";
 import { getViewer } from "@/lib/elite/session";
 import { isSupabaseConfigured } from "@/lib/elite/supabase/server";
-import { inNativeApp } from "@/lib/elite/native-request";
 import { homePathFor, inviteLandingFor, isFreeSignupOpen, trackerFor } from "@/lib/elite/tracker-server";
 import {
   JOIN_AGE_COOKIE,
@@ -28,16 +27,13 @@ export const dynamic = "force-dynamic";
 // The free training log's front door (migration 069). Open to anyone only
 // while a coach has free sign-up switched on at /coach/free; otherwise it
 // says so and offers sign-in. A teammate's link carries ?ref=CODE: whoever
-// joins with it becomes that teammate's friend.
+// joins with it sends that teammate a friend request (072). It works inside
+// the App Store app too: a free account buys nothing.
 export default async function JoinPage({
   searchParams,
 }: {
   searchParams?: { ref?: string; club?: string };
 }) {
-  // Inside the App Store app, accounts are not created (the existing
-  // rule, lib/elite/native-request.ts): the screen there is sign-in only.
-  if (inNativeApp()) redirect("/login");
-
   const ref = cleanReferralCode(searchParams?.ref);
   const club = cleanClubCode(searchParams?.club);
   const viewer = await getViewer();

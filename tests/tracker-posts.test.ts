@@ -519,13 +519,13 @@ describe("the legal pages say what the free app does", () => {
     expect(privacy).toContain("the free app is for players 13 and older.");
     expect(privacy).toContain("the month and year you were born (never the day)");
     expect(privacy).toContain(
-      "The friends you added by link see your first name, last initial, your training time and the photos you post; our coaches can see them too, and nobody else does."
+      "Your friends (added only by a request one of you accepts) see your first name, last initial, your training time and the photos you post; our coaches can see them too, and nobody else does."
     );
     expect(privacy).toContain("You can report a post or block a player at any time, and we can remove a post.");
     const terms = flat("app/terms/page.tsx");
     expect(terms).toContain("A free account is for players 13 and older.");
     expect(terms).toContain("The friends you added see them, and so do our coaches.");
-    expect(terms).toContain("You can report a post or block a player at any time. We can remove any post");
+    expect(terms).toContain("You can report a post or block a player at any time. We have zero tolerance for objectionable content and for abusive players: we look at every report within 24 hours");
   });
 });
 

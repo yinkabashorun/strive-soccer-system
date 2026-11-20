@@ -4,7 +4,7 @@ import { useEffect, type ReactNode } from "react";
 import { X } from "lucide-react";
 
 // A small sheet that comes up from the bottom of the free training log:
-// a day's entries, "Add Marcus B. as a friend?", taking a friend off. It
+// a day's entries, "Send Marcus B. a friend request?", taking a friend off. It
 // closes on the X, on a tap outside it and on Escape. It does not slide
 // or fade: it is simply there, then gone.
 export function TrackerSheet({

@@ -10,10 +10,11 @@ import { blockPlayer, deleteLog, reportPost, toggleProps } from "@/lib/elite/tra
 import { fmtDuration } from "@/lib/elite/time-trained";
 import { feel } from "@/lib/elite/native";
 import { REPORT_REASONS, lockedHeadline, lockedHeadlineLines, lockedLine } from "@/lib/elite/tracker";
-import type { FeedView, OpenCardView } from "@/lib/elite/tracker-server";
+import type { FeedView, FriendRequestView, OpenCardView } from "@/lib/elite/tracker-server";
 import type { LockedCard } from "@/lib/elite/tracker";
 import { usePostLauncher } from "./FreeShell";
 import { FriendAsk } from "./FriendAsk";
+import { FriendRequests } from "./FriendRequests";
 import { ClubAsk } from "./ClubAsk";
 import { sendLink } from "./send-link";
 import { StarMark } from "./StarMark";
@@ -30,6 +31,7 @@ export function FriendsFeed({
   me,
   friendAsk,
   clubAsk,
+  requests = [],
   inviteLink,
 }: {
   date: string; // "Wednesday, Nov 18"
@@ -38,6 +40,7 @@ export function FriendsFeed({
   me: { id: string; initials: string; photo: string | null };
   friendAsk: { code: string; name: string } | null;
   clubAsk: { code: string; name: string; problem: string | null } | null;
+  requests?: FriendRequestView[];
   inviteLink: string;
 }) {
   const { post, profile } = usePostLauncher();
@@ -56,6 +59,8 @@ export function FriendsFeed({
         </div>
         <WeekRing initials={me.initials} photo={me.photo} onOpen={() => profile(me.id)} {...week} />
       </header>
+
+      <FriendRequests requests={requests} />
 
       {faces.length > 0 && (
         <ul className="no-scrollbar flex gap-3.5 overflow-x-auto px-[18px] pb-1.5 pt-5" aria-label="Who trained today">
@@ -87,7 +92,7 @@ export function FriendsFeed({
       {feed.friendCount === 0 ? (
         <Empty
           title="Your friends' training lands here"
-          line="Send your link to a teammate. Once they join, you see each other's training every day."
+          line="Send your link to a teammate. When they join, accept their friend request and you see each other's training every day."
           inviteLink={inviteLink}
         />
       ) : cards.length === 0 ? (

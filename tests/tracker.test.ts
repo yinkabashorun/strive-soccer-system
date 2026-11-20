@@ -658,7 +658,9 @@ describe("the free log stays what it is", () => {
   it("the line about the coached program is hidden inside the App Store app", () => {
     expect(code("app/(free)/log/week/page.tsx")).toContain("programHref={programLink(inNativeApp())}");
     expect(code("components/elite/MyWeek.tsx")).toMatch(/\{programHref && \(/);
-    expect(code("app/(join)/join/page.tsx")).toContain('if (inNativeApp()) redirect("/login")');
+    // free sign-up works inside the app too (nothing is bought); the app
+    // draws it because a reviewed build describes it (app-review.ts)
+    expect(code("app/(join)/join/page.tsx")).not.toContain("inNativeApp");
   });
 });
 
@@ -836,7 +838,7 @@ describe("friends", () => {
     expect(shortName("Marcus")).toBe("Marcus");
     expect(shortName("Marcus B.")).toBe("Marcus B.");
     expect(shortName("")).toBe("A teammate");
-    expect(addFriendQuestion(shortName("Marcus Bell"))).toBe("Add Marcus B. as a friend?");
+    expect(addFriendQuestion(shortName("Marcus Bell"))).toBe("Send Marcus B. a friend request?");
   });
 
   const entry = (id: string, name: string, minutes: number) => ({ id, name, minutes });
@@ -931,33 +933,39 @@ describe("friends", () => {
     expect(code("app/(coach)/coach/free/page.tsx")).toContain('if (viewer.role === "player") redirect("/dashboard")');
   });
 
-  it("friends are made by the link only: joining with it, or opening it signed in and saying yes", () => {
+  it("friends are asked for by the link only, and made only when the link's owner accepts", () => {
     expect(friendAskPath("ABCDEFGH")).toBe("/log?friend=ABCDEFGH");
     const route = code("app/api/elite/auth/join/route.ts");
-    expect(route).toContain("if (referredBy) await makeFriends(userId, referredBy)");
+    expect(route).toContain("if (referredBy) await requestFriend(userId, referredBy)");
+    expect(route).not.toContain("makeFriends");
     const join = code("app/(join)/join/page.tsx");
     expect(join).toContain("if (ref && (await trackerFor(viewer))) redirect(friendAskPath(ref));");
     const page = code("app/(free)/log/page.tsx");
     expect(page).toContain("friendAskFor(viewer, cleanReferralCode(searchParams?.friend))");
     expect(code("components/elite/FriendsFeed.tsx")).toContain("<FriendAsk ask={friendAsk} />");
-    // nothing is added without the tap on Yes
+    // nothing is sent without the tap on Send request
     const ask = code("components/elite/FriendAsk.tsx");
     expect(ask).toContain("addFriendQuestion(asking.name)");
-    expect(ask).toMatch(/onClick=\{\(\) => answer\(true\)\}[\s\S]{0,260}Yes/);
+    expect(ask).toMatch(/onClick=\{\(\) => answer\(true\)\}[\s\S]{0,260}Send request/);
     expect((ask.match(/confirmFriend\(/g) ?? []).length).toBe(1);
-    // no search, no browsing, no requests, anywhere in the free app
-    for (const f of ["components/elite/FriendAsk.tsx", "components/elite/FriendsBoard.tsx", "components/elite/FriendsFeed.tsx"]) {
-      expect(code(f), f).not.toMatch(/<input|search|request/i);
+    // the owner answers on the Friends tab
+    expect(code("components/elite/FriendsFeed.tsx")).toContain("<FriendRequests requests={requests} />");
+    expect(code("components/elite/FriendRequests.tsx")).toContain("answerFriendRequest(id, accept)");
+    // no search and no browsing of other players, anywhere in the free app
+    for (const f of ["components/elite/FriendAsk.tsx", "components/elite/FriendsBoard.tsx", "components/elite/FriendsFeed.tsx", "components/elite/FriendRequests.tsx"]) {
+      expect(code(f), f).not.toMatch(/<input|search/i);
     }
   });
 
   it("the server only pairs the signed-in player, and making friends is not callable from a browser", () => {
     const actions = code("lib/elite/tracker-actions.ts");
-    expect(actions).toContain("makeFriends(o.profileId, otherId)");
+    expect(actions).toContain("requestFriend(o.profileId, otherId)");
+    expect(actions).not.toContain("makeFriends(");
     expect(actions).toContain("friendPair(o.profileId, friendId)");
     // the only functions a browser can call
     const exported = [...actions.matchAll(/export async function (\w+)/g)].map((m) => m[1]).sort();
     expect(exported).toEqual([
+      "answerFriendRequest",
       "archiveClub",
       "blockPlayer",
       "checkJoinAge",

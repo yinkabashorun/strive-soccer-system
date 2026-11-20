@@ -80,7 +80,7 @@ vi.mock("@/lib/elite/session-start", () => ({
 }));
 vi.mock("@/lib/elite/tracker-server", () => ({
   isFreeSignupOpen: async () => state.open,
-  makeFriends: async (x: string, y: string) => {
+  requestFriend: async (x: string, y: string) => {
     state.friends.push([x, y]);
     return "ok";
   },
@@ -223,7 +223,7 @@ describe("free sign-up", () => {
     expect(res.status).toBe(200);
     expect(state.lookedUp).toEqual(["ABCDEFGH"]);
     expect(state.inserts[0].row.referred_by).toBe("sender-9");
-    // and the two of them are friends
+    // and the teammate gets a friend request to accept (072), not a friend
     expect(state.friends).toEqual([["user-1", "sender-9"]]);
   });
 

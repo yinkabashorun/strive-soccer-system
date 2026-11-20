@@ -16,9 +16,11 @@ import { ACCOUNT_DELETED_MESSAGE, ACCOUNT_DELETED_NOTICE } from "@/lib/elite/acc
 export function LoginForm({
   configured,
   native = false,
+  freeOpen = false,
 }: {
   configured: boolean;
-  native?: boolean; // inside the App Store app: sign-in only
+  native?: boolean; // inside the App Store app: no member sign-up
+  freeOpen?: boolean; // free sign-up is open (/coach/free)
 }) {
   const params = useSearchParams();
   const next = params.get("next");
@@ -102,9 +104,18 @@ export function LoginForm({
         </p>
       </form>
 
-      {!native && (
+      {freeOpen && (
         <p className="mt-5 text-center text-sm text-white/50">
           New here?{" "}
+          <Link href="/join" className="tap text-accent hover:underline">
+            Join free
+          </Link>
+        </p>
+      )}
+
+      {!native && (
+        <p className={(freeOpen ? "mt-2" : "mt-5") + " text-center text-sm text-white/50"}>
+          {freeOpen ? "Have an invite from your coach? " : "New here? "}
           <Link href="/signup" className="tap text-accent hover:underline">
             Create an account
           </Link>

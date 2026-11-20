@@ -1,3 +1,4 @@
+import { OFFENSIVE_MESSAGE, isOffensive } from "@/lib/elite/text-filter";
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { getViewer } from "@/lib/elite/session";
@@ -53,6 +54,8 @@ export async function POST(req: Request) {
   const kind = cleanKind(form.get("kind"));
   if (minutes === null || kind === null) return no("Pick how long you trained.", 400);
   if (!mayLog(kind, tracker.grade)) return no(GYM_REFUSED_MESSAGE, 403);
+  // the word filter on what friends will read (text-filter.ts)
+  if (isOffensive(form.get("caption"))) return no(OFFENSIVE_MESSAGE, 400);
   const caption = cleanCaption(form.get("caption"));
 
   const file = form.get("photo");

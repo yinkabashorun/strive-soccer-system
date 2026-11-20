@@ -18,7 +18,7 @@ and the app sells nothing inside it).
 | Privacy Policy URL | | https://thestriveapp.com/privacy |
 | Marketing URL | optional | leave empty |
 | Copyright | | 2026, then the legal name on the Apple account (HIS) |
-| Price | | Free (the app is the members' tool; nothing is bought in it) |
+| Price | | Free (nothing is bought in the app: members join after a call with a coach, and the free training log is free) |
 | Availability | | United States only to start (HIS call) |
 
 Promotional text (170):
@@ -44,9 +44,14 @@ Description:
 > COURSES
 > A library of drills and guides to work through after your sessions: juggling, dribbling, weak foot, strength, speed and more.
 >
-> Strive Elite is for members. If you are not a member yet, you can look around the app with the example player on the sign-in screen.
+> TRAIN WITH YOUR FRIENDS, FREE
+> Not a member? Join free (13 and older). Post a photo of the training you do on your own, set a weekly target, and see the friends you added do the same. Friends are added by request only. Start a club with your team and see how your club's week stacks up.
+>
+> Members get everything above. You can also look around the members' app with the example player on the sign-in screen.
 
-Every line above is something the app does today. Not in it on purpose:
+Every line above is something the app does today (the free part only
+while a coach has free sign-up switched on at /coach/free, which it must
+be for review). Not in it on purpose:
 prices, the guarantee, results claims, alumni names, courses that are not
 in the app yet (Passing, Scoring Goals).
 
@@ -61,8 +66,14 @@ are allowed).
 ## Age rating questionnaire
 
 Answer None to violence, gambling, mature themes and the rest. Say Yes to
-user-generated content (members send private clips and messages to their
-coaches) and describe it as private, coach-reviewed, with a report option.
+user-generated content: members send private clips and messages to their
+coaches, AND free players share photos of their training with the friends
+they accepted. Describe it as: friends by accepted request only, no
+public feed and no search, a word filter on every typed line, report on
+every post, profile photo and club, block on any friend or club mate, a
+coach queue that is texted on every report and acts within 24 hours, and
+Terms with zero tolerance for objectionable content (Nov 20 2026). The
+free app is 13 and older, so expect 12+ or 13+, not 4+.
 Say YES to "Messaging and Chat": a member messages their coach. Apps have
 been rejected under guideline 2.3.6 for answering No to this (see
 `research-2026-11-18.md`, B8). Unrestricted web access: No. Expect 4+ or
@@ -72,11 +83,16 @@ been rejected under guideline 2.3.6 for answering No to this (see
 
 Data linked to the user, none used for tracking: name, email address,
 phone number; photos or videos; customer support (messages); other user
-content; user ID; device ID; product interaction; crash data. Tracking: No.
+content; user ID; device ID; product interaction; crash data. The free
+app adds nothing new to the list: its posts are photos and other user
+content, its birth month and year sit under other user content (used only
+for the 13-and-older check). Tracking: No.
 
 ## Notes for the reviewer (paste into App Review Information)
 
-> Strive Elite is the member app for Strive Soccer's remote coaching. A family joins after a call with a coach; the coach then creates their invitation. There is no purchase, price or sign-up inside the app.
+> Strive Elite is the member app for Strive Soccer's remote coaching. A family joins after a call with a coach; the coach then creates their invitation. There is no purchase or price anywhere in the app.
+>
+> The app also has a free part for players 13 and older: Join free on the sign-in screen. A free player posts a photo of their own training for the friends they accepted, logs training time against a weekly target, and can start or join a club. There is no public feed and no search: friends are added only by sending a request that the other player accepts. Every post, profile photo and club can be reported; any friend or club mate can be blocked; typed text passes a word filter; every report texts our coaches, who review it within 24 hours from a queue at /coach/free and remove the content and the account where needed. The Terms state zero tolerance for objectionable content.
 >
 > What the member gets is personal coaching: each week is built for one player by a coach, the coach answers the player's messages and clips, and the family has a 1:1 call with the coach each month.
 >
@@ -84,6 +100,7 @@ content; user ID; device ID; product interaction; crash data. Tracking: No.
 >
 > Player: [email] / [password]
 > Coach: [email] / [password]
+> Free player: [email] / [password] (or tap Join free and make one)
 >
 > Account deletion: Account (tap the initials, top right) > Delete my account.
 > Notifications: optional, on or off under Account.

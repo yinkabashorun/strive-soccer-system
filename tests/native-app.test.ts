@@ -270,9 +270,12 @@ describe("the native shell (native/)", () => {
     expect(offline).not.toContain("—");
   });
 
-  it("the sign-in screen inside the app is sign-in only", () => {
+  it("the sign-in screen inside the app creates no member account, and offers Join free only while it is open", () => {
     const form = read("components/elite/LoginForm.tsx");
-    expect(form).toMatch(/\{!native && \(\s*<p[^>]*>\s*New here\?/);
+    const member = form.slice(form.indexOf("{!native && ("));
+    expect(member.slice(0, member.indexOf(")}"))).toContain('href="/signup"');
+    expect(form.slice(0, form.indexOf("{!native && ("))).not.toContain('href="/signup"');
+    expect(form).toMatch(/\{freeOpen && \(\s*<p[^>]*>\s*New here\?\{" "\}\s*<Link href="\/join"/);
     expect(read("app/(auth)/login/page.tsx")).toContain("inNativeApp()");
   });
 

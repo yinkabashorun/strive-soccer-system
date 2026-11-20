@@ -6,7 +6,7 @@ import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { AGREEMENT_REQUIRED_MESSAGE, agreementComplete } from "@/lib/elite/legal";
 import { recordConsent } from "@/lib/elite/legal-server";
 import { nyToday } from "@/lib/elite/time";
-import { isFreeSignupOpen, joinClubByCode, makeFriends } from "@/lib/elite/tracker-server";
+import { isFreeSignupOpen, joinClubByCode, requestFriend } from "@/lib/elite/tracker-server";
 import {
   BIRTH_REQUIRED_MESSAGE,
   JOIN_AGE_COOKIE,
@@ -164,10 +164,11 @@ export async function POST(req: Request) {
     );
   }
 
-  // 4b) joining with a teammate's link makes the two of them friends, both
-  // ways (referred_by above stays as the count the coach sees). Best
-  // effort: a failure here never undoes the account.
-  if (referredBy) await makeFriends(userId, referredBy).catch(() => "error");
+  // 4b) joining with a teammate's link sends that teammate a friend
+  // request to accept (072); they are friends once it is accepted.
+  // referred_by above stays as the count the coach sees. Best effort: a
+  // failure here never undoes the account.
+  if (referredBy) await requestFriend(userId, referredBy).catch(() => "error");
 
   // 4c) a club's link: the new player joins the club, and with it is
   // friends with everyone already on it. Best effort, like the friendship.

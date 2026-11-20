@@ -77,8 +77,14 @@ describe("what the app draws", () => {
     }
   });
 
+  it("draws the free app in the first build (Coach Yinka, Nov 20: App Store asap)", () => {
+    for (const r of ["/join", "/log", "/log/u/123", "/log/club/abc", "/log/clubs", "/log/settings", "/coach/free"]) {
+      expect(appScreenRedirect(r, APP), r).toBeNull();
+    }
+  });
+
   it("keeps website-only and unlisted screens out of the app", () => {
-    for (const r of ["/log", "/log/u/123", "/join", "/demo", "/5v5", "/signup", "/leads", "/brand-new-feature"]) {
+    for (const r of ["/demo", "/5v5", "/signup", "/leads", "/preview/abc", "/brand-new-feature"]) {
       expect(appScreenRedirect(r, APP), r).toBe(APP_UNAVAILABLE_PATH);
     }
   });

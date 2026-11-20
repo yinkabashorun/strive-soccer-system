@@ -77,22 +77,23 @@ export const SCREENS: readonly Screen[] = [
   // Accounts are made on the website, by invite, after a call with a coach.
   { path: "/signup", since: WEBSITE_ONLY },
 
-  // The free app (photo posts between players, clubs, rankings). Not in
-  // the first build: the listing and the review notes describe the members'
-  // app only, and sharing between players brings its own review questions
-  // (guideline 1.2). Coach Yinka decides when it goes into a build.
-  { path: "/join", since: WEBSITE_ONLY },
-  { path: "/log", since: WEBSITE_ONLY },
-  { path: "/log/week", since: WEBSITE_ONLY },
-  { path: "/log/days", since: WEBSITE_ONLY },
-  { path: "/log/quiz", since: WEBSITE_ONLY },
-  { path: "/log/clubs", since: WEBSITE_ONLY },
-  { path: "/log/club/[id]", since: WEBSITE_ONLY },
-  { path: "/log/u/[id]", since: WEBSITE_ONLY },
-  { path: "/log/settings", since: WEBSITE_ONLY },
-  { path: "/log/settings/profile", since: WEBSITE_ONLY },
-  { path: "/log/settings/blocked", since: WEBSITE_ONLY },
-  { path: "/coach/free", since: WEBSITE_ONLY },
+  // The free app (photo posts between players, clubs, rankings). In the
+  // first build on Coach Yinka's word (Nov 20 2026, "App store asap"):
+  // free sign-up works inside the app (nothing is bought), and the listing
+  // and the review notes describe it with its report, block, word filter
+  // and coach queue (guideline 1.2).
+  { path: "/join", since: IN_FIRST_BUILD },
+  { path: "/log", since: IN_FIRST_BUILD },
+  { path: "/log/week", since: IN_FIRST_BUILD },
+  { path: "/log/days", since: IN_FIRST_BUILD },
+  { path: "/log/quiz", since: IN_FIRST_BUILD },
+  { path: "/log/clubs", since: IN_FIRST_BUILD },
+  { path: "/log/club/[id]", since: IN_FIRST_BUILD },
+  { path: "/log/u/[id]", since: IN_FIRST_BUILD },
+  { path: "/log/settings", since: IN_FIRST_BUILD },
+  { path: "/log/settings/profile", since: IN_FIRST_BUILD },
+  { path: "/log/settings/blocked", since: IN_FIRST_BUILD },
+  { path: "/coach/free", since: IN_FIRST_BUILD },
 
   // Public pages: an ad landing page with the Meta pixel, the event page,
   // a shared week preview.

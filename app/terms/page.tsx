@@ -66,8 +66,10 @@ export default function TermsPage({
             <p className="mt-3">
               Post photos of your own training only. The friends you added
               see them, and so do our coaches. You can report a post or
-              block a player at any time. We can remove any post, and we
-              can close a free account that posts something it should not.
+              block a player at any time. We have zero tolerance for
+              objectionable content and for abusive players: we look at
+              every report within 24 hours, remove what breaks these terms,
+              and close the account that posted it.
             </p>
           </Section>
 

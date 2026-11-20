@@ -110,8 +110,8 @@ describe("sign-in inside the App Store app", () => {
     const block = form.slice(form.indexOf("{!configured && !native && ("));
     expect(block).toContain("enterDemoCoach");
     expect(form.slice(0, form.indexOf("{!configured && !native && ("))).not.toContain("action={enterDemoCoach}");
-    // And creating an account stays off the screen there.
-    expect(form).toMatch(/\{!native && \(\s*<p[^>]*>\s*New here\?/);
+    // And creating a member account stays off the screen there.
+    expect(form.slice(0, form.indexOf("{!native && ("))).not.toContain('href="/signup"');
   });
 
   it("the website's sign-in keeps its link and its create-account line", () => {

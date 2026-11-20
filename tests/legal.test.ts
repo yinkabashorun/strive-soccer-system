@@ -84,7 +84,7 @@ describe("the agreement is enforced, not just shown", () => {
     expect(gate).toBeGreaterThan(-1);
     expect(layout.indexOf("<AgreementScreen")).toBeGreaterThan(gate);
     // before the membership gate and the app itself
-    expect(gate).toBeLessThan(layout.indexOf("membershipGate("));
+    expect(gate).toBeLessThan(layout.indexOf("gateFor("));
     // never in the demo tour
     expect(layout).toMatch(/!viewer\.demo && \(await consentDue/);
   });

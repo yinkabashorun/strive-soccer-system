@@ -1,5 +1,7 @@
 import { getViewer } from "@/lib/elite/session";
-import { getMessages } from "@/lib/elite/data";
+import { redirect } from "next/navigation";
+import { getMessages, getPlayer } from "@/lib/elite/data";
+import { featureOn } from "@/lib/elite/tiers";
 import { sendPlayerMessage } from "@/lib/elite/player-actions";
 import { MessageThread } from "@/components/elite/MessageThread";
 import { MessageSquare } from "lucide-react";
@@ -10,6 +12,9 @@ export const metadata = { title: "Your coach · Strive Elite" };
 export default async function MessagesPage() {
   const viewer = await getViewer();
   if (!viewer?.playerId) return null;
+  // Not in every offer (Strive Pro, 074): an old link lands on Home.
+  const player = await getPlayer(viewer.playerId);
+  if (!featureOn(player?.tier, "coachChat")) redirect("/dashboard");
   const messages = await getMessages(viewer.playerId);
 
   async function send(body: string) {

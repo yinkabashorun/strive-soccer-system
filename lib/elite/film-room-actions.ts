@@ -5,6 +5,8 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { getViewer } from "./session";
 import { createClient, createServiceClient } from "./supabase/server";
 import { CLIP_BUCKET, ownsFilmRoomPath } from "./clips";
+import { NOT_IN_PLAN_MESSAGE, featureOn, type Feature } from "./tiers";
+import { memberHasFeature } from "./pro-server";
 import type { Announcement } from "./film-room";
 import {
   CHECKIN_SLOT_MINUTES,
@@ -57,13 +59,19 @@ async function notifyMembers(
   db: SupabaseClient,
   kind: string,
   url: string,
+  // Only members whose offer includes this (Strive Pro has no Film Room
+  // and no check-in calls, lib/elite/tiers.ts): nobody is told about
+  // something they cannot use.
+  feature: Feature,
   build: (p: { full_name: string; parent_name: string | null }) => Announcement
 ): Promise<{ members: number; texted: number; pushed: number }> {
   const { data } = await db
     .from("elite_players")
-    .select("id, full_name, parent_name")
+    .select("id, full_name, parent_name, tier")
     .in("subscription_status", ["active", "trialing"]);
-  const everyone = (data as { id: string; full_name: string; parent_name: string | null }[] | null) ?? [];
+  const everyone = (
+    (data as { id: string; full_name: string; parent_name: string | null; tier?: string | null }[] | null) ?? []
+  ).filter((p) => featureOn(p.tier, feature));
   const members = await withoutPlayersOnBreak(db, everyone);
 
   let texted = 0;
@@ -147,7 +155,7 @@ export async function saveFilmRoom(input: {
           : "Couldn't save. Run database migration 062 first.",
     };
   }
-  const counts = await notifyMembers(db, "film_room", "/film", (p) =>
+  const counts = await notifyMembers(db, "film_room", "/film", "filmRoom", (p) =>
     filmRoomAnnouncement({
       parentName: p.parent_name,
       playerName: p.full_name,
@@ -262,7 +270,7 @@ export async function announceCheckinDay(id: string, again = false) {
     return { ok: false as const, error: "That day has already happened." };
   }
   await db.from("elite_checkin_days").update({ announced_at: day.announced_at ?? new Date().toISOString() }).eq("id", id);
-  const counts = await notifyMembers(db, "checkin_open", "/dashboard", (p) =>
+  const counts = await notifyMembers(db, "checkin_open", "/dashboard", "monthlyCheckin", (p) =>
     checkinAnnouncement({
       parentName: p.parent_name,
       playerName: p.full_name,
@@ -289,6 +297,9 @@ export async function recordFilmRoomClip(input: { roomId: string; path: string }
   if (viewer.demo) return { ok: true as const };
   if (!ownsFilmRoomPath(input.path, viewer.playerId, input.roomId)) {
     return { ok: false as const, error: "That clip isn't yours." };
+  }
+  if (!(await memberHasFeature(viewer.playerId, "filmRoom"))) {
+    return { ok: false as const, error: NOT_IN_PLAN_MESSAGE };
   }
   const db = createServiceClient();
   const supabase = createClient();
@@ -379,6 +390,9 @@ export async function bookCheckinSlot(slotId: string) {
   const viewer = await getViewer();
   if (!viewer?.playerId) return { ok: false as const, error: "Sign in first." };
   if (viewer.demo) return { ok: true as const };
+  if (!(await memberHasFeature(viewer.playerId, "monthlyCheckin"))) {
+    return { ok: false as const, error: NOT_IN_PLAN_MESSAGE };
+  }
   const db = createServiceClient();
   if (!db) return { ok: true as const };
 

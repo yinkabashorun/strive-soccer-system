@@ -26,6 +26,7 @@ import { CheckinCard } from "@/components/elite/CheckinCard";
 import { fmtMonday, liveWeekFor, nextMondayNY, nyToday } from "@/lib/elite/time";
 import { greeting, timeAgo } from "@/lib/utils";
 import { TourGuide } from "@/components/elite/TourGuide";
+import { featureOn } from "@/lib/elite/tiers";
 
 // The player's home: one thing on screen - today's session. Under it,
 // one quiet row (Extra work, the coach's note, Take a break), each folded
@@ -47,6 +48,15 @@ export default async function DashboardPage() {
     player.week1_monday = week1Monday;
   }
 
+  // What this member's offer includes (029, 074: lib/elite/tiers.ts).
+  const has = {
+    chat: featureOn(player.tier, "coachChat"),
+    clips: featureOn(player.tier, "sendClip"),
+    progressVideo: featureOn(player.tier, "progressVideo"),
+    monthlyCheckin: featureOn(player.tier, "monthlyCheckin"),
+    calls: featureOn(player.tier, "coachingCalls"),
+  };
+
   const [allHomework, messages, checkins, plans, calls, breaks, progressVideos, monthlyCheckin] =
     await Promise.all([
       getHomework(player.id),
@@ -56,7 +66,9 @@ export default async function DashboardPage() {
       getCoachingCalls(player.id),
       getTrainingBreaks(player.id),
       getProgressVideos(player.id),
-      viewer.demo ? Promise.resolve({ booked: null, open: [] }) : getPlayerCheckin(player.id),
+      viewer.demo || !has.monthlyCheckin
+        ? Promise.resolve({ booked: null, open: [] })
+        : getPlayerCheckin(player.id),
     ]);
 
   const firstName = player.full_name.split(" ")[0];
@@ -107,12 +119,13 @@ export default async function DashboardPage() {
   // Bi-weekly progress video (037): every second week, the same drill.
   // Needs a drill to film (the coach's pick or the first skill drill ever
   // completed) and a week that exists; never while on a break.
-  const videoDue = !onBreak && thisWeek.length > 0 && progressVideoDue(contentWeek, progressVideos);
+  const videoDue =
+    has.progressVideo && !onBreak && thisWeek.length > 0 && progressVideoDue(contentWeek, progressVideos);
   const benchmark = videoDue ? await getBenchmark(player, allHomework) : null;
   const previousVideo = previousProgressVideo(contentWeek, progressVideos);
 
   // The coach's latest word to the player (their own messages are not it).
-  const coachNote = messages.find((m) => m.from_role !== "player") ?? null;
+  const coachNote = has.chat ? messages.find((m) => m.from_role !== "player") ?? null : null;
   const extraOpen = sessions.some(
     (s) => s.list.some((h) => h.is_extra) && s.list.some((h) => !h.completed)
   );
@@ -158,6 +171,7 @@ export default async function DashboardPage() {
           totalMinutes={time.minutes}
           nextWeekLine={nextWeekLine}
           playerId={player.id}
+          sendClips={has.clips}
           example={viewer.demo}
         />
       ) : (
@@ -186,11 +200,11 @@ export default async function DashboardPage() {
 
       {/* Monthly check-in call (062): the call you hold and the times you
           can book. Shows nothing when there is nothing to book. */}
-      {!viewer.demo && <CheckinBooking checkin={monthlyCheckin} firstName={firstName} />}
+      {!viewer.demo && has.monthlyCheckin && <CheckinBooking checkin={monthlyCheckin} firstName={firstName} />}
 
-      {/* Weekly 1:1 call - Complete Pathway only (029). Elite never sees
-          this; the demo tour doesn't cover calls. */}
-      {player.tier !== "elite" && !viewer.demo && (
+      {/* Weekly 1:1 call - Complete Pathway only (029). Elite and Pro
+          never see this; the demo tour doesn't cover calls. */}
+      {has.calls && !viewer.demo && (
         <CoachingCallsCard calls={calls} />
       )}
 

@@ -49,6 +49,7 @@ export function SessionPlayer({
   sessionsTotal,
   weekDoneLine,
   playerId,
+  sendClips = true,
   example = false,
   onClose,
 }: {
@@ -68,6 +69,7 @@ export function SessionPlayer({
   // What to say about next week when this session finishes the week.
   weekDoneLine?: string;
   playerId?: string; // enables Send a clip on skill drills
+  sendClips?: boolean; // false for an offer without Send a clip (lib/elite/tiers.ts)
   example?: boolean; // the example player: never asked about notifications
   onClose: () => void;
 }) {
@@ -256,7 +258,7 @@ export function SessionPlayer({
             </p>
           )}
 
-          {playerId && canSendClip(drill.title) && (
+          {playerId && sendClips && canSendClip(drill.title) && (
             <SendClip playerId={playerId} homeworkId={drill.id} title={drill.title} />
           )}
         </div>

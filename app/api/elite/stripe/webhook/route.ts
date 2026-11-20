@@ -2,12 +2,21 @@ import { NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { isStripeConfigured, stripe } from "@/lib/stripe";
 import { createServiceClient } from "@/lib/elite/supabase/server";
+import { PRO_PLAN } from "@/lib/elite/pro";
+import { activateProCheckout, syncProAccess } from "@/lib/elite/pro-server";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 // Stripe webhook. Keeps the subscriptions table + a player's
 // subscription_status in sync. Configure STRIPE_WEBHOOK_SECRET and point a
 // Stripe webhook at /api/elite/stripe/webhook.
+//
+// Strive Pro (074): a paid Pro checkout switches that member on, found by
+// the profile id our own checkout route put on the session (never by the
+// email typed at Stripe), and only when that member really is on tier
+// pro. A Pro subscription that later ends switches them off again. Every
+// other checkout keeps the older by-email path, unchanged.
 export async function POST(req: Request) {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
   if (!isStripeConfigured() || !secret) {
@@ -32,6 +41,10 @@ export async function POST(req: Request) {
     switch (event.type) {
       case "checkout.session.completed": {
         const s = event.data.object as Stripe.Checkout.Session;
+        if (s.metadata?.plan === PRO_PLAN) {
+          await activateProCheckout(s);
+          break;
+        }
         const email = s.customer_details?.email ?? s.customer_email ?? null;
         if (supabase && email) {
           await syncByEmail(supabase, email, {
@@ -69,6 +82,7 @@ export async function POST(req: Request) {
               updated_at: new Date().toISOString(),
             })
             .eq("stripe_subscription_id", sub.id);
+          await syncProAccess(sub.id, sub.status, event.type === "customer.subscription.deleted");
         }
         break;
       }

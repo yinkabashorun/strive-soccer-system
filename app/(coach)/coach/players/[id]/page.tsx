@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TIER_LABEL, featureOn, tierChip, tierOf } from "@/lib/elite/tiers";
 import { notFound } from "next/navigation";
 import { getViewer } from "@/lib/elite/session";
 import {
@@ -154,6 +155,14 @@ export default async function PlayerProfile({
               active {summary.last_active ? relativeDay(summary.last_active) : "-"}
             </div>
           </div>
+          {tierChip(player.tier) && (
+            <span
+              title={TIER_LABEL[tierOf(player.tier)]}
+              className="rounded-full border border-accent/40 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-accent"
+            >
+              {tierChip(player.tier)}
+            </span>
+          )}
           <span
             className={cn(
               "rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em]",
@@ -331,14 +340,28 @@ export default async function PlayerProfile({
           {/* Intake snapshot */}
           <IntakePanel player={player} />
 
-          {/* The 3-month program (065): the quiz, six focuses, the threads */}
-          <ProgramPanel
-            playerId={player.id}
-            program={program}
-            counts={focusCounts(bankForStudio.drills, player)}
-            liveWeek={live}
-            nextWeek={Math.max(maxBuilt + 1, live)}
-          />
+          {/* The 3-month program (065): the quiz, six focuses, the threads.
+              Not part of Strive Pro (074): their week is built from their
+              answers and their check-ins, nothing more. */}
+          {featureOn(player.tier, "program") ? (
+            <ProgramPanel
+              playerId={player.id}
+              program={program}
+              counts={focusCounts(bankForStudio.drills, player)}
+              liveWeek={live}
+              nextWeek={Math.max(maxBuilt + 1, live)}
+            />
+          ) : (
+            <section className="elite-card p-5">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
+                3-month program
+              </div>
+              <p className="mt-2 text-sm text-white/65">
+                Not part of Strive Pro. Their week is built every Monday from their quiz answers,
+                the drills they finish and their weekly check-in.
+              </p>
+            </section>
+          )}
 
           {/* Course drills offered to this player (040): switch, then tick */}
           <OfferedDrillsPanel

@@ -14,6 +14,8 @@ import { previousProgressVideo, progressVideoDue } from "./progress-video";
 import { sendPlayerSMS } from "./sms";
 import type { ProgressMetric, TrainingLoad, TrainingSpace } from "./types";
 import { TRAINING_LOADS } from "./training";
+import { NOT_IN_PLAN_MESSAGE } from "./tiers";
+import { memberHasFeature } from "./pro-server";
 
 export type OnboardingInput = {
   age: number;
@@ -125,6 +127,9 @@ export async function toggleHomework(id: string, completed: boolean) {
 export async function submitFilm(input: { url: string; note: string }) {
   const viewer = await getViewer();
   if (!viewer?.playerId) return { ok: false as const, error: "unauthorized" };
+  if (!viewer.demo && !(await memberHasFeature(viewer.playerId, "filmRoom"))) {
+    return { ok: false as const, error: NOT_IN_PLAN_MESSAGE };
+  }
   const url = input.url.trim();
   if (!/^https?:\/\/.+\..+/.test(url)) {
     return { ok: false as const, error: "Paste a full video link (starting with http)." };
@@ -188,6 +193,9 @@ export async function addGame(input: {
 }) {
   const viewer = await getViewer();
   if (!viewer?.playerId) return { ok: false as const, error: "unauthorized" };
+  if (!viewer.demo && !(await memberHasFeature(viewer.playerId, "filmRoom"))) {
+    return { ok: false as const, error: NOT_IN_PLAN_MESSAGE };
+  }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(input.game_date)) {
     return { ok: false as const, error: "Pick a game date." };
   }
@@ -237,6 +245,7 @@ export async function markAllNotificationsRead() {
 export async function sendPlayerMessage(body: string) {
   const viewer = await getViewer();
   if (!viewer?.playerId) return { ok: false };
+  if (!viewer.demo && !(await memberHasFeature(viewer.playerId, "coachChat"))) return { ok: false };
   const supabase = createClient();
   if (supabase) {
     await supabase.from("elite_messages").insert({
@@ -268,6 +277,9 @@ export async function checkClipOpen() {
   const viewer = await getViewer();
   if (!viewer?.playerId) return { ok: false as const, error: "Sign in first." };
   if (viewer.demo) return { ok: true as const };
+  if (!(await memberHasFeature(viewer.playerId, "sendClip"))) {
+    return { ok: false as const, error: NOT_IN_PLAN_MESSAGE };
+  }
   const supabase = createClient();
   if (!supabase) return { ok: true as const };
   const { data } = await supabase
@@ -340,6 +352,9 @@ export async function submitProgressVideo(input: { path: string; week: number; s
   const viewer = await getViewer();
   if (!viewer?.playerId) return { ok: false as const, error: "Sign in first." };
   if (viewer.demo) return { ok: true as const };
+  if (!(await memberHasFeature(viewer.playerId, "progressVideo"))) {
+    return { ok: false as const, error: NOT_IN_PLAN_MESSAGE };
+  }
   const supabase = createClient();
   if (!supabase) return { ok: true as const };
 

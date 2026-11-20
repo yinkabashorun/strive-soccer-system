@@ -22,7 +22,8 @@ describe("the Film page is short", () => {
   });
 
   it("keeps the monthly timeline for the retired tier only", () => {
-    expect(page).toMatch(/\{player\.tier !== "elite" && \(\s*<FilmTimeline/);
+    // one rule decides (lib/elite/tiers.ts: complete only)
+    expect(page).toMatch(/\{featureOn\(player\.tier, "filmTimeline"\) && \(\s*<FilmTimeline/);
   });
 
   it("the fold is a full-width, full-height target that says whether it is open", () => {

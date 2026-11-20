@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getViewer } from "@/lib/elite/session";
 import { authCodeLanding } from "@/lib/elite/auth-links";
+import { homePathFor } from "@/lib/elite/tracker-server";
 
 // The app's front door. Strive Elite is a members-only dashboard - the
 // public marketing lives on strivesoccer100x.com - so the root sends people
@@ -22,7 +23,7 @@ export default async function Home({
   if (landing) redirect(landing);
 
   const viewer = await getViewer();
-  if (viewer?.role === "coach" || viewer?.role === "admin") redirect("/coach");
-  if (viewer?.role === "player") redirect("/dashboard");
+  // Coach side, the member app, or the free training log (069).
+  if (viewer) redirect(await homePathFor(viewer));
   redirect("/login");
 }

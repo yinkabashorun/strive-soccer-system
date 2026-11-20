@@ -47,6 +47,7 @@ describe("fresh on reopen", () => {
 
   it("is wired into the member shell, the session player and every upload", () => {
     expect(code("app/(player)/layout.tsx")).toContain("<FreshOnReturn />");
+    expect(code("app/(free)/layout.tsx")).toContain("<FreshOnReturn />");
     expect(code("components/elite/FreshOnReturn.tsx")).toContain("shouldRefreshOnReturn(");
     expect(code("components/elite/SessionPlayer.tsx")).toContain("holdRefresh()");
     expect(code("lib/elite/clip-upload.ts")).toContain("holdRefresh()");

@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
-import { createClient, createServiceClient } from "@/lib/elite/supabase/server";
+import { createServiceClient } from "@/lib/elite/supabase/server";
+import { establishSession } from "@/lib/elite/session-start";
+import { emailHasFreeAccount } from "@/lib/elite/tracker-server";
+import { FREE_ACCOUNT_EXISTS_MESSAGE } from "@/lib/elite/tracker";
 import { sendPlayerEmail } from "@/lib/elite/email";
 import { normalizePhone } from "@/lib/elite/sms";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
@@ -8,22 +11,6 @@ import { AGREEMENT_REQUIRED_MESSAGE, agreementComplete } from "@/lib/elite/legal
 import { recordConsent } from "@/lib/elite/legal-server";
 
 export const runtime = "nodejs";
-
-// Signs the brand-new account in HERE, on the server, so the session
-// comes back in a cookie the server sets (lib/elite/sign-in.ts: a cookie
-// the browser writes itself is capped at 7 days on an iPhone). Returns
-// whether it worked; when it did not, the account still exists and the
-// form sends the person to the sign-in screen.
-async function establishSession(email: string, password: string): Promise<boolean> {
-  try {
-    const supabase = createClient();
-    if (!supabase) return false;
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    return !error && Boolean(data.session);
-  } catch {
-    return false;
-  }
-}
 
 // Redeem an invite code and create a fully-provisioned account: a player
 // (the default) or, for a coach code (054), a coach profile with no player
@@ -130,7 +117,13 @@ export async function POST(req: Request) {
     user_metadata: { full_name: fullName, role },
   });
   if (createErr || !created?.user) {
-    const msg = createErr?.message?.includes("already")
+    const exists = Boolean(createErr?.message?.includes("already"));
+    // An email that holds a FREE training log account (069) cannot redeem
+    // an invite, and signing in would only show the log. Say what is true.
+    if (exists && role === "player" && (await emailHasFreeAccount(email))) {
+      return NextResponse.json({ error: FREE_ACCOUNT_EXISTS_MESSAGE, reason: "free_account" }, { status: 400 });
+    }
+    const msg = exists
       ? "An account with that email already exists. Try signing in."
       : "We couldn't create your account. Please try again.";
     return NextResponse.json({ error: msg }, { status: 400 });

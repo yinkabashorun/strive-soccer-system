@@ -25,6 +25,8 @@ export const config = {
     "/onboarding/:path*",
     "/coach/:path*",
     "/account/:path*",
+    "/log/:path*",
+    "/join",
     "/login",
     "/signup",
   ],

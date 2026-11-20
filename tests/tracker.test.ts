@@ -949,8 +949,8 @@ describe("friends", () => {
     expect(ask).toMatch(/onClick=\{\(\) => answer\(true\)\}[\s\S]{0,260}Send request/);
     expect((ask.match(/confirmFriend\(/g) ?? []).length).toBe(1);
     // the owner answers on the Friends tab
-    expect(code("components/elite/FriendsFeed.tsx")).toContain("<FriendRequests requests={requests} />");
-    expect(code("components/elite/FriendRequests.tsx")).toContain("answerFriendRequest(id, accept)");
+    expect(code("components/elite/FriendsFeed.tsx")).toContain("<FriendRequests requests={requests} clubRequests={clubRequests} />");
+    expect(code("components/elite/FriendRequests.tsx")).toContain("answerFriendRequest(row.id, accept)");
     // no search and no browsing of other players, anywhere in the free app
     for (const f of ["components/elite/FriendAsk.tsx", "components/elite/FriendsBoard.tsx", "components/elite/FriendsFeed.tsx", "components/elite/FriendRequests.tsx"]) {
       expect(code(f), f).not.toMatch(/<input|search/i);
@@ -965,6 +965,8 @@ describe("friends", () => {
     // the only functions a browser can call
     const exported = [...actions.matchAll(/export async function (\w+)/g)].map((m) => m[1]).sort();
     expect(exported).toEqual([
+      "answerClubRequest",
+      "answerClubRequestsAsCoach",
       "answerFriendRequest",
       "archiveClub",
       "blockPlayer",

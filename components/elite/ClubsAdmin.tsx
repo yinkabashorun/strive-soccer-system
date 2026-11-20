@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { archiveClub, createClub, dismissClubReports, renameClub } from "@/lib/elite/tracker-actions";
+import { answerClubRequestsAsCoach, archiveClub, createClub, dismissClubReports, renameClub } from "@/lib/elite/tracker-actions";
 import { CLUB_NAME_MAX, clubLink, type CoachClub, type ReportedClub } from "@/lib/elite/tracker";
 
 // The Clubs card on /coach/free: reported club names first (rename,
@@ -155,6 +155,48 @@ export function ClubsAdmin({
               </div>
               {c.members.length > 0 && (
                 <p className="mt-2 text-sm leading-relaxed text-white/70">{c.members.join(", ")}</p>
+              )}
+              {(c.waiting ?? []).length > 0 && !c.ended && (
+                <div className="mt-3 rounded-xl border border-accent/30 bg-accent/[0.06] p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-[12px] font-semibold uppercase tracking-[0.16em] text-accent">
+                      Asking to join ({(c.waiting ?? []).length})
+                    </span>
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => act(() => answerClubRequestsAsCoach(c.id, (c.waiting ?? []).map((w) => w.id), true))}
+                      className="h-11 rounded-xl bg-bone px-4 text-sm font-semibold text-black disabled:opacity-60"
+                    >
+                      Let everyone in
+                    </button>
+                  </div>
+                  <ul className="mt-2 space-y-1.5">
+                    {(c.waiting ?? []).map((w) => (
+                      <li key={w.id} className="flex items-center justify-between gap-2 text-sm text-bone">
+                        <span className="min-w-0 truncate">{w.name}</span>
+                        <span className="flex shrink-0 gap-2">
+                          <button
+                            type="button"
+                            disabled={busy}
+                            onClick={() => act(() => answerClubRequestsAsCoach(c.id, [w.id], false))}
+                            className="h-11 rounded-xl border border-white/15 px-3 text-sm font-semibold text-white/70"
+                          >
+                            Decline
+                          </button>
+                          <button
+                            type="button"
+                            disabled={busy}
+                            onClick={() => act(() => answerClubRequestsAsCoach(c.id, [w.id], true))}
+                            className="h-11 rounded-xl border border-white/15 px-3 text-sm font-semibold text-bone"
+                          >
+                            Let in
+                          </button>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               )}
               <div className="mt-3 flex flex-wrap gap-2">
                 {!c.ended && (

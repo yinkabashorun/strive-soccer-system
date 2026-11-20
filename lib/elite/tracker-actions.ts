@@ -12,7 +12,8 @@ import {
   clubIdsOf,
   getTracker,
   joinClub,
-  joinClubByCode,
+  requestClubByCode,
+  answerClubRequest as answerClubRequestFor,
   answerFriendRequest as answerFriendRequestFor,
   requestFriend,
   membersOf,
@@ -65,6 +66,7 @@ import {
   limitHit,
   newReferralCode,
   FRIEND_REQUESTS_FULL_MESSAGE,
+  CLUB_REQUESTS_FULL_MESSAGE,
 } from "./tracker";
 
 // The free app: writing it (migration 069). Every write goes through
@@ -470,7 +472,8 @@ export async function reportPost(logId: string, reasonInput: string): Promise<{ 
 type ClubOk = { ok: true; code: string };
 const NOT_A_CLUB = "That club is not there any more.";
 
-// "Yes" on "Join <club>?", from a club's link opened while signed in.
+// "Ask to join" on "Ask to join <club>?", from a club's link opened while
+// signed in: a request the captain (or the coaches) answers (073).
 export async function confirmClub(codeInput: string): Promise<{ ok: true } | Fail> {
   const code = cleanClubCode(codeInput);
   if (!code) return fail("That link is not one of ours.");
@@ -484,8 +487,33 @@ export async function confirmClub(codeInput: string): Promise<{ ok: true } | Fai
     }
     return { ok: true };
   }
-  const res = await joinClubByCode(o.profileId, code);
+  const res = await requestClubByCode(o.profileId, code);
   if (res === "none") return fail("That link is not one of ours.");
+  if (res === "error") return fail(OFFLINE);
+  if (res === "requests_full") return fail(CLUB_REQUESTS_FULL_MESSAGE);
+  if (res !== "requested" && res !== "already" && res !== "ok") return fail(CLUB_REFUSED[res]);
+  touch();
+  return { ok: true };
+}
+
+// A captain lets a player into their club, or not (073). Only the club's
+// captain can answer here; the coaches answer at /coach/free.
+export async function answerClubRequest(clubId: string, requesterId: string, accept: boolean): Promise<{ ok: true } | Fail> {
+  if (typeof clubId !== "string" || !clubId || typeof requesterId !== "string" || !requesterId) {
+    return fail("That request is gone.");
+  }
+  const o = await owner();
+  if (o.kind === "no") return fail(o.error);
+  if (o.kind === "demo") return { ok: true };
+  const res = await answerClubRequestFor({
+    approverId: o.profileId,
+    approverIsCoach: false,
+    clubId,
+    requesterId,
+    accept: accept === true,
+  });
+  if (res === "not_yours") return fail("Only the club's captain can do that.");
+  if (res === "none") return fail("That request is gone.");
   if (res === "error") return fail(OFFLINE);
   if (res !== "ok" && res !== "already") return fail(CLUB_REFUSED[res]);
   touch();
@@ -893,6 +921,30 @@ export async function dismissClubReports(clubId: string): Promise<{ ok: true } |
   if (error) return fail(OFFLINE);
   revalidatePath("/coach/free");
   return { ok: true };
+}
+
+// The coaches let players into a club (073): any club, and the only way
+// into a club a coach made (it has no captain). Several at once with
+// "Let everyone in".
+export async function answerClubRequestsAsCoach(
+  clubId: string,
+  requesterIds: string[],
+  accept: boolean
+): Promise<{ ok: true; done: number } | Fail> {
+  if (typeof clubId !== "string" || !clubId || !Array.isArray(requesterIds)) return fail("That request is gone.");
+  const c = await coach();
+  if (c.kind === "no") return fail("Only a coach can do this.");
+  if (c.kind === "demo") return { ok: true, done: 0 };
+  let done = 0;
+  let refused: string | null = null;
+  for (const id of requesterIds.filter((x): x is string => typeof x === "string" && x.length > 0).slice(0, 50)) {
+    const res = await answerClubRequestFor({ approverId: c.profileId, approverIsCoach: true, clubId, requesterId: id, accept: accept === true });
+    if (res === "ok" || res === "already") done++;
+    else if (res !== "none" && res !== "not_yours" && res !== "error") refused = CLUB_REFUSED[res];
+  }
+  revalidatePath("/coach/free");
+  if (done === 0 && refused) return fail(refused);
+  return { ok: true, done };
 }
 
 // ---- Coach side: the star and the line ---------------------------------

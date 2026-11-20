@@ -84,7 +84,7 @@ vi.mock("@/lib/elite/tracker-server", () => ({
     state.friends.push([x, y]);
     return "ok";
   },
-  joinClubByCode: async (id: string, code: string) => {
+  requestClubByCode: async (id: string, code: string) => {
     state.clubs.push([id, code]);
     return "ok";
   },
@@ -297,7 +297,7 @@ describe("free sign-up", () => {
     expect(state.inserts[0].row).toMatchObject({ birth_year: 2008, birth_month: 3 });
   });
 
-  it("a club's link puts the new player in the club; a bad code is ignored", async () => {
+  it("a club's link asks to join the club for the new player; a bad code is ignored", async () => {
     let res = await post({ ...good, club: "bullrunx" });
     expect(res.status).toBe(200);
     expect(state.clubs).toEqual([["user-1", "BULLRUNX"]]);

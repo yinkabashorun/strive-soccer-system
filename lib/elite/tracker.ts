@@ -515,8 +515,19 @@ export function clubAskPath(code: string): string {
 }
 
 export function clubAskQuestion(name: string): string {
-  return `Join ${name}?`;
+  return `Ask to join ${name}?`;
 }
+
+// Since 073 a club's link sends a request; the captain (or the coaches, for
+// a club a coach made) lets the player in.
+export function clubAskLine(byCoach: boolean): string {
+  return `${byCoach ? "The coaches let you in" : "The club's captain lets you in"}. Then you become friends with everyone in the club, and the club shows on your profile.`;
+}
+export function clubRequestSentLine(name: string, byCoach: boolean): string {
+  return `Request sent. You are in ${name} once ${byCoach ? "the coaches let" : "the captain lets"} you in.`;
+}
+export const CLUB_REQUESTS_PENDING_MAX = 10;
+export const CLUB_REQUESTS_FULL_MESSAGE = "You have a lot of club requests waiting already. Give the captains a little time.";
 
 // May this player join this club? Never past either cap, never an ended
 // club, never twice.
@@ -652,6 +663,8 @@ export type CoachClub = {
   captain: string | null;
   members: string[];
   ended: boolean;
+  // players asking to join (073): the coaches let them in here
+  waiting?: { id: string; name: string }[];
 };
 
 // A club as its members see it (Your clubs on My week).

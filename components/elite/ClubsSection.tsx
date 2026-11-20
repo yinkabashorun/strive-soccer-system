@@ -106,8 +106,8 @@ export function ClubsSection({
         <ActionSheet label="Start a club" title="Start a club" onClose={() => open(null)}>
           <div className="px-[22px] pb-2">
             <p className="text-[14px] leading-relaxed text-white/70">
-              Your club team, a tournament team, the players you train with. Everyone who joins with the club&apos;s link
-              becomes friends with everyone on it. You can be in {CLUBS_PER_PLAYER} clubs.
+              Your club team, a tournament team, the players you train with. Send the club&apos;s link; you let in
+              each player who asks, and they become friends with everyone on it. You can be in {CLUBS_PER_PLAYER} clubs.
             </p>
             <input
               value={name}

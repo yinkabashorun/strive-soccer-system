@@ -42,7 +42,7 @@ describe("joining a club", () => {
     ]);
     // the pair is one row the feed and the board already read both ways
     const server = code("lib/elite/tracker-server.ts");
-    const join_ = fn(server, "export async function joinClub(", "export async function joinClubByCode(");
+    const join_ = fn(server, "export async function joinClub(", "// ---- Club requests (073)");
     expect(join_).toContain('.from("elite_tracker_friends").upsert(pairs, { onConflict: "a,b", ignoreDuplicates: true })');
   });
 
@@ -50,7 +50,7 @@ describe("joining a club", () => {
     const blocks = [{ blocker: "a", blocked: "m" }, { blocker: "m", blocked: "z" }];
     expect(clubPairs("m", ["a", "b", "z"], blocks)).toEqual([{ a: "b", b: "m" }]);
     const server = code("lib/elite/tracker-server.ts");
-    const join_ = fn(server, "export async function joinClub(", "export async function joinClubByCode(");
+    const join_ = fn(server, "export async function joinClub(", "// ---- Club requests (073)");
     expect(join_).toContain('.eq("blocker", profileId).in("blocked", some)');
     expect(join_).toContain('.eq("blocked", profileId).in("blocker", some)');
     expect(join_.indexOf("clubPairs(profileId, others, blocks)")).toBeLessThan(join_.indexOf('.from("elite_tracker_friends")'));
@@ -97,14 +97,15 @@ describe("links", () => {
   it("one link for a new player and for one already signed in", () => {
     expect(clubLink("https://thestriveapp.com/", "ABCDEFGH")).toBe("https://thestriveapp.com/join?club=ABCDEFGH");
     expect(clubAskPath("ABCDEFGH")).toBe("/log?club=ABCDEFGH");
-    expect(clubAskQuestion("Bull Run 2010s")).toBe("Join Bull Run 2010s?");
+    expect(clubAskQuestion("Bull Run 2010s")).toBe("Ask to join Bull Run 2010s?");
     expect(cleanClubCode("abcdefgh")).toBe("ABCDEFGH");
     expect(cleanClubCode("'; drop")).toBeNull();
-    // new: the club is joined at sign-up, after the age and the agreement
+    // new: the club is asked for at sign-up, after the age and the agreement (073)
     const route = code("app/api/elite/auth/join/route.ts");
-    expect(route).toContain("if (club) await joinClubByCode(userId, club)");
-    expect(route.indexOf("oldEnough(birth, today)")).toBeLessThan(route.indexOf("joinClubByCode("));
-    expect(route.indexOf("agreementComplete(")).toBeLessThan(route.indexOf("joinClubByCode("));
+    expect(route).toContain("if (club) await requestClubByCode(userId, club)");
+    expect(route).not.toContain("joinClubByCode");
+    expect(route.indexOf("oldEnough(birth, today)")).toBeLessThan(route.indexOf("requestClubByCode("));
+    expect(route.indexOf("agreementComplete(")).toBeLessThan(route.indexOf("requestClubByCode("));
     expect(code("components/elite/JoinForm.tsx")).toMatch(/ref: referral,\s*club,/);
     // signed in: one sheet on the Friends tab
     expect(code("app/(join)/join/page.tsx")).toContain("if (club && (await trackerFor(viewer))) redirect(clubAskPath(club));");

@@ -188,7 +188,8 @@ export async function getFreeOverview(): Promise<FreeOverview> {
   type ClubReportRow = { club_id: string; reporter_id: string; created_at: string };
   type LineReportRow = { profile_id: string; reporter_id: string; what: "line" | "photo"; created_at: string };
   type NoteRow = { profile_id: string; note: string };
-  const [rows, logs, pairs, openReports, open, targets, clubRows, memberRows, clubReportRows, lineReportRows, noteRows] =
+  type RequestRow = { club_id: string; profile_id: string };
+  const [rows, logs, pairs, openReports, open, targets, clubRows, memberRows, clubReportRows, lineReportRows, noteRows, requestRows] =
     await Promise.all([
     everyRow<Tracker>((from, to) =>
       admin
@@ -256,6 +257,14 @@ export async function getFreeOverview(): Promise<FreeOverview> {
     ),
     everyRow<NoteRow>((from, to) =>
       admin.from("elite_tracker_star_notes").select("profile_id, note").order("profile_id").range(from, to)
+    ),
+    everyRow<RequestRow>((from, to) =>
+      admin
+        .from("elite_tracker_club_requests")
+        .select("club_id, profile_id")
+        .order("created_at")
+        .order("profile_id")
+        .range(from, to)
     ),
   ]);
   const ids = rows.map((r) => r.profile_id);
@@ -371,6 +380,7 @@ export async function getFreeOverview(): Promise<FreeOverview> {
     captain: c.captain_id ? nameOrNone(c.captain_id) : null,
     members: (membersBy.get(c.id) ?? []).map(nameOrNone),
     ended: Boolean(c.archived_at),
+    waiting: requestRows.filter((r) => r.club_id === c.id).map((r) => ({ id: r.profile_id, name: nameOrNone(r.profile_id) })),
   }));
   const clubById = new Map(clubRows.map((c) => [c.id, c]));
   const reportsByClub = new Map<string, ClubReportRow[]>();

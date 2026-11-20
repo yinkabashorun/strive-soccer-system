@@ -77,6 +77,7 @@ import {
   type TargetRow,
   type TrainingLog,
   limitHit,
+  CLUB_REQUESTS_PENDING_MAX,
 } from "./tracker";
 import {
   demoBlocked,
@@ -989,11 +990,109 @@ export async function joinClub(profileId: string, club: ClubRow): Promise<ClubJo
   return "ok";
 }
 
-export async function joinClubByCode(profileId: string, code: string): Promise<ClubJoin | "none" | "error"> {
+// ---- Club requests (073) -------------------------------------------------
+
+// A club's link (opened signed in, or joined with at sign-up) asks to join.
+// The same refusals a join would meet are given now, so a player is never
+// left waiting on a club they could not join.
+export type ClubRequestResult = ClubJoin | "requested" | "requests_full" | "none" | "error";
+
+export async function requestClub(profileId: string, club: ClubRow): Promise<ClubRequestResult> {
+  const admin = createServiceClient();
+  if (!admin) return "error";
+  const decision = clubJoinDecision({
+    clubId: club.id,
+    archived: Boolean(club.archived_at),
+    memberCount: (await membersOf(admin, club.id)).length,
+    myClubIds: await clubIdsOf(admin, profileId),
+  });
+  if (decision !== "ok") return decision;
+  const { data: ban } = await admin
+    .from("elite_tracker_club_bans")
+    .select("club_id")
+    .eq("club_id", club.id)
+    .eq("profile_id", profileId)
+    .maybeSingle();
+  if (ban) return "removed";
+  const { count } = await admin
+    .from("elite_tracker_club_requests")
+    .select("club_id", { count: "exact", head: true })
+    .eq("profile_id", profileId);
+  if ((count ?? 0) >= CLUB_REQUESTS_PENDING_MAX) return "requests_full";
+  const { error } = await admin
+    .from("elite_tracker_club_requests")
+    .upsert({ club_id: club.id, profile_id: profileId }, { onConflict: "club_id,profile_id", ignoreDuplicates: true });
+  return error ? "error" : "requested";
+}
+
+export async function requestClubByCode(profileId: string, code: string): Promise<ClubRequestResult> {
   const admin = createServiceClient();
   if (!admin) return "error";
   const club = await clubByCode(admin, code);
-  return club ? joinClub(profileId, club) : "none";
+  return club ? requestClub(profileId, club) : "none";
+}
+
+// The requests a captain answers: players asking into the clubs this viewer
+// captains. First name and last initial, no photo, until they are in.
+export type ClubRequestView = { clubId: string; club: string; id: string; name: string; initials: string };
+
+export async function clubRequestsFor(viewer: Viewer): Promise<ClubRequestView[]> {
+  if (viewer.demo) return [];
+  const admin = createServiceClient();
+  if (!admin) return [];
+  const { data: clubs } = await admin
+    .from("elite_tracker_clubs")
+    .select("id, name")
+    .eq("captain_id", viewer.profile.id)
+    .is("archived_at", null);
+  const mine = (clubs as { id: string; name: string }[] | null) ?? [];
+  if (mine.length === 0) return [];
+  const { data } = await admin
+    .from("elite_tracker_club_requests")
+    .select("club_id, profile_id, created_at")
+    .in(
+      "club_id",
+      mine.map((c) => c.id)
+    )
+    .order("created_at", { ascending: false })
+    .limit(50);
+  const rows = (data as { club_id: string; profile_id: string }[] | null) ?? [];
+  if (rows.length === 0) return [];
+  const names = await namesOf(admin, rows.map((r) => r.profile_id));
+  const clubName = new Map(mine.map((c) => [c.id, c.name]));
+  return rows.map((r) => {
+    const name = names.get(r.profile_id) ?? "A teammate";
+    return { clubId: r.club_id, club: clubName.get(r.club_id) ?? "Your club", id: r.profile_id, name, initials: initialsOf(name) };
+  });
+}
+
+// Let a player in, or not. Only the club's captain answers for a player's
+// club; the coaches answer for any club (a club a coach made has no
+// captain). Either answer takes the request away; letting in goes through
+// joinClub, so the caps, a removal and the friendships work as before.
+export async function answerClubRequest(input: {
+  approverId: string;
+  approverIsCoach: boolean;
+  clubId: string;
+  requesterId: string;
+  accept: boolean;
+}): Promise<ClubJoin | "none" | "not_yours" | "error"> {
+  const admin = createServiceClient();
+  if (!admin) return "error";
+  const club = await clubById(admin, input.clubId);
+  if (!club) return "none";
+  if (!input.approverIsCoach && club.captain_id !== input.approverId) return "not_yours";
+  const { data: request } = await admin
+    .from("elite_tracker_club_requests")
+    .select("profile_id")
+    .eq("club_id", club.id)
+    .eq("profile_id", input.requesterId)
+    .maybeSingle();
+  if (!request) return "none";
+  await admin.from("elite_tracker_club_requests").delete().eq("club_id", club.id).eq("profile_id", input.requesterId);
+  if (!input.accept) return "ok";
+  const joined = await joinClub(input.requesterId, club);
+  return joined === "already" ? "ok" : joined;
 }
 
 // The club behind a link, asked about once on the Friends tab. A club the
@@ -1002,11 +1101,11 @@ export async function joinClubByCode(profileId: string, code: string): Promise<C
 export async function clubAskFor(
   viewer: Viewer,
   code: string | null
-): Promise<{ code: string; name: string; problem: string | null } | null> {
+): Promise<{ code: string; name: string; problem: string | null; byCoach: boolean } | null> {
   if (!code) return null;
   if (viewer.demo) {
     const c = demoClubAsk(code);
-    return c ? { code, name: c.name, problem: null } : null;
+    return c ? { code, name: c.name, problem: null, byCoach: false } : null;
   }
   const admin = createServiceClient();
   if (!admin) return null;
@@ -1026,9 +1125,17 @@ export async function clubAskFor(
       .eq("club_id", club.id)
       .eq("profile_id", viewer.profile.id)
       .maybeSingle();
-    if (ban) return { code, name: club.name, problem: CLUB_REFUSED.removed };
+    if (ban) return { code, name: club.name, problem: CLUB_REFUSED.removed, byCoach: club.kind === "coach" };
+    // a request already on its way is not asked again
+    const { data: pending } = await admin
+      .from("elite_tracker_club_requests")
+      .select("club_id")
+      .eq("club_id", club.id)
+      .eq("profile_id", viewer.profile.id)
+      .maybeSingle();
+    if (pending) return null;
   }
-  return { code, name: club.name, problem: decision === "ok" ? null : CLUB_REFUSED[decision] };
+  return { code, name: club.name, problem: decision === "ok" ? null : CLUB_REFUSED[decision], byCoach: club.kind === "coach" };
 }
 
 // This viewer's own clubs, with their rosters (first name and last

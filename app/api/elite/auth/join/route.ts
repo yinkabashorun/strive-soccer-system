@@ -6,7 +6,7 @@ import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { AGREEMENT_REQUIRED_MESSAGE, agreementComplete } from "@/lib/elite/legal";
 import { recordConsent } from "@/lib/elite/legal-server";
 import { nyToday } from "@/lib/elite/time";
-import { isFreeSignupOpen, joinClubByCode, requestFriend } from "@/lib/elite/tracker-server";
+import { isFreeSignupOpen, requestClubByCode, requestFriend } from "@/lib/elite/tracker-server";
 import {
   BIRTH_REQUIRED_MESSAGE,
   JOIN_AGE_COOKIE,
@@ -173,7 +173,8 @@ export async function POST(req: Request) {
   // 4c) a club's link: the new player joins the club, and with it is
   // friends with everyone already on it. Best effort, like the friendship.
   const club = cleanClubCode(body.club);
-  if (club) await joinClubByCode(userId, club).catch(() => "error");
+  // a club's link asks to join; the captain or the coaches let them in (073)
+  if (club) await requestClubByCode(userId, club).catch(() => "error");
 
   // 5) the agreement the person just gave (version, time, where).
   await recordConsent({

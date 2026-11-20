@@ -10,7 +10,7 @@ import { blockPlayer, deleteLog, reportPost, toggleProps } from "@/lib/elite/tra
 import { fmtDuration } from "@/lib/elite/time-trained";
 import { feel } from "@/lib/elite/native";
 import { REPORT_REASONS, lockedHeadline, lockedHeadlineLines, lockedLine } from "@/lib/elite/tracker";
-import type { FeedView, FriendRequestView, OpenCardView } from "@/lib/elite/tracker-server";
+import type { ClubRequestView, FeedView, FriendRequestView, OpenCardView } from "@/lib/elite/tracker-server";
 import type { LockedCard } from "@/lib/elite/tracker";
 import { usePostLauncher } from "./FreeShell";
 import { FriendAsk } from "./FriendAsk";
@@ -32,6 +32,7 @@ export function FriendsFeed({
   friendAsk,
   clubAsk,
   requests = [],
+  clubRequests = [],
   inviteLink,
 }: {
   date: string; // "Wednesday, Nov 18"
@@ -39,8 +40,9 @@ export function FriendsFeed({
   week: { minutes: number; target: number; percent: number };
   me: { id: string; initials: string; photo: string | null };
   friendAsk: { code: string; name: string } | null;
-  clubAsk: { code: string; name: string; problem: string | null } | null;
+  clubAsk: { code: string; name: string; problem: string | null; byCoach?: boolean } | null;
   requests?: FriendRequestView[];
+  clubRequests?: ClubRequestView[];
   inviteLink: string;
 }) {
   const { post, profile } = usePostLauncher();
@@ -60,7 +62,7 @@ export function FriendsFeed({
         <WeekRing initials={me.initials} photo={me.photo} onOpen={() => profile(me.id)} {...week} />
       </header>
 
-      <FriendRequests requests={requests} />
+      <FriendRequests requests={requests} clubRequests={clubRequests} />
 
       {faces.length > 0 && (
         <ul className="no-scrollbar flex gap-3.5 overflow-x-auto px-[18px] pb-1.5 pt-5" aria-label="Who trained today">

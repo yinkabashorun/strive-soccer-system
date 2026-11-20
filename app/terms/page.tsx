@@ -56,7 +56,9 @@ export default function TermsPage({
               asks the adult to accept them again before training goes on.
             </p>
             <p className="mt-3">
-              A free account is for players 13 and older. It is a place to
+              A free account is for players 13 and older. A player under
+              18 may agree to these terms on their own, and a parent or
+              guardian should review them with the player. It is a place to
               post and log the training a player does on their own and to
               see the friends they added do the same. It has no coaching
               plan, no drills and no courses, and when free sign-up is open

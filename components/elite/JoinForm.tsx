@@ -4,9 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
-import { GUARDIAN_STATEMENT } from "@/lib/elite/legal";
 import { checkJoinAge } from "@/lib/elite/tracker-actions";
-import { FREE_AGREEMENT_POINTS, FREE_QUIZ, MONTH_NAMES, joinProblem, type JoinStep } from "@/lib/elite/tracker";
+import { FREE_AGE_STATEMENT, FREE_AGREEMENT_POINTS, FREE_QUIZ, MONTH_NAMES, joinProblem, type JoinStep } from "@/lib/elite/tracker";
 import { AppLink } from "./AppLink";
 import { IconBack, IconLock } from "./FreeIcons";
 import { JoinLanding, type JoinInvite } from "./JoinLanding";
@@ -244,7 +243,7 @@ export function JoinForm({
             onChange={(e) => setGuardian(e.target.checked)}
             className="mt-0.5 h-5 w-5 shrink-0 accent-white"
           />
-          <span>{GUARDIAN_STATEMENT}</span>
+          <span>{FREE_AGE_STATEMENT}</span>
         </label>
         <label className="flex min-h-[44px] items-start gap-3 rounded-2xl bg-[#141414] p-4 text-[15px] leading-snug text-bone">
           <input

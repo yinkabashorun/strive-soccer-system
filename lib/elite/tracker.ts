@@ -1555,8 +1555,15 @@ export const FREE_ACCOUNT_EXISTS_MESSAGE =
 // What a free account agrees to, in plain lines above the two boxes (the
 // boxes themselves are the same as every account's: lib/elite/legal.ts).
 // Written to the player, about what a free account actually stores.
+// The first box on free sign-up. A 13 to 17 year old may agree on their
+// own (Coach Yinka, Nov 20 2026), with the line that a parent should
+// review; the members' box ("I am the parent, or 18 or older") is not true
+// for them, so it is never shown here.
+export const FREE_AGE_STATEMENT = "I am 13 or older.";
+
 export const FREE_AGREEMENT_POINTS: string[] = [
   "The free app is for players 13 and older.",
+  "Under 18? A parent or guardian should review these terms with you.",
   "We store your profile, the month and year you were born, your quiz answers, the days you plan to train, the training you log and the photos you post.",
   "The friends you added see your first name, last initial, your training time and the photos you post. So do our coaches.",
   "You can report a post or block a player. We can remove a post.",

@@ -130,3 +130,21 @@ describe("the word filter", () => {
     expect(route).toContain('if (isOffensive(form.get("caption"))) return no(OFFENSIVE_MESSAGE, 400);');
   });
 });
+
+describe("who agrees on free sign-up (Coach Yinka, Nov 20 2026)", () => {
+  it("a 13 to 17 year old agrees to a box that is true for them, and is told a parent should review", async () => {
+    const { FREE_AGE_STATEMENT, FREE_AGREEMENT_POINTS } = await import("@/lib/elite/tracker");
+    const form = read("components/elite/JoinForm.tsx");
+    expect(form).toContain("<span>{FREE_AGE_STATEMENT}</span>");
+    expect(form).not.toContain("GUARDIAN_STATEMENT");
+    expect(FREE_AGE_STATEMENT).toBe("I am 13 or older.");
+    expect(FREE_AGREEMENT_POINTS).toContain("Under 18? A parent or guardian should review these terms with you.");
+    expect(read("app/terms/page.tsx").replace(/\s+/g, " ")).toContain("a parent or guardian should review them with the player");
+  });
+
+  it("a deleted account is gone right away, and any backup copy within 7 days", () => {
+    const privacy = read("app/privacy/page.tsx").replace(/\s+/g, " ");
+    expect(privacy).toContain("Deleting an account is permanent and takes effect right away.");
+    expect(privacy).toContain("Any backup copy held by our hosting provider is gone within 7 days.");
+  });
+});

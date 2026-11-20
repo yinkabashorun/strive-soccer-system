@@ -245,9 +245,10 @@ export default function PrivacyPage({
               the player uploaded. What it does not remove: records of
               payments, which are held by our payment processor and which we
               keep as long as tax and accounting rules require, and text
-              messages already delivered to your phone. Backup copies held
-              by our hosting provider are overwritten on their regular
-              schedule. Deleting an account does not by itself stop a
+              messages already delivered to your phone. Any backup copy
+              held by our hosting provider is gone within 7 days. The phone
+              numbers we text also sit with our texting provider; ask us and
+              we remove them there too. Deleting an account does not by itself stop a
               monthly payment. We are told when an account is deleted and
               stop the billing; you can also ask us directly.
             </p>

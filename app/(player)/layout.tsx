@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { keptOutOfThisApp } from "@/lib/elite/native-request";
 import { redirect } from "next/navigation";
 import { AppNav, type NavItem } from "@/components/elite/AppNav";
 import { Wordmark } from "@/components/elite/Wordmark";
@@ -84,7 +85,7 @@ export default async function PlayerLayout({
           The ask itself is on the finish screen of a session (A8). */}
       {!viewer.demo && <PushKeepAlive />}
       <AppNav
-        items={PLAYER_NAV}
+        items={PLAYER_NAV.filter((item) => !keptOutOfThisApp(item.href))}
         name={viewer.profile.full_name}
         color={viewer.profile.avatar_color}
         roleLabel="Player"

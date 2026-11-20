@@ -13,12 +13,23 @@
 // the server's own way of asking.
 import { headers } from "next/headers";
 import { NATIVE_UA_TOKEN, isNativeUserAgent } from "./app-links";
+import { appScreenRedirect } from "./app-review";
 
 export { NATIVE_UA_TOKEN, isNativeUserAgent };
 
 export function inNativeApp(): boolean {
   try {
     return isNativeUserAgent(headers().get("user-agent"));
+  } catch {
+    return false;
+  }
+}
+
+// Is this screen kept out of the app on this phone? (lib/elite/app-review.ts)
+// Used to leave a menu item out rather than lead to "Not in the app yet".
+export function keptOutOfThisApp(path: string): boolean {
+  try {
+    return appScreenRedirect(path, headers().get("user-agent")) !== null;
   } catch {
     return false;
   }

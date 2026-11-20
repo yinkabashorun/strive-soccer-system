@@ -108,7 +108,8 @@ export async function POST(req: Request) {
     email: fields.email,
     password: fields.password,
     email_confirm: true,
-    user_metadata: { full_name: fullName, role: "player" },
+    user_metadata: { full_name: fullName },
+    app_metadata: { role: "player" },
   });
   if (createErr || !created?.user) {
     const msg = createErr?.message?.includes("already")

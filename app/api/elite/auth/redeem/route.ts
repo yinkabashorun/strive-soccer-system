@@ -114,7 +114,9 @@ export async function POST(req: Request) {
     email,
     password,
     email_confirm: true,
-    user_metadata: { full_name: fullName, role },
+    user_metadata: { full_name: fullName },
+    // The role goes where only the server can write it (070).
+    app_metadata: { role },
   });
   if (createErr || !created?.user) {
     const exists = Boolean(createErr?.message?.includes("already"));

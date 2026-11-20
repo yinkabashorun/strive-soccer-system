@@ -12,6 +12,8 @@ import { AgreementScreen } from "@/components/elite/AgreementScreen";
 import { consentDue } from "@/lib/elite/legal-server";
 import { NO_PROFILE_GATE, membershipGate, type GateCopy } from "@/lib/elite/gates";
 import { SUPPORT_EMAIL } from "@/lib/elite/support";
+import { getTracker, quizDone } from "@/lib/elite/tracker-server";
+import { freeLanding } from "@/lib/elite/tracker";
 
 // Five tabs, the most an iPhone tab bar should carry (Apple HIG). Progress
 // lives one tap away: the time-trained strip on Home and the Account page.
@@ -37,7 +39,13 @@ export default async function PlayerLayout({
   await unlockDueWeeks().catch(() => undefined);
 
   // Authenticated player whose coach hasn't set up their profile yet.
+  // A free account (069) has no player record on purpose and lives in the
+  // training log, never in the member app. Sign-in lands every player on
+  // /dashboard (lib/elite/sign-in.ts); this is the one redirect that takes
+  // a free account from there to the screen it opens on.
   if (!viewer.playerId) {
+    const tracker = viewer.demo ? null : await getTracker(viewer.profile.id);
+    if (tracker) redirect(freeLanding(quizDone(tracker)));
     return <GateScreen gate={NO_PROFILE_GATE} />;
   }
 

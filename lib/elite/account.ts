@@ -40,8 +40,10 @@ export const DELETE_BLOCKED_MESSAGE: Record<"signed_out" | "demo" | "owner", str
 
 // The text the coaches get when a family deletes its own account. The app
 // does not touch billing, so the one thing a coach must do is named.
-export function accountDeletedText(name: string, role: Role): string {
+export function accountDeletedText(name: string, role: Role, free = false): string {
   const who = name.trim() || (role === "coach" ? "A coach" : "A player");
+  // A free training log account (069) has no plan, no clips and no billing.
+  if (free) return `${who} deleted their free training log account in the app.`;
   return role === "coach"
     ? `${who} deleted their coach account in the app.`
     : `${who} deleted their Strive Elite account in the app. Their login, plans, messages and clips are gone. Billing is not stopped by this: cancel it in Stripe.`;

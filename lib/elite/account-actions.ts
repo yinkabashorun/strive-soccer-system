@@ -13,6 +13,7 @@ import {
 } from "./account";
 import { removePlayerFiles } from "./account-server";
 import { textCoaches } from "./coach-alerts";
+import { hasTracker, removeTrackerFiles } from "./tracker-server";
 
 // "Delete my account", from inside the app (App Review Guideline
 // 5.1.1(v)). The person re-enters their password, then everything goes:
@@ -47,6 +48,12 @@ export async function deleteMyAccount(
 
   // Files first: once the account is gone nothing points at them.
   if (viewer.playerId) await removePlayerFiles(admin, viewer.playerId);
+  // A free training log account (069): its log and quiz answers leave
+  // with the login (on delete cascade). Known now, while it still exists,
+  // so the coaches' text says the right thing.
+  const free = viewer.role === "player" && !viewer.playerId && (await hasTracker(user.id));
+  // and its posted photos, which do not leave by cascade
+  if (free) await removeTrackerFiles(user.id);
 
   const { error } = await admin.auth.admin.deleteUser(user.id);
   if (error) {
@@ -56,7 +63,7 @@ export async function deleteMyAccount(
     };
   }
 
-  await textCoaches(accountDeletedText(viewer.profile.full_name, viewer.role)).catch(() => 0);
+  await textCoaches(accountDeletedText(viewer.profile.full_name, viewer.role, free)).catch(() => 0);
   await supabase.auth.signOut().catch(() => undefined);
   cookies().delete(DEMO_COOKIE);
   redirect(`/login?notice=${ACCOUNT_DELETED_NOTICE}`);

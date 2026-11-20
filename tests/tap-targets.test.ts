@@ -45,6 +45,8 @@ describe("finger targets", () => {
       "components/elite/LoginForm.tsx",
       "components/elite/ForgotForm.tsx",
       "components/elite/SignupForm.tsx",
+      "components/elite/JoinForm.tsx",
+      "app/(join)/join/page.tsx",
       "components/elite/AgreementScreen.tsx",
       "app/(auth)/layout.tsx",
     ]) {
@@ -76,7 +78,11 @@ describe("finger targets", () => {
   });
 
   it("a tick box is tapped through its whole row", () => {
-    for (const f of ["components/elite/SignupForm.tsx", "components/elite/AgreementScreen.tsx"]) {
+    for (const f of [
+      "components/elite/SignupForm.tsx",
+      "components/elite/JoinForm.tsx",
+      "components/elite/AgreementScreen.tsx",
+    ]) {
       const src = code(f);
       const boxes = (src.match(/type="checkbox"/g) ?? []).length;
       const rows = (src.match(/<label className="flex min-h-\[44px\]/g) ?? []).length;

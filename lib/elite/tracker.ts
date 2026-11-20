@@ -1362,24 +1362,55 @@ export type JoinFields = {
   password: string;
 };
 
-export function cleanJoin(input: {
+// Which sign-up screen a typed detail lives on, so a problem sends the
+// person back to that screen with a line that names the detail.
+export type JoinStep = "name" | "contact" | "password";
+export type JoinProblem = { step: JoinStep; message: string };
+
+type JoinInput = {
   firstName?: unknown;
   lastName?: unknown;
   email?: unknown;
   phone?: unknown;
   password?: unknown;
-}): JoinFields | null {
-  const text = (v: unknown) => (typeof v === "string" ? v.replace(/\s+/g, " ").trim() : "");
-  const firstName = text(input.firstName);
-  const lastName = text(input.lastName);
-  const email = text(input.email).toLowerCase();
-  const phone = text(input.phone);
-  const password = typeof input.password === "string" ? input.password : "";
-  if (!firstName || !lastName || firstName.length > 60 || lastName.length > 60) return null;
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return null;
-  if (phone.replace(/\D/g, "").length < 10) return null;
-  if (password.length < 8) return null;
-  return { firstName, lastName, email, phone, password };
+};
+
+const joinText = (v: unknown) => (typeof v === "string" ? v.replace(/\s+/g, " ").trim() : "");
+
+// The first thing wrong with the typed details, in screen order, or null.
+// The form runs it on each screen before Next; the server runs it again and
+// sends the same answer back, so the two can never disagree.
+export function joinProblem(input: JoinInput, only?: JoinStep): JoinProblem | null {
+  const check = (step: JoinStep) => !only || only === step;
+  if (check("name")) {
+    const first = joinText(input.firstName);
+    const last = joinText(input.lastName);
+    if (!first || !last) return { step: "name", message: "Enter your first and last name." };
+    if (first.length > 60 || last.length > 60)
+      return { step: "name", message: "Your first and last name can be 60 letters each at most." };
+  }
+  if (check("contact")) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(joinText(input.email).toLowerCase()))
+      return { step: "contact", message: "That email doesn't look right. Check it and try again." };
+    if (joinText(input.phone).replace(/\D/g, "").length < 10)
+      return { step: "contact", message: "Enter a phone number with the area code, 10 digits." };
+  }
+  if (check("password")) {
+    const password = typeof input.password === "string" ? input.password : "";
+    if (password.length < 8) return { step: "password", message: "Your password needs at least 8 characters." };
+  }
+  return null;
+}
+
+export function cleanJoin(input: JoinInput): JoinFields | null {
+  if (joinProblem(input)) return null;
+  return {
+    firstName: joinText(input.firstName),
+    lastName: joinText(input.lastName),
+    email: joinText(input.email).toLowerCase(),
+    phone: joinText(input.phone),
+    password: input.password as string,
+  };
 }
 
 // ---- Where a signed-in person belongs ---------------------------------

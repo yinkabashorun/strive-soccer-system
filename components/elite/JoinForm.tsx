@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { GUARDIAN_STATEMENT } from "@/lib/elite/legal";
 import { checkJoinAge } from "@/lib/elite/tracker-actions";
-import { FREE_AGREEMENT_POINTS, FREE_QUIZ, MONTH_NAMES } from "@/lib/elite/tracker";
+import { FREE_AGREEMENT_POINTS, FREE_QUIZ, MONTH_NAMES, joinProblem, type JoinStep } from "@/lib/elite/tracker";
 import { AppLink } from "./AppLink";
 import { IconBack, IconLock } from "./FreeIcons";
 import { JoinLanding, type JoinInvite } from "./JoinLanding";
@@ -59,6 +59,15 @@ export function JoinForm({
     setStep(to);
   }
 
+  // Next on a typed screen: check that screen's details with the server's
+  // own rule first, so a problem shows here, on the screen it belongs to.
+  function nextIfValid(e: React.FormEvent, here: JoinStep, to: Step) {
+    e.preventDefault();
+    const problem = joinProblem({ firstName, lastName, email, phone, password }, here);
+    if (problem) return setError(problem.message);
+    next(to);
+  }
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -93,6 +102,13 @@ export function JoinForm({
     if (data.reason === "age") {
       setLoading(false);
       setStep("young");
+      return;
+    }
+    if (data.reason === "field" && typeof data.step === "string" && STEPS.includes(data.step as Step)) {
+      // A typed detail was turned down: back to the screen it is on.
+      setLoading(false);
+      setStep(data.step as Step);
+      setError(data.error || "Check this and try again.");
       return;
     }
     if (!res.ok) {
@@ -130,7 +146,7 @@ export function JoinForm({
 
   if (step === "age") {
     return (
-      <Screen step="age" onBack={() => next("landing")} onSubmit={checkAge} error={error}>
+      <Screen step="age" onBack={() => next("landing")} onSubmit={checkAge}>
         <Question title="When were you born?" line="Month and year only. It's never shown to anyone." />
         <Wheel>
           <WheelColumn
@@ -143,27 +159,27 @@ export function JoinForm({
           />
           <WheelColumn label="Year" options={oldestFirst} value={year} onChange={setYear} className="flex-[0.7]" />
         </Wheel>
-        <Foot loading={loading} label="Next" note="For players 13 and older" />
+        <Foot loading={loading} label="Next" note="For players 13 and older" error={error} />
       </Screen>
     );
   }
 
   if (step === "name") {
     return (
-      <Screen step="name" onBack={() => next("age")} onSubmit={(e) => (e.preventDefault(), next("contact"))} error={error}>
+      <Screen step="name" onBack={() => next("age")} onSubmit={(e) => nextIfValid(e, "name", "contact")}>
         <Question title="What's your name?" line="Your friends see your first name and last initial." />
         <div className="mt-8 space-y-3 px-[22px]">
           <Input label="First name" value={firstName} onChange={setFirstName} autoComplete="given-name" />
           <Input label="Last name" value={lastName} onChange={setLastName} autoComplete="family-name" />
         </div>
-        <Foot loading={false} label="Next" />
+        <Foot loading={false} label="Next" error={error} />
       </Screen>
     );
   }
 
   if (step === "contact") {
     return (
-      <Screen step="contact" onBack={() => next("name")} onSubmit={(e) => (e.preventDefault(), next("password"))} error={error}>
+      <Screen step="contact" onBack={() => next("name")} onSubmit={(e) => nextIfValid(e, "contact", "password")}>
         <Question title="How do we reach you?" line="Your email signs you in. Your friends never see either." />
         <div className="mt-8 space-y-3 px-[22px]">
           <Input
@@ -183,14 +199,14 @@ export function JoinForm({
             autoComplete="tel"
           />
         </div>
-        <Foot loading={false} label="Next" />
+        <Foot loading={false} label="Next" error={error} />
       </Screen>
     );
   }
 
   if (step === "password") {
     return (
-      <Screen step="password" onBack={() => next("contact")} onSubmit={(e) => (e.preventDefault(), next("agree"))} error={error}>
+      <Screen step="password" onBack={() => next("contact")} onSubmit={(e) => nextIfValid(e, "password", "agree")}>
         <Question title="Make a password" line="At least 8 characters." />
         <div className="mt-8 px-[22px]">
           <Input
@@ -203,13 +219,13 @@ export function JoinForm({
             minLength={8}
           />
         </div>
-        <Foot loading={false} label="Next" />
+        <Foot loading={false} label="Next" error={error} />
       </Screen>
     );
   }
 
   return (
-    <Screen step="agree" onBack={() => next("password")} onSubmit={onSubmit} error={error}>
+    <Screen step="agree" onBack={() => next("password")} onSubmit={onSubmit}>
       <Question title="One last thing" line="Read these, then tick both boxes." />
       <div className="mt-6 space-y-3 px-[22px]">
         <ul className="space-y-2">
@@ -251,7 +267,7 @@ export function JoinForm({
           </span>
         </label>
       </div>
-      <Foot loading={loading} label="Create my account" />
+      <Foot loading={loading} label="Create my account" error={error} />
     </Screen>
   );
 }
@@ -262,13 +278,11 @@ function Screen({
   step,
   onBack,
   onSubmit,
-  error,
   children,
 }: {
   step: Step;
   onBack: () => void;
   onSubmit: (e: React.FormEvent) => void;
-  error: string | null;
   children: React.ReactNode;
 }) {
   const at = STEPS.indexOf(step);
@@ -288,11 +302,6 @@ function Screen({
         ))}
       </div>
       {children}
-      {error && (
-        <p role="alert" className="mx-[22px] mt-3 text-sm text-red-400">
-          {error}
-        </p>
-      )}
     </form>
   );
 }
@@ -306,9 +315,24 @@ function Question({ title, line }: { title: string; line: string }) {
   );
 }
 
-function Foot({ loading, label, note }: { loading: boolean; label: string; note?: string }) {
+function Foot({
+  loading,
+  label,
+  note,
+  error,
+}: {
+  loading: boolean;
+  label: string;
+  note?: string;
+  error?: string | null;
+}) {
   return (
     <div className="mt-auto px-[22px] pt-8">
+      {error && (
+        <p role="alert" className="mb-3.5 rounded-2xl bg-red-500/10 px-4 py-3 text-[15px] leading-snug text-red-300">
+          {error}
+        </p>
+      )}
       {note && (
         <p className="mb-3.5 flex items-center justify-center gap-2 text-[13px] text-white/60">
           <IconLock size={16} />

@@ -25,6 +25,7 @@ import {
   FREE_DAYS,
   addFriendQuestion,
   cleanJoin,
+  joinProblem,
   cleanKind,
   cleanPlanDays,
   friendAskPath,
@@ -411,6 +412,37 @@ describe("joining", () => {
     expect(cleanJoin({ ...good, phone: "555-0100" })).toBeNull();
     expect(cleanJoin({ ...good, password: "short" })).toBeNull();
     expect(cleanJoin({})).toBeNull();
+  });
+
+  it("names the detail that is wrong and the screen it lives on", () => {
+    expect(joinProblem(good)).toBeNull();
+    expect(joinProblem({ ...good, firstName: " " })).toEqual({ step: "name", message: "Enter your first and last name." });
+    expect(joinProblem({ ...good, email: "a@b" })?.step).toBe("contact");
+    expect(joinProblem({ ...good, phone: "555-0100" })).toEqual({
+      step: "contact",
+      message: "Enter a phone number with the area code, 10 digits.",
+    });
+    expect(joinProblem({ ...good, password: "short" })?.step).toBe("password");
+    // screen order: the earliest screen with a problem comes first
+    expect(joinProblem({ ...good, lastName: "", password: "x" })?.step).toBe("name");
+    // one screen at a time, the way the form checks before Next
+    expect(joinProblem({ ...good, password: "x" }, "contact")).toBeNull();
+    expect(joinProblem({ firstName: "A", lastName: "B" }, "name")).toBeNull();
+    // cleanJoin and joinProblem never disagree
+    for (const input of [good, { ...good, phone: "1" }, { ...good, email: "" }, {}]) {
+      expect(cleanJoin(input) === null).toBe(joinProblem(input) !== null);
+    }
+  });
+
+  it("the sign-up form checks each screen before Next and goes back to the screen the server names", async () => {
+    const { readFileSync } = await import("fs");
+    const src = readFileSync("components/elite/JoinForm.tsx", "utf8");
+    for (const step of ["name", "contact", "password"]) {
+      expect(src).toContain(`nextIfValid(e, "${step}"`);
+    }
+    expect(src).toContain('data.reason === "field"');
+    const route = readFileSync("app/api/elite/auth/join/route.ts", "utf8");
+    expect(route).toContain('reason: "field", step:');
   });
 
   it("the agreement lines say what a free account stores and how to stop texts", () => {

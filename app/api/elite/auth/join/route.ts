@@ -16,6 +16,7 @@ import {
   cleanBirth,
   cleanClubCode,
   cleanJoin,
+  joinProblem,
   cleanReferralCode,
   freeLanding,
   newReferralCode,
@@ -83,8 +84,16 @@ export async function POST(req: Request) {
   if (!agreementComplete(body.agreed ?? {})) {
     return NextResponse.json({ error: AGREEMENT_REQUIRED_MESSAGE }, { status: 400 });
   }
+  // A typed detail the form should have caught: say which one, and which
+  // screen it lives on, so the form takes the person straight back to it.
+  const problem = joinProblem(body);
   const fields = cleanJoin(body);
-  if (!fields) return NextResponse.json({ error: JOIN_FIELDS_MESSAGE }, { status: 400 });
+  if (problem || !fields) {
+    return NextResponse.json(
+      { error: problem?.message ?? JOIN_FIELDS_MESSAGE, reason: "field", step: problem?.step ?? "name" },
+      { status: 400 }
+    );
+  }
 
   const admin = createServiceClient();
   if (!admin) {

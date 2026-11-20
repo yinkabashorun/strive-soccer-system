@@ -5,7 +5,7 @@ import { isSupabaseConfigured } from "@/lib/elite/supabase/server";
 import { rateLimit } from "@/lib/rate-limit";
 import { saveAvatar, trackerFor } from "@/lib/elite/tracker-server";
 import { writeDemoState } from "@/lib/elite/tracker-demo";
-import { AVATAR_MAX_BYTES, AVATAR_MESSAGE, FREE_HOME, FREE_WEEK, looksLikeJpeg } from "@/lib/elite/tracker";
+import { AVATAR_MAX_BYTES, AVATAR_MESSAGE, FREE_HOME, FREE_WEEK, cleanJpeg } from "@/lib/elite/tracker";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -37,8 +37,9 @@ export async function POST(req: Request) {
   }
   const file = form.get("photo");
   if (!(file instanceof Blob) || file.size === 0 || file.size > AVATAR_MAX_BYTES) return no(AVATAR_MESSAGE, 400);
-  const photo = new Uint8Array(await file.arrayBuffer());
-  if (!looksLikeJpeg(photo)) return no(AVATAR_MESSAGE, 400);
+  // a whole JPEG of a real size, with where and when it was taken removed
+  const photo = cleanJpeg(new Uint8Array(await file.arrayBuffer()));
+  if (!photo) return no(AVATAR_MESSAGE, 400);
 
   // The example account (no database): nothing is stored; the cookie
   // remembers that a photo was added so the example shows one.

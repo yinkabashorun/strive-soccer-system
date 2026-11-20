@@ -60,6 +60,9 @@ import {
   validateQuiz,
   type Kind,
   type Season,
+  DAY_CAP_MESSAGE,
+  limitHit,
+  newReferralCode,
 } from "./tracker";
 
 // The free app: writing it (migration 069). Every write goes through
@@ -222,6 +225,7 @@ export async function logTraining(
     .insert({ profile_id: o.profileId, trained_on, minutes, kind, week_target: o.target || null })
     .select("id")
     .single();
+  if (limitHit(error) === "day_cap") return fail(DAY_CAP_MESSAGE);
   if (error || !data) return fail(OFFLINE);
   touch();
   return { ok: true, id: data.id as string, trained_on, minutes, kind };
@@ -307,8 +311,17 @@ export async function removeFriend(friendId: string): Promise<{ ok: true } | Fai
     .eq("a", pair.a)
     .eq("b", pair.b);
   if (error) return fail(OFFLINE);
+  // their old copy of your link will not add them back (071)
+  await o.admin
+    .from("elite_tracker_unfriends")
+    .upsert({ remover: o.profileId, removed: friendId }, { onConflict: "remover,removed", ignoreDuplicates: true });
   touch();
   return { ok: true };
+}
+
+async function shareAClub(admin: Admin, x: string, y: string): Promise<boolean> {
+  const [mine, theirs] = await Promise.all([clubIdsOf(admin, x), clubIdsOf(admin, y)]);
+  return mine.some((id) => theirs.includes(id));
 }
 
 // Block a friend: the friendship ends for both, each stops seeing
@@ -331,7 +344,8 @@ export async function blockPlayer(friendId: string): Promise<{ ok: true } | Fail
     .eq("a", pair.a)
     .eq("b", pair.b)
     .maybeSingle();
-  if (!friends) return fail("Nobody to block.");
+  // a friend, or anyone on one of your clubs (the two places a player is shown)
+  if (!friends && !(await shareAClub(o.admin, o.profileId, friendId))) return fail("Nobody to block.");
   const { error } = await o.admin
     .from("elite_tracker_blocks")
     .upsert({ blocker: o.profileId, blocked: friendId }, { onConflict: "blocker,blocked", ignoreDuplicates: true });
@@ -476,9 +490,10 @@ export async function startClub(nameInput: string): Promise<ClubOk | Fail> {
   if (!mayStartClub((await clubIdsOf(o.admin, o.profileId)).length)) return fail(CLUB_CAP_MESSAGE);
   const club = await newClub({ name, kind: "player", captainId: o.profileId, createdBy: o.profileId });
   if (!club) return fail(OFFLINE);
-  if ((await joinClub(o.profileId, club)) !== "ok") {
+  const joined = await joinClub(o.profileId, club);
+  if (joined !== "ok") {
     await o.admin.from("elite_tracker_clubs").delete().eq("id", club.id);
-    return fail(OFFLINE);
+    return fail(joined === "too_many" ? CLUB_CAP_MESSAGE : OFFLINE);
   }
   touch();
   return { ok: true, code: club.join_code };
@@ -556,8 +571,29 @@ export async function removeClubMember(clubId: string, memberId: string): Promis
     .eq("club_id", clubId)
     .eq("profile_id", memberId);
   if (error) return fail(OFFLINE);
+  // the club's link will not let them back in (071)
+  await c.o.admin
+    .from("elite_tracker_club_bans")
+    .upsert({ club_id: clubId, profile_id: memberId }, { onConflict: "club_id,profile_id", ignoreDuplicates: true });
   touch();
   return { ok: true };
+}
+
+// A new link for the club: the old one stops working for everyone who has
+// it (a link that got passed around). Members stay on.
+export async function newClubLink(clubId: string): Promise<{ ok: true; code: string } | Fail> {
+  const c = await captainOf(clubId);
+  if (c === "demo") return { ok: true, code: newReferralCode() };
+  if ("ok" in c) return c;
+  for (let i = 0; i < 3; i++) {
+    const code = newReferralCode();
+    const { error } = await c.o.admin.from("elite_tracker_clubs").update({ join_code: code }).eq("id", clubId);
+    if (!error) {
+      touch();
+      return { ok: true, code };
+    }
+  }
+  return fail(OFFLINE);
 }
 
 // End the club: no new joins; the roster stays.

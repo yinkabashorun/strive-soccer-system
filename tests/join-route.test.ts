@@ -196,7 +196,8 @@ describe("free sign-up", () => {
     expect(state.created[0]).toMatchObject({
       email: "a@example.com",
       email_confirm: true,
-      user_metadata: { full_name: "Anthony Example", role: "player" },
+      user_metadata: { full_name: "Anthony Example" },
+      app_metadata: { role: "player" },
     });
     expect(state.upserts).toEqual([
       {

@@ -105,7 +105,7 @@ describe("profile photos", () => {
   it("the upload checks the account, the size and that it is a JPEG, and is never public", () => {
     const route = code("app/api/elite/tracker/avatar/route.ts");
     expect(route).toContain("AVATAR_MAX_BYTES");
-    expect(route).toContain("looksLikeJpeg(");
+    expect(route).toContain("cleanJpeg(");
     expect(route).toContain("rateLimit(");
     const server = code("lib/elite/tracker-server.ts");
     expect(server).not.toMatch(/getPublicUrl/);

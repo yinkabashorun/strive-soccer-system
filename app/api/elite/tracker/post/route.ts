@@ -14,9 +14,10 @@ import {
   POST_REFUSED_PHOTO,
   cleanCaption,
   cleanKind,
-  looksLikeJpeg,
+  cleanJpeg,
   mayLog,
   validateMinutes,
+  DAY_CAP_MESSAGE,
 } from "@/lib/elite/tracker";
 
 export const runtime = "nodejs";
@@ -57,8 +58,9 @@ export async function POST(req: Request) {
   const file = form.get("photo");
   if (!(file instanceof Blob) || file.size === 0) return no(POST_REFUSED_PHOTO, 400);
   if (file.size > POST_MAX_BYTES) return no("That photo is too big. Take another one.", 413);
-  const photo = new Uint8Array(await file.arrayBuffer());
-  if (!looksLikeJpeg(photo)) return no(POST_REFUSED_PHOTO, 400);
+  // a whole JPEG of a real size, with where and when it was taken removed
+  const photo = cleanJpeg(new Uint8Array(await file.arrayBuffer()));
+  if (!photo) return no(POST_REFUSED_PHOTO, 400);
 
   const today = nyToday();
 
@@ -82,6 +84,7 @@ export async function POST(req: Request) {
     photo,
     weekTarget: tracker.target_minutes,
   });
+  if (!saved.ok && saved.dayCap) return no(DAY_CAP_MESSAGE, 400);
   if (!saved.ok) return no("Your post was not saved. Check your connection and try again.", 502);
   revalidatePath(FREE_HOME);
   revalidatePath(FREE_WEEK);

@@ -168,6 +168,20 @@ export function chipLabel(minutes: number): string {
 }
 export const LOG_MAX_MINUTES = 300;
 
+// A day holds this much at most, training and gym together (071 holds it
+// in the database too), so nobody can fill a week or a club's ranking
+// with hours that were never trained.
+export const DAY_MAX_MINUTES = 480;
+export const DAY_CAP_MESSAGE = "That is more than 8 hours today. Log what you trained, a day holds 8 hours.";
+
+// Did the database refuse a write for one of the free app's limits (071)?
+export type LimitHit = "day_cap" | "club_removed" | "club_too_many" | "club_full";
+export function limitHit(error: { message?: string } | null | undefined): LimitHit | null {
+  const m = error?.message ?? "";
+  for (const k of ["day_cap", "club_removed", "club_too_many", "club_full"] as const) if (m.includes(k)) return k;
+  return null;
+}
+
 // Gym work is tracked apart from training (Coach Yinka, Nov 18 2026). The
 // weekly target and the ring are training only; gym has no target.
 export const KINDS = [
@@ -495,7 +509,7 @@ export function clubAskQuestion(name: string): string {
 
 // May this player join this club? Never past either cap, never an ended
 // club, never twice.
-export type ClubJoin = "ok" | "already" | "too_many" | "full" | "archived";
+export type ClubJoin = "ok" | "already" | "too_many" | "full" | "archived" | "removed";
 
 export function clubJoinDecision(input: {
   clubId: string;
@@ -522,6 +536,7 @@ export const CLUB_REFUSED: Record<Exclude<ClubJoin, "ok" | "already">, string> =
   too_many: CLUB_CAP_MESSAGE,
   full: `That club is full. A club holds ${CLUB_CAP} players.`,
   archived: "That club has ended.",
+  removed: "The captain took you off this club, so its link no longer works for you.",
 };
 
 // The pairs that joining makes: the new player and every member already on
@@ -974,6 +989,60 @@ export function looksLikeJpeg(bytes: Uint8Array): boolean {
   return bytes.length > 3 && bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
 }
 
+// The smallest photo side we take: anything smaller is not a photo of
+// training (and a tiny junk file must never open a friend's locked post).
+export const PHOTO_MIN_EDGE = 64;
+
+// A photo as we store it: a real JPEG, read marker by marker, with the
+// parts that can carry where and when it was taken (Exif and XMP, IPTC,
+// comments) taken out. The phone already re-draws the photo before it
+// leaves, which drops them; this holds for anything sent to the server
+// another way. null when the file is not a whole JPEG of a real size.
+export function cleanJpeg(bytes: Uint8Array): Uint8Array | null {
+  const n = bytes.length;
+  if (n < 4 || bytes[0] !== 0xff || bytes[1] !== 0xd8) return null;
+  const parts: Uint8Array[] = [bytes.subarray(0, 2)];
+  let i = 2;
+  let size: { width: number; height: number } | null = null;
+  while (i < n) {
+    if (bytes[i] !== 0xff) return null;
+    while (i < n && bytes[i] === 0xff) i++;
+    if (i >= n) return null;
+    const marker = bytes[i];
+    const start = i - 1;
+    i++;
+    if (marker === 0x01 || (marker >= 0xd0 && marker <= 0xd7)) continue;
+    if (marker === 0xd8 || marker === 0xd9) return null; // nothing to show before the image data
+    if (i + 2 > n) return null;
+    const len = (bytes[i] << 8) | bytes[i + 1];
+    if (len < 2 || i + len > n) return null;
+    const isSof = marker >= 0xc0 && marker <= 0xcf && marker !== 0xc4 && marker !== 0xc8 && marker !== 0xcc;
+    if (isSof) {
+      if (len < 7) return null;
+      size = { height: (bytes[i + 3] << 8) | bytes[i + 4], width: (bytes[i + 5] << 8) | bytes[i + 6] };
+    }
+    if (marker === 0xda) {
+      if (!size || size.width < PHOTO_MIN_EDGE || size.height < PHOTO_MIN_EDGE) return null;
+      // the image data runs to the end marker
+      let end = n;
+      while (end > i && !(bytes[end - 2] === 0xff && bytes[end - 1] === 0xd9)) end--;
+      if (end <= i + len) return null;
+      parts.push(bytes.subarray(start, end));
+      const out = new Uint8Array(parts.reduce((t, p) => t + p.length, 0));
+      let at = 0;
+      for (const p of parts) {
+        out.set(p, at);
+        at += p.length;
+      }
+      return out;
+    }
+    const dropped = marker === 0xe1 || marker === 0xed || marker === 0xfe; // Exif/XMP, IPTC, comment
+    if (!dropped) parts.push(bytes.subarray(start, i + len));
+    i += len;
+  }
+  return null;
+}
+
 // The size a photo is shrunk to before it leaves the phone: the longest
 // side at most POST_MAX_EDGE, the shape kept, never made bigger.
 export function fitWithin(width: number, height: number, max = POST_MAX_EDGE): { width: number; height: number } {
@@ -1328,7 +1397,15 @@ export function cardFacts(input: { fullName: string; logs: TrainingLog[]; today:
 const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 export const REFERRAL_CODE_LENGTH = 8;
 
-export function newReferralCode(random: () => number = Math.random): string {
+// A secure random number in [0, 1), from the platform's own generator
+// (Math.random can be predicted from codes a player has seen).
+function secureRandom(): number {
+  const buf = new Uint32Array(1);
+  globalThis.crypto.getRandomValues(buf);
+  return buf[0] / 0x100000000;
+}
+
+export function newReferralCode(random: () => number = secureRandom): string {
   let out = "";
   for (let i = 0; i < REFERRAL_CODE_LENGTH; i++) {
     out += CODE_ALPHABET[Math.floor(random() * CODE_ALPHABET.length) % CODE_ALPHABET.length];

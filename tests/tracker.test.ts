@@ -972,6 +972,7 @@ describe("friends", () => {
       "endMyClub",
       "leaveClub",
       "logTraining",
+      "newClubLink",
       "removeClubMember",
       "removeFriend",
       "removeMyPhoto",

@@ -76,6 +76,7 @@ import {
   type Season,
   type TargetRow,
   type TrainingLog,
+  limitHit,
 } from "./tracker";
 import {
   demoBlocked,
@@ -345,11 +346,22 @@ async function blocksBetween(admin: Admin, x: string, y: string): Promise<Block[
 // only by code that has already established both ids for itself, the
 // sign-up route (who sent the link) and the confirm action (the signed-in
 // viewer and the owner of the code they opened).
+// x is the player who opened the link, y the link's owner. When y once
+// took x off, x cannot come straight back on y's link (071); y adding x
+// again from x's link clears that.
 export async function makeFriends(x: string, y: string): Promise<"ok" | "blocked" | "error"> {
   const pair = friendPair(x, y);
   const admin = createServiceClient();
   if (!pair || !admin) return "error";
   if (blockedEitherWay(await blocksBetween(admin, x, y), x, y)) return "blocked";
+  const { data: removed } = await admin
+    .from("elite_tracker_unfriends")
+    .select("remover")
+    .eq("remover", y)
+    .eq("removed", x)
+    .maybeSingle();
+  if (removed) return "blocked";
+  await admin.from("elite_tracker_unfriends").delete().eq("remover", x).eq("removed", y);
   const { error } = await admin
     .from("elite_tracker_friends")
     .upsert(pair, { onConflict: "a,b", ignoreDuplicates: true });
@@ -715,7 +727,7 @@ export async function savePost(input: {
   caption: string | null;
   photo: Uint8Array;
   weekTarget: number | null; // the player's target right now, kept on the entry
-}): Promise<{ ok: true; id: string } | { ok: false }> {
+}): Promise<{ ok: true; id: string } | { ok: false; dayCap?: boolean }> {
   const admin = createServiceClient();
   const id = crypto.randomUUID();
   const path = postPath(input.profileId, id);
@@ -736,7 +748,7 @@ export async function savePost(input: {
   });
   if (error) {
     await admin.storage.from(POST_BUCKET).remove([path]).catch(() => undefined);
-    return { ok: false };
+    return { ok: false, dayCap: limitHit(error) === "day_cap" };
   }
   return { ok: true, id };
 }
@@ -848,7 +860,14 @@ export async function joinClub(profileId: string, club: ClubRow): Promise<ClubJo
   if (decision !== "ok") return decision;
 
   const { error } = await admin.from("elite_tracker_club_members").insert({ club_id: club.id, profile_id: profileId });
-  if (error) return "error";
+  if (error) {
+    // the database holds the caps and the captain's removals (071)
+    const hit = limitHit(error);
+    if (hit === "club_full") return "full";
+    if (hit === "club_too_many") return "too_many";
+    if (hit === "club_removed") return "removed";
+    return "error";
+  }
   // Two players joining at the same moment can pass the count together:
   // the later one steps back out so a club never goes past the cap.
   const after = await membersOf(admin, club.id);
@@ -904,6 +923,15 @@ export async function clubAskFor(
     myClubIds: await clubIdsOf(admin, viewer.profile.id),
   });
   if (decision === "already") return null;
+  if (decision === "ok") {
+    const { data: ban } = await admin
+      .from("elite_tracker_club_bans")
+      .select("club_id")
+      .eq("club_id", club.id)
+      .eq("profile_id", viewer.profile.id)
+      .maybeSingle();
+    if (ban) return { code, name: club.name, problem: CLUB_REFUSED.removed };
+  }
   return { code, name: club.name, problem: decision === "ok" ? null : CLUB_REFUSED[decision] };
 }
 
@@ -938,9 +966,10 @@ export async function myClubsFor(viewer: Viewer, today: string): Promise<MyClub[
       entriesOf(admin, memberIds, shiftDay(today, -60), today),
     ]);
     const blockedIds = new Set(blocks.flatMap((b) => [b.blocker, b.blocked]).filter((x) => x !== me.id));
-    // a photo only for the viewer and for members not behind a block
-    // (joining a club made every other member a friend)
-    const photos = await avatarsOf(admin, memberIds.filter((x) => !blockedIds.has(x)));
+    // a photo only for the viewer and for members who are friends right
+    // now (a friend taken off keeps the club, not the photo)
+    const friendNow = new Set(await friendIdsOf(admin, me.id));
+    const photos = await avatarsOf(admin, memberIds.filter((x) => x === me.id || (friendNow.has(x) && !blockedIds.has(x))));
     const minutes = new Map<string, number>();
     const lastDay = new Map<string, string>();
     for (const r of recent) {
@@ -954,7 +983,8 @@ export async function myClubsFor(viewer: Viewer, today: string): Promise<MyClub[
       kind: club.kind,
       captain: club.captain_id === me.id && !club.archived_at,
       ended: Boolean(club.archived_at),
-      members: members.map((m) => ({
+      // a block hides each from the other here too
+      members: members.filter((m) => !blockedIds.has(m.profile_id)).map((m) => ({
         id: m.profile_id,
         name: m.profile_id === me.id ? me.name : names.get(m.profile_id) ?? "A teammate",
         captain: club.captain_id === m.profile_id,

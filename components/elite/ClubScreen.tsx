@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { endMyClub, leaveClub, removeClubMember, renameMyClub, reportClub } from "@/lib/elite/tracker-actions";
+import { blockPlayer, endMyClub, leaveClub, newClubLink, removeClubMember, renameMyClub, reportClub } from "@/lib/elite/tracker-actions";
 import { fmtDuration } from "@/lib/elite/time-trained";
 import { CLUB_NAME_MAX, FREE_WEEK, clubLink, clubPlaceLine, lastTrainedLabel, type MyClub } from "@/lib/elite/tracker";
 import { ActionSheet } from "./ActionSheet";
@@ -14,7 +14,7 @@ import { StarMark } from "./StarMark";
 import { sendLink } from "./send-link";
 import { initialsOf } from "@/lib/elite/tracker";
 
-type Sheet = null | "menu" | "rename" | "end" | "report" | "leave" | "remove" | "sent";
+type Sheet = null | "menu" | "rename" | "end" | "report" | "leave" | "remove" | "sent" | "block";
 
 // One club, full screen (the approved mock, screen 7): the newest post
 // photo from a member the viewer may see as the header (else dark), the
@@ -165,12 +165,36 @@ export function ClubScreen({
               ? [
                   { label: "Rename the club", icon: <IconPencil />, onClick: () => { setName(club.name); setSheet("rename"); } },
                   { label: "Take a player off", icon: <IconPerson />, onClick: () => setSheet("remove") },
+                  ...(!club.ended
+                    ? [{ label: "Make a new link", icon: <IconLink />, disabled: busy, onClick: () => act(() => newClubLink(club.id), () => { setSheet(null); router.refresh(); }) }]
+                    : []),
                   { label: "End the club", icon: <IconBlock />, red: true, onClick: () => setSheet("end") },
                 ]
               : [{ label: "Report this club", icon: <IconFlag />, red: true, onClick: () => setSheet("report") }]),
+            ...(club.members.some((m) => !m.you)
+              ? [{ label: "Block a player", icon: <IconBlock />, red: true, onClick: () => setSheet("block") }]
+              : []),
             { label: "Leave the club", icon: <IconExit />, red: true, onClick: () => setSheet("leave") },
           ]}
           note="Leaving keeps the friends you made. To cut one off, block them."
+        />
+      )}
+
+      {sheet === "block" && (
+        <ActionSheet
+          label="Block a player"
+          title="Block a player"
+          onClose={() => setSheet("menu")}
+          rows={club.members
+            .filter((m) => !m.you)
+            .map((m) => ({
+              label: m.name,
+              icon: <FreeAvatar photo={m.photo} initials={initialsOf(m.name)} size={28} />,
+              red: true,
+              disabled: busy,
+              onClick: () => act(() => blockPlayer(m.id), () => { setSheet(null); router.refresh(); }),
+            }))}
+          note="You stop seeing each other anywhere in the app. They are not told."
         />
       )}
 
@@ -187,7 +211,7 @@ export function ClubScreen({
               disabled: busy,
               onClick: () => act(() => removeClubMember(club.id, m.id), () => { setSheet(null); router.refresh(); }),
             }))}
-          note="They stay friends with everyone they made friends with here."
+          note="The club's link will not let them back in. They stay friends with everyone they made friends with here; to cut one off, block them."
         />
       )}
 

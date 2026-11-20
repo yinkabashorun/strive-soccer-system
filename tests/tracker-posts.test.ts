@@ -325,7 +325,7 @@ describe("a post's photo and its one line", () => {
       "validateMinutes(",
       "mayLog(kind, tracker.grade)",
       "file.size > POST_MAX_BYTES",
-      "looksLikeJpeg(photo)",
+      "cleanJpeg(new Uint8Array(await file.arrayBuffer()))",
       "await savePost({\n    profileId: viewer.profile.id,",
     ].map((mark) => route.indexOf(mark));
     expect(order.every((i) => i > -1)).toBe(true);
@@ -444,7 +444,7 @@ describe("blocking", () => {
   it("blocking ends the friendship, and only a current friend can be blocked", () => {
     const acts = code("lib/elite/tracker-actions.ts");
     const fn = acts.slice(acts.indexOf("export async function blockPlayer("), acts.indexOf("export async function unblockPlayer("));
-    expect(fn).toContain('if (!friends) return fail("Nobody to block.");');
+    expect(fn).toContain('if (!friends && !(await shareAClub(o.admin, o.profileId, friendId))) return fail("Nobody to block.");');
     expect(fn).toContain('.upsert({ blocker: o.profileId, blocked: friendId }');
     expect(fn).toContain('.from("elite_tracker_friends").delete().eq("a", pair.a).eq("b", pair.b)');
     // the one who blocked takes it back; the row named is always their own

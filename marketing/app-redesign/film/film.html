@@ -1,0 +1,527 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Strive Elite iPhone film</title>
+<style>
+
+
+@font-face{font-family:"BC";src:url(../mock/Oswald-Bold.ttf);font-weight:900}
+@font-face{font-family:"BC";src:url(../mock/Oswald-Bold.ttf);font-weight:800}
+@font-face{font-family:"B";src:url(../mock/Inter-Medium.ttf);font-weight:500}
+@font-face{font-family:"B";src:url(../mock/Inter-SemiBold.ttf);font-weight:600}
+@font-face{font-family:"B";src:url(../mock/Inter-SemiBold.ttf);font-weight:700}
+:root{--bone:#f2efe8;--dim:rgba(242,239,232,.6);--faint:rgba(242,239,232,.34);--gold:#c8a858;--metal:linear-gradient(135deg,#f0dca0 0%,#c8a858 45%,#8c6d2c 100%);--fill:#0e0e0e;--fill2:#161616;--line:rgba(255,255,255,.07)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1b1b1b;font-family:"B",sans-serif;font-weight:500;color:var(--bone);display:flex;flex-wrap:wrap;gap:28px;padding:28px;width:1780px}
+body.one{padding:0;gap:0;background:#000;width:auto}
+.phone{width:390px;height:844px;background:#000;position:relative;overflow:hidden;flex:none}
+body:not(.one) .phone{border-radius:44px;outline:1px solid #2a2a2a}
+.bc{font-family:"BC";font-weight:900;text-transform:uppercase;letter-spacing:.4px}
+body{font-size:15px;letter-spacing:-.1px}
+.metal{background:var(--metal);-webkit-background-clip:text;background-clip:text;color:transparent}
+svg.i{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.eyebrow{font-size:11px;font-weight:600;letter-spacing:2.6px;text-transform:uppercase;color:var(--gold)}
+.muted{color:var(--dim)}
+img.cover{width:100%;height:100%;object-fit:cover;display:block}
+
+/* tab bar: four tabs for Pro */
+.tabs{position:absolute;z-index:5;left:0;right:0;bottom:0;height:86px;padding:0 26px 22px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(180deg,rgba(0,0,0,0),#000 40%)}
+.tab{font-size:11.5px;font-weight:600;color:var(--faint);text-align:center;width:70px}
+.tab svg{display:block;margin:0 auto 5px;width:24px;height:24px}
+.tab.on{color:var(--bone)}
+.tab.on svg{stroke:var(--bone)}
+.tab.on::after{content:"";display:block;width:4px;height:4px;border-radius:50%;background:var(--gold);margin:4px auto 0}
+
+/* header shared */
+.top{display:flex;align-items:flex-end;justify-content:space-between;padding:58px 20px 0}
+.day{font-size:40px;line-height:1}
+.date{font-size:13.5px;color:var(--dim);margin-top:6px}
+.ring{position:relative;width:58px;height:58px}
+.ring svg{position:absolute;inset:0}
+.ring .ini{position:absolute;inset:7px;border-radius:50%;background:linear-gradient(145deg,#262626,#141414);display:grid;place-items:center;font-weight:600;font-size:14px;letter-spacing:.5px}
+
+/* ---------- 1. home ---------- */
+.hero{margin:18px 14px 0;height:452px;border-radius:30px;overflow:hidden;position:relative}
+.hero .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 12%,rgba(0,0,0,.72) 46%,rgba(0,0,0,.92) 64%,#000 96%)}
+.hero .in{position:absolute;left:0;right:0;bottom:0;padding:0 20px 20px}
+.hero h2{font-size:36px;line-height:1.02}
+.chips{display:flex;gap:8px;margin-top:12px}
+.chip{height:28px;padding:0 12px;border-radius:14px;background:rgba(255,255,255,.12);backdrop-filter:blur(10px);font-size:12.5px;font-weight:600;letter-spacing:.2px;display:flex;align-items:center;gap:6px}
+.thumbs{display:flex;gap:8px;margin-top:16px}
+.thumbs div{flex:1;height:64px;border-radius:14px;overflow:hidden;position:relative}
+.thumbs div span{position:absolute;left:6px;bottom:5px;font-size:10.5px;font-weight:700;text-shadow:0 1px 4px #000}
+.go{margin-top:16px;height:60px;border-radius:18px;background:var(--bone);color:#000;display:flex;align-items:center;justify-content:center;gap:10px;font-size:19px;letter-spacing:1.6px}
+.go svg{width:22px;height:22px;fill:#000;stroke:none}
+.weekline{margin:18px 20px 0;display:flex;align-items:center;justify-content:space-between}
+.dots{display:flex;gap:8px}
+.dot{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-family:"BC";font-weight:900;font-size:17px;background:var(--fill2);color:var(--faint);box-shadow:inset 0 0 0 1px var(--line)}
+.dot.done{background:var(--metal);color:#000}
+.dot.now{background:#000;color:var(--bone);box-shadow:inset 0 0 0 2.5px var(--bone)}
+.wk{text-align:right}
+.wk b{display:block;font-family:"BC";font-weight:900;font-size:28px;line-height:1}
+.wk span{font-size:12.5px;color:var(--dim)}
+
+/* ---------- 2. drill ---------- */
+.vid{position:absolute;left:0;right:0;top:0;height:560px}
+.vid .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,0) 22%,rgba(0,0,0,0) 62%,#000 100%)}
+.seg{position:absolute;top:58px;left:70px;right:20px;display:flex;gap:5px}
+.seg i{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,.28)}
+.seg i.on{background:var(--bone)}
+.seg i.done{background:var(--gold)}
+.x{position:absolute;top:44px;left:14px;width:44px;height:44px;border-radius:50%;background:rgba(0,0,0,.45);display:grid;place-items:center}
+.dr{position:absolute;left:0;right:0;top:470px;padding:0 20px}
+.kind{display:flex;align-items:center;gap:10px;font-size:11px;font-weight:600;letter-spacing:2.4px;text-transform:uppercase;color:var(--dim)}
+.kind em{font-style:normal;color:var(--gold)}
+.dr h2{font-size:34px;line-height:1.04;margin-top:8px}
+.sets{display:flex;gap:10px;margin-top:16px}
+.set{flex:1;height:70px;border-radius:18px;background:var(--fill);box-shadow:inset 0 0 0 1px var(--line);padding:12px 14px}
+.set b{display:block;font-family:"BC";font-weight:900;font-size:24px;line-height:1.05}
+.set span{font-size:12px;color:var(--dim)}
+.cta{position:absolute;left:20px;right:20px;bottom:34px;display:flex;gap:10px}
+.cta .timer{width:60px;height:60px;border-radius:18px;background:var(--fill);box-shadow:inset 0 0 0 1px var(--line);display:grid;place-items:center}
+.cta .done{flex:1;height:60px;border-radius:18px;background:var(--bone);color:#000;display:grid;place-items:center;font-size:19px;letter-spacing:2px}
+
+/* ---------- 3. timer ---------- */
+.tm{position:absolute;inset:0;background:radial-gradient(110% 65% at 50% 38%,#17140b 0%,#000 62%)}
+.big-ring{position:absolute;left:45px;top:170px;width:300px;height:300px}
+.big-ring .c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.big-ring .c b{font-family:"BC";font-weight:900;font-size:84px;line-height:1}
+.big-ring .c span{font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-top:4px}
+.tsets{position:absolute;top:510px;left:0;right:0;display:flex;justify-content:center;gap:10px}
+.tsets i{width:46px;height:8px;border-radius:4px;background:var(--fill2)}
+.tsets i.d{background:var(--metal)}
+.tsets i.n{background:var(--bone)}
+.tname{position:absolute;top:100px;left:0;right:0;text-align:center}
+.tname div{font-size:13px;color:var(--dim);margin-top:4px}
+.tnext{position:absolute;top:560px;left:0;right:0;text-align:center;font-size:15px;color:var(--dim)}
+.tbtns{position:absolute;left:20px;right:20px;bottom:34px;display:flex;gap:10px}
+.tbtns div{flex:1;height:60px;border-radius:18px;background:var(--fill);box-shadow:inset 0 0 0 1px var(--line);display:grid;place-items:center;font-size:18px;letter-spacing:2px}
+.tbtns div.w{background:var(--bone);color:#000}
+
+/* ---------- 4. complete ---------- */
+.cp{position:absolute;inset:0;background:radial-gradient(85% 50% at 50% 30%,#221c0d 0%,#0a0805 48%,#000 76%)}
+.spark{position:absolute;border-radius:2px;background:var(--metal)}
+.cring{position:absolute;left:75px;top:120px;width:240px;height:240px}
+.cring .c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.cring .c b{font-family:"BC";font-weight:900;font-size:72px;line-height:1;background:var(--metal);-webkit-background-clip:text;background-clip:text;color:transparent}
+.cring .c span{font-size:11px;font-weight:600;letter-spacing:3px;text-transform:uppercase;margin-top:2px;color:var(--dim)}
+.ctitle{position:absolute;top:392px;left:0;right:0;text-align:center}
+.ctitle h2{font-size:38px;line-height:1.02}
+.ctitle p{font-size:15px;color:var(--dim);margin-top:8px}
+.cstats{position:absolute;top:500px;left:20px;right:20px;display:flex;gap:10px}
+.cstats div{flex:1;border-radius:18px;background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1px var(--line);padding:14px}
+.cstats b{display:block;font-family:"BC";font-weight:900;font-size:26px;line-height:1.05}
+.cstats span{font-size:12px;color:var(--dim)}
+.medal{position:absolute;top:600px;left:20px;right:20px;border-radius:20px;padding:14px 16px;display:flex;align-items:center;gap:14px;background:linear-gradient(90deg,rgba(200,168,88,.16),rgba(200,168,88,.03));box-shadow:inset 0 0 0 1px rgba(200,168,88,.38)}
+.medal .m{width:52px;height:52px;border-radius:50%;background:var(--metal);display:grid;place-items:center;color:#1a1408;font-family:"BC";font-weight:900;font-size:18px;flex:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
+.medal b{font-weight:700;font-size:16px;display:block}
+.medal span{font-size:13px;color:var(--dim)}
+
+/* ---------- 5. week ---------- */
+.focus{margin:16px 20px 0;font-size:16px;line-height:1.35}
+.focus b{color:var(--gold);font-weight:700}
+.wbar{margin:16px 20px 0;display:flex;gap:6px}
+.wbar i{flex:1;height:6px;border-radius:3px;background:var(--fill2)}
+.wbar i.d{background:var(--metal)}
+.scards{margin-top:16px;display:flex;flex-direction:column;gap:10px;padding:0 14px}
+.sc{height:108px;border-radius:24px;overflow:hidden;position:relative;display:flex}
+.sc .img{position:absolute;inset:0}
+.sc .img img{filter:brightness(.55)}
+.sc.done .img img{filter:brightness(.28) saturate(.5)}
+.sc .t{position:relative;padding:16px 18px;flex:1;display:flex;flex-direction:column;justify-content:space-between}
+.sc .t b{font-family:"BC";font-weight:900;font-size:26px;text-transform:uppercase;line-height:1}
+.sc .t span{font-size:13px;color:rgba(244,241,234,.8)}
+.sc .r{position:relative;width:86px;display:grid;place-items:center}
+.check{width:40px;height:40px;border-radius:50%;background:var(--metal);display:grid;place-items:center;color:#1a1408}
+.sc.now{box-shadow:0 0 0 2.5px var(--bone)}
+.play{width:44px;height:44px;border-radius:50%;background:var(--bone);display:grid;place-items:center}
+.play svg{fill:#000;stroke:none;width:18px;height:18px;margin-left:2px}
+
+/* ---------- 6. courses ---------- */
+.ctop{padding:58px 20px 0}
+.ctop h1{font-size:40px;line-height:1}
+.feat{margin:18px 14px 0;height:300px;border-radius:30px;overflow:hidden;position:relative}
+.feat .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 30%,rgba(0,0,0,.92))}
+.feat .in{position:absolute;left:18px;right:18px;bottom:18px}
+.feat h3{font-size:32px;line-height:1.02;margin-top:6px}
+.feat p{font-size:14px;color:rgba(244,241,234,.8);margin-top:6px}
+.row-h{display:flex;justify-content:space-between;align-items:baseline;margin:22px 20px 10px}
+.row-h b{font-weight:700;font-size:17px}
+.crow{display:flex;gap:10px;padding-left:14px}
+.cc{width:150px;flex:none}
+.cc .im{height:200px;border-radius:22px;overflow:hidden;position:relative}
+.cc .im .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 45%,rgba(0,0,0,.85))}
+.cc .im b{position:absolute;left:12px;right:12px;bottom:12px;font-family:"BC";font-weight:900;font-size:19px;text-transform:uppercase;line-height:1.05;overflow-wrap:anywhere}
+.cc span{display:block;font-size:12.5px;color:var(--dim);margin-top:7px;padding:0 2px}
+
+/* ---------- 7. you ---------- */
+.yo{display:flex;align-items:center;gap:18px;margin:18px 20px 0}
+.yring{position:relative;width:132px;height:132px;flex:none}
+.yring .c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.yring .c b{font-family:"BC";font-weight:900;font-size:30px;line-height:1}
+.yring .c span{font-size:11.5px;color:var(--dim);margin-top:3px}
+.yt b{display:block;font-family:"BC";font-weight:900;font-size:50px;line-height:1}
+.yt span{font-size:13px;color:var(--dim)}
+.chart{margin:22px 20px 0;height:150px;display:flex;align-items:flex-end;gap:9px}
+.chart div{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end}
+.chart i{width:100%;border-radius:8px 8px 4px 4px;background:var(--fill2)}
+.chart i.g{background:var(--metal)}
+.chart span{font-size:11px;color:var(--faint)}
+.badges{display:flex;gap:12px;padding:0 20px;margin-top:12px}
+.bd{flex:1;text-align:center}
+.bd .m{width:72px;height:72px;margin:0 auto;border-radius:50%;display:grid;place-items:center;font-family:"BC";font-weight:900;font-size:20px;color:#1a1408;background:var(--metal);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 0 0 3px #000,0 0 0 4px rgba(200,168,88,.55)}
+.bd .m.off{background:var(--fill2);color:var(--faint);box-shadow:0 0 0 3px #000,0 0 0 4.5px var(--line)}
+.bd span{display:block;font-size:12px;margin-top:9px;color:var(--dim)}
+
+html,body{background:#000}
+body{width:auto;padding:0;gap:0;display:block;overflow:hidden}
+.phone{margin:0 auto}
+@media (min-width:500px){body{display:grid;place-items:center;min-height:100vh;background:#111}.phone{border-radius:44px;outline:1px solid #2a2a2a}}
+:root{--ease:cubic-bezier(.22,1,.36,1);--spring:cubic-bezier(.34,1.4,.5,1)}
+.scr{position:absolute;inset:0;opacity:0;pointer-events:none;background:#000}
+.scr.on{opacity:1;pointer-events:auto}
+.tap{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.press{transition:transform .14s var(--ease)}
+.press:active,.press.down{transform:scale(.96)}
+
+/* finger dot, only in the recorded walkthrough */
+#finger{position:absolute;z-index:99;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:rgba(255,255,255,.28);box-shadow:0 0 0 1.5px rgba(255,255,255,.5);opacity:0;pointer-events:none}
+
+/* welcome */
+#welcome .logo{position:absolute;left:50%;top:150px;width:96px;height:96px;margin-left:-48px;filter:invert(1);opacity:0}
+#welcome .rule{position:absolute;left:50%;top:268px;width:64px;height:1.5px;margin-left:-32px;background:var(--metal);transform:scaleX(0)}
+#welcome h1{position:absolute;top:292px;left:0;right:0;text-align:center;font-size:44px;line-height:1;opacity:0}
+#welcome p{position:absolute;top:346px;left:0;right:0;text-align:center;color:var(--dim);font-size:15.5px;opacity:0}
+.card{position:absolute;left:24px;right:24px;top:420px;height:214px;border-radius:22px;overflow:hidden;
+ background:linear-gradient(150deg,#1d1d1d 0%,#0c0c0c 55%,#050505 100%);box-shadow:inset 0 0 0 1px rgba(200,168,88,.32),0 30px 60px rgba(0,0,0,.6);opacity:0}
+.card .wm{position:absolute;left:22px;top:22px;font-size:22px;letter-spacing:1.2px}
+.card .mk{position:absolute;right:20px;top:18px;width:38px;height:38px;filter:invert(1);opacity:.9}
+.card .nm{position:absolute;left:22px;bottom:44px;font-size:19px;letter-spacing:1.4px}
+.card .since{position:absolute;left:22px;bottom:22px;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--dim)}
+.card .tier{position:absolute;right:22px;bottom:22px;font-size:13px;letter-spacing:2.6px}
+.card .sheen{position:absolute;top:-40%;bottom:-40%;width:90px;left:-140px;transform:rotate(18deg);
+ background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,240,200,.16),rgba(255,255,255,0))}
+.card .lines{position:absolute;inset:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.018) 0 2px,transparent 2px 9px)}
+.wbtn{position:absolute;left:20px;right:20px;bottom:40px;height:60px;border-radius:18px;background:var(--bone);color:#000;display:grid;place-items:center;font-size:19px;letter-spacing:2px;opacity:0}
+
+/* quiz */
+#quiz .q{position:absolute;top:84px;left:20px;right:20px}
+#quiz .q h2{font-size:36px;line-height:1.04;margin-top:10px}
+#quiz .pbar{position:absolute;top:58px;left:20px;right:20px;display:flex;gap:5px}
+#quiz .pbar i{flex:1;height:4px;border-radius:2px;background:var(--fill2)}
+#quiz .pbar i.on{background:var(--bone)}
+.tiles{position:absolute;top:236px;left:14px;right:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.tile{height:230px;border-radius:24px;overflow:hidden;position:relative;transition:opacity .3s var(--ease),transform .3s var(--ease),box-shadow .3s var(--ease)}
+.tile img{filter:brightness(.62)}
+.tile b{position:absolute;left:14px;bottom:14px;font-size:22px;line-height:1.02}
+.tile .ck{position:absolute;right:12px;top:12px;width:30px;height:30px;border-radius:50%;background:var(--bone);color:#000;display:grid;place-items:center;transform:scale(0)}
+.tile.pick{box-shadow:0 0 0 2.5px var(--bone)}
+.tile.pick .ck{transform:scale(1);transition:transform .32s var(--spring)}
+.tiles.chosen .tile:not(.pick){opacity:.28;transform:scale(.97)}
+
+/* building */
+#build .bl{position:absolute;top:300px;left:36px;right:36px}
+#build h2{font-size:34px;line-height:1.04}
+.steps{margin-top:28px;display:flex;flex-direction:column;gap:18px}
+.step{display:flex;align-items:center;gap:14px;font-size:16px;color:var(--faint);transition:color .35s var(--ease)}
+.step i{width:26px;height:26px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--line);display:grid;place-items:center;flex:none;transition:background .35s var(--ease)}
+.step i svg{width:15px;height:15px;stroke:#1a1408;stroke-width:3;opacity:0;transition:opacity .2s}
+.step.ok{color:var(--bone)}
+.step.ok i{background:var(--metal);box-shadow:none}
+.step.ok i svg{opacity:1}
+
+/* the drop */
+#drop .dt{position:absolute;top:70px;left:20px;right:20px}
+#drop h1{font-size:52px;line-height:.98;margin-top:10px}
+#drop .dt p{font-size:16px;color:var(--dim);margin-top:12px;line-height:1.35}
+#drop .dt p b{color:var(--gold);font-weight:600}
+#drop .scards{position:absolute;top:268px;left:0;right:0}
+#drop .sc{opacity:0}
+
+/* session intro */
+#intro{background:transparent}
+#intro .full{position:absolute;inset:0;overflow:hidden}
+#intro .full img{filter:brightness(.42)}
+#intro .it{position:absolute;left:20px;right:20px;top:120px;opacity:0}
+#intro .it h2{font-size:44px;line-height:1;margin-top:10px}
+#intro .it p{color:var(--dim);margin-top:10px;font-size:15px}
+#intro .count{position:absolute;left:0;right:0;top:360px;text-align:center;font-size:150px;line-height:1;opacity:0}
+#intro .cring{left:95px;top:330px;width:200px;height:200px;opacity:0}
+
+/* drill transitions */
+#drill .dbody{position:absolute;inset:0}
+#drill .done{transition:transform .14s var(--ease)}
+#drill .done.ok{background:var(--bone)}
+#drill .done svg{width:30px;height:30px;stroke:#000;stroke-width:3}
+
+/* finish */
+#finish .cp{opacity:0}
+#finish .cring svg .arc{stroke-dashoffset:678.6}
+#finish .cring .c b,#finish .ctitle,#finish .cstats,#finish .medal,#finish .cta{opacity:0}
+#finish .spark{opacity:0}
+
+/* home extras */
+#home .dot{transition:background .3s}
+#you .card{position:relative;left:auto;right:auto;top:auto;margin:18px 20px 0;opacity:1;height:200px}
+#you .yo{margin-top:18px}
+
+*{transition:none!important;animation:none!important}
+html,body{margin:0;background:#000;overflow:hidden}
+body{width:540px;height:960px;position:relative;display:block;padding:0}
+#stage{position:absolute;inset:0;background:radial-gradient(120% 70% at 50% 62%,#0d0b07 0%,#000 60%)}
+#glow{position:absolute;left:40px;right:40px;top:380px;height:520px;background:radial-gradient(closest-side,rgba(200,168,88,.20),transparent);filter:blur(14px)}
+#device{position:absolute;left:105px;top:206px;width:330px;aspect-ratio:390/844;border-radius:15.5%/7.2%;padding:11px;
+  background:linear-gradient(160deg,#2c2c2c,#0b0b0b 42%,#1a1a1a);box-shadow:inset 0 0 0 1px rgba(255,255,255,.13),0 50px 90px -24px rgba(0,0,0,.95),0 0 0 1px #050505;opacity:0}
+#scrwrap{position:relative;width:100%;height:100%;border-radius:12.6%/5.8%;overflow:hidden;background:#000}
+#screen{position:absolute;left:0;top:0;width:390px;height:844px;transform-origin:0 0}
+#screen .phone{width:390px;height:844px;margin:0;outline:none;border-radius:0}
+#island{position:absolute;left:36%;right:36%;top:1.4%;height:3.3%;border-radius:999px;background:#000;z-index:200}
+#you{z-index:6}#timer{z-index:7}#week{z-index:4}#courses{z-index:5}
+#finger{position:absolute;z-index:99;width:46px;height:46px;margin:-23px 0 0 -23px;border-radius:50%;background:rgba(255,255,255,.3);box-shadow:0 0 0 1.5px rgba(255,255,255,.55),0 0 24px rgba(255,255,255,.25);opacity:0;pointer-events:none}
+#eyebrow{position:absolute;left:0;right:0;top:92px;text-align:center;font-size:12.5px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:var(--gold);font-family:"B"}
+#line{position:absolute;left:30px;right:30px;top:116px;text-align:center;text-wrap:balance;font-family:"BC";font-weight:900;font-size:32px;line-height:1.06;text-transform:uppercase;letter-spacing:.4px;color:var(--bone)}
+#title{position:absolute;left:0;right:0;top:360px;text-align:center;opacity:0}
+#title .w{font-family:"BC";font-weight:900;font-size:66px;letter-spacing:1.5px;text-transform:uppercase;line-height:1}
+#title p{font-family:"B";font-size:20px;color:var(--dim);margin-top:16px}
+#end{position:absolute;left:0;right:0;top:300px;text-align:center}
+#end .l{font-family:"BC";font-weight:900;font-size:96px;line-height:.98;text-transform:uppercase;opacity:0}
+#end .wm2{margin-top:44px;opacity:0}
+#end .wm2 b{display:block;font-family:"BC";font-weight:900;font-size:24px;letter-spacing:3px;text-transform:uppercase}
+#end .wm2 > span{display:block;font-family:"B";font-size:14px;color:var(--dim);margin-top:8px;letter-spacing:.5px}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0dca0"/><stop offset=".45" stop-color="#c8a858"/><stop offset="1" stop-color="#8c6d2c"/></linearGradient></defs></svg>
+<div id="stage"></div><div id="glow"></div>
+<div id="title"><div class="w">Strive <span class="metal">Elite</span></div><p>The iPhone app, in one minute.</p></div>
+<div id="eyebrow"></div><div id="line"></div>
+<div id="device"><div id="scrwrap"><div id="island"></div><div id="screen"><div class="phone" id="phone">
+
+<!-- 1. WELCOME: the door. Paid, you're in. -->
+<section class="scr on" id="welcome">
+  <img class="logo" src="../mock/strive-logo.png" alt="">
+  <div class="rule"></div>
+  <h1 class="bc">You're in.</h1>
+  <p>Welcome to Strive Elite, Marcus.</p>
+  <div class="card" id="mcard">
+    <div class="lines"></div>
+    <div class="wm bc">Strive <span class="metal">Elite</span></div>
+    <img class="mk" src="../mock/strive-logo.png" alt="">
+    <div class="nm bc">Marcus B.</div>
+    <div class="since">Member since Nov 2026</div>
+    <div class="tier bc metal">Pro</div>
+    <div class="sheen"></div>
+  </div>
+  <div class="wbtn bc tap press" data-go="quiz">Build my week</div>
+</section>
+
+<!-- 2. QUIZ: one question a screen, tap and it moves on -->
+<section class="scr" id="quiz">
+  <div class="pbar"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>
+  <div class="q"><div class="eyebrow">Question 3 of 4</div><h2 class="bc">What holds you<br>back most?</h2></div>
+  <div class="tiles">
+    <div class="tile tap" data-pick><img class="cover" src="../mock/img/weak-foot-tap-pull-push.jpg"><b class="bc">Weak<br>foot</b><div class="ck"><svg class="i" viewBox="0 0 24 24" style="stroke-width:3;width:16px;height:16px"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div></div>
+    <div class="tile tap" data-pick><img class="cover" src="../mock/img/weak-foot-pop-and-juggle.jpg"><b class="bc">First<br>touch</b><div class="ck"><svg class="i" viewBox="0 0 24 24" style="stroke-width:3;width:16px;height:16px"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div></div>
+    <div class="tile tap" data-pick><img class="cover" src="../mock/img/speed-kneel-and-drive.jpg"><b class="bc">Speed</b><div class="ck"><svg class="i" viewBox="0 0 24 24" style="stroke-width:3;width:16px;height:16px"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div></div>
+    <div class="tile tap" data-pick><img class="cover" src="../mock/img/neymar-feint.jpg"><b class="bc">1v1<br>moves</b><div class="ck"><svg class="i" viewBox="0 0 24 24" style="stroke-width:3;width:16px;height:16px"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div></div>
+  </div>
+</section>
+
+<!-- 3. BUILDING -->
+<section class="scr" id="build">
+  <div class="bl">
+    <div class="eyebrow">Week 1</div>
+    <h2 class="bc" style="margin-top:10px">Building<br>your week</h2>
+    <div class="steps">
+      <div class="step"><i><svg class="i" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></i>Reading your answers</div>
+      <div class="step"><i><svg class="i" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></i>Picking drills for your weak foot</div>
+      <div class="step"><i><svg class="i" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></i>Setting four sessions</div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. THE DROP: the week arrives -->
+<section class="scr" id="drop">
+  <div class="dt"><div class="eyebrow">Week 1 · Nov 23 to Nov 29</div><h1 class="bc">Your week<br>is here.</h1><p>Four sessions. Built around <b>your weak foot.</b></p></div>
+  <div class="scards">
+    <div class="sc now"><div class="img"><img class="cover" src="../mock/img/weak-foot-tap-pull-push.jpg" style="object-position:50% 45%"></div><div class="t"><b>Session 1</b><span>Today · 4 drills · 22 min</span></div><div class="r"><div class="play"><svg class="i" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg></div></div></div>
+    <div class="sc"><div class="img"><img class="cover" src="../mock/img/two-touch-ball-mastery-v1.jpg" style="object-position:50% 45%"></div><div class="t"><b>Session 2</b><span>4 drills · 24 min</span></div><div class="r"></div></div>
+    <div class="sc"><div class="img"><img class="cover" src="../mock/img/wall-pass-touch-stepover.jpg" style="object-position:50% 45%"></div><div class="t"><b>Session 3</b><span>4 drills · 22 min</span></div><div class="r"></div></div>
+    <div class="sc"><div class="img"><img class="cover" src="../mock/img/triangle-turning.jpg" style="object-position:50% 45%"></div><div class="t"><b>Session 4</b><span>4 drills · 23 min</span></div><div class="r"></div></div>
+  </div>
+  <div class="wbtn bc tap press" data-go="home" style="opacity:0">Let's go</div>
+</section>
+
+<!-- 5. HOME -->
+<section class="scr" id="home">
+  <div class="top">
+    <div><div class="bc day">Monday</div><div class="date">Week 1 · Nov 23</div></div>
+    <div class="ring">
+      <svg viewBox="0 0 58 58"><circle cx="29" cy="29" r="26" stroke="#161616" stroke-width="4" fill="none"/><circle id="homering" cx="29" cy="29" r="26" stroke="url(#gold)" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="163.4" stroke-dashoffset="163.4" transform="rotate(-90 29 29)"/></svg>
+      <div class="ini">MB</div>
+    </div>
+  </div>
+  <div class="hero" id="hero">
+    <img class="cover" src="../mock/img/weak-foot-tap-pull-push.jpg" style="object-position:50% 30%">
+    <div class="shade"></div>
+    <div class="in">
+      <div class="eyebrow" id="heroEye">Today · Session 1 of 4</div>
+      <h2 class="bc" style="margin-top:8px">Weak foot<br>and first touch</h2>
+      <div class="chips"><div class="chip">22 min</div><div class="chip">4 drills</div><div class="chip">Wall</div></div>
+      <div class="thumbs">
+        <div><img class="cover" src="../mock/img/plyo-squat-jumps.jpg"><span>Warm-up</span></div>
+        <div><img class="cover" src="../mock/img/weak-foot-tap-pull-push.jpg"></div>
+        <div><img class="cover" src="../mock/img/wall-pass-touch-stepover.jpg"></div>
+        <div><img class="cover" src="../mock/img/l-turn-roll-touch.jpg"></div>
+      </div>
+      <div class="go bc tap press" id="start"><svg class="i" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg>Start session</div>
+    </div>
+  </div>
+  <div class="weekline">
+    <div class="dots"><div class="dot now" id="d1">1</div><div class="dot">2</div><div class="dot">3</div><div class="dot">4</div></div>
+    <div class="wk"><b id="tt">0m</b><span>trained, all time</span></div>
+  </div>
+  <div class="tabs">
+    <div class="tab on tap" data-tab="home"><svg class="i" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</div>
+    <div class="tab tap" data-tab="week"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Week</div>
+    <div class="tab tap" data-tab="courses"><svg class="i" viewBox="0 0 24 24"><path d="M2 5.5A2.5 2.5 0 0 1 4.5 3H10v18H4.5A2.5 2.5 0 0 1 2 18.5zM22 5.5A2.5 2.5 0 0 0 19.5 3H14v18h5.5a2.5 2.5 0 0 0 2.5-2.5z"/></svg>Courses</div>
+    <div class="tab tap" data-tab="you"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>You</div>
+  </div>
+</section>
+
+<!-- 6. SESSION INTRO (the hero card grows into this) -->
+<section class="scr" id="intro">
+  <div class="full"><img class="cover" src="../mock/img/weak-foot-tap-pull-push.jpg" style="object-position:50% 30%"></div>
+  <div class="it"><div class="eyebrow">Session 1 of 4</div><h2 class="bc">Weak foot<br>and first touch</h2><p>4 drills · about 22 minutes. Grab your ball.</p></div>
+  <div class="cring"><svg viewBox="0 0 240 240"><circle cx="120" cy="120" r="108" stroke="rgba(255,255,255,.12)" stroke-width="8" fill="none"/><circle class="arc" cx="120" cy="120" r="108" stroke="url(#gold)" stroke-width="8" fill="none" stroke-linecap="round" stroke-dasharray="678.6" stroke-dashoffset="678.6" transform="rotate(-90 120 120)"/></svg></div>
+  <div class="count bc" id="count">3</div>
+</section>
+
+<!-- 7. DRILL -->
+<section class="scr" id="drill">
+  <div class="dbody" id="dbody">
+    <div class="vid"><img class="cover" id="dimg" src="../mock/img/plyo-squat-jumps.jpg"><div class="shade"></div></div>
+    <div class="dr">
+      <div class="kind"><em id="dnum">Drill 1 of 4</em> <span id="dkind">Warm-up</span></div>
+      <h2 class="bc" id="dtitle">Squat jumps</h2>
+      <div class="sets">
+        <div class="set"><b id="dset">3 × 8</b><span>sets</span></div>
+        <div class="set"><b id="drest">30 sec</b><span>rest between</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="x"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></div>
+  <div class="seg" id="seg"><i class="on"></i><i></i><i></i><i></i></div>
+  <div class="cta">
+    <div class="timer"><svg class="i" viewBox="0 0 24 24" style="width:26px;height:26px"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg></div>
+    <div class="done bc tap" id="done">Done</div>
+  </div>
+</section>
+
+<!-- 8. FINISH -->
+<section class="scr" id="finish">
+  <div class="cp"></div>
+  <i class="spark" style="width:6px;height:14px"></i><i class="spark" style="width:5px;height:12px"></i><i class="spark" style="width:4px;height:10px"></i>
+  <i class="spark" style="width:6px;height:6px;border-radius:50%"></i><i class="spark" style="width:5px;height:5px;border-radius:50%"></i><i class="spark" style="width:4px;height:11px"></i>
+  <i class="spark" style="width:5px;height:12px"></i><i class="spark" style="width:6px;height:6px;border-radius:50%"></i>
+  <div class="cring">
+    <svg viewBox="0 0 240 240"><circle cx="120" cy="120" r="108" stroke="rgba(200,168,88,.16)" stroke-width="12" fill="none"/><circle class="arc" cx="120" cy="120" r="108" stroke="url(#gold)" stroke-width="12" fill="none" stroke-linecap="round" stroke-dasharray="678.6" transform="rotate(-90 120 120)"/></svg>
+    <div class="c"><b id="plus">+0</b><span>Minutes</span></div>
+  </div>
+  <div class="ctitle"><h2 class="bc">Session done,<br>Marcus</h2><p>Your first one. Three more this week.</p></div>
+  <div class="cstats">
+    <div><b>1 / 4</b><span>sessions this week</span></div>
+    <div><b>22m</b><span>trained, all time</span></div>
+  </div>
+  <div class="medal"><div class="m">1H</div><div><b>Next up: 1 hour trained</b><span>38 minutes away. Two sessions get you there.</span></div></div>
+  <div class="cta"><div class="done bc tap press" style="flex:1" id="backhome">Back home</div></div>
+</section>
+
+<!-- 9. YOU (the member card lives here) -->
+<section class="scr" id="you">
+  <div class="top"><div><div class="bc day">You</div><div class="date">Marcus B. · Attacking midfield</div></div></div>
+  <div class="card">
+    <div class="lines"></div>
+    <div class="wm bc">Strive <span class="metal">Elite</span></div>
+    <img class="mk" src="../mock/strive-logo.png" alt="">
+    <div class="nm bc">Marcus B.</div>
+    <div class="since">Member since Nov 2026</div>
+    <div class="tier bc metal">Pro</div>
+    <div class="sheen"></div>
+  </div>
+  <div class="yo">
+    <div class="yring">
+      <svg viewBox="0 0 132 132"><circle cx="66" cy="66" r="58" stroke="#161616" stroke-width="10" fill="none"/><circle cx="66" cy="66" r="58" stroke="url(#gold)" stroke-width="10" fill="none" stroke-linecap="round" stroke-dasharray="364.4" stroke-dashoffset="273" transform="rotate(-90 66 66)"/></svg>
+      <div class="c"><b>22m</b><span>this week</span></div>
+    </div>
+    <div class="yt"><b>22m</b><span>trained, all time.<br>It only ever goes up.</span></div>
+  </div>
+  <div class="row-h"><b>Earned</b><span class="muted" style="font-size:13px">1 of 12</span></div>
+  <div class="badges">
+    <div class="bd"><div class="m">1ST</div><span>First session</span></div>
+    <div class="bd"><div class="m off">1H</div><span>1 hour</span></div>
+    <div class="bd"><div class="m off">3H</div><span>3 hours</span></div>
+    <div class="bd"><div class="m off">10</div><span>10 sessions</span></div>
+  </div>
+  <div class="tabs">
+    <div class="tab tap" data-tab="home"><svg class="i" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</div>
+    <div class="tab tap" data-tab="week"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Week</div>
+    <div class="tab tap" data-tab="courses"><svg class="i" viewBox="0 0 24 24"><path d="M2 5.5A2.5 2.5 0 0 1 4.5 3H10v18H4.5A2.5 2.5 0 0 1 2 18.5zM22 5.5A2.5 2.5 0 0 0 19.5 3H14v18h5.5a2.5 2.5 0 0 0 2.5-2.5z"/></svg>Courses</div>
+    <div class="tab on tap" data-tab="you"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>You</div>
+  </div>
+</section>
+
+<section class="scr" id="timer">
+  <div class="tm"></div>
+  <div class="tname"><div class="bc" style="font-size:24px">Weak foot tap, pull, push</div><div>Set 2 of 3</div></div>
+  <div class="big-ring">
+    <svg viewBox="0 0 300 300"><circle cx="150" cy="150" r="136" stroke="#161616" stroke-width="14" fill="none"/><circle cx="150" cy="150" r="136" stroke="url(#gold)" stroke-width="14" fill="none" stroke-linecap="round" stroke-dasharray="854.5" stroke-dashoffset="256" transform="rotate(-90 150 150)"/></svg>
+    <div class="c"><b>0:42</b><span>Go</span></div>
+  </div>
+  <div class="tsets"><i class="d"></i><i class="n"></i><i></i></div>
+  <div class="tnext">Then 30 seconds of rest</div>
+  <div class="tbtns"><div class="bc">Pause</div><div class="bc w">Skip rest</div></div>
+</section>
+<section class="scr" id="week">
+  <div class="top"><div><div class="bc day">Week 1</div><div class="date">Nov 23 to Nov 29</div></div></div>
+  <div class="focus">This week goes after <b>your weak foot.</b> Built from your quiz.</div>
+  <div class="wbar"><i class="d"></i><i></i><i></i><i></i></div>
+  <div class="scards">
+    <div class="sc done"><div class="img"><img class="cover" src="../mock/img/weak-foot-pop-and-juggle.jpg" style="object-position:50% 40%"></div><div class="t"><b>Session 1</b><span>Done · 22 min</span></div><div class="r"><div class="check"><svg class="i" viewBox="0 0 24 24" style="stroke-width:3"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div></div></div>
+    <div class="sc now"><div class="img"><img class="cover" src="../mock/img/two-touch-ball-mastery-v1.jpg" style="object-position:50% 45%"></div><div class="t"><b>Session 2</b><span>Up next · 4 drills · 24 min</span></div><div class="r"><div class="play"><svg class="i" viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg></div></div></div>
+    <div class="sc"><div class="img"><img class="cover" src="../mock/img/wall-pass-touch-stepover.jpg" style="object-position:50% 45%"></div><div class="t"><b>Session 3</b><span>4 drills · 22 min</span></div><div class="r"></div></div>
+    <div class="sc"><div class="img"><img class="cover" src="../mock/img/triangle-turning.jpg" style="object-position:50% 45%"></div><div class="t"><b>Session 4</b><span>4 drills · 23 min</span></div><div class="r"></div></div>
+  </div>
+  <div class="tabs">
+    <div class="tab"><svg class="i" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</div>
+    <div class="tab on"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Week</div>
+    <div class="tab"><svg class="i" viewBox="0 0 24 24"><path d="M2 5.5A2.5 2.5 0 0 1 4.5 3H10v18H4.5A2.5 2.5 0 0 1 2 18.5zM22 5.5A2.5 2.5 0 0 0 19.5 3H14v18h5.5a2.5 2.5 0 0 0 2.5-2.5z"/></svg>Courses</div>
+    <div class="tab"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>You</div>
+  </div>
+</section>
+<section class="scr" id="courses">
+  <div class="ctop"><h1 class="bc">Courses</h1></div>
+  <div class="feat">
+    <img class="cover" src="../mock/img/juggling-thighs-high.jpg" style="object-position:50% 35%"><div class="shade"></div>
+    <div class="in"><div class="eyebrow">Start here</div><h3 class="bc">Keep It Up</h3><p>Seven levels, from your first touch to heading it up.</p></div>
+  </div>
+  <div class="row-h"><b>Skills</b><span class="muted" style="font-size:13px">See all</span></div>
+  <div class="crow">
+    <div class="cc"><div class="im"><img class="cover" src="../mock/img/neymar-feint.jpg"><div class="shade"></div><b style="font-size:16px">Dribbling<br>Transformation</b></div><span>The most dangerous dribbler on the team</span></div>
+    <div class="cc"><div class="im"><img class="cover" src="../mock/img/weak-foot-pop-and-juggle.jpg"><div class="shade"></div><b>Weak Foot</b></div><span>Shoot, pass and dribble with either foot</span></div>
+    <div class="cc"><div class="im"><img class="cover" src="../mock/img/speed-the-cross.jpg"><div class="shade"></div><b>Speed</b></div><span>A faster first step</span></div>
+  </div>
+  <div class="tabs">
+    <div class="tab"><svg class="i" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Home</div>
+    <div class="tab"><svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>Week</div>
+    <div class="tab on"><svg class="i" viewBox="0 0 24 24"><path d="M2 5.5A2.5 2.5 0 0 1 4.5 3H10v18H4.5A2.5 2.5 0 0 1 2 18.5zM22 5.5A2.5 2.5 0 0 0 19.5 3H14v18h5.5a2.5 2.5 0 0 0 2.5-2.5z"/></svg>Courses</div>
+    <div class="tab"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>You</div>
+  </div>
+</section>
+<div id="finger"></div></div></div></div></div>
+<div id="end"><div class="l">Open it.</div><div class="l">Tap Start.</div><div class="l metal">Train.</div><div class="wm2"><b>Strive <span class="metal">Elite</span></b><span>On iPhone</span></div></div>
+<script type="module">
+import {setup,render,DURATION} from "./film.src.js";
+const scr=document.getElementById("screen"), wrap=document.getElementById("scrwrap");
+scr.style.transform=`scale(${wrap.clientWidth/390})`;
+await document.fonts.ready;
+await Promise.all([...document.images].map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r})));
+setup(); render(0);
+window.__render=render; window.__dur=DURATION; window.__ready=true;
+const q=new URLSearchParams(location.search); if(q.has("t")) render(+q.get("t"));
+</script></body></html>

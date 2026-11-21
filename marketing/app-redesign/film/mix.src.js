@@ -97,7 +97,7 @@ export const CUTS = {
       [30, 4, 21.8, 23.3, [[0, C(1.08, "hero")], [1, C(1.0)]]],
       [34, 6, 24.08, 26.66, [[0, C(1.22, "count")], [1, C(1.32, "count")]]],
       [40, 8, 26.6, 32.6, [[0, C(1.0)], [1, C(1.08, "drill")]]],
-      [48, 6, 37.5, 39.9, [[0, C(1.0)], [0.25, C(1.36, "fring")], [0.75, C(1.36, "fring")], [1, C(1.1)]]],
+      [48, 6, 37.5, 39.9, [[0, C(1.06)], [0.45, C(1.34, "fring")], [1, C(1.38, "fring")]]],
       [54, 4, 43.4, 44.9, [[0, C(1.15, "dots")], [1, C(1.38, "dots")]]],
       // between sessions
       [58, 6, 49.3, 51.5, [[0, C(1.02)], [1, C(1.1)]]],
@@ -105,9 +105,9 @@ export const CUTS = {
       // clubs and friends
       [68, 8, 61.4, 64.4, [[0, C(1.06)], [1, C(1.12)]]],
       [76, 6, 64.5, 66.7, [[0, C(1.04)], [1, C(1.12)]]],
-      [82, 8, 67.0, 70.2, [[0, C(1.06)], [0.55, C(1.1)], [0.8, C(1.3, "kyou")], [1, C(1.34, "kyou")]]],
-      [90, 6, 72.5, 74.9, [[0, C(1.0)], [0.25, C(1.0)], [0.4, C(1.3, "kprops")], [0.7, C(1.3, "kprops")], [1, C(1.05)]]],
-      [96, 8, 75.45, 78.09, [[0, C(1.04)], [0.4, C(1.12)], [0.55, C(1.32, "kstar")], [1, C(1.38, "kstar")]]],
+      [82, 8, 67.0, 70.2, [[0, C(1.06)], [0.45, C(1.1)], [0.85, C(1.3, "kyou")], [1, C(1.32, "kyou")]]],
+      [90, 6, 72.5, 74.9, [[0, C(1.0)], [0.15, C(1.02)], [0.55, C(1.28, "kprops")], [1, C(1.32, "kprops")]]],
+      [96, 8, 75.45, 78.09, [[0, C(1.04)], [0.35, C(1.1)], [0.65, C(1.3, "kstar")], [1, C(1.34, "kstar")]]],
       [104, 6, 78.17, 80.39, [[0, C(1.05)], [0.4, C(1.25, "kyou")], [1, C(1.3, "kyou")]]],
     ],
     words: [[6, "YOU'RE *IN.*"], [12, "A QUICK *QUIZ.*"], [18, "WHAT HOLDS YOU *BACK?*"], [22, "BUILT AROUND *YOU.*"],
@@ -159,15 +159,40 @@ export function setup() {
 
 const gold = (s) => s.replace(/\*(.+?)\*/g, '<span class="metal">$1</span>');
 
+// the camera passes through its keys on a smooth curve (monotone cubic): no stop at each key,
+// no overshoot, so a push in keeps flowing instead of hitching mid-shot
+function smoothAt(xs, ys, x) {
+  const n = xs.length;
+  if (n === 1 || x <= xs[0]) return ys[0];
+  if (x >= xs[n - 1]) return ys[n - 1];
+  const d = [], m = [];
+  for (let i = 0; i < n - 1; i++) d.push((ys[i + 1] - ys[i]) / Math.max(1e-6, xs[i + 1] - xs[i]));
+  for (let i = 0; i < n; i++) {
+    if (i === 0) m.push(n > 2 ? d[0] * 0.5 : 0);
+    else if (i === n - 1) m.push(n > 2 ? d[n - 2] * 0.5 : 0);
+    else m.push(d[i - 1] * d[i] <= 0 ? 0 : (2 * d[i - 1] * d[i]) / (d[i - 1] + d[i]));
+  }
+  let i = 0; while (x > xs[i + 1]) i++;
+  const h = xs[i + 1] - xs[i], u = (x - xs[i]) / h, u2 = u * u, u3 = u2 * u;
+  if (n === 2) { const e = inout(u); return ys[0] + (ys[1] - ys[0]) * e; }
+  return (2 * u3 - 3 * u2 + 1) * ys[i] + (u3 - 2 * u2 + u) * h * m[i] + (-2 * u3 + 3 * u2) * ys[i + 1] + (u3 - u2) * h * m[i + 1];
+}
 function camAt(keys, f) {
-  let a = keys[0], b = keys[keys.length - 1];
-  for (let i = 0; i < keys.length - 1; i++) if (f >= keys[i][0] && f <= keys[i + 1][0]) { a = keys[i]; b = keys[i + 1]; break; }
-  const p = a === b ? 1 : inout(cl((f - a[0]) / (b[0] - a[0])));
-  const A = a[1], Z = b[1];
-  return { s: mix(A.s, Z.s, p), fx: mix(A.f[0], Z.f[0], p), fy: mix(A.f[1], Z.f[1], p), y: mix(A.y, Z.y, p), ry: mix(A.ry, Z.ry, p) };
+  const xs = keys.map((k) => k[0]), g = (fn) => smoothAt(xs, keys.map((k) => fn(k[1])), f);
+  return { s: g((c) => c.s), fx: g((c) => c.f[0]), fy: g((c) => c.f[1]), y: g((c) => c.y), ry: g((c) => c.ry) };
 }
 
 function wordOn(beat) { let w = null; for (const x of CUT.words) if (beat >= x[0]) w = x; return !!(w && w[1]); }
+// 0 to 1, how far the phone has moved for a line on screen: eases over 0.35 s each time a line comes or goes
+function wordLevel(t) {
+  let on = false, at = -1e9;
+  for (const x of CUT.words) {
+    const tx = tb(x[0]); if (tx > t) break;
+    const now = !!x[1]; if (now !== on) { on = now; at = tx; }
+  }
+  const k = inout(cl((t - at) / 0.35));
+  return on ? k : 1 - k;
+}
 
 export function render(t) {
   const beat = bt(t), dev = $("#device"), glow = $("#glow");
@@ -177,23 +202,27 @@ export function render(t) {
   const outK = lin(beat, CUT.deviceOut, CUT.deviceOut + 0.6);
   if (shot) {
     const [b0, n, m0, m1, cam] = shot;
-    const f = (beat - b0) / n;
+    // the shot runs evenly in time: the song's beats are not all the same length, so stepping the
+    // camera and the app by beats made both speed up and slow down from beat to beat
+    const t0s = tb(b0), f = cl((t - t0s) / (tb(b0 + n) - t0s));
     renderApp(mix(m0, m1, f));
     const c = camAt(cam, f);
     // a hard cut on the beat with a short whip in from alternating sides
     const since = t - tb(b0), dir = si % 2 ? -1 : 1;
     const whip = si === 0 ? 0 : 1 - out3(cl(since / 0.16));
     const until = tb(b0 + n) - t, leaveW = 1 - cl(until / 0.06);
-    const pulse = 1 + 0.012 * Math.exp(-((beat % 1) * 8));
     const fx = 11 + c.fx * k, fy = 11 + c.fy * k, cx = 165, cy = 357;
     const pull = cl((c.s - 1) * 2.2);
     // while a line is on screen the phone never rises into it
     let ty = (cy - fy) * pull + c.y;
-    if (wordOn(beat)) ty = Math.max(ty, -10 + (11 + c.fy * k) * (c.s - 1));
+    // ... and glides out of the way when a line comes on instead of jumping
+    const wl = wordLevel(t);
+    const floor = -10 + (11 + c.fy * k) * (c.s - 1), smax = (a, b, e = 40) => (a + b + Math.sqrt((a - b) * (a - b) + e * e)) / 2;
+    if (wl > 0) ty = mix(ty, smax(ty, floor), wl);
     st(dev, {
       opacity: 1 - outK,
       transformOrigin: `${fx}px ${fy}px`,
-      transform: `translate(${(cx - fx) * pull + whip * 70 * dir}px, ${ty}px) scale(${c.s * pulse * mix(1, 0.92, outK)}) rotateY(${c.ry}deg)`,
+      transform: `translate(${(cx - fx) * pull + whip * 70 * dir}px, ${ty}px) scale(${c.s * mix(1, 0.92, outK)}) rotateY(${c.ry}deg)`,
       filter: `blur(${(whip + leaveW) * 5}px)`,
     });
   } else {

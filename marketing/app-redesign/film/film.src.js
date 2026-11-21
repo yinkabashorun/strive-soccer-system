@@ -46,7 +46,7 @@ const TAPS = [
   [7.0, "#welcome .wbtn"], [9.4, "#quiz .tile"], [7.05, "#quiz2 .opt:nth-child(2)"], [18.0, "#drop .wbtn"], [21.0, "#start"],
   [26.6, "#done"], [28.1, "#done"], [29.6, "#done"], [30.85, "#drill .timer"],
   [34.65, "#timer .tbtns .w"], [35.6, "#done"], [41.5, "#backhome"],
-  [45.5, "#home [data-tab=week]"], [47.8, "#week .tab:nth-child(3)"], [50.1, "#courses .tab:nth-child(4)"],
+  [45.5, "#home [data-tab=week]"], [47.8, "#week .tab:nth-child(3)"], [50.1, "#courses .tab:nth-child(4)"], [71.7, "#feed #kprops"],
 ];
 const tapPos = {};
 const REAL_TAPS = [];
@@ -64,8 +64,10 @@ export function setup() {
     const rt = sel.startsWith("#quiz2") ? 8.55 : real(t);
     REAL_TAPS.push(rt); tapPos[rt] = [r.x + r.w / 2, r.y + r.h / 2];
   }
+  show("feed"); { const r = rel($("#kprops")); kpropsPos = [r.x + r.w / 2, r.y + r.h / 2]; }
   show("welcome");
 }
+let kpropsPos = [0, 0];
 
 const QUIZCAP = (c) => c[3].startsWith("A quick") || c[3].startsWith("Tell us");
 const CAPR = CAP.map((c) => (QUIZCAP(c) ? c : [real(c[0]), real(c[1]), c[2], c[3]]));
@@ -231,11 +233,88 @@ export function renderApp(rt) {
   const tab = (id, at) => E(t, at, 0.2);
   if (t >= 45.5 && t < 48.2) { vis("week", tab("week", 45.55)); }
   if (t >= 47.8 && t < 50.5) { vis("courses", tab("courses", 47.85)); }
-  if (t >= 50.1) {
+  if (t >= 50.1 && t < 60.5) {
     vis("you", tab("you", 50.15));
     st($("#you .sheen"), { left: mix(-140, 460, inout(lin(t, 50.6, 51.9))) + "px" });
   }
+  clubs(t);
 }
+
+// ---------- 11. clubs (internal time 59.9 to 77; only the cut films reach it) ----------
+const fmt = (m) => { m = Math.round(m); const h = Math.floor(m / 60), r = m % 60; return h ? `${h}h ${String(r).padStart(2, "0")}m` : `${r}m`; };
+const rise = (el, k, dy = 18) => st(el, { opacity: k, transform: `translateY(${(1 - k) * dy}px)` });
+function clubs(t) {
+  if (t < 59.9) return;
+  // your club
+  if (t < 65.6 || t >= 76.6) {
+    const back2 = t >= 76.6, a = back2 ? E(t, 76.6, 0.45) : E(t, 59.9, 0.45);
+    vis("club", 1, `translateX(${(back2 ? -1 : 1) * (1 - a) * 100}%)`);
+    const c = S.club;
+    st($("#kheroimg"), { transform: `scale(${mix(1.12, 1, out3(lin(t, 59.9, 64.5)))})` });
+    const cr = lin(t, 60.2, 60.6); st($(".kname .kcrest", c), { opacity: cl(cr * 3), transform: `scale(${back(cr)})` });
+    rise($(".kname > div", c), E(t, 60.32, 0.45));
+    rise($(".kstat", c), E(t, 60.5, 0.45));
+    const cnt = out3(lin(t, 60.55, 61.6));
+    $("#kper").textContent = fmt(185 * cnt); $("#kall").textContent = fmt(1110 * cnt);
+    rise($(".ksec", c), E(t, 60.8, 0.4), 8);
+    $$(".kmem", c).forEach((m, i) => {
+      rise(m, E(t, 60.9 + i * 0.1, 0.45), 22);
+      $(".ktm", m).textContent = fmt(+$(".ktm", m).dataset.m * out3(lin(t, 61.0 + i * 0.1, 62.2 + i * 0.1)));
+    });
+    const g = back2 ? lin(t, 77.9, 79.0) : lin(t, 63.3, 64.3), you = $(".kmem.you", c), gary = $(".kmem", c);
+    st(you, { background: `rgba(200,168,88,${0.16 * Math.sin(Math.PI * g)})` });
+    // later the same day: you train again and pass Coach Gary
+    if (back2) {
+      $(".ktm", you).textContent = fmt(mix(195, 285, out3(lin(t, 77.2, 78.1))));
+      const sw = inout(lin(t, 77.75, 78.25));
+      st(you, { transform: `translateY(${-62 * sw}px)`, position: "relative", zIndex: 2 });
+      st(gary, { transform: `translateY(${62 * sw}px)` });
+      const up = t >= 78.0;
+      $(".p", you).textContent = up ? "1" : "2"; $(".p", gary).textContent = up ? "2" : "1";
+      $("#kper").textContent = fmt(mix(185, 200, out3(lin(t, 77.2, 78.1))));
+      $("#kall").textContent = fmt(mix(1110, 1200, out3(lin(t, 77.2, 78.1))));
+    } else { st(you, { transform: "none" }); st(gary, { transform: "none" }); $(".p", you).textContent = "2"; $(".p", gary).textContent = "1"; }
+  }
+  // top clubs: your club climbs to number one
+  if (t >= 65.0 && t < 71.0) {
+    const a = E(t, 65.0, 0.45); vis("clubs", 1, `translateX(${(1 - a) * 100}%)`);
+    const c = S.clubs;
+    rise($(".kt", c), E(t, 65.1, 0.45));
+    ["#kpB", "#kpA", "#kpC"].forEach((id, i) => { const k = lin(t, 65.3 + i * 0.1, 65.9 + i * 0.1); st($(id), { opacity: cl(k * 2), transform: `translateY(${(1 - back(k)) * 40}px)` }); });
+    $$(".krk", c).forEach((r, i) => rise(r, E(t, 65.8 + i * 0.08, 0.4)));
+    $("#kpCt").textContent = fmt(mix(185, 195, out3(lin(t, 67.2, 67.7))));
+    const sw = inout(lin(t, 67.6, 68.15)), B = $("#kpB"), C = $("#kpC");
+    st(C, { left: mix(244, 122, sw) + "px", height: mix(238, 252, sw) + "px", zIndex: 2 });
+    st(B, { left: mix(122, 244, sw) + "px", height: mix(252, 238, sw) + "px" });
+    const done = t >= 67.9;
+    $(".r", C).textContent = done ? "1" : "2"; $(".r", B).textContent = done ? "2" : "1";
+    C.classList.toggle("first", done); B.classList.toggle("first", !done);
+    const pop = lin(t, 68.1, 68.6);
+    st($(".kcrest", C), { transform: `scale(${1 + 0.12 * Math.sin(Math.PI * pop)})` });
+    st(C, { boxShadow: `inset 0 0 0 1.5px var(--gold), 0 0 ${40 * Math.sin(Math.PI * lin(t, 68.0, 69.2))}px rgba(200,168,88,.45)` });
+  }
+  // friends' training: props, then the coach's star
+  if (t >= 70.5 && t < 77.1) {
+    const a = E(t, 70.5, 0.45) - E(t, 76.6, 0.45); vis("feed", 1, `translateX(${(1 - a) * 100}%)`);
+    const f = S.feed;
+    rise($(".kfh", f), E(t, 70.6, 0.4), 10);
+    $$(".kpost", f).forEach((p, i) => rise(p, E(t, 70.7 + i * 0.12, 0.5), 30));
+    const sc = inout(lin(t, 72.7, 73.6));
+    st($("#kfeed"), { transform: `translateY(${-sc * 520}px)` });
+    const on = t >= 71.8, pr = $("#kprops");
+    pr.classList.toggle("on", on);
+    st(pr, { transform: `scale(${press(t, 71.7) * (1 + 0.1 * Math.sin(Math.PI * lin(t, 71.82, 72.2)))})` });
+    $("#kpw").textContent = on ? "You, Coach Gary and 4 others" : "Coach Gary and 4 others";
+    $$(".kburst", f).forEach((b, i) => {
+      const k = lin(t, 71.82, 72.6), ang = (i / 8) * Math.PI * 2 + 0.4, d = (46 + (i % 3) * 14) * out3(k);
+      const o = k <= 0 || k >= 1 ? 0 : k < 0.2 ? k / 0.2 : 1 - (k - 0.2) / 0.8;
+      st(b, { left: kpropsPos[0] - 4 + "px", top: kpropsPos[1] - 4 - sc * 520 + "px", opacity: o, transform: `translate(${Math.cos(ang) * d}px,${Math.sin(ang) * d}px) rotate(${i * 40 * k}deg)` });
+    });
+    const s2 = lin(t, 74.0, 74.45);
+    st($("#kstar"), { opacity: cl(s2 * 3), transform: `scale(${t < 74.0 ? 0 : back(s2) * (1 + 0.5 * Math.sin(Math.PI * lin(t, 74.3, 74.9)))})`, filter: `drop-shadow(0 0 ${10 * Math.sin(Math.PI * lin(t, 74.2, 75.4))}px rgba(240,220,160,.9))` });
+  }
+}
+
 
 function stage(t) {
   // ---------- stage: title, phone, end ----------

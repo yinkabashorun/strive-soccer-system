@@ -303,6 +303,77 @@ body{width:540px;height:960px;position:relative;display:block;padding:0}
 #end .wm2{margin-top:44px;opacity:0}
 #end .wm2 b{display:block;font-family:"BC";font-weight:900;font-size:24px;letter-spacing:3px;text-transform:uppercase}
 #end .wm2 > span{display:block;font-family:"B";font-size:14px;color:var(--dim);margin-top:8px;letter-spacing:.5px}
+/* ---------- clubs (free app screens, in the film) ---------- */
+.kav{border-radius:50%;object-fit:cover;display:block;flex:none}
+.kstar{width:15px;height:15px;fill:var(--gold);flex:none}
+.khero{height:300px;position:relative;overflow:hidden}
+.khero>img{width:100%;height:100%;object-fit:cover;filter:brightness(.6) saturate(.95)}
+.khero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.5),rgba(0,0,0,0) 30%,rgba(0,0,0,.25) 55%,#000 100%)}
+.kback{position:absolute;z-index:2;top:50px;left:14px;width:40px;height:40px;border-radius:50%;background:rgba(0,0,0,.45);display:grid;place-items:center}
+.kname{position:absolute;z-index:2;left:18px;right:18px;bottom:14px;display:flex;align-items:flex-end;gap:14px}
+.kcrest{border-radius:50%;object-fit:cover;display:block;flex:none;box-shadow:0 0 0 2px #000,0 0 0 4px #2c2c2c}
+.kcrest.gold{box-shadow:0 0 0 2px #000,0 0 0 4.5px var(--gold)}
+.kname .kcrest{width:74px;height:74px}
+.kname .bc{font-size:34px;line-height:.92}
+.kname .m{font-size:13.5px;color:var(--dim);margin-top:6px}
+.kstat{display:flex;margin:6px 16px 0;background:var(--fill);box-shadow:inset 0 0 0 1px var(--line);border-radius:18px;padding:15px 0}
+.kstat div{flex:1;text-align:center;border-right:1px solid var(--line)}
+.kstat div:last-child{border:0}
+.kstat b{display:block;font-family:"BC";font-weight:900;font-size:28px;line-height:1}
+.kstat span{font-size:12px;color:var(--dim)}
+.ksec{font-size:11px;letter-spacing:2.4px;text-transform:uppercase;color:var(--dim);font-weight:600;padding:20px 18px 6px}
+.kmem{display:flex;align-items:center;gap:12px;height:62px;padding:0 18px}
+.kmem .kav{width:46px;height:46px}
+.kmem .p{font-family:"BC";font-weight:900;font-size:19px;width:16px;color:var(--faint)}
+.kmem .nm{font-weight:600;font-size:15.5px;display:flex;align-items:center;gap:6px}
+.kmem .sb{font-size:12.5px;color:var(--dim);margin-top:2px}
+.kmem .ktm{margin-left:auto;font-family:"BC";font-weight:900;font-size:23px}
+.kmem.you .nm,.kmem.you .ktm,.kmem.you .p{color:var(--gold)}
+.kmem.you .kav{box-shadow:0 0 0 2px #000,0 0 0 4px var(--gold)}
+.ktag{font-size:10px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#000;background:var(--bone);border-radius:6px;padding:2px 6px 1px}
+.kt{padding:58px 18px 0}
+.kt .bc{font-size:46px;line-height:.9}
+.kt .sub{font-size:13px;color:var(--dim);margin-top:8px}
+.ktop{position:relative;height:262px;margin:18px 16px 4px}
+.kpod{position:absolute;bottom:0;width:112px;border-radius:20px;background:var(--fill);box-shadow:inset 0 0 0 1px var(--line);padding:16px 8px 14px;text-align:center}
+.kpod .kcrest{width:62px;height:62px;margin:0 auto 10px}
+.kpod .r{font-family:"BC";font-weight:900;font-size:17px;color:var(--dim)}
+.kpod .cn{font-weight:600;font-size:13px;line-height:1.2;height:32px;margin-top:2px}
+.kpod .yc{font-size:11.5px;font-weight:600;color:var(--gold);height:16px}
+.kpod b{display:block;font-family:"BC";font-weight:900;font-size:25px;margin-top:4px;line-height:1}
+.kpod small{font-size:11px;color:var(--dim)}
+.kpod.first{background:linear-gradient(180deg,#2a2412,#121212)}
+.kpod.first .r{color:var(--gold)}
+.kpod.mine{box-shadow:inset 0 0 0 1.5px var(--gold)}
+.krk{display:flex;align-items:center;gap:12px;height:64px;padding:0 18px;border-bottom:1px solid var(--line)}
+.krk .p{font-family:"BC";font-weight:900;font-size:20px;width:20px;color:var(--dim)}
+.krk .kcrest{width:44px;height:44px;box-shadow:none}
+.krk .nm{font-weight:600;font-size:15px}
+.krk .sb{font-size:12px;color:var(--dim);margin-top:2px}
+.krk .ktm{margin-left:auto;text-align:right;font-family:"BC";font-weight:900;font-size:22px;line-height:1}
+.krk .ktm small{display:block;font-family:"B";font-weight:500;font-size:11px;color:var(--dim);text-transform:none;margin-top:3px}
+.kfh{position:relative;z-index:3;background:#000;box-shadow:0 12px 12px #000;display:flex;align-items:center;justify-content:space-between;padding:56px 18px 14px}
+.kfh .bc{font-size:34px;line-height:1}
+.kfh .kn{font-size:12.5px;color:var(--dim)}
+.kfeed{position:absolute;left:0;right:0;top:108px}
+.kpost{margin-bottom:22px}
+.kpost .hd{display:flex;align-items:center;gap:10px;padding:0 16px 10px}
+.kpost .hd .kav{width:38px;height:38px}
+.kpost .hd .nm{font-weight:600;font-size:15px;display:flex;align-items:center;gap:5px}
+.kpost .hd .sb{font-size:12px;color:var(--dim);margin-top:1px}
+.kpost .ph{position:relative;margin:0 10px;border-radius:22px;overflow:hidden;height:420px}
+.kpost .ph img{width:100%;height:100%;object-fit:cover;display:block}
+.kpost .ph:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 60%,rgba(0,0,0,.7))}
+.kpost .ph .tt{position:absolute;z-index:2;left:16px;bottom:14px;font-family:"BC";font-weight:900;font-size:40px;line-height:.9;text-shadow:0 2px 12px rgba(0,0,0,.6)}
+.kpost .ph .tt small{display:block;font-family:"B";font-weight:600;font-size:12px;letter-spacing:2px;color:var(--gold);margin-bottom:4px}
+.kpost .ac{display:flex;align-items:center;gap:10px;padding:12px 16px 0}
+.kprops{height:40px;padding:0 16px;border-radius:20px;background:var(--fill2);box-shadow:inset 0 0 0 1px var(--line);display:flex;align-items:center;gap:8px;font-weight:600;font-size:14px}
+.kprops svg{width:18px;height:18px}
+.kprops.on{background:var(--metal);color:#000;box-shadow:none}
+.kprops.on svg{stroke:#000}
+.kpost .ac .who{font-size:12.5px;color:var(--dim);display:flex;align-items:center;gap:6px}
+.kfaces{display:flex}.kfaces img{width:22px;height:22px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2px #000;margin-right:-6px}
+.kburst{position:absolute;width:8px;height:8px;border-radius:2px;background:var(--metal);opacity:0}
 </style></head><body>
 <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0dca0"/><stop offset=".45" stop-color="#c8a858"/><stop offset="1" stop-color="#8c6d2c"/></linearGradient></defs></svg>
 <div id="stage"></div><div id="glow"></div>
@@ -381,7 +452,7 @@ body{width:540px;height:960px;position:relative;display:block;padding:0}
     <div><div class="bc day">Monday</div><div class="date">Week 1 · Nov 23</div></div>
     <div class="ring">
       <svg viewBox="0 0 58 58"><circle cx="29" cy="29" r="26" stroke="#161616" stroke-width="4" fill="none"/><circle id="homering" cx="29" cy="29" r="26" stroke="url(#gold)" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="163.4" stroke-dashoffset="163.4" transform="rotate(-90 29 29)"/></svg>
-      <div class="ini">MB</div>
+      <img class="ini" src="faces/p-audi.jpg" style="object-fit:cover;width:44px;height:44px">
     </div>
   </div>
   <div class="hero" id="hero">
@@ -540,6 +611,50 @@ body{width:540px;height:960px;position:relative;display:block;padding:0}
     <div class="tab on"><svg class="i" viewBox="0 0 24 24"><path d="M2 5.5A2.5 2.5 0 0 1 4.5 3H10v18H4.5A2.5 2.5 0 0 1 2 18.5zM22 5.5A2.5 2.5 0 0 0 19.5 3H14v18h5.5a2.5 2.5 0 0 0 2.5-2.5z"/></svg>Courses</div>
     <div class="tab"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>You</div>
   </div>
+</section>
+<!-- CLUBS: your club, top clubs, friends' training. Real photos only; names are placeholders until Coach Yinka sends them. -->
+<section class="scr" id="club">
+  <div class="khero"><img id="kheroimg" src="faces/post-5.jpg" style="object-position:50% 40%">
+    <div class="kback"><svg class="i" viewBox="0 0 24 24" style="width:20px;height:20px"><path d="m15 5-7 7 7 7"/></svg></div>
+    <div class="kname"><img class="kcrest gold" src="faces/club-1.jpg"><div><div class="bc">Gainesville<br>09s</div><div class="m">6 players. Started by Coach Yinka.</div></div></div>
+  </div>
+  <div class="kstat"><div><b id="krank">#2</b><span>of 24 clubs</span></div><div><b id="kper">3h 05m</b><span>per player</span></div><div><b id="kall">18h 30m</b><span>this week</span></div></div>
+  <div class="ksec">This week</div>
+  <div class="kmems">
+    <div class="kmem"><span class="p">1</span><img class="kav" src="faces/c-gary.jpg"><div><div class="nm">Coach Gary <svg class="kstar" viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6L2.5 9.4l6.6-.8z"/></svg></div><div class="sb">Trained today</div></div><div class="ktm" data-m="270">4h 30m</div></div>
+    <div class="kmem you"><span class="p">2</span><img class="kav" src="faces/p-audi.jpg"><div><div class="nm">You</div><div class="sb">Trained today</div></div><div class="ktm" data-m="195">3h 15m</div></div>
+    <div class="kmem"><span class="p">3</span><img class="kav" src="faces/c-yinka.jpg"><div><div class="nm">Coach Yinka <span class="ktag">Captain</span></div><div class="sb">Yesterday</div></div><div class="ktm" data-m="180">3h 00m</div></div>
+    <div class="kmem"><span class="p">4</span><img class="kav" src="faces/p-lynch.jpg"><div><div class="nm">Jalen R.</div><div class="sb">Trained today</div></div><div class="ktm" data-m="170">2h 50m</div></div>
+    <div class="kmem"><span class="p">5</span><img class="kav" src="faces/p-puma.jpg"><div><div class="nm">Luca M.</div><div class="sb">Yesterday</div></div><div class="ktm" data-m="140">2h 20m</div></div>
+    <div class="kmem"><span class="p">6</span><img class="kav" src="faces/p-usa.jpg"><div><div class="nm">Andre S.</div><div class="sb">Monday</div></div><div class="ktm" data-m="105">1h 45m</div></div>
+  </div>
+</section>
+
+<section class="scr" id="clubs">
+  <div class="kt"><div class="bc">Top clubs</div><div class="sub">This week, by training per player. Starts again Monday.</div></div>
+  <div class="ktop">
+    <div class="kpod" id="kpA" style="left:0;height:226px"><img class="kcrest" src="faces/club-2.jpg"><div class="r">3</div><div class="cn">Sunday<br>Drop-In</div><div class="yc"></div><b>2h 58m</b><small>per player</small></div>
+    <div class="kpod first" id="kpB" style="left:122px;height:252px"><img class="kcrest" src="faces/club-3.jpg"><div class="r">1</div><div class="cn">Ashburn<br>Pickup</div><div class="yc"></div><b>3h 12m</b><small>per player</small></div>
+    <div class="kpod mine" id="kpC" style="left:244px;height:238px"><img class="kcrest gold" src="faces/club-1.jpg"><div class="r">2</div><div class="cn">Gainesville<br>09s</div><div class="yc">Your club</div><b id="kpCt">3h 05m</b><small>per player</small></div>
+  </div>
+  <div class="krk"><span class="p">4</span><img class="kcrest" src="faces/club-4.jpg"><div><div class="nm">Haymarket 08s</div><div class="sb">9 players</div></div><div class="ktm">2h 31m<small>per player</small></div></div>
+  <div class="krk"><span class="p">5</span><img class="kcrest" src="faces/club-5.jpg"><div><div class="nm">Catharpin Crew</div><div class="sb">12 players</div></div><div class="ktm">2h 04m<small>per player</small></div></div>
+  <div class="krk"><span class="p">6</span><img class="kcrest" src="faces/club-6.jpg"><div><div class="nm">Bristow Boys</div><div class="sb">7 players</div></div><div class="ktm">1h 40m<small>per player</small></div></div>
+</section>
+
+<section class="scr" id="feed">
+  <div class="kfh"><div class="bc">Friends</div><div class="kn">Today</div></div>
+  <div class="kfeed" id="kfeed">
+    <div class="kpost"><div class="hd"><img class="kav" src="faces/p-curly.jpg"><div><div class="nm">Kai T.</div><div class="sb">Gainesville 09s · 2h ago</div></div></div>
+      <div class="ph"><img src="faces/post-5.jpg" style="object-position:50% 45%"><div class="tt"><small>Training</small>1h 15m</div></div>
+      <div class="ac"><div class="kprops" id="kprops"><svg class="i" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span>Props</span></div><div class="who"><span class="kfaces"><img src="faces/c-gary.jpg"><img src="faces/p-puma.jpg"></span><span id="kpw">Coach Gary and 4 others</span></div></div></div>
+    <div class="kpost" id="kstarpost"><div class="hd"><img class="kav" src="faces/p-lynch.jpg"><div><div class="nm">Jalen R. <svg class="kstar" id="kstar" viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6L2.5 9.4l6.6-.8z"/></svg></div><div class="sb">Gainesville 09s · 4h ago</div></div></div>
+      <div class="ph"><img src="faces/post-7.jpg" style="object-position:50% 40%"><div class="tt"><small>Training</small>1h 30m</div></div>
+      <div class="ac"><div class="kprops"><svg class="i" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span>Props</span></div><div class="who"><span class="kfaces"><img src="faces/c-yinka.jpg"><img src="faces/p-usa.jpg"></span>Coach Yinka and 6 others</div></div></div>
+    <div class="kpost"><div class="hd"><img class="kav" src="faces/p-usa.jpg"><div><div class="nm">Andre S.</div><div class="sb">Sunday Drop-In · 6h ago</div></div></div>
+      <div class="ph"><img src="faces/post-6.jpg" style="object-position:50% 50%"><div class="tt"><small>Training</small>45m</div></div></div>
+  </div>
+  <i class="kburst"></i><i class="kburst"></i><i class="kburst"></i><i class="kburst"></i><i class="kburst"></i><i class="kburst"></i><i class="kburst"></i><i class="kburst"></i>
 </section>
 <div id="finger"></div></div></div></div></div>
 <div id="end"><div class="l">Open Strive.</div><div class="l">Tap Start.</div><div class="l metal">Train.</div><div class="wm2"><b>Strive <span class="metal">Elite</span></b><span>On iPhone</span></div></div>

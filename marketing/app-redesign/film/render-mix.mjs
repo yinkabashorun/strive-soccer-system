@@ -1,6 +1,6 @@
 // node film/render-mix.mjs long|short -> film/strive-elite-iphone-{long,short}.mp4
 // Same frame-by-frame render as render.mjs (1080x1920, 60 fps, 4 workers), then
-// the beat from beat.py, loudness set to -14 LUFS for Instagram.
+// the beat from beat.py (BEAT=rock for rockbeat.py, file name gets -rock), loudness set to -14 LUFS for Instagram.
 // Needs a server in marketing/app-redesign: python3 -m http.server 8765
 import { createRequire } from "module";
 const require = createRequire("/opt/node22/lib/node_modules/");
@@ -40,8 +40,9 @@ const silent = path.join(tmp, "video.mp4");
 execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", path.join(tmp, "list.txt"), "-c", "copy", silent]);
 fs.writeFileSync(path.join(tmp, "info.json"), JSON.stringify(info));
 const wav = path.join(tmp, "beat.wav");
-execFileSync("python3", [path.join(here, "beat.py"), path.join(tmp, "info.json"), wav]);
-const outFile = path.join(here, `strive-elite-iphone-${cut}.mp4`);
+const rock = process.env.BEAT === "rock";
+execFileSync("python3", [path.join(here, rock ? "rockbeat.py" : "beat.py"), path.join(tmp, "info.json"), wav]);
+const outFile = path.join(here, `strive-elite-iphone-${cut}${rock ? "-rock" : ""}.mp4`);
 execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", silent, "-i", wav, "-filter_complex", `[1:a]atrim=0:${dur},loudnorm=I=-14:TP=-1.5:LRA=9[a]`,
   "-map", "0:v", "-map", "[a]", "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-shortest", "-movflags", "+faststart", outFile]);
 console.log("done", outFile, N, "frames", dur.toFixed(2), "s");

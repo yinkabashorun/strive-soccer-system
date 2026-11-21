@@ -11,7 +11,9 @@ const E = (t, a, d) => out3(lin(t, a, a + d));
 const mix = (a, b, k) => a + (b - a) * k;
 const st = (el, css) => { for (const k in css) el.style[k] = css[k]; };
 
-export const DURATION = 57.5;
+export const DURATION = 59.0;
+const INS = 8.0, ADD = 1.5;
+const real = (x) => (x <= INS ? x : x + ADD);
 
 const S = {}; // screens
 let heroRect;
@@ -25,7 +27,8 @@ const DR = [
 // captions: [start, end, eyebrow, line]
 const CAP = [
   [3.3, 7.4, "Day one", "You're in."],
-  [7.6, 11.0, "Day one", "Tap what holds you back."],
+  [7.6, 8.75, "Day one", "A quick quiz. One tap each."],
+  [9.15, 12.45, "Day one", "Tell us what holds you back."],
   [11.2, 14.2, "Day one", "Your week gets built around it."],
   [14.4, 18.4, "Day one", "Your week arrives. Every Monday."],
   [18.7, 21.4, "Every session", "One card. One button."],
@@ -40,12 +43,13 @@ const CAP = [
 ];
 // taps: [time, selector-or-[x,y] in screen px]
 const TAPS = [
-  [7.0, "#welcome .wbtn"], [9.4, "#quiz .tile"], [18.0, "#drop .wbtn"], [21.0, "#start"],
+  [7.0, "#welcome .wbtn"], [9.4, "#quiz .tile"], [7.05, "#quiz2 .opt:nth-child(2)"], [18.0, "#drop .wbtn"], [21.0, "#start"],
   [26.6, "#done"], [28.1, "#done"], [29.6, "#done"], [30.85, "#drill .timer"],
   [34.65, "#timer .tbtns .w"], [35.6, "#done"], [41.5, "#backhome"],
   [45.5, "#home [data-tab=week]"], [47.8, "#week .tab:nth-child(3)"], [50.1, "#courses .tab:nth-child(4)"],
 ];
 const tapPos = {};
+const REAL_TAPS = [];
 
 export function setup() {
   for (const s of $$(".scr")) S[s.id] = s;
@@ -56,20 +60,24 @@ export function setup() {
   show("home"); heroRect = rel($("#hero"));
   for (const [t, sel] of TAPS) {
     const id = sel.match(/#(\w+)/)[1]; show(id);
-    const el = $(sel); const r = rel(el); tapPos[t] = [r.x + r.w / 2, r.y + r.h / 2];
+    const el = $(sel); const r = rel(el);
+    const rt = sel.startsWith("#quiz2") ? 8.55 : real(t);
+    REAL_TAPS.push(rt); tapPos[rt] = [r.x + r.w / 2, r.y + r.h / 2];
   }
   show("welcome");
 }
 
+const QUIZCAP = (c) => c[3].startsWith("A quick") || c[3].startsWith("Tell us");
+const CAPR = CAP.map((c) => (QUIZCAP(c) ? c : [real(c[0]), real(c[1]), c[2], c[3]]));
 function cap(t) {
   const eb = $("#eyebrow"), ln = $("#line");
   let cur = null;
-  for (const c of CAP) if (t >= c[0] - 0.01 && t <= c[1] + 0.35) cur = c;
+  for (const c of CAPR) if (t >= c[0] - 0.01 && t <= c[1] + 0.35) cur = c;
   if (!cur) { eb.style.opacity = 0; ln.style.opacity = 0; return; }
   const a = E(t, cur[0], 0.45), z = 1 - E(t, cur[1], 0.3);
   const o = Math.min(a, z);
   // the eyebrow only fades when the chapter changes
-  const prev = CAP[CAP.indexOf(cur) - 1], next = CAP[CAP.indexOf(cur) + 1];
+  const prev = CAPR[CAPR.indexOf(cur) - 1], next = CAPR[CAPR.indexOf(cur) + 1];
   const ebIn = prev && prev[2] === cur[2] ? 1 : a, ebOut = next && next[2] === cur[2] ? 1 : z;
   eb.textContent = cur[2]; ln.textContent = cur[3];
   st(eb, { opacity: Math.min(ebIn, ebOut) });
@@ -79,7 +87,7 @@ function cap(t) {
 function finger(t) {
   const f = $("#finger");
   let o = 0, sc = 1, pos = null;
-  for (const [tt] of TAPS) {
+  for (const tt of REAL_TAPS) {
     const d = t - tt + 0.28;
     if (d >= 0 && d <= 0.75) { pos = tapPos[tt]; const k = d / 0.75; o = k < 0.35 ? k / 0.35 : 1 - (k - 0.35) / 0.65; sc = 1.35 - 0.4 * Math.min(1, k / 0.4); }
   }
@@ -91,22 +99,12 @@ const press = (t, at) => { const d = t - at; return d > -0.12 && d < 0.2 ? 1 - 0
 
 function vis(id, o, tf = "none") { st(S[id], { opacity: o, transform: tf, visibility: o > 0.001 ? "visible" : "hidden" }); }
 
-export function render(t) {
+export function render(rt) {
   for (const s of Object.values(S)) vis(s.id, 0);
-  cap(t); finger(t);
-
-  // ---------- stage: title, phone, end ----------
-  const title = $("#title"), end = $("#end"), dev = $("#device"), glow = $("#glow");
-  const tin = E(t, 0.3, 0.9), tout = 1 - E(t, 2.3, 0.6);
-  st(title, { opacity: Math.min(tin, tout), transform: `translateY(${(1 - tin) * 16}px)` });
-  const rise = E(t, 2.4, 1.1), leave = E(t, 52.6, 0.9);
-  const float = Math.sin(t * 0.6) * 3;
-  st(dev, { opacity: rise * (1 - leave), transform: `translateY(${(1 - rise) * 260 + float + leave * -30}px) scale(${mix(0.9, 1, rise) * mix(1, 0.92, leave)})` });
-  st(glow, { opacity: 0.85 * rise * (1 - leave) });
-  const e1 = E(t, 53.4, 0.7), e2 = E(t, 54.2, 0.7), e3 = E(t, 55.0, 0.8);
-  st(end, { opacity: 1 });
-  $$("#end .l").forEach((l, i) => { const k = [e1, e2, e3][i]; st(l, { opacity: k, transform: `translateY(${(1 - k) * 18}px)`, filter: `blur(${(1 - k) * 8}px)` }); });
-  const ew = E(t, 56.0, 0.7); st($("#end .wm2"), { opacity: ew });
+  cap(rt); finger(rt);
+  quiz2(rt);
+  const t = rt <= INS ? rt : Math.max(INS, rt - ADD);
+  stage(rt);
 
   // ---------- 1. the door ----------
   if (t < 8.2) {
@@ -126,8 +124,8 @@ export function render(t) {
     if (t > 7.42) { const k = E(t, 7.42, 0.42); vis("welcome", 1 - k * 0.6, `translateX(${-28 * k}%)`); }
   }
   // ---------- 2. quiz ----------
-  if (t >= 7.42 && t < 11.7) {
-    const k = E(t, 7.42, 0.42); vis("quiz", 1, `translateX(${(1 - k) * 100}%)`);
+  if (t >= 7.42 && t < 11.7 && rt >= 9.0) {
+    const k = E(rt, 9.0, 0.45); vis("quiz", 1, `translateX(${(1 - k) * 100}%)`);
     if (t > 11.2) vis("quiz", 1 - E(t, 11.2, 0.45));
     const tiles = $$("#quiz .tile"), pk = E(t, 9.45, 0.32), pop = back(lin(t, 9.45, 9.8));
     tiles.forEach((tl, i) => {
@@ -234,6 +232,22 @@ export function render(t) {
   }
 }
 
+function stage(t) {
+  // ---------- stage: title, phone, end ----------
+  const title = $("#title"), end = $("#end"), dev = $("#device"), glow = $("#glow");
+  const tin = E(t, 0.3, 0.9), tout = 1 - E(t, 2.3, 0.6);
+  st(title, { opacity: Math.min(tin, tout), transform: `translateY(${(1 - tin) * 16}px)` });
+  const rise = E(t, 2.4, 1.1), leave = E(t, 54.1, 0.9);
+  const float = Math.sin(t * 0.6) * 3;
+  st(dev, { opacity: rise * (1 - leave), transform: `translateY(${(1 - rise) * 260 + float + leave * -30}px) scale(${mix(0.9, 1, rise) * mix(1, 0.92, leave)})` });
+  st(glow, { opacity: 0.85 * rise * (1 - leave) });
+  const e1 = E(t, 54.9, 0.7), e2 = E(t, 55.7, 0.7), e3 = E(t, 56.5, 0.8);
+  st(end, { opacity: 1 });
+  $$("#end .l").forEach((l, i) => { const k = [e1, e2, e3][i]; st(l, { opacity: k, transform: `translateY(${(1 - k) * 18}px)`, filter: `blur(${(1 - k) * 8}px)` }); });
+  const ew = E(t, 57.5, 0.7); st($("#end .wm2"), { opacity: ew });
+
+}
+
 function homeState(after, t) {
   const d1 = $("#d1"), d2 = $$("#home .dot")[1];
   const fill = after && t >= 42.2;
@@ -271,4 +285,15 @@ function timer(t) {
   $("b", $(".big-ring .c", T)).textContent = `0:${String(s).padStart(2, "0")}`;
   $(".big-ring circle:nth-child(2)", T).style.strokeDashoffset = 854.5 * (1 - Math.max(0, secs) / 60);
   st($(".tbtns .w", T), { transform: `scale(${press(t, 34.65)})` });
+}
+
+function quiz2(t) {
+  if (t < 7.42 || t > 9.5) return;
+  const q = S.quiz2, k = E(t, 7.42, 0.42), out = E(t, 9.0, 0.45);
+  vis("quiz2", 1 - out * 0.6, `translateX(${(1 - k) * 100 - out * 28}%)`);
+  const opts = $$(".opt", q), pk = E(t, 8.6, 0.3), pop = back(lin(t, 8.6, 8.95));
+  opts.forEach((o, i) => {
+    if (i === 1) { st(o, { boxShadow: `inset 0 0 0 ${1 + 1.5 * pk}px rgba(242,239,232,${0.07 + 0.93 * pk})`, transform: `scale(${press(t, 8.55)})` }); st($(".ck", o), { transform: `scale(${pop})` }); }
+    else st(o, { opacity: 1 - 0.65 * pk });
+  });
 }

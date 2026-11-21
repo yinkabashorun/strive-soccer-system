@@ -39,7 +39,7 @@ const silent = path.join(tmp, "video.mp4");
 execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", path.join(tmp, "list.txt"), "-c", "copy", silent]);
 // three soft air swishes: the title, the session finishing, the end card
 const sw = (at, len, f0, f1) => `anoisesrc=d=${len}:c=pink:a=0.5,highpass=f=${f0},lowpass=f=${f1},afade=t=in:st=0:d=${(len * 0.45).toFixed(2)},afade=t=out:st=${(len * 0.45).toFixed(2)}:d=${(len * 0.55).toFixed(2)},adelay=${Math.round(at * 1000)}|${Math.round(at * 1000)},apad=whole_dur=${dur}`;
-const filt = [sw(2.4, 1.4, 300, 2600), sw(36.2, 1.2, 400, 3200), sw(53.3, 1.6, 250, 2400)].map((s, i) => `${s}[a${i}]`).join(";") + `;[a0][a1][a2]amix=inputs=3:normalize=0,volume=0.55,alimiter=limit=0.2,aformat=channel_layouts=stereo[a]`;
+const filt = [sw(2.4, 1.4, 300, 2600), sw(37.7, 1.2, 400, 3200), sw(54.8, 1.6, 250, 2400)].map((s, i) => `${s}[a${i}]`).join(";") + `;[a0][a1][a2]amix=inputs=3:normalize=0,volume=0.55,alimiter=limit=0.2,aformat=channel_layouts=stereo[a]`;
 const outFile = path.join(here, "strive-elite-iphone-walkthrough.mp4");
 execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", silent, "-filter_complex", filt, "-map", "0:v", "-map", "[a]", "-c:v", "copy", "-c:a", "aac", "-b:a", "160k", "-shortest", "-movflags", "+faststart", outFile]);
 console.log("done", outFile, N, "frames");

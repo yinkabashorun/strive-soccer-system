@@ -182,6 +182,24 @@ body{width:auto;padding:0;gap:0;display:block;overflow:hidden}
 .press:active,.press.down{transform:scale(.96)}
 
 /* finger dot, only in the recorded walkthrough */
+
+#quiz .q p.qs,#quiz2 .q p.qs{font-family:"B";font-size:15px;color:var(--dim);margin-top:10px;line-height:1.35}
+#quiz .tiles{top:262px}
+#quiz .tile{height:222px}
+#quiz .tile img{filter:brightness(.55)}
+#quiz .tile .tx{position:absolute;left:14px;right:12px;bottom:14px}
+#quiz .tile .tx b{position:static;display:block;font-size:22px;line-height:1.02}
+#quiz .tile .tx span{display:block;font-family:"B";font-size:12.5px;color:rgba(242,239,232,.82);margin-top:5px;line-height:1.3}
+#quiz2 .opts{position:absolute;top:290px;left:20px;right:20px;display:flex;flex-direction:column;gap:12px}
+#quiz2 .opt{position:relative;height:68px;border-radius:20px;background:var(--fill);box-shadow:inset 0 0 0 1px var(--line);display:flex;align-items:center;padding:0 20px}
+#quiz2 .opt b{font-family:"B";font-weight:600;font-size:17px}
+#quiz2 .opt .ck{position:absolute;right:18px;top:19px;width:30px;height:30px;border-radius:50%;background:var(--bone);color:#000;display:grid;place-items:center;transform:scale(0)}
+#quiz2 .pbar{position:absolute;top:58px;left:20px;right:20px;display:flex;gap:5px}
+#quiz2 .pbar i{flex:1;height:4px;border-radius:2px;background:var(--fill2)}
+#quiz2 .pbar i.on{background:var(--bone)}
+#quiz2 .q{position:absolute;top:84px;left:20px;right:20px}
+#quiz2 .q h2{font-size:36px;line-height:1.04;margin-top:10px}
+#end .l{font-size:76px}
 #finger{position:absolute;z-index:99;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:rgba(255,255,255,.28);box-shadow:0 0 0 1.5px rgba(255,255,255,.5);opacity:0;pointer-events:none}
 
 /* welcome */
@@ -311,14 +329,24 @@ body{width:540px;height:960px;position:relative;display:block;padding:0}
 </section>
 
 <!-- 2. QUIZ: one question a screen, tap and it moves on -->
+<section class="scr" id="quiz2">
+  <div class="pbar"><i class="on"></i><i class="on"></i><i></i><i></i></div>
+  <div class="q"><div class="eyebrow">Question 2 of 4</div><h2 class="bc">How often does<br>your team train?</h2><p class="qs">Your week fits around it.</p></div>
+  <div class="opts">
+    <div class="opt"><b>Once or twice a week</b><div class="ck"><svg class="i" viewBox="0 0 24 24" style="stroke-width:3;width:16px;height:16px"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div></div>
+    <div class="opt"><b>Three or four times</b><div class="ck"><svg class="i" viewBox="0 0 24 24" style="stroke-width:3;width:16px;height:16px"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div></div>
+    <div class="opt"><b>Five or more</b><div class="ck"><svg class="i" viewBox="0 0 24 24" style="stroke-width:3;width:16px;height:16px"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div></div>
+    <div class="opt"><b>Off season right now</b><div class="ck"><svg class="i" viewBox="0 0 24 24" style="stroke-width:3;width:16px;height:16px"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div></div>
+  </div>
+</section>
 <section class="scr" id="quiz">
   <div class="pbar"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div>
-  <div class="q"><div class="eyebrow">Question 3 of 4</div><h2 class="bc">What holds you<br>back most?</h2></div>
+  <div class="q"><div class="eyebrow">Question 3 of 4</div><h2 class="bc">What holds you<br>back most?</h2><p class="qs">Pick one. Your first two weeks start there.</p></div>
   <div class="tiles">
-    <div class="tile tap" data-pick><img class="cover" src="../mock/img/weak-foot-tap-pull-push.jpg"><b class="bc">Weak<br>foot</b><div class="ck"><svg class="i" viewBox="0 0 24 24" style="stroke-width:3;width:16px;height:16px"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div></div>
-    <div class="tile tap" data-pick><img class="cover" src="../mock/img/weak-foot-pop-and-juggle.jpg"><b class="bc">First<br>touch</b><div class="ck"><svg class="i" viewBox="0 0 24 24" style="stroke-width:3;width:16px;height:16px"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div></div>
-    <div class="tile tap" data-pick><img class="cover" src="../mock/img/speed-kneel-and-drive.jpg"><b class="bc">Speed</b><div class="ck"><svg class="i" viewBox="0 0 24 24" style="stroke-width:3;width:16px;height:16px"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div></div>
-    <div class="tile tap" data-pick><img class="cover" src="../mock/img/neymar-feint.jpg"><b class="bc">1v1<br>moves</b><div class="ck"><svg class="i" viewBox="0 0 24 24" style="stroke-width:3;width:16px;height:16px"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div></div>
+    <div class="tile"><img class="cover" src="../mock/img/weak-foot-tap-pull-push.jpg"><div class="tx"><b class="bc">Weak foot</b><span>I only trust one foot.</span></div><div class="ck"><svg class="i" viewBox="0 0 24 24" style="stroke-width:3;width:16px;height:16px"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div></div>
+    <div class="tile"><img class="cover" src="../mock/img/weak-foot-pop-and-juggle.jpg"><div class="tx"><b class="bc">First touch</b><span>The ball gets away.</span></div><div class="ck"><svg class="i" viewBox="0 0 24 24" style="stroke-width:3;width:16px;height:16px"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div></div>
+    <div class="tile"><img class="cover" src="../mock/img/speed-kneel-and-drive.jpg"><div class="tx"><b class="bc">Speed</b><span>I lose the race.</span></div><div class="ck"><svg class="i" viewBox="0 0 24 24" style="stroke-width:3;width:16px;height:16px"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div></div>
+    <div class="tile"><img class="cover" src="../mock/img/neymar-feint.jpg"><div class="tx"><b class="bc">1v1 moves</b><span>I can't beat my defender.</span></div><div class="ck"><svg class="i" viewBox="0 0 24 24" style="stroke-width:3;width:16px;height:16px"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div></div>
   </div>
 </section>
 
@@ -514,7 +542,7 @@ body{width:540px;height:960px;position:relative;display:block;padding:0}
   </div>
 </section>
 <div id="finger"></div></div></div></div></div>
-<div id="end"><div class="l">Open it.</div><div class="l">Tap Start.</div><div class="l metal">Train.</div><div class="wm2"><b>Strive <span class="metal">Elite</span></b><span>On iPhone</span></div></div>
+<div id="end"><div class="l">Open Strive.</div><div class="l">Tap Start.</div><div class="l metal">Train.</div><div class="wm2"><b>Strive <span class="metal">Elite</span></b><span>On iPhone</span></div></div>
 <script type="module">
 import {setup,render,DURATION} from "./film.src.js";
 const scr=document.getElementById("screen"), wrap=document.getElementById("scrwrap");

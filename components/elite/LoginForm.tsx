@@ -8,6 +8,7 @@ import { Loader2, Lock, Mail } from "lucide-react";
 import { enterDemoPlayer, enterDemoCoach, signIn } from "@/lib/elite/auth-actions";
 import { INVITE_USED_MESSAGE, INVITE_USED_NOTICE } from "@/lib/elite/invite-link";
 import { ACCOUNT_DELETED_MESSAGE, ACCOUNT_DELETED_NOTICE } from "@/lib/elite/account";
+import { PRO_PAGE } from "@/lib/elite/pro";
 
 // The sign-in screen. The form posts to a server action (signIn in
 // auth-actions.ts): the server signs in and sends the session back in a
@@ -121,6 +122,16 @@ export function LoginForm({
           </Link>
         </p>
       )}
+
+      {/* Strive Pro (074): paid by card, no invite. Shown on the website
+          and inside the app alike; inside the app the card checkout is
+          Stripe's own page, which the phone opens outside the app. */}
+      <p className="mt-2 text-center text-sm text-white/50">
+        Training on your own?{" "}
+        <Link href={PRO_PAGE} className="tap text-accent hover:underline">
+          Join Strive Pro
+        </Link>
+      </p>
 
       {/* The sales door: anyone can walk through a fully-loaded player
           experience - no account, no friction. */}

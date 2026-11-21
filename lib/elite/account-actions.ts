@@ -14,6 +14,8 @@ import {
 import { removePlayerFiles } from "./account-server";
 import { textCoaches } from "./coach-alerts";
 import { hasTracker, removeTrackerFiles } from "./tracker-server";
+import { cancelSubscriptions, memberTier } from "./pro-server";
+import { isPro } from "./tiers";
 
 // "Delete my account", from inside the app (App Review Guideline
 // 5.1.1(v)). The person re-enters their password, then everything goes:
@@ -44,6 +46,14 @@ export async function deleteMyAccount(
   if (!user?.email) return { error: "Sign in again, then come back to this page." };
   if (!(await verifyPassword(user.email, password))) {
     return { error: "That password is not right. Nothing was deleted." };
+  }
+
+  // A Strive Pro member (074) pays by card through the app: the card is
+  // never charged again for an account that no longer exists. Stopped
+  // before anything is deleted, while the subscription rows still point
+  // at it. (Elite billing is the coach's, as before: the text below.)
+  if (viewer.playerId && isPro(await memberTier(viewer.playerId))) {
+    await cancelSubscriptions(user.id, "now").catch(() => undefined);
   }
 
   // Files first: once the account is gone nothing points at them.

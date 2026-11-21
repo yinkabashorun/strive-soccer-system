@@ -23,6 +23,8 @@ export const SESSION_AREAS = [
   "/account/:path*",
   "/log/:path*",
   "/join",
+  // Strive Pro sign-up: the server signs the new account in (074)
+  "/pro/join",
   "/login",
   "/signup",
 ];

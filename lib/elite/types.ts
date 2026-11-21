@@ -21,9 +21,12 @@ export type SubscriptionStatus =
 
 export type PlayerLevel = "Developing" | "Competitive" | "Advanced" | "Elite";
 
-// The two offers (029). Strive Elite is the app; Complete Pathway is the
-// app plus film, the parent report, and weekly 1:1 coaching calls.
-export type MembershipTier = "elite" | "complete";
+// The offers (029, 074). Strive Elite is the app; Complete Pathway is the
+// app plus film, the parent report, and weekly 1:1 coaching calls. Strive
+// Pro (074) is the low-ticket membership, paid by card: the weekly plan
+// and the courses, without the coach's own time. What each one sees is
+// one rule, lib/elite/tiers.ts.
+export type MembershipTier = "elite" | "complete" | "pro";
 
 // A scheduled 1:1 coaching call (elite_coaching_calls, 029). Booking
 // happens on Calendly; this is what the app knows about it, plus the

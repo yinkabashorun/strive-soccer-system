@@ -11,13 +11,16 @@ import { signOut } from "@/lib/elite/auth-actions";
 import { unlockDueWeeks } from "@/lib/elite/unlock";
 import { AgreementScreen } from "@/components/elite/AgreementScreen";
 import { consentDue } from "@/lib/elite/legal-server";
-import { NO_PROFILE_GATE, membershipGate, type GateCopy } from "@/lib/elite/gates";
+import { NO_PROFILE_GATE, gateFor, type GateCopy } from "@/lib/elite/gates";
+import { tabOn } from "@/lib/elite/tiers";
+import { ProCheckoutButton } from "@/components/elite/ProCheckoutButton";
 import { SUPPORT_EMAIL } from "@/lib/elite/support";
 import { getTracker, quizDone } from "@/lib/elite/tracker-server";
 import { freeLanding } from "@/lib/elite/tracker";
 
 // Five tabs, the most an iPhone tab bar should carry (Apple HIG). Progress
 // lives one tap away: the time-trained strip on Home and the Account page.
+// A Strive Pro member (074) has no Film or Coach tab (lib/elite/tiers.ts).
 const PLAYER_NAV: NavItem[] = [
   { href: "/dashboard", label: "Home", icon: "Home" },
   { href: "/homework", label: "Training", icon: "Clipboard" },
@@ -61,6 +64,11 @@ export default async function PlayerLayout({
 
   const player = await getPlayer(viewer.playerId);
 
+  // A Strive Pro member (074) pays first, then takes the quiz: an unpaid
+  // or ended Pro membership sees the checkout before onboarding.
+  const gate = gateFor(player?.subscription_status ?? "none", player?.tier);
+  if (gate?.startPro) return <GateScreen gate={gate} />;
+
   // Onboarding gate: a redeemed player who hasn't completed intake is sent
   // to the standalone onboarding flow first (demo players are pre-onboarded).
   // Strict `=== null` so that before 012 is applied (column absent → the key
@@ -73,7 +81,6 @@ export default async function PlayerLayout({
   // lets the coach revoke access by flipping a player to inactive. A
   // membership that was never switched on and one that was paused read
   // differently (lib/elite/gates.ts).
-  const gate = membershipGate(player?.subscription_status ?? "none");
   if (gate) return <GateScreen gate={gate} />;
 
   const notifications = await getNotifications(viewer.playerId);
@@ -85,7 +92,7 @@ export default async function PlayerLayout({
           The ask itself is on the finish screen of a session (A8). */}
       {!viewer.demo && <PushKeepAlive />}
       <AppNav
-        items={PLAYER_NAV.filter((item) => !keptOutOfThisApp(item.href))}
+        items={PLAYER_NAV.filter((item) => tabOn(player?.tier, item.href) && !keptOutOfThisApp(item.href))}
         name={viewer.profile.full_name}
         color={viewer.profile.avatar_color}
         roleLabel="Player"
@@ -106,6 +113,7 @@ function GateScreen({ gate }: { gate: GateCopy }) {
         {gate.title}
       </h1>
       <p className="mt-3 max-w-sm text-[15px] leading-relaxed text-white/70">{gate.body}</p>
+      {gate.startPro && <ProCheckoutButton className="mt-7 w-full max-w-xs" />}
       {gate.emailCoach && (
         <a
           href={`mailto:${SUPPORT_EMAIL}`}
@@ -114,7 +122,7 @@ function GateScreen({ gate }: { gate: GateCopy }) {
           Email your coach
         </a>
       )}
-      <form action={signOut} className={gate.emailCoach ? "mt-3" : "mt-8"}>
+      <form action={signOut} className={gate.emailCoach || gate.startPro ? "mt-3" : "mt-8"}>
         <button className="btn min-h-[44px] px-6 py-3">Sign out</button>
       </form>
       <Link href="/account" className="mt-2 inline-flex min-h-[44px] items-center px-3 text-sm text-white/60 underline-offset-4 hover:underline">

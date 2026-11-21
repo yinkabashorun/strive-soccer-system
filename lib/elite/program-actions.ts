@@ -5,6 +5,7 @@ import { createClient } from "./supabase/server";
 import { getViewer } from "./session";
 import { liveWeekFor } from "./time";
 import { cleanFocuses, cleanQuiz, cleanThreads, PROGRAM_WEEKS } from "./program";
+import { featureOn } from "./tiers";
 
 // The 3-month program (065). Coach-only writes through the cookie client
 // (RLS: elite_programs_coach_all). Saving never touches a week that is
@@ -37,7 +38,7 @@ export async function saveProgram(playerId: string, input: ProgramInput) {
   const quiz = cleanQuiz(input.quiz);
 
   const [{ data: player }, { data: latest }, { data: existing }] = await Promise.all([
-    c.supabase.from("elite_players").select("week1_monday, current_week").eq("id", playerId).maybeSingle(),
+    c.supabase.from("elite_players").select("week1_monday, current_week, tier").eq("id", playerId).maybeSingle(),
     c.supabase
       .from("elite_homework")
       .select("week")
@@ -48,6 +49,11 @@ export async function saveProgram(playerId: string, input: ProgramInput) {
     c.supabase.from("elite_programs").select("id, start_week").eq("player_id", playerId).eq("status", "active").maybeSingle(),
   ]);
   if (!player) return { ok: false as const, error: "Player not found." };
+  // Not part of Strive Pro (074, lib/elite/tiers.ts): a Pro week is built
+  // from the quiz and the check-ins only, so no program is ever saved.
+  if (!featureOn((player as { tier?: string | null }).tier, "program")) {
+    return { ok: false as const, error: "The 3-month program is not part of Strive Pro." };
+  }
 
   const maxBuilt = (latest as { week: number } | null)?.week ?? 0;
   const liveWeek = player.week1_monday ? liveWeekFor(player.week1_monday, player.current_week) : 1;

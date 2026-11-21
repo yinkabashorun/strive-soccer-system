@@ -4,6 +4,7 @@ import { liveWeekFor } from "@/lib/elite/time";
 import { timeTrained } from "@/lib/elite/time-trained";
 import { WeekList } from "@/components/elite/WeekList";
 import { TourGuide } from "@/components/elite/TourGuide";
+import { featureOn } from "@/lib/elite/tiers";
 
 export default async function HomeworkPage() {
   const viewer = await getViewer();
@@ -33,6 +34,7 @@ export default async function HomeworkPage() {
         items={homework}
         currentWeek={contentWeek}
         playerId={viewer.playerId}
+        sendClips={featureOn(player?.tier, "sendClip")}
         example={viewer.demo}
         firstName={(player?.full_name ?? "").split(" ")[0]}
         totalMinutes={timeTrained(all).minutes}

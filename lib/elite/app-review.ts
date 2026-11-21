@@ -77,6 +77,14 @@ export const SCREENS: readonly Screen[] = [
   // Accounts are made on the website, by invite, after a call with a coach.
   { path: "/signup", since: WEBSITE_ONLY },
 
+  // Strive Pro (074, Nov 20 2026): the page, and its sign-up. In the
+  // first build: the sign-in screen offers it inside the app too, and the
+  // card checkout is Stripe's page, which the phone opens outside the app
+  // (a link out to pay, allowed for US storefronts). The listing and the
+  // review notes must describe it before that build is submitted.
+  { path: "/pro", since: IN_FIRST_BUILD },
+  { path: "/pro/join", since: IN_FIRST_BUILD },
+
   // The free app (photo posts between players, clubs, rankings). In the
   // first build on Coach Yinka's word (Nov 20 2026, "App store asap"):
   // free sign-up works inside the app (nothing is bought), and the listing

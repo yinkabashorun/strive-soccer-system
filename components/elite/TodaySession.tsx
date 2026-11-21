@@ -28,6 +28,7 @@ export function TodaySession({
   totalMinutes,
   nextWeekLine,
   playerId,
+  sendClips = true,
   example = false,
 }: {
   week: number;
@@ -36,6 +37,7 @@ export function TodaySession({
   totalMinutes: number; // all time, as the server last counted it
   nextWeekLine: string;
   playerId?: string; // enables Send a clip (036) on skill drills
+  sendClips?: boolean; // false for an offer without Send a clip (lib/elite/tiers.ts)
   example?: boolean; // the example player
 }) {
   const router = useRouter();
@@ -72,6 +74,7 @@ export function TodaySession({
       sessionsTotal={sessions.length}
       weekDoneLine={nextWeekLine}
       playerId={playerId}
+      sendClips={sendClips}
       example={example}
       onClose={close}
     />

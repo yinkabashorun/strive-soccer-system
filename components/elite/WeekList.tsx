@@ -28,6 +28,7 @@ export function WeekList({
   currentWeek,
   showPast = true,
   playerId,
+  sendClips = true,
   firstName = "",
   totalMinutes = 0,
   example = false,
@@ -36,6 +37,7 @@ export function WeekList({
   currentWeek: number;
   showPast?: boolean;
   playerId?: string; // set on the player's own view: enables Send a clip (036)
+  sendClips?: boolean; // false for an offer without Send a clip (lib/elite/tiers.ts)
   firstName?: string;
   totalMinutes?: number; // all time, as the server last counted it
   example?: boolean; // the example player
@@ -191,6 +193,7 @@ export function WeekList({
           }
           sessionsTotal={sessions.length}
           playerId={playerId}
+          sendClips={sendClips}
           example={example}
           onClose={close}
         />

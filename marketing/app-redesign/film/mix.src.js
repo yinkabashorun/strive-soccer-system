@@ -2,7 +2,11 @@
 // the beat (120 BPM), plays a stretch of the master walkthrough at its own
 // speed so the taps land on the beat, and carries its own camera and one
 // slammed line. ?cut=long (about a minute) or ?cut=short (15 seconds).
+// ?cut=short-song is the short cut laid on the song Coach Yinka sent: a cut
+// with `song` counts in that song's measured beats (song-beats.json, 172 BPM),
+// beat 0 = the song's beat `from`, and every time below follows those beats.
 import { setup as setupApp, renderApp } from "./film.src.js";
+import SONG from "./song-beats.json" with { type: "json" };
 
 const $ = (s, r = document) => r.querySelector(s);
 const cl = (x) => Math.max(0, Math.min(1, x));
@@ -72,12 +76,57 @@ export const CUTS = {
     flash: [6, 18], done: [13.5, 14.5, 15.5], shimmer: [18], deviceOut: 24, tension: [10, 13],
     end: [[24.5, "OPEN STRIVE."], [25.5, "TAP START."], [26.5, "*TRAIN.*"]], mark: 28,
   },
+  // the short cut on his song: one beat = one song beat (172 BPM, ~0.35 s);
+  // starts on song beat 3, two intro hits carry the opening words, the band
+  // comes in on beat 9 (cut beat 6) with the first shot, every shot on a downbeat
+  // or a half bar, the 3 2 1 on three beats in a row, the end words on three.
+  "short-song": {
+    song: { from: 3 },
+    len: 50,
+    open: [[1, "YOUR WEEK."], [4, "BUILT FOR *YOU.*"]], openOut: 6,
+    shots: [
+      [6, 4, 4.4, 5.9, [[0, C(1.0, "mid", 300)], [0.35, C(1.1, "card")], [1, C(1.25, "card")]]],
+      [10, 2, 10.4, 11.4, [[0, C(1.1, "tiles")], [1, C(1.2, "tiles")]]],
+      [12, 4, 16.3, 17.5, [[0, C(1.0)], [1, C(1.08)]]],
+      [16, 2, 22.0, 23.3, [[0, C(1.08, "hero")], [1, C(1.0)]]],
+      [18, 4, 24.08, 27.52, [[0, C(1.22, "count")], [1, C(1.34, "count")]]],
+      [22, 6, 27.35, 31.85, [[0, C(1.0)], [1, C(1.08, "drill")]]],
+      [28, 6, 37.7, 40.1, [[0, C(1.0)], [0.2, C(1.38, "fring")], [0.65, C(1.38, "fring")], [1, C(1.05)]]],
+      [34, 4, 43.5, 44.7, [[0, C(1.15, "dots")], [1, C(1.4, "dots")]]],
+      [38, 4, 52.0, 53.4, [[0, C(1.05, "ycard")], [1, C(1.25, "ycard")]]],
+    ],
+    words: [[6, "YOU'RE *IN.*"], [10, "ONE *TAP.*"], [12, "YOUR *WEEK.*"], [16, "TAP *START.*"], [18, ""],
+      [23, "*DONE.*"], [25, "*DONE.*"], [27, "*DONE.*"], [28, "SESSION *DONE.*"], [34, "ONE CIRCLE *DOWN.*"],
+      [38, "YOUR *CARD.*"], [42, ""]],
+    flash: [12, 31], done: [23, 25, 27], shimmer: [31], deviceOut: 42, tension: [18, 22],
+    end: [[43, "OPEN STRIVE."], [44, "TAP START."], [45, "*TRAIN.*"]], mark: 46,
+  },
 };
 
 const cutName = new URLSearchParams(location.search).get("cut") || "long";
 const CUT = CUTS[cutName];
-export const DURATION = CUT.len * B;
-export const CUT_INFO = { name: cutName, bpm: BPM, len: CUT.len, flash: CUT.flash, done: CUT.done, shimmer: CUT.shimmer,
+
+// beat <-> seconds. A plain cut is a straight 120 BPM grid; a song cut follows
+// the measured beats of the song, so a beat that comes a hair early or late in
+// the recording still gets its cut on it.
+const GRID = (() => {
+  if (!CUT.song) return null;
+  const b = SONG.beats, from = CUT.song.from, p = 60 / SONG.bpm, t0 = b[from], out = [];
+  for (let i = 0; i <= CUT.len + 1; i++) { const j = from + i; out.push((j < b.length ? b[j] : b[b.length - 1] + (j - b.length + 1) * p) - t0); }
+  return out;
+})();
+const tb = (beat) => {
+  if (!GRID) return beat * B;
+  const i = Math.max(0, Math.min(GRID.length - 2, Math.floor(beat)));
+  return GRID[i] + (GRID[i + 1] - GRID[i]) * (beat - i);
+};
+const bt = (t) => {
+  if (!GRID) return t / B;
+  let i = 0; while (i < GRID.length - 2 && GRID[i + 1] <= t) i++;
+  return i + (t - GRID[i]) / (GRID[i + 1] - GRID[i]);
+};
+export const DURATION = tb(CUT.len);
+export const CUT_INFO = { name: cutName, bpm: CUT.song ? SONG.bpm : BPM, song: CUT.song ? { from: CUT.song.from, start: SONG.beats[CUT.song.from] } : null, len: CUT.len, flash: CUT.flash, done: CUT.done, shimmer: CUT.shimmer,
   open: CUT.open.map((w) => w[0]), end: CUT.end.map((w) => w[0]), cuts: CUT.shots.map((s) => s[0]), deviceOut: CUT.deviceOut, tension: CUT.tension, mark: CUT.mark, drop: CUT.shots[0][0] };
 
 let k = 0.789;
@@ -99,7 +148,7 @@ function camAt(keys, f) {
 function wordOn(beat) { let w = null; for (const x of CUT.words) if (beat >= x[0]) w = x; return !!(w && w[1]); }
 
 export function render(t) {
-  const beat = t / B, dev = $("#device"), glow = $("#glow");
+  const beat = bt(t), dev = $("#device"), glow = $("#glow");
   // the shot on screen
   let shot = null, si = -1;
   CUT.shots.forEach((s, i) => { if (beat >= s[0] && beat < s[0] + s[1]) { shot = s; si = i; } });
@@ -110,9 +159,9 @@ export function render(t) {
     renderApp(mix(m0, m1, f));
     const c = camAt(cam, f);
     // a hard cut on the beat with a short whip in from alternating sides
-    const since = t - b0 * B, dir = si % 2 ? -1 : 1;
+    const since = t - tb(b0), dir = si % 2 ? -1 : 1;
     const whip = si === 0 ? 0 : 1 - out3(cl(since / 0.16));
-    const until = (b0 + n) * B - t, leaveW = 1 - cl(until / 0.06);
+    const until = tb(b0 + n) - t, leaveW = 1 - cl(until / 0.06);
     const pulse = 1 + 0.012 * Math.exp(-((beat % 1) * 8));
     const fx = 11 + c.fx * k, fy = 11 + c.fy * k, cx = 165, cy = 357;
     const pull = cl((c.s - 1) * 2.2);
@@ -135,7 +184,7 @@ export function render(t) {
   let w = null; for (const x of CUT.words) if (beat >= x[0]) w = x;
   if (w && w[1] && beat < CUT.deviceOut) {
     if (kin.dataset.t !== w[1]) { kin.innerHTML = `<span>${gold(w[1])}</span>`; kin.dataset.t = w[1]; }
-    const d = t - w[0] * B, s = out3(cl(d / 0.14));
+    const d = t - tb(w[0]), s = out3(cl(d / 0.14));
     st(kin, { opacity: cl(d / 0.05), transform: `scale(${mix(1.28, 1, s)})`, filter: `blur(${(1 - s) * 7}px)` });
   } else st(kin, { opacity: 0 });
 
@@ -146,13 +195,13 @@ export function render(t) {
   const html = list.map((x, i) => `<div class="bl" data-i="${i}">${gold(x[1])}</div>`).join("");
   if (big.dataset.h !== html) { big.innerHTML = html; big.dataset.h = html; }
   [...big.children].forEach((el, i) => {
-    const d = t - list[i][0] * B, s = out3(cl(d / 0.14));
+    const d = t - tb(list[i][0]), s = out3(cl(d / 0.14));
     st(el, { opacity: d < 0 ? 0 : cl(d / 0.05) * fade, transform: `scale(${mix(1.3, 1, s)})`, filter: `blur(${(1 - s) * 8}px)` });
   });
-  const mk = $("#mark"), md = t - CUT.mark * B;
+  const mk = $("#mark"), md = t - tb(CUT.mark);
   st(mk, { opacity: md < 0 ? 0 : out3(cl(md / 0.5)), transform: `translateY(${(1 - out3(cl(md / 0.5))) * 10}px)` });
 
   // the white flash on the big moments
-  let fl = 0; for (const fb of CUT.flash) { const d = t - fb * B; if (d >= 0 && d < 0.16) fl = Math.max(fl, 0.32 * (1 - d / 0.16)); }
+  let fl = 0; for (const fb of CUT.flash) { const d = t - tb(fb); if (d >= 0 && d < 0.16) fl = Math.max(fl, 0.32 * (1 - d / 0.16)); }
   st($("#flash"), { opacity: fl });
 }

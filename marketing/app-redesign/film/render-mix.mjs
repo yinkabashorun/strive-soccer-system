@@ -1,6 +1,9 @@
 // node film/render-mix.mjs long|short -> film/strive-elite-iphone-{long,short}.mp4
 // Same frame-by-frame render as render.mjs (1080x1920, 60 fps, 4 workers), then
 // the beat from beat.py (BEAT=rock for rockbeat.py, file name gets -rock), loudness set to -14 LUFS for Instagram.
+// A song cut (node film/render-mix.mjs short-song) takes SONG=/path/to/recording instead: its audio from the
+// cut's start beat, faded in and out. That copy is for his eyes only and is never committed (a label's song,
+// public repo); the -silent copy is the one to post, with the song added in the Instagram app.
 // Needs a server in marketing/app-redesign: python3 -m http.server 8765
 import { createRequire } from "module";
 const require = createRequire("/opt/node22/lib/node_modules/");
@@ -38,11 +41,23 @@ await b.close();
 fs.writeFileSync(path.join(tmp, "list.txt"), segs.map((s) => `file '${s}'`).join("\n"));
 const silent = path.join(tmp, "video.mp4");
 execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", path.join(tmp, "list.txt"), "-c", "copy", silent]);
-fs.writeFileSync(path.join(tmp, "info.json"), JSON.stringify(info));
-const wav = path.join(tmp, "beat.wav");
-const rock = process.env.BEAT === "rock";
-execFileSync("python3", [path.join(here, rock ? "rockbeat.py" : "beat.py"), path.join(tmp, "info.json"), wav]);
-const outFile = path.join(here, `strive-elite-iphone-${cut}${rock ? "-rock" : ""}.mp4`);
-execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", silent, "-i", wav, "-filter_complex", `[1:a]atrim=0:${dur},loudnorm=I=-14:TP=-1.5:LRA=9[a]`,
-  "-map", "0:v", "-map", "[a]", "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-shortest", "-movflags", "+faststart", outFile]);
-console.log("done", outFile, N, "frames", dur.toFixed(2), "s");
+if (info.song) {
+  if (!process.env.SONG) throw new Error("a song cut needs SONG=/path/to/the recording");
+  const silentOut = path.join(here, `strive-elite-iphone-${cut}-silent.mp4`);
+  execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", silent, "-c", "copy", "-movflags", "+faststart", silentOut]);
+  const outFile = path.join(here, `strive-elite-iphone-${cut}.mp4`);
+  const s0 = info.song.start + 0.006, fo = (dur - 0.9).toFixed(2);
+  execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", silent, "-ss", s0.toFixed(3), "-i", process.env.SONG, "-filter_complex",
+    `[1:a]atrim=0:${dur},asetpts=PTS-STARTPTS,afade=t=in:d=0.04,afade=t=out:st=${fo}:d=0.9,loudnorm=I=-14:TP=-1.5:LRA=9[a]`,
+    "-map", "0:v", "-map", "[a]", "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-shortest", "-movflags", "+faststart", outFile]);
+  console.log("done", outFile, silentOut, N, "frames", dur.toFixed(2), "s");
+} else {
+  fs.writeFileSync(path.join(tmp, "info.json"), JSON.stringify(info));
+  const wav = path.join(tmp, "beat.wav");
+  const rock = process.env.BEAT === "rock";
+  execFileSync("python3", [path.join(here, rock ? "rockbeat.py" : "beat.py"), path.join(tmp, "info.json"), wav]);
+  const outFile = path.join(here, `strive-elite-iphone-${cut}${rock ? "-rock" : ""}.mp4`);
+  execFileSync("ffmpeg", ["-y", "-loglevel", "error", "-i", silent, "-i", wav, "-filter_complex", `[1:a]atrim=0:${dur},loudnorm=I=-14:TP=-1.5:LRA=9[a]`,
+    "-map", "0:v", "-map", "[a]", "-c:v", "copy", "-c:a", "aac", "-b:a", "192k", "-ar", "48000", "-shortest", "-movflags", "+faststart", outFile]);
+  console.log("done", outFile, N, "frames", dur.toFixed(2), "s");
+}

@@ -13,6 +13,7 @@ const $ = (s, r = document) => r.querySelector(s);
 const cl = (x) => Math.max(0, Math.min(1, x));
 const lin = (t, a, b) => cl((t - a) / (b - a));
 const out3 = (x) => 1 - Math.pow(1 - x, 3);
+const outExpo = (x) => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * x));
 const inout = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 const mix = (a, b, k) => a + (b - a) * k;
 const st = (el, css) => { for (const k in css) el.style[k] = css[k]; };
@@ -207,10 +208,10 @@ export function render(t) {
     const t0s = tb(b0), f = cl((t - t0s) / (tb(b0 + n) - t0s));
     renderApp(mix(m0, m1, f));
     const c = camAt(cam, f);
-    // a hard cut on the beat with a short whip in from alternating sides
-    const since = t - tb(b0), dir = si % 2 ? -1 : 1;
-    const whip = si === 0 ? 0 : 1 - out3(cl(since / 0.16));
-    const until = tb(b0 + n) - t, leaveW = 1 - cl(until / 0.06);
+    // a cut on the beat lands softly: the new shot starts a touch closer and settles into place
+    const since = t - tb(b0), settle = si === 0 ? 0 : 1 - outExpo(cl(since / 0.5));
+    // and the phone is never dead still: a slow, even drift
+    const dx = 3 * Math.sin(t * 0.7), dy = 4 * Math.sin(t * 0.53 + 1), rz = 0.35 * Math.sin(t * 0.41 + 2);
     const fx = 11 + c.fx * k, fy = 11 + c.fy * k, cx = 165, cy = 357;
     const pull = cl((c.s - 1) * 2.2);
     // while a line is on screen the phone never rises into it
@@ -222,21 +223,22 @@ export function render(t) {
     st(dev, {
       opacity: 1 - outK,
       transformOrigin: `${fx}px ${fy}px`,
-      transform: `translate(${(cx - fx) * pull + whip * 70 * dir}px, ${ty}px) scale(${c.s * mix(1, 0.92, outK)}) rotateY(${c.ry}deg)`,
-      filter: `blur(${(whip + leaveW) * 5}px)`,
+      transform: `translate(${(cx - fx) * pull + dx}px, ${ty + dy + 12 * settle}px) scale(${c.s * (1 + 0.04 * settle) * mix(1, 0.92, outK)}) rotateY(${c.ry}deg) rotate(${rz}deg)`,
+      filter: "none",
     });
   } else {
     st(dev, { opacity: 0 });
   }
-  st(glow, { opacity: shot ? 0.55 + 0.35 * Math.exp(-((beat % 1) * 5)) : 0 });
+  // the glow breathes once a bar instead of flickering every beat
+  st(glow, { opacity: shot ? 0.62 + 0.12 * Math.sin((Math.PI * 2 * beat) / 4) : 0 });
 
   // the slammed line
   const kin = $("#kin");
   let w = null; for (const x of CUT.words) if (beat >= x[0]) w = x;
   if (w && w[1] && beat < CUT.deviceOut) {
     if (kin.dataset.t !== w[1]) { kin.innerHTML = `<span>${gold(w[1])}</span>`; kin.dataset.t = w[1]; }
-    const d = t - tb(w[0]), s = out3(cl(d / 0.14));
-    st(kin, { opacity: cl(d / 0.05), transform: `scale(${mix(1.28, 1, s)})`, filter: `blur(${(1 - s) * 7}px)` });
+    const d = t - tb(w[0]), s = outExpo(cl(d / 0.4));
+    st(kin, { opacity: cl(d / 0.12), transform: `translateY(${(1 - s) * 10}px) scale(${mix(1.08, 1, s)})`, filter: `blur(${(1 - s) * 4}px)` });
   } else st(kin, { opacity: 0 });
 
   // open and end words, stacked in the middle
@@ -246,13 +248,13 @@ export function render(t) {
   const html = list.map((x, i) => `<div class="bl" data-i="${i}">${gold(x[1])}</div>`).join("");
   if (big.dataset.h !== html) { big.innerHTML = html; big.dataset.h = html; }
   [...big.children].forEach((el, i) => {
-    const d = t - tb(list[i][0]), s = out3(cl(d / 0.14));
-    st(el, { opacity: d < 0 ? 0 : cl(d / 0.05) * fade, transform: `scale(${mix(1.3, 1, s)})`, filter: `blur(${(1 - s) * 8}px)` });
+    const d = t - tb(list[i][0]), s = outExpo(cl(d / 0.45));
+    st(el, { opacity: d < 0 ? 0 : cl(d / 0.14) * fade, transform: `translateY(${(1 - s) * 12}px) scale(${mix(1.1, 1, s)})`, filter: `blur(${(1 - s) * 5}px)` });
   });
   const mk = $("#mark"), md = t - tb(CUT.mark);
   st(mk, { opacity: md < 0 ? 0 : out3(cl(md / 0.5)), transform: `translateY(${(1 - out3(cl(md / 0.5))) * 10}px)` });
 
   // the white flash on the big moments
-  let fl = 0; for (const fb of CUT.flash) { const d = t - tb(fb); if (d >= 0 && d < 0.16) fl = Math.max(fl, 0.32 * (1 - d / 0.16)); }
+  let fl = 0; for (const fb of CUT.flash) { const d = t - tb(fb); if (d >= 0 && d < 0.4) fl = Math.max(fl, 0.16 * cl(d / 0.04) * (1 - out3(cl(d / 0.4)))); }
   st($("#flash"), { opacity: fl });
 }

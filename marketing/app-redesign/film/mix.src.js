@@ -6,7 +6,8 @@
 // with `song` counts in that song's measured beats (song-beats.json, 172 BPM),
 // beat 0 = the song's beat `from`, and every time below follows those beats.
 import { setup as setupApp, renderApp } from "./film.src.js";
-import SONG from "./song-beats.json" with { type: "json" };
+import SONG1 from "./song-beats.json" with { type: "json" };
+import SONGL from "./song-beats-loop.json" with { type: "json" };
 
 const $ = (s, r = document) => r.querySelector(s);
 const cl = (x) => Math.max(0, Math.min(1, x));
@@ -82,40 +83,51 @@ export const CUTS = {
   // comes in on beat 9 (cut beat 6) with the first shot, every shot on a downbeat
   // or a half bar, the 3 2 1 on three beats in a row, the end words on three.
   "short-song": {
-    song: { from: 3 },
-    len: 90,
+    song: { from: 3, loop: true },
+    len: 136,
     open: [[1, "YOUR WEEK."], [4, "BUILT FOR *YOU.*"]], openOut: 6,
     shots: [
-      [6, 4, 4.4, 5.9, [[0, C(1.0, "mid", 300)], [0.35, C(1.1, "card")], [1, C(1.25, "card")]]],
-      [10, 2, 10.4, 11.4, [[0, C(1.1, "tiles")], [1, C(1.2, "tiles")]]],
-      [12, 4, 16.3, 17.5, [[0, C(1.0)], [1, C(1.08)]]],
-      [16, 2, 22.0, 23.3, [[0, C(1.08, "hero")], [1, C(1.0)]]],
-      [18, 4, 24.08, 27.52, [[0, C(1.22, "count")], [1, C(1.34, "count")]]],
-      [22, 6, 27.35, 31.85, [[0, C(1.0)], [1, C(1.08, "drill")]]],
-      [28, 6, 37.7, 40.1, [[0, C(1.0)], [0.2, C(1.38, "fring")], [0.65, C(1.38, "fring")], [1, C(1.05)]]],
-      [34, 4, 43.5, 44.7, [[0, C(1.15, "dots")], [1, C(1.4, "dots")]]],
-      [38, 4, 52.0, 53.4, [[0, C(1.05, "ycard")], [1, C(1.25, "ycard")]]],
+      // day one
+      [6, 6, 4.0, 7.3, [[0, C(1.0, "mid", 300)], [0.4, C(1.08, "card")], [1, C(1.16, "card")]]],
+      [12, 6, 7.4, 11.4, [[0, C(1.06)], [0.5, C(1.06)], [1, C(1.14, "tiles")]]],
+      [18, 6, 12.9, 15.6, [[0, C(1.04)], [1, C(1.12, "steps")]]],
+      [24, 6, 15.9, 18.6, [[0, C(1.0)], [1, C(1.08, "cards")]]],
+      // every session
+      [30, 4, 20.3, 22.7, [[0, C(1.04, "hero")], [1, C(1.1, "hero")]]],
+      [34, 8, 24.08, 27.52, [[0, C(1.18, "count")], [1, C(1.3, "count")]]],
+      [42, 10, 27.1, 32.1, [[0, C(1.0)], [1, C(1.08, "drill")]]],
+      [52, 6, 32.6, 35.6, [[0, C(1.0)], [1, C(1.06)]]],
+      [58, 8, 37.5, 41.0, [[0, C(1.0)], [0.2, C(1.3, "fring")], [0.6, C(1.3, "fring")], [1, C(1.04)]]],
+      [66, 4, 43.4, 44.9, [[0, C(1.12, "dots")], [1, C(1.3, "dots")]]],
+      // between sessions
+      [70, 4, 47.0, 48.9, [[0, C(1.02)], [1, C(1.08)]]],
+      [74, 4, 49.3, 51.3, [[0, C(1.02)], [1, C(1.08)]]],
+      [78, 4, 52.0, 53.4, [[0, C(1.05, "ycard")], [1, C(1.2, "ycard")]]],
       // clubs and friends
-      [42, 8, 61.4, 64.4, [[0, C(1.06)], [1, C(1.12)]]],
-      [50, 6, 64.5, 66.7, [[0, C(1.04)], [1, C(1.12)]]],
-      [56, 8, 67.0, 70.2, [[0, C(1.06)], [0.55, C(1.1)], [0.8, C(1.3, "kyou")], [1, C(1.34, "kyou")]]],
-      [64, 6, 72.5, 74.9, [[0, C(1.0)], [0.25, C(1.0)], [0.4, C(1.3, "kprops")], [0.7, C(1.3, "kprops")], [1, C(1.05)]]],
-      [70, 6, 75.3, 77.5, [[0, C(1.04)], [0.5, C(1.12)], [0.68, C(1.32, "kstar")], [1, C(1.36, "kstar")]]],
-      [76, 6, 79.16, 81.38, [[0, C(1.05)], [0.5, C(1.25, "kyou")], [1, C(1.3, "kyou")]]],
+      [82, 8, 61.4, 64.4, [[0, C(1.06)], [1, C(1.12)]]],
+      [90, 8, 64.5, 67.0, [[0, C(1.04)], [1, C(1.12)]]],
+      [98, 8, 67.0, 70.2, [[0, C(1.06)], [0.55, C(1.1)], [0.8, C(1.3, "kyou")], [1, C(1.34, "kyou")]]],
+      [106, 6, 72.5, 74.9, [[0, C(1.0)], [0.25, C(1.0)], [0.4, C(1.3, "kprops")], [0.7, C(1.3, "kprops")], [1, C(1.05)]]],
+      [112, 8, 75.45, 78.09, [[0, C(1.04)], [0.4, C(1.12)], [0.55, C(1.32, "kstar")], [1, C(1.38, "kstar")]]],
+      [120, 8, 78.17, 81.13, [[0, C(1.05)], [0.4, C(1.25, "kyou")], [1, C(1.3, "kyou")]]],
     ],
-    words: [[6, "YOU'RE *IN.*"], [10, "ONE *TAP.*"], [12, "YOUR *WEEK.*"], [16, "TAP *START.*"], [18, ""],
-      [23, "*DONE.*"], [25, "*DONE.*"], [27, "*DONE.*"], [28, "SESSION *DONE.*"], [34, "ONE CIRCLE *DOWN.*"],
-      [38, "YOUR *CARD.*"], [42, "YOUR *CLUBS.*"], [44, "YOUR CLUB *TEAM.*"], [46, "YOUR PICKUP *SQUAD.*"],
-      [48, "YOUR HIGH *SCHOOL.*"], [50, "AND *STRIVE SOCCER.*"], [56, "COMPETE WITH YOUR *FRIENDS.*"], [62, "MOVE *UP.*"],
-      [64, "SHARE YOUR *TRAINING.*"], [66, "GIVE *PROPS.*"], [70, "THE BEST GET A *STAR.*"],
-      [74, "WILL YOU BE THE NEXT *STRIVE STAR?*"], [76, "OUTWORK YOUR *COACH.*"], [82, ""]],
-    flash: [12, 31, 62, 78], done: [23, 25, 27], shimmer: [31], deviceOut: 82, tension: [18, 22],
-    end: [[83, "OPEN STRIVE."], [84, "TAP START."], [85, "*TRAIN.*"]], mark: 86,
+    words: [[6, "YOU'RE *IN.*"], [12, "A QUICK *QUIZ.*"], [15, "WHAT HOLDS YOU *BACK?*"], [18, "BUILT AROUND *YOU.*"],
+      [24, "YOUR WEEK. *EVERY MONDAY.*"], [30, "TAP *START.*"], [34, ""], [42, "ONE DRILL AT A *TIME.*"],
+      [44, "*DONE.*"], [47, "*DONE.*"], [50, "*DONE.*"], [52, "THE TIMER RUNS *EVERY SET.*"], [58, "SESSION *DONE.*"],
+      [62, "YOUR TIME ONLY GOES *UP.*"], [66, "ONE CIRCLE *DOWN.*"], [70, "YOUR WHOLE *WEEK.*"], [74, "COURSES ON *TOP.*"],
+      [78, "YOUR *CARD.*"], [82, "YOUR *CLUBS.*"], [84, "YOUR CLUB *TEAM.*"], [86, "YOUR PICKUP *SQUAD.*"],
+      [88, "YOUR HIGH *SCHOOL.*"], [90, "AND *STRIVE SOCCER.*"], [98, "COMPETE WITH YOUR *FRIENDS.*"], [104, "MOVE *UP.*"],
+      [106, "SHARE YOUR *TRAINING.*"], [108, "GIVE *PROPS.*"], [112, "THE BEST GET A *STAR.*"],
+      [116, "WILL YOU BE THE NEXT *STRIVE STAR?*"], [120, "OUTWORK YOUR *COACH.*"], [128, ""]],
+    flash: [24, 61, 104, 124], done: [44, 47, 50], shimmer: [61], deviceOut: 128, tension: [34, 42],
+    end: [[129, "OPEN STRIVE."], [130, "TAP START."], [131, "*TRAIN.*"]], mark: 132,
   },
 };
 
 const cutName = new URLSearchParams(location.search).get("cut") || "long";
 const CUT = CUTS[cutName];
+// a song cut can run on the looped song (song-loop.py): its beat times, and SONG= points at the looped audio
+const SONG = CUT.song && CUT.song.loop ? SONGL : SONG1;
 
 // beat <-> seconds. A plain cut is a straight 120 BPM grid; a song cut follows
 // the measured beats of the song, so a beat that comes a hair early or late in

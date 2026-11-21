@@ -46,12 +46,15 @@ const TAPS = [
   [7.0, "#welcome .wbtn"], [9.4, "#quiz .tile"], [7.05, "#quiz2 .opt:nth-child(2)"], [18.0, "#drop .wbtn"], [21.0, "#start"],
   [26.6, "#done"], [28.1, "#done"], [29.6, "#done"], [30.85, "#drill .timer"],
   [34.65, "#timer .tbtns .w"], [35.6, "#done"], [41.5, "#backhome"],
-  [45.5, "#home [data-tab=week]"], [47.8, "#week .tab:nth-child(3)"], [50.1, "#courses .tab:nth-child(4)"], [71.7, "#feed #kprops"],
+  [45.5, "#home [data-tab=week]"], [47.8, "#week .tab:nth-child(3)"], [50.1, "#courses .tab:nth-child(4)"], [62.9, "#clubs #kbig"], [71.7, "#feed #kprops"],
 ];
 const tapPos = {};
 const REAL_TAPS = [];
 
 export function setup() {
+  // players' names live in faces/names.json, which is never committed (public repo)
+  try { const x = new XMLHttpRequest(); x.open("GET", "faces/names.json", false); x.send();
+    if (x.status === 200) { const n = JSON.parse(x.responseText); for (const el of $$("[data-n]")) if (n[el.dataset.n]) el.textContent = n[el.dataset.n]; } } catch (e) {}
   for (const s of $$(".scr")) S[s.id] = s;
   const scr = $("#screen"), sr = scr.getBoundingClientRect(), k = sr.width / 390;
   const rel = (el) => { const r = el.getBoundingClientRect(); return { x: (r.left - sr.left) / k, y: (r.top - sr.top) / k, w: r.width / k, h: r.height / k }; };
@@ -240,67 +243,67 @@ export function renderApp(rt) {
   clubs(t);
 }
 
-// ---------- 11. clubs (internal time 59.9 to 77; only the cut films reach it) ----------
+// ---------- 11. clubs and friends (internal time 59.9 to 80; only the cut films reach it) ----------
+// Your clubs, then Strive Soccer, then the friends leaderboard, friends' training, a starred
+// player's profile, and back to the leaderboard where you pass Coach Gary.
 const fmt = (m) => { m = Math.round(m); const h = Math.floor(m / 60), r = m % 60; return h ? `${h}h ${String(r).padStart(2, "0")}m` : `${r}m`; };
 const rise = (el, k, dy = 18) => st(el, { opacity: k, transform: `translateY(${(1 - k) * dy}px)` });
+const popIn = (el, k, from = 0.9) => st(el, { opacity: cl(k * 2), transform: `scale(${mix(from, 1, back(k))})` });
 function clubs(t) {
   if (t < 59.9) return;
-  // your club
-  if (t < 65.6 || t >= 76.6) {
-    const back2 = t >= 76.6, a = back2 ? E(t, 76.6, 0.45) : E(t, 59.9, 0.45);
-    vis("club", 1, `translateX(${(back2 ? -1 : 1) * (1 - a) * 100}%)`);
-    const c = S.club;
-    st($("#kheroimg"), { transform: `scale(${mix(1.12, 1, out3(lin(t, 59.9, 64.5)))})` });
-    const cr = lin(t, 60.2, 60.6); st($(".kname .kcrest", c), { opacity: cl(cr * 3), transform: `scale(${back(cr)})` });
-    rise($(".kname > div", c), E(t, 60.32, 0.45));
-    rise($(".kstat", c), E(t, 60.5, 0.45));
-    const cnt = out3(lin(t, 60.55, 61.6));
-    $("#kper").textContent = fmt(185 * cnt); $("#kall").textContent = fmt(1110 * cnt);
-    rise($(".ksec", c), E(t, 60.8, 0.4), 8);
-    $$(".kmem", c).forEach((m, i) => {
-      rise(m, E(t, 60.9 + i * 0.1, 0.45), 22);
-      $(".ktm", m).textContent = fmt(+$(".ktm", m).dataset.m * out3(lin(t, 61.0 + i * 0.1, 62.2 + i * 0.1)));
-    });
-    const g = back2 ? lin(t, 77.9, 79.0) : lin(t, 63.3, 64.3), you = $(".kmem.you", c), gary = $(".kmem", c);
-    st(you, { background: `rgba(200,168,88,${0.16 * Math.sin(Math.PI * g)})` });
-    // later the same day: you train again and pass Coach Gary
-    if (back2) {
-      $(".ktm", you).textContent = fmt(mix(195, 285, out3(lin(t, 77.2, 78.1))));
-      const sw = inout(lin(t, 77.75, 78.25));
-      st(you, { transform: `translateY(${-62 * sw}px)`, position: "relative", zIndex: 2 });
-      st(gary, { transform: `translateY(${62 * sw}px)` });
-      const up = t >= 78.0;
-      $(".p", you).textContent = up ? "1" : "2"; $(".p", gary).textContent = up ? "2" : "1";
-      $("#kper").textContent = fmt(mix(185, 200, out3(lin(t, 77.2, 78.1))));
-      $("#kall").textContent = fmt(mix(1110, 1200, out3(lin(t, 77.2, 78.1))));
-    } else { st(you, { transform: "none" }); st(gary, { transform: "none" }); $(".p", you).textContent = "2"; $(".p", gary).textContent = "1"; }
-  }
-  // top clubs: your club climbs to number one
-  if (t >= 65.0 && t < 71.0) {
-    const a = E(t, 65.0, 0.45); vis("clubs", 1, `translateX(${(1 - a) * 100}%)`);
+  // your clubs: Strive Soccer, then club team, pickup, high school, one per beat
+  if (t < 63.6) {
+    const a = E(t, 59.9, 0.4); vis("clubs", 1, `translateX(${(1 - a) * 100}%)`);
     const c = S.clubs;
-    rise($(".kt", c), E(t, 65.1, 0.45));
-    ["#kpB", "#kpA", "#kpC"].forEach((id, i) => { const k = lin(t, 65.3 + i * 0.1, 65.9 + i * 0.1); st($(id), { opacity: cl(k * 2), transform: `translateY(${(1 - back(k)) * 40}px)` }); });
-    $$(".krk", c).forEach((r, i) => rise(r, E(t, 65.8 + i * 0.08, 0.4)));
-    $("#kpCt").textContent = fmt(mix(185, 195, out3(lin(t, 67.2, 67.7))));
-    const sw = inout(lin(t, 67.6, 68.15)), B = $("#kpB"), C = $("#kpC");
-    st(C, { left: mix(244, 122, sw) + "px", height: mix(238, 252, sw) + "px", zIndex: 2 });
-    st(B, { left: mix(122, 244, sw) + "px", height: mix(252, 238, sw) + "px" });
-    const done = t >= 67.9;
-    $(".r", C).textContent = done ? "1" : "2"; $(".r", B).textContent = done ? "2" : "1";
-    C.classList.toggle("first", done); B.classList.toggle("first", !done);
-    const pop = lin(t, 68.1, 68.6);
-    st($(".kcrest", C), { transform: `scale(${1 + 0.12 * Math.sin(Math.PI * pop)})` });
-    st(C, { boxShadow: `inset 0 0 0 1.5px var(--gold), 0 0 ${40 * Math.sin(Math.PI * lin(t, 68.0, 69.2))}px rgba(200,168,88,.45)` });
+    rise($(".kt", c), E(t, 59.95, 0.45));
+    popIn($("#kbig"), lin(t, 60.0, 60.5), 0.94);
+    st($("#kbig"), { transform: `scale(${mix(0.94, 1, back(lin(t, 60.0, 60.5))) * press(t, 62.9)})` });
+    $$(".kc", c).forEach((k, i) => popIn(k, lin(t, 60.65 + i * 0.75, 61.1 + i * 0.75), 0.82));
   }
-  // friends' training: props, then the coach's star
-  if (t >= 70.5 && t < 77.1) {
-    const a = E(t, 70.5, 0.45) - E(t, 76.6, 0.45); vis("feed", 1, `translateX(${(1 - a) * 100}%)`);
+  // Strive Soccer
+  if (t >= 63.0 && t < 65.6) {
+    const a = E(t, 63.0, 0.45); vis("club", 1, `translateX(${(1 - a) * 100}%)`);
+    const c = S.club;
+    st($("#kheroimg"), { transform: `scale(${mix(1.12, 1, out3(lin(t, 63.0, 65.6)))})` });
+    popIn($(".kname .kcrest", c), lin(t, 63.3, 63.7), 0.5);
+    rise($(".kname > div", c), E(t, 63.4, 0.45));
+    rise($(".kstat", c), E(t, 63.55, 0.45));
+    const cnt = out3(lin(t, 63.6, 64.6));
+    $("#kpl").textContent = Math.round(214 * cnt); $("#kall").textContent = fmt(172 * cnt);
+    $$(".ksec", c).forEach((x, i) => rise(x, E(t, 63.8 + i * 0.55, 0.4), 8));
+    $$(".kavs > *", c).forEach((x, i) => popIn(x, lin(t, 63.9 + i * 0.06, 64.3 + i * 0.06), 0.5));
+    rise($(".kinv", c), E(t, 64.25, 0.4));
+    $$(".kstrip img", c).forEach((x, i) => rise(x, E(t, 64.45 + i * 0.08, 0.45), 24));
+  }
+  // the friends leaderboard: you pass Coach Yinka, later Coach Gary
+  if ((t >= 65.0 && t < 71.0) || t >= 76.6) {
+    const back2 = t >= 76.6, a = back2 ? E(t, 76.6, 0.45) : E(t, 65.0, 0.45);
+    vis("board", 1, `translateX(${(back2 ? -1 : 1) * (1 - a) * 100}%)`);
+    const c = S.board, rows = $$(".kmem", c), [gary, yinka, you] = rows;
+    rise($(".kt", c), E(t, 65.1, 0.45));
+    rows.forEach((m, i) => {
+      rise(m, E(t, 65.3 + i * 0.1, 0.45), 22);
+      if (m !== you) $(".ktm", m).textContent = fmt(+$(".ktm", m).dataset.m * out3(lin(t, 65.4 + i * 0.1, 66.6 + i * 0.1)));
+    });
+    const youM = t < 67.2 ? 195 * out3(lin(t, 65.6, 66.8)) : t < 77.35 ? mix(195, 210, out3(lin(t, 67.2, 67.7))) : mix(210, 285, out3(lin(t, 77.35, 78.25)));
+    $(".ktm", you).textContent = fmt(youM);
+    const s1 = inout(lin(t, 67.6, 68.15)), s2 = inout(lin(t, 77.9, 78.4));
+    const off = (m, y) => st(m, { transform: `translateY(${y}px)`, position: "relative", zIndex: m === you ? 2 : 1 });
+    if (t > 66.2) { off(you, -62 * (s1 + s2)); off(yinka, 62 * s1); off(gary, 62 * s2); }
+    $(".p", you).textContent = t >= 78.15 ? "1" : t >= 67.9 ? "2" : "3";
+    $(".p", yinka).textContent = t >= 67.9 ? "3" : "2";
+    $(".p", gary).textContent = t >= 78.15 ? "2" : "1";
+    const g = Math.max(Math.sin(Math.PI * lin(t, 67.7, 68.9)), Math.sin(Math.PI * lin(t, 78.0, 79.3)));
+    st(you, { background: `rgba(200,168,88,${0.18 * g})` });
+  }
+  // friends' training: props
+  if (t >= 70.5 && t < 74.4) {
+    const a = E(t, 70.5, 0.45); vis("feed", 1, `translateX(${(1 - a) * 100}%)`);
     const f = S.feed;
     rise($(".kfh", f), E(t, 70.6, 0.4), 10);
     $$(".kpost", f).forEach((p, i) => rise(p, E(t, 70.7 + i * 0.12, 0.5), 30));
-    const sc = inout(lin(t, 72.7, 73.6));
-    st($("#kfeed"), { transform: `translateY(${-sc * 520}px)` });
+    const sc = inout(lin(t, 72.6, 73.4));
+    st($("#kfeed"), { transform: `translateY(${-sc * 380}px)` });
     const on = t >= 71.8, pr = $("#kprops");
     pr.classList.toggle("on", on);
     st(pr, { transform: `scale(${press(t, 71.7) * (1 + 0.1 * Math.sin(Math.PI * lin(t, 71.82, 72.2)))})` });
@@ -308,13 +311,26 @@ function clubs(t) {
     $$(".kburst", f).forEach((b, i) => {
       const k = lin(t, 71.82, 72.6), ang = (i / 8) * Math.PI * 2 + 0.4, d = (46 + (i % 3) * 14) * out3(k);
       const o = k <= 0 || k >= 1 ? 0 : k < 0.2 ? k / 0.2 : 1 - (k - 0.2) / 0.8;
-      st(b, { left: kpropsPos[0] - 4 + "px", top: kpropsPos[1] - 4 - sc * 520 + "px", opacity: o, transform: `translate(${Math.cos(ang) * d}px,${Math.sin(ang) * d}px) rotate(${i * 40 * k}deg)` });
+      st(b, { left: kpropsPos[0] - 4 + "px", top: kpropsPos[1] - 4 - sc * 380 + "px", opacity: o, transform: `translate(${Math.cos(ang) * d}px,${Math.sin(ang) * d}px) rotate(${i * 40 * k}deg)` });
     });
-    const s2 = lin(t, 74.0, 74.45);
-    st($("#kstar"), { opacity: cl(s2 * 3), transform: `scale(${t < 74.0 ? 0 : back(s2) * (1 + 0.5 * Math.sin(Math.PI * lin(t, 74.3, 74.9)))})`, filter: `drop-shadow(0 0 ${10 * Math.sin(Math.PI * lin(t, 74.2, 75.4))}px rgba(240,220,160,.9))` });
+  }
+  // a starred player, on his own profile
+  if (t >= 73.5 && t < 77.1) {
+    const a = E(t, 73.5, 0.45) - E(t, 76.6, 0.45); vis("prof", 1, `translateX(${(t < 76.6 ? 1 - a : 1 - a) * 100}%)`);
+    const f = S.prof;
+    $("#kparc").style.strokeDashoffset = 301.6 * (1 - 0.86 * out3(lin(t, 73.9, 75.0)));
+    popIn($(".klvl", f), lin(t, 74.4, 74.8), 0.5);
+    $(".klvl", f).style.transform = `translateX(-50%) scale(${mix(0.5, 1, back(lin(t, 74.4, 74.8)))})`;
+    const cnt = out3(lin(t, 73.9, 74.9));
+    $("#kpw1").textContent = fmt(185 * cnt); $("#kpw2").textContent = Math.round(68 * cnt) + "h";
+    rise($(".kwho", f), E(t, 74.0, 0.45));
+    $$(".khl > div", f).forEach((x, i) => popIn(x, lin(t, 74.3 + i * 0.1, 74.8 + i * 0.1), 0.6));
+    rise($(".kbigpost", f), E(t, 74.45, 0.5), 30);
+    const s2 = lin(t, 75.27, 75.72), glow = Math.sin(Math.PI * lin(t, 75.45, 76.9));
+    for (const el of [$("#kstar"), $(".kpstar2", f)])
+      st(el, { opacity: cl(s2 * 3), transform: `scale(${t < 75.27 ? 0 : back(s2) * (1 + 0.3 * Math.sin(Math.PI * lin(t, 75.55, 76.15)))})`, filter: `drop-shadow(0 0 ${12 * glow}px rgba(240,220,160,.95))` });
   }
 }
-
 
 function stage(t) {
   // ---------- stage: title, phone, end ----------

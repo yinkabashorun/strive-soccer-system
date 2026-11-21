@@ -22,7 +22,7 @@ const B = 60 / BPM;
 // screen points the camera can push into (screen px, 390 x 844)
 const P = { card: [195, 525], tiles: [195, 480], steps: [195, 420], cards: [195, 430], hero: [195, 400], count: [195, 430],
   drill: [195, 560], ring: [195, 320], fring: [195, 240], dots: [110, 600], ycard: [195, 190], mid: [195, 422],
-  kyou: [195, 470], kpod: [195, 300], kprops: [110, 600], kstar: [150, 150] };
+  kyou: [195, 260], kpod: [195, 300], kprops: [110, 600], kstar: [150, 250] };
 const C = (s = 1, f = "mid", y = 0, ry = 0) => ({ s, f: P[f], y, ry });
 
 // shot: [beat, beats, masterFrom, masterTo, camera keys [[frac, cam]...]]
@@ -95,19 +95,20 @@ export const CUTS = {
       [28, 6, 37.7, 40.1, [[0, C(1.0)], [0.2, C(1.38, "fring")], [0.65, C(1.38, "fring")], [1, C(1.05)]]],
       [34, 4, 43.5, 44.7, [[0, C(1.15, "dots")], [1, C(1.4, "dots")]]],
       [38, 4, 52.0, 53.4, [[0, C(1.05, "ycard")], [1, C(1.25, "ycard")]]],
-      // clubs
-      [42, 8, 61.4, 64.4, [[0, C(1.06)], [1, C(1.14)]]],
-      [50, 6, 64.2, 66.3, [[0, C(1.0)], [0.4, C(1.28, "kyou")], [1, C(1.32, "kyou")]]],
-      [56, 8, 67.0, 70.2, [[0, C(1.08)], [0.65, C(1.1)], [0.85, C(1.28, "kpod")], [1, C(1.32, "kpod")]]],
-      [64, 6, 72.5, 74.9, [[0, C(1.0)], [0.25, C(1.0)], [0.4, C(1.3, "kprops")], [0.7, C(1.3, "kprops")], [1, C(1.0)]]],
-      [70, 6, 74.03, 76.23, [[0, C(1.0)], [0.55, C(1.0)], [0.75, C(1.5, "kstar")], [1, C(1.55, "kstar")]]],
-      [76, 6, 79.16, 81.38, [[0, C(1.05, "kyou")], [0.6, C(1.3, "kyou")], [1, C(1.34, "kyou")]]],
+      // clubs and friends
+      [42, 8, 61.4, 64.4, [[0, C(1.06)], [1, C(1.12)]]],
+      [50, 6, 64.5, 66.7, [[0, C(1.04)], [1, C(1.12)]]],
+      [56, 8, 67.0, 70.2, [[0, C(1.06)], [0.55, C(1.1)], [0.8, C(1.3, "kyou")], [1, C(1.34, "kyou")]]],
+      [64, 6, 72.5, 74.9, [[0, C(1.0)], [0.25, C(1.0)], [0.4, C(1.3, "kprops")], [0.7, C(1.3, "kprops")], [1, C(1.05)]]],
+      [70, 6, 75.3, 77.5, [[0, C(1.04)], [0.5, C(1.12)], [0.68, C(1.32, "kstar")], [1, C(1.36, "kstar")]]],
+      [76, 6, 79.16, 81.38, [[0, C(1.05)], [0.5, C(1.25, "kyou")], [1, C(1.3, "kyou")]]],
     ],
     words: [[6, "YOU'RE *IN.*"], [10, "ONE *TAP.*"], [12, "YOUR *WEEK.*"], [16, "TAP *START.*"], [18, ""],
       [23, "*DONE.*"], [25, "*DONE.*"], [27, "*DONE.*"], [28, "SESSION *DONE.*"], [34, "ONE CIRCLE *DOWN.*"],
-      [38, "YOUR *CARD.*"], [42, "YOUR *CLUB.*"], [46, "EVERY MINUTE *COUNTS.*"], [50, "RACE YOUR *TEAM.*"],
-      [56, "TOP *CLUBS.*"], [62, "YOUR CLUB *ON TOP.*"], [64, "YOUR *FRIENDS.*"], [66, "GIVE *PROPS.*"],
-      [70, "SEE WHO PUT *IN WORK.*"], [74, "THE BEST GET A *STAR.*"], [76, "OUTWORK YOUR *COACH.*"], [82, ""]],
+      [38, "YOUR *CARD.*"], [42, "YOUR *CLUBS.*"], [44, "YOUR CLUB *TEAM.*"], [46, "YOUR PICKUP *SQUAD.*"],
+      [48, "YOUR HIGH *SCHOOL.*"], [50, "AND *STRIVE SOCCER.*"], [56, "COMPETE WITH YOUR *FRIENDS.*"], [62, "MOVE *UP.*"],
+      [64, "SHARE YOUR *TRAINING.*"], [66, "GIVE *PROPS.*"], [70, "THE BEST GET A *STAR.*"],
+      [74, "WILL YOU BE THE NEXT *STRIVE STAR?*"], [76, "OUTWORK YOUR *COACH.*"], [82, ""]],
     flash: [12, 31, 62, 78], done: [23, 25, 27], shimmer: [31], deviceOut: 82, tension: [18, 22],
     end: [[83, "OPEN STRIVE."], [84, "TAP START."], [85, "*TRAIN.*"]], mark: 86,
   },

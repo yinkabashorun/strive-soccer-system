@@ -9,7 +9,7 @@ const b = await chromium.launch();
 const p = await (await b.newContext({ viewport: { width: 540, height: 960 }, deviceScaleFactor: 1 })).newPage();
 p.on("pageerror", (e) => console.log("ERR", e.message));
 p.on("console", (m) => { if (m.type() === "error") console.log("CONSOLE", m.text()); });
-await p.goto("http://localhost:8765/film/film.html");
+await p.goto("http://localhost:8765/film/" + (process.env.PAGE || "film.html"));
 await p.waitForFunction(() => window.__ready, null, { timeout: 20000 });
 for (const t of ts) { await p.evaluate((t) => window.__render(t), t); await p.screenshot({ path: `${out}/p-${t}.png` }); }
 await b.close();

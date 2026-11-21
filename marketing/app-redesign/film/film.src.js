@@ -99,12 +99,17 @@ const press = (t, at) => { const d = t - at; return d > -0.12 && d < 0.2 ? 1 - 0
 
 function vis(id, o, tf = "none") { st(S[id], { opacity: o, transform: tf, visibility: o > 0.001 ? "visible" : "hidden" }); }
 
-export function render(rt) {
+// The whole walkthrough film: the app, the captions and the stage.
+export function render(rt) { renderApp(rt); cap(rt); stage(rt); }
+
+// Just the app inside the phone at master time rt (taps included). The cut
+// films (mix.src.js) call this with their own clock and draw their own stage.
+export const master = real;
+export function renderApp(rt) {
   for (const s of Object.values(S)) vis(s.id, 0);
-  cap(rt); finger(rt);
+  finger(rt);
   quiz2(rt);
   const t = rt <= INS ? rt : Math.max(INS, rt - ADD);
-  stage(rt);
 
   // ---------- 1. the door ----------
   if (t < 8.2) {

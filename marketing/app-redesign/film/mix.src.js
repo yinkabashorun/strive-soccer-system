@@ -1,0 +1,158 @@
+// The cut films: the same app, edited like a mixtape. Every shot starts on
+// the beat (120 BPM), plays a stretch of the master walkthrough at its own
+// speed so the taps land on the beat, and carries its own camera and one
+// slammed line. ?cut=long (about a minute) or ?cut=short (15 seconds).
+import { setup as setupApp, renderApp } from "./film.src.js";
+
+const $ = (s, r = document) => r.querySelector(s);
+const cl = (x) => Math.max(0, Math.min(1, x));
+const lin = (t, a, b) => cl((t - a) / (b - a));
+const out3 = (x) => 1 - Math.pow(1 - x, 3);
+const inout = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const mix = (a, b, k) => a + (b - a) * k;
+const st = (el, css) => { for (const k in css) el.style[k] = css[k]; };
+
+export const BPM = 120;
+const B = 60 / BPM;
+
+// screen points the camera can push into (screen px, 390 x 844)
+const P = { card: [195, 525], tiles: [195, 480], steps: [195, 420], cards: [195, 430], hero: [195, 400], count: [195, 430],
+  drill: [195, 560], ring: [195, 320], fring: [195, 240], dots: [110, 600], ycard: [195, 190], mid: [195, 422] };
+const C = (s = 1, f = "mid", y = 0, ry = 0) => ({ s, f: P[f], y, ry });
+
+// shot: [beat, beats, masterFrom, masterTo, camera keys [[frac, cam]...]]
+// words: [beat, text]  (*word* is gold); flash: beats; done: beats (a pop on Done)
+export const CUTS = {
+  long: {
+    len: 112,
+    open: [[0, "STRIVE"], [1, "*ELITE*"], [2.5, "ON IPHONE."]], openOut: 4,
+    shots: [
+      [4, 8, 2.9, 7.4, [[0, C(0.9, "mid", 420)], [0.32, C(1)], [0.55, C(1.16, "card")], [0.85, C(1)]]],
+      [12, 5, 7.42, 9.45, [[0, C(1)], [1, C(1.06, "mid")]]],
+      [17, 5, 9.45, 11.95, [[0, C(1.0)], [0.4, C(1.14, "tiles")], [1, C(1.14, "tiles")]]],
+      [22, 5, 13.15, 15.4, [[0, C(1.0)], [1, C(1.2, "steps")]]],
+      [27, 7, 16.3, 19.9, [[0, C(1.0)], [1, C(1.06)]]],
+      [34, 4, 20.5, 22.65, [[0, C(1.0)], [1, C(1.08, "hero")]]],
+      [38, 3, 22.65, 24.05, [[0, C(1.0)], [1, C(1.04)]]],
+      [41, 3, 24.1, 26.68, [[0, C(1.18, "count")], [1, C(1.3, "count")]]],
+      [44, 11, 26.65, 32.15, [[0, C(1.0)], [1, C(1.05, "drill")]]],
+      [55, 7, 32.2, 36.4, [[0, C(1.0)], [0.3, C(1.14, "ring")], [0.9, C(1.14, "ring")], [1, C(1)]]],
+      [62, 2, 36.6, 37.6, [[0, C(1.04, "drill")], [1, C(1.0)]]],
+      [64, 12, 37.55, 43.3, [[0, C(1.0)], [0.15, C(1.36, "fring")], [0.42, C(1.36, "fring")], [0.6, C(1.0)], [1, C(1.0)]]],
+      [76, 6, 43.3, 46.3, [[0, C(1.0)], [0.25, C(1.35, "dots")], [1, C(1.35, "dots")]]],
+      [82, 4, 46.85, 48.85, [[0, C(1.0)], [1, C(1.05)]]],
+      [86, 4, 49.15, 51.15, [[0, C(1.0)], [1, C(1.05)]]],
+      [90, 6, 51.45, 54.45, [[0, C(1.0)], [0.3, C(1.22, "ycard")], [1, C(1.22, "ycard")]]],
+    ],
+    words: [[5, "YOU'RE *IN.*"], [12, "A QUICK *QUIZ.*"], [17, "WHAT HOLDS YOU *BACK?*"], [22, "BUILT AROUND *YOU.*"],
+      [27, "YOUR WEEK IS *HERE.*"], [34, "ONE CARD. ONE *BUTTON.*"], [38, "GRAB YOUR *BALL.*"], [41, ""],
+      [44, "ONE DRILL AT A *TIME.*"], [47, "*DONE.*"], [50, "*DONE.*"], [53, "*DONE.*"], [55.5, "THE TIMER RUNS EVERY *SET.*"],
+      [62, ""], [63, "*DONE.*"], [64, "SESSION *DONE.*"], [70, "YOUR TIME ONLY GOES *UP.*"], [76, "ONE CIRCLE *FILLED.*"],
+      [82, "YOUR WHOLE *WEEK.*"], [86, "COURSES ON *TOP.*"], [90, "YOUR CARD. YOUR *TIME.*"], [96, ""]],
+    flash: [28, 67], done: [47, 50, 53, 63], shimmer: [66.8], deviceOut: 96, tension: [38, 44],
+    end: [[97, "OPEN STRIVE."], [98, "TAP START."], [99, "*TRAIN.*"]], mark: 101,
+  },
+  short: {
+    len: 31,
+    open: [[0, "YOUR WEEK."], [1, "BUILT FOR *YOU.*"]], openOut: 2,
+    shots: [
+      [2, 2, 4.4, 5.9, [[0, C(1.0, "mid", 300)], [0.35, C(1.1, "card")], [1, C(1.25, "card")]]],
+      [4, 2, 10.4, 11.4, [[0, C(1.1, "tiles")], [1, C(1.2, "tiles")]]],
+      [6, 2, 16.3, 17.5, [[0, C(1.0)], [1, C(1.08)]]],
+      [8, 2, 22.0, 23.3, [[0, C(1.08, "hero")], [1, C(1.0)]]],
+      [10, 3, 24.1, 26.68, [[0, C(1.22, "count")], [1, C(1.34, "count")]]],
+      [13, 3, 27.35, 31.85, [[0, C(1.0)], [1, C(1.08, "drill")]]],
+      [16, 4, 37.7, 40.1, [[0, C(1.0)], [0.2, C(1.38, "fring")], [0.65, C(1.38, "fring")], [1, C(1.05)]]],
+      [20, 2, 43.5, 44.7, [[0, C(1.15, "dots")], [1, C(1.4, "dots")]]],
+      [22, 2, 52.0, 53.4, [[0, C(1.05, "ycard")], [1, C(1.25, "ycard")]]],
+    ],
+    words: [[2, "YOU'RE *IN.*"], [4, "ONE *TAP.*"], [6, "YOUR *WEEK.*"], [8, "TAP *START.*"], [10, ""],
+      [13.5, "*DONE.*"], [14.5, "*DONE.*"], [15.5, "*DONE.*"], [16, "SESSION *DONE.*"], [20, "ONE CIRCLE *DOWN.*"],
+      [22, "YOUR *CARD.*"], [24, ""]],
+    flash: [6, 18], done: [13.5, 14.5, 15.5], shimmer: [18], deviceOut: 24, tension: [10, 13],
+    end: [[24.5, "OPEN STRIVE."], [25.5, "TAP START."], [26.5, "*TRAIN.*"]], mark: 28,
+  },
+};
+
+const cutName = new URLSearchParams(location.search).get("cut") || "long";
+const CUT = CUTS[cutName];
+export const DURATION = CUT.len * B;
+export const CUT_INFO = { name: cutName, bpm: BPM, len: CUT.len, flash: CUT.flash, done: CUT.done, shimmer: CUT.shimmer,
+  open: CUT.open.map((w) => w[0]), end: CUT.end.map((w) => w[0]), cuts: CUT.shots.map((s) => s[0]), deviceOut: CUT.deviceOut, tension: CUT.tension, mark: CUT.mark, drop: CUT.shots[0][0] };
+
+let k = 0.789;
+export function setup() {
+  setupApp();
+  k = $("#scrwrap").clientWidth / 390;
+}
+
+const gold = (s) => s.replace(/\*(.+?)\*/g, '<span class="metal">$1</span>');
+
+function camAt(keys, f) {
+  let a = keys[0], b = keys[keys.length - 1];
+  for (let i = 0; i < keys.length - 1; i++) if (f >= keys[i][0] && f <= keys[i + 1][0]) { a = keys[i]; b = keys[i + 1]; break; }
+  const p = a === b ? 1 : inout(cl((f - a[0]) / (b[0] - a[0])));
+  const A = a[1], Z = b[1];
+  return { s: mix(A.s, Z.s, p), fx: mix(A.f[0], Z.f[0], p), fy: mix(A.f[1], Z.f[1], p), y: mix(A.y, Z.y, p), ry: mix(A.ry, Z.ry, p) };
+}
+
+function wordOn(beat) { let w = null; for (const x of CUT.words) if (beat >= x[0]) w = x; return !!(w && w[1]); }
+
+export function render(t) {
+  const beat = t / B, dev = $("#device"), glow = $("#glow");
+  // the shot on screen
+  let shot = null, si = -1;
+  CUT.shots.forEach((s, i) => { if (beat >= s[0] && beat < s[0] + s[1]) { shot = s; si = i; } });
+  const outK = lin(beat, CUT.deviceOut, CUT.deviceOut + 0.6);
+  if (shot) {
+    const [b0, n, m0, m1, cam] = shot;
+    const f = (beat - b0) / n;
+    renderApp(mix(m0, m1, f));
+    const c = camAt(cam, f);
+    // a hard cut on the beat with a short whip in from alternating sides
+    const since = t - b0 * B, dir = si % 2 ? -1 : 1;
+    const whip = si === 0 ? 0 : 1 - out3(cl(since / 0.16));
+    const until = (b0 + n) * B - t, leaveW = 1 - cl(until / 0.06);
+    const pulse = 1 + 0.012 * Math.exp(-((beat % 1) * 8));
+    const fx = 11 + c.fx * k, fy = 11 + c.fy * k, cx = 165, cy = 357;
+    const pull = cl((c.s - 1) * 2.2);
+    // while a line is on screen the phone never rises into it
+    let ty = (cy - fy) * pull + c.y;
+    if (wordOn(beat)) ty = Math.max(ty, -10 + (11 + c.fy * k) * (c.s - 1));
+    st(dev, {
+      opacity: 1 - outK,
+      transformOrigin: `${fx}px ${fy}px`,
+      transform: `translate(${(cx - fx) * pull + whip * 70 * dir}px, ${ty}px) scale(${c.s * pulse * mix(1, 0.92, outK)}) rotateY(${c.ry}deg)`,
+      filter: `blur(${(whip + leaveW) * 5}px)`,
+    });
+  } else {
+    st(dev, { opacity: 0 });
+  }
+  st(glow, { opacity: shot ? 0.55 + 0.35 * Math.exp(-((beat % 1) * 5)) : 0 });
+
+  // the slammed line
+  const kin = $("#kin");
+  let w = null; for (const x of CUT.words) if (beat >= x[0]) w = x;
+  if (w && w[1] && beat < CUT.deviceOut) {
+    if (kin.dataset.t !== w[1]) { kin.innerHTML = `<span>${gold(w[1])}</span>`; kin.dataset.t = w[1]; }
+    const d = t - w[0] * B, s = out3(cl(d / 0.14));
+    st(kin, { opacity: cl(d / 0.05), transform: `scale(${mix(1.28, 1, s)})`, filter: `blur(${(1 - s) * 7}px)` });
+  } else st(kin, { opacity: 0 });
+
+  // open and end words, stacked in the middle
+  const big = $("#big");
+  const showOpen = beat < CUT.openOut + 0.5, list = showOpen ? CUT.open : CUT.end;
+  const fade = showOpen ? 1 - lin(beat, CUT.openOut - 0.1, CUT.openOut + 0.3) : 1;
+  const html = list.map((x, i) => `<div class="bl" data-i="${i}">${gold(x[1])}</div>`).join("");
+  if (big.dataset.h !== html) { big.innerHTML = html; big.dataset.h = html; }
+  [...big.children].forEach((el, i) => {
+    const d = t - list[i][0] * B, s = out3(cl(d / 0.14));
+    st(el, { opacity: d < 0 ? 0 : cl(d / 0.05) * fade, transform: `scale(${mix(1.3, 1, s)})`, filter: `blur(${(1 - s) * 8}px)` });
+  });
+  const mk = $("#mark"), md = t - CUT.mark * B;
+  st(mk, { opacity: md < 0 ? 0 : out3(cl(md / 0.5)), transform: `translateY(${(1 - out3(cl(md / 0.5))) * 10}px)` });
+
+  // the white flash on the big moments
+  let fl = 0; for (const fb of CUT.flash) { const d = t - fb * B; if (d >= 0 && d < 0.16) fl = Math.max(fl, 0.32 * (1 - d / 0.16)); }
+  st($("#flash"), { opacity: fl });
+}

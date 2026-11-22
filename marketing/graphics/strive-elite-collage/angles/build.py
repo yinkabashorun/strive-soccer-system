@@ -76,7 +76,7 @@ pages['04'] = dict(bg=STAD, css="""
 <div class="card"><img src="../cutouts5/loyola-card.jpg"><div class="cap">EXHIBIT A</div></div>
 <img class="p" src="../cutouts5/j1.png" style="left:610px;top:450px;height:690px;z-index:12;filter:drop-shadow(0 24px 30px rgba(0,0,0,.85)) contrast(1.08)">
 <div class="bub" style="left:40px;top:575px;transform:rotate(-6deg)">MIAA runs the DMV</div>
-<div class="bub" style="left:700px;top:1120px;transform:rotate(4deg)">NoVA is overrated</div>
+<div class="bub" style="left:700px;top:1120px;transform:rotate(4deg)">them NoVA boys phony</div>
 <div class="line" style="top:1225px;font-size:30px;font-weight:700;letter-spacing:5px;z-index:15">DEC 19 WE FIND OUT.</div>
 """)
 

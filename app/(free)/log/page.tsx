@@ -3,6 +3,7 @@ import { FriendsFeed } from "@/components/elite/FriendsFeed";
 import { getViewer } from "@/lib/elite/session";
 import { APP_URL } from "@/lib/elite/app-url";
 import { nyToday } from "@/lib/elite/time";
+import { teamAsksFor } from "@/lib/elite/club-teams-server";
 import { clubAskFor, clubRequestsFor, feedFor, friendAskFor, friendRequestsFor, quizDone, trackerFor, weekLogsFor } from "@/lib/elite/tracker-server";
 import {
   FREE_HOME,
@@ -36,7 +37,7 @@ export default async function FriendsPage({
   if (!quizDone(tracker) || !tracker.target_minutes) redirect(FREE_QUIZ);
 
   const today = nyToday();
-  const [feed, logs, friendAsk, clubAsk, requests, clubRequests] = await Promise.all([
+  const [feed, logs, friendAsk, clubAsk, requests, clubRequests, teamAsks] = await Promise.all([
     feedFor(viewer, today),
     weekLogsFor(viewer, tracker, today),
     // a teammate's link, opened while signed in: asked about once
@@ -47,6 +48,8 @@ export default async function FriendsPage({
     friendRequestsFor(viewer),
     // players asking into a club this player captains (073)
     clubRequestsFor(viewer),
+    // games, scores, event rosters and trained-together cards (077)
+    teamAsksFor(viewer, today),
   ]);
   const week = weekProgress(logs, tracker.target_minutes, today);
 
@@ -64,6 +67,7 @@ export default async function FriendsPage({
       clubAsk={clubAsk}
       requests={requests}
       clubRequests={clubRequests}
+      teamAsks={teamAsks}
       inviteLink={joinLink(APP_URL, tracker.referral_code)}
     />
   );

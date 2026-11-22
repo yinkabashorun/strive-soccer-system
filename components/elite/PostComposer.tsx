@@ -4,6 +4,10 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, X } from "lucide-react";
 import { logTraining } from "@/lib/elite/tracker-actions";
+import { teammatesToTag } from "@/lib/elite/club-teams-actions";
+import { TOGETHER_MAX } from "@/lib/elite/club-teams";
+import type { Teammate } from "@/lib/elite/club-teams-server";
+import { FreeAvatar } from "./FreeAvatar";
 import { holdRefresh } from "@/lib/elite/fresh";
 import { feel } from "@/lib/elite/native";
 import {
@@ -41,7 +45,9 @@ async function shrink(file: File): Promise<Blob | null> {
 
 // Posting today's training (mock screen 2): the photo fills the screen, and
 // the sheet over it asks how long, training or gym (older players only),
-// one optional line, and Post to my friends. Under it, "Log it without a
+// one optional line, the club teammates who trained with them (optional,
+// up to eight; each gets a card to add the same time to their own week,
+// 077), and Post to my friends. Under it, "Log it without a
 // photo" keeps the time in the player's own week and shows no card.
 export function PostComposer({
   photo,
@@ -61,12 +67,28 @@ export function PostComposer({
   const [note, setNote] = useState("");
   const [busy, setBusy] = useState<"post" | "log" | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [mates, setMates] = useState<Teammate[]>([]);
+  const [tagged, setTagged] = useState<string[]>([]);
 
   useEffect(() => {
     if (!photo) return setPreview(null);
     const url = URL.createObjectURL(photo);
     setPreview(url);
     return () => URL.revokeObjectURL(url);
+  }, [photo]);
+
+  // The club teammates who can be tagged: asked for once the sheet opens.
+  useEffect(() => {
+    if (!photo) return;
+    let live = true;
+    teammatesToTag()
+      .then((res) => {
+        if (live && res.ok) setMates(res.teammates);
+      })
+      .catch(() => undefined);
+    return () => {
+      live = false;
+    };
   }, [photo]);
 
   // Nothing redraws the page under the sheet while it is open.
@@ -101,6 +123,7 @@ export function PostComposer({
     form.set("minutes", String(minutes));
     form.set("kind", gym ? kind : "training");
     form.set("caption", note);
+    if (tagged.length) form.set("with", tagged.join(","));
     try {
       const res = await fetch("/api/elite/tracker/post", { method: "POST", body: form });
       const data = await res.json().catch(() => ({}));
@@ -213,6 +236,35 @@ export function PostComposer({
               />
               <span className="text-[12px] text-white/60">optional</span>
             </label>
+          )}
+
+          {preview && mates.length > 0 && (
+            <div className="mt-3">
+              <p className="text-[12px] font-semibold uppercase tracking-[1.6px] text-white/60">Trained with (optional)</p>
+              <ul className="no-scrollbar -mx-[18px] mt-1.5 flex gap-2 overflow-x-auto px-[18px]">
+                {mates.map((m) => {
+                  const on = tagged.includes(m.id);
+                  return (
+                    <li key={m.id} className="shrink-0">
+                      <button
+                        type="button"
+                        aria-pressed={on}
+                        onClick={() =>
+                          setTagged((t) => (on ? t.filter((x) => x !== m.id) : t.length < TOGETHER_MAX ? [...t, m.id] : t))
+                        }
+                        className={
+                          "flex h-11 items-center gap-2 rounded-full pl-1 pr-3.5 text-[14px] font-semibold " +
+                          (on ? "bg-bone text-black" : "border border-white/[0.12] bg-[#161616] text-bone")
+                        }
+                      >
+                        <FreeAvatar photo={m.photo} initials={m.initials} size={34} />
+                        {m.name}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
           )}
 
           {error && (

@@ -292,7 +292,9 @@ describe("gym work is tracked apart", () => {
     const actions = code("lib/elite/tracker-actions.ts");
     const refuse = actions.indexOf("if (!mayLog(kind, o.grade)) return fail(GYM_REFUSED_MESSAGE);");
     expect(refuse).toBeGreaterThan(-1);
-    expect(refuse).toBeLessThan(actions.indexOf('.from("elite_training_logs")\n    .insert('));
+    // the one write is insertLog (tracker-server.ts), after the refusal
+    expect(refuse).toBeLessThan(actions.indexOf("insertLog(o.admin"));
+    expect(code("lib/elite/tracker-server.ts")).toMatch(/export async function insertLog\([\s\S]*?\.from\("elite_training_logs"\)\s*\.insert\(/);
     // the grade comes from the player's own saved row, never from the browser
     expect(actions).toContain("grade: tracker.grade");
     expect(GYM_REFUSED_MESSAGE).toBe("Gym work is logged by players in high school or older.");
@@ -671,6 +673,10 @@ describe("free accounts are invisible to everything a member query reads", () =>
     "lib/elite/tracker-actions.ts",
     "app/api/elite/auth/join/route.ts",
     "lib/elite/tracker-ranking.ts", // the club ranking: club names and averages only
+    // clubs as teams (077): sessions, games, events and trained together
+    "lib/elite/club-teams-server.ts",
+    "lib/elite/club-teams-actions.ts",
+    "lib/elite/club-teams-coach.ts",
   ]);
   // (the post route stores nothing itself: it hands a checked photo to
   // savePost in tracker-server.ts)
@@ -686,9 +692,10 @@ describe("free accounts are invisible to everything a member query reads", () =>
         )
       )
       .map(rel)
-      .filter((f) => f !== "lib/elite/tracker.ts"); // comments only
+      .filter((f) => f !== "lib/elite/tracker.ts" && f !== "lib/elite/club-teams.ts"); // comments only
     for (const f of touching) expect(ALLOWED.has(f), f).toBe(true);
     expect(code("lib/elite/tracker.ts")).not.toMatch(/\.from\(/);
+    expect(code("lib/elite/club-teams.ts")).not.toMatch(/\.from\(/);
   });
 
   it("joining never makes a player record", () => {

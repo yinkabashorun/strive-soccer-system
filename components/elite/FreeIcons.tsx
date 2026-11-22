@@ -110,3 +110,9 @@ export const IconTrash = (p: P) => <Line {...p}><path d="M5 7h14M10 7V4h4v3M7 7l
 export const IconExit = (p: P) => <Line {...p}><path d="M14 5h5v14h-5M10 8l-4 4 4 4M6 12h10" /></Line>;
 export const IconPencil = (p: P) => <Line {...p}><path d="M4 20h4L19 9l-4-4L4 16z" /></Line>;
 export const IconRanking = (p: P) => <Line {...p}><path d="M6 20V11M12 20V5M18 20v-6" /></Line>;
+export const IconPin = (p: P) => (
+  <Line {...p}>
+    <path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z" />
+    <circle cx="12" cy="10" r="2.5" />
+  </Line>
+);

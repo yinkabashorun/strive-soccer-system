@@ -206,3 +206,11 @@ describe("the words", () => {
     expect(src).toMatch(/viewer\.demo\) return \{ ok: true as const, session: null/);
   });
 });
+
+describe("Extra Work needs an active membership", () => {
+  it("the shared loader checks the same door as the app", () => {
+    const src = readFileSync(`${__dirname}/../lib/elite/extra-actions.ts`, "utf8");
+    const loader = src.slice(src.indexOf("async function loadExtraContext"));
+    expect(loader).toMatch(/membershipGate\(player\.subscription_status\)/);
+  });
+});

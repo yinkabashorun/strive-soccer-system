@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { membershipGate } from "./gates";
 import { createServiceClient } from "./supabase/server";
 import { getViewer } from "./session";
 import { getDrillBank, normalizeTitle } from "./data";
@@ -82,6 +83,11 @@ async function loadExtraContext(playerId: string): Promise<{ ok: true; ctx: Extr
     .maybeSingle();
   const player = playerRow as Player | null;
   if (!player) return { ok: false, error: "Player not found." };
+  // The same door as the app itself (lib/elite/gates.ts): only an active
+  // or trialing membership adds training, whichever way the request came.
+  if (membershipGate(player.subscription_status)) {
+    return { ok: false, error: "Your membership is not active right now, so Extra Work is off. Email your coach to switch it back on." };
+  }
 
   const { data: hwData } = await admin
     .from("elite_homework")

@@ -195,21 +195,36 @@ function wordLevel(t) {
   return on ? k : 1 - k;
 }
 
-export function render(t) {
+// soft cuts: every cut between two shots that touch is a dissolve centred on the beat. It starts
+// XF_PRE s before the beat, the new shot is about half in on the beat and fully in XF_LEN s after
+// the start. The renderer draws the outgoing shot on a second page and lays it over this one.
+const XF_PRE = 0.08, XF_LEN = 0.35;
+export function xfade(t) {
+  for (let i = 1; i < CUT.shots.length; i++) {
+    const s = CUT.shots[i], p = CUT.shots[i - 1];
+    if (p[0] + p[1] !== s[0]) continue;
+    const d = t - (tb(s[0]) - XF_PRE);
+    if (d >= 0 && d < XF_LEN) return { cur: i, prev: i - 1, a: out3(d / XF_LEN) };
+  }
+  return null;
+}
+export function render(t, force) {
   const beat = bt(t), dev = $("#device"), glow = $("#glow");
-  // the shot on screen
+  // the shot on screen (or the one a dissolve asks for, which may run a moment past its own beats)
   let shot = null, si = -1;
-  CUT.shots.forEach((s, i) => { if (beat >= s[0] && beat < s[0] + s[1]) { shot = s; si = i; } });
+  if (force != null) { si = force; shot = CUT.shots[si]; }
+  else CUT.shots.forEach((s, i) => { if (beat >= s[0] && beat < s[0] + s[1]) { shot = s; si = i; } });
   const outK = lin(beat, CUT.deviceOut, CUT.deviceOut + 0.6);
   if (shot) {
     const [b0, n, m0, m1, cam] = shot;
     // the shot runs evenly in time: the song's beats are not all the same length, so stepping the
     // camera and the app by beats made both speed up and slow down from beat to beat
-    const t0s = tb(b0), f = cl((t - t0s) / (tb(b0 + n) - t0s));
-    renderApp(mix(m0, m1, f));
+    const t0s = tb(b0), fu = (t - t0s) / (tb(b0 + n) - t0s), f = cl(fu);
+    // the app keeps running through a dissolve (fu a little under 0 or over 1), the camera holds
+    renderApp(mix(m0, m1, force != null ? fu : f));
     const c = camAt(cam, f);
     // a cut on the beat lands softly: the new shot starts a touch closer and settles into place
-    const since = t - tb(b0), settle = si === 0 ? 0 : 1 - outExpo(cl(since / 0.5));
+    const since = t - tb(b0), settle = si === 0 ? 0 : 0.5 * (1 - outExpo(cl(since / 0.5)));
     // and the phone is never dead still: a slow, even drift
     const dx = 3 * Math.sin(t * 0.7), dy = 4 * Math.sin(t * 0.53 + 1), rz = 0.35 * Math.sin(t * 0.41 + 2);
     const fx = 11 + c.fx * k, fy = 11 + c.fy * k, cx = 165, cy = 357;

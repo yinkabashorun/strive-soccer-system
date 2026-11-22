@@ -246,7 +246,8 @@ describe("what Pro sees is one rule", () => {
   });
 
   it("the shell, the pages and the server actions all ask the rule", () => {
-    expect(read("app/(player)/layout.tsx")).toContain("tabOn(player?.tier, item.href)");
+    expect(read("app/(player)/layout.tsx")).toContain("memberTabs(player?.tier)");
+    expect(read("lib/elite/experience.ts")).toContain("tabOn(tier, COACH_TAB.href)");
     expect(read("app/(player)/film/page.tsx")).toContain('featureOn(player.tier, "filmRoom")) redirect("/dashboard")');
     expect(read("app/(player)/messages/page.tsx")).toContain('featureOn(player?.tier, "coachChat")) redirect("/dashboard")');
     const dash = read("app/(player)/dashboard/page.tsx");

@@ -476,7 +476,7 @@ export type CronRun = {
   id: string;
   job: string;
   ran_at: string;
-  trigger: "cron" | "coach" | "skipped";
+  trigger: "cron" | "coach" | "skipped" | "onboarding";
   authed: boolean;
   built: number;
   skipped: number;

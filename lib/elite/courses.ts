@@ -9,6 +9,7 @@
 // course, nothing is ticked or tracked (Coach Yinka, Oct 23 2026).
 
 import type { Course, CourseKind, CourseStep, CourseTag } from "./types";
+import { drillPoster } from "./drill-poster";
 
 export const COURSE_TAGS: CourseTag[] = ["beginner", "advanced"];
 
@@ -39,6 +40,19 @@ export function stepTitle(step: Pick<CourseStep, "drill" | "title">): string {
 
 export function stepVideo(step: Pick<CourseStep, "drill" | "video_url">): string | null {
   return step.drill?.video_url || step.video_url || null;
+}
+
+// The picture on a course's card (the Courses shelf, Nov 21 2026): the
+// still of its first step's clip in ladder order, when that clip is one of
+// Strive's own (lib/elite/drill-poster.ts); none for a course of written
+// pages, which shows as type on black.
+export function courseCover(course: Pick<Course, "steps">): string | null {
+  const ordered = [...course.steps].sort((a, b) => a.level_no - b.level_no || a.sort - b.sort);
+  for (const s of ordered) {
+    const p = drillPoster(stepVideo(s));
+    if (p) return p;
+  }
+  return null;
 }
 
 export type CourseLevel = { no: number; name: string | null; steps: CourseStep[] };

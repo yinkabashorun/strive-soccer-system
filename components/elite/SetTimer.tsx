@@ -87,7 +87,7 @@ export function SetTimer({ reps }: { reps: string }) {
 
   if (!plan) {
     return (
-      <div className="mt-3 inline-flex rounded-2xl border border-accent/35 bg-accent/[0.08] px-4 py-2.5 font-display text-xl font-bold uppercase tracking-wide text-accent">
+      <div className="m-card mt-4 inline-flex px-4 py-3 m-num text-[22px] leading-none text-bone">
         {reps}
       </div>
     );
@@ -116,13 +116,26 @@ export function SetTimer({ reps }: { reps: string }) {
 
   if (!step) {
     return (
-      <div className="mt-3 flex flex-wrap items-center gap-2">
-        <div className="inline-flex rounded-2xl border border-accent/35 bg-accent/[0.08] px-4 py-2.5 font-display text-xl font-bold uppercase tracking-wide text-accent">
-          {reps}
+      <div className="mt-4">
+        {/* The coach's words as the two boxes of the approved screen:
+            the sets, then the rest between them when one is written. */}
+        <div className="flex gap-2.5">
+          <div className="m-card min-w-0 flex-1 px-3.5 py-3">
+            <div className="m-num truncate text-[24px] leading-[1.05]">{reps.split(/,\s*rest/i)[0]}</div>
+            <div className="mt-0.5 text-[12px] text-white/60">sets</div>
+          </div>
+          {plan.restSec !== null && (
+            <div className="m-card min-w-0 flex-1 px-3.5 py-3">
+              <div className="m-num truncate text-[24px] leading-[1.05]">
+                {plan.restSec >= 60 && plan.restSec % 60 === 0 ? `${plan.restSec / 60} min` : `${plan.restSec} sec`}
+              </div>
+              <div className="mt-0.5 text-[12px] text-white/60">rest between</div>
+            </div>
+          )}
         </div>
         <button
           onClick={start}
-          className="inline-flex h-[46px] items-center gap-2 rounded-2xl border border-white/15 bg-white/[0.05] px-4 text-sm font-semibold text-bone active:scale-[0.97]"
+          className="m-button-quiet mt-2.5 h-[46px] w-full gap-2 text-[15px]"
         >
           <Timer className="h-4 w-4" />
           {plan.workSec !== null ? "Start timer" : "Time my rest"}
@@ -154,7 +167,7 @@ export function SetTimer({ reps }: { reps: string }) {
       className={cn(
         "mt-3 scroll-my-4 rounded-2xl border p-4 transition-colors",
         step.phase === "done"
-          ? "border-accent/40 bg-accent/[0.08]"
+          ? "border-gold/40 bg-gold/[0.08]"
           : working
             ? "border-white/25 bg-white/[0.07]"
             : "border-white/10 bg-white/[0.03]"
@@ -180,7 +193,7 @@ export function SetTimer({ reps }: { reps: string }) {
             className={cn(
               "font-display text-lg font-black uppercase tracking-wide",
               step.phase === "done" || step.phase === "rest" || step.phase === "between"
-                ? "text-accent"
+                ? "text-gold"
                 : "text-bone"
             )}
           >
@@ -200,7 +213,7 @@ export function SetTimer({ reps }: { reps: string }) {
         </div>
 
         {step.phase === "done" ? (
-          <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-accent text-black animate-check-pop">
+          <span className="metal-disc grid h-12 w-12 shrink-0 place-items-center rounded-full animate-check-pop">
             <Check className="h-6 w-6" strokeWidth={3.5} />
           </span>
         ) : total !== null ? (
@@ -224,7 +237,7 @@ export function SetTimer({ reps }: { reps: string }) {
       {shown !== null && total !== null && (
         <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/12">
           <div
-            className={cn("h-full rounded-full", working ? "bg-white" : "bg-accent")}
+            className={cn("h-full rounded-full", working ? "bg-white" : "bg-metal")}
             style={{ width: `${Math.min(100, Math.max(0, (1 - shown / total) * 100))}%` }}
           />
         </div>

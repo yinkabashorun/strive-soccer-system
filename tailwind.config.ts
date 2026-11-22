@@ -28,13 +28,27 @@ const config: Config = {
         },
         bone: "#F5F4EF",
         muted: "#8a8a92",
+        // The member app (approved Nov 20 2026): champagne gold, used only
+        // on what was earned (rings, medals, ticks, the current bar), and
+        // the near-black fills its cards sit on. Gold is never a button.
+        gold: {
+          DEFAULT: "#c8a858",
+          light: "#f0dca0",
+          deep: "#8c6d2c",
+        },
+        fill: {
+          DEFAULT: "#0e0e0e",
+          2: "#161616",
+        },
       },
       fontFamily: {
         // Barlow / Barlow Condensed = Strive Soccer FC brand type.
         // Loaded via <link> in app/layout.tsx (no build-time fetch).
-        sans: ["Barlow", "ui-sans-serif", "system-ui", "-apple-system", "sans-serif"],
-        body: ["Barlow", "ui-sans-serif", "system-ui", "sans-serif"],
-        display: ["'Barlow Condensed'", "ui-sans-serif", "system-ui", "sans-serif"],
+        // Read through two variables (app/globals.css): Barlow everywhere,
+        // Oswald and Inter inside the member app (the member-ui class).
+        sans: ["var(--font-body)", "ui-sans-serif", "system-ui", "-apple-system", "sans-serif"],
+        body: ["var(--font-body)", "ui-sans-serif", "system-ui", "sans-serif"],
+        display: ["var(--font-display)", "ui-sans-serif", "system-ui", "sans-serif"],
         mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
       },
       letterSpacing: {
@@ -49,6 +63,8 @@ const config: Config = {
       backgroundImage: {
         "grid-faint":
           "linear-gradient(to right, rgba(255,255,255,0.04) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.04) 1px, transparent 1px)",
+        // The metal: gold that looks earned (rings, medals, ticks).
+        metal: "linear-gradient(135deg, #f0dca0 0%, #c8a858 45%, #8c6d2c 100%)",
         "radial-spot":
           "radial-gradient(60% 60% at 50% 0%, rgba(212,175,55,0.10) 0%, rgba(0,0,0,0) 70%)",
       },
@@ -70,6 +86,16 @@ const config: Config = {
         "glow-once": "glow-once 1.2s ease-out both",
         rise: "rise 0.45s cubic-bezier(0.2,0,0,1) both",
         "bar-fill": "bar-fill 0.4s cubic-bezier(0.2,0,0,1) both",
+        // The experience (Nov 21 2026, marketing/app-redesign/experience.md):
+        // one soft ease-out for things moving into place, one small spring
+        // for things that pop. Rewards are the only long ones.
+        "card-rise": "card-rise 0.9s cubic-bezier(0.34,1.4,0.5,1) both",
+        sheen: "sheen 1.3s cubic-bezier(0.4,0,0.2,1) 0.5s both",
+        land: "land 0.62s cubic-bezier(0.34,1.4,0.5,1) both",
+        "count-pop": "count-pop 0.8s cubic-bezier(0.22,1,0.36,1) both",
+        spark: "spark 1.1s cubic-bezier(0.22,1,0.36,1) both",
+        "tab-in": "fade-in 0.22s cubic-bezier(0.22,1,0.36,1) both",
+        "step-in": "step-in 0.4s cubic-bezier(0.22,1,0.36,1) both",
       },
       keyframes: {
         "pulse-soft": {
@@ -116,6 +142,33 @@ const config: Config = {
         "bar-fill": {
           "0%": { transform: "scaleX(0)" },
           "100%": { transform: "scaleX(1)" },
+        },
+        "card-rise": {
+          "0%": { opacity: "0", transform: "translateY(120px) rotateX(24deg) scale(0.94)" },
+          "100%": { opacity: "1", transform: "none" },
+        },
+        sheen: {
+          "0%": { transform: "translateX(-160px) rotate(18deg)" },
+          "100%": { transform: "translateX(560px) rotate(18deg)" },
+        },
+        land: {
+          "0%": { opacity: "0", transform: "translateY(40px) scale(0.96)" },
+          "100%": { opacity: "1", transform: "none" },
+        },
+        "count-pop": {
+          "0%": { opacity: "0", transform: "scale(1.5)" },
+          "25%": { opacity: "1", transform: "scale(1)" },
+          "80%": { opacity: "1", transform: "scale(0.96)" },
+          "100%": { opacity: "0", transform: "scale(0.9)" },
+        },
+        spark: {
+          "0%": { opacity: "0", transform: "translate(0,0) rotate(var(--r,0deg)) scale(0.4)" },
+          "20%": { opacity: "1" },
+          "100%": { opacity: "0", transform: "translate(var(--dx,0px), var(--dy,0px)) rotate(var(--r,0deg)) scale(1)" },
+        },
+        "step-in": {
+          "0%": { opacity: "0", transform: "translateX(28px)" },
+          "100%": { opacity: "1", transform: "none" },
         },
       },
     },

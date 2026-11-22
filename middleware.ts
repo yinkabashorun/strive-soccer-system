@@ -15,6 +15,7 @@ export const SESSION_AREAS = [
   "/dashboard/:path*",
   "/homework/:path*",
   "/progress/:path*",
+  "/you/:path*",
   "/courses/:path*",
   "/film/:path*",
   "/messages/:path*",

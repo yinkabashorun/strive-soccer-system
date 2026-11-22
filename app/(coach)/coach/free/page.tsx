@@ -4,6 +4,8 @@ import { ReportsQueue } from "@/components/elite/ReportsQueue";
 import { ClubsAdmin } from "@/components/elite/ClubsAdmin";
 import { LineReports } from "@/components/elite/LineReports";
 import { StarToggle } from "@/components/elite/StarToggle";
+import { WaitlistAdmin } from "@/components/elite/WaitlistAdmin";
+import { getWaitlist } from "@/lib/elite/waitlist-server";
 import { getViewer } from "@/lib/elite/session";
 import { APP_URL } from "@/lib/elite/app-url";
 import { nyToday } from "@/lib/elite/time";
@@ -25,6 +27,7 @@ export default async function CoachFreePage() {
   if (viewer.role === "player") redirect("/dashboard");
 
   const data = viewer.demo ? demoOverview(nyToday()) : await getFreeOverview();
+  const waitlist = viewer.demo ? [] : await getWaitlist();
   const joinedOn = (iso: string) =>
     new Date(iso).toLocaleDateString("en-US", {
       month: "short",
@@ -49,6 +52,8 @@ export default async function CoachFreePage() {
       <ClubsAdmin clubs={data.clubs} reports={data.clubReports} appUrl={APP_URL} />
 
       <FreeAdmin open={data.open} joinUrl={`${APP_URL}/join`} targets={data.targets} />
+
+      <WaitlistAdmin rows={waitlist} open={data.open} />
 
       <div className="mt-8 grid max-w-2xl grid-cols-2 gap-3 sm:grid-cols-4">
         <div className="elite-card p-4">

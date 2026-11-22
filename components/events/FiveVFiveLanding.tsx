@@ -125,6 +125,22 @@ export function FiveVFiveLanding() {
         </section>
       )}
 
+      {/* The waitlist perk for teams (076) */}
+      {formId && (
+        <section className="mt-6 rounded-2xl border border-accent/25 bg-accent/[0.06] p-5">
+          <p className="font-display text-sm font-bold uppercase tracking-wider text-accent">Captains: get your roster on the Strive app list</p>
+          <p className="mt-2 text-sm leading-relaxed text-white/75">
+            Join the list, then send your link to every player on your roster. Teams with the whole roster on the list get their own graphic in the 5v5 social rollout and start in the app as a club on day one. Standout players on the list get the first Strive Stars.
+          </p>
+          <a
+            href={E.waitlist}
+            className="mt-4 inline-flex h-11 items-center rounded-xl bg-bone px-5 font-display text-sm font-black uppercase tracking-wide text-black"
+          >
+            Get on the list
+          </a>
+        </section>
+      )}
+
       {/* What every team gets */}
       <h2 className="mb-2.5 mt-9 font-display text-sm font-bold uppercase tracking-wider text-white/50">Every team gets</h2>
       <div className="grid grid-cols-2 gap-2">

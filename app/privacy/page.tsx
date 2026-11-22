@@ -4,7 +4,7 @@ import { SHEET_PARAM, shownInSheet } from "@/lib/elite/app-links";
 
 export const metadata = { title: "Privacy Policy · Strive Elite" };
 
-const UPDATED = "November 18, 2026";
+const UPDATED = "November 22, 2026";
 const CONTACT_EMAIL = "coach@strivesoccer100x.com";
 
 export default function PrivacyPage({
@@ -88,6 +88,17 @@ export default function PrivacyPage({
                 report a post or block a player at any time, and we can
                 remove a post. Deleting a post or your account deletes its
                 photos.
+              </li>
+              <li>
+                <strong className="text-bone">The waitlist:</strong> while
+                the free app is not open yet, a player 13 or older can join
+                its waitlist. We keep their first and last name, phone
+                number, the month and year they were born, who they play
+                for if they tell us, and which teammate&apos;s link they
+                used. We text them their own link once and once more when
+                the app opens, and add them to our texting provider with a
+                waitlist tag. Nothing is kept for anyone under 13. Ask us
+                and we take you off the list.
               </li>
               <li>
                 <strong className="text-bone">Messages:</strong> any message

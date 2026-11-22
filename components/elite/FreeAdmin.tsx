@@ -54,7 +54,7 @@ export function FreeAdmin({
             <div className="mt-0.5 text-sm text-white/60">
               {open
                 ? "Anyone with the link can make a free account."
-                : "Nobody can make a free account. The link says sign-up is not open yet."}
+                : "Nobody can make a free account. The link is the waitlist: players leave their phone and get their own link to send."}
             </div>
           </div>
           <button

@@ -23,13 +23,24 @@ const dur = await p0.evaluate(() => window.__dur), info = await p0.evaluate(() =
 const N = Math.round(dur * FPS), per = Math.ceil(N / WORKERS);
 async function worker(w) {
   const from = w * per, to = Math.min(N, from + per);
-  const p = await (await b.newContext({ viewport: { width: 540, height: 960 }, deviceScaleFactor: 2 })).newPage();
-  await p.goto(URL); await p.waitForFunction(() => window.__ready, null, { timeout: 30000 });
+  const open = async () => { const q = await (await b.newContext({ viewport: { width: 540, height: 960 }, deviceScaleFactor: 2 })).newPage();
+    await q.goto(URL); await q.waitForFunction(() => window.__ready, null, { timeout: 30000 }); return q; };
+  // p draws the film; g draws only the outgoing shot of each dissolve, so neither page jumps back in time
+  const p = await open(), g = await open();
   const seg = path.join(tmp, `seg${w}.mp4`);
   const ff = spawn("ffmpeg", ["-y", "-loglevel", "error", "-f", "image2pipe", "-framerate", String(FPS), "-c:v", "mjpeg", "-i", "-",
     "-c:v", "libx264", "-preset", "slow", "-crf", "14", "-pix_fmt", "yuv420p", "-r", String(FPS), seg]);
   for (let i = from; i < to; i++) {
-    await p.evaluate((t) => window.__render(t), i / FPS);
+    const t = i / FPS, xf = await p.evaluate((t) => window.__xfade(t), t);
+    if (xf) {
+      await g.evaluate(([t, s]) => window.__render(t, s), [t, xf.prev]);
+      const old = "data:image/jpeg;base64," + (await g.screenshot({ type: "jpeg", quality: 98 })).toString("base64");
+      await p.evaluate(([t, s]) => window.__render(t, s), [t, xf.cur]);
+      await p.evaluate(([u, o]) => window.__overlay(u, o), [old, 1 - xf.a]);
+    } else {
+      await p.evaluate(() => window.__overlay(null));
+      await p.evaluate((t) => window.__render(t), t);
+    }
     const buf = await p.screenshot({ type: "jpeg", quality: 95 });
     if (!ff.stdin.write(buf)) await new Promise((r) => ff.stdin.once("drain", r));
   }

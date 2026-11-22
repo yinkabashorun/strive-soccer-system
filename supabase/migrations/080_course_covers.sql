@@ -20,3 +20,6 @@ update elite_courses set cover_url = '/courses/strength.jpg' where slug = 'stren
 update elite_courses set cover_url = '/courses/dribbling-transformation.jpg' where slug = 'dribbling-transformation' and cover_url is null;
 update elite_courses set cover_url = '/courses/college-recruiting.jpg' where slug = 'college-recruiting' and cover_url is null;
 update elite_courses set cover_url = '/courses/academy-recruiting.jpg' where slug = 'academy-recruiting' and cover_url is null;
+-- Added the same day: the General Nutrition Guide's cover, a generated food
+-- photo (no people, no text, no brands), on Coach Yinka's "Make an ai photo".
+update elite_courses set cover_url = '/courses/general-nutrition-guide.jpg' where slug = 'general-nutrition-guide' and cover_url is null;

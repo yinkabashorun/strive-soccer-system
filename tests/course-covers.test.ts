@@ -34,7 +34,7 @@ describe("course cover pictures", () => {
   it("every cover the migration sets is a real file in public/", () => {
     const sql = read("supabase/migrations/080_course_covers.sql");
     const paths = [...sql.matchAll(/cover_url = '(\/courses\/[a-z0-9-]+\.jpg)'/g)].map((m) => m[1]);
-    expect(paths.length).toBe(4);
+    expect(paths.length).toBe(5);
     for (const p of paths) {
       expect(cleanCoverUrl(p)).toBe(p);
       expect(existsSync(resolve(root, "public" + p)), p).toBe(true);

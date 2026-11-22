@@ -2,18 +2,20 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
-  HOLDS_BACK,
+  ATTRIBUTES,
   ONBOARDING_FIELDS,
   QUIZ_STEPS,
   SPACES,
   TEAM_TRAINING,
+  cleanSelfAssessment,
   emptyAnswers,
   firstUnanswered,
+  lowestAttributes,
+  selfScale,
   quizInput,
   stepReady,
   type QuizAnswers,
 } from "@/lib/elite/quiz";
-import { PROGRESS_METRICS } from "@/lib/elite/types";
 
 const read = (p: string) => readFileSync(resolve(__dirname, "..", p), "utf8");
 
@@ -21,11 +23,14 @@ const read = (p: string) => readFileSync(resolve(__dirname, "..", p), "utf8");
 // still collect every field the intake action stores, and hand that action
 // exactly the shape it always took. Nothing dropped, nothing new stored.
 
+// Every attribute rated 4, the shape a finished rating page leaves.
+const allFour = Object.fromEntries(ATTRIBUTES.map((x) => [x.id, 4])) as QuizAnswers["attrs"];
+
 const full = (patch: Partial<QuizAnswers> = {}): QuizAnswers => ({
   ...emptyAnswers("+17035550100"),
   gender: "girl",
   team: "3-4",
-  holdsBack: "weak_foot",
+  attrs: { ...allFour, weak_foot: 2, speed: 3 },
   age: 13,
   position: "Winger",
   foot: "Left",
@@ -60,10 +65,16 @@ describe("the quiz asks everything the intake stores", () => {
   it("each screen has a stable id, once", () => {
     const ids = QUIZ_STEPS.map((s) => s.id);
     expect(new Set(ids).size).toBe(ids.length);
-    // The approved video's two questions are early, in this order.
-    expect(ids.indexOf("team")).toBe(1);
-    expect(ids.indexOf("holdsBack")).toBe(2);
-    expect(ids[ids.length - 1]).toBe("parent");
+    // About you, then your game (on the ball, then off it), then your
+    // training, then the parent: Coach Yinka's order, Nov 22 2026.
+    expect(ids).toEqual([
+      "gender", "age", "position", "foot", "level", "club",
+      "onBall", "offBall", "goals",
+      "team", "space", "nearby",
+      "parent",
+    ]);
+    const sections = QUIZ_STEPS.map((s) => s.section);
+    expect([...new Set(sections)]).toEqual(["About you", "Your game", "Your training", "Your parent"]);
   });
 });
 
@@ -78,8 +89,10 @@ describe("the answers reach the action unchanged in shape", () => {
       dominant_foot: "Left",
       gender: "girl",
       goals: ["Make the regional squad", "Start every game"],
-      weaknesses: ["Weak foot"],
-      self_assessment: Object.fromEntries(PROGRESS_METRICS.map((m) => [m, 50])),
+      weaknesses: ["Weak foot", "Speed"],
+      self_assessment: Object.fromEntries(
+        ATTRIBUTES.map((x) => [x.label, x.id === "weak_foot" ? 2 : x.id === "speed" ? 3 : 4])
+      ),
       parent_name: "Dana Smith",
       parent_email: "dana@example.com",
       parent_phone: "+17035550100",
@@ -104,21 +117,46 @@ describe("the answers reach the action unchanged in shape", () => {
     ]);
   });
 
-  it("the weak spot is stored as the tile's own name, in the player's words on screen", () => {
-    expect(HOLDS_BACK.map((h) => [h.label, h.line])).toEqual([
-      ["Weak foot", "I only trust one foot."],
-      ["First touch", "The ball gets away."],
-      ["Speed", "I lose the race."],
-      ["1v1 moves", "I can't beat my defender."],
-    ]);
-    expect(quizInput(full({ holdsBack: "one_v_one" })).weaknesses).toEqual(["1v1 moves"]);
+  it("the attributes split on the ball and off the ball, every one with a plain line", () => {
+    const on = ATTRIBUTES.filter((x) => x.group === "on").map((x) => x.label);
+    const off = ATTRIBUTES.filter((x) => x.group === "off").map((x) => x.label);
+    expect(on).toEqual(["First touch", "Close control", "Weak foot", "Dribbling and 1v1", "Short passing", "Long passing", "Shooting"]);
+    expect(off).toEqual(["Speed", "Agility", "Strength", "Fitness", "Scanning", "Decision making", "Movement", "Defending"]);
+    for (const x of ATTRIBUTES) {
+      expect(x.line.length).toBeGreaterThan(10);
+      expect(x.line).not.toMatch(/—/);
+    }
+    expect(new Set(ATTRIBUTES.map((x) => x.id)).size).toBe(ATTRIBUTES.length);
   });
 
-  it("the pictures are Strive's own drill stills, never stock or a youth photo", () => {
-    for (const img of [...HOLDS_BACK, ...SPACES].map((h) => h.image)) {
-      expect(img).toMatch(/^\/drills\/posters\/[a-z0-9-]+\.jpg$/);
-      expect(() => read(`public${img}`)).not.toThrow();
-    }
+  it("the weaknesses are the lowest ratings: 3 or under, lowest first, at most three", () => {
+    expect(lowestAttributes({ ...allFour, shooting: 1, fitness: 2, speed: 3, agility: 3 })).toEqual(["Shooting", "Fitness", "Speed"]);
+    // ties keep the list's order, on the ball first
+    expect(lowestAttributes({ ...allFour, defending: 2, first_touch: 2 })).toEqual(["First touch", "Defending"]);
+    // nothing under 4: the single lowest, so the plan still has a start
+    expect(lowestAttributes({ ...allFour, movement: 5 })).toEqual(["First touch"]);
+    expect(lowestAttributes({ ...allFour, first_touch: 5, close_control: 5, weak_foot: 4 })).toEqual(["Weak foot"]);
+    expect(lowestAttributes({})).toEqual([]);
+  });
+
+  it("only known attributes rated 1 to 5 are stored, by label", () => {
+    expect(cleanSelfAssessment({ "First touch": 3, Speed: 5, "Made up": 4, Shooting: 9, Agility: 2.5, Fitness: "4" })).toEqual({
+      "First touch": 3,
+      Speed: 5,
+    });
+    expect(cleanSelfAssessment(null)).toEqual({});
+    expect(cleanSelfAssessment("x")).toEqual({});
+  });
+
+  it("the server cleans the ratings itself", () => {
+    expect(read("lib/elite/player-actions.ts")).toContain("self_assessment: cleanSelfAssessment(input.self_assessment)");
+  });
+
+  it("old 0 to 100 rows and new 1 to 5 rows are told apart", () => {
+    expect(selfScale({ "First touch": 3, Speed: 5 })).toBe(5);
+    expect(selfScale({ "Ball Mastery": 75, Speed: 50 })).toBe(100);
+    expect(selfScale({})).toBe(100);
+    expect(selfScale(null)).toBe(100);
   });
 
   it("a known parent phone is kept and never asked twice", () => {
@@ -132,11 +170,16 @@ describe("a screen moves on only when it is answered", () => {
     const a = emptyAnswers();
     expect(stepReady("gender", a)).toBe(false);
     expect(stepReady("team", a)).toBe(false);
-    expect(stepReady("holdsBack", a)).toBe(false);
+    expect(stepReady("onBall", a)).toBe(false);
+    expect(stepReady("offBall", a)).toBe(false);
     expect(stepReady("nearby", a)).toBe(false);
     expect(stepReady("club", a)).toBe(true);
     expect(stepReady("goals", a)).toBe(true);
-    expect(stepReady("ratings", a)).toBe(true);
+    // a rating page moves on only when every attribute on it is rated
+    const onOnly = Object.fromEntries(ATTRIBUTES.filter((x) => x.group === "on").map((x) => [x.id, 3]));
+    expect(stepReady("onBall", { ...a, attrs: onOnly })).toBe(true);
+    expect(stepReady("offBall", { ...a, attrs: onOnly })).toBe(false);
+    expect(stepReady("onBall", { ...a, attrs: { ...onOnly, shooting: 0 } })).toBe(false);
     expect(stepReady("parent", a)).toBe(false);
     expect(stepReady("parent", { ...a, parentName: "Dana" })).toBe(true);
   });
@@ -146,6 +189,7 @@ describe("a screen moves on only when it is answered", () => {
     expect(firstUnanswered(full({ gender: undefined }))).toBe(0);
     expect(QUIZ_STEPS[firstUnanswered(full({ parentName: " " }))].id).toBe("parent");
     expect(QUIZ_STEPS[firstUnanswered(full({ position: undefined }))].id).toBe("position");
+    expect(QUIZ_STEPS[firstUnanswered(full({ attrs: { ...allFour, defending: undefined } }))].id).toBe("offBall");
   });
 
   it("the quiz screen saves through the same action as before", () => {

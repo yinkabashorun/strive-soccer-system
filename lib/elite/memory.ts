@@ -14,6 +14,7 @@ import {
   getWeeklyPlans,
   latestCoachingCallNotes,
 } from "./data";
+import { selfScale } from "./quiz";
 import type { Player } from "./types";
 
 // Builds the memory text injected into the AI prompt. Returns "" when there
@@ -50,7 +51,8 @@ export async function buildPlayerMemory(player: Player): Promise<string> {
     const self = Object.entries(player.self_assessment)
       .map(([k, v]) => `${k} ${v}`)
       .join(", ");
-    intake.push(`self-rated at intake: ${self}`);
+    const scale = selfScale(player.self_assessment) === 5 ? "1 to 5, 5 is a strength" : "0 to 100";
+    intake.push(`self-rated at intake (${scale}): ${self}`);
   }
   if (intake.length) lines.push(`INTAKE: ${intake.join("; ")}.`);
 

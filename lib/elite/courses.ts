@@ -46,13 +46,25 @@ export function stepVideo(step: Pick<CourseStep, "drill" | "video_url">): string
 // still of its first step's clip in ladder order, when that clip is one of
 // Strive's own (lib/elite/drill-poster.ts); none for a course of written
 // pages, which shows as type on black.
-export function courseCover(course: Pick<Course, "steps">): string | null {
+export function courseCover(course: Pick<Course, "steps"> & Partial<Pick<Course, "cover_url">>): string | null {
+  // The picture the coach picked comes first (080).
+  const picked = cleanCoverUrl(course.cover_url);
+  if (picked) return picked;
   const ordered = [...course.steps].sort((a, b) => a.level_no - b.level_no || a.sort - b.sort);
   for (const s of ordered) {
     const p = drillPoster(stepVideo(s));
     if (p) return p;
   }
   return null;
+}
+
+// A course's own cover picture (080): only a path to an image on our own
+// site, the same rule as the database's check, so nothing from another
+// host and nothing that is not a picture can become a card's image.
+export function cleanCoverUrl(raw: string | null | undefined): string | null {
+  const t = (raw ?? "").trim();
+  if (t.length === 0 || t.length > 200) return null;
+  return /^\/[A-Za-z0-9_-]+(\/[A-Za-z0-9_-]+)*\.(jpg|jpeg|png|webp)$/.test(t) ? t : null;
 }
 
 export type CourseLevel = { no: number; name: string | null; steps: CourseStep[] };

@@ -1,5 +1,5 @@
 import { Clock } from "lucide-react";
-import { fmtDuration, type TimeTrained } from "@/lib/elite/time-trained";
+import { areaName, fmtDuration, type TimeTrained } from "@/lib/elite/time-trained";
 import { StatTile } from "./StatTile";
 
 // Progress as the family sees it (034): time trained, sessions done,
@@ -35,7 +35,7 @@ export function TimeTrainedPanel({ time }: { time: TimeTrained }) {
           {time.byPillar.map((p) => (
             <div key={p.pillar}>
               <div className="flex items-center justify-between text-sm">
-                <span className="text-white/75">{p.pillar}</span>
+                <span className="text-white/75">{areaName(p.pillar)}</span>
                 <span className="font-display font-bold tabular-nums text-bone">{fmtDuration(p.minutes)}</span>
               </div>
               <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/[0.06]">

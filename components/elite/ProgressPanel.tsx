@@ -9,8 +9,9 @@ import { overallProgress } from "@/lib/elite/data";
 // ordered by the canonical metric list. Used on the player progress page
 // and inside the coach's player profile.
 export function ProgressPanel({ progress }: { progress: Progress[] }) {
-  // No ratings yet → an honest empty state, not a page of zeros. Ratings
-  // come from real coaching sessions, so this fills in after week one.
+  // No ratings yet → an honest empty state, not a page of zeros. The
+  // ratings are set with each new week from the work done and the weekly
+  // check-in, so this fills in once the first week is built.
   if (progress.length === 0) {
     return (
       <div className="elite-card p-8 text-center">
@@ -18,9 +19,9 @@ export function ProgressPanel({ progress }: { progress: Progress[] }) {
           Your baseline is coming
         </div>
         <p className="mx-auto mt-2 max-w-sm text-sm text-white/50">
-          Your coach rates the seven pillars from your actual training. The
-          first ratings land with your first training week, then you watch
-          them climb.
+          Your ratings start with your first training week. After that they
+          move with the work you put in and what you tell us in your weekly
+          check-in.
         </p>
       </div>
     );

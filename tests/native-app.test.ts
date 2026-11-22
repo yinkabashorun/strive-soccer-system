@@ -242,6 +242,9 @@ describe("the native shell (native/)", () => {
   it("is set up for native push", () => {
     expect(read("native/ios/App/App/App.entitlements")).toContain("aps-environment");
     expect(project).toContain("CODE_SIGN_ENTITLEMENTS = App/App.entitlements;");
+    // A TestFlight build is signed for distribution: a development identity
+    // needs a registered device, and the CI Mac has none (run #1, Nov 22).
+    expect(project).toContain('CODE_SIGN_IDENTITY = "Apple Distribution";');
     const delegate = read("native/ios/App/App/AppDelegate.swift");
     expect(delegate).toContain("capacitorDidRegisterForRemoteNotifications");
     expect(delegate).toContain("capacitorDidFailToRegisterForRemoteNotifications");

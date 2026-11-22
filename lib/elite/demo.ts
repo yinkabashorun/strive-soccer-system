@@ -12,6 +12,7 @@ import type {
   ProgressMetric,
   WeeklyPlan,
 } from "./types";
+import type { Program } from "./program";
 
 // ---------------------------------------------------------------------------
 // Strive Elite demo data.
@@ -1075,3 +1076,19 @@ export const DEMO_ACHIEVEMENTS: Achievement[] = [
 
 // The player the demo "player login" signs in as.
 export const DEMO_PLAYER_ID = "p-marcus";
+
+// The example player's 3-month program (065), so the tour shows the goal
+// ladder with a focus. Started in his week 3: week 7 is the first half of
+// month two. Example data like the rest of Marcus.
+export const DEMO_PROGRAMS: Program[] = [
+  {
+    id: "prog-marcus",
+    player_id: "p-marcus",
+    start_week: 3,
+    weeks: 12,
+    status: "active",
+    focuses: ["weak_foot", "first_touch_air", "passing_short", "one_v_one", "close_control", "acceleration"],
+    threads: [{ kind: "strength", from_block: 1, to_block: 3 }],
+    quiz: { goal: "Make the regional development squad by spring", limiters: ["weak_foot", "first_touch_air"] },
+  },
+];

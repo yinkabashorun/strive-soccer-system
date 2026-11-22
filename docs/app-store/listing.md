@@ -96,6 +96,8 @@ for the 13-and-older check). Tracking: No.
 >
 > A club's captain can plan a club training session (seen only by that club's members) or a game against another club in the same county that chose to be open to games (seen only by the two clubs). Every session and game shows which club organized it; Strive does not run or supervise them, a captain accepts that before planning and a player before saying they're in. A place is the name of a public field or park: the app refuses street addresses, links and phone numbers. There is no messaging between clubs and no direct messages. Sessions and games can be reported into the same coach queue, and a coach can cancel any of them. Strive's own events are a separate list: a captain enters the club with a roster, each player accepts the event's waiver, and payment for a physical event happens outside the app.
 >
+> My drills (free part, optional): a free player names a drill of their own and films short takes of it (up to 20 seconds) whenever they want, then watches two takes side by side or every take in a row. Takes are private: only the player sees them (our coaches can too); they are never in the friends feed or on a profile. A Share button makes one video of the takes on the phone itself and hands it to the phone's share sheet; the app never posts anything for the player.
+>
 > What the member gets is personal coaching: each week is built for one player by a coach, the coach answers the player's messages and clips, and the family has a 1:1 call with the coach each month.
 >
 > Sign in with the player account below to see the member side, and the coach account to see the coach side (the coach side is where a coach builds and reviews each player's week).

@@ -45,7 +45,8 @@ export async function getPushStatus(): Promise<PushStatus> {
       .in("subscription_status", ["active", "trialing"]),
   ]);
   // A device is a browser subscription or a phone with the App Store app.
-  const all = [...(subs ?? []), ...(phones ?? [])];
+  // A free account's devices (078) carry no player and are not counted.
+  const all = [...(subs ?? []), ...(phones ?? [])].filter((s) => s.player_id);
   status.devices = all.length;
   status.playersOn = new Set(all.map((s) => s.player_id as string)).size;
   status.playersTotal = count ?? 0;
@@ -63,6 +64,22 @@ export async function sendPushToPlayer(
   playerId: string,
   payload: PushPayload
 ): Promise<{ sent: number }> {
+  return sendToDevices("player_id", playerId, payload);
+}
+
+// The same for a free account (078): its devices are on file by profile.
+export async function sendPushToProfile(
+  profileId: string,
+  payload: PushPayload
+): Promise<{ sent: number }> {
+  return sendToDevices("profile_id", profileId, payload);
+}
+
+async function sendToDevices(
+  column: "player_id" | "profile_id",
+  id: string,
+  payload: PushPayload
+): Promise<{ sent: number }> {
   const web = isPushConfigured();
   const native = isNativePushConfigured();
   if (!web && !native) return { sent: 0 };
@@ -76,7 +93,7 @@ export async function sendPushToPlayer(
     const { data: subs } = await admin
       .from("elite_push_subscriptions")
       .select("id, endpoint, p256dh, auth")
-      .eq("player_id", playerId);
+      .eq(column, id);
     await Promise.all(
       (subs ?? []).map(async (s) => {
         try {
@@ -102,7 +119,7 @@ export async function sendPushToPlayer(
     const { data: phones } = await admin
       .from("elite_native_push_tokens")
       .select("token")
-      .eq("player_id", playerId);
+      .eq(column, id);
     const tokens = (phones ?? []).map((p) => p.token as string);
     if (tokens.length > 0) {
       const result = await sendApns(tokens, payload);

@@ -26,12 +26,14 @@ const STEPS: Step[] = ["age", "name", "contact", "password", "agree"];
 export function JoinForm({
   configured,
   referral,
+  source = "",
   club,
   years,
   invite,
 }: {
   configured: boolean;
   referral: string;
+  source?: string; // where the link came from ("share", 078), for the coach
   club: string; // a club's link code, joined with the account
   years: number[]; // the birth years offered, newest first
   invite: JoinInvite;
@@ -88,6 +90,7 @@ export function JoinForm({
           password,
           ref: referral,
           club,
+          src: source,
           birth: { month: Number(month), year: Number(year) },
           agreed: { guardian, terms },
         }),

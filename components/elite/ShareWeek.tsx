@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { fmtDuration } from "@/lib/elite/time-trained";
+import { shareText } from "@/lib/elite/share-link";
 
 const CARD_URL = "/api/elite/tracker/card";
 const FILE_NAME = "my-week-strive-elite.png";
@@ -50,10 +51,12 @@ export function ShareWeek({
   stamp,
   minutes,
   preview,
+  shareLink,
 }: {
   stamp: string;
   minutes: number; // this week's training, for the card's line
   preview: string | null; // the player's latest photo this week, for the little story
+  shareLink: string; // their own join link (share-link.ts): every share is an invite
 }) {
   const ready = useRef<Ready | null>(null);
   const [busy, setBusy] = useState(false);
@@ -74,13 +77,15 @@ export function ShareWeek({
   }, [stamp]);
 
   async function hand(file: File): Promise<void> {
+    const text = shareText("week", shareLink);
     if (!canShareFile(file)) {
       saveToPhone(file);
-      setNote("Saved to this device. Add it to your story from your photos or downloads.");
+      await navigator.clipboard?.writeText(text).catch(() => undefined);
+      setNote("Saved to this device, and your link is copied. Add it to your story from your photos or downloads.");
       return;
     }
     try {
-      await navigator.share({ files: [file] });
+      await navigator.share({ files: [file], text });
       setAgain(false);
     } catch (e) {
       const name = (e as { name?: string })?.name;

@@ -125,7 +125,10 @@ export default async function CoachFreePage() {
                 </td>
                 <td className="px-4 py-3 tabular-nums text-white/70">{a.posts_week}</td>
                 <td className="px-4 py-3 tabular-nums text-white/70">{fmtDuration(a.all_minutes)}</td>
-                <td className="px-4 py-3 text-white/70">{joinedOn(a.joined)}</td>
+                <td className="px-4 py-3 text-white/70">
+                  {joinedOn(a.joined)}
+                  {a.from_share && <span className="ml-2 text-[11px] font-semibold uppercase text-accent">From a share</span>}
+                </td>
                 <td className="px-4 py-3 tabular-nums text-white/70">{a.referrals}</td>
                 <td className="px-4 py-3 tabular-nums text-white/70">{a.friends}</td>
               </tr>

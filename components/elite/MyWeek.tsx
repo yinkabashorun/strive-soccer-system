@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { X } from "lucide-react";
+import { ChevronRight, Video, X } from "lucide-react";
+import { FREE_DRILLS } from "@/lib/elite/my-drills";
 import { deleteLog } from "@/lib/elite/tracker-actions";
 import { fmtDuration } from "@/lib/elite/time-trained";
 import {
@@ -44,6 +45,7 @@ export function MyWeek({
   appUrl,
   inviteLink,
   programHref,
+  shareLink,
 }: {
   logs: TrainingLog[]; // this week's, newest first
   target: number; // training minutes a week
@@ -61,6 +63,7 @@ export function MyWeek({
   // Where the one line about the coached program leads; null inside the
   // App Store app, where the line is not drawn (programLink in tracker.ts).
   programHref: string | null;
+  shareLink: string; // their own join link for everything they share (share-link.ts)
 }) {
   const router = useRouter();
   const { logOnly, profile } = usePostLauncher();
@@ -166,8 +169,24 @@ export function MyWeek({
 
       <ClubsSection clubs={clubs} ranking={ranking} appUrl={appUrl} />
 
+      {/* My drills (078): the player's own named drills and their takes.
+          Optional and private, one row in. */}
+      <Link
+        href={FREE_DRILLS}
+        className="mx-[18px] mt-[22px] flex min-h-[64px] items-center gap-3 rounded-2xl border border-white/10 bg-[#121212] px-4 py-3"
+      >
+        <span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-accent/15 text-accent">
+          <Video className="h-5 w-5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-[16px] font-bold text-bone">My drills</span>
+          <span className="block text-[13px] text-white/60">Film a drill now and then, watch yourself get better. Only you see them.</span>
+        </span>
+        <ChevronRight className="h-5 w-5 shrink-0 text-white/50" />
+      </Link>
+
       <div className="mx-[18px] mt-[22px]">
-        <ShareWeek stamp={`${minutes}:${logs.length}`} minutes={minutes} preview={preview} />
+        <ShareWeek stamp={`${minutes}:${logs.length}`} minutes={minutes} preview={preview} shareLink={shareLink} />
       </div>
 
       <div className="mt-2 text-center">

@@ -98,7 +98,35 @@ export function useNotificationsAsk(enabled: boolean): { ask: FinishAsk; shown: 
 // The ask itself: one screen, one plain line of why, one button. Shown in
 // place of the finish screen after the member taps Done there, then the
 // session closes whatever they choose.
-export function PushOptIn({ ask, onDone }: { ask: Exclude<FinishAsk, null>; onDone: () => void }) {
+// The free app asks the same way, once, right after a player's first post
+// (078), in its own words: what a friend posted and props, nothing else.
+const COPY = {
+  member: {
+    title: "Turn on notifications",
+    body: "So you know the moment your new week is live, your coach messages you, or a Film Room is announced. Nothing else.",
+    install:
+      "Tap the Share button in your browser, then tap Add to Home Screen. Open Strive Elite from your home screen and turn on notifications, so you know the moment your new week is live or your coach messages you.",
+    where: "You can change this any time on your Account page.",
+  },
+  free: {
+    title: "Know the moment your friends post?",
+    body: "We tell you when a friend posts or gives you props. Never more than that, and never late at night.",
+    install:
+      "Tap the Share button in your browser, then tap Add to Home Screen. Open Strive Elite from your home screen and turn on notifications, so you know the moment your friends post.",
+    where: "You can change this any time in Settings.",
+  },
+} as const;
+
+export function PushOptIn({
+  ask,
+  onDone,
+  variant = "member",
+}: {
+  ask: Exclude<FinishAsk, null>;
+  onDone: () => void;
+  variant?: keyof typeof COPY;
+}) {
+  const copy = COPY[variant];
   const [busy, setBusy] = useState(false);
 
   async function enable() {
@@ -129,15 +157,13 @@ export function PushOptIn({ ask, onDone }: { ask: Exclude<FinishAsk, null>; onDo
             <Icon className="h-9 w-9" />
           </span>
           <h2 className="mt-6 font-display text-4xl font-black uppercase leading-[0.95] animate-rise [animation-delay:80ms]">
-            {install ? "Add Strive Elite to your home screen" : "Turn on notifications"}
+            {install ? "Add Strive Elite to your home screen" : copy.title}
           </h2>
           <p className="mt-4 max-w-xs text-[15px] leading-relaxed text-white/75 animate-rise [animation-delay:160ms]">
-            {install
-              ? "Tap the Share button in your browser, then tap Add to Home Screen. Open Strive Elite from your home screen and turn on notifications, so you know the moment your new week is live or your coach messages you."
-              : "So you know the moment your new week is live, your coach messages you, or a Film Room is announced. Nothing else."}
+            {install ? copy.install : copy.body}
           </p>
           <p className="mt-3 max-w-xs text-[13px] leading-relaxed text-white/60 animate-rise [animation-delay:220ms]">
-            You can change this any time on your Account page.
+            {copy.where}
           </p>
         </div>
       </div>

@@ -7,6 +7,7 @@ import {
   getMessages,
   getBenchmark,
   getPlayer,
+  getProgram,
   getProgressVideos,
   getTrainingBreaks,
   getWeeklyPlans,
@@ -27,6 +28,7 @@ import { fmtMonday, liveWeekFor, nextMondayNY, nyToday } from "@/lib/elite/time"
 import { greeting, timeAgo } from "@/lib/utils";
 import { TourGuide } from "@/components/elite/TourGuide";
 import { featureOn } from "@/lib/elite/tiers";
+import { programWeekFor } from "@/lib/elite/program";
 
 // The player's home: one thing on screen - today's session. Under it,
 // one quiet row (Extra work, the coach's note, Take a break), each folded
@@ -57,7 +59,7 @@ export default async function DashboardPage() {
     calls: featureOn(player.tier, "coachingCalls"),
   };
 
-  const [allHomework, messages, checkins, plans, calls, breaks, progressVideos, monthlyCheckin] =
+  const [allHomework, messages, checkins, plans, calls, breaks, progressVideos, monthlyCheckin, program] =
     await Promise.all([
       getHomework(player.id),
       getMessages(player.id),
@@ -69,6 +71,8 @@ export default async function DashboardPage() {
       viewer.demo || !has.monthlyCheckin
         ? Promise.resolve({ booked: null, open: [] })
         : getPlayerCheckin(player.id),
+      // The 3-month program (065), for the goal ladder's goal and focus.
+      getProgram(player.id),
     ]);
 
   const firstName = player.full_name.split(" ")[0];
@@ -173,6 +177,8 @@ export default async function DashboardPage() {
           playerId={player.id}
           sendClips={has.clips}
           example={viewer.demo}
+          goal={{ program: program?.quiz.goal ?? null, onboarding: player.goals[0] ?? null }}
+          focus={programWeekFor(program, contentWeek)?.focusName ?? null}
         />
       ) : (
         <section className="elite-card p-6 text-center">

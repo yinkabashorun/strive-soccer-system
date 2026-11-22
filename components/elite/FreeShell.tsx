@@ -11,7 +11,9 @@ import { IconClock, IconFriends, IconPlus } from "./FreeIcons";
 // approved mock, marketing/free-log/mock), and the posting screen that
 // the plus and every "Post my training" button open. The plus goes
 // straight to the camera; the posting screen comes up over everything
-// with the photo just taken.
+// with the photo just taken. A video instead of a photo can be saved as
+// a take of one of the player's own drills (078); it never reaches the
+// friends feed, which stays photos.
 type Launcher = {
   // Open the camera; the posting screen follows with the photo.
   post: () => void;
@@ -50,6 +52,7 @@ export function FreeShell({
   const onWeek =
     pathname === FREE_WEEK ||
     pathname.startsWith("/log/club") ||
+    pathname.startsWith("/log/drills") ||
     pathname.startsWith("/log/events") ||
     pathname.startsWith("/log/plan/");
   const tabs = onFriends || onWeek;
@@ -61,7 +64,7 @@ export function FreeShell({
       <input
         ref={input}
         type="file"
-        accept="image/*"
+        accept="image/*,video/*"
         capture="environment"
         className="hidden"
         aria-hidden

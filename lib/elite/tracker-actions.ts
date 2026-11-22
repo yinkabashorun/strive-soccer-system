@@ -1,5 +1,6 @@
 "use server";
 
+import { noticeProps } from "./free-notices-server";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createServiceClient } from "./supabase/server";
@@ -421,6 +422,17 @@ export async function toggleProps(logId: string): Promise<{ ok: true; propped: b
     ? await o.admin.from("elite_log_props").delete().eq("log_id", logId).eq("profile_id", o.profileId)
     : await o.admin.from("elite_log_props").insert({ log_id: logId, profile_id: o.profileId });
   if (error) return fail(OFFLINE);
+  // The post's owner hears about new props (078): once per post, three a
+  // day at most, never at night. Best effort.
+  if (!had) {
+    await noticeProps({
+      giverId: o.profileId,
+      ownerId: found.post.profile_id,
+      postId: logId,
+      postDay: found.post.trained_on,
+      today,
+    }).catch(() => false);
+  }
   return { ok: true, propped: !had };
 }
 

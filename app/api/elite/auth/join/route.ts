@@ -1,3 +1,4 @@
+import { cleanSource } from "@/lib/elite/waitlist";
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/elite/supabase/server";
 import { establishSession } from "@/lib/elite/session-start";
@@ -52,6 +53,7 @@ export async function POST(req: Request) {
     phone?: unknown;
     password?: unknown;
     ref?: unknown;
+    src?: unknown;
     club?: unknown;
     birth?: { month?: unknown; year?: unknown };
     agreed?: { guardian?: unknown; terms?: unknown };
@@ -163,6 +165,12 @@ export async function POST(req: Request) {
       { status: 500 }
     );
   }
+
+  // 4a) where the link came from ("share" for a link in a shared card or
+  // video, 078), for the coaches' list. A separate write, best effort: a
+  // database without the column yet never stops a sign-up.
+  const source = cleanSource(body.src);
+  if (source) await admin.from("elite_trackers").update({ source }).eq("profile_id", userId).then(() => undefined, () => undefined);
 
   // 4b) joining with a teammate's link sends that teammate a friend
   // request to accept (072); they are friends once it is accepted.

@@ -17,13 +17,19 @@ import { resumableUpload } from "./resumable-upload";
 // fallback when the resumable one cannot start.
 export const UPLOAD_FAILED = "Upload didn't go through. Check your connection and try again.";
 
+// The free app's drill takes (078) go the same way into the player's own
+// folder of the free app's private bucket: pass that bucket and its 60 MB
+// cap. Storage policies decide what each account may write.
 export async function uploadClip(
   file: File,
   path: string,
-  onProgress?: (percent: number) => void
+  onProgress?: (percent: number) => void,
+  opts: { bucket?: string; maxMb?: number } = {}
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  if (file.size > MAX_CLIP_MB * 1024 * 1024) {
-    return { ok: false, error: `That clip is over ${MAX_CLIP_MB}MB. Film a shorter one.` };
+  const bucket = opts.bucket ?? CLIP_BUCKET;
+  const maxMb = opts.maxMb ?? MAX_CLIP_MB;
+  if (file.size > maxMb * 1024 * 1024) {
+    return { ok: false, error: `That clip is over ${maxMb}MB. Film a shorter one.` };
   }
   const supabase = createClient();
   if (!supabase) return { ok: false, error: "Clips send from the live app." };
@@ -40,7 +46,7 @@ export async function uploadClip(
     if (url && anonKey && accessToken) {
       const done = await resumableUpload({
         auth: { supabaseUrl: url, anonKey, accessToken },
-        bucket: CLIP_BUCKET,
+        bucket,
         path,
         file,
         contentType,
@@ -52,7 +58,7 @@ export async function uploadClip(
       }
     }
     const { error } = await supabase.storage
-      .from(CLIP_BUCKET)
+      .from(bucket)
       .upload(path, file, { contentType, cacheControl: "3600" });
     if (error) return { ok: false, error: UPLOAD_FAILED };
     onProgress?.(100);

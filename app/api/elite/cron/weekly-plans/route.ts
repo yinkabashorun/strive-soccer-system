@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { runPlanBuilder } from "@/lib/elite/auto-plan";
 import { createServiceClient } from "@/lib/elite/supabase/server";
 import { unlockDueWeeks } from "@/lib/elite/unlock";
+import { sendTrainingReminders } from "@/lib/elite/reminders-server";
 import { isSundayEveNY, nyHour } from "@/lib/elite/time";
 
 export const runtime = "nodejs";
@@ -28,6 +29,10 @@ export const fetchCache = "force-no-store";
 //                           plan gets it now. Otherwise a no-op that still
 //                           logs a row, which is how the dashboard knows
 //                           the cron is alive at all.
+//   Mon-Sat, every hour   - the reminder at a member's usual time: one
+//                           push a day at most, only at their hour, never
+//                           on a break, once the week is done or if they
+//                           trained today (lib/elite/reminders.ts, 078).
 //   Every hour            - unlock Monday-held weeks that are due (so the
 //                           Monday 6am ET unlock + texts no longer depend
 //                           on someone opening the app); then heal any
@@ -48,8 +53,12 @@ export async function GET(req: Request) {
   // decision below sees the real state.
   await unlockDueWeeks().catch(() => undefined);
 
+  // The reminder at each member's usual time (claimed per player per day,
+  // so a second run this hour sends nothing). Never on a Sunday.
+  const reminders = await sendTrainingReminders().catch(() => ({ checked: 0, sent: 0 }));
+
   if (isSundayEveNY() && nyHour() < 15) {
-    return NextResponse.json({ ok: true, skipped: "sunday before 3pm ET" });
+    return NextResponse.json({ ok: true, skipped: "sunday before 3pm ET", reminders });
   }
 
   const outcome = await runPlanBuilder({ trigger: "cron", authed });
@@ -67,10 +76,15 @@ export async function GET(req: Request) {
         .from("elite_sms_sends")
         .delete()
         .lt("sent_at", new Date(Date.now() - 60 * 864e5).toISOString());
+      // The reminder ledger (078) only has to remember today.
+      await admin
+        .from("elite_training_reminders")
+        .delete()
+        .lt("sent_at", new Date(Date.now() - 60 * 864e5).toISOString());
     }
   } catch {
     /* next run tries again */
   }
 
-  return NextResponse.json({ ok: true, ...outcome });
+  return NextResponse.json({ ok: true, ...outcome, reminders });
 }

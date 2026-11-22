@@ -304,6 +304,9 @@ describe("the redrawn screens keep the house rules", () => {
     for (const s of ["Weekly target", "My training days", "Send my link", "Blocked", "Support", "Privacy and terms", "Sign out", "Delete my account"]) {
       expect(settings).toContain(s);
     }
-    expect(settings).not.toMatch(/DeviceSettings|Progress|Vibration/);
+    expect(settings).not.toMatch(/Progress|Vibration/);
+    // the one device setting a free account has: notifications (078), in
+    // the free app's own words and without the member's other switches
+    expect(settings).toContain('<DeviceSettings showNotifications variant="free" />');
   });
 });

@@ -314,7 +314,9 @@ describe("a post's photo and its one line", () => {
     expect(composer).toContain("fitWithin(");
     expect(composer).toContain('"image/jpeg", POST_JPEG_QUALITY');
     // the camera opens from the plus (and every Post my training button)
-    expect(code("components/elite/FreeShell.tsx")).toMatch(/type="file"\s+accept="image\/\*"\s+capture="environment"/);
+    // (a video can be picked too: it becomes a take of the player's own
+    // drill and never a post, 078)
+    expect(code("components/elite/FreeShell.tsx")).toMatch(/type="file"\s+accept="image\/\*,video\/\*"\s+capture="environment"/);
   });
 
   it("the server takes the photo only after it knows who is signed in, and only a JPEG", () => {

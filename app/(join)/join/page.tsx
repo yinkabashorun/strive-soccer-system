@@ -70,7 +70,9 @@ export default async function JoinPage({
       );
     }
     if (cookies().get(JOIN_AGE_COOKIE)) return <UnderAge />;
-    const w = cleanWaitlistCode(searchParams?.w);
+    // A share from a free player who has no waitlist code carries their
+    // free code (?ref=); it counts here as who sent them (share-link.ts).
+    const w = cleanWaitlistCode(searchParams?.w) ?? ref;
     const sender = await waitlistInviter(w);
     return (
       <WaitlistForm
@@ -94,6 +96,7 @@ export default async function JoinPage({
     <JoinForm
       configured={configured}
       referral={ref ?? ""}
+      source={cleanSource(searchParams?.src) ?? ""}
       club={club ?? ""}
       years={birthYears(nyToday())}
       invite={invite}

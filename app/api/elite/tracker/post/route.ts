@@ -1,3 +1,4 @@
+import { noticeFriendPost } from "@/lib/elite/free-notices-server";
 import { OFFENSIVE_MESSAGE, isOffensive } from "@/lib/elite/text-filter";
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
@@ -95,6 +96,9 @@ export async function POST(req: Request) {
   // each gets a card to add the same time to their own week. Clubmates
   // only and never across a block, checked on the server.
   await tagTogether({ posterId: viewer.profile.id, logId: saved.id, kind, raw: form.get("with") }).catch(() => 0);
+  // Friends who have not posted today hear about it (078): one a day at
+  // most, accepted friends only, never across a block, never at night.
+  await noticeFriendPost(viewer.profile.id, today).catch(() => 0);
   revalidatePath(FREE_HOME);
   revalidatePath(FREE_WEEK);
   return NextResponse.json({ ok: true, id: saved.id });

@@ -45,6 +45,15 @@ export async function joinWaitlist(input: {
     if (data && data.phone !== fields.phone) {
       referredBy = input.ref;
       referrer = data as { first_name: string; phone: string };
+    } else if (!data) {
+      // A free player's own code, from a card or video they shared while
+      // sign-up is closed (share-link.ts): it counts as who sent them.
+      const { data: free } = await admin
+        .from("elite_trackers")
+        .select("profile_id, phone")
+        .eq("referral_code", input.ref)
+        .maybeSingle();
+      if (free && (free as { phone: string | null }).phone !== fields.phone) referredBy = input.ref;
     }
   }
 

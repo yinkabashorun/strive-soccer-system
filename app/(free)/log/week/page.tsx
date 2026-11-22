@@ -14,6 +14,7 @@ import {
   weekLogsFor,
 } from "@/lib/elite/tracker-server";
 import { clubRankingFor } from "@/lib/elite/tracker-ranking";
+import { shareLinkFor } from "@/lib/elite/share-link-server";
 import {
   FREE_WEEK,
   FREE_QUIZ,
@@ -62,6 +63,7 @@ export default async function MyWeekPage() {
       appUrl={APP_URL}
       inviteLink={joinLink(APP_URL, tracker.referral_code)}
       programHref={programLink(inNativeApp())}
+      shareLink={await shareLinkFor(tracker, viewer.demo)}
     />
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { DeviceSettings } from "./DeviceSettings";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
@@ -61,6 +62,11 @@ export function FreeSettings({
         <Head>Your training</Head>
         <Row href="/log/quiz" icon={<IconClock />} label="Weekly target" value={targetLine} />
         {daysLine && <Row href="/log/days" icon={<IconCalendar />} label="My training days" value={daysLine} />}
+
+        <Head>This phone</Head>
+        <div className="-ml-4">
+          <DeviceSettings showNotifications variant="free" />
+        </div>
 
         <Head>Friends</Head>
         <Row onClick={send} icon={<IconLink />} label={copied ? "Link copied" : "Send my link"} chevron />

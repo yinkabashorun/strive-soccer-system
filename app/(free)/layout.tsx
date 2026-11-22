@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { FreshOnReturn } from "@/components/elite/FreshOnReturn";
 import { FreeShell } from "@/components/elite/FreeShell";
+import { PushKeepAlive } from "@/components/elite/PushOptIn";
 import { AgreementScreen } from "@/components/elite/AgreementScreen";
 import { getViewer } from "@/lib/elite/session";
 import { signOut } from "@/lib/elite/auth-actions";
@@ -31,6 +32,8 @@ export default async function FreeLayout({ children }: { children: React.ReactNo
   return (
     <div className="min-h-[100svh] bg-black text-bone">
       <FreshOnReturn />
+      {/* A phone that said yes to notifications is kept on file (078). */}
+      {!viewer.demo && <PushKeepAlive />}
       <FreeShell gym={tracksGym(tracker.grade)}>
         <main className="mx-auto w-full max-w-md pb-[calc(120px+env(safe-area-inset-bottom))] pt-[env(safe-area-inset-top)]">
           {children}

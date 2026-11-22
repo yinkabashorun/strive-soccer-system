@@ -7,6 +7,9 @@ import type { Homework } from "@/lib/elite/types";
 import {
   groupSessions,
   isDone,
+  oneMoreLine,
+  planSessionCount,
+  planSessionsLeft,
   sessionName,
   sessionProgress,
   type SessionGroup,
@@ -15,6 +18,7 @@ import { sessionsWord } from "@/lib/elite/training";
 import { fmtDuration } from "@/lib/elite/time-trained";
 import { SessionPlayer } from "./SessionPlayer";
 import { SessionRows, WeekBar, liveMinutes, useDrillState } from "./SessionRows";
+import { goalLadder } from "@/lib/elite/home";
 
 // The heart of the player's home: ONE thing to do. The next session of the
 // week as a short list with one big Start button; Start opens the session
@@ -30,6 +34,8 @@ export function TodaySession({
   playerId,
   sendClips = true,
   example = false,
+  goal = null,
+  focus = null,
 }: {
   week: number;
   rows: Homework[]; // every drill of the week being trained
@@ -39,6 +45,8 @@ export function TodaySession({
   playerId?: string; // enables Send a clip (036) on skill drills
   sendClips?: boolean; // false for an offer without Send a clip (lib/elite/tiers.ts)
   example?: boolean; // the example player
+  goal?: { program: string | null; onboarding: string | null } | null; // the ladder's top rung
+  focus?: string | null; // the 3-month program's focus this week, by name
 }) {
   const router = useRouter();
   const { done, toggle } = useDrillState();
@@ -66,12 +74,8 @@ export function TodaySession({
       weekLabel={`Week ${week}`}
       firstName={firstName}
       minutesBefore={allTime - sessionProgress(open.group.list, done).minutesDone}
-      sessionsLeftAfter={
-        sessions.filter(
-          (s) => s.n !== open.group.n && s.list.some((h) => !isDone(h, done))
-        ).length
-      }
-      sessionsTotal={sessions.length}
+      sessionsLeftAfter={planSessionsLeft(sessions, done, open.group.n)}
+      sessionsTotal={planSessionCount(sessions)}
       weekDoneLine={nextWeekLine}
       playerId={playerId}
       sendClips={sendClips}
@@ -99,34 +103,61 @@ export function TodaySession({
 
   const progress = sessionProgress(current.list, done);
   const started = progress.done > 0;
-  const position = sessions.findIndex((s) => s.n === current.n) + 1;
+  const planTotal = planSessionCount(sessions);
+  const left = planSessionsLeft(sessions, done);
+  // The goal ladder (lib/elite/home.ts): goal, this block's focus, this
+  // week, then the Start button. The week's bars sit on the last rung.
+  const rungs = goalLadder({
+    programGoal: goal?.program,
+    onboardingGoal: goal?.onboarding,
+    focusName: focus,
+    sessionsDone: planTotal - left,
+    sessionsTotal: planTotal,
+  });
+  const more = oneMoreLine(left);
 
   return (
     <section className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03]">
       <div className="p-5 pb-4">
-        <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.2em] text-white/55">
-          <span>
-            Week {week} ·{" "}
-            {current.extra ? "Extra session" : `Session ${position} of ${sessions.length}`}
-          </span>
-          <span className="tabular-nums">
-            {progress.done}/{progress.total}
-          </span>
+        <ol aria-label="Why today's session" className="space-y-0.5 border-l-2 border-accent/50 pl-3">
+          {rungs.map((r) => (
+            <li key={r.key} className="flex items-baseline gap-3">
+              <span className="w-[74px] shrink-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-white/55">
+                {r.label}
+              </span>
+              {r.key === "week" ? (
+                <span className="flex min-w-0 flex-1 items-center gap-3">
+                  <span className="shrink-0 text-[14px] font-semibold tabular-nums text-bone">{r.value}</span>
+                  <span className="min-w-0 flex-1">
+                    <WeekBar sessions={sessions} done={done} />
+                  </span>
+                </span>
+              ) : (
+                // One line, so Home stays one screen; the whole goal is
+                // on Progress and read in full by a screen reader.
+                <span title={r.value} className="min-w-0 flex-1 truncate text-[14px] font-semibold leading-snug text-bone">
+                  {r.value}
+                </span>
+              )}
+            </li>
+          ))}
+        </ol>
+        <div className="mt-3 flex items-end justify-between gap-3">
+          <h2 className="font-display text-[34px] font-black uppercase leading-none text-bone">
+            {current.extra ? "Extra session" : started ? "Keep going" : "Today's session"}
+          </h2>
+          <p className="shrink-0 text-right text-[13px] leading-tight text-white/65" aria-label={`Week ${week}, ${progress.total} drills, about ${progress.minutesTotal} minutes`}>
+            Week {week} · {progress.total} drills
+            <br />
+            about {progress.minutesTotal} min
+          </p>
         </div>
-        <div className="mt-2.5">
-          <WeekBar sessions={sessions} done={done} />
-        </div>
-        <h2 className="mt-4 font-display text-[34px] font-black uppercase leading-none text-bone">
-          {started ? "Keep going" : "Today's session"}
-        </h2>
-        <p className="mt-1.5 text-sm text-white/65">
-          {progress.total} drills · about {progress.minutesTotal} min
-        </p>
+        {more && <p className="mt-2 text-sm font-semibold text-accent">{more}</p>}
         <button
           onClick={() =>
             setOpen({ group: current, index: Math.max(0, progress.nextIndex) })
           }
-          className="mt-4 flex h-14 w-full items-center justify-center gap-2.5 rounded-2xl bg-white font-display text-xl font-black uppercase tracking-wide text-black transition-transform active:scale-[0.98]"
+          className="mt-3.5 flex h-14 w-full items-center justify-center gap-2.5 rounded-2xl bg-white font-display text-xl font-black uppercase tracking-wide text-black transition-transform active:scale-[0.98]"
         >
           <Play className="h-5 w-5" fill="currentColor" />
           {started ? "Continue session" : "Start session"}

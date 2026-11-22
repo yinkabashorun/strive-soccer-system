@@ -71,7 +71,10 @@ export type Player = {
   // Intake + AI memory (012_intake_memory_checkins)
   club?: string;
   dominant_foot?: string;
-  self_assessment?: Partial<Record<ProgressMetric, number>>; // 0-100 self ratings
+  // The player's own ratings at intake: 1 to 5 per attribute from Nov 22
+  // 2026 (lib/elite/quiz.ts ATTRIBUTES), 0 to 100 per pillar before that.
+  // selfScale() in quiz.ts says which.
+  self_assessment?: Record<string, number>;
   coach_memory?: string; // coach's freeform memory note, always fed to the AI
   // Training environment (019): what the player can actually train with.
   // null/undefined = never asked; the AI treats that as "no wall, no goal".
@@ -172,6 +175,7 @@ export type Course = {
   intro: string | null;
   kind: CourseKind;
   external_url?: string | null; // link courses (058): where the card opens
+  cover_url?: string | null; // 080: the card's picture, a path on our own site
   active: boolean;
   sort: number;
   steps: CourseStep[];

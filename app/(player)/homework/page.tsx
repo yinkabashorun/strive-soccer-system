@@ -12,7 +12,7 @@ export const metadata = { title: "Week · Strive Elite" };
 // The Week tab (approved mock v4): the week's number and dates, what this
 // week goes after in the plan's own words, then the sessions as photo
 // cards (WeekList). The route stays /homework so every old link works.
-export default async function HomeworkPage() {
+export default async function HomeworkPage({ searchParams }: { searchParams?: { start?: string } }) {
   const viewer = await getViewer();
   if (!viewer?.playerId) return null;
   const [player, all, plans] = await Promise.all([
@@ -48,7 +48,16 @@ export default async function HomeworkPage() {
         example={viewer.demo}
         firstName={(player?.full_name ?? "").split(" ")[0]}
         totalMinutes={timeTrained(all).minutes}
+        startSession={startSessionParam(searchParams?.start)}
       />
     </div>
   );
+}
+
+// /homework?start=N opens session N of this week (the Extra Work session
+// just added). Anything that is not a small whole number is ignored.
+function startSessionParam(raw: string | undefined): number | null {
+  if (!raw || !/^\d{1,2}$/.test(raw)) return null;
+  const n = Number(raw);
+  return n >= 1 ? n : null;
 }

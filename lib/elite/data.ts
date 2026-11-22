@@ -316,7 +316,7 @@ export async function getCourses(opts?: {
   if (!supabase) return [];
   let q = supabase
     .from("elite_courses")
-    .select("id, slug, name, subtitle, intro, kind, external_url, active, sort, elite_course_steps(*, elite_drills(*))")
+    .select("id, slug, name, subtitle, intro, kind, external_url, cover_url, active, sort, elite_course_steps(*, elite_drills(*))")
     .order("sort");
   if (!opts?.includeInactive) q = q.eq("active", true);
   const { data, error } = await q;
@@ -331,6 +331,7 @@ export async function getCourses(opts?: {
     intro: c.intro,
     kind: c.kind,
     external_url: c.external_url ?? null,
+    cover_url: c.cover_url ?? null,
     active: c.active,
     sort: c.sort,
     steps: [...(c.elite_course_steps ?? [])]

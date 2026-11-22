@@ -6,7 +6,8 @@ import { MemberCard } from "@/components/elite/MemberCard";
 import { GoldRing, HoursMedal, WeeklyChart } from "@/components/elite/YouParts";
 import { TourGuide } from "@/components/elite/TourGuide";
 import { cardName, cardTierLabel, hoursMedals, memberSinceLabel, weeklyMinutes } from "@/lib/elite/experience";
-import { fmtDuration, timeTrained } from "@/lib/elite/time-trained";
+import { fmtDuration, timeByArea, timeTrained } from "@/lib/elite/time-trained";
+import { TimeByArea } from "@/components/elite/TimeByArea";
 import { liveWeekFor } from "@/lib/elite/time";
 import { DEFAULT_DRILL_MIN } from "@/lib/elite/time-trained";
 
@@ -71,6 +72,8 @@ export default async function YouPage() {
 
       <WeeklyChart bars={bars} liveWeek={week} />
 
+      <TimeByArea areas={timeByArea(homework.filter((h) => h.week <= live), week)} />
+
       <section aria-label="Earned">
         <div className="mb-3 flex items-baseline justify-between">
           <h2 className="text-[17px] font-semibold">Earned</h2>
@@ -103,7 +106,7 @@ export default async function YouPage() {
       </section>
 
       <nav className="m-card divide-y divide-white/[0.06] overflow-hidden" aria-label="More">
-        <Row href="/progress" label="Progress" detail="Your coach's rating, your goals and notes" />
+        <Row href="/progress" label="Progress" detail="Your ratings, your goals and notes" />
         <Row href="/account" label="Account and settings" detail="This phone, help, sign out" />
       </nav>
     </div>

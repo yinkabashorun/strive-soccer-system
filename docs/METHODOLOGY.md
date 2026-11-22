@@ -125,6 +125,17 @@ from the filmed bank, never a drill they have already completed, then never
 one from the current week, then the least recently done. One open extra at
 a time. Same wall and space rules, same filmed-only guard at the database.
 
+The player can also pick the drills themselves (Nov 2026, "Pick my own
+drills", lib/elite/extra-pick.ts): every active, filmed drill that fits
+them (wall, goal, a few yards, course drills only when offered), grouped by
+area, strength drills included, never a plyo. They tick 1 to 6
+(EXTRA_PICK_MAX) in the order they want to train them. The warm-up is
+always added first; their skill drills follow in tap order, their strength
+drills last; when the note requires strengthening and they picked none, one
+finisher is added last. The server checks every id again before anything
+is written. Either way in, the new session opens straight away on the Week
+tab.
+
 ## Space (Oct 2026)
 
 "A ball and a few yards" is a player setting. On it, only bank drills the

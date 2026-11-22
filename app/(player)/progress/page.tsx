@@ -43,11 +43,13 @@ export default async function ProgressPage() {
       {/* Earned, in gold. Moved here from Home so Home is one screen. */}
       <Achievements achievements={achievements} />
 
-      {/* The coach's rating of the seven pillars, kept under its own name.
-          Green means trending up. */}
+      {/* The seven pillar ratings. They are set each week by the plan
+          builder from the work done and the check-in, never by someone
+          watching, so the heading says "Your ratings", not "Coach's
+          rating" (Coach Yinka's option 2, Nov 22 2026). Green is up. */}
       <section>
         <h2 className="mb-3 font-display text-xl font-bold uppercase tracking-tight">
-          Coach&apos;s rating
+          Your ratings
         </h2>
         <ProgressPanel progress={progress} />
       </section>

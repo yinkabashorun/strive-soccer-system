@@ -24,7 +24,7 @@ const inputCls =
   "w-full rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 text-sm text-bone placeholder:text-white/25 focus:border-accent/40 focus:outline-none";
 const labelCls = "mb-1 block text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35";
 
-type CourseDraft = { id?: string; name: string; subtitle: string; intro: string; kind: CourseKind; external_url: string };
+type CourseDraft = { id?: string; name: string; subtitle: string; intro: string; kind: CourseKind; external_url: string; cover_url: string };
 type StepDraft = {
   id?: string;
   course_id: string;
@@ -139,7 +139,7 @@ export function CourseEditor({ courses, bank }: { courses: Course[]; bank: Drill
           </p>
         </div>
         <button
-          onClick={() => setCourseDraft({ name: "", subtitle: "", intro: "", kind: "drill", external_url: "" })}
+          onClick={() => setCourseDraft({ name: "", subtitle: "", intro: "", kind: "drill", external_url: "", cover_url: "" })}
           className="btn-accent shrink-0 px-4 py-2.5 text-sm"
         >
           <Plus className="h-4 w-4" /> New course
@@ -169,6 +169,15 @@ export function CourseEditor({ courses, bank }: { courses: Course[]; bank: Drill
           <div>
             <label className={labelCls}>Intro (one rule per line)</label>
             <textarea value={courseDraft.intro} onChange={(e) => setCourseDraft({ ...courseDraft, intro: e.target.value })} rows={3} className={inputCls} />
+          </div>
+          <div>
+            <label className={labelCls}>Card picture (a path on this site; blank uses the first drill&apos;s still)</label>
+            <input
+              value={courseDraft.cover_url}
+              onChange={(e) => setCourseDraft({ ...courseDraft, cover_url: e.target.value })}
+              placeholder="/courses/speed.jpg"
+              className={inputCls}
+            />
           </div>
           {courseDraft.kind === "link" && (
             <div>
@@ -243,7 +252,7 @@ export function CourseEditor({ courses, bank }: { courses: Course[]; bank: Drill
                   </div>
                   <div className={cn("flex shrink-0 gap-1", pending && "opacity-40")}>
                     <button
-                      onClick={() => setCourseDraft({ id: c.id, name: c.name, subtitle: c.subtitle ?? "", intro: c.intro ?? "", kind: c.kind, external_url: c.external_url ?? "" })}
+                      onClick={() => setCourseDraft({ id: c.id, name: c.name, subtitle: c.subtitle ?? "", intro: c.intro ?? "", kind: c.kind, external_url: c.external_url ?? "", cover_url: c.cover_url ?? "" })}
                       className="rounded-lg p-2 text-white/40 hover:bg-white/5 hover:text-bone"
                       title="Edit"
                     >

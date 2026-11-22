@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, ChevronDown, Play } from "lucide-react";
 import { sessionHeadline, sessionImage } from "@/lib/elite/experience";
@@ -37,6 +37,7 @@ export function WeekList({
   firstName = "",
   totalMinutes = 0,
   example = false,
+  startSession,
 }: {
   items: Homework[];
   currentWeek: number;
@@ -46,6 +47,10 @@ export function WeekList({
   firstName?: string;
   totalMinutes?: number; // all time, as the server last counted it
   example?: boolean; // the example player
+  // A session to open straight away (/homework?start=N): the Extra Work
+  // session the player just added. Opened once, then the address is
+  // cleaned so a reload or the back button does not open it again.
+  startSession?: number | null;
 }) {
   const router = useRouter();
   const { done, toggle } = useDrillState();
@@ -58,6 +63,18 @@ export function WeekList({
       .map(([week, list]) => ({ week, list }))
       .sort((a, b) => b.week - a.week);
   }, [items]);
+
+  const started = useRef(false);
+  useEffect(() => {
+    if (started.current || !startSession) return;
+    started.current = true;
+    router.replace("/homework", { scroll: false });
+    const group = groupSessions(items.filter((h) => h.week === currentWeek)).find((g) => g.n === startSession);
+    if (!group) return;
+    const p = sessionProgress(group.list, {});
+    if (p.complete) return;
+    setOpen({ group, index: Math.max(0, p.nextIndex), origin: null });
+  }, [startSession, items, currentWeek, router]);
 
   const close = useCallback(() => {
     setOpen(null);

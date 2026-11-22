@@ -4,7 +4,7 @@
 // completeOnboarding (lib/elite/player-actions.ts) stores is still asked,
 // and quizInput below hands that action exactly the shape it always took.
 // tests/quiz.test.ts fails when a field the server stores is not asked.
-import { PROGRESS_METRICS, type PlayerLevel, type ProgressMetric, type TrainingLoad, type TrainingSpace } from "./types";
+import type { PlayerLevel, TrainingLoad, TrainingSpace } from "./types";
 import type { OnboardingInput } from "./player-actions";
 
 // Every field the intake action takes. A Record over the input's own keys,
@@ -30,12 +30,10 @@ export const ONBOARDING_FIELDS: Record<keyof OnboardingInput, true> = {
 
 // ---- The answers, as the screens collect them ----
 export type TeamTraining = "1-2" | "3-4" | "5+" | "off";
-export type HoldsBack = "weak_foot" | "first_touch" | "speed" | "one_v_one";
 
 export type QuizAnswers = {
   gender?: "boy" | "girl";
   team?: TeamTraining;
-  holdsBack?: HoldsBack;
   age?: number;
   position?: string;
   foot?: "Right" | "Left" | "Both";
@@ -46,7 +44,8 @@ export type QuizAnswers = {
   nearbyAnswered?: boolean;
   club: string;
   goals: string;
-  ratings: Record<ProgressMetric, number>;
+  // The player's own 1 to 5 on every attribute, by attribute id.
+  attrs: Partial<Record<AttributeId, number>>;
   parentName: string;
   parentEmail: string;
   parentPhone: string;
@@ -58,7 +57,7 @@ export function emptyAnswers(knownParentPhone = ""): QuizAnswers {
     goal: false,
     club: "",
     goals: "",
-    ratings: Object.fromEntries(PROGRESS_METRICS.map((m) => [m, 50])) as Record<ProgressMetric, number>,
+    attrs: {},
     parentName: "",
     parentEmail: "",
     parentPhone: knownParentPhone,
@@ -77,15 +76,82 @@ export const TEAM_TRAINING: { id: TeamTraining; label: string; load: TrainingLoa
   { id: "off", label: "Off season right now", load: "off_season" },
 ];
 
-// "What holds you back most?" The tile's name is what the coach and the
-// plan read (the first weakness); the line under it is the player's own
-// words. The pictures are stills of Strive's own drill clips.
-export const HOLDS_BACK: { id: HoldsBack; label: string; line: string; image: string }[] = [
-  { id: "weak_foot", label: "Weak foot", line: "I only trust one foot.", image: "/drills/posters/weak-foot-tap-pull-push.jpg" },
-  { id: "first_touch", label: "First touch", line: "The ball gets away.", image: "/drills/posters/weak-foot-pop-and-juggle.jpg" },
-  { id: "speed", label: "Speed", line: "I lose the race.", image: "/drills/posters/speed-kneel-and-drive.jpg" },
-  { id: "one_v_one", label: "1v1 moves", line: "I can't beat my defender.", image: "/drills/posters/neymar-feint.jpg" },
-];
+// "Rate yourself" (Nov 22 2026, Coach Yinka: "it should just be the more
+// in depth form where they fill out attributes ... split into a couple
+// pages ... stuff on the ball, then stuff off of the ball"). Replaces the
+// four "what holds you back" tiles and the seven 0 to 100 sliders. Each
+// attribute is rated 1 to 5 by a tap; the labels are what the coach and the
+// plan builder read (self_assessment keys), the line is what the player
+// sees under the name. The lowest ones become the player's weaknesses.
+export type AttributeGroup = "on" | "off";
+export const ATTRIBUTES = [
+  { id: "first_touch", group: "on", label: "First touch", line: "The ball sticks when it reaches you." },
+  { id: "close_control", group: "on", label: "Close control", line: "Keeping it tight in a small space." },
+  { id: "weak_foot", group: "on", label: "Weak foot", line: "Passing and shooting with your other foot." },
+  { id: "dribbling", group: "on", label: "Dribbling and 1v1", line: "Taking a defender on and beating them." },
+  { id: "short_passing", group: "on", label: "Short passing", line: "Quick, clean passes to feet." },
+  { id: "long_passing", group: "on", label: "Long passing", line: "Switching play and driven balls." },
+  { id: "shooting", group: "on", label: "Shooting", line: "Striking it clean and on target." },
+  { id: "speed", group: "off", label: "Speed", line: "Your first steps and your top speed." },
+  { id: "agility", group: "off", label: "Agility", line: "Stopping, turning and changing direction fast." },
+  { id: "strength", group: "off", label: "Strength", line: "Holding a player off and winning 50/50s." },
+  { id: "fitness", group: "off", label: "Fitness", line: "Still running hard at the end of the game." },
+  { id: "scanning", group: "off", label: "Scanning", line: "Looking around before the ball comes to you." },
+  { id: "decisions", group: "off", label: "Decision making", line: "Picking the right pass, dribble or shot." },
+  { id: "movement", group: "off", label: "Movement", line: "Finding space and getting open." },
+  { id: "defending", group: "off", label: "Defending", line: "Winning the ball back." },
+] as const satisfies readonly { id: string; group: AttributeGroup; label: string; line: string }[];
+export type AttributeId = (typeof ATTRIBUTES)[number]["id"];
+
+export const RATING_MIN = 1;
+export const RATING_MAX = 5;
+// The words at the two ends and the middle of the scale.
+export const RATING_WORDS: Record<1 | 3 | 5, string> = { 1: "Needs work", 3: "Solid", 5: "A strength" };
+
+export function attributesIn(group: AttributeGroup) {
+  return ATTRIBUTES.filter((x) => x.group === group);
+}
+
+function validRating(v: unknown): v is number {
+  return typeof v === "number" && Number.isInteger(v) && v >= RATING_MIN && v <= RATING_MAX;
+}
+
+// The attributes the player rated lowest: every one at 3 or under, lowest
+// first, ties in the order of the list (on the ball first), at most three.
+// A player who rated nothing under 4 gets their single lowest, so the plan
+// still has a place to start.
+export const MAX_WEAKNESSES = 3;
+export function lowestAttributes(attrs: Partial<Record<string, number>>): string[] {
+  const rated = ATTRIBUTES.map((x, i) => ({ label: x.label, v: attrs[x.id], i })).filter(
+    (r): r is { label: (typeof ATTRIBUTES)[number]["label"]; v: number; i: number } => validRating(r.v)
+  );
+  if (!rated.length) return [];
+  const sorted = [...rated].sort((a, b) => a.v - b.v || a.i - b.i);
+  const low = sorted.filter((r) => r.v <= 3).slice(0, MAX_WEAKNESSES);
+  return (low.length ? low : sorted.slice(0, 1)).map((r) => r.label);
+}
+
+// What the server stores from the quiz's ratings: only known attributes,
+// only whole numbers 1 to 5, keyed by the attribute's label. Run on the
+// server too, so a hand-made request cannot store anything else.
+export function cleanSelfAssessment(input: unknown): Record<string, number> {
+  if (!input || typeof input !== "object") return {};
+  const src = input as Record<string, unknown>;
+  const out: Record<string, number> = {};
+  for (const x of ATTRIBUTES) {
+    const v = src[x.label];
+    if (validRating(v)) out[x.label] = v;
+  }
+  return out;
+}
+
+// The scale a stored self-assessment uses: the quiz stores 1 to 5 from
+// Nov 22 2026; every row from before holds 0 to 100 (checked: the lowest
+// top value among them is 75).
+export function selfScale(self: Record<string, unknown> | null | undefined): 5 | 100 {
+  const vals = Object.values(self ?? {}).filter((v): v is number => typeof v === "number");
+  return vals.length > 0 && vals.every((v) => v <= RATING_MAX) ? 5 : 100;
+}
 
 export const AGES = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19];
 export const POSITIONS = [
@@ -108,18 +174,21 @@ export const SPACES: { id: TrainingSpace; label: string; line: string; image: st
 // ---- The screens, in order ----
 export type QuizStepId =
   | "gender"
-  | "team"
-  | "holdsBack"
   | "age"
   | "position"
   | "foot"
   | "level"
+  | "club"
+  | "onBall"
+  | "offBall"
+  | "goals"
+  | "team"
   | "space"
   | "nearby"
-  | "club"
-  | "goals"
-  | "ratings"
   | "parent";
+
+// The four parts of the quiz, shown above each question.
+export type QuizSection = "About you" | "Your game" | "Your training" | "Your parent";
 
 export type QuizStep = {
   id: QuizStepId;
@@ -127,22 +196,24 @@ export type QuizStep = {
   fields: (keyof OnboardingInput)[];
   // A tap answers it and the next screen comes up by itself.
   autoAdvance: boolean;
+  section: QuizSection;
 };
 
 export const QUIZ_STEPS: readonly QuizStep[] = [
-  { id: "gender", fields: ["gender"], autoAdvance: true },
-  { id: "team", fields: ["training_load"], autoAdvance: true },
-  { id: "holdsBack", fields: ["weaknesses"], autoAdvance: true },
-  { id: "age", fields: ["age"], autoAdvance: true },
-  { id: "position", fields: ["position"], autoAdvance: true },
-  { id: "foot", fields: ["dominant_foot"], autoAdvance: true },
-  { id: "level", fields: ["level"], autoAdvance: true },
-  { id: "space", fields: ["space"], autoAdvance: true },
-  { id: "nearby", fields: ["has_wall", "has_goal"], autoAdvance: false },
-  { id: "club", fields: ["club"], autoAdvance: false },
-  { id: "goals", fields: ["goals"], autoAdvance: false },
-  { id: "ratings", fields: ["self_assessment"], autoAdvance: false },
-  { id: "parent", fields: ["parent_name", "parent_email", "parent_phone"], autoAdvance: false },
+  { id: "gender", fields: ["gender"], autoAdvance: true, section: "About you" },
+  { id: "age", fields: ["age"], autoAdvance: true, section: "About you" },
+  { id: "position", fields: ["position"], autoAdvance: true, section: "About you" },
+  { id: "foot", fields: ["dominant_foot"], autoAdvance: true, section: "About you" },
+  { id: "level", fields: ["level"], autoAdvance: true, section: "About you" },
+  { id: "club", fields: ["club"], autoAdvance: false, section: "About you" },
+  { id: "onBall", fields: ["self_assessment"], autoAdvance: false, section: "Your game" },
+  // The weaknesses come from both rating pages, so they are stored here.
+  { id: "offBall", fields: ["self_assessment", "weaknesses"], autoAdvance: false, section: "Your game" },
+  { id: "goals", fields: ["goals"], autoAdvance: false, section: "Your game" },
+  { id: "team", fields: ["training_load"], autoAdvance: true, section: "Your training" },
+  { id: "space", fields: ["space"], autoAdvance: true, section: "Your training" },
+  { id: "nearby", fields: ["has_wall", "has_goal"], autoAdvance: false, section: "Your training" },
+  { id: "parent", fields: ["parent_name", "parent_email", "parent_phone"], autoAdvance: false, section: "Your parent" },
 ];
 
 // Whether a screen has what it needs to move on. A typed screen that is
@@ -153,8 +224,9 @@ export function stepReady(id: QuizStepId, a: QuizAnswers): boolean {
       return a.gender === "boy" || a.gender === "girl";
     case "team":
       return Boolean(a.team);
-    case "holdsBack":
-      return Boolean(a.holdsBack);
+    case "onBall":
+    case "offBall":
+      return attributesIn(id === "onBall" ? "on" : "off").every((x) => validRating(a.attrs[x.id]));
     case "age":
       return typeof a.age === "number" && a.age > 0;
     case "position":
@@ -192,7 +264,6 @@ function splitLines(s: string): string[] {
 // sent before the quiz.
 export function quizInput(a: QuizAnswers): OnboardingInput {
   const team = TEAM_TRAINING.find((t) => t.id === a.team);
-  const holds = HOLDS_BACK.find((h) => h.id === a.holdsBack);
   return {
     age: a.age ?? 0,
     position: (a.position ?? "").trim(),
@@ -201,8 +272,10 @@ export function quizInput(a: QuizAnswers): OnboardingInput {
     dominant_foot: a.foot ?? "Right",
     gender: a.gender === "girl" ? "girl" : "boy",
     goals: splitLines(a.goals),
-    weaknesses: holds ? [holds.label] : [],
-    self_assessment: Object.fromEntries(PROGRESS_METRICS.map((m) => [m, a.ratings[m]])) as Partial<Record<ProgressMetric, number>>,
+    weaknesses: lowestAttributes(a.attrs),
+    self_assessment: cleanSelfAssessment(
+      Object.fromEntries(ATTRIBUTES.map((x) => [x.label, a.attrs[x.id]]))
+    ),
     parent_name: a.parentName.trim(),
     parent_email: a.parentEmail.trim(),
     parent_phone: a.parentPhone.trim(),

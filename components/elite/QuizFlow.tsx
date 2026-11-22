@@ -3,19 +3,22 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, ChevronLeft } from "lucide-react";
-import { PROGRESS_METRICS } from "@/lib/elite/types";
 import { completeOnboarding } from "@/lib/elite/player-actions";
 import { buildMyFirstWeek } from "@/lib/elite/first-week-actions";
 import {
   AGES,
   FEET,
-  HOLDS_BACK,
   LEVELS,
   POSITIONS,
   QUIZ_STEPS,
   SPACES,
+  RATING_MAX,
+  RATING_MIN,
+  RATING_WORDS,
   TEAM_TRAINING,
+  attributesIn,
   emptyAnswers,
+  lowestAttributes,
   firstUnanswered,
   quizInput,
   stepReady,
@@ -127,10 +130,9 @@ export function QuizFlow({
 
   if (stage === "building") {
     const team = TEAM_TRAINING.find((t) => t.id === a.team);
-    const holds = HOLDS_BACK.find((h) => h.id === a.holdsBack);
     return (
       <Building
-        weakSpot={weakSpotPhrase(holds ? [holds.label] : []) ?? "you"}
+        weakSpot={weakSpotPhrase(lowestAttributes(a.attrs)) ?? "you"}
         sessions={sessionsWord(sessionsFor(team?.load))}
         onLive={() => {
           router.replace("/dashboard");
@@ -167,7 +169,7 @@ export function QuizFlow({
 
       <div key={current.id} className="flex min-h-0 flex-1 flex-col px-5 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-5 animate-step-in">
         <div className="m-eyebrow">
-          Question {step + 1} of {total}
+          {current.section} · {step + 1} of {total}
         </div>
         <Question id={current.id} />
 
@@ -187,13 +189,6 @@ export function QuizFlow({
               options={TEAM_TRAINING.map((t) => ({ key: t.id, label: t.label }))}
               value={picked ?? a.team ?? null}
               onPick={(k) => choose(k, { team: k as QuizAnswers["team"] })}
-            />
-          )}
-          {current.id === "holdsBack" && (
-            <Tiles
-              options={HOLDS_BACK.map((h) => ({ key: h.id, label: h.label, line: h.line, image: h.image }))}
-              value={picked ?? a.holdsBack ?? null}
-              onPick={(k) => choose(k, { holdsBack: k as QuizAnswers["holdsBack"] })}
             />
           )}
           {current.id === "age" && (
@@ -270,27 +265,15 @@ export function QuizFlow({
               className={fieldCls}
             />
           )}
-          {current.id === "ratings" && (
-            <div className="space-y-3.5">
-              {PROGRESS_METRICS.map((m) => (
-                <div key={m}>
-                  <div className="flex items-center justify-between text-[14px]">
-                    <span className="font-semibold text-white/85">{m}</span>
-                    <span className="m-num text-[18px] tabular-nums">{a.ratings[m]}</span>
-                  </div>
-                  <input
-                    type="range"
-                    min={0}
-                    max={100}
-                    step={5}
-                    value={a.ratings[m]}
-                    onChange={(e) => setA((p) => ({ ...p, ratings: { ...p.ratings, [m]: Number(e.target.value) } }))}
-                    aria-label={`${m}, out of 100`}
-                    className="h-11 w-full accent-[#F5F4EF]"
-                  />
-                </div>
-              ))}
-            </div>
+          {(current.id === "onBall" || current.id === "offBall") && (
+            <RatePage
+              group={current.id === "onBall" ? "on" : "off"}
+              attrs={a.attrs}
+              onRate={(id, v) => {
+                feel("drill");
+                setA((p) => ({ ...p, attrs: { ...p.attrs, [id]: v } }));
+              }}
+            />
           )}
           {current.id === "parent" && (
             <div className="space-y-3">
@@ -363,15 +346,68 @@ export function QuizFlow({
   );
 }
 
+// One rating page: every attribute in the group, its line, and five
+// buttons, 1 to 5. The scale's words sit once at the top.
+function RatePage({
+  group,
+  attrs,
+  onRate,
+}: {
+  group: "on" | "off";
+  attrs: QuizAnswers["attrs"];
+  onRate: (id: string, v: number) => void;
+}) {
+  const scale = Array.from({ length: RATING_MAX - RATING_MIN + 1 }, (_, i) => RATING_MIN + i);
+  return (
+    <div>
+      <div className="mb-3 flex justify-between text-[12px] font-semibold uppercase tracking-[0.12em] text-white/50" aria-hidden>
+        <span>1 · {RATING_WORDS[1]}</span>
+        <span>3 · {RATING_WORDS[3]}</span>
+        <span>5 · {RATING_WORDS[5]}</span>
+      </div>
+      <div className="space-y-2.5">
+        {attributesIn(group).map((x) => {
+          const v = attrs[x.id];
+          return (
+            <div key={x.id} className="m-card px-4 py-3.5" role="group" aria-label={`${x.label}, 1 to 5`}>
+              <div className="text-[16px] font-semibold text-bone">{x.label}</div>
+              <div className="mt-0.5 text-[13px] leading-snug text-white/60">{x.line}</div>
+              <div className="mt-3 grid grid-cols-5 gap-2">
+                {scale.map((n) => {
+                  const on = v === n;
+                  return (
+                    <button
+                      key={n}
+                      type="button"
+                      onClick={() => onRate(x.id, n)}
+                      aria-pressed={on}
+                      aria-label={`${x.label}: ${n}`}
+                      className={cn(
+                        "press h-11 rounded-[14px] m-num text-[17px] tabular-nums transition-colors",
+                        on ? "bg-bone text-black" : "bg-fill-2 text-white/80"
+                      )}
+                    >
+                      {n}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 const fieldCls =
   "w-full rounded-[18px] bg-fill px-4 py-4 text-bone shadow-[inset_0_0_0_1px_rgba(255,255,255,0.07)] placeholder:text-white/35 focus:shadow-[inset_0_0_0_1.5px_rgba(245,244,239,0.5)] focus:outline-none";
 
-// The words of each question. The team and weak-spot questions carry the
-// approved video's own wording.
+// The words of each question. The team question carries the approved
+// video's own wording.
 const QUESTIONS: Record<string, { title: string; sub?: string }> = {
   gender: { title: "Boy or girl?", sub: "So the updates about your training read right." },
   team: { title: "How often does your team train?", sub: "Your week fits around it." },
-  holdsBack: { title: "What holds you back most?", sub: "Pick one. Your first two weeks start there." },
   age: { title: "How old are you?" },
   position: { title: "What position do you play?", sub: "Your main one." },
   foot: { title: "Which is your strong foot?" },
@@ -380,7 +416,8 @@ const QUESTIONS: Record<string, { title: string; sub?: string }> = {
   nearby: { title: "What is near where you train?", sub: "Tick any you have. Your drills only use what is there." },
   club: { title: "What team do you play for?", sub: "Club and age group, if you have one." },
   goals: { title: "What are you chasing?", sub: "One goal a line. This one is optional." },
-  ratings: { title: "Rate yourself.", sub: "Be honest. This is your starting line, and your coach re-rates you as you grow." },
+  onBall: { title: "On the ball.", sub: "Rate yourself on each one, 1 to 5. Be honest: the lowest ones are where your training starts." },
+  offBall: { title: "Off the ball.", sub: "Your speed, your body and how you read the game. Same scale, 1 to 5." },
   parent: { title: "Your parent or guardian.", sub: "We text them when your new week is ready." },
 };
 

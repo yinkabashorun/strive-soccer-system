@@ -17,8 +17,8 @@ const COPY: Record<
     body: "We read how the week went, then write the next one. Unlocks Monday.",
   },
   progress: {
-    headline: "Scored from real training.",
-    body: "Seven skills, tracked all season.",
+    headline: "Every minute adds up.",
+    body: "Time trained, area by area, all season.",
   },
   film: {
     headline: "We watch the real footage.",

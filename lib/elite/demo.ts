@@ -253,7 +253,22 @@ const hw = (
     completed: it.completed ?? false,
     completed_at: it.completed ? (it.completed_at ?? daysFromNow(-1)) : null,
     sort: i,
+    pillar: it.pillar ?? demoPillar(it.title),
   }));
+
+// The area each example drill is filed under, as the database's trigger
+// fills it from the drill bank for a real row (034), so the example
+// player's time by area reads like a real one.
+function demoPillar(title: string): string {
+  if (/^plyo warm-up/i.test(title)) return "Plyo";
+  if (/^strength:/i.test(title)) return "Strengthening";
+  if (/^speed:|sprint/i.test(title)) return "Speed";
+  if (/weak foot/i.test(title)) return "Weak Foot";
+  if (/feint|elastico|maradona|croqueta|mbappe|1v1/i.test(title)) return "Confidence";
+  if (/wall pass|passing|cruyff|triangle|3 cone/i.test(title)) return "Passing";
+  if (/scan/i.test(title)) return "Scanning";
+  return "Ball Mastery";
+}
 
 // Real plyo warm-ups pulled straight from the live drill bank - same title,
 // exercise text, reps, and hosted video every real session opens with.

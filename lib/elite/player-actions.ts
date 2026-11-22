@@ -12,8 +12,9 @@ import { CLIP_BUCKET, clipCooldown, clipCooldownMessage, ownsClipPath, ownsProgr
 import { getBenchmark, getHomework, getProgressVideos } from "./data";
 import { previousProgressVideo, progressVideoDue } from "./progress-video";
 import { sendPlayerSMS } from "./sms";
-import type { ProgressMetric, TrainingLoad, TrainingSpace } from "./types";
+import type { TrainingLoad, TrainingSpace } from "./types";
 import { TRAINING_LOADS } from "./training";
+import { cleanSelfAssessment } from "./quiz";
 import { NOT_IN_PLAN_MESSAGE } from "./tiers";
 import { memberHasFeature } from "./pro-server";
 
@@ -26,7 +27,7 @@ export type OnboardingInput = {
   gender: "boy" | "girl";
   goals: string[];
   weaknesses: string[];
-  self_assessment: Partial<Record<ProgressMetric, number>>;
+  self_assessment: Record<string, number>;
   parent_name: string;
   parent_email: string;
   parent_phone: string;
@@ -57,7 +58,7 @@ export async function completeOnboarding(input: OnboardingInput) {
     gender: input.gender,
     goals: input.goals.filter(Boolean).slice(0, 6),
     weaknesses: input.weaknesses.filter(Boolean).slice(0, 6),
-    self_assessment: input.self_assessment,
+    self_assessment: cleanSelfAssessment(input.self_assessment),
     parent_email: input.parent_email.trim(),
     has_wall: input.has_wall,
     has_goal: input.has_goal,

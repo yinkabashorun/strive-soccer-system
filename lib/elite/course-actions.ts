@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "./supabase/server";
 import { getViewer } from "./session";
-import { cleanExternalUrl, slugify, validateStepInput, type StepInput } from "./courses";
+import { cleanCoverUrl, cleanExternalUrl, slugify, validateStepInput, type StepInput } from "./courses";
 import type { CourseKind } from "./types";
 
 // Courses (offer stack item 9, Oct 26 2026). Coach-only writes through
@@ -34,6 +34,7 @@ export type CourseInput = {
   intro?: string | null;
   kind: CourseKind;
   external_url?: string | null; // link courses only (058)
+  cover_url?: string | null; // 080: a picture on our own site, any kind
 };
 
 export async function saveCourse(input: CourseInput) {
@@ -46,6 +47,13 @@ export async function saveCourse(input: CourseInput) {
   const kind: CourseKind = input.kind === "lesson" ? "lesson" : input.kind === "link" ? "link" : "drill";
   const subtitle = (input.subtitle ?? "").trim().slice(0, 120) || null;
   const intro = (input.intro ?? "").trim().slice(0, 2000) || null;
+  // The card's picture (080): blank clears it, anything that is not a path
+  // to an image on our own site is refused in words.
+  const coverRaw = (input.cover_url ?? "").trim();
+  const cover_url = coverRaw ? cleanCoverUrl(coverRaw) : null;
+  if (coverRaw && !cover_url) {
+    return { ok: false as const, error: "The picture must be a path on this site ending in .jpg, .png or .webp, like /courses/speed.jpg." };
+  }
   // A link course carries an https address and nothing else does (058's
   // check constraint says the same; this says it first, in plain words).
   const external_url = kind === "link" ? cleanExternalUrl(input.external_url) : null;
@@ -58,7 +66,7 @@ export async function saveCourse(input: CourseInput) {
     // A link course's address can change; no other kind has one.
     const { data: existing } = await c.supabase.from("elite_courses").select("kind").eq("id", input.id).maybeSingle();
     const was = (existing as { kind: CourseKind } | null)?.kind;
-    const patch: Record<string, unknown> = { name, subtitle, intro };
+    const patch: Record<string, unknown> = { name, subtitle, intro, cover_url };
     if (was === "link") {
       if (!external_url) return { ok: false as const, error: "A link course needs an address that starts with https:// or with a single /." };
       patch.external_url = external_url;
@@ -85,7 +93,7 @@ export async function saveCourse(input: CourseInput) {
     .maybeSingle();
   const { data, error } = await c.supabase
     .from("elite_courses")
-    .insert({ slug, name, subtitle, intro, kind, external_url, active: false, sort: ((last?.sort as number | undefined) ?? 0) + 10 })
+    .insert({ slug, name, subtitle, intro, kind, external_url, cover_url, active: false, sort: ((last?.sort as number | undefined) ?? 0) + 10 })
     .select("id")
     .single();
   if (error || !data) return { ok: false as const, error: "Couldn't create the course. Run database migrations 041 and 058 first." };

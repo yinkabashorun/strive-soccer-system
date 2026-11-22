@@ -27,7 +27,7 @@ import { generatePlanFromNotes } from "./ai-coach";
 import { applyGeneratedPlanCore } from "./coach-actions";
 import { getDrillBank, latestCoachingCallNotes, loadTemplateContext, loadProgramWeek } from "./data";
 import { isSundayEveNY, liveWeekFor } from "./time";
-import { alertCoach, latestCronRun, PLAN_BUILDER_JOB, startCronRun, updateCronRun } from "./cron-log";
+import { alertCoach, FIRST_WEEK_JOB, latestCronRun, PLAN_BUILDER_JOB, startCronRun, updateCronRun } from "./cron-log";
 import { auditLiveWeeks, type HealthIssue } from "./health";
 import { backfillHomeworkVideos } from "./data";
 import { builderTargetWeek } from "./week-target";
@@ -73,7 +73,10 @@ function synthesizeNotes(
 }
 
 export async function runAutoWeeklyPlans(
-  onProgress?: (results: Result[]) => Promise<void> | void
+  onProgress?: (results: Result[]) => Promise<void> | void,
+  // One player only (a new member's first week, buildFirstWeekFor). The
+  // same body, the same rules, the same gates: the roster is just one row.
+  onlyPlayerId?: string
 ): Promise<PlanBuilderOutcome> {
   const empty = (reason: string): PlanBuilderOutcome => ({
     ran: 0, built: 0, skipped: 0, errors: [], results: [], reason,
@@ -90,11 +93,13 @@ export async function runAutoWeeklyPlans(
     .maybeSingle();
   if (!coach?.id) return empty("no coach/admin profile to attribute plans to");
 
-  const { data: players } = await admin
+  let rosterQuery = admin
     .from("elite_players")
     .select("*")
     .not("onboarded_at", "is", null)
     .in("subscription_status", ["active", "trialing"]);
+  if (onlyPlayerId) rosterQuery = rosterQuery.eq("id", onlyPlayerId);
+  const { data: players } = await rosterQuery;
   const roster = (players as Player[] | null) ?? [];
 
   // Admin read - the drill table is coach-only under RLS and the cron has
@@ -215,6 +220,40 @@ export async function runAutoWeeklyPlans(
 }
 
 export type PlanBuilderInput = { trigger: "cron" | "coach"; authed: boolean };
+
+// A new member's first week, the moment they finish the quiz (Nov 21 2026,
+// the building screen). It is the hourly builder's own body for one player:
+// the same week rule (a quiz finished on a Sunday is held to Monday), the
+// same bank gates and the same announcement ledger, so it can never build
+// anything the hourly run would not, and a second run (this, the hourly
+// cron, a coach tap) finds the week built and does nothing. Logged under
+// its own job; an error texts the coach like any builder error, and the
+// hourly run tries again within the hour.
+export async function buildFirstWeekFor(playerId: string): Promise<PlanBuilderOutcome> {
+  const runId = await startCronRun({ job: FIRST_WEEK_JOB, trigger: "onboarding", authed: true }).catch(() => null);
+  let outcome: PlanBuilderOutcome = { ran: 0, built: 0, skipped: 0, errors: [], results: [] };
+  try {
+    outcome = await runAutoWeeklyPlans(undefined, playerId);
+  } catch (err) {
+    outcome = { ...outcome, errors: [{ name: "run", error: err instanceof Error ? err.message : "unknown crash" }] };
+  }
+  await updateCronRun(runId, {
+    built: outcome.built,
+    skipped: outcome.skipped,
+    errors: outcome.errors,
+    issues: [],
+    summary: summarize(outcome),
+    finished: true,
+  }).catch(() => undefined);
+  if (outcome.errors.length > 0) {
+    await alertCoach(
+      `A new member's first week did not build when they finished the quiz: ${outcome.errors
+        .map((e) => `${e.name} (${e.error})`)
+        .join("; ")}. The hourly builder tries again within the hour.`
+    );
+  }
+  return outcome;
+}
 
 function summarize(o: PlanBuilderOutcome): string {
   const parts = [

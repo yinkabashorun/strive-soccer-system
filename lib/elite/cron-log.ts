@@ -16,6 +16,11 @@ import { sendCoachDigest } from "./email";
 import type { CronRun } from "./types";
 
 export const PLAN_BUILDER_JOB = "weekly-plans";
+// A new member's first week, built the moment they finish the quiz
+// (lib/elite/auto-plan.ts buildFirstWeekFor). Logged under its own job so
+// the Plan builder card and the digest watchdog keep reading the hourly
+// builder alone: a member joining can never make a dead cron look alive.
+export const FIRST_WEEK_JOB = "first-week";
 
 // Where the alert text goes. The coach has no phone column on their
 // profile; this is the same number the SMS system was verified against.

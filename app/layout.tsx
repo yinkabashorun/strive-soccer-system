@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { inter, oswald } from "./fonts";
 
 export const metadata: Metadata = {
   title: "Strive Elite · Premium Player Development",
@@ -40,7 +41,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="bg-black">
+    // The member app's own type is defined here for every page (the
+    // variables only); a screen uses it through the member-ui class.
+    <html lang="en" className={`bg-black ${oswald.variable} ${inter.variable}`}>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link

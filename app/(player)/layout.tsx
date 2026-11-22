@@ -1,33 +1,29 @@
 import Link from "next/link";
 import { keptOutOfThisApp } from "@/lib/elite/native-request";
 import { redirect } from "next/navigation";
-import { AppNav, type NavItem } from "@/components/elite/AppNav";
+import { MemberNav } from "@/components/elite/MemberNav";
 import { Wordmark } from "@/components/elite/Wordmark";
 import { FreshOnReturn } from "@/components/elite/FreshOnReturn";
 import { PushKeepAlive } from "@/components/elite/PushOptIn";
 import { getViewer } from "@/lib/elite/session";
-import { getNotifications, getPlayer } from "@/lib/elite/data";
+import { getHomework, getNotifications, getPlayer } from "@/lib/elite/data";
 import { signOut } from "@/lib/elite/auth-actions";
 import { unlockDueWeeks } from "@/lib/elite/unlock";
 import { AgreementScreen } from "@/components/elite/AgreementScreen";
 import { consentDue } from "@/lib/elite/legal-server";
 import { NO_PROFILE_GATE, gateFor, type GateCopy } from "@/lib/elite/gates";
-import { tabOn } from "@/lib/elite/tiers";
+import { memberTabs } from "@/lib/elite/experience";
+import { groupSessions } from "@/lib/elite/session-flow";
+import { liveWeekFor } from "@/lib/elite/time";
 import { ProCheckoutButton } from "@/components/elite/ProCheckoutButton";
 import { SUPPORT_EMAIL } from "@/lib/elite/support";
 import { getTracker, quizDone } from "@/lib/elite/tracker-server";
 import { freeLanding } from "@/lib/elite/tracker";
 
-// Five tabs, the most an iPhone tab bar should carry (Apple HIG). Progress
-// lives one tap away: the time-trained strip on Home and the Account page.
-// A Strive Pro member (074) has no Film or Coach tab (lib/elite/tiers.ts).
-const PLAYER_NAV: NavItem[] = [
-  { href: "/dashboard", label: "Home", icon: "Home" },
-  { href: "/homework", label: "Training", icon: "Clipboard" },
-  { href: "/courses", label: "Courses", icon: "BookOpen" },
-  { href: "/film", label: "Film", icon: "Film" },
-  { href: "/messages", label: "Coach", icon: "MessageSquare" },
-];
+// The tabs (approved mock v4, Nov 20 2026): Home, Week, Courses and You
+// for Strive Pro; Coach before You for an offer with the coach chat. The
+// Film Room is a card on Home and a link on Coach, not a tab. One rule,
+// memberTabs in lib/elite/experience.ts; Progress and Account sit under You.
 
 export default async function PlayerLayout({
   children,
@@ -59,7 +55,11 @@ export default async function PlayerLayout({
   // when the terms change. The Account page (and deleting the account)
   // stays reachable without it.
   if (!viewer.demo && (await consentDue(viewer.profile.id))) {
-    return <AgreementScreen signOut={signOut} />;
+    return (
+      <div className="member-ui">
+        <AgreementScreen signOut={signOut} />
+      </div>
+    );
   }
 
   const player = await getPlayer(viewer.playerId);
@@ -83,22 +83,30 @@ export default async function PlayerLayout({
   // differently (lib/elite/gates.ts).
   if (gate) return <GateScreen gate={gate} />;
 
-  const notifications = await getNotifications(viewer.playerId);
+  const [notifications, homework] = await Promise.all([
+    getNotifications(viewer.playerId),
+    getHomework(viewer.playerId),
+  ]);
+  // The ring around the member's initials: this week's sessions done.
+  const live = liveWeekFor(player?.week1_monday, player?.current_week);
+  const maxBuilt = homework.reduce((m, h) => Math.max(m, h.week), 0);
+  const week = Math.max(1, Math.min(live, maxBuilt || 1));
+  const sessions = groupSessions(homework.filter((h) => h.week === week && !h.is_extra));
+  const weekDone = sessions.length ? sessions.filter((s) => s.list.every((h) => h.completed)).length / sessions.length : 0;
 
   return (
-    <div className="min-h-[100svh] bg-black text-bone lg:flex">
+    <div className="member-ui min-h-[100svh] bg-black text-bone lg:flex">
       <FreshOnReturn />
       {/* A phone that already said yes to notifications stays on file.
           The ask itself is on the finish screen of a session (A8). */}
       {!viewer.demo && <PushKeepAlive />}
-      <AppNav
-        items={PLAYER_NAV.filter((item) => tabOn(player?.tier, item.href) && !keptOutOfThisApp(item.href))}
+      <MemberNav
+        tabs={memberTabs(player?.tier).filter((t) => !keptOutOfThisApp(t.href))}
         name={viewer.profile.full_name}
-        color={viewer.profile.avatar_color}
-        roleLabel="Player"
+        weekDone={weekDone}
         notifications={notifications}
       />
-      <main className="mx-auto w-full max-w-3xl flex-1 px-4 pb-[calc(4.75rem+env(safe-area-inset-bottom))] pt-4 sm:px-6 lg:pb-12 lg:pt-8">
+      <main className="relative mx-auto w-full max-w-3xl flex-1 px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-[calc(env(safe-area-inset-top)+1.25rem)] sm:px-6 lg:pb-12 lg:pt-8">
         {children}
       </main>
     </div>
@@ -107,9 +115,9 @@ export default async function PlayerLayout({
 
 function GateScreen({ gate }: { gate: GateCopy }) {
   return (
-    <div className="flex min-h-[100svh] flex-col items-center justify-center bg-black px-6 py-10 text-center text-bone">
+    <div className="member-ui flex min-h-[100svh] flex-col items-center justify-center bg-black px-6 py-10 text-center text-bone">
       <Wordmark href={null} size="lg" />
-      <h1 className="mt-8 font-display text-3xl font-black uppercase tracking-tight">
+      <h1 className="mt-8 m-head text-[34px] leading-none">
         {gate.title}
       </h1>
       <p className="mt-3 max-w-sm text-[15px] leading-relaxed text-white/70">{gate.body}</p>
@@ -117,7 +125,7 @@ function GateScreen({ gate }: { gate: GateCopy }) {
       {gate.emailCoach && (
         <a
           href={`mailto:${SUPPORT_EMAIL}`}
-          className="mt-7 flex h-14 w-full max-w-xs items-center justify-center rounded-2xl bg-white font-display text-xl font-black uppercase tracking-wide text-black"
+          className="m-button mt-7 max-w-xs"
         >
           Email your coach
         </a>

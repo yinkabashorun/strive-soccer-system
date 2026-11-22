@@ -16,6 +16,7 @@ import {
   sessionProgress,
 } from "@/lib/elite/session-flow";
 import { timeTrained } from "@/lib/elite/time-trained";
+import { memberTabs } from "@/lib/elite/experience";
 
 const root = path.resolve(__dirname, "..");
 const read = (rel: string) => readFileSync(path.join(root, rel), "utf8");
@@ -172,9 +173,10 @@ describe("the feel of each moment", () => {
 
 describe("the player shell", () => {
   it("has at most five tabs", () => {
-    const layout = read("app/(player)/layout.tsx");
-    const nav = layout.slice(layout.indexOf("const PLAYER_NAV"), layout.indexOf("];", layout.indexOf("const PLAYER_NAV")));
-    expect((nav.match(/href:/g) ?? []).length).toBeLessThanOrEqual(5);
+    for (const tier of ["pro", "elite", "complete", null] as const) {
+      expect(memberTabs(tier).length).toBeLessThanOrEqual(5);
+    }
+    expect(read("app/(player)/layout.tsx")).toContain("memberTabs(player?.tier)");
   });
 
   it("sign out is not a one-tap icon in the phone header", () => {
@@ -182,5 +184,10 @@ describe("the player shell", () => {
     const top = nav.slice(nav.indexOf("Mobile top bar"), nav.indexOf("Mobile bottom tab bar"));
     expect(top).not.toContain("signOut");
     expect(top).toContain('href="/account"');
+    // The member app's corner is the bell and the member's ring, which
+    // opens You (where Account is); sign out lives on Account only.
+    const member = read("components/elite/MemberNav.tsx");
+    expect(member).not.toContain("signOut");
+    expect(member).toContain('href="/you" aria-label="You"');
   });
 });

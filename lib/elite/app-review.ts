@@ -57,6 +57,9 @@ export const SCREENS: readonly Screen[] = [
   { path: "/dashboard", since: IN_FIRST_BUILD },
   { path: "/homework", since: IN_FIRST_BUILD },
   { path: "/progress", since: IN_FIRST_BUILD },
+  // You (Nov 21 2026, the approved redesign): the member card, time
+  // trained, the weekly chart and the medals; Progress and Account under it.
+  { path: "/you", since: IN_FIRST_BUILD },
   { path: "/film", since: IN_FIRST_BUILD },
   { path: "/messages", since: IN_FIRST_BUILD },
   { path: "/courses", since: IN_FIRST_BUILD },

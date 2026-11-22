@@ -69,9 +69,9 @@ pages['04'] = dict(bg=STAD, css="""
 <div class="bub" style="left:640px;top:330px;transform:rotate(3deg);opacity:.45">NoVA is overrated</div>
 <div class="bub" style="left:120px;top:990px;transform:rotate(3deg);opacity:.45">we'd cook them</div>
 <div class="bub" style="left:620px;top:1040px;transform:rotate(-3deg);opacity:.55">easy money</div>
-<div class="big white" style="top:480px;font-size:92px;white-space:nowrap">THE AVERAGE MIAA TEAM</div>
+<div class="big white" style="top:480px;font-size:92px;white-space:nowrap">&ldquo;THE AVERAGE MIAA TEAM</div>
 <div class="big gold" style="top:590px;font-size:236px">WIPES</div>
-<div class="big white" style="top:780px;font-size:84px;white-space:nowrap">ANY NOVA PUBLIC SCHOOL.</div>
+<div class="big white" style="top:780px;font-size:84px;white-space:nowrap">ANY NOVA PUBLIC SCHOOL.&rdquo;</div>
 <div class="rule" style="top:910px"></div>
 <div class="line" style="top:935px;font-size:34px;font-weight:600;letter-spacing:4px">DEC 19 WE FIND OUT.</div>
 """)

@@ -61,35 +61,38 @@ pages['03'] = dict(bg='', css="""
 <div class="pin" style="left:178px;top:140px"></div><div class="pin" style="left:880px;top:122px"></div>
 """)
 
-pages['04'] = dict(bg='<img class="bg" src="../cutouts5/loyola-bg.jpg" style="opacity:.55">', css="""
-.bub{position:absolute;z-index:12;font-family:'Inter',sans-serif;font-weight:600;color:#f1e9d6;background:rgba(40,36,30,.78);
- border:1px solid rgba(200,168,88,.35);border-radius:28px;padding:16px 26px;font-size:28px;box-shadow:0 10px 30px rgba(0,0,0,.6)}
+pages['04'] = dict(bg=STAD, css="""
+.bub{position:absolute;z-index:14;font-family:'Inter',sans-serif;font-weight:600;color:#f1e9d6;background:rgba(40,36,30,.88);
+ border:1px solid rgba(200,168,88,.45);border-radius:28px;padding:14px 24px;font-size:26px;box-shadow:0 10px 30px rgba(0,0,0,.7)}
+.card{position:absolute;left:90px;top:590px;width:700px;height:500px;z-index:10;transform:rotate(-3deg);background:#f4ecd8;padding:16px 16px 70px;
+ box-shadow:0 40px 80px rgba(0,0,0,.9)}
+.card img{width:100%;height:100%;object-fit:cover;object-position:50% 70%;display:block}
+.card .cap{position:absolute;left:0;right:0;bottom:16px;text-align:center;font-family:'Oswald';font-weight:700;font-size:30px;letter-spacing:6px;color:#1a140a}
 """, body="""
-<div class="bub" style="left:70px;top:290px;transform:rotate(-4deg);opacity:.55">MIAA runs the DMV</div>
-<div class="bub" style="left:640px;top:330px;transform:rotate(3deg);opacity:.45">NoVA is overrated</div>
-<div class="bub" style="left:120px;top:990px;transform:rotate(3deg);opacity:.45">we'd cook them</div>
-<div class="bub" style="left:620px;top:1040px;transform:rotate(-3deg);opacity:.55">easy money</div>
-<div class="big white" style="top:480px;font-size:92px;white-space:nowrap">&ldquo;THE AVERAGE MIAA TEAM</div>
-<div class="big gold" style="top:590px;font-size:236px">WIPES</div>
-<div class="big white" style="top:780px;font-size:84px;white-space:nowrap">ANY NOVA PUBLIC SCHOOL.&rdquo;</div>
-<div class="rule" style="top:910px"></div>
-<div class="line" style="top:935px;font-size:34px;font-weight:600;letter-spacing:4px">DEC 19 WE FIND OUT.</div>
-<div class="fade" style="height:300px;z-index:9"></div>
+<div class="big white" style="top:120px;font-size:92px;white-space:nowrap">&ldquo;THE AVERAGE MIAA TEAM</div>
+<div class="big gold" style="top:222px;font-size:220px">WIPES</div>
+<div class="big white" style="top:410px;font-size:84px;white-space:nowrap">ANY NOVA PUBLIC SCHOOL.&rdquo;</div>
+<div class="line" style="top:520px;font-size:24px;letter-spacing:3px;color:#cfc2a0">THE MIAA SIDE, LOUD AND CLEAR.</div>
+<div class="card"><img src="../cutouts5/loyola-card.jpg"><div class="cap">EXHIBIT A</div></div>
+<img class="p" src="../cutouts5/j1.png" style="left:610px;top:450px;height:690px;z-index:12;filter:drop-shadow(0 24px 30px rgba(0,0,0,.85)) contrast(1.08)">
+<div class="bub" style="left:40px;top:575px;transform:rotate(-6deg)">MIAA runs the DMV</div>
+<div class="bub" style="left:700px;top:1120px;transform:rotate(4deg)">NoVA is overrated</div>
+<div class="line" style="top:1225px;font-size:30px;font-weight:700;letter-spacing:5px;z-index:15">DEC 19 WE FIND OUT.</div>
 """)
 
 pages['05'] = dict(bg=STAD, css="""
-.stamp{position:absolute;white-space:nowrap;left:600px;top:790px;z-index:22;transform:rotate(-12deg);border:5px solid #c8a858;color:#c8a858;
- font-family:'Oswald',sans-serif;font-weight:700;font-size:40px;letter-spacing:6px;padding:10px 22px;opacity:.9}
-.tro{position:absolute;left:50%;top:600px;height:560px;transform:translateX(-50%);z-index:8;opacity:.9;
- filter:drop-shadow(0 0 40px rgba(255,210,120,.3)) drop-shadow(0 40px 40px rgba(0,0,0,.85))}
+.stamp{position:absolute;white-space:nowrap;left:560px;top:520px;z-index:22;transform:rotate(-10deg);border:5px solid #c8a858;color:#c8a858;
+ font-family:'Oswald',sans-serif;font-weight:700;font-size:38px;letter-spacing:6px;padding:10px 22px;background:rgba(5,5,5,.6)}
+.pill{position:absolute;left:50%;transform:translateX(-50%);bottom:130px;z-index:25;white-space:nowrap;font-family:'Inter';font-weight:600;font-size:30px;
+ color:#f1e9d6;background:rgba(5,5,5,.82);border:1px solid rgba(200,168,88,.5);border-radius:40px;padding:16px 34px}
 """, body="""
-<div class="line" style="top:150px;font-size:34px;font-weight:700;letter-spacing:14px;color:#c8a858">PREDICTION:</div>
-<div class="big white" style="top:215px;font-size:220px">NOVA</div>
-<div class="big gold" style="top:385px;font-size:236px">SWEEPS.</div>
-<img class="tro" src="../trophy/photo-trophy-short.png">
-<div class="fade" style="height:500px"></div>
-<div class="line" style="top:1080px;font-size:30px">Screenshot this, Baltimore. <b style="color:#efd287">Prove us wrong.</b></div>
+<div class="line" style="top:130px;font-size:34px;font-weight:700;letter-spacing:14px;color:#c8a858">PREDICTION:</div>
+<div class="big white" style="top:190px;font-size:200px">NOVA</div>
+<div class="big gold" style="top:345px;font-size:216px">SWEEPS.</div>
+<img class="p" src="../cutouts5/v2.png" style="left:-40px;top:560px;width:1160px;z-index:6">
 <div class="stamp">SAVED FOR DEC 19</div>
+<div class="fade" style="height:240px;z-index:20;background:linear-gradient(to bottom,rgba(5,5,5,0),rgba(5,5,5,.92) 70%)"></div>
+<div class="pill">Screenshot this, Baltimore. <b style="color:#efd287">Prove us wrong.</b></div>
 """)
 
 pages['06'] = dict(bg='', css="""

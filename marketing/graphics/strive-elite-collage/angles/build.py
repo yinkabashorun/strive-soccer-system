@@ -61,7 +61,7 @@ pages['03'] = dict(bg='', css="""
 <div class="pin" style="left:178px;top:140px"></div><div class="pin" style="left:880px;top:122px"></div>
 """)
 
-pages['04'] = dict(bg=STAD, css="""
+pages['04'] = dict(bg='<img class="bg" src="../cutouts5/loyola-bg.jpg" style="opacity:.55">', css="""
 .bub{position:absolute;z-index:12;font-family:'Inter',sans-serif;font-weight:600;color:#f1e9d6;background:rgba(40,36,30,.78);
  border:1px solid rgba(200,168,88,.35);border-radius:28px;padding:16px 26px;font-size:28px;box-shadow:0 10px 30px rgba(0,0,0,.6)}
 """, body="""
@@ -74,6 +74,7 @@ pages['04'] = dict(bg=STAD, css="""
 <div class="big white" style="top:780px;font-size:84px;white-space:nowrap">ANY NOVA PUBLIC SCHOOL.&rdquo;</div>
 <div class="rule" style="top:910px"></div>
 <div class="line" style="top:935px;font-size:34px;font-weight:600;letter-spacing:4px">DEC 19 WE FIND OUT.</div>
+<div class="fade" style="height:300px;z-index:9"></div>
 """)
 
 pages['05'] = dict(bg=STAD, css="""
@@ -135,7 +136,7 @@ pages['07'] = dict(bg=STAD, css="""
  <div class="c" style="left:0;bottom:0;border-width:0 0 4px 4px"></div><div class="c" style="right:0;bottom:0;border-width:0 4px 4px 0"></div>
  <div class="rec"><b></b>REC</div><div class="tc">00:03:00</div><div class="gm">GROUP STAGE  •  GAME 3 OF 3</div>
 </div>
-<img class="p" src="../cutouts3/b4n.png" style="left:300px;top:470px;height:600px;z-index:11">
+<img class="p" src="../cutouts5/v1.png" style="left:230px;top:500px;width:620px;z-index:11">
 <div class="fade" style="height:330px"></div>
 <div class="line" style="top:1090px;font-size:32px">So when Baltimore loses, <b style="color:#efd287">there's film.</b></div>
 """)

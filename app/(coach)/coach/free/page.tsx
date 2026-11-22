@@ -5,6 +5,8 @@ import { ClubsAdmin } from "@/components/elite/ClubsAdmin";
 import { LineReports } from "@/components/elite/LineReports";
 import { StarToggle } from "@/components/elite/StarToggle";
 import { WaitlistAdmin } from "@/components/elite/WaitlistAdmin";
+import { TeamsAdmin } from "@/components/elite/TeamsAdmin";
+import { demoTeamsOverview, getTeamsOverview } from "@/lib/elite/club-teams-coach";
 import { getWaitlist } from "@/lib/elite/waitlist-server";
 import { getViewer } from "@/lib/elite/session";
 import { APP_URL } from "@/lib/elite/app-url";
@@ -28,6 +30,9 @@ export default async function CoachFreePage() {
 
   const data = viewer.demo ? demoOverview(nyToday()) : await getFreeOverview();
   const waitlist = viewer.demo ? [] : await getWaitlist();
+  const teams = viewer.demo ? demoTeamsOverview() : await getTeamsOverview();
+  const openReports =
+    data.reports.length + data.clubReports.length + data.lineReports.length + teams.plans.filter((p) => p.reports.length > 0).length;
   const joinedOn = (iso: string) =>
     new Date(iso).toLocaleDateString("en-US", {
       month: "short",
@@ -51,6 +56,8 @@ export default async function CoachFreePage() {
 
       <ClubsAdmin clubs={data.clubs} reports={data.clubReports} appUrl={APP_URL} />
 
+      <TeamsAdmin data={teams} />
+
       <FreeAdmin open={data.open} joinUrl={`${APP_URL}/join`} targets={data.targets} />
 
       <WaitlistAdmin rows={waitlist} open={data.open} />
@@ -72,10 +79,10 @@ export default async function CoachFreePage() {
           <div
             className={
               "font-display text-3xl font-black tabular-nums" +
-              (data.reports.length + data.clubReports.length + data.lineReports.length ? " text-red-400" : "")
+              (openReports ? " text-red-400" : "")
             }
           >
-            {data.reports.length + data.clubReports.length + data.lineReports.length}
+            {openReports}
           </div>
           <div className="mt-1 text-xs uppercase tracking-[0.16em] text-white/50">Open reports</div>
         </div>

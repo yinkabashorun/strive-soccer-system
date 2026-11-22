@@ -1580,6 +1580,11 @@ export const FREE_AGREEMENT_POINTS: string[] = [
   "We store your profile, the month and year you were born, your quiz answers, the days you plan to train, the training you log and the photos you post.",
   "The friends you added see your first name, last initial, your training time and the photos you post. So do our coaches.",
   "You can report a post or block a player. We can remove a post.",
+  // 077 (Nov 22 2026): club sessions and games are organized by players.
+  // LEGAL_VERSION is not bumped for it, as on Nov 20: it is free-app
+  // conduct, and every captain and player also accepts it on its own
+  // one-time sheet before planning or saying they're in.
+  "Club sessions and games in the app are organized by players, not by Strive. Strive provides the app only and does not run, supervise or insure them. You take part at your own risk, and a parent or guardian should know where a player under 18 is playing.",
   "Some of that information is handled by the service providers named in the Privacy Policy.",
   "A coach may text or call the number you give us. Message and data rates may apply. Reply STOP to any text to end them.",
 ];

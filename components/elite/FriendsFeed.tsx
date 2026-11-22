@@ -16,6 +16,8 @@ import { usePostLauncher } from "./FreeShell";
 import { FriendAsk } from "./FriendAsk";
 import { FriendRequests } from "./FriendRequests";
 import { ClubAsk } from "./ClubAsk";
+import { TeamRequests } from "./TeamRequests";
+import type { TeamAsks } from "@/lib/elite/club-teams-server";
 import { sendLink } from "./send-link";
 import { StarMark } from "./StarMark";
 
@@ -33,6 +35,7 @@ export function FriendsFeed({
   clubAsk,
   requests = [],
   clubRequests = [],
+  teamAsks,
   inviteLink,
 }: {
   date: string; // "Wednesday, Nov 18"
@@ -43,6 +46,7 @@ export function FriendsFeed({
   clubAsk: { code: string; name: string; problem: string | null; byCoach?: boolean } | null;
   requests?: FriendRequestView[];
   clubRequests?: ClubRequestView[];
+  teamAsks?: TeamAsks;
   inviteLink: string;
 }) {
   const { post, profile } = usePostLauncher();
@@ -63,6 +67,7 @@ export function FriendsFeed({
       </header>
 
       <FriendRequests requests={requests} clubRequests={clubRequests} />
+      {teamAsks && <TeamRequests asks={teamAsks} />}
 
       {faces.length > 0 && (
         <ul className="no-scrollbar flex gap-3.5 overflow-x-auto px-[18px] pb-1.5 pt-5" aria-label="Who trained today">
@@ -301,6 +306,7 @@ function OpenPost({ card, onGone }: { card: OpenCardView; onGone: () => void }) 
             {fmtDuration(card.minutes)}
           </div>
           {card.caption && <p className="mt-2.5 break-words text-[14.5px] text-white/90">{card.caption}</p>}
+          {card.together && <p className="mt-1.5 text-[13px] font-semibold text-white/80">{card.together}</p>}
         </div>
         {card.mine ? (
           props.count > 0 && (

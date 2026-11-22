@@ -163,6 +163,9 @@ describe("the native shell (native/)", () => {
       "NSCameraUsageDescription",
       "NSMicrophoneUsageDescription",
       "NSPhotoLibraryUsageDescription",
+      // the share sheet's Save Video (My Drills reel, Then and now) closes
+      // the app without this one
+      "NSPhotoLibraryAddUsageDescription",
     ]) {
       expect(plist).toContain(key);
     }

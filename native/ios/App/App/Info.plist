@@ -58,11 +58,13 @@
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSCameraUsageDescription</key>
-	<string>Strive Elite uses the camera so you can film a drill or a progress clip and send it to your coach.</string>
+	<string>Strive Elite uses the camera so you can film your drills and training, take a photo for your training post, and send clips to your coach.</string>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Strive Elite uses the microphone to record sound with the clips you film for your coach.</string>
+	<string>Strive Elite uses the microphone to record sound with the clips you film.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Strive Elite opens your photo library so you can pick a training or game clip to send to your coach.</string>
+	<string>Strive Elite opens your photo library so you can pick a photo or a clip of your training or games.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Strive Elite saves your progress videos to your photo library when you choose Save Video.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

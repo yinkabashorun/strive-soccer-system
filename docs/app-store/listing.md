@@ -9,7 +9,7 @@ and the app sells nothing inside it).
 
 | Field | Limit | Draft |
 |---|---|---|
-| Name | 30 | Strive Elite |
+| Name | 30 | Strive Soccer (the App Store Connect record; "Strive Elite" was taken). The name under the icon on the phone stays Strive Elite. |
 | Subtitle | 30 | Personalized soccer training |
 | Primary category | | Sports |
 | Secondary category | | Health & Fitness |

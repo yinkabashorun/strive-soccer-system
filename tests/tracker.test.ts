@@ -677,6 +677,14 @@ describe("free accounts are invisible to everything a member query reads", () =>
     "lib/elite/club-teams-server.ts",
     "lib/elite/club-teams-actions.ts",
     "lib/elite/club-teams-coach.ts",
+    // my drills (078): the player's own drills and takes, owner only
+    "lib/elite/my-drills-server.ts",
+    "lib/elite/my-drills-actions.ts",
+    // every share is an invite (078): a free player's code counts on the
+    // waitlist while sign-up is closed
+    "lib/elite/waitlist-server.ts",
+    // the daily pull (078): who posted today, for a friend's notification
+    "lib/elite/free-notices-server.ts",
   ]);
   // (the post route stores nothing itself: it hands a checked photo to
   // savePost in tracker-server.ts)
@@ -687,7 +695,7 @@ describe("free accounts are invisible to everything a member query reads", () =>
       .filter((f) => /\.(ts|tsx)$/.test(f));
     const touching = files
       .filter((f) =>
-        /elite_trackers|elite_training_logs|elite_tracker_friends|elite_tracker_blocks|elite_log_props|elite_post_reports|elite_target_table|elite_settings|tracker-posts|elite_tracker_clubs|elite_tracker_club_members|elite_club_reports|elite_tracker_star_notes|elite_line_reports/.test(
+        /elite_trackers|elite_training_logs|elite_tracker_friends|elite_tracker_blocks|elite_log_props|elite_post_reports|elite_target_table|elite_settings|tracker-posts|elite_tracker_clubs|elite_tracker_club_members|elite_club_reports|elite_tracker_star_notes|elite_line_reports|elite_tracker_drills|elite_tracker_takes/.test(
           readFileSync(f, "utf8")
         )
       )

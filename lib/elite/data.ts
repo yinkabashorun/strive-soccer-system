@@ -20,6 +20,7 @@ import {
   DEMO_PARENT_REPORTS,
   DEMO_PLAYERS,
   DEMO_PROGRESS,
+  DEMO_PROGRAMS,
   DEMO_WEEKLY_PLANS,
 } from "./demo";
 import type {
@@ -372,8 +373,9 @@ export async function loadTemplateContext(
 // Service client first: the hourly builder has no login, and the builder
 // must see the same program the coach saved.
 export async function getProgram(playerId: string, client?: SupabaseClient): Promise<Program | null> {
+  if (isDemo(playerId)) return DEMO_PROGRAMS.find((p) => p.player_id === playerId) ?? null;
   const supabase = client ?? createServiceClient() ?? createClient();
-  if (!supabase || isDemo(playerId)) return null;
+  if (!supabase) return null;
   const { data, error } = await supabase
     .from("elite_programs")
     .select("*")

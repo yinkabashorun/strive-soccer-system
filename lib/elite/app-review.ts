@@ -107,6 +107,12 @@ export const SCREENS: readonly Screen[] = [
   { path: "/log/events", since: IN_FIRST_BUILD },
   { path: "/log/events/[id]", since: IN_FIRST_BUILD },
   { path: "/log/u/[id]", since: IN_FIRST_BUILD },
+  // My drills (078, Nov 22 2026): a player's own named drills and the
+  // takes they film of them, private to the player. In the first build,
+  // which is not submitted yet; the review notes describe them
+  // (docs/app-store/listing.md).
+  { path: "/log/drills", since: IN_FIRST_BUILD },
+  { path: "/log/drills/[id]", since: IN_FIRST_BUILD },
   { path: "/log/settings", since: IN_FIRST_BUILD },
   { path: "/log/settings/profile", since: IN_FIRST_BUILD },
   { path: "/log/settings/blocked", since: IN_FIRST_BUILD },

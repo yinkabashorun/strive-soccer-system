@@ -7,6 +7,8 @@ import type { Homework } from "@/lib/elite/types";
 import {
   groupSessions,
   isDone,
+  planSessionCount,
+  planSessionsLeft,
   sessionName,
   sessionProgress,
   type SessionGroup,
@@ -188,10 +190,8 @@ export function WeekList({
           weekLabel={`Week ${topWeek.week}`}
           firstName={firstName}
           minutesBefore={allTime - sessionProgress(open.group.list, done).minutesDone}
-          sessionsLeftAfter={
-            sessions.filter((s) => s.n !== open.group.n && s.list.some((h) => !isDone(h, done))).length
-          }
-          sessionsTotal={sessions.length}
+          sessionsLeftAfter={planSessionsLeft(sessions, done, open.group.n)}
+          sessionsTotal={planSessionCount(sessions)}
           playerId={playerId}
           sendClips={sendClips}
           example={example}

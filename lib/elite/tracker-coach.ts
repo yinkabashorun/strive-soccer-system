@@ -4,6 +4,7 @@
 // comes from here: a player's screens read tracker-server.ts, which only
 // ever reads that player's own rows and their own friends'.
 import { createServiceClient } from "./supabase/server";
+import { SHARE_SOURCE } from "./share-link";
 import { nyToday } from "./time";
 import {
   DEFAULT_TARGETS,
@@ -42,6 +43,7 @@ export type FreeAccount = {
   all_minutes: number; // training, all time
   joined: string;
   referrals: number; // joined with this player's link
+  from_share: boolean; // joined through a link in something another player shared (078)
   friends: number;
   posts_week: number; // photos posted this week that are still up
   aura_level: number; // 1 to 11
@@ -130,6 +132,7 @@ export function demoOverview(today: string): FreeOverview {
         all_minutes: allTimeMinutes(logs),
         joined: "2026-11-02T15:00:00.000Z",
         referrals: 1,
+        from_share: false,
         friends: 5,
         posts_week: 2,
         aura_level: auraLevel(auraPoints(logs.map((l) => ({ ...l, photo: Boolean(l.photo) })), 240)).level,
@@ -293,6 +296,13 @@ export async function getFreeOverview(): Promise<FreeOverview> {
     add(allBy, l.profile_id, l.minutes);
     if (thisWeek) add(weekBy, l.profile_id, l.minutes);
   }
+  // Joined through a shared card or video (078). Its own read, so a
+  // database without the column yet reads as nobody.
+  const fromShare = new Set<string>();
+  {
+    const { data, error } = await admin.from("elite_trackers").select("profile_id").eq("source", SHARE_SOURCE);
+    if (!error) for (const r of (data as { profile_id: string }[] | null) ?? []) fromShare.add(r.profile_id);
+  }
   const referralsBy = new Map<string, number>();
   for (const r of rows) if (r.referred_by) add(referralsBy, r.referred_by, 1);
   const auraLogsBy = new Map<string, AuraLog[]>();
@@ -328,6 +338,7 @@ export async function getFreeOverview(): Promise<FreeOverview> {
     all_minutes: allBy.get(r.profile_id) ?? 0,
     joined: r.created_at,
     referrals: referralsBy.get(r.profile_id) ?? 0,
+    from_share: fromShare.has(r.profile_id),
     friends: friendsBy.get(r.profile_id) ?? 0,
     posts_week: postsBy.get(r.profile_id) ?? 0,
     aura_level: auraLevel(auraPoints(auraLogsBy.get(r.profile_id) ?? [], r.target_minutes ?? 0)).level,

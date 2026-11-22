@@ -4,10 +4,24 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, X } from "lucide-react";
 import { logTraining } from "@/lib/elite/tracker-actions";
+import { myDrillNames, saveTake } from "@/lib/elite/my-drills-actions";
+import {
+  DRILL_NAME_MAX,
+  TAKE_MAX_MB,
+  TAKE_TOO_LONG,
+  VIDEO_PRIVATE_LINE,
+  drillHref,
+  takeExtension,
+  takeLengthOk,
+  takePath,
+} from "@/lib/elite/my-drills";
+import { readVideoSeconds } from "@/lib/elite/my-drills-client";
+import { uploadClip } from "@/lib/elite/clip-upload";
 import { teammatesToTag } from "@/lib/elite/club-teams-actions";
 import { TOGETHER_MAX } from "@/lib/elite/club-teams";
 import type { Teammate } from "@/lib/elite/club-teams-server";
 import { FreeAvatar } from "./FreeAvatar";
+import { PushOptIn, useNotificationsAsk } from "./PushOptIn";
 import { holdRefresh } from "@/lib/elite/fresh";
 import { feel } from "@/lib/elite/native";
 import {
@@ -19,6 +33,7 @@ import {
   NO_PHOTO_LINK,
   POST_JPEG_QUALITY,
   POST_REFUSED_PHOTO,
+  POST_BUCKET,
   POST_RULES_LINE,
   chipLabel,
   fitWithin,
@@ -69,6 +84,20 @@ export function PostComposer({
   const [error, setError] = useState<string | null>(null);
   const [mates, setMates] = useState<Teammate[]>([]);
   const [tagged, setTagged] = useState<string[]>([]);
+  // A video instead of a photo (078): it can be saved as a take of one of
+  // the player's own drills. It is never posted: the feed stays photos.
+  const isVideo = Boolean(photo && photo.type.startsWith("video/"));
+  const [drills, setDrills] = useState<{ id: string; name: string }[]>([]);
+  const [profileId, setProfileId] = useState<string | null>(null);
+  const [drill, setDrill] = useState<string | "new" | null>(null);
+  const [newName, setNewName] = useState("");
+  const [tooLong, setTooLong] = useState(false);
+  const [seconds, setSeconds] = useState<number | null>(null);
+  const [percent, setPercent] = useState<number | null>(null);
+  // Notifications are asked for once, right after a photo post (078): the
+  // moment a player can see why they would want to know a friend posted.
+  const { ask, shown } = useNotificationsAsk(Boolean(photo) && !isVideo);
+  const [asking, setAsking] = useState(false);
 
   useEffect(() => {
     if (!photo) return setPreview(null);
@@ -77,9 +106,31 @@ export function PostComposer({
     return () => URL.revokeObjectURL(url);
   }, [photo]);
 
+  // A video: the player's drills for the chips, and its length.
+  useEffect(() => {
+    if (!photo || !isVideo) return;
+    let live = true;
+    myDrillNames()
+      .then((res) => {
+        if (live && res.ok) {
+          setDrills(res.drills);
+          setProfileId(res.profileId);
+        }
+      })
+      .catch(() => undefined);
+    readVideoSeconds(photo).then((s) => {
+      if (!live) return;
+      setSeconds(Number.isFinite(s) ? s : null);
+      setTooLong(!takeLengthOk(s));
+    });
+    return () => {
+      live = false;
+    };
+  }, [photo, isVideo]);
+
   // The club teammates who can be tagged: asked for once the sheet opens.
   useEffect(() => {
-    if (!photo) return;
+    if (!photo || isVideo) return;
     let live = true;
     teammatesToTag()
       .then((res) => {
@@ -89,7 +140,7 @@ export function PostComposer({
     return () => {
       live = false;
     };
-  }, [photo]);
+  }, [photo, isVideo]);
 
   // Nothing redraws the page under the sheet while it is open.
   useEffect(() => holdRefresh(), []);
@@ -135,7 +186,62 @@ export function PostComposer({
       setBusy(null);
       return setError("Your post was not saved. Check your connection and try again.");
     }
+    if (ask) {
+      shown();
+      setBusy(null);
+      return setAsking(true);
+    }
     done(FREE_HOME);
+  }
+
+  // The video: the minutes go on the week (when picked), the take into the
+  // drill (when picked). Nothing is posted to the feed.
+  async function saveVideo() {
+    if (!photo) return;
+    const toDrill = drill !== null && !tooLong;
+    if (!toDrill && minutes === null) return;
+    setError(null);
+    setBusy("post");
+    let landing = FREE_WEEK;
+    if (toDrill) {
+      if (drill === "new" && !newName.trim()) {
+        setBusy(null);
+        return setError("Give your new drill a name.");
+      }
+      const takeId = crypto.randomUUID();
+      const path = profileId ? takePath(profileId, takeId, takeExtension(photo.name, photo.type)) : null;
+      if (!path) {
+        setBusy(null);
+        return setError("Takes are saved from your own account, not the example.");
+      }
+      setPercent(0);
+      const up = await uploadClip(photo, path, setPercent, { bucket: POST_BUCKET, maxMb: TAKE_MAX_MB });
+      setPercent(null);
+      if (!up.ok) {
+        setBusy(null);
+        return setError(up.error);
+      }
+      const res = await saveTake({
+        drillId: drill === "new" ? null : drill,
+        newDrillName: drill === "new" ? newName : null,
+        takeId,
+        path,
+        seconds,
+      }).catch(() => null);
+      if (!res || !res.ok) {
+        setBusy(null);
+        return setError(res && !res.ok ? res.error : "That take was not saved. Try again.");
+      }
+      landing = drillHref(res.drillId);
+    }
+    if (minutes !== null) {
+      const res = await logTraining(minutes, gym ? kind : "training").catch(() => null);
+      if (!res || !res.ok) {
+        setBusy(null);
+        return setError(res && !res.ok ? res.error : "Your time was not saved. Check your connection and try again.");
+      }
+    }
+    done(landing);
   }
 
   async function logIt() {
@@ -150,10 +256,20 @@ export function PostComposer({
     done(FREE_WEEK);
   }
 
+  if (asking && ask) {
+    return (
+      <div role="dialog" aria-modal="true" aria-label="Notifications" className="fixed inset-0 z-50 flex flex-col bg-black text-bone">
+        <PushOptIn ask={ask} variant="free" onDone={() => done(FREE_HOME)} />
+      </div>
+    );
+  }
+
   return (
     <div role="dialog" aria-modal="true" aria-label="Post your training" className="fixed inset-0 z-50 bg-black">
       <div className="relative mx-auto h-full max-w-md overflow-hidden">
-        {preview ? (
+        {preview && isVideo ? (
+          <video src={preview} autoPlay muted loop playsInline aria-label="Your training video" className="absolute inset-0 h-full w-full object-cover" />
+        ) : preview ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img src={preview} alt="Your training photo" className="absolute inset-0 h-full w-full object-cover" />
         ) : (
@@ -224,7 +340,7 @@ export function PostComposer({
             ))}
           </div>
 
-          {preview && (
+          {preview && !isVideo && (
             <label className="mt-3 flex h-[54px] items-center gap-3 rounded-2xl border border-white/[0.09] bg-[#161616] px-4">
               <span className="sr-only">One line about your training</span>
               <input
@@ -238,7 +354,7 @@ export function PostComposer({
             </label>
           )}
 
-          {preview && mates.length > 0 && (
+          {preview && !isVideo && mates.length > 0 && (
             <div className="mt-3">
               <p className="text-[12px] font-semibold uppercase tracking-[1.6px] text-white/60">Trained with (optional)</p>
               <ul className="no-scrollbar -mx-[18px] mt-1.5 flex gap-2 overflow-x-auto px-[18px]">
@@ -267,13 +383,71 @@ export function PostComposer({
             </div>
           )}
 
+          {preview && isVideo && (
+            <div className="mt-3">
+              <p className="text-[12px] font-semibold uppercase tracking-[1.6px] text-white/60">Save to a drill (optional)</p>
+              {tooLong ? (
+                <p className="mt-1.5 text-[14px] text-white/70">{TAKE_TOO_LONG} You can still log your time.</p>
+              ) : (
+                <ul className="no-scrollbar -mx-[18px] mt-1.5 flex gap-2 overflow-x-auto px-[18px]">
+                  {[...drills.map((d) => ({ id: d.id, name: d.name })), { id: "new", name: "New drill" }].map((d) => {
+                    const on = drill === d.id;
+                    return (
+                      <li key={d.id} className="shrink-0">
+                        <button
+                          type="button"
+                          aria-pressed={on}
+                          onClick={() => setDrill(on ? null : d.id)}
+                          className={
+                            "flex h-11 items-center rounded-full px-4 text-[14px] font-semibold " +
+                            (on ? "bg-bone text-black" : "border border-white/[0.12] bg-[#161616] text-bone")
+                          }
+                        >
+                          {d.id === "new" ? `+ ${d.name}` : d.name}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+              {drill === "new" && !tooLong && (
+                <label className="mt-2 flex h-[54px] items-center gap-3 rounded-2xl border border-white/[0.09] bg-[#161616] px-4">
+                  <span className="sr-only">Name your new drill</span>
+                  <input
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value.slice(0, DRILL_NAME_MAX))}
+                    maxLength={DRILL_NAME_MAX}
+                    placeholder="Name your drill, like Weak foot juggles"
+                    className="h-full min-w-0 flex-1 bg-transparent text-[16px] text-bone placeholder:text-white/50 focus:outline-none"
+                  />
+                </label>
+              )}
+              <p className="mt-2 text-[12px] leading-snug text-white/60">{VIDEO_PRIVATE_LINE}</p>
+            </div>
+          )}
+
           {error && (
             <p className="mt-3 text-[14px] text-red-400" aria-live="polite">
               {error}
             </p>
           )}
 
-          {preview ? (
+          {preview && isVideo ? (
+            <button
+              type="button"
+              disabled={busy !== null || (minutes === null && (drill === null || tooLong))}
+              onClick={saveVideo}
+              className="mt-3 flex h-[60px] w-full items-center justify-center rounded-[20px] bg-bone font-display text-[24px] font-black uppercase tracking-[0.5px] text-black disabled:opacity-50"
+            >
+              {busy === "post" ? (
+                percent !== null ? `Sending ${percent}%` : <Loader2 className="h-6 w-6 animate-spin" />
+              ) : drill !== null && !tooLong ? (
+                minutes !== null ? "Save the take and my time" : "Save the take"
+              ) : (
+                "Log my training"
+              )}
+            </button>
+          ) : preview ? (
             <>
               <p className="mt-3 text-[12px] leading-snug text-white/60">{POST_RULES_LINE}</p>
               <button

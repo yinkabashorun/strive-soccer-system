@@ -16,6 +16,11 @@
 //     weekUnlockedPush
 //   - film-room-actions.ts notifyMembers: the pushTitle and pushBody of
 //     filmRoomAnnouncement and checkinAnnouncement (film-room.ts)
+//   - free-notices-server.ts (sendPushToProfile, the free app): friendPostPush
+//     and propsPush, each claimed first in elite_free_notices (078)
+//   - reminders-server.ts sendTrainingReminders, the hourly cron at the
+//     member's usual time: trainingReminderPush (at most one a day,
+//     claimed first in elite_training_reminders, 078)
 // One announcement a week is enforced by the database (announce.ts), so
 // the two new-week pushes can never both go out for the same week.
 
@@ -63,6 +68,26 @@ export function weekUnlockedPush(input: { first: string; week: number; focus?: s
     body: input.focus || "Your new training week just unlocked.",
     url: "/dashboard",
   };
+}
+
+// The reminder at the member's usual training time (lib/elite/reminders.ts
+// decides when). It says what is waiting; when one plan session is left it
+// says that one completes the week. Never a count of anything missed.
+export function trainingReminderPush(input: { sessionsLeft: number }): PushText {
+  return input.sessionsLeft === 1
+    ? { title: "One more session completes your week", body: "Today's is ready.", url: "/dashboard" }
+    : { title: "Today's session is ready", body: "One tap and you're training.", url: "/dashboard" };
+}
+
+// The free app's two (free-notices.ts decides when): a friend posted and
+// this player has not yet today, and a friend gave props. `first` is the
+// friend's first name.
+export function friendPostPush(first: string): PushText {
+  return { title: `${first} just posted`, body: "Post yours to see it.", url: "/log" };
+}
+
+export function propsPush(first: string): PushText {
+  return { title: `${first} gave you props`, body: "On your training post.", url: "/log" };
 }
 
 // The rule itself, as a check a test (or anything else) can run on a

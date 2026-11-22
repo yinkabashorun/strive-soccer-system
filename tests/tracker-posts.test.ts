@@ -314,7 +314,9 @@ describe("a post's photo and its one line", () => {
     expect(composer).toContain("fitWithin(");
     expect(composer).toContain('"image/jpeg", POST_JPEG_QUALITY');
     // the camera opens from the plus (and every Post my training button)
-    expect(code("components/elite/FreeShell.tsx")).toMatch(/type="file"\s+accept="image\/\*"\s+capture="environment"/);
+    // (a video can be picked too: it becomes a take of the player's own
+    // drill and never a post, 078)
+    expect(code("components/elite/FreeShell.tsx")).toMatch(/type="file"\s+accept="image\/\*,video\/\*"\s+capture="environment"/);
   });
 
   it("the server takes the photo only after it knows who is signed in, and only a JPEG", () => {
@@ -534,7 +536,8 @@ describe("the coach queue and taking a block back", () => {
     const page = code("app/(coach)/coach/free/page.tsx");
     expect(page).toContain("<ReportsQueue reports={data.reports} />");
     expect(page).toContain("{data.posts_week}");
-    expect(page).toContain("{data.reports.length + data.clubReports.length + data.lineReports.length}");
+    expect(page).toContain("data.reports.length + data.clubReports.length + data.lineReports.length");
+    expect(page).toContain("{openReports}");
     expect(page).toContain('"Posts this week"');
     const queue = code("components/elite/ReportsQueue.tsx");
     expect(queue).toContain("removePost(r.log_id)");

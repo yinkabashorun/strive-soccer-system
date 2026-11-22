@@ -6,12 +6,14 @@
 // with `song` counts in that song's measured beats (song-beats.json, 172 BPM),
 // beat 0 = the song's beat `from`, and every time below follows those beats.
 import { setup as setupApp, renderApp } from "./film.src.js";
-import SONG from "./song-beats.json" with { type: "json" };
+import SONG1 from "./song-beats.json" with { type: "json" };
+import SONGL from "./song-beats-loop.json" with { type: "json" };
 
 const $ = (s, r = document) => r.querySelector(s);
 const cl = (x) => Math.max(0, Math.min(1, x));
 const lin = (t, a, b) => cl((t - a) / (b - a));
 const out3 = (x) => 1 - Math.pow(1 - x, 3);
+const outExpo = (x) => (x >= 1 ? 1 : 1 - Math.pow(2, -10 * x));
 const inout = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
 const mix = (a, b, k) => a + (b - a) * k;
 const st = (el, css) => { for (const k in css) el.style[k] = css[k]; };
@@ -21,7 +23,8 @@ const B = 60 / BPM;
 
 // screen points the camera can push into (screen px, 390 x 844)
 const P = { card: [195, 525], tiles: [195, 480], steps: [195, 420], cards: [195, 430], hero: [195, 400], count: [195, 430],
-  drill: [195, 560], ring: [195, 320], fring: [195, 240], dots: [110, 600], ycard: [195, 190], mid: [195, 422] };
+  drill: [195, 560], ring: [195, 320], fring: [195, 240], dots: [110, 600], ycard: [195, 190], mid: [195, 422],
+  kyou: [195, 260], kpod: [195, 300], kprops: [110, 600], kstar: [150, 250] };
 const C = (s = 1, f = "mid", y = 0, ry = 0) => ({ s, f: P[f], y, ry });
 
 // shot: [beat, beats, masterFrom, masterTo, camera keys [[frac, cam]...]]
@@ -81,30 +84,50 @@ export const CUTS = {
   // comes in on beat 9 (cut beat 6) with the first shot, every shot on a downbeat
   // or a half bar, the 3 2 1 on three beats in a row, the end words on three.
   "short-song": {
-    song: { from: 3 },
-    len: 50,
+    song: { from: 3, loop: true },
+    len: 118,
     open: [[1, "YOUR WEEK."], [4, "BUILT FOR *YOU.*"]], openOut: 6,
     shots: [
-      [6, 4, 4.4, 5.9, [[0, C(1.0, "mid", 300)], [0.35, C(1.1, "card")], [1, C(1.25, "card")]]],
-      [10, 2, 10.4, 11.4, [[0, C(1.1, "tiles")], [1, C(1.2, "tiles")]]],
-      [12, 4, 16.3, 17.5, [[0, C(1.0)], [1, C(1.08)]]],
-      [16, 2, 22.0, 23.3, [[0, C(1.08, "hero")], [1, C(1.0)]]],
-      [18, 4, 24.08, 27.52, [[0, C(1.22, "count")], [1, C(1.34, "count")]]],
-      [22, 6, 27.35, 31.85, [[0, C(1.0)], [1, C(1.08, "drill")]]],
-      [28, 6, 37.7, 40.1, [[0, C(1.0)], [0.2, C(1.38, "fring")], [0.65, C(1.38, "fring")], [1, C(1.05)]]],
-      [34, 4, 43.5, 44.7, [[0, C(1.15, "dots")], [1, C(1.4, "dots")]]],
-      [38, 4, 52.0, 53.4, [[0, C(1.05, "ycard")], [1, C(1.25, "ycard")]]],
+      // day one, in order: in, the quiz, the build, the week
+      [6, 6, 4.2, 6.4, [[0, C(1.0, "mid", 300)], [0.35, C(1.1, "card")], [1, C(1.22, "card")]]],
+      [12, 6, 7.3, 9.3, [[0, C(1.04)], [1, C(1.1)]]],
+      [18, 4, 9.6, 11.5, [[0, C(1.08, "tiles")], [1, C(1.18, "tiles")]]],
+      [22, 4, 12.9, 15.0, [[0, C(1.04)], [1, C(1.12, "steps")]]],
+      [26, 4, 16.2, 17.8, [[0, C(1.0)], [1, C(1.08)]]],
+      // the first session, start to finish
+      [30, 4, 21.8, 23.3, [[0, C(1.08, "hero")], [1, C(1.0)]]],
+      [34, 6, 24.08, 26.66, [[0, C(1.22, "count")], [1, C(1.32, "count")]]],
+      [40, 8, 26.6, 32.6, [[0, C(1.0)], [1, C(1.08, "drill")]]],
+      [48, 6, 37.5, 39.9, [[0, C(1.06)], [0.45, C(1.34, "fring")], [1, C(1.38, "fring")]]],
+      [54, 4, 43.4, 44.9, [[0, C(1.15, "dots")], [1, C(1.38, "dots")]]],
+      // between sessions
+      [58, 6, 49.3, 51.5, [[0, C(1.02)], [1, C(1.1)]]],
+      [64, 4, 51.9, 53.5, [[0, C(1.05, "ycard")], [1, C(1.24, "ycard")]]],
+      // clubs and friends
+      [68, 8, 61.4, 64.4, [[0, C(1.06)], [1, C(1.12)]]],
+      [76, 6, 64.5, 66.7, [[0, C(1.04)], [1, C(1.12)]]],
+      [82, 8, 67.0, 70.2, [[0, C(1.06)], [0.45, C(1.1)], [0.85, C(1.3, "kyou")], [1, C(1.32, "kyou")]]],
+      [90, 6, 72.5, 74.9, [[0, C(1.0)], [0.15, C(1.02)], [0.55, C(1.28, "kprops")], [1, C(1.32, "kprops")]]],
+      [96, 8, 75.45, 78.09, [[0, C(1.04)], [0.35, C(1.1)], [0.65, C(1.3, "kstar")], [1, C(1.34, "kstar")]]],
+      [104, 6, 78.17, 80.39, [[0, C(1.05)], [0.4, C(1.25, "kyou")], [1, C(1.3, "kyou")]]],
     ],
-    words: [[6, "YOU'RE *IN.*"], [10, "ONE *TAP.*"], [12, "YOUR *WEEK.*"], [16, "TAP *START.*"], [18, ""],
-      [23, "*DONE.*"], [25, "*DONE.*"], [27, "*DONE.*"], [28, "SESSION *DONE.*"], [34, "ONE CIRCLE *DOWN.*"],
-      [38, "YOUR *CARD.*"], [42, ""]],
-    flash: [12, 31], done: [23, 25, 27], shimmer: [31], deviceOut: 42, tension: [18, 22],
-    end: [[43, "OPEN STRIVE."], [44, "TAP START."], [45, "*TRAIN.*"]], mark: 46,
+    words: [[6, "YOU'RE *IN.*"], [12, "A QUICK *QUIZ.*"], [18, "WHAT HOLDS YOU *BACK?*"], [22, "BUILT AROUND *YOU.*"],
+      [26, "YOUR WEEK. *EVERY MONDAY.*"], [30, "TAP *START.*"], [34, ""], [40, "ONE DRILL AT A *TIME.*"],
+      [42, "*DONE.*"], [44, "*DONE.*"], [46, "*DONE.*"], [48, "SESSION *DONE.*"], [54, "ONE CIRCLE *DOWN.*"],
+      [58, "COURSES ON *TOP.*"], [61, "SPEED. STRENGTH. *FIRST TOUCH.*"], [64, "YOUR *CARD.*"],
+      [68, "YOUR *CLUBS.*"], [70, "YOUR CLUB *TEAM.*"], [72, "YOUR PICKUP *SQUAD.*"], [74, "YOUR HIGH *SCHOOL.*"],
+      [76, "AND *STRIVE SOCCER.*"], [82, "COMPETE WITH YOUR *FRIENDS.*"], [88, "MOVE *UP.*"], [90, "SHARE YOUR *TRAINING.*"],
+      [92, "GIVE *PROPS.*"], [96, "THE BEST GET A *STAR.*"], [100, "WILL YOU BE THE NEXT *STRIVE STAR?*"],
+      [104, "OUTWORK YOUR *COACH.*"], [110, ""]],
+    flash: [26, 51, 88, 108], done: [42, 44, 46], shimmer: [51], deviceOut: 110, tension: [34, 40],
+    end: [[111, "OPEN STRIVE."], [112, "TAP START."], [113, "*TRAIN.*"]], mark: 114,
   },
 };
 
 const cutName = new URLSearchParams(location.search).get("cut") || "long";
 const CUT = CUTS[cutName];
+// a song cut can run on the looped song (song-loop.py): its beat times, and SONG= points at the looped audio
+const SONG = CUT.song && CUT.song.loop ? SONGL : SONG1;
 
 // beat <-> seconds. A plain cut is a straight 120 BPM grid; a song cut follows
 // the measured beats of the song, so a beat that comes a hair early or late in
@@ -137,55 +160,100 @@ export function setup() {
 
 const gold = (s) => s.replace(/\*(.+?)\*/g, '<span class="metal">$1</span>');
 
+// the camera passes through its keys on a smooth curve (monotone cubic): no stop at each key,
+// no overshoot, so a push in keeps flowing instead of hitching mid-shot
+function smoothAt(xs, ys, x) {
+  const n = xs.length;
+  if (n === 1 || x <= xs[0]) return ys[0];
+  if (x >= xs[n - 1]) return ys[n - 1];
+  const d = [], m = [];
+  for (let i = 0; i < n - 1; i++) d.push((ys[i + 1] - ys[i]) / Math.max(1e-6, xs[i + 1] - xs[i]));
+  for (let i = 0; i < n; i++) {
+    if (i === 0) m.push(n > 2 ? d[0] * 0.5 : 0);
+    else if (i === n - 1) m.push(n > 2 ? d[n - 2] * 0.5 : 0);
+    else m.push(d[i - 1] * d[i] <= 0 ? 0 : (2 * d[i - 1] * d[i]) / (d[i - 1] + d[i]));
+  }
+  let i = 0; while (x > xs[i + 1]) i++;
+  const h = xs[i + 1] - xs[i], u = (x - xs[i]) / h, u2 = u * u, u3 = u2 * u;
+  if (n === 2) { const e = inout(u); return ys[0] + (ys[1] - ys[0]) * e; }
+  return (2 * u3 - 3 * u2 + 1) * ys[i] + (u3 - 2 * u2 + u) * h * m[i] + (-2 * u3 + 3 * u2) * ys[i + 1] + (u3 - u2) * h * m[i + 1];
+}
 function camAt(keys, f) {
-  let a = keys[0], b = keys[keys.length - 1];
-  for (let i = 0; i < keys.length - 1; i++) if (f >= keys[i][0] && f <= keys[i + 1][0]) { a = keys[i]; b = keys[i + 1]; break; }
-  const p = a === b ? 1 : inout(cl((f - a[0]) / (b[0] - a[0])));
-  const A = a[1], Z = b[1];
-  return { s: mix(A.s, Z.s, p), fx: mix(A.f[0], Z.f[0], p), fy: mix(A.f[1], Z.f[1], p), y: mix(A.y, Z.y, p), ry: mix(A.ry, Z.ry, p) };
+  const xs = keys.map((k) => k[0]), g = (fn) => smoothAt(xs, keys.map((k) => fn(k[1])), f);
+  return { s: g((c) => c.s), fx: g((c) => c.f[0]), fy: g((c) => c.f[1]), y: g((c) => c.y), ry: g((c) => c.ry) };
 }
 
 function wordOn(beat) { let w = null; for (const x of CUT.words) if (beat >= x[0]) w = x; return !!(w && w[1]); }
+// 0 to 1, how far the phone has moved for a line on screen: eases over 0.35 s each time a line comes or goes
+function wordLevel(t) {
+  let on = false, at = -1e9;
+  for (const x of CUT.words) {
+    const tx = tb(x[0]); if (tx > t) break;
+    const now = !!x[1]; if (now !== on) { on = now; at = tx; }
+  }
+  const k = inout(cl((t - at) / 0.35));
+  return on ? k : 1 - k;
+}
 
-export function render(t) {
+// soft cuts: every cut between two shots that touch is a dissolve centred on the beat. It starts
+// XF_PRE s before the beat, the new shot is about half in on the beat and fully in XF_LEN s after
+// the start. The renderer draws the outgoing shot on a second page and lays it over this one.
+const XF_PRE = 0.08, XF_LEN = 0.35;
+export function xfade(t) {
+  for (let i = 1; i < CUT.shots.length; i++) {
+    const s = CUT.shots[i], p = CUT.shots[i - 1];
+    if (p[0] + p[1] !== s[0]) continue;
+    const d = t - (tb(s[0]) - XF_PRE);
+    if (d >= 0 && d < XF_LEN) return { cur: i, prev: i - 1, a: out3(d / XF_LEN) };
+  }
+  return null;
+}
+export function render(t, force) {
   const beat = bt(t), dev = $("#device"), glow = $("#glow");
-  // the shot on screen
+  // the shot on screen (or the one a dissolve asks for, which may run a moment past its own beats)
   let shot = null, si = -1;
-  CUT.shots.forEach((s, i) => { if (beat >= s[0] && beat < s[0] + s[1]) { shot = s; si = i; } });
+  if (force != null) { si = force; shot = CUT.shots[si]; }
+  else CUT.shots.forEach((s, i) => { if (beat >= s[0] && beat < s[0] + s[1]) { shot = s; si = i; } });
   const outK = lin(beat, CUT.deviceOut, CUT.deviceOut + 0.6);
   if (shot) {
     const [b0, n, m0, m1, cam] = shot;
-    const f = (beat - b0) / n;
-    renderApp(mix(m0, m1, f));
+    // the shot runs evenly in time: the song's beats are not all the same length, so stepping the
+    // camera and the app by beats made both speed up and slow down from beat to beat
+    const t0s = tb(b0), fu = (t - t0s) / (tb(b0 + n) - t0s), f = cl(fu);
+    // the app keeps running through a dissolve (fu a little under 0 or over 1), the camera holds
+    renderApp(mix(m0, m1, force != null ? fu : f));
     const c = camAt(cam, f);
-    // a hard cut on the beat with a short whip in from alternating sides
-    const since = t - tb(b0), dir = si % 2 ? -1 : 1;
-    const whip = si === 0 ? 0 : 1 - out3(cl(since / 0.16));
-    const until = tb(b0 + n) - t, leaveW = 1 - cl(until / 0.06);
-    const pulse = 1 + 0.012 * Math.exp(-((beat % 1) * 8));
+    // a cut on the beat lands softly: the new shot starts a touch closer and settles into place
+    const since = t - tb(b0), settle = si === 0 ? 0 : 0.5 * (1 - outExpo(cl(since / 0.5)));
+    // and the phone is never dead still: a slow, even drift
+    const dx = 3 * Math.sin(t * 0.7), dy = 4 * Math.sin(t * 0.53 + 1), rz = 0.35 * Math.sin(t * 0.41 + 2);
     const fx = 11 + c.fx * k, fy = 11 + c.fy * k, cx = 165, cy = 357;
     const pull = cl((c.s - 1) * 2.2);
     // while a line is on screen the phone never rises into it
     let ty = (cy - fy) * pull + c.y;
-    if (wordOn(beat)) ty = Math.max(ty, -10 + (11 + c.fy * k) * (c.s - 1));
+    // ... and glides out of the way when a line comes on instead of jumping
+    const wl = wordLevel(t);
+    const floor = -10 + (11 + c.fy * k) * (c.s - 1), smax = (a, b, e = 40) => (a + b + Math.sqrt((a - b) * (a - b) + e * e)) / 2;
+    if (wl > 0) ty = mix(ty, smax(ty, floor), wl);
     st(dev, {
       opacity: 1 - outK,
       transformOrigin: `${fx}px ${fy}px`,
-      transform: `translate(${(cx - fx) * pull + whip * 70 * dir}px, ${ty}px) scale(${c.s * pulse * mix(1, 0.92, outK)}) rotateY(${c.ry}deg)`,
-      filter: `blur(${(whip + leaveW) * 5}px)`,
+      transform: `translate(${(cx - fx) * pull + dx}px, ${ty + dy + 12 * settle}px) scale(${c.s * (1 + 0.04 * settle) * mix(1, 0.92, outK)}) rotateY(${c.ry}deg) rotate(${rz}deg)`,
+      filter: "none",
     });
   } else {
     st(dev, { opacity: 0 });
   }
-  st(glow, { opacity: shot ? 0.55 + 0.35 * Math.exp(-((beat % 1) * 5)) : 0 });
+  // the glow breathes once a bar instead of flickering every beat
+  st(glow, { opacity: shot ? 0.62 + 0.12 * Math.sin((Math.PI * 2 * beat) / 4) : 0 });
 
   // the slammed line
   const kin = $("#kin");
   let w = null; for (const x of CUT.words) if (beat >= x[0]) w = x;
   if (w && w[1] && beat < CUT.deviceOut) {
     if (kin.dataset.t !== w[1]) { kin.innerHTML = `<span>${gold(w[1])}</span>`; kin.dataset.t = w[1]; }
-    const d = t - tb(w[0]), s = out3(cl(d / 0.14));
-    st(kin, { opacity: cl(d / 0.05), transform: `scale(${mix(1.28, 1, s)})`, filter: `blur(${(1 - s) * 7}px)` });
+    const d = t - tb(w[0]), s = outExpo(cl(d / 0.4));
+    st(kin, { opacity: cl(d / 0.12), transform: `translateY(${(1 - s) * 10}px) scale(${mix(1.08, 1, s)})`, filter: `blur(${(1 - s) * 4}px)` });
   } else st(kin, { opacity: 0 });
 
   // open and end words, stacked in the middle
@@ -195,13 +263,13 @@ export function render(t) {
   const html = list.map((x, i) => `<div class="bl" data-i="${i}">${gold(x[1])}</div>`).join("");
   if (big.dataset.h !== html) { big.innerHTML = html; big.dataset.h = html; }
   [...big.children].forEach((el, i) => {
-    const d = t - tb(list[i][0]), s = out3(cl(d / 0.14));
-    st(el, { opacity: d < 0 ? 0 : cl(d / 0.05) * fade, transform: `scale(${mix(1.3, 1, s)})`, filter: `blur(${(1 - s) * 8}px)` });
+    const d = t - tb(list[i][0]), s = outExpo(cl(d / 0.45));
+    st(el, { opacity: d < 0 ? 0 : cl(d / 0.14) * fade, transform: `translateY(${(1 - s) * 12}px) scale(${mix(1.1, 1, s)})`, filter: `blur(${(1 - s) * 5}px)` });
   });
   const mk = $("#mark"), md = t - tb(CUT.mark);
   st(mk, { opacity: md < 0 ? 0 : out3(cl(md / 0.5)), transform: `translateY(${(1 - out3(cl(md / 0.5))) * 10}px)` });
 
   // the white flash on the big moments
-  let fl = 0; for (const fb of CUT.flash) { const d = t - tb(fb); if (d >= 0 && d < 0.16) fl = Math.max(fl, 0.32 * (1 - d / 0.16)); }
+  let fl = 0; for (const fb of CUT.flash) { const d = t - tb(fb); if (d >= 0 && d < 0.4) fl = Math.max(fl, 0.16 * cl(d / 0.04) * (1 - out3(cl(d / 0.4)))); }
   st($("#flash"), { opacity: fl });
 }

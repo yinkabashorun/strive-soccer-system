@@ -9,6 +9,9 @@ import {
   drillKind,
   groupSessions,
   isDone,
+  oneMoreLine,
+  planSessionCount,
+  planSessionsLeft,
   sessionName,
   sessionProgress,
   type SessionGroup,
@@ -19,6 +22,7 @@ import { sessionsWord } from "@/lib/elite/training";
 import { fmtDuration } from "@/lib/elite/time-trained";
 import { SessionPlayer, type Origin } from "./SessionPlayer";
 import { liveMinutes, useDrillState } from "./SessionRows";
+import { goalLadder } from "@/lib/elite/home";
 import { cn } from "@/lib/utils";
 
 // The heart of Home (approved mock v4, Nov 20 2026): ONE card and ONE
@@ -38,6 +42,8 @@ export function TodaySession({
   playerId,
   sendClips = true,
   example = false,
+  goal = null,
+  focus = null,
 }: {
   week: number;
   rows: Homework[]; // every drill of the week being trained
@@ -47,6 +53,8 @@ export function TodaySession({
   playerId?: string; // enables Send a clip (036) on skill drills
   sendClips?: boolean; // false for an offer without Send a clip (lib/elite/tiers.ts)
   example?: boolean; // the example player
+  goal?: { program: string | null; onboarding: string | null } | null; // the ladder's top rung
+  focus?: string | null; // the 3-month program's focus this week, by name
 }) {
   const router = useRouter();
   const { done, toggle } = useDrillState();
@@ -81,10 +89,8 @@ export function TodaySession({
       weekLabel={`Week ${week}`}
       firstName={firstName}
       minutesBefore={allTime - sessionProgress(open.group.list, done).minutesDone}
-      sessionsLeftAfter={
-        sessions.filter((s) => s.n !== open.group.n && s.list.some((h) => !isDone(h, done))).length
-      }
-      sessionsTotal={sessions.length}
+      sessionsLeftAfter={planSessionsLeft(sessions, done, open.group.n)}
+      sessionsTotal={planSessionCount(sessions)}
       weekDoneLine={nextWeekLine}
       playerId={playerId}
       sendClips={sendClips}
@@ -117,6 +123,19 @@ export function TodaySession({
   const started = progress.done > 0;
   const headline = sessionHeadline(current.list);
   const image = sessionImage(current.list);
+  const planTotal = planSessionCount(sessions);
+  const left = planSessionsLeft(sessions, done);
+  // The goal ladder (lib/elite/home.ts): goal, this block's focus, this
+  // week, then Start. It sits over the top of the photo, so Home stays
+  // one screen; "One more session completes your week." sits by Start.
+  const rungs = goalLadder({
+    programGoal: goal?.program,
+    onboardingGoal: goal?.onboarding,
+    focusName: focus,
+    sessionsDone: planTotal - left,
+    sessionsTotal: planTotal,
+  });
+  const more = oneMoreLine(left);
 
   function start(index: number) {
     const r = cardRef.current?.getBoundingClientRect();
@@ -142,6 +161,44 @@ export function TodaySession({
           className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0)_12%,rgba(0,0,0,0.72)_46%,rgba(0,0,0,0.92)_64%,#000_96%)]"
           aria-hidden
         />
+        {rungs.length > 0 && (
+          <ol
+            aria-label="Why today's session"
+            className="absolute inset-x-3 top-3 space-y-1 rounded-[18px] bg-black/55 px-3.5 py-2.5 backdrop-blur-md"
+          >
+            {rungs.map((r) => (
+              <li key={r.key} className="flex items-center gap-3">
+                <span className="w-[92px] shrink-0 whitespace-nowrap text-[11px] font-semibold uppercase tracking-[0.12em] text-white/60">
+                  {r.label}
+                </span>
+                {r.key === "week" ? (
+                  <span className="flex min-w-0 flex-1 items-center gap-2.5">
+                    <span className="shrink-0 text-[14px] font-semibold tabular-nums text-bone">{r.value}</span>
+                    <span className="flex min-w-0 flex-1 gap-1" aria-hidden>
+                      {sessions
+                        .filter((g) => !g.extra)
+                        .map((g) => (
+                          <span
+                            key={g.n}
+                            className={cn(
+                              "h-1 flex-1 rounded-full",
+                              g.list.every((h) => isDone(h, done)) ? "bg-metal" : "bg-white/20"
+                            )}
+                          />
+                        ))}
+                    </span>
+                  </span>
+                ) : (
+                  // One line, so Home stays one screen; the whole goal is
+                  // on Progress and read in full by a screen reader.
+                  <span title={r.value} className="min-w-0 flex-1 truncate text-[14px] font-semibold text-bone">
+                    {r.value}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ol>
+        )}
         <div className="absolute inset-x-0 bottom-0 px-5 pb-5">
           <div className="m-eyebrow">
             {started ? "Keep going" : "Today"} ·{" "}
@@ -190,7 +247,8 @@ export function TodaySession({
               );
             })}
           </div>
-          <button onClick={() => start(Math.max(0, progress.nextIndex))} className="m-button mt-4">
+          {more && <p className="mt-3 text-[14px] font-semibold text-bone">{more}</p>}
+          <button onClick={() => start(Math.max(0, progress.nextIndex))} className="m-button mt-3">
             <Play className="h-5 w-5" fill="currentColor" />
             {started ? "Continue session" : "Start session"}
           </button>

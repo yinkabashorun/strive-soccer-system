@@ -28,6 +28,10 @@ export const FIVE_V_FIVE = {
   dmWord: "5V5",
   instagramDm: "https://ig.me/m/strivesoccerfc",
   instagram: "https://www.instagram.com/strivesoccerfc",
+  // The Strive app waitlist (075, 076), tagged so the coach sees who came
+  // from the 5v5. A team with its whole roster on it gets its own graphic
+  // in the rollout and starts in the app as a club (Coach Yinka, Nov 22).
+  waitlist: "/join?src=5v5",
   handle: "@strivesoccerfc",
   // The team registration form (Coach Yinka, Nov 19: first "a google
   // form", then he sent his GHL form). One form for both prices; the page

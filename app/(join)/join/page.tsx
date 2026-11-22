@@ -1,16 +1,19 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { JoinForm } from "@/components/elite/JoinForm";
 import { UnderAge } from "@/components/elite/UnderAge";
+import { WaitlistForm } from "@/components/elite/WaitlistForm";
+import { WaitlistStatus } from "@/components/elite/WaitlistStatus";
+import { APP_URL } from "@/lib/elite/app-url";
+import { waitlistInviter, waitlistStatus } from "@/lib/elite/waitlist-server";
+import { WAITLIST_COOKIE, cleanSource, cleanWaitlistCode, waitlistLink } from "@/lib/elite/waitlist";
 import { nyToday } from "@/lib/elite/time";
 import { getViewer } from "@/lib/elite/session";
 import { isSupabaseConfigured } from "@/lib/elite/supabase/server";
 import { homePathFor, inviteLandingFor, isFreeSignupOpen, trackerFor } from "@/lib/elite/tracker-server";
 import {
   JOIN_AGE_COOKIE,
-  JOIN_CLOSED_MESSAGE,
   birthYears,
   cleanClubCode,
   cleanReferralCode,
@@ -26,13 +29,14 @@ export const dynamic = "force-dynamic";
 
 // The free training log's front door (migration 069). Open to anyone only
 // while a coach has free sign-up switched on at /coach/free; otherwise it
-// says so and offers sign-in. A teammate's link carries ?ref=CODE: whoever
+// is the waitlist (075): ?w=CODE is the teammate who sent the link and
+// ?src=WORD where the visit came from (5v5, ig). A teammate's link carries ?ref=CODE: whoever
 // joins with it sends that teammate a friend request (072). It works inside
 // the App Store app too: a free account buys nothing.
 export default async function JoinPage({
   searchParams,
 }: {
-  searchParams?: { ref?: string; club?: string };
+  searchParams?: { ref?: string; club?: string; w?: string; src?: string };
 }) {
   const ref = cleanReferralCode(searchParams?.ref);
   const club = cleanClubCode(searchParams?.club);
@@ -52,17 +56,32 @@ export default async function JoinPage({
   // form does.
   const configured = isSupabaseConfigured();
   if (configured && !(await isFreeSignupOpen())) {
+    // Sign-up is closed: this page is the waitlist (migration 075). A
+    // player who joined on this phone sees their link and their teammates.
+    const mine = await waitlistStatus(cookies().get(WAITLIST_COOKIE)?.value);
+    if (mine) {
+      return (
+        <WaitlistStatus
+          first={mine.first}
+          link={waitlistLink(APP_URL, mine.code)}
+          phone={mine.phone}
+          teammates={mine.teammates}
+        />
+      );
+    }
+    if (cookies().get(JOIN_AGE_COOKIE)) return <UnderAge />;
+    // A share from a free player who has no waitlist code carries their
+    // free code (?ref=); it counts here as who sent them (share-link.ts).
+    const w = cleanWaitlistCode(searchParams?.w) ?? ref;
+    const sender = await waitlistInviter(w);
     return (
-      <div className="mx-auto flex min-h-[100svh] w-full max-w-md flex-col px-[22px] pb-[calc(32px+env(safe-area-inset-bottom))] pt-[calc(96px+env(safe-area-inset-top))]">
-        <h1 className="font-display text-[46px] font-black uppercase leading-[0.9]">Not open yet</h1>
-        <p className="mt-3 text-[15.5px] leading-[1.4] text-white/70">{JOIN_CLOSED_MESSAGE}</p>
-        <Link
-          href="/login"
-          className="mt-auto flex h-[58px] w-full items-center justify-center rounded-[18px] bg-bone font-display text-[23px] font-black uppercase text-black"
-        >
-          Sign in
-        </Link>
-      </div>
+      <WaitlistForm
+        configured={configured}
+        referral={w ?? ""}
+        source={cleanSource(searchParams?.src) ?? (w ? "teammate" : "")}
+        years={birthYears(nyToday())}
+        invite={sender ? { kind: "friend", first: sender.first, initials: sender.initials } : null}
+      />
     );
   }
 
@@ -77,6 +96,7 @@ export default async function JoinPage({
     <JoinForm
       configured={configured}
       referral={ref ?? ""}
+      source={cleanSource(searchParams?.src) ?? ""}
       club={club ?? ""}
       years={birthYears(nyToday())}
       invite={invite}

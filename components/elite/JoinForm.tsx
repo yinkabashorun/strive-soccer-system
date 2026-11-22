@@ -26,12 +26,14 @@ const STEPS: Step[] = ["age", "name", "contact", "password", "agree"];
 export function JoinForm({
   configured,
   referral,
+  source = "",
   club,
   years,
   invite,
 }: {
   configured: boolean;
   referral: string;
+  source?: string; // where the link came from ("share", 078), for the coach
   club: string; // a club's link code, joined with the account
   years: number[]; // the birth years offered, newest first
   invite: JoinInvite;
@@ -88,6 +90,7 @@ export function JoinForm({
           password,
           ref: referral,
           club,
+          src: source,
           birth: { month: Number(month), year: Number(year) },
           agreed: { guardian, terms },
         }),
@@ -273,18 +276,20 @@ export function JoinForm({
 
 // One question a screen: the back arrow, the step bar, the question, and
 // the white button pinned to the bottom.
-function Screen({
+export function Screen({
   step,
+  steps = STEPS,
   onBack,
   onSubmit,
   children,
 }: {
-  step: Step;
+  step: string;
+  steps?: readonly string[]; // the step bar; the waitlist has its own
   onBack: () => void;
   onSubmit: (e: React.FormEvent) => void;
   children: React.ReactNode;
 }) {
-  const at = STEPS.indexOf(step);
+  const at = steps.indexOf(step);
   return (
     <form
       onSubmit={onSubmit}
@@ -295,8 +300,8 @@ function Screen({
           <IconBack />
         </button>
       </div>
-      <div className="flex gap-1.5 px-[18px]" aria-label={`Step ${at + 1} of ${STEPS.length}`}>
-        {STEPS.map((s, i) => (
+      <div className="flex gap-1.5 px-[18px]" aria-label={`Step ${at + 1} of ${steps.length}`}>
+        {steps.map((s, i) => (
           <i key={s} className={"h-1 flex-1 rounded-sm " + (i <= at ? "bg-bone" : "bg-[#262626]")} />
         ))}
       </div>
@@ -305,7 +310,7 @@ function Screen({
   );
 }
 
-function Question({ title, line }: { title: string; line: string }) {
+export function Question({ title, line }: { title: string; line: string }) {
   return (
     <div className="px-[22px] pt-[30px]">
       <h1 className="font-display text-[46px] font-black uppercase leading-[0.9]">{title}</h1>
@@ -314,7 +319,7 @@ function Question({ title, line }: { title: string; line: string }) {
   );
 }
 
-function Foot({
+export function Foot({
   loading,
   label,
   note,
@@ -355,7 +360,7 @@ function Foot({
   );
 }
 
-function Input({
+export function Input({
   label,
   value,
   onChange,
@@ -363,6 +368,7 @@ function Input({
   placeholder,
   autoComplete,
   minLength,
+  required = true,
 }: {
   label: string;
   value: string;
@@ -371,13 +377,14 @@ function Input({
   placeholder?: string;
   autoComplete?: string;
   minLength?: number;
+  required?: boolean;
 }) {
   return (
     <label className="block">
       <span className="mb-2 block text-[14px] font-semibold text-white/70">{label}</span>
       <input
         type={type}
-        required
+        required={required}
         value={value}
         minLength={minLength}
         onChange={(e) => onChange(e.target.value)}

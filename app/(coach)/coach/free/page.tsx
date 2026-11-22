@@ -4,6 +4,10 @@ import { ReportsQueue } from "@/components/elite/ReportsQueue";
 import { ClubsAdmin } from "@/components/elite/ClubsAdmin";
 import { LineReports } from "@/components/elite/LineReports";
 import { StarToggle } from "@/components/elite/StarToggle";
+import { WaitlistAdmin } from "@/components/elite/WaitlistAdmin";
+import { TeamsAdmin } from "@/components/elite/TeamsAdmin";
+import { demoTeamsOverview, getTeamsOverview } from "@/lib/elite/club-teams-coach";
+import { getWaitlist } from "@/lib/elite/waitlist-server";
 import { getViewer } from "@/lib/elite/session";
 import { APP_URL } from "@/lib/elite/app-url";
 import { nyToday } from "@/lib/elite/time";
@@ -25,6 +29,10 @@ export default async function CoachFreePage() {
   if (viewer.role === "player") redirect("/dashboard");
 
   const data = viewer.demo ? demoOverview(nyToday()) : await getFreeOverview();
+  const waitlist = viewer.demo ? [] : await getWaitlist();
+  const teams = viewer.demo ? demoTeamsOverview() : await getTeamsOverview();
+  const openReports =
+    data.reports.length + data.clubReports.length + data.lineReports.length + teams.plans.filter((p) => p.reports.length > 0).length;
   const joinedOn = (iso: string) =>
     new Date(iso).toLocaleDateString("en-US", {
       month: "short",
@@ -48,7 +56,11 @@ export default async function CoachFreePage() {
 
       <ClubsAdmin clubs={data.clubs} reports={data.clubReports} appUrl={APP_URL} />
 
+      <TeamsAdmin data={teams} />
+
       <FreeAdmin open={data.open} joinUrl={`${APP_URL}/join`} targets={data.targets} />
+
+      <WaitlistAdmin rows={waitlist} open={data.open} />
 
       <div className="mt-8 grid max-w-2xl grid-cols-2 gap-3 sm:grid-cols-4">
         <div className="elite-card p-4">
@@ -67,10 +79,10 @@ export default async function CoachFreePage() {
           <div
             className={
               "font-display text-3xl font-black tabular-nums" +
-              (data.reports.length + data.clubReports.length + data.lineReports.length ? " text-red-400" : "")
+              (openReports ? " text-red-400" : "")
             }
           >
-            {data.reports.length + data.clubReports.length + data.lineReports.length}
+            {openReports}
           </div>
           <div className="mt-1 text-xs uppercase tracking-[0.16em] text-white/50">Open reports</div>
         </div>
@@ -113,7 +125,10 @@ export default async function CoachFreePage() {
                 </td>
                 <td className="px-4 py-3 tabular-nums text-white/70">{a.posts_week}</td>
                 <td className="px-4 py-3 tabular-nums text-white/70">{fmtDuration(a.all_minutes)}</td>
-                <td className="px-4 py-3 text-white/70">{joinedOn(a.joined)}</td>
+                <td className="px-4 py-3 text-white/70">
+                  {joinedOn(a.joined)}
+                  {a.from_share && <span className="ml-2 text-[11px] font-semibold uppercase text-accent">From a share</span>}
+                </td>
                 <td className="px-4 py-3 tabular-nums text-white/70">{a.referrals}</td>
                 <td className="px-4 py-3 tabular-nums text-white/70">{a.friends}</td>
               </tr>

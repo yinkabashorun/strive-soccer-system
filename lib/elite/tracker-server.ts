@@ -19,6 +19,7 @@ import { createServiceClient, isSupabaseConfigured } from "./supabase/server";
 import type { Viewer } from "./session";
 import { shiftDay } from "./time";
 import { clubRankingFor } from "./tracker-ranking";
+import { withLine } from "./club-teams";
 import {
   CLUB_CAP,
   CLUB_REFUSED,
@@ -120,7 +121,7 @@ export type Tracker = {
 export const TRACKER_COLUMNS =
   "profile_id, phone, birth_year, birth_month, grade, level, season, goal, target_minutes, plan_days, quiz_done_at, referral_code, referred_by, playing_for, starred_at, avatar_path, created_at";
 
-type Admin = NonNullable<ReturnType<typeof createServiceClient>>;
+export type Admin = NonNullable<ReturnType<typeof createServiceClient>>;
 
 // ---- One account ------------------------------------------------------
 
@@ -247,7 +248,7 @@ export async function emailHasFreeAccount(email: string): Promise<boolean> {
 // ---- Friends ----------------------------------------------------------
 
 // The ids of this player's own friends: every pair they are one side of.
-async function friendIdsOf(admin: Admin, profileId: string): Promise<string[]> {
+export async function friendIdsOf(admin: Admin, profileId: string): Promise<string[]> {
   const [left, right] = await Promise.all([
     admin.from("elite_tracker_friends").select("b").eq("a", profileId),
     admin.from("elite_tracker_friends").select("a").eq("b", profileId),
@@ -593,7 +594,7 @@ export async function myLatestPhotoFor(viewer: Viewer, today: string): Promise<s
 }
 
 // Blocks either way between the viewer and any of these accounts.
-async function blocksWith(admin: Admin, profileId: string, ids: string[]): Promise<Block[]> {
+export async function blocksWith(admin: Admin, profileId: string, ids: string[]): Promise<Block[]> {
   const out: Block[] = [];
   for (let i = 0; i < ids.length; i += 200) {
     const some = ids.slice(i, i + 200);
@@ -611,7 +612,7 @@ async function blocksWith(admin: Admin, profileId: string, ids: string[]): Promi
 const POST_COLUMNS = "id, profile_id, trained_on, minutes, kind, created_at, photo_path, caption, removed_at";
 
 // First name and last initial for a list of accounts.
-async function namesOf(admin: Admin, ids: string[]): Promise<Map<string, string>> {
+export async function namesOf(admin: Admin, ids: string[]): Promise<Map<string, string>> {
   const names = new Map<string, string>();
   for (let i = 0; i < ids.length; i += 200) {
     const { data } = await admin.from("elite_profiles").select("id, full_name").in("id", ids.slice(i, i + 200));
@@ -665,6 +666,7 @@ export type OpenCardView = Omit<OpenCard, "photoPath" | "createdAt"> & {
   ago: string;
   props: number;
   propped: boolean;
+  together?: string | null; // "with Diego, Nico": teammates who added it (077)
 };
 export type FeedCardView = OpenCardView | LockedCard;
 export type FeedView = {
@@ -737,10 +739,22 @@ export async function feedFor(viewer: Viewer, today: string): Promise<FeedView> 
   const cards = buildFeed({ rows, viewer: photoViewer, names, today });
 
   const open = cards.filter((c): c is OpenCard => c.state === "open");
-  const [urls, props] = await Promise.all([
+  const [urls, props, together] = await Promise.all([
     sign(open.map((c) => c.photoPath)),
     propsOf(open.map((c) => c.id)),
+    admin ? togetherOf(admin, open.map((c) => c.id)) : Promise.resolve(new Map<string, string[]>()),
   ]);
+  // "with Diego, Nico": the teammates who added a post's time to their own
+  // week. Named only when the viewer may see them (the viewer, their
+  // friends); anyone else is a count.
+  const withFor = (logId: string): string | null => {
+    const ids = together.get(logId) ?? [];
+    const shown = ids.filter((x) => x === me.id || friendIds.has(x));
+    return withLine(
+      shown.map((x) => (x === me.id ? "you" : firstNameOf(names.get(x) ?? "a teammate"))),
+      ids.length - shown.length
+    );
+  };
 
   const activeToday = new Set(rows.filter((r) => r.trained_on === today).map((r) => r.profile_id));
   return {
@@ -765,12 +779,28 @@ export async function feedFor(viewer: Viewer, today: string): Promise<FeedView> 
           ago: timeSince({ day: c.day, createdAt }, nowMs, today),
           props: props.get(c.id)?.count ?? 0,
           propped: props.get(c.id)?.mine ?? false,
+          together: withFor(c.id),
           starred: starred.has(c.ownerId),
           photo: photos.get(c.ownerId) ?? null,
         },
       ];
     }),
   };
+}
+
+// Who added each of these posts' time to their own week (trained
+// together, 077). An unreachable table reads as nobody.
+async function togetherOf(admin: Admin, logIds: string[]): Promise<Map<string, string[]>> {
+  const out = new Map<string, string[]>();
+  for (let i = 0; i < logIds.length; i += 200) {
+    const { data } = await admin
+      .from("elite_trained_together")
+      .select("log_id, tagged")
+      .in("log_id", logIds.slice(i, i + 200))
+      .eq("answer", "added");
+    for (const r of (data as { log_id: string; tagged: string }[] | null) ?? []) out.set(r.log_id, [...(out.get(r.log_id) ?? []), r.tagged]);
+  }
+  return out;
 }
 
 // One post, with what this viewer is to it, for the actions that act on
@@ -809,6 +839,30 @@ export async function postForViewer(
       reported,
     },
   };
+}
+
+// One entry in a player's own week: the one place a log without a photo
+// is written (Log it without a photo, and a teammate's "Add it to your
+// week" from a trained-together card, 077). The database holds the day's
+// 8 hours (071); the caller has already checked gym is theirs to log
+// (mayLog). NOT a server action.
+export async function insertLog(
+  admin: Admin,
+  input: { profileId: string; day: string; minutes: number; kind: Kind; weekTarget: number | null }
+): Promise<{ ok: true; id: string } | { ok: false; dayCap: boolean }> {
+  const { data, error } = await admin
+    .from("elite_training_logs")
+    .insert({
+      profile_id: input.profileId,
+      trained_on: input.day,
+      minutes: input.minutes,
+      kind: input.kind,
+      week_target: input.weekTarget || null,
+    })
+    .select("id")
+    .single();
+  if (error || !data) return { ok: false, dayCap: limitHit(error) === "day_cap" };
+  return { ok: true, id: data.id as string };
 }
 
 // Store a post: the photo first, then the entry that points at it, so an

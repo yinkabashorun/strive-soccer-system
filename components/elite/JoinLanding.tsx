@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Crest, FreeAvatar } from "./FreeAvatar";
+import { WAITLIST_LANDING_LINE } from "@/lib/elite/waitlist";
 
 // Who sent the link, as much as a signed-out visitor may see: a friend's
 // first name and initials, or a club's name and crest. Never a photo of a
@@ -18,8 +19,25 @@ export const JOIN_PHOTO = "/free-demo/post-gary-1.jpg";
 // Opening an invite (the mock, screen 9): the photo full screen, who
 // invited you, the wordmark, what the app is in one line, and one white
 // button.
-export function JoinLanding({ invite, onJoin }: { invite: JoinInvite; onJoin: () => void }) {
-  const button = !invite ? "Get started" : invite.kind === "friend" ? `Join ${invite.first}` : "Join the club";
+// While sign-up is closed the same page is the waitlist's front door
+// (migration 075): "Opening soon" above the headline and one button,
+// Get on the list.
+export function JoinLanding({
+  invite,
+  onJoin,
+  waitlist = false,
+}: {
+  invite: JoinInvite;
+  onJoin: () => void;
+  waitlist?: boolean;
+}) {
+  const button = waitlist
+    ? "Get on the list"
+    : !invite
+      ? "Get started"
+      : invite.kind === "friend"
+        ? `Join ${invite.first}`
+        : "Join the club";
   return (
     <div className="relative mx-auto min-h-[100svh] w-full max-w-md overflow-hidden">
       <div className="absolute inset-0" aria-hidden>
@@ -46,6 +64,7 @@ export function JoinLanding({ invite, onJoin }: { invite: JoinInvite; onJoin: ()
       <div className="absolute inset-x-[22px] bottom-[calc(40px+env(safe-area-inset-bottom))] z-[2]">
         <p className="font-display text-[15px] font-black tracking-[3px] text-bone">
           STRIVE <span className="text-accent">ELITE</span>
+          {waitlist && <span className="ml-3 text-[13px] tracking-[2px] text-white/60">OPENING SOON</span>}
         </p>
         <h1 className="mt-3 font-display text-[56px] font-black uppercase leading-[0.86] tracking-[-0.5px]">
           Train.
@@ -59,6 +78,7 @@ export function JoinLanding({ invite, onJoin }: { invite: JoinInvite; onJoin: ()
         <p className="mt-3.5 text-[16px] leading-[1.4] text-white/80">
           Log the work you put in on your own, see your friends&apos; training, and see who put in the most work this
           week.
+          {waitlist && WAITLIST_LANDING_LINE}
         </p>
         <button
           type="button"

@@ -119,11 +119,32 @@ export function sessionName(group: Pick<SessionGroup, "n" | "extra">): string {
   return group.extra ? "Extra session" : `Session ${group.n}`;
 }
 
+// The plan sessions of a week still open: sessions with a drill not yet
+// done, Extra work left out (an extra is on top of the week, never part of
+// completing it). `except` leaves one session out (the one being finished).
+export function planSessionsLeft(sessions: SessionGroup[], done: DoneMap, except?: number): number {
+  return sessions.filter(
+    (s) => !s.extra && s.n !== except && s.list.some((h) => !isDone(h, done))
+  ).length;
+}
+
+export function planSessionCount(sessions: SessionGroup[]): number {
+  return sessions.filter((s) => !s.extra).length;
+}
+
+// Said on Home and on the finish screen when exactly one plan session of
+// the week is left; nothing at all otherwise (a complete week is never
+// nagged, two or more left is not news).
+export const ONE_MORE_LINE = "One more session completes your week.";
+export function oneMoreLine(sessionsLeft: number): string | null {
+  return sessionsLeft === 1 ? ONE_MORE_LINE : null;
+}
+
 // What the finish screen says comes next. Never a nag, never a count of
 // what is left undone beyond the plain fact.
 export function afterSessionLine(sessionsLeft: number): string {
   if (sessionsLeft <= 0) return "That was the last session of the week.";
-  if (sessionsLeft === 1) return "One session left this week. It is there when you are.";
+  if (sessionsLeft === 1) return ONE_MORE_LINE;
   return `${sessionsLeft} sessions left this week. The next one is there when you are.`;
 }
 

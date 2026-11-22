@@ -323,9 +323,20 @@ describe("the word", () => {
       "lib/elite/tracker-server.ts",
       "lib/elite/tracker-demo.ts",
       "app/(free)/log/week/page.tsx",
+      // clubs as teams (077): the screens say "club", never "team"
+      "components/elite/PlanForm.tsx",
+      "components/elite/PlanDetail.tsx",
+      "components/elite/PlanCardView.tsx",
+      "components/elite/TeamRequests.tsx",
+      "components/elite/EventEntry.tsx",
+      "components/elite/CountySheet.tsx",
+      "app/(free)/log/events/page.tsx",
+      "app/(free)/log/club/[id]/near/page.tsx",
     ];
+    // "club-teams" is a file's name (lib/elite/club-teams.ts), not a word on
+    // a screen.
     const real =
-      /team training|town team|club team|school team|College team|tournament team|higher team|for my team|What team do you play for|5v5: Team \d/i;
+      /team training|town team|club team|school team|College team|tournament team|higher team|for my team|What team do you play for|5v5: Team \d|club-teams/i;
     for (const f of files) {
       const src = code(f);
       for (const m of src.matchAll(/\bteams?\b/gi)) {

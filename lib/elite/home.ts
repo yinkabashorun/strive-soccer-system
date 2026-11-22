@@ -28,3 +28,34 @@ export function homeMoreItems(input: {
   if (input.canSetBreak) items.push({ key: "break", label: "Take a break" });
   return items;
 }
+
+// THE GOAL LADDER (Nov 22 2026): at the top of the session card, why
+// today's session matters, top to bottom: the player's goal, this block's
+// focus, how far through this week they are. Then the Start button.
+//   goal   the 3-month program's quiz answer when a program exists, else
+//          the first goal from onboarding; no rung when there is none
+//   focus  the program's focus pillar for the week being trained; no rung
+//          without a program (or past its twelve weeks)
+//   week   "2 of 4": plan sessions done of the plan sessions in the week
+//          (Extra work is on top of the week and never counted)
+// Never a streak, never a count of anything missed.
+export type LadderRung = { key: "goal" | "focus" | "week"; label: string; value: string };
+
+export function goalLadder(input: {
+  programGoal?: string | null;
+  onboardingGoal?: string | null;
+  focusName?: string | null;
+  sessionsDone: number;
+  sessionsTotal: number;
+}): LadderRung[] {
+  const rungs: LadderRung[] = [];
+  const goal = (input.programGoal ?? "").trim() || (input.onboardingGoal ?? "").trim();
+  if (goal) rungs.push({ key: "goal", label: "Goal", value: goal });
+  const focus = (input.focusName ?? "").trim();
+  if (focus) rungs.push({ key: "focus", label: "This block", value: focus });
+  if (input.sessionsTotal > 0) {
+    const done = Math.max(0, Math.min(input.sessionsDone, input.sessionsTotal));
+    rungs.push({ key: "week", label: "This week", value: `${done} of ${input.sessionsTotal}` });
+  }
+  return rungs;
+}

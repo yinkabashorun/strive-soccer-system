@@ -126,7 +126,7 @@ describe("the week as sessions", () => {
 describe("the finish screen never nags", () => {
   it("says what is left as a plain fact, with no guilt", () => {
     expect(afterSessionLine(0)).toBe("That was the last session of the week.");
-    expect(afterSessionLine(1)).toContain("One session left");
+    expect(afterSessionLine(1)).toBe("One more session completes your week.");
     for (const n of [0, 1, 2, 5]) {
       expect(afterSessionLine(n)).not.toMatch(/miss|behind|streak|don't|hurry|only/i);
     }

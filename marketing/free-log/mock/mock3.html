@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Strive clubs as teams (mock-up)</title>
+<style>
+@font-face{font-family:"BC";src:url(BarlowCondensed-900.ttf);font-weight:900}
+@font-face{font-family:"BC";src:url(BarlowCondensed-800.ttf);font-weight:800}
+@font-face{font-family:"B";src:url(Barlow-500.ttf);font-weight:500}
+@font-face{font-family:"B";src:url(Barlow-600.ttf);font-weight:600}
+@font-face{font-family:"B";src:url(Barlow-700.ttf);font-weight:700}
+:root{--ink:#000;--line:rgba(255,255,255,.08);--bone:#f4f1ea;--dim:rgba(244,241,234,.56);--faint:rgba(244,241,234,.34);--gold:#d4af37;--red:#ff5a4e;--fill:#141414;--fill2:#1e1e1e}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#1b1b1b;font-family:"B",sans-serif;font-weight:500;color:var(--bone);display:flex;flex-wrap:wrap;gap:28px;padding:28px;width:1300px}
+body.one{padding:0;gap:0;background:#000;width:auto}
+.phone{width:390px;height:844px;background:var(--ink);position:relative;overflow:hidden;flex:none}
+body:not(.one) .phone{border-radius:44px;outline:1px solid #2a2a2a}
+.bc{font-family:"BC";font-weight:900;text-transform:uppercase}
+svg.i{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+/* top bar (inner pages) */
+.bar{height:44px;margin-top:50px;padding:0 10px;display:flex;align-items:center;justify-content:space-between}
+.bar .t{font-weight:700;font-size:17px;display:flex;align-items:center;gap:6px}
+.ib{width:44px;height:44px;display:grid;place-items:center}
+
+/* avatars */
+.av{border-radius:50%;object-fit:cover;display:block;flex:none}
+.ini{border-radius:50%;display:grid;place-items:center;font-weight:700;color:#ddd;background:linear-gradient(145deg,#2c2c2c,#1a1a1a);flex:none}
+.star{width:15px;height:15px;fill:var(--gold);flex:none}
+
+/* tab bar */
+.tabs{position:absolute;z-index:5;left:0;right:0;bottom:0;height:88px;padding:0 44px 22px;display:flex;align-items:center;justify-content:space-between;background:linear-gradient(180deg,rgba(0,0,0,0),#000 38%)}
+.tab{font-size:12px;font-weight:600;color:var(--dim);text-align:center;width:72px}
+.tab svg{display:block;margin:0 auto 5px}
+.tab.on{color:var(--bone)}
+.plus{width:62px;height:62px;border-radius:50%;background:var(--bone);display:grid;place-items:center;box-shadow:0 0 0 5px #000;color:#000}
+.plus svg{width:28px;height:28px;stroke-width:2.6}
+
+/* buttons */
+.btn{height:44px;border-radius:12px;background:var(--fill2);display:flex;align-items:center;justify-content:center;gap:7px;font-weight:700;font-size:15px}
+.btn.white{background:var(--bone);color:#000}
+.big{height:58px;border-radius:18px;background:var(--bone);color:#000;display:grid;place-items:center;font-family:"BC";font-weight:900;font-size:23px;letter-spacing:.5px;text-transform:uppercase}
+
+/* ---------- 5. profile ---------- */
+.ph{display:flex;align-items:center;gap:22px;padding:6px 18px 0}
+.ring{position:relative;width:96px;height:96px;flex:none}
+.ring svg{position:absolute;inset:0}
+.ring img,.ring .ini{position:absolute;inset:7px;width:82px;height:82px}
+.lvl{position:absolute;left:50%;bottom:-7px;transform:translateX(-50%);background:var(--gold);color:#000;font-family:"BC";font-weight:900;font-size:15px;padding:2px 9px 1px;border-radius:9px;border:2.5px solid #000;white-space:nowrap}
+.stats{flex:1;display:flex;justify-content:space-between}
+.stats div{text-align:center}
+.stats b{display:block;font-family:"BC";font-weight:900;font-size:26px;line-height:1}
+.stats span{font-size:12.5px;color:var(--dim)}
+.who{padding:16px 18px 0}
+.who .n{font-weight:700;font-size:16px;display:flex;align-items:center;gap:5px}
+.who .l{font-size:14px;color:var(--dim);margin-top:3px}
+.who .pf{font-size:14px;margin-top:2px}
+.btns{display:flex;gap:8px;padding:14px 18px 0}
+.btns .btn{flex:1}
+.hl{display:flex;gap:16px;padding:18px 18px 0}
+.hl div{width:68px;text-align:center;font-size:11.5px;color:var(--bone);font-weight:600;line-height:1.2}
+.crest{width:64px;height:64px;border-radius:50%;margin:0 auto 7px;display:grid;place-items:center;box-shadow:0 0 0 1.5px #000,0 0 0 3px #333}
+.crest svg{width:34px;height:38px}
+.crest.add{background:#000;box-shadow:0 0 0 1.5px #333 inset}
+.gtabs{display:flex;margin-top:18px;border-bottom:1px solid var(--line)}
+.gtabs div{flex:1;height:44px;display:grid;place-items:center;color:var(--faint)}
+.gtabs .on{color:var(--bone);box-shadow:inset 0 -1.5px 0 var(--bone)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5px}
+.grid div{aspect-ratio:1;position:relative;overflow:hidden}
+.grid img{width:100%;height:100%;object-fit:cover;display:block}
+.grid span{position:absolute;left:7px;bottom:6px;font-family:"BC";font-weight:900;font-size:17px;text-shadow:0 1px 6px rgba(0,0,0,.8)}
+
+/* ---------- 6. action sheet ---------- */
+.dimmed{position:absolute;inset:0;filter:brightness(.35)}
+.dimmed img{width:100%;height:100%;object-fit:cover}
+.as{position:absolute;left:0;right:0;bottom:0;background:#1a1a1a;border-radius:26px 26px 0 0;padding:10px 0 34px;z-index:4}
+.grab{width:38px;height:5px;border-radius:3px;background:#444;margin:0 auto 14px}
+.asrow{display:flex;align-items:center;gap:14px;height:56px;padding:0 22px;font-size:16.5px;font-weight:600}
+.asrow svg{opacity:.9}
+.asrow.red{color:var(--red)}
+.sep{height:1px;background:var(--line);margin:6px 0}
+.askey{display:flex;gap:10px;padding:2px 16px 12px}
+.askey div{flex:1;height:82px;border-radius:16px;background:#242424;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:600}
+
+/* ---------- 7. club ---------- */
+.hero{height:290px;position:relative;overflow:hidden}
+.hero>img{width:100%;height:100%;object-fit:cover;filter:brightness(.55) saturate(.9)}
+.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,0) 30%,rgba(0,0,0,.2) 55%,#000 100%)}
+.hero .bar{position:absolute;top:0;left:0;right:0;z-index:2;margin-top:50px}
+.hero .ib{background:rgba(0,0,0,.4);border-radius:50%;width:40px;height:40px;margin:0 4px}
+.cname{position:absolute;z-index:2;left:18px;right:18px;bottom:16px;display:flex;align-items:flex-end;gap:14px}
+.cname .crest{margin:0;width:70px;height:70px;box-shadow:0 0 0 3px #000}
+.cname .crest svg{width:38px;height:42px}
+.cname .bc{font-size:34px;line-height:.92}
+.cname .m{font-size:13.5px;color:var(--dim);margin-top:5px}
+.cstat{display:flex;margin:6px 18px 0;background:var(--fill);border-radius:18px;padding:16px 0}
+.cstat div{flex:1;text-align:center;border-right:1px solid var(--line)}
+.cstat div:last-child{border:0}
+.cstat b{display:block;font-family:"BC";font-weight:900;font-size:30px;line-height:1}
+.cstat span{font-size:12px;color:var(--dim)}
+.sec{font-size:11px;letter-spacing:2.4px;text-transform:uppercase;color:var(--dim);font-weight:700;padding:22px 18px 8px}
+.mem{display:flex;align-items:center;gap:12px;height:58px;padding:0 18px}
+.mem .av,.mem .ini{width:42px;height:42px;font-size:14px}
+.mem .nm{font-weight:600;font-size:15.5px;display:flex;align-items:center;gap:5px}
+.mem .sb{font-size:12.5px;color:var(--dim);margin-top:1px}
+.mem .tm{margin-left:auto;font-family:"BC";font-weight:900;font-size:22px}
+.mem.you .nm,.mem.you .tm{color:var(--gold)}
+.mem.you .ini{background:var(--gold);color:#000}
+.tag{font-size:10.5px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;color:#000;background:var(--bone);border-radius:6px;padding:2px 6px 1px}
+
+/* ---------- 8. ranking ---------- */
+.ptitle{padding:58px 18px 0}
+.ptitle .bc{font-size:44px;line-height:.9}
+.ptitle .sub{font-size:13px;color:var(--dim);margin-top:6px}
+.pill{display:inline-flex;gap:4px;background:var(--fill);border-radius:12px;padding:4px;margin:16px 18px 6px}
+.pill div{height:34px;padding:0 14px;border-radius:9px;display:grid;place-items:center;font-weight:700;font-size:14px;color:var(--dim)}
+.pill .on{background:var(--fill2);color:var(--bone)}
+.top3{display:flex;gap:8px;padding:10px 18px 4px;align-items:flex-end}
+.top3>div{flex:1;border-radius:20px;background:var(--fill);padding:16px 8px 14px;text-align:center}
+.top3 .crest{width:58px;height:58px;margin:0 auto 10px}
+.top3 .r{font-family:"BC";font-weight:900;font-size:15px;color:var(--dim)}
+.top3 .cn{font-weight:700;font-size:13px;line-height:1.2;height:32px;margin-top:2px}
+.top3 b{display:block;font-family:"BC";font-weight:900;font-size:25px;margin-top:6px;line-height:1}
+.top3 small{font-size:11px;color:var(--dim)}
+.top3 .first{padding-top:24px;background:linear-gradient(180deg,#26210f,#141414)}
+.top3 .mine{box-shadow:inset 0 0 0 1.5px var(--gold)}
+.rk{display:flex;align-items:center;gap:12px;height:62px;padding:0 18px;border-bottom:1px solid var(--line)}
+.rk .p{font-family:"BC";font-weight:900;font-size:20px;width:20px;color:var(--dim)}
+.rk .crest{width:40px;height:40px;margin:0;box-shadow:none}
+.rk .crest svg{width:22px;height:25px}
+.rk .nm{font-weight:600;font-size:15px}
+.rk .sb{font-size:12px;color:var(--dim);margin-top:2px}
+.rk .tm{margin-left:auto;text-align:right;font-family:"BC";font-weight:900;font-size:22px;line-height:1}
+.rk .tm small{display:block;font-family:"B";font-weight:500;font-size:11px;color:var(--dim);text-transform:none}
+.rk.mine .nm{color:var(--gold)}
+.note{font-size:12.5px;color:var(--faint);text-align:center;padding:16px 30px 0;line-height:1.4}
+
+/* ---------- 9. welcome ---------- */
+.full{position:absolute;inset:0}
+.full img{width:100%;height:100%;object-fit:cover}
+.full:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.6) 0,rgba(0,0,0,0) 22%,rgba(0,0,0,0) 38%,rgba(0,0,0,.92) 66%,#000)}
+.inv{position:absolute;z-index:2;top:60px;left:18px;right:18px;display:flex;justify-content:center}
+.inv div{display:flex;align-items:center;gap:10px;background:rgba(0,0,0,.45);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.14);border-radius:30px;padding:6px 16px 6px 6px;font-size:14px;font-weight:600}
+.inv img{width:34px;height:34px}
+.wel{position:absolute;z-index:2;left:22px;right:22px;bottom:40px}
+.wm{font-family:"BC";font-weight:900;font-size:15px;letter-spacing:3px;color:var(--bone)}
+.wm em{font-style:normal;color:var(--gold)}
+.wel .bc{font-size:56px;line-height:.86;margin-top:12px;letter-spacing:-.5px}
+.wel p{font-size:16px;color:rgba(255,255,255,.8);margin-top:14px;line-height:1.4}
+.wel .big{margin-top:24px}
+.wel .sec2{text-align:center;font-size:15px;font-weight:600;margin-top:18px;color:var(--dim)}
+.wel .sec2 b{color:var(--bone)}
+
+/* ---------- 10. age step ---------- */
+.steps{display:flex;gap:6px;padding:0 18px}
+.steps i{flex:1;height:4px;border-radius:2px;background:#262626}
+.steps .on{background:var(--bone)}
+.q{padding:30px 22px 0}
+.q .bc{font-size:46px;line-height:.9}
+.q p{font-size:15.5px;color:var(--dim);margin-top:12px;line-height:1.4}
+.wheel{display:flex;gap:10px;margin:40px 22px 0;position:relative;height:250px}
+.wheel:before{content:"";position:absolute;left:0;right:0;top:100px;height:50px;border-radius:14px;background:var(--fill2)}
+.wcol{flex:1;position:relative;text-align:center;font-size:22px;font-weight:600;color:var(--faint);overflow:hidden}
+.wcol div{height:50px;line-height:50px}
+.wcol .on{color:var(--bone);font-weight:700}
+.wcol .f1{opacity:.55;font-size:19px}
+.wcol .f2{opacity:.25;font-size:16px}
+.foot{position:absolute;left:22px;right:22px;bottom:40px}
+.priv{display:flex;align-items:center;gap:8px;justify-content:center;font-size:13px;color:var(--dim);margin-bottom:14px}
+
+/* ---------- 11. settings ---------- */
+.set{padding:0 0 0 18px}
+.sr{display:flex;align-items:center;gap:16px;height:54px;padding-right:18px;font-size:16px;font-weight:600}
+.sr .ch{margin-left:auto;color:var(--faint);width:18px;height:18px}
+.sr .val{margin-left:auto;font-size:14px;color:var(--dim);font-weight:500}
+.sr.red{color:var(--red)}
+.sh{font-size:13px;color:var(--dim);font-weight:600;padding:20px 0 4px}
+.meh{display:flex;align-items:center;gap:14px;margin:6px 18px 0;padding:14px;background:var(--fill);border-radius:18px}
+.meh .ring{width:64px;height:64px}
+.meh .ring .ini{inset:5px;width:54px;height:54px;font-size:17px;background:var(--gold);color:#000}
+.meh .lvl{font-size:12px;padding:1px 7px 0}
+.meh b{font-weight:700;font-size:17px;display:block}
+.meh span{font-size:13px;color:var(--dim)}
+
+/* ---------- 12. my week, scrolled ---------- */
+.row{display:flex;align-items:center;gap:12px;height:54px;padding:0 18px}
+.row .p{font-family:"BC";font-weight:900;font-size:22px;width:18px;color:var(--dim)}
+.row .av,.row .ini{width:38px;height:38px;font-size:13px}
+.row .nm{font-weight:600;font-size:15.5px;display:flex;align-items:center;gap:5px}
+.row .tm{margin-left:auto;font-family:"BC";font-weight:900;font-size:24px}
+.row.you .p,.row.you .nm{color:var(--gold)}
+.row.you .ini{background:var(--gold);color:#000}
+.bar2{height:3px;border-radius:2px;background:#1f1f1f;margin:0 18px 0 48px;overflow:hidden}
+.bar2 i{display:block;height:100%;background:#3a3a3a}
+.row.you+.bar2 i{background:var(--gold)}
+.invite{display:flex;align-items:center;gap:12px;height:54px;padding:0 18px;color:var(--bone);font-weight:600;font-size:15px}
+.invite i{width:38px;height:38px;border-radius:50%;border:1.5px dashed #444;display:grid;place-items:center}
+.cards{display:flex;gap:10px;padding:0 18px;overflow:hidden}
+.cc{width:152px;flex:none;border-radius:20px;background:var(--fill);padding:14px}
+.cc .crest{width:46px;height:46px;margin:0 0 12px;box-shadow:none}
+.cc .crest svg{width:25px;height:28px}
+.cc .nm{font-weight:700;font-size:14px;line-height:1.2;height:34px}
+.cc .rkn{font-family:"BC";font-weight:900;font-size:24px;margin-top:8px;line-height:1}
+.cc .sb{font-size:11.5px;color:var(--dim);margin-top:3px}
+.cc.new{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-weight:600;font-size:14px;color:var(--dim);background:transparent;border:1.5px dashed #2c2c2c}
+.share{display:flex;align-items:center;gap:14px;margin:22px 18px 0;padding:12px;border-radius:20px;background:var(--fill)}
+.story{width:62px;height:110px;border-radius:10px;overflow:hidden;position:relative;flex:none;background:#000}
+.story img{width:100%;height:100%;object-fit:cover;filter:brightness(.6)}
+.story b{position:absolute;left:5px;bottom:18px;font-family:"BC";font-weight:900;font-size:20px;line-height:.9}
+.story s{position:absolute;left:5px;bottom:7px;text-decoration:none;font-size:6.5px;letter-spacing:1px;color:var(--gold);font-weight:700}
+.share .tx b{font-weight:700;font-size:16px;display:block}
+.share .tx span{font-size:13px;color:var(--dim);display:block;margin-top:3px;line-height:1.3}
+.share .btn{margin-top:10px;height:38px;font-size:14px;padding:0 16px;display:inline-flex}
+
+/* ---------- mock 3: clubs as teams ---------- */
+.area{display:inline-flex;align-items:center;gap:5px;font-size:13px;color:var(--dim);margin-top:5px}
+.rec{display:flex;margin:6px 18px 0;background:var(--fill);border-radius:18px;padding:16px 0}
+.rec div{flex:1;text-align:center;border-right:1px solid var(--line)}
+.rec div:last-child{border:0}
+.rec b{display:block;font-family:"BC";font-weight:900;font-size:30px;line-height:1}
+.rec span{font-size:12px;color:var(--dim)}
+.card{margin:0 18px 10px;border-radius:20px;background:var(--fill);padding:14px 16px;position:relative;overflow:hidden}
+.card .k{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--dim);font-weight:700}
+.card .h{font-family:"BC";font-weight:900;font-size:24px;line-height:1;margin-top:6px;text-transform:uppercase}
+.card .s{font-size:13.5px;color:var(--dim);margin-top:5px;line-height:1.35}
+.card .st{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:13px;font-weight:700;border-radius:8px;padding:5px 9px}
+.st.pay{background:rgba(212,175,55,.14);color:var(--gold)}
+.st.ok{background:rgba(255,255,255,.08);color:var(--bone)}
+.vs{display:flex;align-items:center;gap:12px;margin-top:12px}
+.vs .crest{width:44px;height:44px;margin:0;box-shadow:none}
+.vs .crest svg{width:24px;height:27px}
+.vs .nm{font-weight:700;font-size:15px}
+.vs .x{font-family:"BC";font-weight:900;font-size:16px;color:var(--faint)}
+.ev{margin:0 18px 12px;border-radius:22px;overflow:hidden;background:var(--fill);position:relative}
+.ev .img{height:200px;position:relative}
+.ev .img img{width:100%;height:100%;object-fit:cover;object-position:50% 30%}
+.ev .img:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,#141414)}
+.ev .body{padding:4px 16px 16px}
+.ev .h{font-family:"BC";font-weight:900;font-size:28px;line-height:.95;text-transform:uppercase}
+.ev .s{font-size:13.5px;color:var(--dim);margin-top:6px;line-height:1.35}
+.ev .btn{margin-top:14px}
+.ev.small{display:flex;gap:14px;align-items:center;padding:14px 16px}
+.ev.small .ic{width:56px;height:56px;border-radius:14px;background:var(--fill2);display:grid;place-items:center;flex:none;color:var(--gold)}
+.ev.small .h{font-size:21px}
+.ev.small .s{margin-top:3px}
+.gold{color:var(--gold)}
+.pick{display:flex;align-items:center;gap:12px;height:58px;padding:0 18px}
+.pick .av,.pick .ini{width:42px;height:42px;font-size:14px}
+.pick .nm{font-weight:600;font-size:15.5px}
+.pick .sb{font-size:12.5px;color:var(--dim);margin-top:1px}
+.box{margin-left:auto;width:26px;height:26px;border-radius:8px;border:1.8px solid #444;display:grid;place-items:center}
+.box.on{background:var(--bone);border-color:var(--bone);color:#000}
+.count{display:flex;justify-content:space-between;align-items:center;padding:6px 18px 0;font-size:13.5px;color:var(--dim)}
+.count b{color:var(--bone);font-weight:700}
+.payfoot{position:absolute;left:18px;right:18px;bottom:34px}
+.payfoot .line{display:flex;justify-content:space-between;font-size:14px;color:var(--dim);margin-bottom:12px}
+.payfoot .line b{color:var(--bone);font-family:"BC";font-weight:900;font-size:22px}
+.near{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line)}
+.near .crest{width:46px;height:46px;margin:0;box-shadow:none}
+.near .crest svg{width:25px;height:28px}
+.near .nm{font-weight:700;font-size:15.5px}
+.near .sb{font-size:12.5px;color:var(--dim);margin-top:2px}
+.near .btn{margin-left:auto;height:36px;padding:0 14px;font-size:13.5px}
+.slot{display:flex;align-items:center;gap:14px;margin:0 18px 8px;padding:13px 14px;border-radius:16px;background:var(--fill);border:1.5px solid transparent}
+.slot.on{border-color:var(--bone)}
+.slot .d{width:50px;text-align:center;flex:none}
+.slot .d b{display:block;font-family:"BC";font-weight:900;font-size:24px;line-height:1}
+.slot .d span{font-size:11px;letter-spacing:1.5px;color:var(--dim);font-weight:700}
+.slot .nm{font-weight:700;font-size:15px}
+.slot .sb{font-size:12.5px;color:var(--dim);margin-top:2px;display:flex;align-items:center;gap:4px}
+.slot .tg{margin-left:auto;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--dim)}
+.score{display:flex;align-items:center;justify-content:center;gap:18px;padding:18px 18px 8px}
+.score .side{text-align:center;width:110px}
+.score .crest{width:70px;height:70px;margin:0 auto 10px}
+.score .crest svg{width:38px;height:42px}
+.score .nm{font-weight:700;font-size:14.5px;line-height:1.2}
+.score .n{font-family:"BC";font-weight:900;font-size:64px;line-height:1}
+.score .dash{font-family:"BC";font-weight:900;font-size:40px;color:var(--faint)}
+.win{color:var(--gold)}
+.conf{display:flex;gap:8px;padding:6px 18px 0}
+.conf div{flex:1;border-radius:14px;background:var(--fill);padding:11px 12px;font-size:13px;display:flex;align-items:center;gap:8px}
+.conf svg{color:var(--gold)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <symbol id="shield" viewBox="0 0 34 38"><path d="M17 1l15 5v12c0 9.5-6.4 16.2-15 19C8.4 34.2 2 27.5 2 18V6z"/></symbol>
+    <symbol id="starp" viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6L2.5 9.4l6.6-.8z"/></symbol>
+  </defs>
+</svg>
+
+<!-- 13. A club, as a team -->
+<section class="phone" id="s13">
+  <div class="hero" style="height:232px">
+    <img src="post-gary-2.jpg" style="object-position:50% 30%">
+    <div class="bar"><div class="ib"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></div><div class="ib"><svg class="i" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="19" cy="12" r="1" fill="currentColor"/></svg></div></div>
+    <div class="cname"><div class="crest" style="background:linear-gradient(150deg,#c43d3d,#5a1515)"><svg viewBox="0 0 34 38" fill="#fff"><use href="#shield"/><text x="17" y="24" text-anchor="middle" font-family="BC" font-weight="900" font-size="14" fill="#5a1515">RFC</text></svg></div><div><div class="bc">Renegados FC</div><div class="area"><svg class="i" viewBox="0 0 24 24" style="width:15px;height:15px"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0114 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Prince William County · 9 players</div></div></div>
+  </div>
+  <div class="rec">
+    <div><b>4-1</b><span>record</span></div>
+    <div><b>#2</b><span>in the county</span></div>
+    <div><b>18h</b><span>trained this week</span></div>
+  </div>
+  <div class="btns"><div class="btn white"><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M12 5v14M5 12h14"/></svg>Plan</div><div class="btn"><svg class="i" viewBox="0 0 24 24" style="width:18px;height:18px"><path d="M12 5v14M5 12h14"/></svg>Invite</div></div>
+  <div class="sec">Coming up</div>
+  <div class="card">
+    <div class="k" style="display:flex;align-items:center;gap:6px"><svg class="i" viewBox="0 0 24 24" style="width:14px;height:14px"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/></svg>Club training · members only</div>
+    <div class="h">Weak foot and finishing</div>
+    <div class="s">Tue, 6:00 PM · Catharpin Park</div>
+    <div class="st ok"><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px;stroke-width:3"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>6 going</div>
+  </div>
+  <div class="card">
+    <div class="k">Pickup · club vs club</div>
+    <div class="vs"><div class="crest" style="background:linear-gradient(150deg,#c43d3d,#5a1515)"><svg viewBox="0 0 34 38" fill="#fff"><use href="#shield"/><text x="17" y="24" text-anchor="middle" font-family="BC" font-weight="900" font-size="14" fill="#5a1515">RFC</text></svg></div><span class="nm">Renegados</span><span class="x">VS</span><div class="crest" style="background:linear-gradient(150deg,#2f6bd6,#132d63)"><svg viewBox="0 0 34 38" fill="#fff"><use href="#shield"/><text x="17" y="24" text-anchor="middle" font-family="BC" font-weight="900" font-size="14" fill="#132d63">BB</text></svg></div><span class="nm">Bristow Boys</span></div>
+    <div class="s" style="margin-top:10px">Sat, 11:00 AM · Braemar Park · 8 going</div>
+  </div>
+  <div class="card">
+    <div class="k">Strive event</div>
+    <div class="h">Strive Elite 5v5</div>
+    <div class="st pay" style="margin-top:8px"><svg class="i" viewBox="0 0 24 24" style="width:15px;height:15px"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>Entered. Pay to lock your spot.</div>
+  </div>
+  <div class="tabs">
+    <div class="tab"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="9" r="3.2"/><path d="M3 19c.6-3.2 2.9-5 6-5s5.4 1.8 6 5"/><circle cx="17" cy="8" r="2.4"/><path d="M16.5 13.2c2.4.2 4 1.8 4.5 4.3"/></svg>Friends</div>
+    <div class="plus"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+    <div class="tab on"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>My week</div>
+  </div>
+</section>
+
+<!-- 14. Strive events, from a club -->
+<section class="phone" id="s14">
+  <div class="bar"><div class="ib"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></div><div class="t">Strive events</div><div class="ib"></div></div>
+  <div class="ptitle" style="padding-top:6px;padding-bottom:12px"><div class="sub" style="margin-top:0">Enter your club. Your spot is locked once it is paid.</div></div>
+  <div class="ev">
+    <div class="img"><img src="../../../public/events/strive-elite-5v5.jpg"></div>
+    <div class="body">
+      <div class="k" style="font-size:11px;letter-spacing:2px;color:var(--gold);font-weight:700">BIGGEST STRIVE EVENT</div>
+      <div class="h" style="margin-top:6px">Strive Elite 5v5</div>
+      <div class="s">Up to 9 players, all 21 and under. $450 a team early, $550 after. Cash prize to the winner.</div>
+      <div class="btn white">Enter Renegados FC</div>
+    </div>
+  </div>
+  <div class="ev small">
+    <div class="ic"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5l2.5 4.5h-5zM5 9.5l4 1.5-1 4.5M19 9.5l-4 1.5 1 4.5M9 19l3-3 3 3"/></svg></div>
+    <div><div class="h">Strive pickup</div><div class="s">Run by us, with a coach there. The list gets sign-up 48 hours first.</div></div>
+  </div>
+  <div class="tabs">
+    <div class="tab"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="9" r="3.2"/><path d="M3 19c.6-3.2 2.9-5 6-5s5.4 1.8 6 5"/><circle cx="17" cy="8" r="2.4"/><path d="M16.5 13.2c2.4.2 4 1.8 4.5 4.3"/></svg>Friends</div>
+    <div class="plus"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+    <div class="tab on"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>My week</div>
+  </div>
+</section>
+
+<!-- 15. Pick the roster -->
+<section class="phone" id="s15">
+  <div class="bar"><div class="ib"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></div><div class="t">Enter the 5v5</div><div class="ib"></div></div>
+  <div class="q" style="padding-top:8px"><div class="bc" style="font-size:40px">Who's playing?</div><p>Pick up to 9 from Renegados FC. Everyone has to be 21 or under.</p></div>
+  <div class="count"><span><b>7</b> of 9 picked</span><span>All 21 and under</span></div>
+  <div style="height:6px"></div>
+  <div class="pick"><img class="av" src="av-gary.jpg" style="width:42px;height:42px"><div><div class="nm">Gary G.</div><div class="sb">Captain</div></div><div class="box on"><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px;stroke-width:3"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div></div>
+  <div class="pick"><div class="ini">DR</div><div><div class="nm">Diego R.</div><div class="sb">Member</div></div><div class="box on"><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px;stroke-width:3"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div></div>
+  <div class="pick"><div class="ini">NA</div><div><div class="nm">Nico A.</div><div class="sb">Member</div></div><div class="box on"><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px;stroke-width:3"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div></div>
+  <div class="pick"><img class="av" src="av-yinka.jpg" style="width:42px;height:42px"><div><div class="nm">Yinka B.</div><div class="sb">Member</div></div><div class="box on"><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px;stroke-width:3"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div></div>
+  <div class="pick"><div class="ini">RC</div><div><div class="nm">Ryan C.</div><div class="sb">Member</div></div><div class="box on"><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px;stroke-width:3"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div></div>
+  <div class="pick"><div class="ini">MB</div><div><div class="nm">Marcus B.</div><div class="sb">Member</div></div><div class="box"></div></div>
+  <div class="payfoot">
+    <div class="line"><span>Entry, early</span><b>$450</b></div>
+    <div class="big">Enter and pay</div>
+  </div>
+</section>
+
+<!-- 16. Clubs near you -->
+<section class="phone" id="s16">
+  <div class="bar"><div class="ib"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></div><div class="t"></div><div class="ib"></div></div>
+  <div class="ptitle" style="padding-top:6px"><div class="bc">Clubs near you</div><div class="sub">Open to games. You only see clubs in your county.</div></div>
+  <div class="pill"><div class="on">Prince William</div><div>Change county</div></div>
+  <div class="near"><div class="crest" style="background:linear-gradient(150deg,#2f6bd6,#132d63)"><svg viewBox="0 0 34 38" fill="#fff"><use href="#shield"/><text x="17" y="24" text-anchor="middle" font-family="BC" font-weight="900" font-size="14" fill="#132d63">BB</text></svg></div><div><div class="nm">Bristow Boys</div><div class="sb">3-2 · 8 players</div></div><div class="btn white">Play them</div></div>
+  <div class="near"><div class="crest" style="background:linear-gradient(150deg,#2a9d6b,#0f3f2a)"><svg viewBox="0 0 34 38" fill="#fff"><use href="#shield"/><text x="17" y="24" text-anchor="middle" font-family="BC" font-weight="900" font-size="14" fill="#0f3f2a">H08</text></svg></div><div><div class="nm">Haymarket 08s</div><div class="sb">5-0 · 10 players</div></div><div class="btn white">Play them</div></div>
+  <div class="near"><div class="crest" style="background:linear-gradient(150deg,#e8e4da,#8d8a82)"><svg viewBox="0 0 34 38" fill="#000"><use href="#shield"/><text x="17" y="24" text-anchor="middle" font-family="BC" font-weight="900" font-size="14" fill="#e8e4da">CC</text></svg></div><div><div class="nm">Catharpin Crew</div><div class="sb">1-1 · 7 players</div></div><div class="btn white">Play them</div></div>
+  <div class="near"><div class="crest" style="background:linear-gradient(150deg,#d4af37,#7a6118)"><svg viewBox="0 0 34 38" fill="#000"><use href="#shield"/><text x="17" y="24" text-anchor="middle" font-family="BC" font-weight="900" font-size="14" fill="#d4af37">SP</text></svg></div><div><div class="nm">Sunday Pickup</div><div class="sb">New · 12 players</div></div><div class="btn white">Play them</div></div>
+  <div class="note">Clubs choose to be on this list. Only captains can send a game, and clubs never message each other.</div>
+  <div class="tabs">
+    <div class="tab"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="9" r="3.2"/><path d="M3 19c.6-3.2 2.9-5 6-5s5.4 1.8 6 5"/><circle cx="17" cy="8" r="2.4"/><path d="M16.5 13.2c2.4.2 4 1.8 4.5 4.3"/></svg>Friends</div>
+    <div class="plus"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+    <div class="tab on"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>My week</div>
+  </div>
+</section>
+
+<!-- 17. Plan: training or pickup -->
+<section class="phone" id="s17">
+  <div class="bar"><div class="ib"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></div><div class="t">Plan</div><div class="ib"></div></div>
+  <div class="pill" style="margin-top:4px"><div>Club training</div><div class="on">Pickup vs a club</div></div>
+  <div class="q" style="padding-top:10px"><div class="bc" style="font-size:40px">Pickup vs<br>Haymarket 08s</div></div>
+  <div class="sec" style="padding-top:18px">When</div>
+  <div class="slot on"><div class="d"><span>SAT</span><b>11AM</b></div><div><div class="nm">Saturday, 11:00 AM</div><div class="sb">90 minutes</div></div><div class="tg">Change</div></div>
+  <div class="sec" style="padding-top:12px">Where</div>
+  <div class="slot on"><div class="d" style="color:var(--gold)"><svg class="i" viewBox="0 0 24 24" style="width:24px;height:24px"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0114 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg></div><div><div class="nm">Braemar Park</div><div class="sb">Public field · Prince William County</div></div><div class="tg">Change</div></div>
+  <div class="note" style="text-align:left;padding:4px 18px 0">Public fields only, picked from the list. No home addresses.</div>
+  <div class="foot"><div class="priv">Haymarket's captain accepts or passes. Both clubs see who's going.</div><div class="big">Send the game</div></div>
+</section>
+
+<!-- 18. The result -->
+<section class="phone" id="s18">
+  <div class="bar"><div class="ib"><svg class="i" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></div><div class="t">Club game</div><div class="ib"></div></div>
+  <div class="k" style="text-align:center;font-size:11px;letter-spacing:2px;color:var(--dim);font-weight:700;margin-top:8px">FINAL · SAT · BRAEMAR PARK</div>
+  <div class="score">
+    <div class="side"><div class="crest" style="background:linear-gradient(150deg,#c43d3d,#5a1515)"><svg viewBox="0 0 34 38" fill="#fff"><use href="#shield"/><text x="17" y="24" text-anchor="middle" font-family="BC" font-weight="900" font-size="14" fill="#5a1515">RFC</text></svg></div><div class="nm win">Renegados FC</div></div>
+    <div class="n win">4</div><div class="dash">-</div><div class="n">2</div>
+    <div class="side"><div class="crest" style="background:linear-gradient(150deg,#2a9d6b,#0f3f2a)"><svg viewBox="0 0 34 38" fill="#fff"><use href="#shield"/><text x="17" y="24" text-anchor="middle" font-family="BC" font-weight="900" font-size="14" fill="#0f3f2a">H08</text></svg></div><div class="nm">Haymarket 08s</div></div>
+  </div>
+  <div class="conf"><div><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px;stroke-width:3"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Renegados captain</div><div><svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px;stroke-width:3"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Haymarket captain</div></div><div class="note" style="padding-top:8px">The score counts once both captains confirm it.</div>
+  <div class="sec">Prince William County, by wins</div>
+  <div class="rk"><span class="p">1</span><div class="crest" style="background:linear-gradient(150deg,#2a9d6b,#0f3f2a)"><svg viewBox="0 0 34 38" fill="#fff"><use href="#shield"/><text x="17" y="24" text-anchor="middle" font-family="BC" font-weight="900" font-size="14" fill="#0f3f2a">H08</text></svg></div><div><div class="nm">Haymarket 08s</div><div class="sb">10 players</div></div><div class="tm">5-1<small>record</small></div></div>
+  <div class="rk mine"><span class="p">2</span><div class="crest" style="background:linear-gradient(150deg,#c43d3d,#5a1515)"><svg viewBox="0 0 34 38" fill="#fff"><use href="#shield"/><text x="17" y="24" text-anchor="middle" font-family="BC" font-weight="900" font-size="14" fill="#5a1515">RFC</text></svg></div><div><div class="nm">Renegados FC</div><div class="sb">9 players. Your club</div></div><div class="tm">5-1<small>record</small></div></div>
+  <div class="rk"><span class="p">3</span><div class="crest" style="background:linear-gradient(150deg,#2f6bd6,#132d63)"><svg viewBox="0 0 34 38" fill="#fff"><use href="#shield"/><text x="17" y="24" text-anchor="middle" font-family="BC" font-weight="900" font-size="14" fill="#132d63">BB</text></svg></div><div><div class="nm">Bristow Boys</div><div class="sb">8 players</div></div><div class="tm">3-2<small>record</small></div></div>
+  <div class="rk"><span class="p">4</span><div class="crest" style="background:linear-gradient(150deg,#e8e4da,#8d8a82)"><svg viewBox="0 0 34 38" fill="#000"><use href="#shield"/><text x="17" y="24" text-anchor="middle" font-family="BC" font-weight="900" font-size="14" fill="#e8e4da">CC</text></svg></div><div><div class="nm">Catharpin Crew</div><div class="sb">7 players</div></div><div class="tm">1-1<small>record</small></div></div>
+  <div class="note">Club names, parks, players and scores here are examples.</div>
+  <div class="tabs">
+    <div class="tab"><svg class="i" viewBox="0 0 24 24"><circle cx="9" cy="9" r="3.2"/><path d="M3 19c.6-3.2 2.9-5 6-5s5.4 1.8 6 5"/><circle cx="17" cy="8" r="2.4"/><path d="M16.5 13.2c2.4.2 4 1.8 4.5 4.3"/></svg>Friends</div>
+    <div class="plus"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></div>
+    <div class="tab on"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>My week</div>
+  </div>
+</section>
+
+<script>
+const s=new URLSearchParams(location.search).get("s");
+if(s){document.body.classList.add("one");document.querySelectorAll(".phone").forEach(p=>{if(p.id!=="s"+s)p.remove()})}
+</script>
+</body>
+</html>

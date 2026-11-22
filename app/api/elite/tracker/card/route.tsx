@@ -5,6 +5,7 @@ import { getViewer } from "@/lib/elite/session";
 import { nyToday } from "@/lib/elite/time";
 import { trackerFor, weekLogsFor } from "@/lib/elite/tracker-server";
 import { CARD_HANDLE, cardFacts, tracksGym } from "@/lib/elite/tracker";
+import { SHARE_LINE } from "@/lib/elite/share-link";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -137,17 +138,34 @@ export async function GET() {
           )}
         </div>
 
-        <div
-          style={{
-            display: "flex",
-            fontFamily: "Barlow",
-            fontWeight: 600,
-            fontSize: 40,
-            letterSpacing: 4,
-            color: "rgba(245,244,239,0.72)",
-          }}
-        >
-          {CARD_HANDLE}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              fontFamily: "Barlow",
+              fontWeight: 600,
+              fontSize: 40,
+              letterSpacing: 4,
+              color: "rgba(245,244,239,0.72)",
+            }}
+          >
+            {CARD_HANDLE}
+          </div>
+          {/* Every share is an invite (078): the address only, never the
+              code; the full link rides in the share text. */}
+          <div
+            style={{
+              display: "flex",
+              fontFamily: "Barlow",
+              fontWeight: 600,
+              fontSize: 34,
+              letterSpacing: 3,
+              marginTop: 14,
+              color: GOLD,
+            }}
+          >
+            {SHARE_LINE}
+          </div>
         </div>
       </div>
     ),

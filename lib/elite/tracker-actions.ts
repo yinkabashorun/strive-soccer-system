@@ -1,5 +1,6 @@
 "use server";
 
+import { noticeProps } from "./free-notices-server";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { createServiceClient } from "./supabase/server";
@@ -11,6 +12,7 @@ import {
   clubById,
   clubIdsOf,
   getTracker,
+  insertLog,
   joinClub,
   requestClubByCode,
   answerClubRequest as answerClubRequestFor,
@@ -63,7 +65,6 @@ import {
   type Kind,
   type Season,
   DAY_CAP_MESSAGE,
-  limitHit,
   newReferralCode,
   FRIEND_REQUESTS_FULL_MESSAGE,
   CLUB_REQUESTS_FULL_MESSAGE,
@@ -224,15 +225,10 @@ export async function logTraining(
     });
     return { ok: true, id, trained_on, minutes, kind };
   }
-  const { data, error } = await o.admin
-    .from("elite_training_logs")
-    .insert({ profile_id: o.profileId, trained_on, minutes, kind, week_target: o.target || null })
-    .select("id")
-    .single();
-  if (limitHit(error) === "day_cap") return fail(DAY_CAP_MESSAGE);
-  if (error || !data) return fail(OFFLINE);
+  const saved = await insertLog(o.admin, { profileId: o.profileId, day: trained_on, minutes, kind, weekTarget: o.target });
+  if (!saved.ok) return fail(saved.dayCap ? DAY_CAP_MESSAGE : OFFLINE);
   touch();
-  return { ok: true, id: data.id as string, trained_on, minutes, kind };
+  return { ok: true, id: saved.id, trained_on, minutes, kind };
 }
 
 // The delete on an entry or on your own post: only ever the player's own
@@ -426,6 +422,17 @@ export async function toggleProps(logId: string): Promise<{ ok: true; propped: b
     ? await o.admin.from("elite_log_props").delete().eq("log_id", logId).eq("profile_id", o.profileId)
     : await o.admin.from("elite_log_props").insert({ log_id: logId, profile_id: o.profileId });
   if (error) return fail(OFFLINE);
+  // The post's owner hears about new props (078): once per post, three a
+  // day at most, never at night. Best effort.
+  if (!had) {
+    await noticeProps({
+      giverId: o.profileId,
+      ownerId: found.post.profile_id,
+      postId: logId,
+      postDay: found.post.trained_on,
+      today,
+    }).catch(() => false);
+  }
   return { ok: true, propped: !had };
 }
 

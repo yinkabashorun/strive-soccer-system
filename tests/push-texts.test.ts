@@ -6,6 +6,7 @@ import {
   coachMessagePush,
   newWeekPush,
   pushTextProblems,
+  trainingReminderPush,
   weekUnlockedPush,
 } from "../lib/elite/push-texts";
 import { checkinAnnouncement, filmRoomAnnouncement } from "../lib/elite/film-room";
@@ -49,6 +50,8 @@ const EVERY_PUSH: Record<string, { title: string; body: string; url?: string }> 
   "week unlocked Monday, no name, no focus": weekUnlockedPush({ first: "", week: 8, focus: null }),
   "Film Room announced": { title: film.pushTitle, body: film.pushBody, url: "/film" },
   "check-in days announced": { title: checkin.pushTitle, body: checkin.pushBody, url: "/dashboard" },
+  "reminder at the usual time": trainingReminderPush({ sessionsLeft: 3 }),
+  "reminder at the usual time, one session left": trainingReminderPush({ sessionsLeft: 1 }),
 };
 
 describe("the list: every push, word for word", () => {
@@ -98,6 +101,29 @@ describe("the list: every push, word for word", () => {
     expect(film.pushBody).toMatch(/^\w+day, \w+ \d+ at \d+:\d\d [AP]M ET\. Upload 3 to 5 clips by .+ in the Film tab\.$/);
     expect(checkin.pushTitle).toBe("Monthly check-in calls are open");
     expect(checkin.pushBody).toMatch(/\. Pick your 30-minute time on your dashboard\.$/);
+  });
+});
+
+describe("the reminder at the usual time", () => {
+  it("says what is waiting, word for word", () => {
+    expect(EVERY_PUSH["reminder at the usual time"]).toEqual({
+      title: "Today's session is ready",
+      body: "One tap and you're training.",
+      url: "/dashboard",
+    });
+    expect(EVERY_PUSH["reminder at the usual time, one session left"]).toEqual({
+      title: "One more session completes your week",
+      body: "Today's is ready.",
+      url: "/dashboard",
+    });
+  });
+
+  it("is claimed for the day before it is sent", () => {
+    const src = read("lib/elite/reminders-server.ts");
+    const claim = src.indexOf("claimReminder(admin, p.id, today)");
+    expect(claim).toBeGreaterThan(-1);
+    expect(src.indexOf("sendPushToPlayer(p.id")).toBeGreaterThan(claim);
+    expect(src).toContain("maySend(await claimReminder(");
   });
 });
 
@@ -172,7 +198,12 @@ describe("no push is written anywhere else", () => {
     .sort();
 
   it("the senders are the three files this list knows", () => {
-    expect(senders).toEqual(["lib/elite/coach-actions.ts", "lib/elite/film-room-actions.ts", "lib/elite/unlock.ts"]);
+    expect(senders).toEqual([
+      "lib/elite/coach-actions.ts",
+      "lib/elite/film-room-actions.ts",
+      "lib/elite/reminders-server.ts",
+      "lib/elite/unlock.ts",
+    ]);
   });
 
   it("every send takes its words from the list", () => {
@@ -181,6 +212,7 @@ describe("no push is written anywhere else", () => {
       /sendPushToPlayer\(\s*playerId,\s*newWeekPush\(\{ first, week, firstWeek, focus: plan\.weekly_focus \}\)\s*\)/,
       /sendPushToPlayer\(\s*plan\.player_id,\s*weekUnlockedPush\(\{ first, week: plan\.week, focus: plan\.focus \}\)\s*\)/,
       /sendPushToPlayer\(p\.id, \{ title: m\.pushTitle, body: m\.pushBody, url \}\)/,
+      /sendPushToPlayer\(p\.id, trainingReminderPush\(\{ sessionsLeft: left \}\)\)/,
     ];
     let calls = 0;
     let matched = 0;

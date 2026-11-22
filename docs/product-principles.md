@@ -25,14 +25,14 @@ where that happens: a personal progression system, not a catalog.
    a reward: the ring, the minutes added, the next milestone, a new best.
 5. **Show progress closing on a goal.** "2 of 4 this week", "One more
    session completes your week." Distance shrinking pulls people forward.
-6. **Show real improvement, not just effort.** Benchmark tests the player
-   repeats every two weeks, and the side-by-side clips, turn an invisible
-   change into a number and a picture.
+6. **Show real improvement, not just effort.** The progress video for
+   members, and My Drills in the free app (Then and now, the progress
+   reel), turn an invisible change into a picture the player can see.
 7. **Let them see who they are becoming.** Profile, history, member card,
    aura, milestones: "I'm a Strive player" built from what they did.
 8. **Let the right people see it.** Friends, clubs, the county. Never a
    board of thousands of strangers where they are #4,821.
-9. **Make history valuable.** Every session, test, post and club result
+9. **Make history valuable.** Every session, take, post and club result
    stays and adds up. The account gets more valuable every week.
 10. **Prompts come from the player's life, not from our need for an
     open.** "Today's session is ready" at the hour they usually train,
@@ -44,7 +44,7 @@ where that happens: a personal progression system, not a catalog.
   anything). Progress is time trained, weeks completed and milestones, all
   numbers that only go up.
 - **Never invent a number.** No "+4% weak foot" unless the player
-  measured it. Every improvement number comes from the player's own test
+  measured it. Every improvement number comes from the player's own
   counts or from the coach, and is labelled that way.
 - **Members are ranked against nobody.** Comparison lives in the free
   app, and there only among friends, inside clubs, and clubs by county.

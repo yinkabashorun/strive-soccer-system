@@ -88,7 +88,12 @@ describe("Home: one thing, then one quiet row", () => {
   });
 
   it("the shell leaves room for the tab bar and the phone's home indicator, no more", () => {
-    // The approved tab bar is taller (icon, label and the gold dot).
-    expect(read("app/(player)/layout.tsx")).toContain("pb-[calc(6rem+env(safe-area-inset-bottom))]");
+    // The approved tab bar is taller (icon, label and the gold dot) with a
+    // short fade above it; the last card scrolls fully clear of both.
+    expect(read("app/(player)/layout.tsx")).toContain("pb-[calc(7.5rem+env(safe-area-inset-bottom))]");
+    // The bar is solid black behind the tabs, so page text never reads through it.
+    expect(read("components/elite/MemberNav.tsx")).toMatch(
+      /aria-label="Tabs"[\s\S]{0,300}className="fixed inset-x-0 bottom-0 z-40 bg-black pb-safe/
+    );
   });
 });

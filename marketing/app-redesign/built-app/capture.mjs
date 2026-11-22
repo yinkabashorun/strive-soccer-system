@@ -79,6 +79,10 @@ await shot("10-drop", 2000);
 const go = p.getByRole("button", { name: "Let's go" });
 if (await go.count()) await go.click();
 await shot("11-home", 900);
+// Scrolled to the end: the last card sits clear of the tab bar.
+await p.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+await shot("11b-home-scrolled", 600);
+await p.evaluate(() => window.scrollTo(0, 0));
 
 // 12 the count-in, 13 a drill, 14 the check, 15 the finish
 await p.getByRole("button", { name: /Start session|Continue session/ }).click();

@@ -80,7 +80,9 @@ export function MemberNav({
       {tabs.length > 1 && (
         <nav
           aria-label="Tabs"
-          className="fixed inset-x-0 bottom-0 z-40 bg-[linear-gradient(180deg,rgba(0,0,0,0),#000_40%)] pb-safe lg:hidden"
+          // Solid black wherever a tab sits, so nothing reads through the
+          // labels; a short fade above it lets the page slip under softly.
+          className="fixed inset-x-0 bottom-0 z-40 bg-black pb-safe before:pointer-events-none before:absolute before:inset-x-0 before:-top-7 before:h-7 before:bg-[linear-gradient(180deg,rgba(0,0,0,0),#000)] before:content-[''] lg:hidden"
         >
           <div className="mx-auto flex max-w-md items-stretch justify-around px-3 pt-3">
             {tabs.map((t) => {

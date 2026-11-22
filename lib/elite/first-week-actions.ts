@@ -6,6 +6,12 @@ import { createServiceClient } from "./supabase/server";
 import { buildFirstWeekFor } from "./auto-plan";
 import { firstWeekStatus, type FirstWeekStatus } from "./experience";
 import { nyToday } from "./time";
+import { FIRST_WEEK_HELD } from "./first-week-claim";
+
+// While another build holds the first-week claim (079), this reads the
+// state again on this beat until the week shows up or the wait ends.
+const HELD_POLL_MS = 2500;
+const HELD_WAIT_MS = 35_000;
 
 // The building screen (Nov 21 2026): the moment a member finishes the quiz
 // their first week is built through the hourly builder's own body
@@ -45,8 +51,17 @@ export async function buildMyFirstWeek(): Promise<{ status: FirstWeekStatus }> {
   let state = await readState(viewer.playerId);
   if (!state || !state.onboarded) return { status: "waiting" };
   if (state.active && !state.built) {
-    await buildFirstWeekFor(viewer.playerId).catch(() => undefined);
+    const outcome = await buildFirstWeekFor(viewer.playerId).catch(() => null);
     state = (await readState(viewer.playerId)) ?? state;
+    // Another build holds this first week (the building screen reloaded,
+    // or the hourly builder got there first): build nothing, read again
+    // until it lands, then say honestly where it is.
+    const held = outcome?.results.some((r) => r.ok && r.skipped === FIRST_WEEK_HELD) ?? false;
+    const until = Date.now() + HELD_WAIT_MS;
+    while (held && !state.built && Date.now() < until) {
+      await new Promise((r) => setTimeout(r, HELD_POLL_MS));
+      state = (await readState(viewer.playerId)) ?? state;
+    }
   }
   revalidatePath("/dashboard");
   return { status: firstWeekStatus({ ...state, today: nyToday() }) };

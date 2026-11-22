@@ -31,6 +31,7 @@ import { alertCoach, FIRST_WEEK_JOB, latestCronRun, PLAN_BUILDER_JOB, startCronR
 import { auditLiveWeeks, type HealthIssue } from "./health";
 import { backfillHomeworkVideos } from "./data";
 import { builderTargetWeek } from "./week-target";
+import { FIRST_WEEK_HELD, claimFirstWeek, releaseFirstWeek } from "./first-week-claim";
 import { fmtBreakDate, settleBreaks } from "./breaks";
 import { nyToday } from "./time";
 import type { Player, TrainingBreak } from "./types";
@@ -125,6 +126,8 @@ export async function runAutoWeeklyPlans(
   }
 
   for (const player of roster) {
+    // The first-week claim (079), when this run holds it for this player.
+    let claimedFirst = false;
     try {
       const breaks = breaksByPlayer.get(player.id) ?? [];
       const onBreak = breaks.find((b) => b.since <= today && today <= b.until);
@@ -155,6 +158,31 @@ export async function runAutoWeeklyPlans(
       if (maxBuilt >= target) {
         results.push({ playerId: player.id, name: player.full_name, ok: true, skipped: "already built" });
         continue;
+      }
+
+      // A FIRST week is built by one caller at a time (079): the building
+      // screen after the quiz and this hourly run can reach the same new
+      // player at once, and two interleaved builds would double the week.
+      // Held elsewhere: build nothing. Table unreachable: build as before.
+      if (maxBuilt === 0) {
+        const claim = await claimFirstWeek(admin, player.id);
+        if (claim === "held") {
+          results.push({ playerId: player.id, name: player.full_name, ok: true, skipped: FIRST_WEEK_HELD });
+          continue;
+        }
+        claimedFirst = claim === "claimed";
+        if (claimedFirst) {
+          // Another build may have finished between the read above and
+          // the claim: check again under the claim.
+          const { count } = await admin
+            .from("elite_homework")
+            .select("id", { count: "exact", head: true })
+            .eq("player_id", player.id);
+          if ((count ?? 0) > 0) {
+            results.push({ playerId: player.id, name: player.full_name, ok: true, skipped: "already built" });
+            continue;
+          }
+        }
       }
 
       const [{ data: lastHomework }, { data: lastCheckin }] = await Promise.all([
@@ -209,6 +237,9 @@ export async function runAutoWeeklyPlans(
         ok: false,
         error: err instanceof Error ? err.message : "unknown error",
       });
+    } finally {
+      // Built or not, the build ended: a later caller may take it over.
+      if (claimedFirst) await releaseFirstWeek(admin, player.id);
     }
     await onProgress?.(results);
   }

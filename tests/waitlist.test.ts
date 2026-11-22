@@ -11,6 +11,12 @@ import {
   inviteOrder,
   maskedPhone,
   openText,
+  PICKUP_HEAD_START_HOURS,
+  WAITLIST_LANDING_LINE,
+  WAITLIST_PERKS,
+  cleanPickupLink,
+  pickupOrder,
+  pickupText,
   teammateCounts,
   teammatesLine,
   waitlistLink,
@@ -132,5 +138,48 @@ describe("the waitlist (075)", () => {
 
   it("the Privacy Policy names the waitlist", () => {
     expect(read("app/privacy/page.tsx")).toContain("The waitlist:");
+  });
+
+  it("the three perks are his: pickup 48 hours early, the 5v5 team graphic, the first Strive Stars", () => {
+    expect(PICKUP_HEAD_START_HOURS).toBe(48);
+    expect(WAITLIST_PERKS.map((p) => p.title)).toEqual([
+      "Pickup sign-up first",
+      "Your 5v5 team, in the rollout",
+      "The first Strive Stars",
+    ]);
+    for (const p of WAITLIST_PERKS) expect(p.line).not.toMatch(/—|AI\b|automated|guarantee/);
+    expect(WAITLIST_LANDING_LINE).toContain("48 hours");
+    expect(read("components/elite/WaitlistStatus.tsx")).toContain("WAITLIST_PERKS");
+    expect(read("components/elite/JoinLanding.tsx")).toContain("WAITLIST_LANDING_LINE");
+    expect(read("components/events/FiveVFiveLanding.tsx")).toContain("E.waitlist");
+  });
+
+  it("a pickup link is https only, goes to each person once, and a new link goes to everyone", () => {
+    expect(cleanPickupLink("https://link.example.com/pickup")).toBe("https://link.example.com/pickup");
+    expect(cleanPickupLink("http://link.example.com")).toBeNull();
+    expect(cleanPickupLink("javascript:alert(1)")).toBeNull();
+    expect(cleanPickupLink("https://a b.com")).toBeNull();
+    const t = pickupText("Sam", "https://x.example.com/p");
+    expect(t).toContain("48 hours");
+    expect(t).toContain("https://x.example.com/p");
+    expect(t).toContain("Reply STOP");
+    expect(t.length).toBeLessThan(320);
+    const rows = [
+      { id: "a", created_at: "2026-11-22T10:00:00Z", pickup_link: "https://x.example.com/p" },
+      { id: "b", created_at: "2026-11-22T09:00:00Z", pickup_link: null },
+      { id: "c", created_at: "2026-11-22T11:00:00Z", pickup_link: "https://x.example.com/old" },
+    ];
+    expect(pickupOrder(rows, "https://x.example.com/p").map((r) => r.id)).toEqual(["b", "c"]);
+    expect(pickupOrder(rows, "https://x.example.com/next").map((r) => r.id)).toEqual(["b", "a", "c"]);
+  });
+
+  it("the pickup text needs a coach, a clean link, and never waits on sign-up opening", () => {
+    const actions = read("lib/elite/waitlist-actions.ts");
+    const fn = actions.slice(actions.indexOf("export async function textWaitlistPickup"));
+    expect(fn).toMatch(/cleanPickupLink\(rawLink\)/);
+    expect(fn.slice(0, fn.indexOf("// Take one person"))).not.toMatch(/isFreeSignupOpen/);
+    const sql = read("supabase/migrations/076_waitlist_pickup.sql");
+    expect(sql).toMatch(/pickup_link text/);
+    expect(sql).not.toMatch(/create policy|for insert|for update/);
   });
 });

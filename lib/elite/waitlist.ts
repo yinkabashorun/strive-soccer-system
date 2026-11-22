@@ -169,5 +169,64 @@ export function inviteOrder(
     .slice(0, limit);
 }
 
+// ---- What being on the list gets you (Coach Yinka, Nov 22 2026) -------
+// Three perks, all real and all delivered by the coaches: the pickup
+// head start (the text below), the 5v5 team graphic and club, and the
+// first Strive Stars. Shown on /join and on /5v5 from these lines only.
+
+export const PICKUP_HEAD_START_HOURS = 48;
+
+export const WAITLIST_PERKS: readonly { title: string; line: string }[] = [
+  {
+    title: "Pickup sign-up first",
+    line: `The list gets every Strive pickup sign-up ${PICKUP_HEAD_START_HOURS} hours before we post it anywhere else.`,
+  },
+  {
+    title: "Your 5v5 team, in the rollout",
+    line: "Get your whole 5v5 roster on the list and your team gets its own graphic in the 5v5 social rollout, and starts in the app as a club on day one.",
+  },
+  {
+    title: "The first Strive Stars",
+    line: "The standout players at the 5v5 who are on the list get the first Strive Stars in the app.",
+  },
+];
+
+// The one line on the welcome screen, before they join.
+export const WAITLIST_LANDING_LINE = ` Get on the list: pickup sign-up ${PICKUP_HEAD_START_HOURS} hours before anyone else, and we text you the moment the app opens.`;
+
+// Only an https link of a sensible length can go out in a text.
+export function cleanPickupLink(raw: unknown): string | null {
+  if (typeof raw !== "string") return null;
+  const s = raw.trim();
+  if (s.length > 300 || /\s/.test(s)) return null;
+  try {
+    const u = new URL(s);
+    return u.protocol === "https:" && u.hostname.includes(".") ? u.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
+export function pickupText(first: string, link: string): string {
+  return (
+    `${first}, Strive pickup sign-up is open to the list first. ` +
+    `You have ${PICKUP_HEAD_START_HOURS} hours before we post it anywhere else: ${link} ` +
+    `Lock your spot. Reply STOP to stop these texts.`
+  );
+}
+
+// Who gets a pickup link on a tap: everyone not yet sent this exact
+// link, oldest sign-up first, one batch at a time.
+export function pickupOrder<R extends Pick<WaitlistRow, "id" | "created_at"> & { pickup_link: string | null }>(
+  rows: R[],
+  link: string,
+  limit = INVITE_BATCH
+): R[] {
+  return rows
+    .filter((r) => r.pickup_link !== link)
+    .sort((a, b) => a.created_at.localeCompare(b.created_at))
+    .slice(0, limit);
+}
+
 export const OPEN_FIRST_MESSAGE =
   "Open free sign-up first. Until it is open, the link in the text shows the waitlist again.";

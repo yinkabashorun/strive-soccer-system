@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { Crest, FreeAvatar } from "./FreeAvatar";
+import { WAITLIST_LANDING_LINE } from "@/lib/elite/waitlist";
 
 // Who sent the link, as much as a signed-out visitor may see: a friend's
 // first name and initials, or a club's name and crest. Never a photo of a
@@ -77,7 +78,7 @@ export function JoinLanding({
         <p className="mt-3.5 text-[16px] leading-[1.4] text-white/80">
           Log the work you put in on your own, see your friends&apos; training, and see who put in the most work this
           week.
-          {waitlist && " Get on the list and we text you the moment it opens."}
+          {waitlist && WAITLIST_LANDING_LINE}
         </p>
         <button
           type="button"

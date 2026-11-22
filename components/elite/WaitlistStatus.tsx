@@ -6,6 +6,7 @@ import {
   FIRST_GROUP_AT,
   WAITLIST_ASK,
   WAITLIST_HEADLINE,
+  WAITLIST_PERKS,
   inFirstGroup,
   maskedPhone,
   teammatesLine,
@@ -80,6 +81,21 @@ export function WaitlistStatus({
       <div className="mt-8 rounded-2xl border border-white/10 bg-[#141414] p-4">
         <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-white/50">Your link</p>
         <p className="mt-1.5 break-all text-[15px] text-bone">{link}</p>
+      </div>
+
+      <div className="mt-8">
+        <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-white/50">On the list you get</p>
+        <ul className="mt-3 space-y-3">
+          {WAITLIST_PERKS.map((p) => (
+            <li key={p.title} className="flex gap-3">
+              <span className="mt-[7px] h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-hidden />
+              <div>
+                <p className="text-[15px] font-semibold text-bone">{p.title}</p>
+                <p className="mt-0.5 text-[14px] leading-[1.4] text-white/65">{p.line}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
 
       <div className="mt-auto pt-8">

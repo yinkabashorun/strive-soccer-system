@@ -133,7 +133,11 @@ export async function waitlistInviter(code: string | null): Promise<{ first: str
   return { first: data.first_name as string, initials: initialsOf(`${data.first_name} ${data.last_name}`) };
 }
 
-export type WaitlistOverviewRow = WaitlistRow & { teammates: number; referrer: string | null };
+export type WaitlistOverviewRow = WaitlistRow & {
+  teammates: number;
+  referrer: string | null;
+  pickup_sent_at: string | null;
+};
 
 // The coach's list at /coach/free: everyone, newest first, with how many
 // teammates each brought and who sent them.
@@ -142,10 +146,10 @@ export async function getWaitlist(): Promise<WaitlistOverviewRow[]> {
   if (!admin) return [];
   const { data } = await admin
     .from("elite_waitlist")
-    .select("id, first_name, last_name, phone, team, code, referred_by, invited_at, created_at")
+    .select("id, first_name, last_name, phone, team, code, referred_by, invited_at, created_at, pickup_sent_at")
     .order("created_at", { ascending: false })
     .limit(2000);
-  const rows = (data ?? []) as WaitlistRow[];
+  const rows = (data ?? []) as (WaitlistRow & { pickup_sent_at: string | null })[];
   const counts = teammateCounts(rows);
   const byCode = new Map(rows.map((r) => [r.code, `${r.first_name} ${r.last_name}`]));
   return rows.map((r) => ({

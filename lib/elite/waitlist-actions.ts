@@ -10,7 +10,15 @@ import { getViewer } from "./session";
 import { APP_URL } from "./app-url";
 import { sendSms } from "./sms";
 import { isFreeSignupOpen } from "./tracker-server";
-import { OPEN_FIRST_MESSAGE, inviteOrder, openText, type WaitlistRow } from "./waitlist";
+import {
+  OPEN_FIRST_MESSAGE,
+  cleanPickupLink,
+  inviteOrder,
+  openText,
+  pickupOrder,
+  pickupText,
+  type WaitlistRow,
+} from "./waitlist";
 
 type Fail = { ok: false; error: string };
 const fail = (error: string): Fail => ({ ok: false, error });
@@ -56,6 +64,50 @@ export async function textWaitlist(
     } else failed++;
   }
   const left = inviteOrder(rows, who, Number.MAX_SAFE_INTEGER).length - sent;
+  revalidatePath("/coach/free");
+  return { ok: true, sent, failed, left };
+}
+
+// The pickup head start (076): text the list a pickup sign-up link, 48
+// hours before it is posted anywhere else. Works while free sign-up is
+// closed (this is the waitlist's own perk). Each row is sent a given link
+// once; a new event's link goes to everyone again. One batch per tap.
+export async function textWaitlistPickup(
+  rawLink: string
+): Promise<{ ok: true; sent: number; failed: number; left: number } | Fail> {
+  const c = await coachAdmin();
+  if (c.kind === "no") return fail("Only a coach can do this.");
+  const link = cleanPickupLink(rawLink);
+  if (!link) return fail("Paste the pickup sign-up link, starting with https://.");
+  if (c.kind === "demo") return { ok: true, sent: 0, failed: 0, left: 0 };
+
+  const { data, error } = await c.admin
+    .from("elite_waitlist")
+    .select("id, first_name, phone, pickup_link, created_at")
+    .limit(5000);
+  if (error) return fail(OFFLINE);
+  const rows = (data ?? []) as {
+    id: string;
+    first_name: string;
+    phone: string;
+    pickup_link: string | null;
+    created_at: string;
+  }[];
+  const batch = pickupOrder(rows, link);
+
+  let sent = 0;
+  let failed = 0;
+  for (const r of batch) {
+    const ok = await sendSms(r.phone, r.first_name, pickupText(r.first_name, link));
+    if (ok) {
+      sent++;
+      await c.admin
+        .from("elite_waitlist")
+        .update({ pickup_link: link, pickup_sent_at: new Date().toISOString() })
+        .eq("id", r.id);
+    } else failed++;
+  }
+  const left = pickupOrder(rows, link, Number.MAX_SAFE_INTEGER).length - sent;
   revalidatePath("/coach/free");
   return { ok: true, sent, failed, left };
 }

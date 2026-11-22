@@ -1,11 +1,11 @@
-"""Writes the seven 5v5 co-post angles (01.html to 07.html). Render each with
+"""Writes the 5v5 co-post carousel, Baltimore County vs Northern Virginia
+(01.html to 08.html; Coach Yinka Nov 22: most players are Baltimore County vs NoVA). Render each with
 node ../render.mjs 2 NN.png angles/NN.html from the folder above."""
 HEAD = """<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="style.css"><style>{css}</style></head>
 <body><div class="stage">{bg}<div class="vig"></div>
-<div class="eyebrow">STRIVE ELITE 5V5<i>•</i>MD VS VA</div>
+<div class="eyebrow" style="font-size:19px;letter-spacing:7px">STRIVE ELITE 5V5<i>•</i>BALTIMORE COUNTY VS NOVA</div>
 {body}
-<div class="foot" style="bottom:44px;height:auto"><div class="prize"><b>$3,000</b> CASH<span style="color:#c8a858;margin:0 18px">•</span>32 TEAMS</div>
-<div class="meta">SAT, DEC 19<i>•</i>SOFIVE COLUMBIA</div><div class="url">THESTRIVEAPP.COM/5V5</div></div>
+{foot}
 <img class="logo" src="../strive-logo-512.png"><div class="grain"></div></div></body></html>"""
 STAD = '<img class="bg" src="../stadium/stadium-dark.png">'
 VA = ''.join(f'<img class="p" src="../cutouts3/{f}" style="{s}">' for f, s in [
@@ -28,13 +28,13 @@ pages = {}
 pages['01'] = dict(bg=STAD, css="", body=f"""
 <div class="big white" style="top:135px;font-size:122px;white-space:nowrap">WALK IN YO TRAP.</div>
 <div class="big gold" style="top:255px;font-size:122px;white-space:nowrap">TAKE OVER YO TRAP.</div>
-<div class="line" style="top:398px;font-size:30px">Virginia is coming to Columbia, Maryland. Dec 19.</div>
+<div class="line" style="top:398px;font-size:30px">NoVA is coming to Columbia. Dec 19.</div>
 {VA}<div class="fade"></div>""")
 
 pages['02'] = dict(bg=STAD, css="", body=f"""
 <div class="big white" style="top:125px;font-size:118px">IT'S IN YOUR</div>
 <div class="big gold" style="top:228px;font-size:168px">BACKYARD,</div>
-<div class="big white" style="top:375px;font-size:118px">MARYLAND.</div>
+<div class="big white" style="top:375px;font-size:118px">BALTIMORE.</div>
 <div class="line" style="top:500px;font-size:30px;letter-spacing:1px">No long drive. No away crowd. <b style="color:#efd287">No excuses.</b></div>
 {MD}<div class="fade"></div>""")
 
@@ -51,7 +51,7 @@ pages['03'] = dict(bg='', css="""
 """, body="""
 <div class="poster">
  <div class="w" style="top:50px;font-size:170px;letter-spacing:10px">WANTED</div>
- <div class="w" style="top:262px;font-size:30px;letter-spacing:6px">ONE MARYLAND TEAM THAT CAN HANG</div>
+ <div class="w" style="top:262px;font-size:30px;letter-spacing:4px">ONE BALTIMORE TEAM THAT CAN HANG</div>
  <div style="position:absolute;left:230px;top:318px;width:320px;height:320px;border:3px solid #2a1d0a;background:rgba(42,29,10,.12)"></div>
  <div class="w" style="top:345px;font-size:230px;line-height:1;opacity:.85">?</div>
  <div class="w" style="top:665px;font-size:38px;letter-spacing:10px">REWARD</div>
@@ -65,15 +65,15 @@ pages['04'] = dict(bg=STAD, css="""
 .bub{position:absolute;z-index:12;font-family:'Inter',sans-serif;font-weight:600;color:#f1e9d6;background:rgba(40,36,30,.78);
  border:1px solid rgba(200,168,88,.35);border-radius:28px;padding:16px 26px;font-size:28px;box-shadow:0 10px 30px rgba(0,0,0,.6)}
 """, body="""
-<div class="bub" style="left:70px;top:150px;transform:rotate(-4deg);opacity:.55">MD runs the DMV</div>
-<div class="bub" style="left:640px;top:190px;transform:rotate(3deg);opacity:.45">nobody in VA can play</div>
-<div class="bub" style="left:120px;top:850px;transform:rotate(3deg);opacity:.45">we'd cook them</div>
-<div class="bub" style="left:620px;top:900px;transform:rotate(-3deg);opacity:.55">easy money</div>
-<div class="big white" style="top:340px;font-size:104px;white-space:nowrap">MARYLAND HAS BEEN</div>
-<div class="big gold" style="top:450px;font-size:196px">ALL TALK</div>
-<div class="big white" style="top:640px;font-size:110px">FOR YEARS.</div>
-<div class="rule" style="top:770px"></div>
-<div class="line" style="top:795px;font-size:34px;font-weight:600;letter-spacing:4px">DEC 19 WE FIND OUT.</div>
+<div class="bub" style="left:70px;top:290px;transform:rotate(-4deg);opacity:.55">Baltimore runs the DMV</div>
+<div class="bub" style="left:640px;top:330px;transform:rotate(3deg);opacity:.45">nobody in NoVA can play</div>
+<div class="bub" style="left:120px;top:990px;transform:rotate(3deg);opacity:.45">we'd cook them</div>
+<div class="bub" style="left:620px;top:1040px;transform:rotate(-3deg);opacity:.55">easy money</div>
+<div class="big white" style="top:480px;font-size:104px;white-space:nowrap">BALTIMORE HAS BEEN</div>
+<div class="big gold" style="top:590px;font-size:196px">ALL TALK</div>
+<div class="big white" style="top:780px;font-size:110px">FOR YEARS.</div>
+<div class="rule" style="top:910px"></div>
+<div class="line" style="top:935px;font-size:34px;font-weight:600;letter-spacing:4px">DEC 19 WE FIND OUT.</div>
 """)
 
 pages['05'] = dict(bg=STAD, css="""
@@ -83,16 +83,16 @@ pages['05'] = dict(bg=STAD, css="""
  filter:drop-shadow(0 0 40px rgba(255,210,120,.3)) drop-shadow(0 40px 40px rgba(0,0,0,.85))}
 """, body="""
 <div class="line" style="top:150px;font-size:34px;font-weight:700;letter-spacing:14px;color:#c8a858">PREDICTION:</div>
-<div class="big white" style="top:215px;font-size:200px">VIRGINIA</div>
+<div class="big white" style="top:215px;font-size:220px">NOVA</div>
 <div class="big gold" style="top:385px;font-size:236px">SWEEPS.</div>
 <img class="tro" src="../trophy/photo-trophy-short.png">
 <div class="fade" style="height:500px"></div>
-<div class="line" style="top:1080px;font-size:30px">Screenshot this, Maryland. <b style="color:#efd287">Prove us wrong.</b></div>
+<div class="line" style="top:1080px;font-size:30px">Screenshot this, Baltimore. <b style="color:#efd287">Prove us wrong.</b></div>
 <div class="stamp">SAVED FOR DEC 19</div>
 """)
 
 pages['06'] = dict(bg='', css="""
-.phone{position:absolute;left:210px;top:290px;width:660px;height:740px;z-index:10;border-radius:56px;background:#0d0d0f;
+.phone{position:absolute;left:210px;top:290px;width:660px;height:830px;z-index:10;border-radius:56px;background:#0d0d0f;
  border:3px solid #2b2b2e;box-shadow:0 40px 90px rgba(0,0,0,.9),0 0 0 10px #151517}
 .top{position:absolute;left:0;right:0;top:0;height:120px;border-bottom:1px solid #222;text-align:center;padding-top:30px}
 .top .av{width:54px;height:54px;border-radius:50%;margin:0 auto;background:linear-gradient(135deg,#c8a858,#6d5114);
@@ -111,13 +111,13 @@ pages['06'] = dict(bg='', css="""
 <div class="big gold" style="top:200px;font-size:72px;line-height:1">HAS HAD THIS ARGUMENT.</div>
 <div class="phone"><div class="top"><div class="av">DMV</div><div class="nm">the DMV chat</div></div>
 <div class="msgs">
- <div class="who">MD</div><div class="m l">MD &gt; VA no debate</div>
- <div class="who" style="text-align:right;margin-right:14px">VA</div><div class="m r">bet</div>
+ <div class="who">BALTIMORE</div><div class="m l">Baltimore &gt; NoVA no debate</div>
+ <div class="who" style="text-align:right;margin-right:14px">NOVA</div><div class="m r">bet</div>
  <div class="m r">$3,000 says prove it. Dec 19, SoFive Columbia</div>
  <div class="seen">Seen 9:41 PM</div>
- <div class="who">MD</div><div class="typing"><i></i><i style="opacity:.7"></i><i style="opacity:.4"></i></div>
+ <div class="who">BALTIMORE</div><div class="typing"><i></i><i style="opacity:.7"></i><i style="opacity:.4"></i></div>
 </div></div>
-<div class="line" style="top:1068px;font-size:30px;font-weight:600;letter-spacing:6px;z-index:31">DEC 19 ENDS IT.</div>
+<div class="line" style="top:1160px;font-size:30px;font-weight:600;letter-spacing:6px;z-index:31">DEC 19 ENDS IT.</div>
 """)
 
 pages['07'] = dict(bg=STAD, css="""
@@ -137,9 +137,31 @@ pages['07'] = dict(bg=STAD, css="""
 </div>
 <img class="p" src="../cutouts3/b4n.png" style="left:300px;top:470px;height:600px;z-index:11">
 <div class="fade" style="height:330px"></div>
-<div class="line" style="top:1090px;font-size:32px">So when Maryland loses, <b style="color:#efd287">there's film.</b></div>
+<div class="line" style="top:1090px;font-size:32px">So when Baltimore loses, <b style="color:#efd287">there's film.</b></div>
 """)
 
-for k, v in pages.items():
-    open(f'{k}.html', 'w').write(HEAD.format(**v))
+CLOSE = dict(bg=STAD, css="""
+.tro{position:absolute;left:50%;top:430px;height:520px;transform:translateX(-50%);z-index:8;
+ filter:drop-shadow(0 0 40px rgba(255,210,120,.3)) drop-shadow(0 40px 40px rgba(0,0,0,.85))}
+.row{position:absolute;left:0;right:0;text-align:center;font-family:'Inter';font-weight:600;color:#f1e9d6;z-index:20;letter-spacing:2px}
+""", body="""
+<div class="big white" style="top:120px;font-size:150px">WHO RUNS</div>
+<div class="big gold" style="top:250px;font-size:150px">THE DMV?</div>
+<img class="tro" src="../trophy/photo-trophy-short.png">
+<div class="fade" style="height:520px"></div>
+<div class="row" style="top:900px;font-size:26px;letter-spacing:6px;color:#e9d9ad">BALTIMORE COUNTY VS NORTHERN VIRGINIA</div>
+<div class="row" style="top:950px;font-size:30px">3 games minimum. Every game recorded.</div>
+<div class="row" style="top:995px;font-size:30px">Early bird <b style="color:#efd287">$450 a team</b> through Nov 25.</div>
+<div class="row" style="top:1040px;font-size:30px">Follow <b style="color:#efd287">@strivesoccerfc</b> for the schedule.</div>
+""")
+SWIPE = ('<div style="position:absolute;left:56px;right:120px;bottom:56px;z-index:30;display:flex;justify-content:space-between;'
+         'font-family:Inter;font-weight:600;font-size:20px;letter-spacing:6px;color:#cfc2a0"><span>{n} / 8</span>'
+         '<span style="color:#c8a858">SWIPE &rarr;</span></div>')
+FULL = ('<div class="foot" style="bottom:44px;height:auto"><div class="prize"><b>$3,000</b> CASH<span style="color:#c8a858;margin:0 18px">•</span>32 TEAMS</div>'
+        '<div class="meta">SAT, DEC 19<i>•</i>SOFIVE COLUMBIA</div><div class="url">THESTRIVEAPP.COM/5V5</div></div>')
+order = ['01', '02', '04', '06', '03', '05', '07']  # the carousel order: trap, backyard, all talk, group chat, wanted, prediction, 3 games
+for i, k in enumerate(order, 1):
+    v = dict(pages[k]); v['foot'] = SWIPE.format(n=i)
+    open(f'{i:02d}.html', 'w').write(HEAD.format(**v))
+open('08.html', 'w').write(HEAD.format(**CLOSE, foot=FULL))
 print('ok')

@@ -6,6 +6,7 @@ import { isSupabaseConfigured } from "@/lib/elite/supabase/server";
 import { nyToday } from "@/lib/elite/time";
 import { rateLimit } from "@/lib/rate-limit";
 import { savePost, trackerFor } from "@/lib/elite/tracker-server";
+import { tagTogether } from "@/lib/elite/club-teams-server";
 import { readDemoState, writeDemoState } from "@/lib/elite/tracker-demo";
 import {
   FREE_HOME,
@@ -34,7 +35,8 @@ const no = (error: string, status: number) => NextResponse.json({ ok: false, err
 // The account, the day and the path all come from the server, never from
 // the form.
 //
-// POST multipart { photo, minutes, kind, caption? } -> { ok, id } | { ok: false, error }
+// POST multipart { photo, minutes, kind, caption?, with? } -> { ok, id } | { ok: false, error }
+// ("with" is the ids of club teammates who trained with them, comma separated)
 export async function POST(req: Request) {
   const viewer = await getViewer();
   if (!viewer || viewer.role !== "player") return no("Sign in first.", 401);
@@ -89,6 +91,10 @@ export async function POST(req: Request) {
   });
   if (!saved.ok && saved.dayCap) return no(DAY_CAP_MESSAGE, 400);
   if (!saved.ok) return no("Your post was not saved. Check your connection and try again.", 502);
+  // the club teammates who trained with them, if any were tapped (077):
+  // each gets a card to add the same time to their own week. Clubmates
+  // only and never across a block, checked on the server.
+  await tagTogether({ posterId: viewer.profile.id, logId: saved.id, kind, raw: form.get("with") }).catch(() => 0);
   revalidatePath(FREE_HOME);
   revalidatePath(FREE_WEEK);
   return NextResponse.json({ ok: true, id: saved.id });

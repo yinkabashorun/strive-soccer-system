@@ -5,38 +5,39 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { blockPlayer, endMyClub, leaveClub, newClubLink, removeClubMember, renameMyClub, reportClub } from "@/lib/elite/tracker-actions";
 import { fmtDuration } from "@/lib/elite/time-trained";
-import { CLUB_NAME_MAX, FREE_WEEK, clubLink, clubPlaceLine, lastTrainedLabel, type MyClub } from "@/lib/elite/tracker";
+import { CLUB_NAME_MAX, FREE_WEEK, clubLink, lastTrainedLabel, type MyClub } from "@/lib/elite/tracker";
+import { placeLine } from "@/lib/elite/club-teams";
+import type { ClubTeamView } from "@/lib/elite/club-teams-server";
 import { ActionSheet } from "./ActionSheet";
 import { Crest, FreeAvatar } from "./FreeAvatar";
 import { FreeTopBar } from "./FreeTopBar";
-import { IconBlock, IconExit, IconFlag, IconLink, IconMore, IconPencil, IconPerson, IconPlus } from "./FreeIcons";
+import { IconBlock, IconCalendar, IconExit, IconFlag, IconLink, IconMore, IconPencil, IconPerson, IconPin, IconPlus, IconRanking } from "./FreeIcons";
+import { CountySheet } from "./CountySheet";
+import { PlanCardView } from "./PlanCardView";
+import { PlayTermsSheet } from "./PlayTermsSheet";
 import { StarMark } from "./StarMark";
 import { sendLink } from "./send-link";
 import { initialsOf } from "@/lib/elite/tracker";
 
-type Sheet = null | "menu" | "rename" | "end" | "report" | "leave" | "remove" | "sent" | "block";
+type Sheet = null | "menu" | "rename" | "end" | "report" | "leave" | "remove" | "sent" | "block" | "county" | "organizer";
 
-// One club, full screen (the approved mock, screen 7): the newest post
-// photo from a member the viewer may see as the header (else dark), the
-// crest and name, who started it, this week's three numbers, the white
-// invite button, and the roster with photos, when each last trained and
-// their time. A captain's controls are in the "..." sheet.
+// One club, full screen (the approved mocks, screens 7 and 13): the newest
+// post photo from a member the viewer may see as the header (else dark),
+// the crest and name, its county and players, the three numbers (record,
+// place in the county, trained this week), Plan (the captain) and Invite,
+// what is coming up (sessions and games, each "Organized by" the club,
+// and Strive events it entered), then the roster with photos, when each
+// last trained and their time. A captain's controls are in the "..." sheet.
 export function ClubScreen({
   club,
-  startedBy,
-  place,
-  total,
-  perPlayer,
+  play,
   weekTotal,
   heroUrl,
   appUrl,
   today,
 }: {
   club: MyClub;
-  startedBy: string | null;
-  place: number | null;
-  total: number;
-  perPlayer: number;
+  play: ClubTeamView;
   weekTotal: number;
   heroUrl: string | null;
   appUrl: string;
@@ -48,7 +49,7 @@ export function ClubScreen({
   const [copied, setCopied] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, start] = useTransition();
-  const rank = clubPlaceLine(place, total);
+  const rank = placeLine(play.place);
   const members = [...club.members].sort((x, y) => (y.minutes ?? 0) - (x.minutes ?? 0) || x.name.localeCompare(y.name));
 
   function act(run: () => Promise<{ ok: true } | { ok: false; error: string }>, after: () => void) {
@@ -67,8 +68,12 @@ export function ClubScreen({
     }
   }
 
-  const players = `${club.members.length} ${club.members.length === 1 ? "player" : "players"}.`;
-  const by = startedBy ? ` Started by ${startedBy === "you" ? "you" : startedBy}.` : "";
+  const players = `${club.members.length} ${club.members.length === 1 ? "player" : "players"}`;
+
+  function plan() {
+    if (!play.accepted.organizer) return setSheet("organizer");
+    router.push(`/log/club/${club.id}/plan`);
+  }
 
   return (
     <div>
@@ -100,32 +105,77 @@ export function ClubScreen({
           <Crest club={club} size={70} className="shadow-[0_0_0_3px_#000]" />
           <div className="min-w-0">
             <h1 className="font-display text-[34px] font-black uppercase leading-[0.92]">{club.name}</h1>
-            <p className="mt-[5px] text-[13.5px] text-white/60">
+            <p className="mt-[5px] flex items-center gap-1 text-[13.5px] text-white/60">
+              {play.countyName && <IconPin size={15} />}
+              {play.countyName ? `${play.countyName} · ` : ""}
               {players}
-              {by}
-              {club.ended ? " Ended." : ""}
+              {club.ended ? " · Ended" : ""}
             </p>
           </div>
         </div>
       </div>
 
       <div className="mx-[18px] mt-1.5 flex rounded-[18px] bg-[#141414] py-4 text-center">
+        <Num big={play.record} small="record" />
         <Num big={rank.big} small={rank.small} />
-        <Num big={fmtDuration(perPlayer)} small="per player" />
-        <Num big={fmtDuration(weekTotal)} small="this week" last />
+        <Num big={fmtDuration(weekTotal)} small="trained this week" last />
       </div>
 
       {!club.ended && (
-        <div className="px-[18px] pt-3.5">
+        <div className="flex gap-2.5 px-[18px] pt-3.5">
+          {play.canPlan && (
+            <button
+              type="button"
+              onClick={plan}
+              className="flex h-11 flex-1 items-center justify-center gap-[7px] rounded-xl bg-bone text-[15px] font-bold text-black"
+            >
+              <IconPlus size={18} />
+              Plan
+            </button>
+          )}
           <button
             type="button"
             onClick={invite}
-            className="flex h-11 w-full items-center justify-center gap-[7px] rounded-xl bg-bone text-[15px] font-bold text-black"
+            className={
+              "flex h-11 flex-1 items-center justify-center gap-[7px] rounded-xl text-[15px] font-bold " +
+              (play.canPlan ? "bg-[#1c1c1c] text-bone" : "bg-bone text-black")
+            }
           >
             <IconPlus size={18} />
-            {copied ? "Link copied" : "Invite to the club"}
+            {copied ? "Link copied" : play.canPlan ? "Invite" : "Invite to the club"}
           </button>
         </div>
+      )}
+
+      {(play.plans.length > 0 || play.events.length > 0) && (
+        <>
+          <h2 className="px-[18px] pb-2 pt-[22px] text-[11px] font-bold uppercase tracking-[2.4px] text-white/60">Coming up</h2>
+          <ul className="space-y-2.5">
+            {play.plans.map((p) => (
+              <li key={p.id}>
+                <PlanCardView card={p} perspective={club.id} />
+              </li>
+            ))}
+            {play.events.map((e) => (
+              <li key={e.id}>
+                <Link href={`/log/events/${e.id}?club=${club.id}`} className="mx-[18px] block rounded-[22px] bg-[#141414] px-[18px] pb-4 pt-[15px]">
+                  <span className="block text-[11px] font-bold uppercase tracking-[2.2px] text-white/60">Strive event</span>
+                  <span className="mt-1.5 block font-display text-[24px] font-black uppercase leading-[1]">{e.name}</span>
+                  <span className="mt-1.5 block text-[14px] text-white/60">{e.when}</span>
+                  <span
+                    className={
+                      "mt-2.5 inline-flex min-h-[32px] items-center gap-1.5 rounded-[10px] px-3 text-[13px] font-bold " +
+                      (e.state === "paid" ? "bg-[#2e2a1c] text-accent" : "bg-[#222] text-bone")
+                    }
+                  >
+                    <IconCalendar size={15} />
+                    {e.line}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
 
       <h2 className="px-[18px] pb-2 pt-[22px] text-[11px] font-bold uppercase tracking-[2.4px] text-white/60">This week</h2>
@@ -163,6 +213,8 @@ export function ClubScreen({
             ...(!club.ended ? [{ label: "Send the club's link", icon: <IconLink />, onClick: () => { setSheet(null); invite(); } }] : []),
             ...(club.captain
               ? [
+                  { label: "County and games", icon: <IconPin />, onClick: () => setSheet("county") },
+                  ...(play.county ? [{ label: "Clubs near you", icon: <IconRanking />, onClick: () => { setSheet(null); router.push(`/log/club/${club.id}/near`); } }] : []),
                   { label: "Rename the club", icon: <IconPencil />, onClick: () => { setName(club.name); setSheet("rename"); } },
                   { label: "Take a player off", icon: <IconPerson />, onClick: () => setSheet("remove") },
                   ...(!club.ended
@@ -177,6 +229,19 @@ export function ClubScreen({
             { label: "Leave the club", icon: <IconExit />, red: true, onClick: () => setSheet("leave") },
           ]}
           note="Leaving keeps the friends you made. To cut one off, block them."
+        />
+      )}
+
+      {sheet === "county" && <CountySheet clubId={club.id} county={play.county} open={play.open} onClose={() => setSheet(null)} />}
+
+      {sheet === "organizer" && (
+        <PlayTermsSheet
+          kind="organizer"
+          onClose={() => setSheet(null)}
+          then={() => {
+            setSheet(null);
+            router.push(`/log/club/${club.id}/plan`);
+          }}
         />
       )}
 

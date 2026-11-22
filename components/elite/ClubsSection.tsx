@@ -60,12 +60,18 @@ export function ClubsSection({
     <section className="mt-1">
       <div className="flex items-center justify-between pr-2">
         <h2 className="px-[18px] pb-2 pt-[22px] text-[11px] font-bold uppercase tracking-[2.4px] text-white/60">Your clubs</h2>
-        {ranking.rows.length > 0 && (
-          <Link href="/log/clubs" className="mt-3 inline-flex min-h-[44px] items-center gap-1 px-2.5 text-[13px] font-semibold text-white/70">
-            Top clubs
+        <span className="flex">
+          <Link href="/log/events" className="mt-3 inline-flex min-h-[44px] items-center gap-1 px-2.5 text-[13px] font-semibold text-white/70">
+            Strive events
             <IconChevron size={16} />
           </Link>
-        )}
+          {ranking.rows.length > 0 && (
+            <Link href="/log/clubs" className="mt-3 inline-flex min-h-[44px] items-center gap-1 px-2.5 text-[13px] font-semibold text-white/70">
+              Top clubs
+              <IconChevron size={16} />
+            </Link>
+          )}
+        </span>
       </div>
       <ul className="no-scrollbar flex gap-2.5 overflow-x-auto px-[18px]">
         {clubs.map((c) => {

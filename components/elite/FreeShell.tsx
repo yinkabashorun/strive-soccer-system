@@ -47,7 +47,11 @@ export function FreeShell({
   // The set-up screens (the four questions, the days) and Settings have no
   // tab bar. A profile sits under Friends; a club and Top clubs under My week.
   const onFriends = pathname === FREE_HOME || pathname.startsWith("/log/u/");
-  const onWeek = pathname === FREE_WEEK || pathname.startsWith("/log/club");
+  const onWeek =
+    pathname === FREE_WEEK ||
+    pathname.startsWith("/log/club") ||
+    pathname.startsWith("/log/events") ||
+    pathname.startsWith("/log/plan/");
   const tabs = onFriends || onWeek;
 
   return (

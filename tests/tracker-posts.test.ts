@@ -534,7 +534,8 @@ describe("the coach queue and taking a block back", () => {
     const page = code("app/(coach)/coach/free/page.tsx");
     expect(page).toContain("<ReportsQueue reports={data.reports} />");
     expect(page).toContain("{data.posts_week}");
-    expect(page).toContain("{data.reports.length + data.clubReports.length + data.lineReports.length}");
+    expect(page).toContain("data.reports.length + data.clubReports.length + data.lineReports.length");
+    expect(page).toContain("{openReports}");
     expect(page).toContain('"Posts this week"');
     const queue = code("components/elite/ReportsQueue.tsx");
     expect(queue).toContain("removePost(r.log_id)");

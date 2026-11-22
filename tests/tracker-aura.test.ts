@@ -79,7 +79,8 @@ describe("aura", () => {
     expect(auraPoints(hit, 720)).toBe(before);
     expect(before).toBe(240 + AURA_WEEK_HIT);
     // every entry keeps the target at the moment it was logged
-    expect(code("lib/elite/tracker-actions.ts")).toContain("week_target: o.target || null");
+    // a log without a photo goes through insertLog, which keeps the target
+    expect(code("lib/elite/tracker-actions.ts")).toContain("weekTarget: o.target");
     expect(code("lib/elite/tracker-server.ts")).toContain("week_target: input.weekTarget || null");
     expect(code("app/api/elite/tracker/post/route.ts")).toContain("weekTarget: tracker.target_minutes");
     expect(read("supabase/migrations/069_free_training_log.sql")).toContain(

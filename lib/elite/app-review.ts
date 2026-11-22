@@ -97,6 +97,15 @@ export const SCREENS: readonly Screen[] = [
   { path: "/log/quiz", since: IN_FIRST_BUILD },
   { path: "/log/clubs", since: IN_FIRST_BUILD },
   { path: "/log/club/[id]", since: IN_FIRST_BUILD },
+  // Clubs as teams (077, Nov 22 2026): clubs near you, planning a club
+  // session or a game, one session or game, Strive events and a club's
+  // entry. In the first build, which is not submitted yet; the listing's
+  // review notes describe them (docs/app-store/listing.md).
+  { path: "/log/club/[id]/near", since: IN_FIRST_BUILD },
+  { path: "/log/club/[id]/plan", since: IN_FIRST_BUILD },
+  { path: "/log/plan/[id]", since: IN_FIRST_BUILD },
+  { path: "/log/events", since: IN_FIRST_BUILD },
+  { path: "/log/events/[id]", since: IN_FIRST_BUILD },
   { path: "/log/u/[id]", since: IN_FIRST_BUILD },
   { path: "/log/settings", since: IN_FIRST_BUILD },
   { path: "/log/settings/profile", since: IN_FIRST_BUILD },

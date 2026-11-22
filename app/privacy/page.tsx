@@ -90,6 +90,18 @@ export default function PrivacyPage({
                 photos.
               </li>
               <li>
+                <strong className="text-bone">Clubs, sessions and games:</strong>{" "}
+                a club&apos;s county, its record and how many players it has
+                are visible to the captains of other clubs in that county
+                when the club is open to games, and to nobody else. A club
+                session or game (its day, time, place and who is in) is seen
+                only by the members of the clubs involved. We keep when you
+                accepted that games and sessions are organized by players,
+                the teammates you tag as having trained with you, and, for a
+                Strive event, when you said you were in and the waiver you
+                accepted.
+              </li>
+              <li>
                 <strong className="text-bone">The waitlist:</strong> while
                 the free app is not open yet, a player 13 or older can join
                 its waitlist. We keep their first and last name, phone

@@ -11,6 +11,7 @@ import {
   clubById,
   clubIdsOf,
   getTracker,
+  insertLog,
   joinClub,
   requestClubByCode,
   answerClubRequest as answerClubRequestFor,
@@ -63,7 +64,6 @@ import {
   type Kind,
   type Season,
   DAY_CAP_MESSAGE,
-  limitHit,
   newReferralCode,
   FRIEND_REQUESTS_FULL_MESSAGE,
   CLUB_REQUESTS_FULL_MESSAGE,
@@ -224,15 +224,10 @@ export async function logTraining(
     });
     return { ok: true, id, trained_on, minutes, kind };
   }
-  const { data, error } = await o.admin
-    .from("elite_training_logs")
-    .insert({ profile_id: o.profileId, trained_on, minutes, kind, week_target: o.target || null })
-    .select("id")
-    .single();
-  if (limitHit(error) === "day_cap") return fail(DAY_CAP_MESSAGE);
-  if (error || !data) return fail(OFFLINE);
+  const saved = await insertLog(o.admin, { profileId: o.profileId, day: trained_on, minutes, kind, weekTarget: o.target });
+  if (!saved.ok) return fail(saved.dayCap ? DAY_CAP_MESSAGE : OFFLINE);
   touch();
-  return { ok: true, id: data.id as string, trained_on, minutes, kind };
+  return { ok: true, id: saved.id, trained_on, minutes, kind };
 }
 
 // The delete on an entry or on your own post: only ever the player's own

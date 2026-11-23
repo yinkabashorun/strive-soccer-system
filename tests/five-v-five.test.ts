@@ -15,7 +15,7 @@ describe("5v5 pricing", () => {
   });
   it("closes when Dec 6 starts in New York", () => {
     expect(phaseAt(at("2026-12-06T05:00:00Z"))).toBe("closed");
-    expect(priceAt(at("2026-12-19T15:00:00Z"))).toBeNull();
+    expect(priceAt(at("2026-12-21T15:00:00Z"))).toBeNull();
     expect(registerTarget(at("2026-12-06T05:00:00Z"))).toBeNull();
   });
   it("labels the deadlines in New York days", () => {

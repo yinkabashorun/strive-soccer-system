@@ -3,7 +3,7 @@
 node ../render.mjs 2 NN.png angles/NN.html from the folder above."""
 HEAD = """<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="style.css"><style>{css}</style></head>
 <body><div class="stage">{bg}<div class="vig"></div>
-<div class="eyebrow" style="font-size:19px;letter-spacing:7px">STRIVE ELITE 5V5<i>•</i>BALTIMORE COUNTY VS NOVA</div>
+<div class="eyebrow" style="font-size:19px;letter-spacing:7px">STRIVE ELITE 5V5<i>•</i>MARYLAND VS VIRGINIA</div>
 {body}
 {foot}
 <img class="logo" src="../strive-logo-512.png"><div class="grain"></div></div></body></html>"""
@@ -28,7 +28,7 @@ pages = {}
 pages['01'] = dict(bg=STAD, css="", body=f"""
 <div class="big white" style="top:135px;font-size:122px;white-space:nowrap">WALK IN YO TRAP.</div>
 <div class="big gold" style="top:255px;font-size:122px;white-space:nowrap">TAKE OVER YO TRAP.</div>
-<div class="line" style="top:398px;font-size:30px">NoVA is coming to Columbia. Dec 19.</div>
+<div class="line" style="top:398px;font-size:30px">Virginia is coming to Maryland. Dec 21.</div>
 {VA}<div class="fade"></div>""")
 
 pages['02'] = dict(bg=STAD, css="", body=f"""
@@ -77,7 +77,7 @@ pages['04'] = dict(bg=STAD, css="""
 <img class="p" src="../cutouts5/j1.png" style="left:610px;top:450px;height:690px;z-index:12;filter:drop-shadow(0 24px 30px rgba(0,0,0,.85)) contrast(1.08)">
 <div class="bub" style="left:40px;top:575px;transform:rotate(-6deg)">MIAA runs the DMV</div>
 <div class="bub" style="left:700px;top:1120px;transform:rotate(4deg)">them NoVA boys phony</div>
-<div class="line" style="top:1225px;font-size:30px;font-weight:700;letter-spacing:5px;z-index:15">DEC 19 WE FIND OUT.</div>
+<div class="line" style="top:1225px;font-size:30px;font-weight:700;letter-spacing:5px;z-index:15">DEC 21 WE FIND OUT.</div>
 """)
 
 pages['05'] = dict(bg=STAD, css="""
@@ -90,7 +90,7 @@ pages['05'] = dict(bg=STAD, css="""
 <div class="big white" style="top:190px;font-size:200px">NOVA</div>
 <div class="big gold" style="top:345px;font-size:216px">SWEEPS.</div>
 <img class="p" src="../cutouts5/v2.png" style="left:-40px;top:560px;width:1160px;z-index:6">
-<div class="stamp">SAVED FOR DEC 19</div>
+<div class="stamp">SAVED FOR DEC 21</div>
 <div class="fade" style="height:240px;z-index:20;background:linear-gradient(to bottom,rgba(5,5,5,0),rgba(5,5,5,.92) 70%)"></div>
 <div class="pill">Screenshot this, Baltimore. <b style="color:#efd287">Prove us wrong.</b></div>
 """)
@@ -117,11 +117,11 @@ pages['06'] = dict(bg='', css="""
 <div class="msgs">
  <div class="who">BALTIMORE</div><div class="m l">Baltimore &gt; NoVA no debate</div>
  <div class="who" style="text-align:right;margin-right:14px">NOVA</div><div class="m r">bet</div>
- <div class="m r">$3,000 says prove it. Dec 19, SoFive Columbia</div>
+ <div class="m r">$3,000 says prove it. Dec 21, SoFive Columbia</div>
  <div class="seen">Seen 9:41 PM</div>
  <div class="who">BALTIMORE</div><div class="typing"><i></i><i style="opacity:.7"></i><i style="opacity:.4"></i></div>
 </div></div>
-<div class="line" style="top:1160px;font-size:30px;font-weight:600;letter-spacing:6px;z-index:31">DEC 19 ENDS IT.</div>
+<div class="line" style="top:1160px;font-size:30px;font-weight:600;letter-spacing:6px;z-index:31">DEC 21 ENDS IT.</div>
 """)
 
 pages['07'] = dict(bg=STAD, css="""
@@ -153,7 +153,7 @@ CLOSE = dict(bg=STAD, css="""
 <div class="big gold" style="top:250px;font-size:150px">THE DMV?</div>
 <img class="tro" src="../trophy/photo-trophy-short.png">
 <div class="fade" style="height:520px"></div>
-<div class="row" style="top:900px;font-size:26px;letter-spacing:6px;color:#e9d9ad">BALTIMORE COUNTY VS NORTHERN VIRGINIA</div>
+<div class="row" style="top:900px;font-size:26px;letter-spacing:6px;color:#e9d9ad">MARYLAND VS VIRGINIA</div>
 <div class="row" style="top:950px;font-size:30px">3 games minimum. Every game recorded.</div>
 <div class="row" style="top:995px;font-size:30px">Early bird <b style="color:#efd287">$450 a team</b> through Nov 25.</div>
 <div class="row" style="top:1040px;font-size:30px">Follow <b style="color:#efd287">@strivesoccerfc</b> for the schedule.</div>
@@ -162,7 +162,7 @@ SWIPE = ('<div style="position:absolute;left:56px;right:120px;bottom:56px;z-inde
          'font-family:Inter;font-weight:600;font-size:20px;letter-spacing:6px;color:#cfc2a0"><span>{n} / 8</span>'
          '<span style="color:#c8a858">SWIPE &rarr;</span></div>')
 FULL = ('<div class="foot" style="bottom:44px;height:auto"><div class="prize"><b>$3,000</b> CASH<span style="color:#c8a858;margin:0 18px">•</span>32 TEAMS</div>'
-        '<div class="meta">SAT, DEC 19<i>•</i>SOFIVE COLUMBIA</div><div class="url">THESTRIVEAPP.COM/5V5</div></div>')
+        '<div class="meta">MON, DEC 21<i>•</i>SOFIVE COLUMBIA</div><div class="url">THESTRIVEAPP.COM/5V5</div></div>')
 order = ['01', '02', '04', '06', '03', '05', '07']  # the carousel order: trap, backyard, all talk, group chat, wanted, prediction, 3 games
 for i, k in enumerate(order, 1):
     v = dict(pages[k]); v['foot'] = SWIPE.format(n=i)

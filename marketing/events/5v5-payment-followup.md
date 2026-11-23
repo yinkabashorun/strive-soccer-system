@@ -34,7 +34,7 @@ paid team.
 
 1. Add tag `5v5-registered`.
 2. **SMS 1, sent immediately:**
-   > Hey {{contact.first_name}}, {{TEAM NAME FIELD}} is registered for the Strive Elite 5v5, Sat, Dec 19 at SoFive Columbia. Lock your spot with the entry fee here: {{custom_values.5v5_payment_link}} Your spot is held once it is paid.
+   > Hey {{contact.first_name}}, {{TEAM NAME FIELD}} is registered for the Strive Elite 5v5, Mon, Dec 21 at SoFive Columbia. Lock your spot with the entry fee here: {{custom_values.5v5_payment_link}} Your spot is held once it is paid.
 3. Wait 1 day.
 4. **SMS 2:**
    > {{contact.first_name}}, your team's spot in the 5v5 is not locked yet. 32 teams get in, and a spot is held only once the entry fee is paid: {{custom_values.5v5_payment_link}}
@@ -58,7 +58,7 @@ text.
 **Trigger:** Contact tag added `5v5-paid`.
 
 1. **SMS, sent immediately:**
-   > {{contact.first_name}}, payment received. {{TEAM NAME FIELD}} is in the Strive Elite 5v5, Sat, Dec 19 at SoFive Columbia. The schedule and the social media rollout drop on Instagram a week before the event, so make sure your whole team follows @strivesoccerfc.
+   > {{contact.first_name}}, payment received. {{TEAM NAME FIELD}} is in the Strive Elite 5v5, Mon, Dec 21 at SoFive Columbia. The schedule and the social media rollout drop on Instagram a week before the event, so make sure your whole team follows @strivesoccerfc.
 
 ## Notes
 

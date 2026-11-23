@@ -1,4 +1,4 @@
-// Strive Elite 5v5, Sat Dec 19 2026 at SoFive Columbia (Coach Yinka,
+// Strive Elite 5v5, Mon Dec 21 2026 at SoFive Columbia (Coach Yinka,
 // Nov 13 and Nov 19 2026). The page at /5v5 reads every fact and the
 // price from here, so the poster, the caption and the page cannot drift.
 //
@@ -12,8 +12,8 @@ import { nyLocalToIso } from "@/lib/elite/film-room";
 
 export const FIVE_V_FIVE = {
   name: "Strive Elite 5v5",
-  dateLabel: "Saturday, December 19",
-  shortDate: "Sat, Dec 19",
+  dateLabel: "Monday, December 21",
+  shortDate: "Mon, Dec 21",
   venue: "SoFive Columbia",
   prize: 3000,
   teams: 32, // Coach Yinka, Nov 19 (was 16)

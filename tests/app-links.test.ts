@@ -217,6 +217,7 @@ describe("every member screen follows the rule", () => {
     for (const name of [
       "AgreementScreen",
       "SignupForm",
+      "JoinForm",
       "ProgressVideoCard",
       "FilmTimeline",
       "CourseLibrary",

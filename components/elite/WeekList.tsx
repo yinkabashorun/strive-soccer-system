@@ -1,49 +1,60 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, ChevronDown, Play } from "lucide-react";
+import { sessionHeadline, sessionImage } from "@/lib/elite/experience";
+import { fmtDuration } from "@/lib/elite/time-trained";
 import type { Homework } from "@/lib/elite/types";
 import {
   groupSessions,
   isDone,
+  planSessionCount,
+  planSessionsLeft,
   sessionName,
   sessionProgress,
   type SessionGroup,
 } from "@/lib/elite/session-flow";
 import { sessionsWord } from "@/lib/elite/training";
-import { SessionPlayer } from "./SessionPlayer";
-import { SessionRows, WeekBar, liveMinutes, useDrillState } from "./SessionRows";
+import { SessionPlayer, type Origin } from "./SessionPlayer";
+import { liveMinutes, useDrillState } from "./SessionRows";
 import { cn } from "@/lib/utils";
 
-// The player's whole week: one card per session (four In-Season, six
-// Off-Season, plus any Extra Work). The session to do next is open with a
-// Start button; finished ones fold away under a gold tick; any of them
-// opens with a tap. Start opens the session full screen, one drill at a
-// time (SessionPlayer). Earlier weeks collapse underneath. When the whole
-// week is done the player is told the next one is on its way, never a
-// false "new week ready".
+// The player's whole week (approved mock v4, Nov 20 2026): a bar per
+// session that fills gold as each is done, then one photo card per session
+// (four In-Season, six Off-Season, plus any Extra Work): a gold tick on a
+// finished one, a white ring and a play button on the one up next. Any
+// card opens its session full screen, one drill at a time (SessionPlayer),
+// growing out of the card. Earlier weeks collapse underneath. When the
+// whole week is done the player is told the next one is on its way, never
+// a false "new week ready".
 export function WeekList({
   items,
   currentWeek,
   showPast = true,
   playerId,
+  sendClips = true,
   firstName = "",
   totalMinutes = 0,
   example = false,
+  startSession,
 }: {
   items: Homework[];
   currentWeek: number;
   showPast?: boolean;
   playerId?: string; // set on the player's own view: enables Send a clip (036)
+  sendClips?: boolean; // false for an offer without Send a clip (lib/elite/tiers.ts)
   firstName?: string;
   totalMinutes?: number; // all time, as the server last counted it
   example?: boolean; // the example player
+  // A session to open straight away (/homework?start=N): the Extra Work
+  // session the player just added. Opened once, then the address is
+  // cleaned so a reload or the back button does not open it again.
+  startSession?: number | null;
 }) {
   const router = useRouter();
   const { done, toggle } = useDrillState();
-  const [open, setOpen] = useState<{ group: SessionGroup; index: number } | null>(null);
-  const [expanded, setExpanded] = useState<Record<number, boolean>>({});
+  const [open, setOpen] = useState<{ group: SessionGroup; index: number; origin: Origin | null } | null>(null);
 
   const weeks = useMemo(() => {
     const by = new Map<number, Homework[]>();
@@ -52,6 +63,18 @@ export function WeekList({
       .map(([week, list]) => ({ week, list }))
       .sort((a, b) => b.week - a.week);
   }, [items]);
+
+  const started = useRef(false);
+  useEffect(() => {
+    if (started.current || !startSession) return;
+    started.current = true;
+    router.replace("/homework", { scroll: false });
+    const group = groupSessions(items.filter((h) => h.week === currentWeek)).find((g) => g.n === startSession);
+    if (!group) return;
+    const p = sessionProgress(group.list, {});
+    if (p.complete) return;
+    setOpen({ group, index: Math.max(0, p.nextIndex), origin: null });
+  }, [startSession, items, currentWeek, router]);
 
   const close = useCallback(() => {
     setOpen(null);
@@ -74,29 +97,41 @@ export function WeekList({
   const allDone = sessionsDone === sessions.length;
   const allTime = liveMinutes(totalMinutes, topWeek.list, done);
 
+  const regular = sessions.filter((s) => !s.extra);
+  const position = (g: SessionGroup) => regular.findIndex((s) => s.n === g.n) + 1;
+
+  function openSession(s: SessionGroup, el: HTMLElement) {
+    const p = sessionProgress(s.list, done);
+    const r = el.getBoundingClientRect();
+    setOpen({
+      group: s,
+      index: p.complete ? 0 : Math.max(0, p.nextIndex),
+      origin: { top: r.top, left: r.left, width: r.width, height: r.height },
+    });
+  }
+
   return (
     <div className="space-y-4">
-      <div>
-        <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.2em] text-white/55">
-          <span>Week {topWeek.week}</span>
-          <span className="tabular-nums">
-            {sessionsDone}/{sessions.length} sessions
-          </span>
-        </div>
-        <div className="mt-2.5">
-          <WeekBar sessions={sessions} done={done} />
-        </div>
+      {/* One bar per session: metal once it is done. Never drained. */}
+      <div className="flex gap-1.5" aria-label={`${sessionsDone} of ${sessions.length} sessions done this week`}>
+        {sessions.map((s) => (
+          <span
+            key={s.n}
+            className={cn(
+              "h-1.5 flex-1 rounded-full transition-colors duration-300",
+              s.list.every((h) => isDone(h, done)) ? "bg-metal" : "bg-fill-2"
+            )}
+          />
+        ))}
       </div>
 
       {allDone && (
-        <div className="flex items-start gap-3 rounded-3xl border border-accent/30 bg-accent/[0.07] p-5">
-          <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-accent text-black">
-            <Check className="h-3.5 w-3.5" strokeWidth={4} />
+        <div className="m-card flex items-start gap-3 p-5 shadow-[inset_0_0_0_1px_rgba(200,168,88,0.35)]">
+          <span className="metal-disc mt-0.5 grid h-7 w-7 shrink-0 place-items-center rounded-full">
+            <Check className="h-4 w-4" strokeWidth={3.5} />
           </span>
           <div>
-            <div className="font-display text-xl font-black uppercase leading-none">
-              Week complete
-            </div>
+            <div className="m-head text-[22px] leading-none">Week complete</div>
             <p className="mt-1.5 text-[15px] text-white/75">
               All {sessionsWord(sessions.length)} sessions done. Your next week is on its way.
             </p>
@@ -104,75 +139,59 @@ export function WeekList({
         </div>
       )}
 
-      {sessions.map((s) => {
-        const p = sessionProgress(s.list, done);
-        const isNext = nextUp?.n === s.n;
-        const isOpen = expanded[s.n] ?? isNext;
-        return (
-          <section
-            key={s.n}
-            className={cn(
-              "overflow-hidden rounded-3xl border bg-white/[0.03]",
-              isNext ? "border-white/15" : "border-white/[0.08]"
-            )}
-          >
-            <button
-              onClick={() => setExpanded((e) => ({ ...e, [s.n]: !isOpen }))}
-              aria-expanded={isOpen}
-              className="flex w-full items-center gap-3 p-4 text-left"
-            >
-              <span
+      <ol className="-mx-1.5 space-y-2.5">
+        {sessions.map((s) => {
+          const p = sessionProgress(s.list, done);
+          const isNext = nextUp?.n === s.n;
+          const image = sessionImage(s.list);
+          const headline = sessionHeadline(s.list);
+          const name = s.extra ? "Extra session" : `Session ${position(s)}`;
+          return (
+            <li key={s.n}>
+              <button
+                onClick={(e) => openSession(s, e.currentTarget)}
+                aria-label={`${name}${headline ? `, ${headline}` : ""}${p.complete ? ", done" : isNext ? ", up next" : ""}`}
                 className={cn(
-                  "grid h-9 w-9 shrink-0 place-items-center rounded-full font-display text-lg font-black",
-                  p.complete ? "bg-accent text-black" : "bg-white/[0.08] text-bone"
+                  "press relative flex h-[108px] w-full overflow-hidden rounded-[24px] bg-fill text-left",
+                  isNext && "shadow-[0_0_0_2.5px_#F5F4EF]"
                 )}
               >
-                {p.complete ? <Check className="h-4.5 w-4.5" strokeWidth={3.5} /> : s.n}
-              </span>
-              <span className="min-w-0 flex-1">
-                <span className="block font-display text-xl font-black uppercase leading-none">
-                  {sessionName(s)}
-                </span>
-                <span className="mt-1 block text-xs text-white/55">
-                  {p.complete
-                    ? `Done · ${p.minutesTotal} min`
-                    : `${p.done}/${p.total} drills · about ${p.minutesTotal} min`}
-                </span>
-              </span>
-              <ChevronDown
-                className={cn("h-5 w-5 shrink-0 text-white/50 transition-transform", isOpen && "rotate-180")}
-              />
-            </button>
-
-            {isOpen && (
-              <>
-                <div className="border-t border-white/[0.06] px-1.5">
-                  <SessionRows
-                    drills={s.list}
-                    done={done}
-                    onToggle={toggle}
-                    onOpen={(index) => setOpen({ group: s, index })}
+                {image && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={image}
+                    alt=""
+                    aria-hidden
+                    className={cn(
+                      "absolute inset-0 h-full w-full object-cover object-[50%_45%]",
+                      p.complete ? "brightness-[0.28] saturate-50" : "brightness-[0.55]"
+                    )}
                   />
-                </div>
-                {!p.complete && (
-                  <div className="p-4 pt-3">
-                    <button
-                      onClick={() => setOpen({ group: s, index: Math.max(0, p.nextIndex) })}
-                      className={cn(
-                        "flex h-14 w-full items-center justify-center gap-2.5 rounded-2xl font-display text-xl font-black uppercase tracking-wide transition-transform active:scale-[0.98]",
-                        isNext ? "bg-white text-black" : "border border-white/15 text-bone"
-                      )}
-                    >
-                      <Play className="h-5 w-5" fill="currentColor" />
-                      {p.done > 0 ? "Continue session" : "Start session"}
-                    </button>
-                  </div>
                 )}
-              </>
-            )}
-          </section>
-        );
-      })}
+                <span className="relative flex flex-1 flex-col justify-between px-[18px] py-4">
+                  <span className="m-head text-[26px] leading-none">{name}</span>
+                  <span className="text-[13px] text-white/80">
+                    {p.complete
+                      ? `Done · ${p.minutesTotal} min`
+                      : `${isNext ? "Up next · " : ""}${p.total} drills · ${p.minutesTotal} min${p.done > 0 ? ` · ${p.done} done` : ""}`}
+                  </span>
+                </span>
+                <span className="relative grid w-[86px] place-items-center" aria-hidden>
+                  {p.complete ? (
+                    <span className="metal-disc grid h-10 w-10 place-items-center rounded-full">
+                      <Check className="h-5 w-5" strokeWidth={3.5} />
+                    </span>
+                  ) : isNext ? (
+                    <span className="grid h-11 w-11 place-items-center rounded-full bg-bone text-black">
+                      <Play className="ml-0.5 h-[18px] w-[18px]" fill="currentColor" />
+                    </span>
+                  ) : null}
+                </span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
 
       {showPast && past.map((w) => <PastWeek key={w.week} week={w.week} list={w.list} />)}
 
@@ -183,14 +202,16 @@ export function WeekList({
           onToggle={toggle}
           startIndex={open.index}
           title={sessionName(open.group)}
+          headline={sessionHeadline(open.group.list)}
+          eyebrow={open.group.extra ? "Extra session" : `Session ${position(open.group)} of ${regular.length}`}
+          origin={open.origin}
           weekLabel={`Week ${topWeek.week}`}
           firstName={firstName}
           minutesBefore={allTime - sessionProgress(open.group.list, done).minutesDone}
-          sessionsLeftAfter={
-            sessions.filter((s) => s.n !== open.group.n && s.list.some((h) => !isDone(h, done))).length
-          }
-          sessionsTotal={sessions.length}
+          sessionsLeftAfter={planSessionsLeft(sessions, done, open.group.n)}
+          sessionsTotal={planSessionCount(sessions)}
           playerId={playerId}
+          sendClips={sendClips}
           example={example}
           onClose={close}
         />
@@ -201,21 +222,21 @@ export function WeekList({
 
 function PastWeek({ week, list }: { week: number; list: Homework[] }) {
   const [open, setOpen] = useState(false);
-  const done = list.filter((h) => h.completed).length;
+  const minutes = list.filter((h) => h.completed).reduce((m, h) => m + (h.duration_min ?? 15), 0);
   const ordered = [...list].sort(
     (a, b) => (a.session ?? 1) - (b.session ?? 1) || a.sort - b.sort
   );
   return (
-    <div className="elite-card overflow-hidden">
+    <div className="m-card overflow-hidden">
       <button
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="flex w-full items-center justify-between p-4 text-left"
+        className="flex min-h-[56px] w-full items-center justify-between p-4 text-left"
       >
-        <span className="text-[15px] font-medium text-white/80">Week {week}</span>
+        <span className="text-[15px] font-semibold text-white/80">Week {week}</span>
         <span className="flex items-center gap-3">
-          <span className="text-xs tabular-nums text-white/55">
-            {done}/{list.length} done
+          <span className="text-[13px] tabular-nums text-white/60">
+            {minutes > 0 ? `${fmtDuration(minutes)} trained` : ""}
           </span>
           <ChevronDown
             className={cn("h-4 w-4 text-white/50 transition-transform", open && "rotate-180")}
@@ -227,7 +248,7 @@ function PastWeek({ week, list }: { week: number; list: Homework[] }) {
           {ordered.map((h) => (
             <li key={h.id} className="flex items-center gap-2.5 text-sm text-white/70">
               <Check
-                className={cn("h-4 w-4 shrink-0", h.completed ? "text-accent" : "text-white/50")}
+                className={cn("h-4 w-4 shrink-0", h.completed ? "text-gold" : "text-white/50")}
                 strokeWidth={3}
               />
               <span className="min-w-0 flex-1 truncate">{h.title}</span>

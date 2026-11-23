@@ -4,8 +4,11 @@ import {
   createServiceClient,
   isSupabaseConfigured,
 } from "./supabase/server";
+import { bearerToken } from "./supabase/bearer";
 import type { Profile, Role } from "./types";
 import { DEMO_COACH, DEMO_PLAYERS, DEMO_PLAYER_ID } from "./demo";
+import { perRequest } from "./request-cache";
+import { NO_SETUP, setupFromRow, type ProfileSetup } from "./account-profile";
 
 // Resolves the current viewer for Strive Elite. Uses real Supabase auth
 // when configured; otherwise falls back to a demo cookie set on the login
@@ -30,6 +33,9 @@ export type Viewer = {
   role: Role;
   playerId: string | null; // set when the viewer is a player
   demo: boolean;
+  // The profile photo and @username this account owes, if any (081). Read
+  // from the same profile row, so it costs no extra trip.
+  setup: ProfileSetup;
 };
 
 function demoViewer(role: Role): Viewer {
@@ -46,6 +52,7 @@ function demoViewer(role: Role): Viewer {
       role: "player",
       playerId: p.id,
       demo: true,
+      setup: NO_SETUP,
     };
   }
   return {
@@ -59,23 +66,34 @@ function demoViewer(role: Role): Viewer {
     role: "coach",
     playerId: null,
     demo: true,
+    setup: NO_SETUP,
   };
 }
 
-export async function getViewer(): Promise<Viewer | null> {
+// Read once per request: the member shell, its page and anything they call
+// all ask who is signed in (request-cache.ts).
+export const getViewer = perRequest(readViewer);
+
+async function readViewer(): Promise<Viewer | null> {
   const supabase = createClient();
+
+  // A request from the native iPhone app (lib/elite/supabase/bearer.ts):
+  // the phone's access token is verified with Supabase itself, never read
+  // from the request body, and there is no demo fallback for it.
+  const token = bearerToken();
 
   // Real auth path
   if (supabase && isSupabaseConfigured()) {
     const {
       data: { user },
-    } = await supabase.auth.getUser();
+    } = token ? await supabase.auth.getUser(token) : await supabase.auth.getUser();
     if (user) {
-      const { data: profile } = await supabase
-        .from("elite_profiles")
-        .select("*")
-        .eq("id", user.id)
-        .maybeSingle();
+      // The profile and the player row are read side by side: a coach has
+      // no player row, so the second read simply finds nothing.
+      const [{ data: profile }, { data: playerRow }] = await Promise.all([
+        supabase.from("elite_profiles").select("*").eq("id", user.id).maybeSingle(),
+        supabase.from("elite_players").select("id").eq("profile_id", user.id).maybeSingle(),
+      ]);
 
       let role: Role = (profile?.role as Role) ?? "player";
 
@@ -103,14 +121,7 @@ export async function getViewer(): Promise<Viewer | null> {
       }
 
       let playerId: string | null = null;
-      if (role === "player") {
-        const { data: player } = await supabase
-          .from("elite_players")
-          .select("id")
-          .eq("profile_id", user.id)
-          .maybeSingle();
-        playerId = player?.id ?? null;
-      }
+      if (role === "player") playerId = (playerRow?.id as string | undefined) ?? null;
       return {
         profile: {
           id: user.id,
@@ -122,9 +133,13 @@ export async function getViewer(): Promise<Viewer | null> {
         role,
         playerId,
         demo: false,
+        setup: setupFromRow(profile as Record<string, unknown> | null, user.id),
       };
     }
   }
+
+  // A token that did not verify is a signed-out app, never the demo tour.
+  if (token) return null;
 
   // Demo path
   const demoRole = cookies().get(DEMO_COOKIE)?.value as Role | undefined;

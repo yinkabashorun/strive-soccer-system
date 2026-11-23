@@ -9,6 +9,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { unstable_noStore as noStore } from "next/cache";
 import { createClient, createServiceClient } from "./supabase/server";
 import { recentAppErrors } from "./app-errors-server";
+import { perRequest } from "./request-cache";
 import {
   DEMO_ACHIEVEMENTS,
   DEMO_CHECKINS,
@@ -20,6 +21,7 @@ import {
   DEMO_PARENT_REPORTS,
   DEMO_PLAYERS,
   DEMO_PROGRESS,
+  DEMO_PROGRAMS,
   DEMO_WEEKLY_PLANS,
 } from "./demo";
 import type {
@@ -68,7 +70,8 @@ export async function getPlayers(): Promise<Player[]> {
   return (data as Player[] | null) ?? [];
 }
 
-export async function getPlayer(id: string): Promise<Player | null> {
+// The member shell and its page both read these three (request-cache.ts).
+export const getPlayer = perRequest(async function getPlayer(id: string): Promise<Player | null> {
   const supabase = createClient();
   if (!supabase || isDemo(id)) return DEMO_PLAYERS.find((p) => p.id === id) ?? null;
   const { data } = await supabase
@@ -77,9 +80,9 @@ export async function getPlayer(id: string): Promise<Player | null> {
     .eq("id", id)
     .maybeSingle();
   return (data as Player | null) ?? null;
-}
+});
 
-export async function getHomework(playerId: string): Promise<Homework[]> {
+export const getHomework = perRequest(async function getHomework(playerId: string): Promise<Homework[]> {
   const supabase = createClient();
   if (!supabase || isDemo(playerId))
     return DEMO_HOMEWORK.filter((h) => h.player_id === playerId).sort(
@@ -91,7 +94,7 @@ export async function getHomework(playerId: string): Promise<Homework[]> {
     .eq("player_id", playerId)
     .order("sort");
   return (data as Homework[] | null) ?? [];
-}
+});
 
 // Highest week number each player has homework for - i.e. how far ahead
 // their plan is built. One bulk query; the coach dashboard uses it to flag
@@ -315,7 +318,7 @@ export async function getCourses(opts?: {
   if (!supabase) return [];
   let q = supabase
     .from("elite_courses")
-    .select("id, slug, name, subtitle, intro, kind, external_url, active, sort, elite_course_steps(*, elite_drills(*))")
+    .select("id, slug, name, subtitle, intro, kind, external_url, cover_url, active, sort, elite_course_steps(*, elite_drills(*))")
     .order("sort");
   if (!opts?.includeInactive) q = q.eq("active", true);
   const { data, error } = await q;
@@ -330,6 +333,7 @@ export async function getCourses(opts?: {
     intro: c.intro,
     kind: c.kind,
     external_url: c.external_url ?? null,
+    cover_url: c.cover_url ?? null,
     active: c.active,
     sort: c.sort,
     steps: [...(c.elite_course_steps ?? [])]
@@ -372,8 +376,9 @@ export async function loadTemplateContext(
 // Service client first: the hourly builder has no login, and the builder
 // must see the same program the coach saved.
 export async function getProgram(playerId: string, client?: SupabaseClient): Promise<Program | null> {
+  if (isDemo(playerId)) return DEMO_PROGRAMS.find((p) => p.player_id === playerId) ?? null;
   const supabase = client ?? createServiceClient() ?? createClient();
-  if (!supabase || isDemo(playerId)) return null;
+  if (!supabase) return null;
   const { data, error } = await supabase
     .from("elite_programs")
     .select("*")
@@ -822,7 +827,7 @@ export async function getPlayerSummary(playerId: string): Promise<PlayerSummary>
   return computeSummary(await getHomework(playerId));
 }
 
-export async function getNotifications(
+export const getNotifications = perRequest(async function getNotifications(
   playerId: string
 ): Promise<EliteNotification[]> {
   const supabase = createClient();
@@ -848,7 +853,7 @@ export async function getNotifications(
     .limit(30);
   if (error) return []; // table not created yet
   return (data as EliteNotification[] | null) ?? [];
-}
+});
 
 export async function getCoachRoster(): Promise<RosterRow[]> {
   const supabase = createClient();

@@ -40,7 +40,15 @@ function writePref(key: string, on: boolean) {
 // notifications (on, off, and a plain reason when they cannot be turned
 // on from here), vibration, and whether drill demos play on their own.
 // Nothing here is required to use the app.
-export function DeviceSettings({ showNotifications }: { showNotifications: boolean }) {
+export function DeviceSettings({
+  showNotifications,
+  variant = "member",
+}: {
+  showNotifications: boolean;
+  // The free app's Settings (078) shows the notifications row alone, in
+  // its own words; the member's Account page shows every row.
+  variant?: "member" | "free";
+}) {
   const [push, setPush] = useState<Push>("loading");
   const [busy, setBusy] = useState(false);
   const [feel, setFeel] = useState(true);
@@ -110,7 +118,10 @@ export function DeviceSettings({ showNotifications }: { showNotifications: boole
 
   const pushLine: Record<Push, string> = {
     loading: "Checking this phone.",
-    on: "On for this phone. New week, a message from your coach, Film Room.",
+    on:
+      variant === "free"
+        ? "On for this phone. When a friend posts or gives you props, never at night."
+        : "On for this phone. New week, a message from your coach, Film Room.",
     off: "Off for this phone.",
     install:
       "On an iPhone, add Strive Elite to your home screen first: tap Share, then Add to Home Screen. Then turn them on here.",
@@ -140,33 +151,37 @@ export function DeviceSettings({ showNotifications }: { showNotifications: boole
           )}
         </div>
       )}
-      <Switch
-        label="Vibration"
-        detail="A light tap when you tick a drill or finish a session."
-        on={feel}
-        onChange={(v) => {
-          setFeel(v);
-          writePref(FEEL_PREF_KEY, v);
-        }}
-      />
-      <Switch
-        label="Timer sound"
-        detail="A tone when a set or a rest starts and ends."
-        on={sound}
-        onChange={(v) => {
-          setSound(v);
-          writePref(SOUND_PREF_KEY, v);
-        }}
-      />
-      <Switch
-        label="Play drill demos automatically"
-        detail="Muted, on a loop. Off means one tap to play."
-        on={autoplay}
-        onChange={(v) => {
-          setAutoplay(v);
-          writePref(AUTOPLAY_PREF_KEY, v);
-        }}
-      />
+      {variant === "member" && (
+        <>
+          <Switch
+            label="Vibration"
+            detail="A light tap when you tick a drill or finish a session."
+            on={feel}
+            onChange={(v) => {
+              setFeel(v);
+              writePref(FEEL_PREF_KEY, v);
+            }}
+          />
+          <Switch
+            label="Timer sound"
+            detail="A tone when a set or a rest starts and ends."
+            on={sound}
+            onChange={(v) => {
+              setSound(v);
+              writePref(SOUND_PREF_KEY, v);
+            }}
+          />
+          <Switch
+            label="Play drill demos automatically"
+            detail="Muted, on a loop. Off means one tap to play."
+            on={autoplay}
+            onChange={(v) => {
+              setAutoplay(v);
+              writePref(AUTOPLAY_PREF_KEY, v);
+            }}
+          />
+        </>
+      )}
     </div>
   );
 }

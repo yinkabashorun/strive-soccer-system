@@ -126,6 +126,44 @@ async function claimSmsSend(phone: string, message: string): Promise<boolean> {
   }
 }
 
+// Put a person into GHL by phone, with their name, and ADD tags (GHL's
+// add-tags call keeps every tag the contact already has, so an old client
+// who joins the waitlist keeps theirs). Best-effort like every GHL call
+// here: false when GHL is not set up or does not answer.
+export async function tagGhlContact(
+  phone: string,
+  person: { firstName: string; lastName?: string },
+  tags: string[]
+): Promise<boolean> {
+  if (!isSmsConfigured()) return false;
+  const normalized = normalizePhone(phone);
+  if (!normalized) return false;
+  try {
+    const res = await fetch(`${GHL_BASE}/contacts/upsert`, {
+      method: "POST",
+      headers: headers(),
+      body: JSON.stringify({
+        locationId: locationId(),
+        phone: normalized,
+        firstName: person.firstName,
+        ...(person.lastName ? { lastName: person.lastName } : {}),
+      }),
+    });
+    if (!res.ok) return false;
+    const data = (await res.json()) as { contact?: { id?: string }; id?: string };
+    const id = data.contact?.id ?? data.id;
+    if (!id || tags.length === 0) return Boolean(id);
+    const tagged = await fetch(`${GHL_BASE}/contacts/${id}/tags`, {
+      method: "POST",
+      headers: headers(),
+      body: JSON.stringify({ tags }),
+    });
+    return tagged.ok;
+  } catch {
+    return false;
+  }
+}
+
 // Upsert the contact by phone, then send the text. Exported directly (not
 // just via sendPlayerSMS) so it can be exercised on its own - e.g. a
 // one-off test send with no player record involved.

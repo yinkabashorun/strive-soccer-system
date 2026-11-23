@@ -4,7 +4,7 @@ import { SHEET_PARAM, shownInSheet } from "@/lib/elite/app-links";
 
 export const metadata = { title: "Privacy Policy · Strive Elite" };
 
-const UPDATED = "November 18, 2026";
+const UPDATED = "November 23, 2026";
 const CONTACT_EMAIL = "coach@strivesoccer100x.com";
 
 export default function PrivacyPage({
@@ -70,6 +70,58 @@ export default function PrivacyPage({
                 privately. Only your family and the coaches can open them.
                 A clip is never posted publicly unless a parent or guardian
                 has said yes to that specific clip.
+              </li>
+              <li>
+                <strong className="text-bone">Profile photo and username:</strong>{" "}
+                every account has one profile photo and one username, asked
+                for once when the account is set up. The photo is stored
+                privately, with where and when it was taken removed, and
+                shown only through our own server: to the player, to the
+                coaches, and in the free app to the friends the player
+                accepted. The username is checked against a list of words we
+                do not allow and can be changed at any time. A coach can
+                remove a photo; deleting the account deletes it.
+              </li>
+              <li>
+                <strong className="text-bone">A free account:</strong>{" "}
+                the free app is for players 13 and older. We keep your
+                name, email and phone number, the month and year you were
+                born (never the day), the answers you give when you set it
+                up (your grade, playing level, in season or off season, and
+                your goal), the days you plan to train, each entry you log
+                (the date, the minutes, and whether it was training or gym
+                work), the photos you post with their one line, the props
+                you give, and the players you block or report. Photos are
+                stored privately and shown only through short-lived links.
+                Your friends (added only by a request one of you accepts) see your first name, last
+                initial, your training time and the photos you post; our
+                coaches can see them too, and nobody else does. You can
+                report a post or block a player at any time, and we can
+                remove a post. Deleting a post or your account deletes its
+                photos.
+              </li>
+              <li>
+                <strong className="text-bone">Clubs, sessions and games:</strong>{" "}
+                a club&apos;s county, its record and how many players it has
+                are visible to the captains of other clubs in that county
+                when the club is open to games, and to nobody else. A club
+                session or game (its day, time, place and who is in) is seen
+                only by the members of the clubs involved. We keep when you
+                accepted that games and sessions are organized by players,
+                the teammates you tag as having trained with you, and, for a
+                Strive event, when you said you were in and the waiver you
+                accepted.
+              </li>
+              <li>
+                <strong className="text-bone">The waitlist:</strong> while
+                the free app is not open yet, a player 13 or older can join
+                its waitlist. We keep their first and last name, phone
+                number, the month and year they were born, who they play
+                for if they tell us, and which teammate&apos;s link they
+                used. We text them their own link once and once more when
+                the app opens, and add them to our texting provider with a
+                waitlist tag. Nothing is kept for anyone under 13. Ask us
+                and we take you off the list.
               </li>
               <li>
                 <strong className="text-bone">Messages:</strong> any message
@@ -227,9 +279,10 @@ export default function PrivacyPage({
               the player uploaded. What it does not remove: records of
               payments, which are held by our payment processor and which we
               keep as long as tax and accounting rules require, and text
-              messages already delivered to your phone. Backup copies held
-              by our hosting provider are overwritten on their regular
-              schedule. Deleting an account does not by itself stop a
+              messages already delivered to your phone. Any backup copy
+              held by our hosting provider is gone within 7 days. The phone
+              numbers we text also sit with our texting provider; ask us and
+              we remove them there too. Deleting an account does not by itself stop a
               monthly payment. We are told when an account is deleted and
               stop the billing; you can also ask us directly.
             </p>

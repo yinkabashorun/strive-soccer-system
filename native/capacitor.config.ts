@@ -20,6 +20,9 @@ const config: CapacitorConfig = {
   ios: {
     contentInset: "never",
     backgroundColor: "#000000",
+    // A long press on a link or a picture never opens a preview of a web
+    // page: it is an app, not a browser (Nov 23 2026).
+    allowsLinkPreview: false,
   },
   server: {
     url: "https://thestriveapp.com",

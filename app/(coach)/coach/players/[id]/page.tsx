@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TIER_LABEL, featureOn, tierChip, tierOf } from "@/lib/elite/tiers";
 import { notFound } from "next/navigation";
 import { getViewer } from "@/lib/elite/session";
 import {
@@ -59,6 +60,9 @@ import { TierControl } from "@/components/elite/TierControl";
 import { CoachingCallsPanel } from "@/components/elite/CoachingCallsPanel";
 import { DuplicateWeekButton } from "@/components/elite/DuplicateWeekButton";
 import { cn, formatSessionDate, relativeDay, timeAgo } from "@/lib/utils";
+import { RemoveMemberPhoto } from "@/components/elite/RemoveMemberPhoto";
+import { setupOfAccount } from "@/lib/elite/account-profile-server";
+import { photoAddress } from "@/lib/elite/account-profile";
 
 export default async function PlayerProfile({
   params,
@@ -94,6 +98,9 @@ export default async function PlayerProfile({
   const benchmark = await getBenchmark(player, homework);
   // The 3-month program (065), if the coach has saved one.
   const program = await getProgram(player.id);
+  // The member's profile photo and @username (081).
+  const account = await setupOfAccount(player.profile_id);
+  const photo = photoAddress(account, player.profile_id ?? undefined);
 
   // Weeks derive from the calendar: live = where the program clock is
   // today, contentWeek = what the player is actually training.
@@ -142,11 +149,23 @@ export default async function PlayerProfile({
           <ArrowLeft className="h-4 w-4" /> Roster
         </Link>
         <div className="mt-4 flex flex-wrap items-center gap-4">
-          <Avatar name={player.full_name} color={player.avatar_color} size={64} />
+          {photo ? (
+            // the member's own profile photo (081), from our own route
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={photo} alt="" className="h-16 w-16 rounded-full object-cover" />
+          ) : (
+            <Avatar name={player.full_name} color={player.avatar_color} size={64} />
+          )}
           <div className="flex-1">
             <h1 className="font-display text-3xl font-black leading-none sm:text-4xl">
               {player.full_name}
             </h1>
+            {(account.username || photo) && (
+              <div className="mt-1 flex flex-wrap items-center gap-3 text-sm text-white/60">
+                {account.username && <span>@{account.username}</span>}
+                {photo && <RemoveMemberPhoto playerId={player.id} />}
+              </div>
+            )}
             <div className="mt-1.5 text-sm text-white/50">
               {player.age ? `Age ${player.age} · ` : ""}
               {player.position || "Player"} · Week {live}
@@ -154,6 +173,14 @@ export default async function PlayerProfile({
               active {summary.last_active ? relativeDay(summary.last_active) : "-"}
             </div>
           </div>
+          {tierChip(player.tier) && (
+            <span
+              title={TIER_LABEL[tierOf(player.tier)]}
+              className="rounded-full border border-accent/40 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-accent"
+            >
+              {tierChip(player.tier)}
+            </span>
+          )}
           <span
             className={cn(
               "rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em]",
@@ -331,14 +358,28 @@ export default async function PlayerProfile({
           {/* Intake snapshot */}
           <IntakePanel player={player} />
 
-          {/* The 3-month program (065): the quiz, six focuses, the threads */}
-          <ProgramPanel
-            playerId={player.id}
-            program={program}
-            counts={focusCounts(bankForStudio.drills, player)}
-            liveWeek={live}
-            nextWeek={Math.max(maxBuilt + 1, live)}
-          />
+          {/* The 3-month program (065): the quiz, six focuses, the threads.
+              Not part of Strive Pro (074): their week is built from their
+              answers and their check-ins, nothing more. */}
+          {featureOn(player.tier, "program") ? (
+            <ProgramPanel
+              playerId={player.id}
+              program={program}
+              counts={focusCounts(bankForStudio.drills, player)}
+              liveWeek={live}
+              nextWeek={Math.max(maxBuilt + 1, live)}
+            />
+          ) : (
+            <section className="elite-card p-5">
+              <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">
+                3-month program
+              </div>
+              <p className="mt-2 text-sm text-white/65">
+                Not part of Strive Pro. Their week is built every Monday from their quiz answers,
+                the drills they finish and their weekly check-in.
+              </p>
+            </section>
+          )}
 
           {/* Course drills offered to this player (040): switch, then tick */}
           <OfferedDrillsPanel

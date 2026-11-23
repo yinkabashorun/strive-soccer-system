@@ -1,0 +1,252 @@
+<title>Strive Elite iPhone Walkthrough</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Oswald:wght@600;700&display=swap">
+<style>
+/* Layout: an Apple-style product walkthrough. Black stage, phones as the heroes,
+   three chapters in the order a member lives them, one line of copy per screen. */
+:root{
+  --bg:#000;
+  --stage:#0b0b0a;
+  --line:rgba(242,239,232,.09);
+  --fg:#f2efe8;
+  --dim:rgba(242,239,232,.62);
+  --faint:rgba(242,239,232,.38);
+  --gold:#c8a858;
+  --metal:linear-gradient(135deg,#f0dca0 0%,#c8a858 45%,#8c6d2c 100%);
+  --display:"Oswald","Arial Narrow",Impact,sans-serif;
+  --body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1240px;margin:0 auto}
+h1,h2,h3{font-family:var(--display);font-weight:700;text-transform:uppercase;letter-spacing:.3px;margin:0;text-wrap:balance}
+p{margin:0}
+.eyebrow{font-size:12px;font-weight:600;letter-spacing:2.6px;text-transform:uppercase;color:var(--gold)}
+.metal{background:var(--metal);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* top bar */
+.bar{display:flex;justify-content:space-between;align-items:center;padding-block:22px;border-bottom:1px solid var(--line)}
+.wm{font-family:var(--display);font-weight:700;font-size:19px;letter-spacing:1.4px;text-transform:uppercase}
+.bar span:last-child{font-size:13px;color:var(--dim)}
+
+/* the device */
+.device{position:relative;aspect-ratio:390/844;width:100%;border-radius:15.5%/7.2%;padding:3.4%;
+  background:linear-gradient(160deg,#2b2b2b,#0c0c0c 40%,#191919);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),0 40px 80px -20px rgba(0,0,0,.9),0 0 0 1px #050505}
+.device .screen{position:relative;width:100%;height:100%;border-radius:12.5%/5.8%;overflow:hidden;background:#000}
+.device img,.device video{display:block;width:100%;height:100%;object-fit:cover}
+.device .screen::after{content:"";position:absolute;left:35%;right:35%;top:1.6%;height:3.4%;border-radius:999px;background:#000}
+
+/* hero */
+.hero{display:grid;gap:56px;padding-block:72px 40px;text-align:center}
+.hero h1{font-size:clamp(44px,8vw,96px);line-height:.98}
+.hero p.lead{font-size:clamp(18px,2.2vw,22px);color:var(--dim);max-width:34ch;margin:22px auto 0;text-wrap:balance}
+.trio{position:relative;display:flex;justify-content:center;align-items:flex-end;gap:0;max-width:760px;margin:0 auto;width:100%}
+.trio .device{width:34%;flex:none}
+.trio .device:nth-child(1){transform:translateX(14%) rotate(-6deg) scale(.86);opacity:.9}
+.trio .device:nth-child(2){z-index:2}
+.trio .device:nth-child(3){transform:translateX(-14%) rotate(6deg) scale(.86);opacity:.9}
+.glow{position:absolute;inset:20% 10% -6%;background:radial-gradient(closest-side,rgba(200,168,88,.22),transparent);z-index:-1;filter:blur(10px)}
+
+/* film */
+.film{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:56px;align-items:center;padding-block:72px;border-top:1px solid var(--line)}
+.film .device{max-width:300px;justify-self:center}
+.film h2{font-size:clamp(34px,5vw,58px);line-height:1}
+.film p{color:var(--dim);margin-top:16px;max-width:40ch}
+
+/* chapters */
+.chapter{padding-block:80px;border-top:1px solid var(--line)}
+.chapter header{display:grid;gap:12px;margin-bottom:44px;max-width:680px}
+.chapter h2{font-size:clamp(34px,5vw,58px);line-height:1}
+.chapter header p{color:var(--dim);font-size:19px}
+.rail{display:grid;grid-template-columns:repeat(var(--n),minmax(0,1fr));gap:28px}
+.step{display:grid;gap:18px;align-content:start;min-width:0}
+.step .meta{display:grid;gap:6px}
+.step .num{font-size:12px;font-weight:600;letter-spacing:2.4px;color:var(--gold);font-variant-numeric:tabular-nums}
+.step h3{font-size:24px;line-height:1.1}
+.step p{color:var(--dim);font-size:15.5px}
+.step .do{display:inline-flex;align-items:center;gap:8px;margin-top:6px;font-size:13px;font-weight:600;color:var(--fg);
+  padding:7px 12px;border-radius:999px;border:1px solid var(--line);background:var(--stage);width:fit-content}
+.step .do i{width:6px;height:6px;border-radius:50%;background:var(--metal)}
+
+/* never */
+.never{padding-block:80px;border-top:1px solid var(--line)}
+.never h2{font-size:clamp(34px,5vw,58px);line-height:1;margin-bottom:12px}
+.never > p{color:var(--dim);font-size:19px;max-width:46ch}
+.nogrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:22px;overflow:hidden;margin-top:40px}
+.nogrid div{background:var(--bg);padding:28px 24px;display:grid;gap:8px}
+.nogrid b{font-family:var(--display);font-size:26px;text-transform:uppercase;letter-spacing:.3px}
+.nogrid span{color:var(--dim);font-size:15px}
+
+/* details */
+.details{padding-block:80px;border-top:1px solid var(--line)}
+.details h2{font-size:clamp(34px,5vw,58px);line-height:1;margin-bottom:40px}
+.spec{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:36px}
+.spec div{display:grid;gap:6px;align-content:start}
+.spec b{font-family:var(--display);font-size:clamp(40px,5vw,56px);line-height:1;font-weight:700}
+.spec span{color:var(--dim);font-size:15px}
+
+footer{padding-block:40px 56px;border-top:1px solid var(--line);color:var(--faint);font-size:13px;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+
+/* phones: the chapters become a swipe rail, like the app */
+@media (max-width:820px){
+  .rail{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:18px;margin-inline:calc(-1 * max(16px,env(safe-area-inset-left,0px)));
+    padding-inline:max(16px,env(safe-area-inset-left,0px));padding-bottom:12px;scrollbar-width:none}
+  .rail::-webkit-scrollbar{display:none}
+  .step{flex:0 0 68%;scroll-snap-align:center}
+  .film{grid-template-columns:1fr;text-align:center}
+  .film p{margin-inline:auto}
+  .nogrid,.spec{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hero{padding-block:48px 24px;gap:40px}
+  .chapter,.never,.details,.film{padding-block:56px}
+}
+@media (min-width:821px) and (max-width:1100px){
+  .rail[style*="--n:5"]{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+.swipe{display:none;font-size:13px;color:var(--faint);margin-top:14px}
+@media (max-width:820px){.swipe{display:block}}
+@media (prefers-reduced-motion:no-preference){
+  .step .device{transition:transform .4s cubic-bezier(.22,1,.36,1)}
+  .step:hover .device{transform:translateY(-6px)}
+}
+</style>
+
+<div class="wrap">
+  <div class="bar"><span class="wm">Strive <span class="metal">Elite</span></span><span>The iPhone app</span></div>
+
+  <section class="hero">
+    <div>
+      <div class="eyebrow">Strive Elite for iPhone</div>
+      <h1 style="margin-top:16px">Open it.<br>Tap Start.<br><span class="metal">Train.</span></h1>
+      <p class="lead">A new week every Monday, built around your game. Every session is one tap away, one drill at a time.</p>
+    </div>
+    <div class="trio">
+      <div class="glow"></div>
+      <div class="device"><div class="screen"><img src="shots/drill.jpg" alt="A drill screen: the demo playing, the sets, and a Done button"></div></div>
+      <div class="device"><div class="screen"><img src="shots/home.jpg" alt="Home: today's session card with Start session"></div></div>
+      <div class="device"><div class="screen"><img src="shots/finish.jpg" alt="The finish screen: plus 22 minutes inside a gold ring"></div></div>
+    </div>
+  </section>
+
+  <section class="film">
+    <div class="device"><div class="screen"><video src="proto-walkthrough.mp4" poster="shots/door.jpg" autoplay muted loop playsinline aria-label="A 35 second walkthrough of the app"></video></div></div>
+    <div>
+      <div class="eyebrow">Watch it move</div>
+      <h2 style="margin-top:12px">35 seconds, from joining to the first finished session.</h2>
+      <p>Paying, the member card, the quiz, the week arriving, a full session, the finish, and back home with the first circle filled.</p>
+    </div>
+  </section>
+
+  <section class="chapter">
+    <header>
+      <div class="eyebrow">Chapter 1 · Day one</div>
+      <h2>From joining to training in four taps.</h2>
+      <p>Nothing to set up and no forms. Each screen asks for one thing.</p>
+    </header>
+    <div class="rail" style="--n:4">
+      <article class="step">
+        <div class="device"><div class="screen"><img src="shots/door.jpg" alt="You're in, with the member card"></div></div>
+        <div class="meta"><span class="num">01</span><h3>You're in.</h3><p>The moment you join, your member card rises with your name on it.</p><span class="do"><i></i>Tap Build my week</span></div>
+      </article>
+      <article class="step">
+        <div class="device"><div class="screen"><img src="shots/quiz.jpg" alt="Quiz: what holds you back most, four photo tiles"></div></div>
+        <div class="meta"><span class="num">02</span><h3>Say what holds you back.</h3><p>One question a screen. Tap a photo and the next question comes up by itself.</p><span class="do"><i></i>Tap your answer</span></div>
+      </article>
+      <article class="step">
+        <div class="device"><div class="screen"><img src="shots/build.jpg" alt="Building your week, three lines ticked"></div></div>
+        <div class="meta"><span class="num">03</span><h3>Your week gets built.</h3><p>Three lines tick off, and the second one names your own weak spot.</p><span class="do"><i></i>Nothing to do</span></div>
+      </article>
+      <article class="step">
+        <div class="device"><div class="screen"><img src="shots/drop.jpg" alt="Your week is here, four session cards"></div></div>
+        <div class="meta"><span class="num">04</span><h3>Your week arrives.</h3><p>Four sessions land on screen. Every Monday the new week arrives the same way.</p><span class="do"><i></i>Tap Let's go</span></div>
+      </article>
+    </div>
+    <p class="swipe">Swipe for the next screen</p>
+  </section>
+
+  <section class="chapter">
+    <header>
+      <div class="eyebrow">Chapter 2 · Every session</div>
+      <h2>One button starts it. One button finishes each drill.</h2>
+      <p>About twenty minutes each. The app keeps the count so you can keep your head up.</p>
+    </header>
+    <div class="rail" style="--n:5">
+      <article class="step">
+        <div class="device"><div class="screen"><img src="shots/home.jpg" alt="Home with today's session"></div></div>
+        <div class="meta"><span class="num">05</span><h3>One card. One button.</h3><p>Home shows today's session and nothing else. The circles show where you are in the week.</p><span class="do"><i></i>Tap Start session</span></div>
+      </article>
+      <article class="step">
+        <div class="device"><div class="screen"><img src="shots/countin.jpg" alt="The count-in, number 2 inside a gold ring"></div></div>
+        <div class="meta"><span class="num">06</span><h3>3, 2, 1.</h3><p>The card opens into the session and counts you in. Grab your ball.</p><span class="do"><i></i>Get in position</span></div>
+      </article>
+      <article class="step">
+        <div class="device"><div class="screen"><img src="shots/drill.jpg" alt="One drill with its demo and sets"></div></div>
+        <div class="meta"><span class="num">07</span><h3>One drill at a time.</h3><p>Watch the demo, read the sets, train. Done turns into a check and the next drill slides in.</p><span class="do"><i></i>Tap Done</span></div>
+      </article>
+      <article class="step">
+        <div class="device"><div class="screen"><img src="shots/timer.jpg" alt="The set timer at 0:42"></div></div>
+        <div class="meta"><span class="num">08</span><h3>The timer runs your sets.</h3><p>It counts every set and every rest, with a tone and a buzz each time it changes.</p><span class="do"><i></i>Tap the timer</span></div>
+      </article>
+      <article class="step">
+        <div class="device"><div class="screen"><img src="shots/finish.jpg" alt="Session done, plus 22 minutes"></div></div>
+        <div class="meta"><span class="num">09</span><h3>Session done.</h3><p>The ring closes, your minutes count up, and the next medal shows how close you are.</p><span class="do"><i></i>Tap Back home</span></div>
+      </article>
+    </div>
+    <p class="swipe">Swipe for the next screen</p>
+  </section>
+
+  <section class="chapter">
+    <header>
+      <div class="eyebrow">Chapter 3 · Between sessions</div>
+      <h2>Everything else, two taps away.</h2>
+      <p>Four tabs at the bottom: Home, Week, Courses and You.</p>
+    </header>
+    <div class="rail" style="--n:3">
+      <article class="step">
+        <div class="device"><div class="screen"><img src="shots/week.jpg" alt="The week: four session cards, two with gold checks"></div></div>
+        <div class="meta"><span class="num">10</span><h3>Your whole week.</h3><p>Every session on one screen. The finished ones carry a gold check.</p><span class="do"><i></i>Tab: Week</span></div>
+      </article>
+      <article class="step">
+        <div class="device"><div class="screen"><img src="shots/courses.jpg" alt="Courses: Keep It Up featured, then Dribbling, Weak Foot, Speed"></div></div>
+        <div class="meta"><span class="num">11</span><h3>Courses on top of your week.</h3><p>Weak foot, speed, strength, dribbling and more. Open any course any time.</p><span class="do"><i></i>Tab: Courses</span></div>
+      </article>
+      <article class="step">
+        <div class="device"><div class="screen"><img src="shots/you.jpg" alt="You: the member card, time trained, medals"></div></div>
+        <div class="meta"><span class="num">12</span><h3>Your card and your time.</h3><p>Your member card, every minute you've trained and every medal you've earned. Your time only goes up.</p><span class="do"><i></i>Tab: You</span></div>
+      </article>
+    </div>
+    <p class="swipe">Swipe for the next screen</p>
+  </section>
+
+  <section class="never">
+    <div class="eyebrow">What you won't find</div>
+    <h2 style="margin-top:12px">A quiet app.</h2>
+    <p>The only things that light up gold are the things you did.</p>
+    <div class="nogrid">
+      <div><b>No ads</b><span>Not one, anywhere in the app.</span></div>
+      <div><b>No streaks</b><span>Take a week off and you lose nothing.</span></div>
+      <div><b>No guilt</b><span>Nothing counts what you missed.</span></div>
+      <div><b>No noise</b><span>A notification means your week is live, or something you asked for.</span></div>
+    </div>
+  </section>
+
+  <section class="details">
+    <div class="eyebrow">The details</div>
+    <h2 style="margin-top:12px">Built to feel instant.</h2>
+    <div class="spec">
+      <div><b class="metal">0.15s</b><span>The most a tap ever waits for an answer.</span></div>
+      <div><b class="metal">1</b><span>Button that matters on every screen, always in reach of your thumb.</span></div>
+      <div><b class="metal">4</b><span>Tabs. They switch with a crossfade, never a loading spinner.</span></div>
+      <div><b class="metal">60s</b><span>Away and back, and the screen is already up to date.</span></div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Strive Elite · @strivesoccerfc</span>
+    <span>This is the design of the Strive Elite iPhone app. Names and numbers on the screens are examples.</span>
+  </footer>
+</div>

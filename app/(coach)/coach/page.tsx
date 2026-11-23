@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { TIER_LABEL, tierChip, tierOf } from "@/lib/elite/tiers";
 import { ArrowUpRight, CalendarOff, CalendarPlus, Clock, Flame, Users } from "lucide-react";
 import { getViewer } from "@/lib/elite/session";
 import {
@@ -180,12 +181,12 @@ export default async function CoachDashboard() {
                       {needsCount} new
                     </span>
                   )}
-                  {tierByPlayer[r.player_id] === "complete" && (
+                  {tierChip(tierByPlayer[r.player_id]) && (
                     <span
-                      title="Complete Pathway"
+                      title={TIER_LABEL[tierOf(tierByPlayer[r.player_id])]}
                       className="rounded-full border border-accent/40 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-[0.12em] text-accent"
                     >
-                      Complete
+                      {tierChip(tierByPlayer[r.player_id])}
                     </span>
                   )}
                   <StatusDot status={r.subscription_status} />

@@ -215,7 +215,7 @@ function pillarFor(text: string): string | null {
   return null;
 }
 
-function fromBank(d: Drill): GeneratedDrill {
+export function fromBank(d: Drill): GeneratedDrill {
   return {
     title: d.title,
     exercise: d.how,
@@ -582,21 +582,45 @@ export function composeExtraSession(opts: {
   take(shelfDrills);
   if (drills.length === 0) return null;
 
-  // Warm-up first: a filmed bank plyo, preferring one not in this week.
-  const plyos = rankForExtra(bank.filter((d) => d.pillar === PLYO_PILLAR), [], weekSet);
-  const warm = plyos[0] ? [fromBank(plyos[0])] : [];
-
-  // Finisher last when the player's note requires strengthening.
-  const strengthPool = bank.filter((d) => d.pillar === STRENGTH_PILLAR);
-  const finisher =
-    strength === "required" && strengthPool.length
-      ? [fromBank(rankForExtra(strengthPool, doneTitles, weekSet)[0])]
-      : [];
+  // Warm-up first, finisher last when the note requires one: the same two
+  // rules every Extra Work session follows (extraWarmUp, extraFinisher).
+  const warmUp = extraWarmUp(bank, weekTitles);
+  const finisher = strength === "required" ? extraFinisher(bank, player, doneTitles, weekTitles) : null;
 
   return {
     title: `Extra: ${EXTRA_SHELVES[shelf].label}`,
-    drills: [...warm, ...drills, ...finisher],
+    drills: [...(warmUp ? [fromBank(warmUp)] : []), ...drills, ...(finisher ? [fromBank(finisher)] : [])],
   };
+}
+
+// The warm-up every Extra Work session opens with: a filmed bank plyo,
+// preferring one that is not already in this week. The player never has
+// to pick it; it is always added first. Null only when the bank has none.
+export function extraWarmUp(bank: Drill[], weekTitles: string[]): Drill | null {
+  const weekSet = new Set(weekTitles.map(normalizeDrillTitle));
+  const plyos = bank.filter((d) => d.pillar === PLYO_PILLAR && d.active !== false && Boolean(d.video_url));
+  return rankForExtra(plyos, [], weekSet)[0] ?? null;
+}
+
+// The strengthening finisher added last when the player's note requires
+// one: a filmed finisher they can do, not in this week first, then the
+// least recently done.
+export function extraFinisher(
+  bank: Drill[],
+  player: PlayerEnv | null | undefined,
+  doneTitles: string[],
+  weekTitles: string[]
+): Drill | null {
+  const weekSet = new Set(weekTitles.map(normalizeDrillTitle));
+  const pool = bank.filter(
+    (d) =>
+      d.pillar === STRENGTH_PILLAR &&
+      d.active !== false &&
+      Boolean(d.video_url) &&
+      !isCourseDrill(d) &&
+      drillFitsPlayer(d, player)
+  );
+  return rankForExtra(pool, doneTitles, weekSet)[0] ?? null;
 }
 
 // ---------------------------------------------------------------------

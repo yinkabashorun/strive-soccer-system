@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ChevronRight, Clapperboard } from "lucide-react";
 import { getViewer } from "@/lib/elite/session";
 import {
   getCheckins,
@@ -7,6 +8,7 @@ import {
   getMessages,
   getBenchmark,
   getPlayer,
+  getProgram,
   getProgressVideos,
   getTrainingBreaks,
   getWeeklyPlans,
@@ -23,9 +25,17 @@ import { CoachingCallsCard } from "@/components/elite/CoachingCallsCard";
 import { CheckinBooking } from "@/components/elite/CheckinBooking";
 import { getPlayerCheckin } from "@/lib/elite/film-room-data";
 import { CheckinCard } from "@/components/elite/CheckinCard";
-import { fmtMonday, liveWeekFor, nextMondayNY, nyToday } from "@/lib/elite/time";
-import { greeting, timeAgo } from "@/lib/utils";
+import { liveWeekFor, nextMondayNY, nyToday } from "@/lib/elite/time";
+import { nextWeekLine as nextWeekLineFor } from "@/lib/elite/app-payload";
+import { timeAgo } from "@/lib/utils";
+import { WeekDrop, type DropCard } from "@/components/elite/WeekDrop";
+import { groupSessions, sessionProgress } from "@/lib/elite/session-flow";
+import { mondayOfProgramWeek, sessionImage, shortDate, todayName, weekRange } from "@/lib/elite/experience";
+import { sessionsWord } from "@/lib/elite/training";
+import { getNextFilmRoom } from "@/lib/elite/film-room-data";
 import { TourGuide } from "@/components/elite/TourGuide";
+import { featureOn } from "@/lib/elite/tiers";
+import { programWeekFor } from "@/lib/elite/program";
 
 // The player's home: one thing on screen - today's session. Under it,
 // one quiet row (Extra work, the coach's note, Take a break), each folded
@@ -33,7 +43,13 @@ import { TourGuide } from "@/components/elite/TourGuide";
 // greeting; the week shows once, on the session card. A card that only
 // sometimes applies (the progress clip, a call to book, the weekly
 // check-in) appears between the two when it does.
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  // ?drop=1: the example player can see the drop again (the sales tour);
+  // a member's drop follows the once-a-week rule only.
+  searchParams?: { drop?: string };
+}) {
   const viewer = await getViewer();
   if (!viewer?.playerId) return null; // layout renders the "almost there" state
 
@@ -47,7 +63,17 @@ export default async function DashboardPage() {
     player.week1_monday = week1Monday;
   }
 
-  const [allHomework, messages, checkins, plans, calls, breaks, progressVideos, monthlyCheckin] =
+  // What this member's offer includes (029, 074: lib/elite/tiers.ts).
+  const has = {
+    chat: featureOn(player.tier, "coachChat"),
+    clips: featureOn(player.tier, "sendClip"),
+    progressVideo: featureOn(player.tier, "progressVideo"),
+    monthlyCheckin: featureOn(player.tier, "monthlyCheckin"),
+    filmRoom: featureOn(player.tier, "filmRoom"),
+    calls: featureOn(player.tier, "coachingCalls"),
+  };
+
+  const [allHomework, messages, checkins, plans, calls, breaks, progressVideos, monthlyCheckin, program, filmRoom] =
     await Promise.all([
       getHomework(player.id),
       getMessages(player.id),
@@ -56,7 +82,13 @@ export default async function DashboardPage() {
       getCoachingCalls(player.id),
       getTrainingBreaks(player.id),
       getProgressVideos(player.id),
-      viewer.demo ? Promise.resolve({ booked: null, open: [] }) : getPlayerCheckin(player.id),
+      viewer.demo || !has.monthlyCheckin
+        ? Promise.resolve({ booked: null, open: [] })
+        : getPlayerCheckin(player.id),
+      // The 3-month program (065), for the goal ladder's goal and focus.
+      getProgram(player.id),
+      // The next Film Room, for its card (a card here, not a tab).
+      has.filmRoom && !viewer.demo ? getNextFilmRoom().catch(() => null) : Promise.resolve(null),
     ]);
 
   const firstName = player.full_name.split(" ")[0];
@@ -90,58 +122,76 @@ export default async function DashboardPage() {
   const weekDone = sessions.length > 0 && !current;
 
   // What to say about next week - never a false "it's ready".
-  const nextScheduled = plans.find(
-    (p) =>
-      p.week > contentWeek &&
-      p.unlocks_at &&
-      new Date(p.unlocks_at).getTime() > Date.now()
-  );
-  const nextWeekLine = nextScheduled
-    ? `Week ${nextScheduled.week} unlocks ${fmtMonday(nextMondayNY())}.`
-    : maxBuilt < live
-      ? `Your coach is building week ${live}. It lands the moment it's ready.`
-      : `Your coach is building week ${live + 1}. It drops Monday.`;
+  // One rule with the iPhone app's Home (lib/elite/app-payload.ts).
+  const nextWeekLine = nextWeekLineFor({
+    plans,
+    week: contentWeek,
+    live,
+    maxBuilt,
+    now: Date.now(),
+    nextMonday: nextMondayNY(),
+  });
 
   const checkedInThisWeek = checkins.some((c) => c.week === contentWeek);
 
   // Bi-weekly progress video (037): every second week, the same drill.
   // Needs a drill to film (the coach's pick or the first skill drill ever
   // completed) and a week that exists; never while on a break.
-  const videoDue = !onBreak && thisWeek.length > 0 && progressVideoDue(contentWeek, progressVideos);
+  const videoDue =
+    has.progressVideo && !onBreak && thisWeek.length > 0 && progressVideoDue(contentWeek, progressVideos);
   const benchmark = videoDue ? await getBenchmark(player, allHomework) : null;
   const previousVideo = previousProgressVideo(contentWeek, progressVideos);
 
   // The coach's latest word to the player (their own messages are not it).
-  const coachNote = messages.find((m) => m.from_role !== "player") ?? null;
+  const coachNote = has.chat ? messages.find((m) => m.from_role !== "player") ?? null : null;
   const extraOpen = sessions.some(
     (s) => s.list.some((h) => h.is_extra) && s.list.some((h) => !h.completed)
   );
 
+  // The drop (experience.ts): the week's sessions as they land, shown
+  // once per new week before anything in it is done.
+  const plan = plans.find((p) => p.week === contentWeek);
+  const regular = groupSessions(thisWeek).filter((g) => !g.extra);
+  const dropCards: DropCard[] = regular.map((g, i) => {
+    const p = sessionProgress(g.list, {});
+    return {
+      n: g.n,
+      label: `Session ${i + 1}`,
+      line: `${i === 0 ? "Today · " : ""}${p.total} drills · ${p.minutesTotal} min`,
+      image: sessionImage(g.list),
+    };
+  });
+  const sessionsCount = sessionsWord(regular.length);
+  const dropLine = `${sessionsCount.charAt(0).toUpperCase()}${sessionsCount.slice(1)} sessions. ${
+    plan?.focus?.trim() || "Built from your answers and how your training goes."
+  }`;
+
   return (
     <div className="space-y-4">
+      {/* The day and the week, the way the approved Home opens. Time
+          trained shows once, under the card (034: no streak, no
+          percentage, nothing that counts what was missed). */}
+      <header className="pr-24">
+        <h1 className="m-head text-[40px] leading-none">{todayName()}</h1>
+        <p className="mt-1.5 text-[13.5px] text-white/60">
+          {sessions.length > 0 ? `Week ${contentWeek} · ` : ""}
+          {shortDate()}
+        </p>
+      </header>
+
       {viewer.demo && <TourGuide page="home" />}
 
-      {/* Greeting, and time trained once: the pill opens Progress (034: no
-          streak, no percentage, nothing that counts what was missed) */}
-      <header className="flex items-center justify-between gap-3 animate-fade-up">
-        <h1 className="min-w-0 font-display text-[22px] font-black leading-none">
-          {greeting()}, {firstName}
-        </h1>
-        {time.minutes > 0 && (
-          <Link
-            href="/progress"
-            aria-label={`${fmtDuration(time.minutes)} trained. Open your progress`}
-            className="flex min-h-[44px] shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border border-accent/30 bg-accent/[0.07] px-3.5"
-          >
-            <span className="font-display text-lg font-black leading-none text-accent">
-              {fmtDuration(time.minutes)}
-            </span>
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-white/60">
-              trained
-            </span>
-          </Link>
-        )}
-      </header>
+      {sessions.length > 0 && !onBreak && (
+        <WeekDrop
+          playerId={player.id}
+          week={contentWeek}
+          range={weekRange(mondayOfProgramWeek(player.week1_monday, contentWeek))}
+          line={dropLine}
+          cards={dropCards}
+          anyDone={thisWeek.some((h) => h.completed)}
+          replay={viewer.demo && searchParams?.drop === "1"}
+        />
+      )}
 
       {/* THE thing: today's session (or the victory lap, or the break) */}
       {onBreak ? (
@@ -158,18 +208,41 @@ export default async function DashboardPage() {
           totalMinutes={time.minutes}
           nextWeekLine={nextWeekLine}
           playerId={player.id}
+          sendClips={has.clips}
           example={viewer.demo}
+          goal={{ program: program?.quiz.goal ?? null, onboarding: player.goals[0] ?? null }}
+          focus={programWeekFor(program, contentWeek)?.focusName ?? null}
         />
       ) : (
-        <section className="elite-card p-6 text-center">
-          <p className="font-display text-2xl font-black uppercase leading-tight">
-            Your first week is coming, {firstName}
-          </p>
-          <p className="mx-auto mt-2 max-w-sm text-[15px] leading-relaxed text-white/65">
-            Your coach is building it around your profile right now. It shows up here the
-            moment it is ready, and you get a notification when it does.
+        <section className="m-card px-6 py-8 text-center">
+          <p className="m-head text-[30px] leading-[1.02]">Your first week is coming, {firstName}</p>
+          <p className="mx-auto mt-3 max-w-sm text-[15px] leading-relaxed text-white/65">
+            Your coach is building it around your answers. It shows up here the moment it is ready,
+            and you get a notification when it does.
           </p>
         </section>
+      )}
+
+      {/* The Film Room (062) for an offer that has it: a card here, not a
+          tab. Its page has the Zoom link and the clip upload. */}
+      {has.filmRoom && (
+        <Link href="/film" className="press m-card flex min-h-[72px] items-center gap-3.5 px-4 py-3.5">
+          <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-fill-2 text-bone">
+            <Clapperboard className="h-5 w-5" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-[15px] font-semibold text-bone">Film Room</span>
+            <span className="mt-0.5 block truncate text-[13px] text-white/60">
+              {filmRoom
+                ? `${new Date(filmRoom.scheduled_at).toLocaleDateString("en-US", {
+                    weekday: "long",
+                    timeZone: "America/New_York",
+                  })} on Zoom. Send your clips before it.`
+                : "Upload clips from your games for the next one."}
+            </span>
+          </span>
+          <ChevronRight className="h-4 w-4 shrink-0 text-white/50" />
+        </Link>
       )}
 
       {/* Progress video (037): asked once per even week, same drill */}
@@ -186,11 +259,11 @@ export default async function DashboardPage() {
 
       {/* Monthly check-in call (062): the call you hold and the times you
           can book. Shows nothing when there is nothing to book. */}
-      {!viewer.demo && <CheckinBooking checkin={monthlyCheckin} firstName={firstName} />}
+      {!viewer.demo && has.monthlyCheckin && <CheckinBooking checkin={monthlyCheckin} firstName={firstName} />}
 
-      {/* Weekly 1:1 call - Complete Pathway only (029). Elite never sees
-          this; the demo tour doesn't cover calls. */}
-      {player.tier !== "elite" && !viewer.demo && (
+      {/* Weekly 1:1 call - Complete Pathway only (029). Elite and Pro
+          never see this; the demo tour doesn't cover calls. */}
+      {has.calls && !viewer.demo && (
         <CoachingCallsCard calls={calls} />
       )}
 

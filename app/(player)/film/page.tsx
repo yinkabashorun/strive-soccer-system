@@ -1,4 +1,6 @@
 import { Clapperboard } from "lucide-react";
+import { redirect } from "next/navigation";
+import { featureOn } from "@/lib/elite/tiers";
 import { getViewer } from "@/lib/elite/session";
 import { getFilm, getGames, getPlayer } from "@/lib/elite/data";
 import { liveWeekFor, monthFromWeek, nyToday } from "@/lib/elite/time";
@@ -25,6 +27,9 @@ export default async function FilmPage() {
     getNextFilmRoom(),
   ]);
   if (!player) return null;
+  // Not in every offer (Strive Pro, 074): the tab is not drawn, and an
+  // old link lands on Home instead of a page they cannot use.
+  if (!featureOn(player.tier, "filmRoom")) redirect("/dashboard");
   const roomClips = room && !viewer.demo ? await getPlayerFilmRoomClips(viewer.playerId, room.id) : [];
 
   const currentMonth = monthFromWeek(liveWeekFor(player.week1_monday, player.current_week));
@@ -52,7 +57,7 @@ export default async function FilmPage() {
         firstName={firstName}
       />
 
-      {player.tier !== "elite" && (
+      {featureOn(player.tier, "filmTimeline") && (
         <FilmTimeline
           films={films}
           currentMonth={currentMonth}

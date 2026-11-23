@@ -8,6 +8,7 @@ import { clipExtension, progressPath } from "@/lib/elite/clips";
 import { uploadClip } from "@/lib/elite/clip-upload";
 import { AppLink } from "./AppLink";
 import { DrillVideo } from "./DrillVideo";
+import { useCameraHint } from "./useCameraHint";
 
 // Bi-weekly progress video (offer stack item 7): every second week the
 // player films the same drill. The parent gets the link by text; the
@@ -33,12 +34,15 @@ export function ProgressVideoCard({
   const [state, setState] = useState<"idle" | "uploading" | "sent" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
   const [, start] = useTransition();
+  const [percent, setPercent] = useState(0);
+  const [hint, clearHint] = useCameraHint(fileRef);
 
   async function onFile(file: File) {
     setError(null);
     setState("uploading");
+    setPercent(0);
     const path = progressPath(playerId, week, clipExtension(file.name, file.type));
-    const up = await uploadClip(file, path);
+    const up = await uploadClip(file, path, setPercent);
     if (!up.ok) {
       setError(up.error);
       setState("error");
@@ -119,13 +123,17 @@ export function ProgressVideoCard({
           <button
             type="button"
             disabled={state === "uploading"}
-            onClick={() => fileRef.current?.click()}
+            onClick={() => {
+              clearHint();
+              fileRef.current?.click();
+            }}
             className="btn-accent mt-4 inline-flex items-center gap-2 px-5 py-3 disabled:opacity-60"
           >
             {state === "uploading" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-            {state === "uploading" ? "Sending…" : week === 1 ? "Film my first clip" : "Film it and send"}
+            {state === "uploading" ? `Sending ${percent}%` : week === 1 ? "Film my first clip" : "Film it and send"}
           </button>
           {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
+          {hint && !error && <p className="mt-3 text-[13px] text-white/55">{hint}</p>}
         </>
       )}
     </section>

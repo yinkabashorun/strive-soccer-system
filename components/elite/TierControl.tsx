@@ -9,10 +9,14 @@ import { cn } from "@/lib/utils";
 const OPTIONS: { value: MembershipTier; label: string; sub: string }[] = [
   { value: "elite", label: "Strive Elite", sub: "The app" },
   { value: "complete", label: "Complete Pathway", sub: "App + film + calls" },
+  { value: "pro", label: "Strive Pro", sub: "Plan + courses, paid by card" },
 ];
 
 // Which offer this player is on. Complete unlocks Film Room, the monthly
-// breakdown, the weekly parent report, and the coaching-calls card.
+// breakdown, the weekly parent report, and the coaching-calls card. Strive
+// Pro (074) is the weekly plan and the courses, none of the coach's own
+// time (lib/elite/tiers.ts). Moving a family onto Pro does not start a
+// card payment: Pro is paid at /pro, and its access follows Stripe.
 export function TierControl({
   playerId,
   initial,
@@ -41,7 +45,7 @@ export function TierControl({
         </div>
         {pending && <Loader2 className="h-3.5 w-3.5 animate-spin text-white/40" />}
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         {OPTIONS.map((o) => (
           <button
             key={o.value}
@@ -59,7 +63,8 @@ export function TierControl({
         ))}
       </div>
       <p className="mt-2 text-xs text-white/35">
-        Complete unlocks film review, the weekly parent report, and coaching calls.
+        Complete unlocks film review, the weekly parent report, and coaching calls. Pro has no
+        Film Room, coach chat, calls or clips.
       </p>
     </div>
   );

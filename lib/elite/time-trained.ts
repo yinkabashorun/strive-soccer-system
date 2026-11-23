@@ -67,3 +67,43 @@ export function fmtDuration(minutes: number): string {
   const rest = m % 60;
   return rest ? `${h}h ${rest}m` : `${h}h`;
 }
+
+// ---------------------------------------------------------------------
+// Time by area (Nov 22 2026, Coach Yinka: "track time trained on the
+// specific areas they were working on"). Every completed drill's minutes
+// under the area it is filed under, in the player's words, with this
+// week's share beside the all-time total. Only adds up, like every number
+// here.
+// ---------------------------------------------------------------------
+export const AREA_NAMES: Record<string, string> = {
+  "Ball Mastery": "Ball mastery",
+  "Weak Foot": "Weak foot",
+  Passing: "Passing",
+  Confidence: "1v1 moves",
+  Scanning: "Scanning",
+  "Decision Making": "Decision making",
+  Speed: "Speed",
+  Shooting: "Shooting",
+  Plyo: "Plyo warm-ups",
+  Strengthening: "Strength",
+};
+
+export function areaName(pillar: string): string {
+  return AREA_NAMES[pillar] ?? pillar;
+}
+
+export type AreaMinutes = { area: string; minutes: number; thisWeek: number };
+
+export function timeByArea(rows: Homework[], week: number): AreaMinutes[] {
+  const areas = new Map<string, AreaMinutes>();
+  for (const h of rows) {
+    if (!h.completed || !h.pillar) continue;
+    const area = areaName(h.pillar);
+    const m = h.duration_min ?? DEFAULT_DRILL_MIN;
+    const a = areas.get(area) ?? { area, minutes: 0, thisWeek: 0 };
+    a.minutes += m;
+    if (h.week === week) a.thisWeek += m;
+    areas.set(area, a);
+  }
+  return [...areas.values()].sort((a, b) => b.minutes - a.minutes || a.area.localeCompare(b.area));
+}

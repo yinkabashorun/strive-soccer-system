@@ -6,6 +6,7 @@ import { checkClipOpen, sendClip } from "@/lib/elite/player-actions";
 import { clipExtension, clipPath } from "@/lib/elite/clips";
 import { uploadClip } from "@/lib/elite/clip-upload";
 import { cn } from "@/lib/utils";
+import { useCameraHint } from "./useCameraHint";
 
 // "Send a clip" on a drill card (offer stack item 5): the player films
 // the drill, it uploads straight from the phone into their own folder of
@@ -26,10 +27,13 @@ export function SendClip({
   const [state, setState] = useState<"idle" | "checking" | "uploading" | "sent" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
   const [, start] = useTransition();
+  const [percent, setPercent] = useState(0);
+  const [hint, clearHint] = useCameraHint(fileRef);
 
   // One clip every two weeks: ask before opening the camera.
   async function onTap() {
     setError(null);
+    clearHint();
     setState("checking");
     const open = await checkClipOpen();
     if (!open.ok) {
@@ -44,8 +48,9 @@ export function SendClip({
   async function onFile(file: File) {
     setError(null);
     setState("uploading");
+    setPercent(0);
     const path = clipPath(playerId, homeworkId, clipExtension(file.name, file.type));
-    const up = await uploadClip(file, path);
+    const up = await uploadClip(file, path, setPercent);
     if (!up.ok) {
       setError(up.error);
       setState("error");
@@ -95,10 +100,11 @@ export function SendClip({
           ) : (
             <Video className="h-3.5 w-3.5" />
           )}
-          {state === "uploading" ? "Sending…" : "Send a clip"}
+          {state === "uploading" ? `Sending ${percent}%` : "Send a clip"}
         </button>
       )}
       {error && <p className="mt-1.5 text-[13px] text-red-400">{error}</p>}
+      {hint && !error && <p className="mt-1.5 text-[13px] text-white/55">{hint}</p>}
     </div>
   );
 }

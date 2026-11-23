@@ -4,6 +4,7 @@ import { EnvToggle } from "./EnvToggle";
 import { LoadToggle, SpaceToggle } from "./PlanToggle";
 import { GenderToggle } from "./GenderToggle";
 import { ContactInfoEditor } from "./ContactInfoEditor";
+import { selfScale } from "@/lib/elite/quiz";
 
 // Snapshot of what the player told us at intake, plus coach-editable
 // contact info and training environment. Gives the coach the context they
@@ -11,6 +12,7 @@ import { ContactInfoEditor } from "./ContactInfoEditor";
 export function IntakePanel({ player }: { player: Player }) {
   const self = player.self_assessment ?? {};
   const selfEntries = Object.entries(self);
+  const outOf = selfScale(self);
 
   const rows: [string, string][] = [];
   if (player.club) rows.push(["Club", player.club]);
@@ -76,7 +78,7 @@ export function IntakePanel({ player }: { player: Player }) {
           {selfEntries.length > 0 && (
             <div className="mt-4 border-t border-white/6 pt-3">
               <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-white/35">
-                Self-assessment at intake
+                Self-assessment at intake, out of {outOf}
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {selfEntries.map(([metric, value]) => (

@@ -9,7 +9,10 @@ export const ROOT = resolve(__dirname, "..", "..");
 
 export const MEMBER_ROOTS = [
   "app/(player)",
+  "app/(free)",
   "app/(auth)",
+  "app/(join)",
+  "app/(public)/pro", // Strive Pro, its page and its sign-up (074)
   "app/account",
   "app/support",
   "app/onboarding",

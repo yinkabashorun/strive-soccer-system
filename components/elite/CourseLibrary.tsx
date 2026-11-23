@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft, BookOpen, ChevronRight, Download, ExternalLink, PencilLine } from "lucide-react";
 import type { Course } from "@/lib/elite/types";
-import { courseNotice, externalHref, isInternalHref, levelsOf, stepTitle, stepVideo } from "@/lib/elite/courses";
+import { courseCover, courseNotice, externalHref, isInternalHref, levelsOf, stepTitle, stepVideo } from "@/lib/elite/courses";
 import { AppLink } from "@/components/elite/AppLink";
 import { DrillVideo } from "@/components/elite/DrillVideo";
 import { cn } from "@/lib/utils";
@@ -22,22 +22,24 @@ export function CourseList({
   basePath: string;
   staff?: boolean;
 }) {
+  // The shelf (approved mock v4, Nov 20 2026): the first course as one big
+  // photo card, every other one in a row of tall cards under it. The
+  // pictures are stills of the course's own drill clips; a course of
+  // written pages has none and shows as type on black.
+  const [featured, ...rest] = courses;
   return (
-    <div className="space-y-6">
-      <header className="animate-fade-up">
-        <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/50">Library</div>
-        <h1 className="mt-1 flex items-center gap-2.5 font-display text-3xl font-black sm:text-4xl">
-          <BookOpen className="h-7 w-7 text-accent" /> Courses
-        </h1>
-        <p className="mt-2 text-white/50">
+    <div className="space-y-5">
+      <header className="pr-24">
+        <h1 className="m-head text-[40px] leading-none">Courses</h1>
+        <p className="mt-2 text-[14px] leading-snug text-white/60">
           {staff
             ? "What every member sees on their Courses tab, course by course. Edit any of them in the drill bank."
-            : "Ladders and guides from Coach Yinka and Coach Gary. Open one, watch the step, go do it. More land as they are filmed."}
+            : "On top of your week. Open one, watch the step, go do it."}
         </p>
         {staff && (
           <Link
             href="/coach/drills"
-            className="mt-3 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-accent hover:underline"
+            className="mt-2 inline-flex min-h-[44px] items-center gap-1.5 text-[13px] font-semibold uppercase tracking-wider text-accent hover:underline"
           >
             <PencilLine className="h-3.5 w-3.5" /> Edit courses
           </Link>
@@ -45,58 +47,104 @@ export function CourseList({
       </header>
 
       {courses.length === 0 ? (
-        <div className="elite-card p-6 text-[15px] leading-relaxed text-white/65">
+        <div className="m-card p-6 text-[15px] leading-relaxed text-white/65">
           The first course is on its way. It shows up here the moment it is ready.
         </div>
       ) : (
-        <div className="space-y-2.5">
-          {courses.map((c) => {
-            const levels = levelsOf(c.steps).length;
-            const notice = staff ? courseNotice(c) : null;
-            // Every course opens its page in the app first. A link course's
-            // page is the gate (LinkCourseGate) that shows the course's
-            // password before the button to its own site (Nov 5 2026).
-            const out = externalHref(c);
-            const Card = Link;
-            const cardProps = { href: `${basePath}/${c.slug}` };
-            return (
-              <Card
-                key={c.id}
-                {...cardProps}
-                className={cn(
-                  "elite-card flex items-center justify-between gap-4 p-5 transition-colors hover:border-accent/40",
-                  notice && "opacity-70"
-                )}
-              >
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="font-display text-xl font-bold uppercase tracking-tight">{c.name}</div>
-                    {staff && !c.active && (
-                      <span className="rounded-full border border-white/15 px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.14em] text-white/50">
-                        Off
-                      </span>
-                    )}
-                  </div>
-                  {c.subtitle && <div className="mt-0.5 text-sm text-white/55">{c.subtitle}</div>}
-                  <div className="mt-1.5 text-xs text-white/50">
-                    {c.kind === "link"
-                      ? "Opens the course site"
-                      : c.kind === "drill"
-                      ? `${levels} level${levels === 1 ? "" : "s"} · ${c.steps.length} drill${c.steps.length === 1 ? "" : "s"}, every one on video`
-                      : `${c.steps.length} lesson${c.steps.length === 1 ? "" : "s"}`}
-                  </div>
-                  {notice && <div className="mt-1.5 text-xs text-amber-300/80">{notice}</div>}
-                </div>
-                {out && !isInternalHref(out) ? (
-                  <ExternalLink className="h-5 w-5 shrink-0 text-white/50" />
-                ) : (
-                  <ChevronRight className="h-5 w-5 shrink-0 text-white/50" />
-                )}
-              </Card>
-            );
-          })}
-        </div>
+        <>
+          <CourseCard course={featured} basePath={basePath} staff={staff} featured />
+          {rest.length > 0 && (
+            <section aria-label="All courses">
+              <div className="mb-2.5 flex items-baseline justify-between">
+                <h2 className="text-[17px] font-semibold">All courses</h2>
+                <span className="text-[13px] text-white/60">{courses.length}</span>
+              </div>
+              <ul className="no-scrollbar -mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 pb-1 sm:-mx-6 sm:px-6">
+                {rest.map((c) => (
+                  <li key={c.id} className="w-[150px] shrink-0 snap-start">
+                    <CourseCard course={c} basePath={basePath} staff={staff} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </>
       )}
+    </div>
+  );
+}
+
+function CourseCard({
+  course: c,
+  basePath,
+  staff,
+  featured = false,
+}: {
+  course: Course;
+  basePath: string;
+  staff: boolean;
+  featured?: boolean;
+}) {
+  const notice = staff ? courseNotice(c) : null;
+  const cover = courseCover(c);
+  const levels = levelsOf(c.steps).length;
+  const out = externalHref(c);
+  const outside = Boolean(out && !isInternalHref(out));
+  // Every course opens its page in the app first. A link course's page is
+  // the gate (LinkCourseGate) that shows the course's password before the
+  // button to its own site (Nov 5 2026).
+  const meta =
+    c.kind === "link"
+      ? "Opens the course site"
+      : c.kind === "drill"
+        ? `${levels} level${levels === 1 ? "" : "s"} · ${c.steps.length} drill${c.steps.length === 1 ? "" : "s"}`
+        : `${c.steps.length} lesson${c.steps.length === 1 ? "" : "s"}`;
+  return (
+    <div className={cn(notice && "opacity-70")}>
+      <Link
+        href={`${basePath}/${c.slug}`}
+        className={cn(
+          "press relative block overflow-hidden bg-fill",
+          featured ? "-mx-1.5 h-[300px] rounded-[30px]" : "h-[200px] rounded-[22px]"
+        )}
+      >
+        {cover ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={cover} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
+        ) : (
+          <span className="absolute inset-0 bg-[radial-gradient(90%_70%_at_20%_0%,#1d1a12_0%,#0e0e0e_60%)]" aria-hidden />
+        )}
+        <span
+          className={cn(
+            "absolute inset-0",
+            featured
+              ? "bg-[linear-gradient(180deg,rgba(0,0,0,0)_30%,rgba(0,0,0,0.92))]"
+              : "bg-[linear-gradient(180deg,rgba(0,0,0,0)_45%,rgba(0,0,0,0.85))]"
+          )}
+          aria-hidden
+        />
+        <span className={cn("absolute", featured ? "inset-x-[18px] bottom-[18px]" : "inset-x-3 bottom-3")}>
+          {featured && <span className="m-eyebrow block">Start here</span>}
+          <span
+            className={cn(
+              "block m-head [overflow-wrap:anywhere]",
+              featured ? "mt-1.5 text-[32px] leading-[1.02]" : "text-[19px] leading-[1.05]"
+            )}
+          >
+            {c.name}
+          </span>
+          {featured && c.subtitle && <span className="mt-1.5 block text-[14px] text-white/80">{c.subtitle}</span>}
+        </span>
+        {outside && <ExternalLink className="absolute right-3 top-3 h-4 w-4 text-white/70" aria-hidden />}
+        {staff && !c.active && (
+          <span className="absolute left-3 top-3 rounded-full bg-black/60 px-2 py-0.5 text-[11px] font-bold uppercase tracking-[0.14em] text-white/70">
+            Off
+          </span>
+        )}
+      </Link>
+      {!featured && c.subtitle && <p className="mt-1.5 line-clamp-2 px-0.5 text-[12.5px] text-white/60">{c.subtitle}</p>}
+      {featured && <p className="mt-2 px-0.5 text-[12.5px] text-white/60">{meta}</p>}
+      {notice && <p className="mt-1 px-0.5 text-[12px] text-amber-300/80">{notice}</p>}
     </div>
   );
 }

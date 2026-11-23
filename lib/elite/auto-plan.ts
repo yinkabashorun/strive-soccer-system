@@ -27,10 +27,11 @@ import { generatePlanFromNotes } from "./ai-coach";
 import { applyGeneratedPlanCore } from "./coach-actions";
 import { getDrillBank, latestCoachingCallNotes, loadTemplateContext, loadProgramWeek } from "./data";
 import { isSundayEveNY, liveWeekFor } from "./time";
-import { alertCoach, latestCronRun, PLAN_BUILDER_JOB, startCronRun, updateCronRun } from "./cron-log";
+import { alertCoach, FIRST_WEEK_JOB, latestCronRun, PLAN_BUILDER_JOB, startCronRun, updateCronRun } from "./cron-log";
 import { auditLiveWeeks, type HealthIssue } from "./health";
 import { backfillHomeworkVideos } from "./data";
 import { builderTargetWeek } from "./week-target";
+import { FIRST_WEEK_HELD, claimFirstWeek, releaseFirstWeek } from "./first-week-claim";
 import { fmtBreakDate, settleBreaks } from "./breaks";
 import { nyToday } from "./time";
 import type { Player, TrainingBreak } from "./types";
@@ -73,7 +74,10 @@ function synthesizeNotes(
 }
 
 export async function runAutoWeeklyPlans(
-  onProgress?: (results: Result[]) => Promise<void> | void
+  onProgress?: (results: Result[]) => Promise<void> | void,
+  // One player only (a new member's first week, buildFirstWeekFor). The
+  // same body, the same rules, the same gates: the roster is just one row.
+  onlyPlayerId?: string
 ): Promise<PlanBuilderOutcome> {
   const empty = (reason: string): PlanBuilderOutcome => ({
     ran: 0, built: 0, skipped: 0, errors: [], results: [], reason,
@@ -90,11 +94,13 @@ export async function runAutoWeeklyPlans(
     .maybeSingle();
   if (!coach?.id) return empty("no coach/admin profile to attribute plans to");
 
-  const { data: players } = await admin
+  let rosterQuery = admin
     .from("elite_players")
     .select("*")
     .not("onboarded_at", "is", null)
     .in("subscription_status", ["active", "trialing"]);
+  if (onlyPlayerId) rosterQuery = rosterQuery.eq("id", onlyPlayerId);
+  const { data: players } = await rosterQuery;
   const roster = (players as Player[] | null) ?? [];
 
   // Admin read - the drill table is coach-only under RLS and the cron has
@@ -120,6 +126,8 @@ export async function runAutoWeeklyPlans(
   }
 
   for (const player of roster) {
+    // The first-week claim (079), when this run holds it for this player.
+    let claimedFirst = false;
     try {
       const breaks = breaksByPlayer.get(player.id) ?? [];
       const onBreak = breaks.find((b) => b.since <= today && today <= b.until);
@@ -150,6 +158,31 @@ export async function runAutoWeeklyPlans(
       if (maxBuilt >= target) {
         results.push({ playerId: player.id, name: player.full_name, ok: true, skipped: "already built" });
         continue;
+      }
+
+      // A FIRST week is built by one caller at a time (079): the building
+      // screen after the quiz and this hourly run can reach the same new
+      // player at once, and two interleaved builds would double the week.
+      // Held elsewhere: build nothing. Table unreachable: build as before.
+      if (maxBuilt === 0) {
+        const claim = await claimFirstWeek(admin, player.id);
+        if (claim === "held") {
+          results.push({ playerId: player.id, name: player.full_name, ok: true, skipped: FIRST_WEEK_HELD });
+          continue;
+        }
+        claimedFirst = claim === "claimed";
+        if (claimedFirst) {
+          // Another build may have finished between the read above and
+          // the claim: check again under the claim.
+          const { count } = await admin
+            .from("elite_homework")
+            .select("id", { count: "exact", head: true })
+            .eq("player_id", player.id);
+          if ((count ?? 0) > 0) {
+            results.push({ playerId: player.id, name: player.full_name, ok: true, skipped: "already built" });
+            continue;
+          }
+        }
       }
 
       const [{ data: lastHomework }, { data: lastCheckin }] = await Promise.all([
@@ -204,6 +237,9 @@ export async function runAutoWeeklyPlans(
         ok: false,
         error: err instanceof Error ? err.message : "unknown error",
       });
+    } finally {
+      // Built or not, the build ended: a later caller may take it over.
+      if (claimedFirst) await releaseFirstWeek(admin, player.id);
     }
     await onProgress?.(results);
   }
@@ -215,6 +251,40 @@ export async function runAutoWeeklyPlans(
 }
 
 export type PlanBuilderInput = { trigger: "cron" | "coach"; authed: boolean };
+
+// A new member's first week, the moment they finish the quiz (Nov 21 2026,
+// the building screen). It is the hourly builder's own body for one player:
+// the same week rule (a quiz finished on a Sunday is held to Monday), the
+// same bank gates and the same announcement ledger, so it can never build
+// anything the hourly run would not, and a second run (this, the hourly
+// cron, a coach tap) finds the week built and does nothing. Logged under
+// its own job; an error texts the coach like any builder error, and the
+// hourly run tries again within the hour.
+export async function buildFirstWeekFor(playerId: string): Promise<PlanBuilderOutcome> {
+  const runId = await startCronRun({ job: FIRST_WEEK_JOB, trigger: "onboarding", authed: true }).catch(() => null);
+  let outcome: PlanBuilderOutcome = { ran: 0, built: 0, skipped: 0, errors: [], results: [] };
+  try {
+    outcome = await runAutoWeeklyPlans(undefined, playerId);
+  } catch (err) {
+    outcome = { ...outcome, errors: [{ name: "run", error: err instanceof Error ? err.message : "unknown crash" }] };
+  }
+  await updateCronRun(runId, {
+    built: outcome.built,
+    skipped: outcome.skipped,
+    errors: outcome.errors,
+    issues: [],
+    summary: summarize(outcome),
+    finished: true,
+  }).catch(() => undefined);
+  if (outcome.errors.length > 0) {
+    await alertCoach(
+      `A new member's first week did not build when they finished the quiz: ${outcome.errors
+        .map((e) => `${e.name} (${e.error})`)
+        .join("; ")}. The hourly builder tries again within the hour.`
+    );
+  }
+  return outcome;
+}
 
 function summarize(o: PlanBuilderOutcome): string {
   const parts = [

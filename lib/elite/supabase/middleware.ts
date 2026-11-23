@@ -14,6 +14,7 @@ const PROTECTED_PREFIXES = [
   "/dashboard",
   "/homework",
   "/progress",
+  "/you",
   "/film",
   "/coach",
 ];

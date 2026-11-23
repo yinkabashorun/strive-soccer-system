@@ -9,6 +9,7 @@ import { uploadClip } from "@/lib/elite/clip-upload";
 import { FILM_CLIPS_MAX, FILM_CLIPS_MIN, fmtWhen } from "@/lib/elite/film-room";
 import type { FilmRoom, FilmRoomClip } from "@/lib/elite/types";
 import { AppLink } from "./AppLink";
+import { useCameraHint } from "./useCameraHint";
 
 // The member side of the weekly Film Room (062): when it is, the Zoom
 // link, and the place to upload three to five clips for Coach Yinka and
@@ -30,6 +31,7 @@ export function FilmRoomCard({
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [hint, clearHint] = useCameraHint(fileRef);
 
   if (!room) {
     return (
@@ -58,9 +60,10 @@ export function FilmRoomCard({
     let added = 0;
     for (let i = 0; i < files.length; i++) {
       const f = files[i];
-      setBusy(`Sending clip ${i + 1} of ${files.length}`);
+      const label = files.length > 1 ? `Sending clip ${i + 1} of ${files.length}` : "Sending";
+      setBusy(`${label}, 0%`);
       const path = filmRoomPath(playerId, room.id, clipExtension(f.name, f.type), t0 + i);
-      const up = await uploadClip(f, path);
+      const up = await uploadClip(f, path, (p) => setBusy(`${label}, ${p}%`));
       if (!up.ok) {
         setError(up.error);
         break;
@@ -154,7 +157,10 @@ export function FilmRoomCard({
           <button
             type="button"
             disabled={busy !== null}
-            onClick={() => fileRef.current?.click()}
+            onClick={() => {
+              clearHint();
+              fileRef.current?.click();
+            }}
             className="btn mt-3 inline-flex min-h-[44px] px-5 py-2 text-sm disabled:opacity-60"
           >
             {busy ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" /> : <Upload className="mr-1.5 h-4 w-4" />}
@@ -171,6 +177,7 @@ export function FilmRoomCard({
         )}
         {enough && <p className="mt-2 text-[13px] text-accent">That&apos;s a full set. We&apos;ll go through them on the call.</p>}
         {error && <p className="mt-2 text-[13px] text-red-400">{error}</p>}
+        {hint && !error && busy === null && <p className="mt-2 text-[13px] text-white/55">{hint}</p>}
       </div>
     </div>
   );

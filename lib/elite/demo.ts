@@ -12,6 +12,7 @@ import type {
   ProgressMetric,
   WeeklyPlan,
 } from "./types";
+import type { Program } from "./program";
 
 // ---------------------------------------------------------------------------
 // Strive Elite demo data.
@@ -252,7 +253,22 @@ const hw = (
     completed: it.completed ?? false,
     completed_at: it.completed ? (it.completed_at ?? daysFromNow(-1)) : null,
     sort: i,
+    pillar: it.pillar ?? demoPillar(it.title),
   }));
+
+// The area each example drill is filed under, as the database's trigger
+// fills it from the drill bank for a real row (034), so the example
+// player's time by area reads like a real one.
+function demoPillar(title: string): string {
+  if (/^plyo warm-up/i.test(title)) return "Plyo";
+  if (/^strength:/i.test(title)) return "Strengthening";
+  if (/^speed:|sprint/i.test(title)) return "Speed";
+  if (/weak foot/i.test(title)) return "Weak Foot";
+  if (/feint|elastico|maradona|croqueta|mbappe|1v1/i.test(title)) return "Confidence";
+  if (/wall pass|passing|cruyff|triangle|3 cone/i.test(title)) return "Passing";
+  if (/scan/i.test(title)) return "Scanning";
+  return "Ball Mastery";
+}
 
 // Real plyo warm-ups pulled straight from the live drill bank - same title,
 // exercise text, reps, and hosted video every real session opens with.
@@ -1075,3 +1091,19 @@ export const DEMO_ACHIEVEMENTS: Achievement[] = [
 
 // The player the demo "player login" signs in as.
 export const DEMO_PLAYER_ID = "p-marcus";
+
+// The example player's 3-month program (065), so the tour shows the goal
+// ladder with a focus. Started in his week 3: week 7 is the first half of
+// month two. Example data like the rest of Marcus.
+export const DEMO_PROGRAMS: Program[] = [
+  {
+    id: "prog-marcus",
+    player_id: "p-marcus",
+    start_week: 3,
+    weeks: 12,
+    status: "active",
+    focuses: ["weak_foot", "first_touch_air", "passing_short", "one_v_one", "close_control", "acceleration"],
+    threads: [{ kind: "strength", from_block: 1, to_block: 3 }],
+    quiz: { goal: "Make the regional development squad by spring", limiters: ["weak_foot", "first_touch_air"] },
+  },
+];

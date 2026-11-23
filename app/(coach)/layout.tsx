@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { AppNav, type NavItem } from "@/components/elite/AppNav";
 import { getViewer } from "@/lib/elite/session";
+import { keptOutOfThisApp } from "@/lib/elite/native-request";
 import { unlockDueWeeks } from "@/lib/elite/unlock";
 
 const COACH_NAV: NavItem[] = [
@@ -8,6 +9,7 @@ const COACH_NAV: NavItem[] = [
   { href: "/coach/drills", label: "Drill bank", icon: "Dumbbell" },
   { href: "/coach/courses", label: "Courses", icon: "BookOpen" },
   { href: "/coach/calls", label: "Calls", icon: "Film" },
+  { href: "/coach/free", label: "Free app", icon: "BarChart3" },
 ];
 
 export default async function CoachLayout({
@@ -25,7 +27,7 @@ export default async function CoachLayout({
   return (
     <div className="min-h-[100svh] bg-black text-bone lg:flex">
       <AppNav
-        items={COACH_NAV}
+        items={COACH_NAV.filter((item) => !keptOutOfThisApp(item.href))}
         name={viewer.profile.full_name}
         color={viewer.profile.avatar_color}
         roleLabel="Coach"

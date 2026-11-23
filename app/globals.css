@@ -4,13 +4,28 @@
 
 :root {
   color-scheme: dark;
+  /* The two type slots every font-display / font-body class reads. Barlow
+     is the brand type for the coach side and the public pages. */
+  --font-display: "Barlow Condensed";
+  --font-body: "Barlow";
+}
+
+/* The member app (approved Nov 20 2026, marketing/app-redesign/mock):
+   Oswald Bold headlines, Inter for labels and body. Everything inside a
+   member-ui element reads the new type through the same classes, so a
+   shared component looks right on both sides without a second copy. */
+.member-ui {
+  --font-display: var(--font-oswald);
+  --font-body: var(--font-inter);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  letter-spacing: -0.006em;
 }
 
 html,
 body {
   background: #000;
   color: #f5f4ef;
-  font-family: "Barlow", ui-sans-serif, system-ui, sans-serif;
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   font-feature-settings: "ss01", "cv11";
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
@@ -87,6 +102,14 @@ summary,
   padding-bottom: env(safe-area-inset-bottom);
 }
 
+/* A row that scrolls sideways with no bar (the free app's row of faces). */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 .scrollbar-thin::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -139,16 +162,145 @@ summary,
   .elite-card {
     @apply rounded-3xl border border-white/[0.07] bg-white/[0.02] shadow-soft;
   }
-  /* Numeric inputs that edit in place — no native spinner arrows. */
-  .no-spin::-webkit-outer-spin-button,
-  .no-spin::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+
+  /* ---- The member app's pieces (marketing/app-redesign/mock/mock4.html) ---- */
+  /* A near-black card with a hairline edge instead of a border. */
+  .m-card {
+    @apply rounded-[22px] bg-fill;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
   }
-  .no-spin {
-    -moz-appearance: textfield;
-    appearance: textfield;
+  /* The tracked gold line over a headline. Gold here marks a place, the
+     only gold that is not an earned thing; it is never a button. */
+  .m-eyebrow {
+    @apply font-body text-[11px] font-semibold uppercase tracking-[0.24em] text-gold;
   }
+  /* A headline: Oswald Bold, upper case, a touch of tracking. */
+  .m-head {
+    @apply font-display font-bold uppercase;
+    letter-spacing: 0.01em;
+  }
+  /* A number or a measure in the headline face, kept in its own case so
+     "4h 20m" and "3 x 1 min" read as written. */
+  .m-num {
+    @apply font-display font-bold;
+    letter-spacing: 0.01em;
+  }
+  /* The one main button: off-white with black type. */
+  .m-button {
+    @apply flex h-[60px] w-full items-center justify-center gap-2.5 rounded-[18px] bg-bone font-display text-[19px] font-bold uppercase text-black transition-transform duration-150 active:scale-[0.97];
+    letter-spacing: 0.1em;
+  }
+  /* The quiet second button beside it. */
+  .m-button-quiet {
+    @apply flex h-[60px] items-center justify-center rounded-[18px] bg-fill font-display text-[18px] font-bold uppercase text-bone transition-transform duration-150 active:scale-[0.97];
+    letter-spacing: 0.1em;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
+  }
+  /* Gold that was earned, on text (minutes counted, a ring's number). */
+  .metal-text {
+    background-image: linear-gradient(135deg, #f0dca0 0%, #c8a858 45%, #8c6d2c 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* A medal or a tick: the metal disc with its light edge. */
+  .metal-disc {
+    @apply bg-metal text-[#1a1408];
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  }
+}
+
+/* The member card (the door after joining, and the top of You): the faint
+   engraved lines and the light that sweeps across it once. */
+.member-card-lines {
+  background: repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.018) 0 2px, transparent 2px 9px);
+}
+.member-card-sheen {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 240, 200, 0.16), rgba(255, 255, 255, 0));
+}
+
+/* A gold ring drawing itself to its own value (the finish screen's ring
+   draws all the way; this one stops where the player is). */
+.ring-draw {
+  animation: ring-draw 1.1s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both;
+}
+@keyframes ring-draw {
+  from {
+    stroke-dashoffset: var(--ring);
+  }
+}
+
+/* The press feel on every tappable card: it answers inside 0.15 s. */
+.press {
+  transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.press:active {
+  transform: scale(0.97);
+}
+
+/* Reduced motion for the experience: the door, the drop, the count-in, the
+   sparks and the quiz steps become plain fades; the sheen does not run. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-card-rise,
+  .animate-land,
+  .animate-step-in,
+  .animate-count-pop {
+    animation: fade-in 0.25s ease-out both !important;
+    transform: none !important;
+  }
+  .ring-draw {
+    animation: none !important;
+  }
+  .animate-sheen,
+  .animate-spark {
+    animation: none !important;
+    opacity: 0 !important;
+  }
+  .press:active {
+    transform: none;
+  }
+  /* screens come in with a plain fade, nothing slides or scales */
+  .animate-screen-in,
+  .animate-screen-from-right,
+  .animate-screen-from-left,
+  .animate-screen-nudge-right,
+  .animate-screen-nudge-left {
+    animation: fade-in 0.2s ease-out backwards !important;
+  }
+}
+
+/* The press feel everywhere in the member app (Nov 23 2026, "glides, is
+   fast"): every link and button that is a card or a control sinks a touch
+   the instant a finger lands, and comes back as it lifts. Inline text
+   links (.tap) and the fields are left alone. The tab bar has its own
+   feel (MemberNav). */
+.member-ui a:not(.tap):not(.no-press),
+.member-ui button:not(.no-press),
+.member-ui [role="button"] {
+  transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.member-ui a:not(.tap):not(.no-press):active,
+.member-ui button:not(:disabled):not(.no-press):active,
+.member-ui [role="button"]:active {
+  transform: scale(0.97);
+}
+@media (prefers-reduced-motion: reduce) {
+  .member-ui a:not(.tap):not(.no-press):active,
+  .member-ui button:not(.no-press):active,
+  .member-ui [role="button"]:active {
+    transform: none;
+  }
+}
+
+/* Numeric inputs that edit in place — no native spinner arrows. */
+.no-spin::-webkit-outer-spin-button,
+.no-spin::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+.no-spin {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 .dot-grid {

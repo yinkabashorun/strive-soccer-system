@@ -7,6 +7,14 @@ import { getViewer } from "@/lib/elite/session";
 import { signOut } from "@/lib/elite/auth-actions";
 import { deleteGate } from "@/lib/elite/account";
 import { SUPPORT_EMAIL, concernMailto } from "@/lib/elite/support";
+import { consentDue } from "@/lib/elite/legal-server";
+import { trackerFor } from "@/lib/elite/tracker-server";
+import { profileSetupDue } from "@/lib/elite/account-profile";
+import { FREE_SETTINGS, FREE_WEEK } from "@/lib/elite/tracker";
+import { hasRunningSubscription, memberTier } from "@/lib/elite/pro-server";
+import { isPro } from "@/lib/elite/tiers";
+import { PRO_PRICE_LINE } from "@/lib/elite/pro";
+import { CancelProForm } from "@/components/elite/CancelProForm";
 
 export const metadata = { title: "Account · Strive Elite" };
 
@@ -19,8 +27,20 @@ export default async function AccountPage() {
   if (!viewer) redirect("/login?next=/account");
 
   const isPlayer = viewer.role === "player";
-  const home = isPlayer ? "/dashboard" : "/coach";
+  // A free account (069) has its own Settings inside the free app. It
+  // lands here only while new terms wait for its yes (the free app shows
+  // the agreement until then), so it can still sign out or delete.
+  const tracker = viewer.demo ? null : await trackerFor(viewer);
+  // ...or while it still owes its profile photo and username (081): the
+  // one-time screen links here so Sign out and Delete stay reachable.
+  if (tracker && !profileSetupDue(viewer.setup) && !(await consentDue(viewer.profile.id))) redirect(FREE_SETTINGS);
+  const isMember = isPlayer && !tracker;
+  const home = !isPlayer ? "/coach" : tracker ? FREE_WEEK : "/dashboard";
   const canDelete = deleteGate(viewer).allowed;
+  // Strive Pro (074): the membership is paid by card here, so it is
+  // cancelled here too.
+  const pro = isMember && !viewer.demo && viewer.playerId ? isPro(await memberTier(viewer.playerId)) : false;
+  const canCancelPro = pro && (await hasRunningSubscription(viewer.profile.id));
 
   return (
     <div className="min-h-[100svh] bg-black text-bone">
@@ -44,12 +64,22 @@ export default async function AccountPage() {
           </div>
         </div>
 
-        {isPlayer && (
+        {isMember && (
           <Group title="Your training">
             <Row href="/progress" label="Progress" detail="Time trained and your coach's ratings" />
           </Group>
         )}
-
+        {pro && (
+          <Group title="Strive Pro">
+            <div className="p-4">
+              <span className="block text-[15px] font-semibold text-bone">{PRO_PRICE_LINE}</span>
+              <span className="mt-0.5 block text-sm text-white/60">
+                {canCancelPro ? "Your membership is on." : "No membership running."}
+              </span>
+            </div>
+            {canCancelPro && <CancelProForm />}
+          </Group>
+        )}
         {!viewer.demo && (
           <Group title="Sign-in">
             <Row href="/account/password" label="Change password" />
@@ -57,7 +87,7 @@ export default async function AccountPage() {
         )}
 
         <Group title="This phone">
-          <DeviceSettings showNotifications={isPlayer && !viewer.demo} />
+          <DeviceSettings showNotifications={isMember && !viewer.demo} />
         </Group>
 
         <Group title="Help">

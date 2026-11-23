@@ -4,7 +4,7 @@ import { SHEET_PARAM, shownInSheet } from "@/lib/elite/app-links";
 
 export const metadata = { title: "Terms of Service · Strive Elite" };
 
-const UPDATED = "November 18, 2026";
+const UPDATED = "November 22, 2026";
 const CONTACT_EMAIL = "coach@strivesoccer100x.com";
 
 export default function TermsPage({
@@ -55,6 +55,24 @@ export default function TermsPage({
               that. If the terms change in a way that matters, the app
               asks the adult to accept them again before training goes on.
             </p>
+            <p className="mt-3">
+              A free account is for players 13 and older. A player under
+              18 may agree to these terms on their own, and a parent or
+              guardian should review them with the player. It is a place to
+              post and log the training a player does on their own and to
+              see the friends they added do the same. It has no coaching
+              plan, no drills and no courses, and when free sign-up is open
+              it is created without an invite. Everything else in these
+              terms applies to it the same way.
+            </p>
+            <p className="mt-3">
+              Post photos of your own training only. The friends you added
+              see them, and so do our coaches. You can report a post or
+              block a player at any time. We have zero tolerance for
+              objectionable content and for abusive players: we look at
+              every report within 24 hours, remove what breaks these terms,
+              and close the account that posted it.
+            </p>
           </Section>
 
           <Section title="The program">
@@ -74,6 +92,43 @@ export default function TermsPage({
               app. Refunds are handled the same day, in good faith, if
               something isn&apos;t right - reach out and we&apos;ll sort it
               out.
+            </p>
+          </Section>
+
+          {/* NEEDS A LAWYER'S READ (Nov 22 2026, migration 077): the
+              section below on sessions, games and Strive events was
+              written by us, not reviewed by counsel. It is the Terms half
+              of a structure where the app never arranges a meeting itself:
+              closed groups, "Organized by" a club, and the two one-time
+              sheets a captain and a player accept. */}
+          <Section title="Club sessions, games and Strive events">
+            <p>
+              In the free app, a club&apos;s captain can plan a club
+              training session for the club&apos;s members, or a game
+              against another club. Strive provides the app only. Strive
+              does not organize, run, supervise or insure any session or
+              game players plan in the app, and does not check the place,
+              the people or the conditions. Everyone who takes part does
+              so at their own risk.
+            </p>
+            <p className="mt-3">
+              A captain who plans a session or a game is responsible for
+              what they plan: picking a public place, never a home, and
+              telling the players where and when. Only the members of the
+              clubs involved can see a session or a game. A parent or
+              guardian should know where and when a player under 18 is
+              playing.
+            </p>
+            <p className="mt-3">
+              In-person play that Strive itself runs happens only at Strive
+              events. Entering a Strive event means every player on the
+              roster accepts that event&apos;s waiver, and a spot is held
+              only once it is paid.
+            </p>
+            <p className="mt-3">
+              You can report a session or a game at any time. Our coaches
+              can cancel any session or game, and remove a club or an
+              account that breaks these terms.
             </p>
           </Section>
 

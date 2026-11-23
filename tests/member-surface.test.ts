@@ -15,7 +15,15 @@ describe("member-facing screens: the floors", () => {
     expect(names).toContain("app/(player)/dashboard/page.tsx");
     expect(names).toContain("components/elite/SessionPlayer.tsx");
     expect(names).toContain("components/elite/LoginForm.tsx");
-    expect(names).toContain("components/elite/OnboardingForm.tsx");
+    expect(names).toContain("components/elite/QuizFlow.tsx");
+    expect(names).toContain("app/(player)/you/page.tsx");
+    // the free training log (069) holds the same floors
+    expect(names).toContain("app/(free)/log/page.tsx");
+    expect(names).toContain("components/elite/FriendsFeed.tsx");
+    expect(names).toContain("components/elite/MyWeek.tsx");
+    expect(names).toContain("components/elite/PostComposer.tsx");
+    expect(names).toContain("components/elite/TrackerQuiz.tsx");
+    expect(names).toContain("components/elite/JoinForm.tsx");
   });
 
   it("no type under 11 px", () => {

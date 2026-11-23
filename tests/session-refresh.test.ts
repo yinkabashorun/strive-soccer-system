@@ -22,12 +22,23 @@ describe("the session is refreshed on every signed-in area", () => {
     for (const area of areas) expect(matched(`/${area}`), `/${area} is not in middleware.ts`).toBe(true);
   });
 
-  it("covers the coach side, the account pages, onboarding and the front door", () => {
-    for (const path of ["/coach", "/account", "/onboarding"]) expect(matched(path), path).toBe(true);
-    expect(middleware).toMatch(/matcher:\s*\[[\s\S]*"\/",/);
+  it("covers the free training log and its sign-up page", () => {
+    const dir = join(root, "app", "(free)");
+    const areas = readdirSync(dir).filter((n) => statSync(join(dir, n)).isDirectory());
+    expect(areas).toEqual(["log"]);
+    for (const area of areas) expect(matched(`/${area}`), `/${area} is not in middleware.ts`).toBe(true);
+    // the server signs a new free account in, so its cookie is refreshed here too
+    expect(matched("/join")).toBe(true);
   });
 
-  it("still leaves the public pages and the API alone", () => {
+  it("covers the coach side, the account pages, onboarding and the front door", () => {
+    for (const path of ["/coach", "/account", "/onboarding"]) expect(matched(path), path).toBe(true);
+    expect(middleware).toMatch(/SESSION_AREAS = \[\s*"\/",/);
+    // the list is what decides, and the matcher reaches every page
+    expect(middleware).toContain("if (!inSessionArea(path)) return NextResponse.next();");
+  });
+
+  it("does not refresh a session on the public pages or the API", () => {
     for (const path of ["/demo", "/privacy", "/terms", "/support", "/api"]) expect(matched(path), path).toBe(false);
   });
 });

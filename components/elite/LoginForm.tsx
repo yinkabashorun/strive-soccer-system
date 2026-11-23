@@ -8,6 +8,7 @@ import { Loader2, Lock, Mail } from "lucide-react";
 import { enterDemoPlayer, enterDemoCoach, signIn } from "@/lib/elite/auth-actions";
 import { INVITE_USED_MESSAGE, INVITE_USED_NOTICE } from "@/lib/elite/invite-link";
 import { ACCOUNT_DELETED_MESSAGE, ACCOUNT_DELETED_NOTICE } from "@/lib/elite/account";
+import { PRO_PAGE } from "@/lib/elite/pro";
 
 // The sign-in screen. The form posts to a server action (signIn in
 // auth-actions.ts): the server signs in and sends the session back in a
@@ -16,9 +17,11 @@ import { ACCOUNT_DELETED_MESSAGE, ACCOUNT_DELETED_NOTICE } from "@/lib/elite/acc
 export function LoginForm({
   configured,
   native = false,
+  freeOpen = false,
 }: {
   configured: boolean;
-  native?: boolean; // inside the App Store app: sign-in only
+  native?: boolean; // inside the App Store app: no member sign-up
+  freeOpen?: boolean; // free sign-up is open (/coach/free)
 }) {
   const params = useSearchParams();
   const next = params.get("next");
@@ -102,14 +105,33 @@ export function LoginForm({
         </p>
       </form>
 
-      {!native && (
+      {freeOpen && (
         <p className="mt-5 text-center text-sm text-white/50">
           New here?{" "}
+          <Link href="/join" className="tap text-accent hover:underline">
+            Join free
+          </Link>
+        </p>
+      )}
+
+      {!native && (
+        <p className={(freeOpen ? "mt-2" : "mt-5") + " text-center text-sm text-white/50"}>
+          {freeOpen ? "Have an invite from your coach? " : "New here? "}
           <Link href="/signup" className="tap text-accent hover:underline">
             Create an account
           </Link>
         </p>
       )}
+
+      {/* Strive Pro (074): paid by card, no invite. Shown on the website
+          and inside the app alike; inside the app the card checkout is
+          Stripe's own page, which the phone opens outside the app. */}
+      <p className="mt-2 text-center text-sm text-white/50">
+        Training on your own?{" "}
+        <Link href={PRO_PAGE} className="tap text-accent hover:underline">
+          Join Strive Pro
+        </Link>
+      </p>
 
       {/* The sales door: anyone can walk through a fully-loaded player
           experience - no account, no friction. */}

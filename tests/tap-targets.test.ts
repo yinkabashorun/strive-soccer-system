@@ -45,6 +45,8 @@ describe("finger targets", () => {
       "components/elite/LoginForm.tsx",
       "components/elite/ForgotForm.tsx",
       "components/elite/SignupForm.tsx",
+      "components/elite/JoinForm.tsx",
+      "app/(join)/join/page.tsx",
       "components/elite/AgreementScreen.tsx",
       "app/(auth)/layout.tsx",
     ]) {
@@ -76,7 +78,11 @@ describe("finger targets", () => {
   });
 
   it("a tick box is tapped through its whole row", () => {
-    for (const f of ["components/elite/SignupForm.tsx", "components/elite/AgreementScreen.tsx"]) {
+    for (const f of [
+      "components/elite/SignupForm.tsx",
+      "components/elite/JoinForm.tsx",
+      "components/elite/AgreementScreen.tsx",
+    ]) {
       const src = code(f);
       const boxes = (src.match(/type="checkbox"/g) ?? []).length;
       const rows = (src.match(/<label className="flex min-h-\[44px\]/g) ?? []).length;
@@ -104,8 +110,8 @@ describe("sign-in inside the App Store app", () => {
     const block = form.slice(form.indexOf("{!configured && !native && ("));
     expect(block).toContain("enterDemoCoach");
     expect(form.slice(0, form.indexOf("{!configured && !native && ("))).not.toContain("action={enterDemoCoach}");
-    // And creating an account stays off the screen there.
-    expect(form).toMatch(/\{!native && \(\s*<p[^>]*>\s*New here\?/);
+    // And creating a member account stays off the screen there.
+    expect(form.slice(0, form.indexOf("{!native && ("))).not.toContain('href="/signup"');
   });
 
   it("the website's sign-in keeps its link and its create-account line", () => {

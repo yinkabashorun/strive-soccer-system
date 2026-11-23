@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { SETUP_REFUSED, profileSetupDue } from "./account-profile";
 import { createClient, createServiceClient } from "./supabase/server";
 import { getViewer } from "./session";
 import { maybeAwardAchievements } from "./achievements";
@@ -12,27 +13,13 @@ import { CLIP_BUCKET, clipCooldown, clipCooldownMessage, ownsClipPath, ownsProgr
 import { getBenchmark, getHomework, getProgressVideos } from "./data";
 import { previousProgressVideo, progressVideoDue } from "./progress-video";
 import { sendPlayerSMS } from "./sms";
-import type { ProgressMetric, TrainingLoad, TrainingSpace } from "./types";
 import { TRAINING_LOADS } from "./training";
+import { cleanSelfAssessment } from "./quiz";
+import { NOT_IN_PLAN_MESSAGE } from "./tiers";
+import { memberHasFeature } from "./pro-server";
 
-export type OnboardingInput = {
-  age: number;
-  position: string;
-  level: string;
-  club: string;
-  dominant_foot: string;
-  gender: "boy" | "girl";
-  goals: string[];
-  weaknesses: string[];
-  self_assessment: Partial<Record<ProgressMetric, number>>;
-  parent_name: string;
-  parent_email: string;
-  parent_phone: string;
-  has_wall: boolean;
-  has_goal: boolean;
-  training_load: TrainingLoad; // 033
-  space: TrainingSpace; // 033
-};
+import type { OnboardingInput } from "./onboarding-input";
+export type { OnboardingInput } from "./onboarding-input";
 
 // Complete a player's intake. Players cannot UPDATE their own elite_players
 // row under RLS (coach-managed), so this runs through the service client
@@ -42,6 +29,10 @@ export async function completeOnboarding(input: OnboardingInput) {
   const viewer = await getViewer();
   if (!viewer?.playerId) return { ok: false as const };
   if (viewer.demo) return { ok: true as const }; // demo: nothing to persist
+  // The profile photo and @username come first (081, both required): a
+  // finished onboarding without them is refused here, not only on the
+  // phone. Before 081 is applied nothing is owed (account-profile.ts).
+  if (profileSetupDue(viewer.setup)) return { ok: false as const, needsSetup: true as const, error: SETUP_REFUSED };
 
   const admin = createServiceClient();
   if (!admin) return { ok: false as const };
@@ -55,7 +46,7 @@ export async function completeOnboarding(input: OnboardingInput) {
     gender: input.gender,
     goals: input.goals.filter(Boolean).slice(0, 6),
     weaknesses: input.weaknesses.filter(Boolean).slice(0, 6),
-    self_assessment: input.self_assessment,
+    self_assessment: cleanSelfAssessment(input.self_assessment),
     parent_email: input.parent_email.trim(),
     has_wall: input.has_wall,
     has_goal: input.has_goal,
@@ -125,6 +116,9 @@ export async function toggleHomework(id: string, completed: boolean) {
 export async function submitFilm(input: { url: string; note: string }) {
   const viewer = await getViewer();
   if (!viewer?.playerId) return { ok: false as const, error: "unauthorized" };
+  if (!viewer.demo && !(await memberHasFeature(viewer.playerId, "filmRoom"))) {
+    return { ok: false as const, error: NOT_IN_PLAN_MESSAGE };
+  }
   const url = input.url.trim();
   if (!/^https?:\/\/.+\..+/.test(url)) {
     return { ok: false as const, error: "Paste a full video link (starting with http)." };
@@ -188,6 +182,9 @@ export async function addGame(input: {
 }) {
   const viewer = await getViewer();
   if (!viewer?.playerId) return { ok: false as const, error: "unauthorized" };
+  if (!viewer.demo && !(await memberHasFeature(viewer.playerId, "filmRoom"))) {
+    return { ok: false as const, error: NOT_IN_PLAN_MESSAGE };
+  }
   if (!/^\d{4}-\d{2}-\d{2}$/.test(input.game_date)) {
     return { ok: false as const, error: "Pick a game date." };
   }
@@ -237,6 +234,7 @@ export async function markAllNotificationsRead() {
 export async function sendPlayerMessage(body: string) {
   const viewer = await getViewer();
   if (!viewer?.playerId) return { ok: false };
+  if (!viewer.demo && !(await memberHasFeature(viewer.playerId, "coachChat"))) return { ok: false };
   const supabase = createClient();
   if (supabase) {
     await supabase.from("elite_messages").insert({
@@ -268,6 +266,9 @@ export async function checkClipOpen() {
   const viewer = await getViewer();
   if (!viewer?.playerId) return { ok: false as const, error: "Sign in first." };
   if (viewer.demo) return { ok: true as const };
+  if (!(await memberHasFeature(viewer.playerId, "sendClip"))) {
+    return { ok: false as const, error: NOT_IN_PLAN_MESSAGE };
+  }
   const supabase = createClient();
   if (!supabase) return { ok: true as const };
   const { data } = await supabase
@@ -340,6 +341,9 @@ export async function submitProgressVideo(input: { path: string; week: number; s
   const viewer = await getViewer();
   if (!viewer?.playerId) return { ok: false as const, error: "Sign in first." };
   if (viewer.demo) return { ok: true as const };
+  if (!(await memberHasFeature(viewer.playerId, "progressVideo"))) {
+    return { ok: false as const, error: NOT_IN_PLAN_MESSAGE };
+  }
   const supabase = createClient();
   if (!supabase) return { ok: true as const };
 

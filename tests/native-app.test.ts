@@ -163,6 +163,9 @@ describe("the native shell (native/)", () => {
       "NSCameraUsageDescription",
       "NSMicrophoneUsageDescription",
       "NSPhotoLibraryUsageDescription",
+      // the share sheet's Save Video (My Drills reel, Then and now) closes
+      // the app without this one
+      "NSPhotoLibraryAddUsageDescription",
     ]) {
       expect(plist).toContain(key);
     }
@@ -239,6 +242,11 @@ describe("the native shell (native/)", () => {
   it("is set up for native push", () => {
     expect(read("native/ios/App/App/App.entitlements")).toContain("aps-environment");
     expect(project).toContain("CODE_SIGN_ENTITLEMENTS = App/App.entitlements;");
+    // Automatic signing archives with a development identity and re-signs
+    // for distribution at export; a hard-coded distribution identity is
+    // refused ("conflicting provisioning settings", TestFlight run #3).
+    expect(project).not.toContain('CODE_SIGN_IDENTITY = "Apple Distribution";');
+    expect(project).toContain("CODE_SIGN_STYLE = Automatic;");
     const delegate = read("native/ios/App/App/AppDelegate.swift");
     expect(delegate).toContain("capacitorDidRegisterForRemoteNotifications");
     expect(delegate).toContain("capacitorDidFailToRegisterForRemoteNotifications");
@@ -270,9 +278,12 @@ describe("the native shell (native/)", () => {
     expect(offline).not.toContain("—");
   });
 
-  it("the sign-in screen inside the app is sign-in only", () => {
+  it("the sign-in screen inside the app creates no member account, and offers Join free only while it is open", () => {
     const form = read("components/elite/LoginForm.tsx");
-    expect(form).toMatch(/\{!native && \(\s*<p[^>]*>\s*New here\?/);
+    const member = form.slice(form.indexOf("{!native && ("));
+    expect(member.slice(0, member.indexOf(")}"))).toContain('href="/signup"');
+    expect(form.slice(0, form.indexOf("{!native && ("))).not.toContain('href="/signup"');
+    expect(form).toMatch(/\{freeOpen && \(\s*<p[^>]*>\s*New here\?\{" "\}\s*<Link href="\/join"/);
     expect(read("app/(auth)/login/page.tsx")).toContain("inNativeApp()");
   });
 
@@ -300,5 +311,50 @@ describe("the native shell (native/)", () => {
       if (existsSync(full)) walk(full);
     }
     expect(found).toEqual([]);
+  });
+});
+
+describe("the iPhone app feels like an app (Nov 23 2026)", () => {
+  const project = read("native/ios/App/App.xcodeproj/project.pbxproj");
+  const controller = read("native/ios/App/App/StriveBridgeViewController.swift");
+
+  it("swipes back from the left edge, in the screen the app actually shows", () => {
+    expect(controller).toMatch(/class StriveBridgeViewController: CAPBridgeViewController/);
+    expect(controller).toMatch(/override func capacitorDidLoad\(\) \{\s*super\.capacitorDidLoad\(\)/);
+    expect(controller).toContain("webView?.allowsBackForwardNavigationGestures = true");
+    // The scene builds the window in code, so that is the line that counts;
+    // the storyboard says the same for anything that still loads it.
+    const scene = read("native/ios/App/App/SceneDelegate.swift");
+    expect(scene).toContain("window?.rootViewController = StriveBridgeViewController()");
+    expect(scene).not.toContain("= CAPBridgeViewController()");
+    expect(read("native/ios/App/App/Base.lproj/Main.storyboard")).toContain(
+      'customClass="StriveBridgeViewController" customModule="App" customModuleProvider="target"'
+    );
+  });
+
+  it("the new Swift file is compiled into the app target", () => {
+    // a file reference, a build file, the group and the Sources phase, as
+    // for SceneDelegate.swift
+    expect(project.match(/StriveBridgeViewController\.swift/g)!.length).toBe(project.match(/SceneDelegate\.swift/g)!.length);
+    expect(project).toContain("StriveBridgeViewController.swift in Sources");
+    expect(project).toMatch(/path = StriveBridgeViewController\.swift; sourceTree = "<group>";/);
+  });
+
+  it("a long press opens no web page preview", () => {
+    expect(read("native/capacitor.config.ts")).toMatch(/ios: \{[\s\S]*allowsLinkPreview: false/);
+  });
+
+  it("signing is untouched: automatic, never a hard-coded distribution identity", () => {
+    expect(project).not.toContain('CODE_SIGN_IDENTITY = "Apple Distribution"');
+    expect(project.match(/CODE_SIGN_STYLE = Automatic;/g)!.length).toBe(2);
+  });
+
+  it("the site's sideways swipe between tabs never starts at the edge the phone uses for back", async () => {
+    const { EDGE_PX, startsAtEdge } = await import("../lib/elite/tab-motion");
+    expect(EDGE_PX).toBeGreaterThanOrEqual(20);
+    expect(startsAtEdge(10, 393)).toBe(true);
+    expect(startsAtEdge(388, 393)).toBe(true);
+    expect(startsAtEdge(200, 393)).toBe(false);
+    expect(read("components/elite/SwipeTabs.tsx")).toContain("startsAtEdge(t.clientX, window.innerWidth)");
   });
 });

@@ -83,16 +83,20 @@ describe("the agreement is enforced, not just shown", () => {
     const gate = layout.indexOf("consentDue(");
     expect(gate).toBeGreaterThan(-1);
     expect(layout.indexOf("<AgreementScreen")).toBeGreaterThan(gate);
-    // before the membership gate and the app itself
-    expect(gate).toBeLessThan(layout.indexOf("membershipGate("));
-    // never in the demo tour
-    expect(layout).toMatch(/!viewer\.demo && \(await consentDue/);
+    // the order (before the membership gate and the app itself) is the one
+    // rule shared with the iPhone app, lib/elite/member-gate.ts, whose order
+    // tests/app-api.test.ts holds
+    expect(layout).toContain("memberState(");
+    expect(read("lib/elite/member-gate.ts").indexOf("consentDue")).toBeLessThan(read("lib/elite/member-gate.ts").indexOf("gateFor("));
+    // never in the demo tour (read side by side with the player and the
+    // week, so the shell asks the database once, Nov 23 2026)
+    expect(layout).toMatch(/viewer\.demo \? false : consentDue\(viewer\.profile\.id\)/);
   });
 
   it("the in-app screen records the adult's name and can always be left", () => {
     const action = read("lib/elite/legal-actions.ts");
-    expect(action).toContain("agreementComplete(");
-    expect(action).toContain("cleanGuardianName(");
+    expect(action).toContain("inAppAgreement(");
+    expect(read("lib/elite/legal.ts")).toMatch(/export function inAppAgreement[\s\S]*agreementComplete\([\s\S]*cleanGuardianName\(/);
     expect(action).toContain('source: "in_app"');
     const screen = read("components/elite/AgreementScreen.tsx");
     expect(screen).not.toContain("defaultChecked");

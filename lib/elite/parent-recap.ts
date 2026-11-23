@@ -10,6 +10,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { createServiceClient } from "./supabase/server";
 import { isOnBreak } from "./breaks";
+import { featureOn } from "./tiers";
 import type { Homework, TrainingBreak } from "./types";
 
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-4-8";
@@ -66,8 +67,9 @@ export async function buildParentRecap(
   // The weekly parent report is a Complete Pathway feature (029). This is
   // the ONE gate for it - both senders (coach-actions publishNow and
   // unlock.ts's Monday flip) go through here, so nothing can send it to an
-  // Elite family. Pre-029 rows have no tier and keep the old behavior.
-  if ((player as { tier?: string | null }).tier === "elite") return null;
+  // Elite or Strive Pro family (074). Pre-029 rows have no tier and keep
+  // the old behavior. The rule itself is lib/elite/tiers.ts.
+  if (!featureOn((player as { tier?: string | null }).tier, "parentReport")) return null;
   const rows = hw as Homework[];
 
   // Sessions = (week, session) groups fully completed; minutes from

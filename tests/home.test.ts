@@ -45,16 +45,21 @@ describe("Home: one thing, then one quiet row", () => {
     expect(page).not.toContain('href="/homework"');
   });
 
-  it("time trained shows once and opens Progress; the week shows once, on the session card", () => {
+  it("time trained shows once and opens You; the week shows once, in the header", () => {
+    // The approved Home (mock v4): the day and "Week 7 · Nov 24" at the
+    // top; time trained, all time, once, under the card, opening You.
     const page = code("app/(player)/dashboard/page.tsx");
     const jsx = page.slice(page.indexOf("return (\n    <div"));
-    // One visible duration (the pill); the aria-label names it for a screen reader.
-    expect((jsx.match(/(?<!\$)\{fmtDuration\(time\.minutes\)\}/g) ?? []).length).toBe(1);
-    expect(jsx).toMatch(/<Link\s+href="\/progress"[\s\S]{0,200}min-h-\[44px\]/);
-    // The header no longer repeats the week; the card carries it.
+    expect(jsx).not.toMatch(/fmtDuration\(/);
     const header = jsx.slice(jsx.indexOf("<header"), jsx.indexOf("</header>"));
-    expect(header).not.toMatch(/Week \{/);
-    expect(code("components/elite/TodaySession.tsx")).toMatch(/Week \{week\}/);
+    expect(header).toMatch(/Week \$\{contentWeek\}/);
+    const card = code("components/elite/TodaySession.tsx");
+    const line = card.slice(card.indexOf("function WeekLine("), card.indexOf("function VictoryLap("));
+    expect((line.match(/\{fmtDuration\(minutes\)\}/g) ?? []).length).toBe(1);
+    expect(card).toMatch(/<Link href="\/you" className="press min-h-\[44px\]/);
+    // The card itself never repeats the week.
+    const hero = card.slice(card.indexOf("<section"), card.indexOf("</section>"));
+    expect(hero).not.toMatch(/Week \{week\}/);
   });
 
   it("the folded items open in place and say what they are", () => {
@@ -68,11 +73,12 @@ describe("Home: one thing, then one quiet row", () => {
     expect(more).not.toMatch(/—|\bAI\b|automated|algorithm|streak/i);
   });
 
-  it("the session rows on Home are compact and still a full finger target", () => {
-    expect(code("components/elite/TodaySession.tsx")).toMatch(/<SessionRows[\s\S]*?compact\s*\/>/);
-    const rows = code("components/elite/SessionRows.tsx");
-    expect(rows).toMatch(/compact \? "h-\[52px\]" : "h-16"/);
-    expect(rows).toContain("w-14");
+  it("the drills on the Home card are pictures, each a full finger target that opens it", () => {
+    const card = code("components/elite/TodaySession.tsx");
+    expect(card).toMatch(/aria-label=\{`Open drill \$\{i \+ 1\}`\}\s*className="press relative h-16 flex-1/);
+    expect(card).toContain("current.list.slice(0, 4)");
+    // One main button on the card: Start (or Continue) session.
+    expect((card.match(/className="m-button/g) ?? []).length).toBe(1);
   });
 
   it("achievements live on the Progress page", () => {
@@ -82,6 +88,12 @@ describe("Home: one thing, then one quiet row", () => {
   });
 
   it("the shell leaves room for the tab bar and the phone's home indicator, no more", () => {
-    expect(read("app/(player)/layout.tsx")).toContain("pb-[calc(4.75rem+env(safe-area-inset-bottom))]");
+    // The approved tab bar is taller (icon, label and the gold dot) with a
+    // short fade above it; the last card scrolls fully clear of both.
+    expect(read("app/(player)/layout.tsx")).toContain("pb-[calc(7.5rem+env(safe-area-inset-bottom))]");
+    // The bar is solid black behind the tabs, so page text never reads through it.
+    expect(read("components/elite/MemberNav.tsx")).toMatch(
+      /aria-label="Tabs"[\s\S]{0,300}className="fixed inset-x-0 bottom-0 z-40 bg-black pb-safe/
+    );
   });
 });

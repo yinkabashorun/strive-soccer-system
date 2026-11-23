@@ -39,8 +39,18 @@ describe("what a deletion removes and who is told", () => {
     expect(accountDeletedText("", "coach")).toBe("A coach deleted their coach account in the app.");
   });
 
+  it("a free training log account has no billing to stop, and the text says so by leaving it out", () => {
+    const t = accountDeletedText("Anthony Example", "player", true);
+    expect(t).toBe("Anthony Example deleted their free training log account in the app.");
+    expect(t).not.toMatch(/Stripe|billing/i);
+    const src = read("lib/elite/account-delete.ts");
+    // known before the login is deleted, while the row still exists
+    expect(src.indexOf("hasTracker(user.id)")).toBeLessThan(src.indexOf("auth.admin.deleteUser("));
+    expect(read("app/account/delete/page.tsx")).toContain("every entry in your training log");
+  });
+
   it("both delete paths remove the files before the login", () => {
-    for (const f of ["lib/elite/account-actions.ts", "lib/elite/coach-actions.ts"]) {
+    for (const f of ["lib/elite/account-delete.ts", "lib/elite/coach-actions.ts"]) {
       const src = read(f);
       const files = src.indexOf("removePlayerFiles(");
       const user = src.indexOf("auth.admin.deleteUser(");
@@ -50,7 +60,7 @@ describe("what a deletion removes and who is told", () => {
   });
 
   it("the member's own delete asks for the password first", () => {
-    const src = read("lib/elite/account-actions.ts");
+    const src = read("lib/elite/account-delete.ts");
     expect(src.indexOf("verifyPassword(")).toBeGreaterThan(-1);
     expect(src.indexOf("verifyPassword(")).toBeLessThan(src.indexOf("auth.admin.deleteUser("));
   });

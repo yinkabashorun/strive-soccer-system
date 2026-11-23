@@ -76,8 +76,8 @@ poster image on any drill video, so a slow connection shows a black box.
 | A22 | App-level privacy manifest in the app target (no tracking). | DONE Nov 18; the collected-data list is filled on the first build (C5) |
 | A23 | Saved passwords offered on the sign-in screen: the email field marked as the user name; the association file on the site and the entitlement in the app. | Field: DONE Nov 18. File and entitlement: BLOCKED on the Team ID |
 | A24 | The screen stays on during a session on every iPhone the app allows: raise the minimum to iOS 16.4 or add the keep-awake plugin. | DONE Nov 18: minimum is iOS 16.4, no plugin (never compiled) |
-| A25 | A guard for guideline 2.5.19: a new member-facing feature stays hidden inside the app until a reviewed build describes it. One list, one test. | TODO |
-| A26 | Uploads that survive real life: progress for each clip, the screen kept awake, and large Film Room clips sent in resumable pieces. One line on where to turn the camera back on if it was refused. | TODO |
+| A25 | A guard for guideline 2.5.19: a new member-facing feature stays hidden inside the app until a reviewed build describes it. One list, one test. | DONE Nov 20 (`lib/elite/app-review.ts`, `tests/app-review.test.ts`): every page and route is listed with the first build that describes it; the middleware sends the app to /app-unavailable for anything else. The free app, /5v5, /demo, /signup and Strive OS are website only for now (his call, D15) |
+| A26 | Uploads that survive real life: progress for each clip, the screen kept awake, and large Film Room clips sent in resumable pieces. One line on where to turn the camera back on if it was refused. | DONE Nov 20 (`lib/elite/resumable-upload.ts`, `tests/resumable-upload.test.ts`): 6 MB resumable pieces with up to 4 retries from the server's own offset, a plain upload as fallback, the percent on all three buttons, the screen kept on, the camera line when the picker closes empty. NOT PROVEN against live storage from here: the first real clip is the test |
 | A27 | The public /demo page (it carries the Meta pixel) can never load inside the app. | DONE Nov 18: three guards (`tests/demo-never-in-app.test.ts`) |
 | A28 | Launch screen is plain black matching the first screen, with no logo (Apple's launch guidance). Changes A16: the icon still needs the sharp logo, the launch screen does not. | DONE Nov 18 (never compiled) |
 | A29 | Every push text re-read against Apple's rules: it informs, never orders, never sells; one per event. | DONE Nov 18 as an audit: every push text is in `lib/elite/push-texts.ts` under a test, wording unchanged. His to rule on: see the log |
@@ -134,6 +134,7 @@ how sure it is. What each answer turned into:
 | D12 | Book Apple's 30-minute "Meet with App Review" appointment once the account is active, and ask the payment question before submitting. |
 | D13 | Parental consent for a member under 13: tie the parent's payment and the sales call to the consent record (what is shown before payment, a short script on the call). A lawyer's call. |
 | D14 | The fallback order if Apple refuses on payment: appeal as 1:1 coaching; then take the course library out of the iPhone app; then Apple's in-app purchase. |
+| D15 | Does the free app go into the first App Store build? ANSWERED Nov 20: yes ("App store asap"). Its screens are listed as first build in `lib/elite/app-review.ts`; Join free works inside the app; listing.md describes it. FOR REVIEW: free sign-up must be switched on at /coach/free, and a free reviewer login is made with the other two (D3). |
 
 ## Order
 
@@ -168,3 +169,18 @@ the thing in the way.
   from our server's addresses, so its per-address limit is shared.
   Next: A25, A26, then A17.
 - Nov 19 2026: A18 proven on the live app (Coach Yinka signed out and back in on his phone).
+- Nov 20 2026: A25 and A26 done (676 tests). Inside the app every screen
+  not in the reviewed build goes to "Not in the app yet" (sign out and
+  Delete my account stay reachable there, so a free account that signs in
+  inside the app can still delete itself). New his-call item D15: does
+  the free app go into the first build? If yes, the description, the
+  review notes and the age rating answers (players share photos with
+  each other, guideline 1.2) change with it. Next: A17 (screenshots),
+  then the A20 leftover (Hudl, Veo, Drive links).
+- Nov 20 2026, later: the free app is IN the first build (D15, his word).
+  For guideline 1.2 (content shared between users) it now has, besides
+  report, block and the coach queue: friends by accepted request only
+  (072), a word filter on every typed line other players read
+  (lib/elite/text-filter.ts), and Terms with zero tolerance and a 24-hour
+  promise on reports. Listing, review notes and age rating answers updated
+  in listing.md (expect 12+ or 13+). 688 tests.

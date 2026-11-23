@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput } from "react-native";
+import { StyleSheet, TextInput } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PASSWORD_CHANGED_MESSAGE, passwordChangeProblem } from "@shared/account";
 import { useChangePassword } from "@/api/queries";
 import { ApiError } from "@/api/client";
+import { FormScreen } from "@/FormScreen";
 import { Body, Button, Head, Icon, Press } from "@/ui";
 import { color, font } from "@/theme";
 
@@ -32,8 +33,7 @@ export default function ChangePassword() {
   }
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: color.black }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <ScrollView contentContainerStyle={{ paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }}>
+    <FormScreen contentStyle={{ paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }}>
         <Press onPress={() => router.back()} style={{ width: 44, height: 44, justifyContent: "center" }} accessibilityLabel="Back">
           <Icon name="back" />
         </Press>
@@ -44,8 +44,7 @@ export default function ChangePassword() {
         <TextInput style={styles.input} placeholder="New password, 8 characters or more" placeholderTextColor={color.faint} secureTextEntry textContentType="newPassword" value={next} onChangeText={setNext} accessibilityLabel="New password" />
         {msg ? <Body style={{ marginTop: 14, color: msg.ok ? color.bone : color.danger }}>{msg.text}</Body> : null}
         <Button style={{ marginTop: 20 }} label="Change password" busy={change.isPending} onPress={go} />
-      </ScrollView>
-    </KeyboardAvoidingView>
+    </FormScreen>
   );
 }
 

@@ -1,6 +1,7 @@
 import { API_BASE, FIXTURES } from "@/config";
 import { accessToken, signOutHere } from "@/auth/session";
 import { fixtureResponse } from "./fixtures";
+import type { Multipart } from "@shared/upload-body";
 
 // Every call to the site's app API (app/api/app/*): the Supabase access
 // token as a bearer header, JSON both ways, a time limit, and one meaning
@@ -21,7 +22,10 @@ export class ApiError extends Error {
 
 export const OFFLINE_MESSAGE = "We could not reach Strive. Check your connection and try again.";
 
-type Options = { method?: "GET" | "POST" | "DELETE"; body?: unknown; form?: FormData; timeoutMs?: number };
+// `upload` is a file as bytes (lib/elite/upload-body.ts). Never a FormData: this
+// Expo version's fetch refuses a React Native file part, and the request
+// never leaves the phone.
+type Options = { method?: "GET" | "POST" | "DELETE"; body?: unknown; upload?: Multipart; timeoutMs?: number };
 
 // The bearer header, for an image our own API serves (the profile photo).
 export async function authHeaders(): Promise<Record<string, string>> {
@@ -50,10 +54,10 @@ export async function api<T>(path: string, opts: Options = {}): Promise<T> {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
-        ...(opts.body !== undefined && !opts.form ? { "Content-Type": "application/json" } : {}),
+        ...(opts.upload ? { "Content-Type": opts.upload.contentType } : opts.body !== undefined ? { "Content-Type": "application/json" } : {}),
       },
-      // a file goes as multipart (the phone sets its own boundary)
-      body: opts.form ?? (opts.body !== undefined ? JSON.stringify(opts.body) : undefined),
+      // bytes are a body every fetch takes; the type list just does not name them
+      body: opts.upload ? (opts.upload.body as unknown as BodyInit) : opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
       signal: controller.signal,
     });
   } catch {

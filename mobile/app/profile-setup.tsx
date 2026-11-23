@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
+import { View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -8,6 +8,7 @@ import { keys, useMe } from "@/api/queries";
 import { queryClient } from "@/api/queryClient";
 import { signOutEverywhere } from "@/account";
 import { PhotoStep, UsernameStep } from "@/ProfileSteps";
+import { FormScreen } from "@/FormScreen";
 import { Body, Eyebrow, Icon, Label, Press } from "@/ui";
 import { color } from "@/theme";
 
@@ -33,8 +34,7 @@ export default function ProfileSetup() {
   }
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: color.black }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <ScrollView contentContainerStyle={{ paddingTop: insets.top + 8, paddingHorizontal: 24, paddingBottom: insets.bottom + 40 }} keyboardShouldPersistTaps="handled">
+    <FormScreen contentStyle={{ paddingTop: insets.top + 8, paddingHorizontal: 24, paddingBottom: insets.bottom + 40 }}>
         {editing ? (
           <Press onPress={() => router.back()} style={{ width: 44, height: 44, justifyContent: "center" }} accessibilityLabel="Back">
             <Icon name="back" />
@@ -68,7 +68,6 @@ export default function ProfileSetup() {
             </Press>
           </View>
         ) : null}
-      </ScrollView>
-    </KeyboardAvoidingView>
+    </FormScreen>
   );
 }

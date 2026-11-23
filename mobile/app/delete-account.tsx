@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { Alert, StyleSheet, TextInput, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDeleteAccount } from "@/api/queries";
 import { ApiError } from "@/api/client";
 import { leaveDeletedAccount } from "@/account";
+import { FormScreen } from "@/FormScreen";
 import { Body, Button, Card, Eyebrow, Head, Icon, Press } from "@/ui";
 import { color, font } from "@/theme";
 
@@ -37,8 +38,7 @@ export default function DeleteAccount() {
   }
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: color.black }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <ScrollView contentContainerStyle={{ paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }}>
+    <FormScreen contentStyle={{ paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }}>
         <Press onPress={() => router.back()} style={{ width: 44, height: 44, justifyContent: "center" }} accessibilityLabel="Back">
           <Icon name="back" />
         </Press>
@@ -91,8 +91,7 @@ export default function DeleteAccount() {
           </Head>
         </Press>
         <Button style={{ marginTop: 10 }} quiet label="Keep my account" onPress={() => router.back()} />
-      </ScrollView>
-    </KeyboardAvoidingView>
+    </FormScreen>
   );
 }
 

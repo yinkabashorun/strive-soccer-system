@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { StyleSheet, TextInput, View } from "react-native";
 import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -28,6 +28,7 @@ import { weakSpotPhrase } from "@shared/experience";
 import { sessionsFor, sessionsWord } from "@shared/training";
 import { useMe, useSubmitQuiz } from "@/api/queries";
 import { ApiError } from "@/api/client";
+import { FormScreen } from "@/FormScreen";
 import { MEDIA_BASE } from "@/config";
 import { tick } from "@/feel";
 import { useDraft } from "@/quiz-draft";
@@ -97,16 +98,26 @@ export default function QuizStep() {
   const last = nextStepId(id, withProfile) === null;
 
   return (
-    <KeyboardAvoidingView style={styles.fill} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <View style={[styles.head, { paddingTop: insets.top + 8 }]}>
-        <Press onPress={() => router.back()} style={styles.back} accessibilityLabel="Back">
-          <Icon name="back" />
-        </Press>
-        <View style={styles.progress} accessible accessibilityLabel={`Question ${index + 1} of ${total}`}>
-          <View style={[styles.progressFill, { width: `${((index + 1) / total) * 100}%` }]} />
-        </View>
-      </View>
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: insets.bottom + 120 }} keyboardShouldPersistTaps="handled">
+    <FormScreen
+      contentStyle={{ paddingHorizontal: 24, paddingBottom: insets.bottom + 120 }}
+      header={
+          <View style={[styles.head, { paddingTop: insets.top + 8 }]}>
+            <Press onPress={() => router.back()} style={styles.back} accessibilityLabel="Back">
+              <Icon name="back" />
+            </Press>
+            <View style={styles.progress} accessible accessibilityLabel={`Question ${index + 1} of ${total}`}>
+              <View style={[styles.progressFill, { width: `${((index + 1) / total) * 100}%` }]} />
+            </View>
+          </View>
+      }
+      footer={
+          quiz && !quiz.autoAdvance ? (
+            <View style={[styles.cta, { paddingBottom: insets.bottom + 16 }]}>
+              <NextButton ready={ready || id === "nearby"} last={last} busy={submit.isPending} onNext={() => next(id === "nearby" ? { nearbyAnswered: true } : undefined)} />
+            </View>
+          ) : null
+      }
+    >
         {quiz ? (
           <>
             <Animated.View entering={FadeInDown.duration(320)}>
@@ -141,13 +152,7 @@ export default function QuizStep() {
             {error}
           </Body>
         ) : null}
-      </ScrollView>
-      {quiz && !quiz.autoAdvance ? (
-        <View style={[styles.cta, { paddingBottom: insets.bottom + 16 }]}>
-          <NextButton ready={ready || id === "nearby"} last={last} busy={submit.isPending} onNext={() => next(id === "nearby" ? { nearbyAnswered: true } : undefined)} />
-        </View>
-      ) : null}
-    </KeyboardAvoidingView>
+    </FormScreen>
   );
 }
 

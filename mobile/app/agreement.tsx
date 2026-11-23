@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { StyleSheet, TextInput, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useConsent, useMe } from "@/api/queries";
 import { ApiError } from "@/api/client";
 import { openSite } from "@/links";
 import { signOutEverywhere } from "@/account";
+import { FormScreen } from "@/FormScreen";
 import { Body, Button, Head, Icon, Label, Press } from "@/ui";
 import { color, font } from "@/theme";
 
@@ -35,8 +36,7 @@ export default function Agreement() {
   }
 
   return (
-    <KeyboardAvoidingView style={styles.fill} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <ScrollView contentContainerStyle={{ paddingTop: insets.top + 60, paddingBottom: insets.bottom + 30, paddingHorizontal: 24 }}>
+    <FormScreen contentStyle={{ paddingTop: insets.top + 60, paddingBottom: insets.bottom + 30, paddingHorizontal: 24 }}>
         <Head size={40}>Before you train</Head>
         <View style={{ marginTop: 18, gap: 12 }}>
           {(c?.points ?? []).map((p) => (
@@ -79,8 +79,7 @@ export default function Agreement() {
             <Label dim size={14}>Sign out</Label>
           </Press>
         </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+    </FormScreen>
   );
 }
 

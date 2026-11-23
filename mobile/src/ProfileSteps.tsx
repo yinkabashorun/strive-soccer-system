@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { StyleSheet, TextInput, View } from "react-native";
+import { Linking, StyleSheet, TextInput, View } from "react-native";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { SETUP_COPY } from "@shared/account-profile";
 import { USERNAME_MESSAGES, normalizeUsername, usernameProblem } from "@shared/username";
+import { AVATAR_MESSAGE } from "@shared/tracker";
 import { ApiError } from "./api/client";
 import { checkUsername, savePhoto, saveUsername } from "./profile-api";
 import { tick } from "./feel";
@@ -108,20 +109,35 @@ export function PhotoStep({ seenBy, initialUri, onDone }: { seenBy: string; init
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // The camera opens only once the phone has said yes to it: the picker
+  // does not ask on its own, it just refuses. A no is said plainly, with
+  // the way to change it, and choosing from photos still works without it.
+  const [cameraOff, setCameraOff] = useState(false);
+
   async function choose(camera: boolean) {
-    const res = camera
-      ? await ImagePicker.launchCameraAsync({ allowsEditing: true, aspect: [1, 1], quality: 0.9, cameraType: ImagePicker.CameraType.front })
-      : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], allowsEditing: true, aspect: [1, 1], quality: 0.9 });
+    setError(null);
+    setCameraOff(false);
+    let res: ImagePicker.ImagePickerResult;
+    try {
+      if (camera) {
+        const asked = await ImagePicker.requestCameraPermissionsAsync();
+        if (!asked.granted) return setCameraOff(true);
+      }
+      res = camera
+        ? await ImagePicker.launchCameraAsync({ allowsEditing: true, aspect: [1, 1], quality: 0.9, cameraType: ImagePicker.CameraType.front })
+        : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], allowsEditing: true, aspect: [1, 1], quality: 0.9 });
+    } catch {
+      return setError(camera ? "The camera did not open. Choose from your photos instead." : "Your photos did not open. Try again.");
+    }
     if (res.canceled || !res.assets[0]) return;
     setUri(res.assets[0].uri);
     setSaved(false);
     setBusy(true);
-    setError(null);
     try {
       await savePhoto(res.assets[0].uri);
       setSaved(true);
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "Your photo was not saved. Check your connection and try again.");
+      setError(e instanceof ApiError ? e.message : AVATAR_MESSAGE);
     } finally {
       setBusy(false);
     }
@@ -138,6 +154,14 @@ export function PhotoStep({ seenBy, initialUri, onDone }: { seenBy: string; init
         <Button quiet label="Take a photo" onPress={() => void choose(true)} disabled={busy} />
         <Button quiet label="Choose from photos" onPress={() => void choose(false)} disabled={busy} />
       </View>
+      {cameraOff ? (
+        <View style={{ marginTop: 12 }}>
+          <Body style={{ color: color.danger }}>The camera is turned off for Strive Elite. Turn it on in Settings, or choose from your photos.</Body>
+          <Press onPress={() => void Linking.openSettings()} style={{ minHeight: 44, justifyContent: "center", alignSelf: "flex-start" }} accessibilityRole="link">
+            <Label size={14}>Open Settings</Label>
+          </Press>
+        </View>
+      ) : null}
       {error ? <Body style={{ color: color.danger, marginTop: 12 }}>{error}</Body> : null}
       <Button style={{ marginTop: 24 }} label="Next" busy={busy} disabled={!saved} onPress={onDone} />
     </View>

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { KeyboardAvoidingView, Platform, StyleSheet, TextInput, View } from "react-native";
+import { useRef, useState, type ComponentRef } from "react";
+import { Keyboard, StyleSheet, Text, TextInput, View } from "react-native";
 import { Image } from "expo-image";
 import * as WebBrowser from "expo-web-browser";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -7,6 +7,7 @@ import { signInWithPassword } from "@/auth/session";
 import { queryClient } from "@/api/queryClient";
 import { keys } from "@/api/queries";
 import { API_BASE } from "@/config";
+import { FormScreen } from "@/FormScreen";
 import { Body, Button, Head, Label, Press } from "@/ui";
 import { color, font } from "@/theme";
 
@@ -20,8 +21,10 @@ export default function SignIn() {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const passwordField = useRef<ComponentRef<typeof TextInput>>(null);
 
   async function go() {
+    Keyboard.dismiss();
     setBusy(true);
     setError(null);
     const problem = await signInWithPassword(email, password);
@@ -31,66 +34,66 @@ export default function SignIn() {
   }
 
   return (
-    <KeyboardAvoidingView style={styles.fill} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <View style={[styles.body, { paddingTop: insets.top + 80, paddingBottom: insets.bottom + 24 }]}>
-        <Image source={require("../assets/splash.png")} style={styles.mark} contentFit="contain" accessibilityLabel="Strive" />
-        <Head size={40} style={{ marginTop: 28 }}>
-          Sign in
-        </Head>
-        <Body dim style={{ marginTop: 8 }}>
-          Use the email and password you use on thestriveapp.com.
-        </Body>
+    <FormScreen contentStyle={{ paddingHorizontal: 24, paddingTop: insets.top + 44, paddingBottom: insets.bottom + 24 }}>
+      <Image source={require("../assets/splash.png")} style={styles.mark} contentFit="contain" accessibilityLabel="Strive" />
+      <Head size={40} style={{ marginTop: 22 }}>
+        Strive <Text style={{ color: color.gold }}>Elite</Text>
+      </Head>
+      <Body dim style={{ marginTop: 8 }}>
+        Sign in to your Strive Elite account with the email and password you use on thestriveapp.com.
+      </Body>
 
-        <View style={{ marginTop: 28, gap: 12 }}>
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            placeholderTextColor={color.faint}
-            autoCapitalize="none"
-            autoComplete="email"
-            keyboardType="email-address"
-            textContentType="username"
-            value={email}
-            onChangeText={setEmail}
-            returnKeyType="next"
-            accessibilityLabel="Email"
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            placeholderTextColor={color.faint}
-            secureTextEntry
-            autoComplete="current-password"
-            textContentType="password"
-            value={password}
-            onChangeText={setPassword}
-            returnKeyType="go"
-            onSubmitEditing={go}
-            accessibilityLabel="Password"
-          />
-        </View>
-        {error ? (
-          <View style={styles.error} accessibilityLiveRegion="polite">
-            <Body size={14}>{error}</Body>
-          </View>
-        ) : null}
-        <Button style={{ marginTop: 20 }} label="Sign in" busy={busy} onPress={go} />
-        <Press
-          style={styles.link}
-          accessibilityRole="link"
-          onPress={() => WebBrowser.openBrowserAsync(`${API_BASE}/forgot`, { presentationStyle: WebBrowser.WebBrowserPresentationStyle.PAGE_SHEET })}
-        >
-          <Label dim>Forgot your password?</Label>
-        </Press>
+      <View style={{ marginTop: 24, gap: 12 }}>
+        <TextInput
+          style={styles.input}
+          placeholder="Email"
+          placeholderTextColor={color.faint}
+          autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="email"
+          keyboardType="email-address"
+          textContentType="username"
+          value={email}
+          onChangeText={setEmail}
+          returnKeyType="next"
+          onSubmitEditing={() => passwordField.current?.focus()}
+          submitBehavior="submit"
+          accessibilityLabel="Email"
+        />
+        <TextInput
+          ref={passwordField}
+          style={styles.input}
+          placeholder="Password"
+          placeholderTextColor={color.faint}
+          secureTextEntry
+          autoComplete="current-password"
+          textContentType="password"
+          value={password}
+          onChangeText={setPassword}
+          returnKeyType="go"
+          onSubmitEditing={go}
+          accessibilityLabel="Password"
+        />
       </View>
-    </KeyboardAvoidingView>
+      {error ? (
+        <View style={styles.error} accessibilityLiveRegion="polite">
+          <Body size={14}>{error}</Body>
+        </View>
+      ) : null}
+      <Button style={{ marginTop: 18 }} label="Sign in" busy={busy} onPress={go} />
+      <Press
+        style={styles.link}
+        accessibilityRole="link"
+        onPress={() => WebBrowser.openBrowserAsync(`${API_BASE}/forgot`, { presentationStyle: WebBrowser.WebBrowserPresentationStyle.PAGE_SHEET })}
+      >
+        <Label dim>Forgot your password?</Label>
+      </Press>
+    </FormScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  fill: { flex: 1, backgroundColor: color.black },
-  body: { flex: 1, paddingHorizontal: 24 },
-  mark: { width: 64, height: 64 },
+  mark: { width: 56, height: 56 },
   input: {
     minHeight: 56,
     borderRadius: 16,

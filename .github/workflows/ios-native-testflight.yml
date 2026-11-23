@@ -1,0 +1,135 @@
+# Builds the NATIVE Strive Elite iPhone app (mobile/, React Native with
+# Expo) and uploads it to TestFlight. The older Capacitor shell (native/)
+# keeps its own workflow, "iOS to TestFlight"; both upload to the same App
+# Store Connect app (bundle ID com.strivesoccer.elite), so the build number
+# must always be higher than the last upload of EITHER (5 or more after
+# Capacitor build 4).
+#
+# Runs ONLY when started by hand: GitHub > Actions > "Native iOS to
+# TestFlight" > Run workflow. No Expo account and no EAS: the project is
+# generated on the Mac runner (expo prebuild) and signed exactly the way the
+# Capacitor run #4 finally worked: AUTOMATIC signing with the App Store
+# Connect API key (-allowProvisioningUpdates), archive, then export with
+# method app-store-connect and destination upload. Never a hard-coded
+# "Apple Distribution" identity (run #3: it breaks automatic signing). A
+# development profile needs a registered device, and the team has one.
+#
+# The same four secrets as the Capacitor workflow, never in this repository:
+#   APPLE_TEAM_ID, ASC_KEY_ID, ASC_ISSUER_ID, ASC_P8
+name: Native iOS to TestFlight
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_number:
+        description: "Build number (higher than the last upload of either app: 5 or more)"
+        required: true
+        default: "5"
+
+permissions:
+  contents: read
+
+jobs:
+  testflight:
+    runs-on: macos-26
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: mobile
+    env:
+      CI: "1"
+      EXPO_NO_TELEMETRY: "1"
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+
+      - name: Install the app's packages
+        run: npm ci
+
+      - name: Check the app (types, logic, the iPhone bundle)
+        run: npm run verify
+
+      - name: Set the build number
+        env:
+          BUILD_NUMBER: ${{ inputs.build_number }}
+        run: |
+          case "$BUILD_NUMBER" in (''|*[!0-9]*) echo "The build number must be a whole number." >&2; exit 1;; esac
+          node -e 'const f="app.json";const c=JSON.parse(require("fs").readFileSync(f,"utf8"));c.expo.ios.buildNumber=process.env.BUILD_NUMBER;require("fs").writeFileSync(f,JSON.stringify(c,null,2));'
+
+      - name: Generate the iPhone project
+        run: npx expo prebuild --platform ios --clean
+
+      - name: Write the App Store Connect key
+        env:
+          ASC_P8: ${{ secrets.ASC_P8 }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+        run: |
+          if [ -z "$ASC_P8" ] || [ -z "$ASC_KEY_ID" ]; then
+            echo "The App Store Connect secrets are not set. See docs/app-store/README.md." >&2
+            exit 1
+          fi
+          mkdir -p "$RUNNER_TEMP/keys"
+          printf '%s' "$ASC_P8" > "$RUNNER_TEMP/keys/AuthKey_${ASC_KEY_ID}.p8"
+
+      - name: Archive
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+          BUILD_NUMBER: ${{ inputs.build_number }}
+        run: |
+          WORKSPACE=$(ls -d ios/*.xcworkspace | head -n 1)
+          SCHEME=$(basename "$WORKSPACE" .xcworkspace)
+          echo "Workspace $WORKSPACE, scheme $SCHEME"
+          xcodebuild archive \
+            -workspace "$WORKSPACE" \
+            -scheme "$SCHEME" \
+            -configuration Release \
+            -destination "generic/platform=iOS" \
+            -archivePath "$RUNNER_TEMP/StriveEliteNative.xcarchive" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/keys/AuthKey_${ASC_KEY_ID}.p8" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            CURRENT_PROJECT_VERSION="$BUILD_NUMBER"
+
+      - name: Upload to TestFlight
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+          ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+        run: |
+          cat > "$RUNNER_TEMP/export.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store-connect</string>
+            <key>destination</key>
+            <string>upload</string>
+            <key>teamID</key>
+            <string>${APPLE_TEAM_ID}</string>
+            <key>signingStyle</key>
+            <string>automatic</string>
+          </dict>
+          </plist>
+          PLIST
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/StriveEliteNative.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/export.plist" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/keys/AuthKey_${ASC_KEY_ID}.p8" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+
+      - name: Remove the key
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/keys"

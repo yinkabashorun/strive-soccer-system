@@ -1,5 +1,5 @@
 import { parseReps } from "@shared/set-timer";
-import { drillMinutes } from "@shared/session-flow";
+
 
 // The two tiles under a drill's name in the session player (approved mock
 // v4, screen 2): the sets and the rest, read from the coach's own words by
@@ -41,4 +41,4 @@ export function drillEyebrow(kind: "warmup" | "finisher" | "skill", skillIndex: 
   return `Drill ${skillIndex + 1} of ${skillCount}`;
 }
 
-export { drillMinutes };
+

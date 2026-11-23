@@ -1,10 +1,11 @@
 import { useState } from "react";
-import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { StyleSheet, TextInput, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCheckin, useMe } from "@/api/queries";
 import { ApiError } from "@/api/client";
 import { feel, tick } from "@/feel";
+import { FormScreen } from "@/FormScreen";
 import { Body, Button, Head, Label, Press } from "@/ui";
 import { color, font } from "@/theme";
 
@@ -46,8 +47,7 @@ export default function Checkin() {
   }
 
   return (
-    <KeyboardAvoidingView style={styles.fill} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 40 }} keyboardShouldPersistTaps="handled">
+    <FormScreen contentStyle={{ padding: 20, paddingBottom: insets.bottom + 40 }}>
         <Head size={32}>Weekly check-in</Head>
         <Body dim style={{ marginTop: 6 }}>
           A minute. It shapes next week.
@@ -59,8 +59,7 @@ export default function Checkin() {
         <Field label="Anything else" value={note} onChange={setNote} />
         {error ? <Body style={{ color: color.danger, marginTop: 12 }}>{error}</Body> : null}
         <Button style={{ marginTop: 22 }} label="Send" busy={save.isPending} onPress={send} />
-      </ScrollView>
-    </KeyboardAvoidingView>
+    </FormScreen>
   );
 }
 

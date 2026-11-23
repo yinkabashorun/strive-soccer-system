@@ -16,7 +16,7 @@ import {
 import { FREE_AGE_STATEMENT } from "@/lib/elite/tracker";
 import { AppLink } from "./AppLink";
 import { openProCheckout } from "./ProCheckoutButton";
-import { Foot, Input, Question, Screen } from "./JoinForm";
+import { Foot, Input, Question, Screen, TICK_BOTH } from "./JoinForm";
 import { Wheel, WheelColumn } from "./WheelPicker";
 
 // Strive Pro sign-up (074), one thing a screen the way Instagram does it
@@ -49,7 +49,7 @@ export function ProJoinForm({
   const [step, setStep] = useState<Step>("age");
   const [month, setMonth] = useState(1);
   // the wheel starts on a typical member's age; they turn it to their own
-  const [year, setYear] = useState(years.includes(years[0] - 13) ? years[0] - 13 : years[0]);
+  const [year, setYear] = useState(years.includes(years[0] - 8) ? years[0] - 8 : years[0]);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -84,6 +84,7 @@ export function ProJoinForm({
     setError(null);
     setSignIn(false);
     if (!open) return setError(PAYMENTS_OFF_MESSAGE);
+    if (!guardian || !terms) return setError(TICK_BOTH);
     if (!birth) {
       go("age");
       return setError("Pick the month and year the player was born.");

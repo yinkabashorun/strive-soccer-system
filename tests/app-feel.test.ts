@@ -168,3 +168,34 @@ describe("glide: the swipe between tabs", () => {
     expect(swipe).toMatch(/if \(reduced\) return;\s*const hasNeighbor/);
   });
 });
+
+describe("sign-up, Instagram style: one thing a screen", () => {
+  it("the main button is pinned to the bottom and rides above the keyboard", () => {
+    expect(read("components/elite/OnboardingShell.tsx")).toContain("window.innerHeight - vv.height - vv.offsetTop");
+    for (const f of ["components/elite/JoinForm.tsx", "components/elite/QuizFlow.tsx", "components/elite/OnboardingShell.tsx"]) {
+      expect(read(f), f).toMatch(/style=\{\{ bottom: kb \}\}/);
+    }
+  });
+
+  it("each screen says what is wrong in its own words, never the browser's bubble", () => {
+    const join = read("components/elite/JoinForm.tsx");
+    expect(join).toMatch(/onSubmit=\{onSubmit\}\s*\/\/[^\n]*\n[^\n]*\n\s*noValidate/);
+    expect(join).toContain("if (!guardian || !terms) {");
+    const pro = read("components/elite/ProJoinForm.tsx");
+    expect(pro).toContain("if (!guardian || !terms) return setError(TICK_BOTH);");
+    expect(pro).toContain("joinProblem({ firstName, lastName, email, phone, password }, here)");
+  });
+
+  it("Strive Pro sign-up is the same screens as the free one, not a second set", () => {
+    const pro = read("components/elite/ProJoinForm.tsx");
+    expect(pro).toContain('import { Foot, Input, Question, Screen, TICK_BOTH } from "./JoinForm";');
+    expect(pro).toContain('const STEPS: Step[] = ["age", "name", "contact", "password", "agree"];');
+    expect(pro).not.toContain("<select");
+  });
+
+  it("the first field of a typed screen has the keyboard up as it lands", () => {
+    expect(read("components/elite/JoinForm.tsx").match(/autoFocus\b/g)!.length).toBeGreaterThanOrEqual(4);
+    expect(read("components/elite/ProJoinForm.tsx").match(/ autoFocus\b|\n\s*autoFocus\n/g)!.length).toBeGreaterThanOrEqual(3);
+    expect(read("components/elite/ProfileSetup.tsx")).toContain("<UsernameInput value={name} onChange={setName} state={state} autoFocus onEnter={takeName} />");
+  });
+});

@@ -14,6 +14,7 @@ import { Wheel, WheelColumn } from "./WheelPicker";
 import { useKeyboardInset } from "./OnboardingShell";
 
 type Step = "landing" | "age" | "name" | "contact" | "password" | "agree" | "young";
+export const TICK_BOTH = "Tick both boxes to go on.";
 const STEPS: Step[] = ["age", "name", "contact", "password", "agree"];
 
 // Create a free account (migration 069), one question a screen (the mock,
@@ -73,6 +74,10 @@ export function JoinForm({
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    if (!guardian || !terms) {
+      setError(TICK_BOTH);
+      return;
+    }
     if (!configured) {
       setError("Sign-up isn't configured yet.");
       return;
@@ -296,6 +301,9 @@ export function Screen({
   return (
     <form
       onSubmit={onSubmit}
+      // every screen checks itself and says what is wrong in its own words,
+      // above the button (never the browser's "Please fill out this field")
+      noValidate
       className="mx-auto flex min-h-[100svh] w-full max-w-md flex-col pb-[calc(32px+env(safe-area-inset-bottom))] pt-[env(safe-area-inset-top)]"
     >
       <div className="mt-[26px] flex h-11 items-center px-[10px]">

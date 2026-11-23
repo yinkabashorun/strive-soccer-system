@@ -106,11 +106,13 @@ for the 13-and-older check). Tracking: No.
 > Coach: [email] / [password]
 > Free player: [email] / [password] (or tap Join free and make one)
 >
-> Account deletion: Account (tap the initials, top right) > Delete my account.
+> Every account has a profile photo and a username, asked for once at the end of sign-up (members) or right after it (free players). The photo is seen only by the player's coaches and, in the free part, the friends they accepted; it can be reported, and a coach can remove it. The username follows the word filter and can be changed under You > Edit profile (members) or Settings > Edit profile (free).
+>
+> Account deletion: Account (tap the photo, top right) > Delete my account.
 > Notifications: optional, on or off under Account.
 > The app loads its screens from our server, with native push notifications, haptics, camera upload for training clips and an offline screen.
 
-The two logins are made once the first build is on TestFlight.
+The two logins are made once the first build is on TestFlight. Each reviewer login (player, coach is exempt, free player) needs a profile photo and a username set before it is handed over (081): an account without them opens on the one-time photo and username screen, which a reviewer may read as a wall.
 
 ## The text to current families before the agreement screen appears
 

@@ -16,7 +16,7 @@
 // With no database configured (a local build), the example data in
 // tracker-demo.ts stands in so the screens can be seen.
 import { createServiceClient, isSupabaseConfigured } from "./supabase/server";
-import { avatarUrlsOf, clearProfilePhoto } from "./account-profile-server";
+import { avatarUrlsOf, clearProfilePhoto, usernamesOf } from "./account-profile-server";
 import type { Viewer } from "./session";
 import { shiftDay } from "./time";
 import { clubRankingFor } from "./tracker-ranking";
@@ -1376,7 +1376,7 @@ export async function profileFor(viewer: Viewer, targetId: string, today: string
   const tracker = await getTracker(targetId);
   if (!tracker) return null;
 
-  const [names, clubIds, logs, photos, theirs, mineToday, reported] = await Promise.all([
+  const [names, clubIds, logs, photos, theirs, mineToday, reported, usernames] = await Promise.all([
     namesOf(admin, [targetId]),
     clubIdsOf(admin, targetId),
     auraLogsOf(admin, targetId),
@@ -1391,6 +1391,7 @@ export async function profileFor(viewer: Viewer, targetId: string, today: string
       .limit(GRID_FETCH),
     admin.from("elite_training_logs").select(POST_COLUMNS).eq("profile_id", meId).eq("trained_on", today),
     reportedBy(admin, meId),
+    usernamesOf(admin, [targetId]),
   ]);
   const clubs: { id: string; name: string }[] = [];
   for (const id of clubIds) {
@@ -1437,6 +1438,7 @@ export async function profileFor(viewer: Viewer, targetId: string, today: string
     levelName: labelOf(LEVELS, tracker.level) || null,
     playingFor: tracker.playing_for,
     starred: Boolean(tracker.starred_at),
+    username: usernames.get(targetId) ?? null,
   };
 }
 

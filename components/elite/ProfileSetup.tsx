@@ -291,9 +291,11 @@ export function ProfileSetup({
             e.target.value = "";
           }}
         />
-        <p className="mt-6 max-w-[260px] text-center text-[13px] leading-snug text-white/50">
-          Take one now or pick one from your photos. We cut it to a circle.
-        </p>
+        {!preview && (
+          <p className="mt-6 max-w-[260px] text-center text-[13px] leading-snug text-white/55">
+            Take one now or pick one from your photos. We cut it to a circle.
+          </p>
+        )}
         {error && (
           <p role="alert" className="mt-3 text-center text-[14px] text-red-400">
             {error}

@@ -627,6 +627,11 @@ export type Profile = {
   levelName: string | null; // the level they play at, from the quiz, in its own words
   playingFor: string | null; // the player's own line
   starred: boolean; // a coach gave them the star
+  // their @username (081), shown under the name on the profile. The name
+  // ("Gary G.") stays the name everywhere else: the feed, the boards and
+  // the clubs read as the people you know; the username is how you tell
+  // who someone is on their own profile.
+  username?: string | null;
 };
 
 // Who may open a profile: the player, their friends, and coaches. A block

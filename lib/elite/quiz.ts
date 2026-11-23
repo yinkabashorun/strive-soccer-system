@@ -5,7 +5,7 @@
 // and quizInput below hands that action exactly the shape it always took.
 // tests/quiz.test.ts fails when a field the server stores is not asked.
 import type { PlayerLevel, TrainingLoad, TrainingSpace } from "./types";
-import type { OnboardingInput } from "./player-actions";
+import type { OnboardingInput } from "./onboarding-input";
 
 // Every field the intake action takes. A Record over the input's own keys,
 // so TypeScript refuses this list the day a field is added or removed.
@@ -284,4 +284,41 @@ export function quizInput(a: QuizAnswers): OnboardingInput {
     training_load: team?.load ?? "in_season",
     space: a.space === "tight" ? "tight" : "open",
   };
+}
+
+// The answers as they arrive from somewhere that cannot be trusted (the
+// native iPhone app's request body, a draft saved on a phone): every field
+// is taken only when it is one of the choices above or a short string, so
+// nothing else ever reaches the intake action. Unknown keys are dropped.
+const MAX_TEXT = 200;
+const MAX_GOALS = 600;
+
+function text(v: unknown, max = MAX_TEXT): string {
+  return typeof v === "string" ? v.slice(0, max) : "";
+}
+
+export function cleanAnswers(raw: unknown): QuizAnswers {
+  const r = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+  const a = emptyAnswers();
+  if (r.gender === "boy" || r.gender === "girl") a.gender = r.gender;
+  if (TEAM_TRAINING.some((t) => t.id === r.team)) a.team = r.team as TeamTraining;
+  if (typeof r.age === "number" && AGES.includes(r.age)) a.age = r.age;
+  if (typeof r.position === "string" && POSITIONS.includes(r.position)) a.position = r.position;
+  if ((FEET as readonly unknown[]).includes(r.foot)) a.foot = r.foot as QuizAnswers["foot"];
+  if ((LEVELS as unknown[]).includes(r.level)) a.level = r.level as PlayerLevel;
+  if (r.space === "open" || r.space === "tight") a.space = r.space;
+  a.wall = r.wall === true;
+  a.goal = r.goal === true;
+  if (r.nearbyAnswered === true) a.nearbyAnswered = true;
+  a.club = text(r.club);
+  a.goals = text(r.goals, MAX_GOALS);
+  const attrs = r.attrs && typeof r.attrs === "object" ? (r.attrs as Record<string, unknown>) : {};
+  for (const x of ATTRIBUTES) {
+    const v = attrs[x.id];
+    if (validRating(v)) a.attrs[x.id] = v;
+  }
+  a.parentName = text(r.parentName);
+  a.parentEmail = text(r.parentEmail);
+  a.parentPhone = text(r.parentPhone, 40);
+  return a;
 }

@@ -4,7 +4,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getViewer } from "./session";
-import { agreementComplete, cleanGuardianName } from "./legal";
+import { inAppAgreement } from "./legal";
 import { recordConsent } from "./legal-server";
 
 export type AgreeState = { error: string | null };
@@ -15,21 +15,17 @@ export async function acceptAgreement(_prev: AgreeState, formData: FormData): Pr
   const viewer = await getViewer();
   if (!viewer || viewer.demo) redirect("/login");
 
-  if (
-    !agreementComplete({
-      guardian: formData.get("guardian") === "on",
-      terms: formData.get("terms") === "on",
-    })
-  ) {
-    return { error: "Tick both boxes to continue." };
-  }
-  const name = cleanGuardianName(formData.get("guardian_name"));
-  if (!name) return { error: "Type the full name of the parent or guardian who is agreeing." };
+  const agreed = inAppAgreement({
+    guardian: formData.get("guardian") === "on",
+    terms: formData.get("terms") === "on",
+    guardianName: formData.get("guardian_name"),
+  });
+  if (!agreed.ok) return { error: agreed.error };
 
   const ok = await recordConsent({
     profileId: viewer.profile.id,
     source: "in_app",
-    guardianName: name,
+    guardianName: agreed.name,
     userAgent: headers().get("user-agent"),
   });
   if (!ok) return { error: "That did not save. Check your connection and try again." };

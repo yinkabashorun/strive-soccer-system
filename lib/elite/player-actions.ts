@@ -12,30 +12,13 @@ import { CLIP_BUCKET, clipCooldown, clipCooldownMessage, ownsClipPath, ownsProgr
 import { getBenchmark, getHomework, getProgressVideos } from "./data";
 import { previousProgressVideo, progressVideoDue } from "./progress-video";
 import { sendPlayerSMS } from "./sms";
-import type { TrainingLoad, TrainingSpace } from "./types";
 import { TRAINING_LOADS } from "./training";
 import { cleanSelfAssessment } from "./quiz";
 import { NOT_IN_PLAN_MESSAGE } from "./tiers";
 import { memberHasFeature } from "./pro-server";
 
-export type OnboardingInput = {
-  age: number;
-  position: string;
-  level: string;
-  club: string;
-  dominant_foot: string;
-  gender: "boy" | "girl";
-  goals: string[];
-  weaknesses: string[];
-  self_assessment: Record<string, number>;
-  parent_name: string;
-  parent_email: string;
-  parent_phone: string;
-  has_wall: boolean;
-  has_goal: boolean;
-  training_load: TrainingLoad; // 033
-  space: TrainingSpace; // 033
-};
+import type { OnboardingInput } from "./onboarding-input";
+export type { OnboardingInput } from "./onboarding-input";
 
 // Complete a player's intake. Players cannot UPDATE their own elite_players
 // row under RLS (coach-managed), so this runs through the service client

@@ -4,6 +4,7 @@ import {
   createServiceClient,
   isSupabaseConfigured,
 } from "./supabase/server";
+import { bearerToken } from "./supabase/bearer";
 import type { Profile, Role } from "./types";
 import { DEMO_COACH, DEMO_PLAYERS, DEMO_PLAYER_ID } from "./demo";
 
@@ -65,11 +66,16 @@ function demoViewer(role: Role): Viewer {
 export async function getViewer(): Promise<Viewer | null> {
   const supabase = createClient();
 
+  // A request from the native iPhone app (lib/elite/supabase/bearer.ts):
+  // the phone's access token is verified with Supabase itself, never read
+  // from the request body, and there is no demo fallback for it.
+  const token = bearerToken();
+
   // Real auth path
   if (supabase && isSupabaseConfigured()) {
     const {
       data: { user },
-    } = await supabase.auth.getUser();
+    } = token ? await supabase.auth.getUser(token) : await supabase.auth.getUser();
     if (user) {
       const { data: profile } = await supabase
         .from("elite_profiles")
@@ -125,6 +131,9 @@ export async function getViewer(): Promise<Viewer | null> {
       };
     }
   }
+
+  // A token that did not verify is a signed-out app, never the demo tour.
+  if (token) return null;
 
   // Demo path
   const demoRole = cookies().get(DEMO_COOKIE)?.value as Role | undefined;

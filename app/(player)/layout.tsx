@@ -11,7 +11,8 @@ import { signOut } from "@/lib/elite/auth-actions";
 import { unlockDueWeeks } from "@/lib/elite/unlock";
 import { AgreementScreen } from "@/components/elite/AgreementScreen";
 import { consentDue } from "@/lib/elite/legal-server";
-import { NO_PROFILE_GATE, gateFor, type GateCopy } from "@/lib/elite/gates";
+import { NO_PROFILE_GATE, type GateCopy } from "@/lib/elite/gates";
+import { memberState } from "@/lib/elite/member-gate";
 import { memberTabs } from "@/lib/elite/experience";
 import { groupSessions } from "@/lib/elite/session-flow";
 import { liveWeekFor } from "@/lib/elite/time";
@@ -43,45 +44,43 @@ export default async function PlayerLayout({
   // training log, never in the member app. Sign-in lands every player on
   // /dashboard (lib/elite/sign-in.ts); this is the one redirect that takes
   // a free account from there to the screen it opens on.
+  const tracker = !viewer.playerId && !viewer.demo ? await getTracker(viewer.profile.id) : null;
   if (!viewer.playerId) {
-    const tracker = viewer.demo ? null : await getTracker(viewer.profile.id);
     if (tracker) redirect(freeLanding(quizDone(tracker)));
     return <GateScreen gate={NO_PROFILE_GATE} />;
   }
 
-  // Agreement gate (068): a member who has not accepted the current Terms
-  // and Privacy Policy does that first, once. New accounts accept at
-  // sign-up; this catches everyone who joined before, and everyone again
-  // when the terms change. The Account page (and deleting the account)
-  // stays reachable without it.
-  if (!viewer.demo && (await consentDue(viewer.profile.id))) {
+  const [player, due] = await Promise.all([
+    getPlayer(viewer.playerId),
+    viewer.demo ? Promise.resolve(false) : consentDue(viewer.profile.id),
+  ]);
+
+  // Who gets in, and which screen everyone else sees, is ONE rule shared
+  // with the native iPhone app's API (lib/elite/member-gate.ts):
+  //   - the agreement (068), once, before anything else; the Account page
+  //     (and deleting the account) stays reachable without it
+  //   - a Strive Pro member (074) pays first, then takes the quiz
+  //   - a redeemed player who has not finished intake takes the quiz
+  //     (demo players are pre-onboarded)
+  //   - any other membership not switched on sees the coach screen
+  const state = memberState({
+    role: viewer.role,
+    playerId: viewer.playerId,
+    isFree: Boolean(tracker),
+    consentDue: due,
+    player: viewer.demo && player ? { ...player, onboarded_at: player.onboarded_at ?? "demo" } : player,
+  });
+  if (state.kind === "consent") {
     return (
       <div className="member-ui">
         <AgreementScreen signOut={signOut} />
       </div>
     );
   }
-
-  const player = await getPlayer(viewer.playerId);
-
-  // A Strive Pro member (074) pays first, then takes the quiz: an unpaid
-  // or ended Pro membership sees the checkout before onboarding.
-  const gate = gateFor(player?.subscription_status ?? "none", player?.tier);
-  if (gate?.startPro) return <GateScreen gate={gate} />;
-
-  // Onboarding gate: a redeemed player who hasn't completed intake is sent
-  // to the standalone onboarding flow first (demo players are pre-onboarded).
-  // Strict `=== null` so that before 012 is applied (column absent → the key
-  // is undefined) we degrade to the old behavior instead of trapping players.
-  if (!viewer.demo && player && player.onboarded_at === null) {
-    redirect("/onboarding");
+  if (state.kind === "pro_checkout" || state.kind === "membership" || state.kind === "no_profile") {
+    return <GateScreen gate={state.gate} />;
   }
-
-  // Membership gate: access requires an active/trialing subscription. This
-  // lets the coach revoke access by flipping a player to inactive. A
-  // membership that was never switched on and one that was paused read
-  // differently (lib/elite/gates.ts).
-  if (gate) return <GateScreen gate={gate} />;
+  if (state.kind === "onboarding") redirect("/onboarding");
 
   const [notifications, homework] = await Promise.all([
     getNotifications(viewer.playerId),

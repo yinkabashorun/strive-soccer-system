@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
 import { createClient as createAdminClient } from "@supabase/supabase-js";
 import { freshFetch } from "./fresh-fetch";
+import { bearerToken } from "./bearer";
 
 type CookieToSet = { name: string; value: string; options: CookieOptions };
 
@@ -19,6 +20,18 @@ export function createClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
   if (!url || !key) return null;
+
+  // A request from the native iPhone app (app/api/app/*, lib/elite/app-api.ts):
+  // the phone's access token is the session, sent as a bearer header, and
+  // RLS applies to it exactly as it does to the cookie session. The client
+  // is typed as the cookie client so every caller stays unchanged.
+  const token = bearerToken();
+  if (token) {
+    return createAdminClient(url, key, {
+      global: { fetch: freshFetch, headers: { Authorization: `Bearer ${token}` } },
+      auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
+    }) as unknown as ReturnType<typeof createServerClient>;
+  }
 
   const cookieStore = cookies();
   return createServerClient(url, key, {

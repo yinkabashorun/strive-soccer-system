@@ -367,7 +367,7 @@ describe("a post's photo and its one line", () => {
     const del = acts.slice(acts.indexOf("export async function deleteLog("), acts.indexOf("export async function confirmFriend("));
     expect(del).toContain("ownsPostPath(path, o.profileId)");
     expect(del).toContain(".storage.from(POST_BUCKET).remove([path])");
-    const account = code("lib/elite/account-actions.ts");
+    const account = code("lib/elite/account-delete.ts");
     expect(account.indexOf("await removeTrackerFiles(user.id)")).toBeGreaterThan(-1);
     expect(account.indexOf("await removeTrackerFiles(user.id)")).toBeLessThan(account.indexOf("admin.auth.admin.deleteUser(user.id)"));
   });

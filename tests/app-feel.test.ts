@@ -31,7 +31,11 @@ describe("speed: nothing extra in front of a tap", () => {
     expect(unlock).toBeLessThan(cron.indexOf("isSundayEveNY() && nyHour() < 15"));
     expect(unlock).toBeLessThan(cron.indexOf("runPlanBuilder("));
     // and the cron runs every hour
-    expect(read("vercel.json")).toMatch(/"path": "\/api\/elite\/cron\/weekly-plans",\s*"schedule": "0 \* \* \* \*"/);
+    // (read as data, never as text: Vercel rewrites vercel.json onto one
+    // line before it builds, so a match on its spacing passes everywhere
+    // but there; that failed every deploy on Nov 23 2026)
+    const crons: { path: string; schedule: string }[] = JSON.parse(read("vercel.json")).crons;
+    expect(crons.find((c) => c.path === "/api/elite/cron/weekly-plans")?.schedule).toBe("0 * * * *");
   });
 
   it("the shell reads the agreement, the player, the bell and the week side by side", () => {

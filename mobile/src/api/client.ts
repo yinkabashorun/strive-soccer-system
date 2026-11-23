@@ -1,7 +1,7 @@
 import { API_BASE, FIXTURES } from "@/config";
 import { accessToken, signOutHere } from "@/auth/session";
 import { fixtureResponse } from "./fixtures";
-import type { Multipart } from "@/multipart";
+import type { Multipart } from "@shared/upload-body";
 
 // Every call to the site's app API (app/api/app/*): the Supabase access
 // token as a bearer header, JSON both ways, a time limit, and one meaning
@@ -22,7 +22,7 @@ export class ApiError extends Error {
 
 export const OFFLINE_MESSAGE = "We could not reach Strive. Check your connection and try again.";
 
-// `upload` is a file as bytes (src/multipart.ts). Never a FormData: this
+// `upload` is a file as bytes (lib/elite/upload-body.ts). Never a FormData: this
 // Expo version's fetch refuses a React Native file part, and the request
 // never leaves the phone.
 type Options = { method?: "GET" | "POST" | "DELETE"; body?: unknown; upload?: Multipart; timeoutMs?: number };

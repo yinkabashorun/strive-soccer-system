@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import path from "node:path";
-import { base64ToBytes, oneFileForm } from "../mobile/src/multipart";
+import { base64ToBytes, oneFileForm } from "@/lib/elite/upload-body";
 
 // The native iPhone app (mobile/): what only shows on a real phone, held
 // here so it cannot come back. (It lives with the site's tests because it
-// reads the app's files, and the app's own tests are typed for a phone,
-// with no Node.) Each of these was found on the first TestFlight build of the native app
+// reads the app's files as text, and the app's own tests are typed for a
+// phone, with no Node. It never IMPORTS the app's code: the machine that
+// runs the site's tests has only the site's packages.) Each of these was found on the first TestFlight build of the native app
 // (Nov 23 2026): the profile photo never left the phone, the camera never
 // opened, the sign-in keyboard could not be put away.
 

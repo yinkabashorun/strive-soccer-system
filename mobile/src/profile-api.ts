@@ -4,7 +4,7 @@ import { normalizeUsername } from "@shared/username";
 import { AVATAR_MAX_BYTES, AVATAR_MESSAGE } from "@shared/tracker";
 import { api, ApiError } from "./api/client";
 import { FIXTURES } from "./config";
-import { base64ToBytes, oneFileForm } from "./multipart";
+import { base64ToBytes, oneFileForm } from "@shared/upload-body";
 
 // The required profile photo and @username (migration 081): the website's
 // own rules decide on the server (lib/elite/profile-actions.ts and the photo
@@ -24,7 +24,7 @@ export async function saveUsername(input: string): Promise<AppUsernameAnswer> {
 // then checks it is a whole JPEG of a real size and takes out where and
 // when it was taken before it is stored. The image tool hands the JPEG back
 // as text (base64), so its size is known here and it is sent as plain bytes
-// (src/multipart.ts says why it is never a FormData or a fetch of the file).
+// (lib/elite/upload-body.ts says why it is never a FormData or a fetch of the file).
 const SHRINK: { side: number; compress: number }[] = [
   { side: 720, compress: 0.8 },
   { side: 512, compress: 0.6 },

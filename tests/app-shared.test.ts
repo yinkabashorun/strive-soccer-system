@@ -90,6 +90,18 @@ describe("what the phone shares with the site", () => {
     }
   });
 
+  // The other direction of the same trap: the machine that runs the SITE's
+  // tests has only the site's packages, and a file under mobile/ is read
+  // with mobile/'s own settings, which need the app's packages. A site test
+  // may read the app's files as text; it never imports them (code both
+  // sides need lives in lib/elite). A test that did passed here and failed
+  // on GitHub and Vercel, Nov 23 2026.
+  it("no site test imports the app's code", () => {
+    const tests = readdirSync(path.join(root, "tests")).filter((n) => n.endsWith(".ts"));
+    const bad = tests.filter((n) => /from\s+["'][^"']*\/mobile\//.test(readFileSync(path.join(root, "tests", n), "utf8")));
+    expect(bad).toEqual([]);
+  });
+
   it("the gate the server sends is the shape the phone reads", () => {
     const s: MemberState = memberState({ role: "player", playerId: "p", isFree: false, consentDue: true, player: null });
     const forPhone: AppMemberState = s; // fails to compile if the two drift

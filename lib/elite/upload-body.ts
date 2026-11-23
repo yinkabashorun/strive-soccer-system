@@ -8,8 +8,10 @@
 // by every fetch, so the upload is one JPEG in one multipart body, made
 // here, with nothing left to how a given fetch treats a form.
 //
-// Pure: tests/logic.test.ts sends what this builds through the same
-// Request.formData() the server uses and gets the photo back byte for byte.
+// Shared with the phone ("@shared/upload-body") and pure, so the site's
+// tests can run it: tests/app-device.test.ts sends what this builds through
+// the same Request.formData() the server uses and gets the photo back byte
+// for byte.
 
 const B64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
@@ -20,10 +22,10 @@ export function base64ToBytes(input: string): Uint8Array {
   const out = new Uint8Array(Math.floor((text.length * 3) / 4));
   let o = 0;
   for (let i = 0; i < text.length; i += 4) {
-    const a = B64.indexOf(text[i]!);
+    const a = B64.indexOf(text[i]);
     const b = B64.indexOf(text[i + 1] ?? "A");
-    const c = i + 2 < text.length ? B64.indexOf(text[i + 2]!) : -1;
-    const d = i + 3 < text.length ? B64.indexOf(text[i + 3]!) : -1;
+    const c = i + 2 < text.length ? B64.indexOf(text[i + 2]) : -1;
+    const d = i + 3 < text.length ? B64.indexOf(text[i + 3]) : -1;
     out[o++] = (a << 2) | (b >> 4);
     if (c >= 0) out[o++] = ((b & 15) << 4) | (c >> 2);
     if (d >= 0) out[o++] = ((c & 3) << 6) | d;

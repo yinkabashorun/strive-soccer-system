@@ -14,7 +14,7 @@ how it is checked: a test that fails the build, or Coach Yinka's phone.
 |---|---|---|
 | 1 | A screen with a text field moves out of the keyboard's way, scrolls, puts the keyboard away on a tap of empty space or a drag, and its buttons work on the first tap | `src/FormScreen.tsx`, the only place the keyboard is handled; `tests/app-device.test.ts` |
 | 2 | Next on a field moves to the next field; Go submits | test for sign-in; phone for the rest |
-| 3 | A file is sent as bytes, never as a FormData file part and never by fetching a file on the phone (this Expo version's fetch refuses both) | `src/multipart.ts`; test sends it through the server's own parser |
+| 3 | A file is sent as bytes, never as a FormData file part and never by fetching a file on the phone (this Expo version's fetch refuses both) | `lib/elite/upload-body.ts`; test sends it through the server's own parser |
 | 4 | The camera, photos and notifications are asked for before they are used; a no is said plainly with a way to Settings; the rest still works | test for the camera; phone for notifications |
 | 5 | Before using a library call, read the installed version's own source for what it accepts, not memory of an older version | habit; the record names each miss |
 | 6 | Nothing sits under the notch, the home bar or the tab bar | phone |

@@ -264,6 +264,13 @@ export function weekRange(monday: string | null | undefined): string | null {
   return `${f(start)} to ${f(end)}`;
 }
 
+// The building screen's three lines (the website's quiz and the iPhone
+// app). The first two are true the moment the answers are saved; the third
+// ticks only when the week really is built.
+export function buildingLines(weakSpot: string, sessions: string): [string, string, string] {
+  return ["Reading your answers", `Picking drills for ${weakSpot}`, `Setting ${sessions} sessions`];
+}
+
 // The NY Monday a given program week starts on, from week1_monday.
 export function mondayOfProgramWeek(week1Monday: string | null | undefined, week: number): string | null {
   if (!week1Monday || !/^\d{4}-\d{2}-\d{2}$/.test(week1Monday)) return null;

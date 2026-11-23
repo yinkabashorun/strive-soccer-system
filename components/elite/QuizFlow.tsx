@@ -22,6 +22,7 @@ import {
   firstUnanswered,
   quizInput,
   stepReady,
+  QUIZ_QUESTIONS,
   type QuizAnswers,
 } from "@/lib/elite/quiz";
 import {
@@ -29,6 +30,7 @@ import {
   FIRST_WEEK_WAIT_MS,
   weakSpotPhrase,
   type FirstWeekStatus,
+  buildingLines,
 } from "@/lib/elite/experience";
 import { sessionsFor, sessionsWord } from "@/lib/elite/training";
 import { feel } from "@/lib/elite/native";
@@ -403,26 +405,8 @@ function RatePage({
 const fieldCls =
   "w-full rounded-[18px] bg-fill px-4 py-4 text-bone shadow-[inset_0_0_0_1px_rgba(255,255,255,0.07)] placeholder:text-white/35 focus:shadow-[inset_0_0_0_1.5px_rgba(245,244,239,0.5)] focus:outline-none";
 
-// The words of each question. The team question carries the approved
-// video's own wording.
-const QUESTIONS: Record<string, { title: string; sub?: string }> = {
-  gender: { title: "Boy or girl?", sub: "So the updates about your training read right." },
-  team: { title: "How often does your team train?", sub: "Your week fits around it." },
-  age: { title: "How old are you?" },
-  position: { title: "What position do you play?", sub: "Your main one." },
-  foot: { title: "Which is your strong foot?" },
-  level: { title: "What level do you play at?" },
-  space: { title: "Where will you train most days?", sub: "Every drill will fit the space you have." },
-  nearby: { title: "What is near where you train?", sub: "Tick any you have. Your drills only use what is there." },
-  club: { title: "What team do you play for?", sub: "Club and age group, if you have one." },
-  goals: { title: "What are you chasing?", sub: "One goal a line. This one is optional." },
-  onBall: { title: "On the ball.", sub: "Rate yourself on each one, 1 to 5. Be honest: the lowest ones are where your training starts." },
-  offBall: { title: "Off the ball.", sub: "Your speed, your body and how you read the game. Same scale, 1 to 5." },
-  parent: { title: "Your parent or guardian.", sub: "We text them when your new week is ready." },
-};
-
 function Question({ id }: { id: string }) {
-  const q = QUESTIONS[id];
+  const q = QUIZ_QUESTIONS[id as keyof typeof QUIZ_QUESTIONS];
   return (
     <>
       <h1 className="mt-2.5 m-head text-[36px] leading-[1.04] text-balance">{q.title}</h1>
@@ -640,7 +624,7 @@ function Building({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const lines = ["Reading your answers", `Picking drills for ${weakSpot}`, `Setting ${sessions} sessions`];
+  const lines = buildingLines(weakSpot, sessions);
   const said = status && status !== "live" ? FIRST_WEEK_LINE[status] : null;
 
   return (

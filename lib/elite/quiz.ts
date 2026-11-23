@@ -216,6 +216,25 @@ export const QUIZ_STEPS: readonly QuizStep[] = [
   { id: "parent", fields: ["parent_name", "parent_email", "parent_phone"], autoAdvance: false, section: "Your parent" },
 ];
 
+// The words of each question, shared by the website quiz and the iPhone
+// app. The team question carries the approved
+// video's own wording.
+export const QUIZ_QUESTIONS: Record<QuizStepId, { title: string; sub?: string }> = {
+  gender: { title: "Boy or girl?", sub: "So the updates about your training read right." },
+  team: { title: "How often does your team train?", sub: "Your week fits around it." },
+  age: { title: "How old are you?" },
+  position: { title: "What position do you play?", sub: "Your main one." },
+  foot: { title: "Which is your strong foot?" },
+  level: { title: "What level do you play at?" },
+  space: { title: "Where will you train most days?", sub: "Every drill will fit the space you have." },
+  nearby: { title: "What is near where you train?", sub: "Tick any you have. Your drills only use what is there." },
+  club: { title: "What team do you play for?", sub: "Club and age group, if you have one." },
+  goals: { title: "What are you chasing?", sub: "One goal a line. This one is optional." },
+  onBall: { title: "On the ball.", sub: "Rate yourself on each one, 1 to 5. Be honest: the lowest ones are where your training starts." },
+  offBall: { title: "Off the ball.", sub: "Your speed, your body and how you read the game. Same scale, 1 to 5." },
+  parent: { title: "Your parent or guardian.", sub: "We text them when your new week is ready." },
+};
+
 // Whether a screen has what it needs to move on. A typed screen that is
 // optional (the club, the goals) is always ready.
 export function stepReady(id: QuizStepId, a: QuizAnswers): boolean {

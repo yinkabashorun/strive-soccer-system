@@ -53,9 +53,13 @@ jobs:
       CI: "1"
       EXPO_NO_TELEMETRY: "1"
       EXPO_PUBLIC_FIXTURES: "1"
-      SCREENS: ${{ runner.temp }}/screens
     steps:
       - uses: actions/checkout@v4
+
+      # where the pictures are collected (the runner's temp folder is only
+      # known once the job is running, so it is set here, not above)
+      - name: Choose the pictures folder
+        run: echo "SCREENS=$RUNNER_TEMP/screens" >> "$GITHUB_ENV"
 
       - uses: actions/setup-node@v4
         with:

@@ -37,6 +37,13 @@ jobs:
           NEXT_TELEMETRY_DISABLED: "1"
       - run: npm run check:crons
       - run: npm run check:library
+      # A workflow file GitHub cannot read fails without ever starting (the
+      # simulator check did, on its first push, Nov 23 2026). Read them all
+      # the way GitHub does.
+      - name: Workflow files are valid
+        run: |
+          pip install --quiet actionlint-py
+          actionlint .github/workflows/*.yml
       # Vercel rewrites vercel.json onto one line before it builds, so a test
       # that matches that file's spacing passes here and fails only there
       # (every deploy failed that way on Nov 23 2026). Run the tests once

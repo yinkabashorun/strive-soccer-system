@@ -34,7 +34,7 @@ pages['01'] = dict(bg=STAD, css="", body=f"""
 pages['02'] = dict(bg=STAD, css="", body=f"""
 <div class="big white" style="top:125px;font-size:118px">IT'S IN YOUR</div>
 <div class="big gold" style="top:228px;font-size:168px">BACKYARD,</div>
-<div class="big white" style="top:375px;font-size:118px">MARYLAND.</div>
+<div class="big white" style="top:375px;font-size:118px">BALTIMORE.</div>
 <div class="line" style="top:500px;font-size:30px;letter-spacing:1px">Home field. Home crowd. <b style="color:#efd287">No excuses.</b></div>
 {MD}<div class="fade"></div>""")
 

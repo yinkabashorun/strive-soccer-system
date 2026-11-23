@@ -5,7 +5,9 @@
     "noUncheckedIndexedAccess": false,
     "paths": {
       "@/*": ["./src/*"],
-      "@shared/*": ["../lib/elite/*"]
+      "@shared/*": ["../lib/elite/*"],
+      "@supabase/supabase-js": ["./node_modules/@supabase/supabase-js"],
+      "obscenity": ["./node_modules/obscenity"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],

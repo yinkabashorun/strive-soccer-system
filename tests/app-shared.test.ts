@@ -76,6 +76,20 @@ describe("what the phone shares with the site", () => {
     for (const f of seen.keys()) expect(readFileSync(f, "utf8"), f).not.toMatch(/^["']use (server|client)["']/m);
   });
 
+  // A shared file sits outside mobile/, so on its own TypeScript looks for
+  // its packages in the SITE's node_modules. The Mac that builds the app
+  // installs only mobile/'s packages, so each package a shared file may
+  // reach has to be one the app installs AND be pointed at the app's copy
+  // (the first native TestFlight run failed on exactly this, Nov 23 2026).
+  it("every package a shared file may reach is the app's own copy", () => {
+    const pkg = JSON.parse(readFileSync(path.join(root, "mobile/package.json"), "utf8"));
+    const paths = JSON.parse(readFileSync(path.join(root, "mobile/tsconfig.json"), "utf8")).compilerOptions.paths;
+    for (const name of Object.keys(ALLOWED_EXTERNAL)) {
+      expect(pkg.dependencies[name], `${name} in mobile/package.json`).toBeTruthy();
+      expect(paths[name], `${name} in mobile/tsconfig.json paths`).toEqual([`./node_modules/${name}`]);
+    }
+  });
+
   it("the gate the server sends is the shape the phone reads", () => {
     const s: MemberState = memberState({ role: "player", playerId: "p", isFree: false, consentDue: true, player: null });
     const forPhone: AppMemberState = s; // fails to compile if the two drift

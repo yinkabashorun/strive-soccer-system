@@ -45,3 +45,36 @@ jobs:
         run: |
           node -e "const fs=require('fs');fs.writeFileSync('vercel.json',JSON.stringify(JSON.parse(fs.readFileSync('vercel.json','utf8'))))"
           npm test
+
+  # The native iPhone app (mobile/), checked the way the Mac that builds it
+  # for TestFlight sees it: a fresh checkout with ONLY mobile/'s packages
+  # installed, never the site's. Types, the app's tests, the iPhone bundle,
+  # then the iPhone project generated with a build number set, the same
+  # steps "Native iOS to TestFlight" runs before it compiles. A Mac run
+  # waits in line and is started by hand, so anything that can fail here
+  # should fail here first (the first native run died at the type check
+  # because a shared file's packages were only in the site's node_modules).
+  mobile:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile
+    env:
+      CI: "1"
+      EXPO_NO_TELEMETRY: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+      - run: npm ci
+      - run: npm run verify
+      - name: Generate the iPhone project (as the TestFlight run does)
+        env:
+          BUILD_NUMBER: "1"
+        run: |
+          node -e 'const f="app.json";const c=JSON.parse(require("fs").readFileSync(f,"utf8"));c.expo.ios.buildNumber=process.env.BUILD_NUMBER;require("fs").writeFileSync(f,JSON.stringify(c,null,2));'
+          npx expo prebuild --platform ios --clean
+          test -f ios/StriveElite.xcodeproj/xcshareddata/xcschemes/StriveElite.xcscheme

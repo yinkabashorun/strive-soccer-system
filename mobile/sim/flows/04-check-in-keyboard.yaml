@@ -1,0 +1,24 @@
+# The weekly check-in with the keyboard up on a text box low on the page.
+appId: com.strivesoccer.elite
+---
+- launchApp:
+    clearState: true
+    arguments:
+      fixtureState: ok
+- extendedWaitUntil:
+    visible: "Start session"
+    timeout: 30000
+- openLink: striveelite://checkin
+- extendedWaitUntil:
+    visible: "Send"
+    timeout: 15000
+- tapOn: "Anything else"
+- inputText: "Legs felt heavy on Thursday."
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: t12-check-in-typing
+- tapOn:
+    point: "50%,8%"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: t13-check-in-keyboard-away

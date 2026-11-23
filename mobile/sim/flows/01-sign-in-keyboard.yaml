@@ -1,0 +1,23 @@
+# The sign-in keyboard: it comes up, Next moves to the password, and a tap
+# on empty space puts it away with the Sign in button in reach.
+appId: com.strivesoccer.elite
+---
+- launchApp:
+    clearState: true
+    arguments:
+      fixtureState: signedout
+- extendedWaitUntil:
+    visible: "Sign in"
+    timeout: 30000
+- tapOn: "Email"
+- inputText: "marcus@example.com"
+- takeScreenshot: t01-sign-in-typing-email
+- pressKey: Enter
+- inputText: "password1"
+- takeScreenshot: t02-sign-in-typing-password
+- tapOn:
+    point: "50%,10%"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: t03-sign-in-keyboard-away
+- assertVisible: "Sign in"

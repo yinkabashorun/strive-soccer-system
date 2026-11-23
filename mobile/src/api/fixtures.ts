@@ -1,20 +1,29 @@
-import { Platform } from "react-native";
+import { Platform, Settings } from "react-native";
 import type { AppBootstrap, AppDrill, AppExtra, AppMemberState, AppWeek, AppYou } from "@shared/app-contract";
 import { MEDIA_BASE } from "@/config";
 
 // The example player the screens are drawn with for review screenshots
-// (EXPO_PUBLIC_FIXTURES=1, browser build only; never on a phone). Names and
-// numbers are examples, the drills and their stills are the real bank's.
-// On the web the state can be chosen with ?state=ok|consent|onboarding|
-// membership|pro_checkout|setup|signedout.
+// (EXPO_PUBLIC_FIXTURES=1): the browser build (scripts/screenshots.mjs) and
+// the iPhone simulator build that GitHub's Mac walks through
+// (.github/workflows/ios-simulator-screens.yml). Never the build that goes
+// to TestFlight. Names and numbers are examples, the drills and their
+// stills are the real bank's.
+//
+// Which member the example is, chosen per run:
+//   browser    ?state=ok|consent|onboarding|membership|pro_checkout|setup|signedout
+//   simulator  the launch argument -fixtureState <the same words>, which
+//              iOS hands the app as a setting (sim/shots.sh, sim/flows)
+export const FIXTURE_STATES = ["ok", "consent", "onboarding", "membership", "pro_checkout", "setup", "signedout"] as const;
 
 function chosenState(): string {
-  if (Platform.OS !== "web") return "ok";
+  let raw: unknown = null;
   try {
-    return new URLSearchParams(globalThis.location?.search ?? "").get("state") ?? "ok";
+    if (Platform.OS === "web") raw = new URLSearchParams(globalThis.location?.search ?? "").get("state");
+    else if (Platform.OS === "ios") raw = Settings?.get?.("fixtureState");
   } catch {
-    return "ok";
+    raw = null;
   }
+  return typeof raw === "string" && (FIXTURE_STATES as readonly string[]).includes(raw) ? raw : "ok";
 }
 
 export function fixtureSignedIn(): boolean {

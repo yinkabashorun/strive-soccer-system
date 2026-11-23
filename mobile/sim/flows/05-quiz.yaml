@@ -1,0 +1,20 @@
+# The first screens of the quiz by taps, from the door.
+appId: com.strivesoccer.elite
+---
+- launchApp:
+    clearState: true
+    arguments:
+      fixtureState: onboarding
+- extendedWaitUntil:
+    visible: "Build my week"
+    timeout: 30000
+- takeScreenshot: t14-door
+- tapOn: "Build my week"
+- extendedWaitUntil:
+    visible: "Boy"
+    timeout: 15000
+- takeScreenshot: t15-quiz-first-question
+- tapOn: "Boy"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: t16-quiz-second-question

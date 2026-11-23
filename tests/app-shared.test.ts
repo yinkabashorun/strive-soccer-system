@@ -163,6 +163,45 @@ describe("the phone's build", () => {
     expect(readFileSync(path.join(root, "mobile/src/config.ts"), "utf8")).toContain('process.env.EXPO_PUBLIC_FIXTURES === "1"');
   });
 
+  // The simulator check on GitHub's Mac (ios-simulator-screens.yml) builds
+  // the app WITH the example data so every screen can be looked at. It must
+  // stay a look and nothing more: no Apple key, nothing archived or
+  // uploaded, never from main; and the example member can only be chosen
+  // where the example data is on.
+  it("the simulator check shows example data and ships nothing", () => {
+    const sim = readFileSync(path.join(root, ".github/workflows/ios-simulator-screens.yml"), "utf8");
+    const steps = sim.split("\n").filter((l) => !l.trim().startsWith("#")).join("\n");
+    expect(steps).toContain('EXPO_PUBLIC_FIXTURES: "1"');
+    expect(steps).toContain("-sdk iphonesimulator");
+    expect(steps).not.toMatch(/secrets\.(ASC_|APPLE_|APNS_)/);
+    expect(steps).not.toMatch(/exportArchive|xcodebuild archive|app-store-connect|TestFlight/);
+    expect(steps).toMatch(/branches: \["claude\/\*\*"\]/);
+    expect(steps).not.toMatch(/branches:.*main/);
+    // both TestFlight workflows stay free of the example data
+    for (const f of ["ios-native-testflight.yml", "ios-testflight.yml"]) {
+      expect(readFileSync(path.join(root, ".github/workflows", f), "utf8"), f).not.toContain("FIXTURES");
+    }
+    // every example member the script and the flows ask for is one the app knows
+    const fixtures = readFileSync(path.join(root, "mobile/src/api/fixtures.ts"), "utf8");
+    const known = (fixtures.match(/FIXTURE_STATES = \[([^\]]+)\]/)?.[1] ?? "").match(/[a-z_]+/g) ?? [];
+    expect(known).toContain("signedout");
+    const shots = readFileSync(path.join(root, "mobile/sim/shots.sh"), "utf8");
+    const asked = new Set<string>();
+    for (const m of shots.matchAll(/^[\w-]+\|([a-z_]+)\|/gm)) asked.add(m[1]);
+    for (const n of readdirSync(path.join(root, "mobile/sim/flows"))) {
+      const flow = readFileSync(path.join(root, "mobile/sim/flows", n), "utf8");
+      expect(flow, n).toContain("appId: com.strivesoccer.elite");
+      for (const m of flow.matchAll(/fixtureState: ([a-z_]+)/g)) asked.add(m[1]);
+    }
+    expect(asked.size).toBeGreaterThan(4);
+    for (const state of asked) expect(known, state).toContain(state);
+    // the member is read from the launch argument only inside the example file
+    const elsewhere = files(path.join(root, "mobile/src"))
+      .concat(files(path.join(root, "mobile/app")))
+      .filter((f) => !f.endsWith("fixtures.ts") && readFileSync(f, "utf8").includes("fixtureState"));
+    expect(elsewhere).toEqual([]);
+  });
+
   it("carries no secret", () => {
     for (const f of files(path.join(root, "mobile/src")).concat(files(path.join(root, "mobile/app")))) {
       expect(readFileSync(f, "utf8"), f).not.toMatch(/service_role|BEGIN PRIVATE KEY|sk_live_|sk_test_/);

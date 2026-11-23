@@ -85,8 +85,9 @@ describe("the agreement is enforced, not just shown", () => {
     expect(layout.indexOf("<AgreementScreen")).toBeGreaterThan(gate);
     // before the membership gate and the app itself
     expect(gate).toBeLessThan(layout.indexOf("gateFor("));
-    // never in the demo tour
-    expect(layout).toMatch(/!viewer\.demo && \(await consentDue/);
+    // never in the demo tour (read side by side with the player and the
+    // week, so the shell asks the database once, Nov 23 2026)
+    expect(layout).toMatch(/viewer\.demo \? false : consentDue\(viewer\.profile\.id\)/);
   });
 
   it("the in-app screen records the adult's name and can always be left", () => {

@@ -13,13 +13,19 @@ export function MemberCard({
   tier,
   rise = false,
   className,
+  photo = null,
+  handle = null,
 }: {
   name: string;
   since: string | null;
   tier: string;
   rise?: boolean;
   className?: string;
+  // the member's own photo and @username (081), when they have them
+  photo?: string | null;
+  handle?: string | null;
 }) {
+  const left = photo ? "left-[76px]" : "left-[22px]";
   return (
     <div className={cn("[perspective:900px]", className)}>
       <div
@@ -29,7 +35,7 @@ export function MemberCard({
           rise && "animate-card-rise [animation-delay:700ms]"
         )}
         role="img"
-        aria-label={`Strive Elite member card. ${name}. ${since ?? ""}. ${tier}.`}
+        aria-label={`Strive Elite member card. ${name}.${handle ? ` ${handle}.` : ""} ${since ?? ""}. ${tier}.`}
       >
         <div className="member-card-lines absolute inset-0" aria-hidden />
         <div className="absolute left-[22px] top-[22px] m-head text-[22px] tracking-[0.06em]" aria-hidden>
@@ -42,11 +48,22 @@ export function MemberCard({
           aria-hidden
           className="absolute right-5 top-[18px] h-[38px] w-[38px] opacity-90 invert"
         />
-        <div className="absolute bottom-[44px] left-[22px] m-head text-[19px] tracking-[0.07em]" aria-hidden>
+        {photo && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={photo}
+            alt=""
+            aria-hidden
+            className="absolute bottom-[22px] left-[22px] h-[42px] w-[42px] rounded-full object-cover shadow-[0_0_0_1.5px_rgba(200,168,88,0.55)]"
+          />
+        )}
+        <div className={cn("absolute bottom-[44px] m-head text-[19px] tracking-[0.07em]", left)} aria-hidden>
           {name}
         </div>
-        {since && (
-          <div className="absolute bottom-[22px] left-[22px] text-[11px] font-semibold uppercase tracking-[0.18em] text-white/60" aria-hidden>
+        {(since || handle) && (
+          <div className={cn("absolute bottom-[22px] text-[11px] font-semibold uppercase tracking-[0.18em] text-white/60", left)} aria-hidden>
+            {handle && <span className="normal-case tracking-normal text-white/75">{handle}</span>}
+            {handle && since ? " · " : ""}
             {since}
           </div>
         )}

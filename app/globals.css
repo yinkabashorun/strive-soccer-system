@@ -259,6 +259,37 @@ summary,
   .press:active {
     transform: none;
   }
+  /* screens come in with a plain fade, nothing slides or scales */
+  .animate-screen-in,
+  .animate-screen-from-right,
+  .animate-screen-from-left,
+  .animate-screen-nudge-right,
+  .animate-screen-nudge-left {
+    animation: fade-in 0.2s ease-out backwards !important;
+  }
+}
+
+/* The press feel everywhere in the member app (Nov 23 2026, "glides, is
+   fast"): every link and button that is a card or a control sinks a touch
+   the instant a finger lands, and comes back as it lifts. Inline text
+   links (.tap) and the fields are left alone. The tab bar has its own
+   feel (MemberNav). */
+.member-ui a:not(.tap):not(.no-press),
+.member-ui button:not(.no-press),
+.member-ui [role="button"] {
+  transition: transform 0.14s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.member-ui a:not(.tap):not(.no-press):active,
+.member-ui button:not(:disabled):not(.no-press):active,
+.member-ui [role="button"]:active {
+  transform: scale(0.97);
+}
+@media (prefers-reduced-motion: reduce) {
+  .member-ui a:not(.tap):not(.no-press):active,
+  .member-ui button:not(.no-press):active,
+  .member-ui [role="button"]:active {
+    transform: none;
+  }
 }
 
 /* Numeric inputs that edit in place — no native spinner arrows. */

@@ -8,8 +8,11 @@ import { PushKeepAlive } from "@/components/elite/PushOptIn";
 import { getViewer } from "@/lib/elite/session";
 import { getHomework, getNotifications, getPlayer } from "@/lib/elite/data";
 import { signOut } from "@/lib/elite/auth-actions";
-import { unlockDueWeeks } from "@/lib/elite/unlock";
 import { AgreementScreen } from "@/components/elite/AgreementScreen";
+import { ProfileSetupScreen } from "@/components/elite/ProfileSetupScreen";
+import { SwipeTabs } from "@/components/elite/SwipeTabs";
+import { photoAddress, profileSetupDue, setupSteps } from "@/lib/elite/account-profile";
+import { suggestUsernames } from "@/lib/elite/account-profile-server";
 import { consentDue } from "@/lib/elite/legal-server";
 import { NO_PROFILE_GATE, gateFor, type GateCopy } from "@/lib/elite/gates";
 import { memberTabs } from "@/lib/elite/experience";
@@ -19,6 +22,7 @@ import { ProCheckoutButton } from "@/components/elite/ProCheckoutButton";
 import { SUPPORT_EMAIL } from "@/lib/elite/support";
 import { getTracker, quizDone } from "@/lib/elite/tracker-server";
 import { freeLanding } from "@/lib/elite/tracker";
+import { initials } from "@/lib/utils";
 
 // The tabs (approved mock v4, Nov 20 2026): Home, Week, Courses and You
 // for Strive Pro; Coach before You for an offer with the coach chat. The
@@ -35,8 +39,10 @@ export default async function PlayerLayout({
   // Coaches AND admins live in the coach app, never the player shell.
   if (viewer.role !== "player") redirect("/coach");
 
-  // Process any weeks due to unlock (Monday-morning flip, VA time).
-  await unlockDueWeeks().catch(() => undefined);
+  // The Monday 6am ET unlock is NOT run here: the hourly builder does it
+  // first thing every hour (app/api/elite/cron/weekly-plans), and running
+  // it on every screen of every member put database work in front of
+  // every tap (tests/app-feel.test.ts holds this).
 
   // Authenticated player whose coach hasn't set up their profile yet.
   // A free account (069) has no player record on purpose and lives in the
@@ -54,15 +60,24 @@ export default async function PlayerLayout({
   // sign-up; this catches everyone who joined before, and everyone again
   // when the terms change. The Account page (and deleting the account)
   // stays reachable without it.
-  if (!viewer.demo && (await consentDue(viewer.profile.id))) {
+  //
+  // Everything the shell needs is read side by side, not one after the
+  // other: the agreement record, the player, the bell and the week. The
+  // page reads the same player and week through the same per-request cache
+  // (lib/elite/request-cache.ts), so it does not ask again.
+  const [consent, player, notifications, homework] = await Promise.all([
+    viewer.demo ? false : consentDue(viewer.profile.id),
+    getPlayer(viewer.playerId),
+    getNotifications(viewer.playerId),
+    getHomework(viewer.playerId),
+  ]);
+  if (consent) {
     return (
       <div className="member-ui">
         <AgreementScreen signOut={signOut} />
       </div>
     );
   }
-
-  const player = await getPlayer(viewer.playerId);
 
   // A Strive Pro member (074) pays first, then takes the quiz: an unpaid
   // or ended Pro membership sees the checkout before onboarding.
@@ -83,16 +98,30 @@ export default async function PlayerLayout({
   // differently (lib/elite/gates.ts).
   if (gate) return <GateScreen gate={gate} />;
 
-  const [notifications, homework] = await Promise.all([
-    getNotifications(viewer.playerId),
-    getHomework(viewer.playerId),
-  ]);
+  // The profile photo and @username (081), asked once of every member made
+  // before they were part of onboarding; built like the agreement gate.
+  // The example tour is never asked (its setup is never "available"), and
+  // an unreadable profile row opens the app anyway.
+  if (!viewer.demo && profileSetupDue(viewer.setup)) {
+    return (
+      <div className="member-ui">
+        <ProfileSetupScreen
+          steps={setupSteps(viewer.setup)}
+          ideas={viewer.setup.username ? [] : await suggestUsernames(viewer.profile.id, viewer.profile.full_name).catch(() => [])}
+          initials={initials(viewer.profile.full_name)}
+          seenBy="your coaches"
+          signOut={signOut}
+        />
+      </div>
+    );
+  }
   // The ring around the member's initials: this week's sessions done.
   const live = liveWeekFor(player?.week1_monday, player?.current_week);
   const maxBuilt = homework.reduce((m, h) => Math.max(m, h.week), 0);
   const week = Math.max(1, Math.min(live, maxBuilt || 1));
   const sessions = groupSessions(homework.filter((h) => h.week === week && !h.is_extra));
   const weekDone = sessions.length ? sessions.filter((s) => s.list.every((h) => h.completed)).length / sessions.length : 0;
+  const tabs = memberTabs(player?.tier).filter((t) => !keptOutOfThisApp(t.href));
 
   return (
     <div className="member-ui min-h-[100svh] bg-black text-bone lg:flex">
@@ -101,13 +130,15 @@ export default async function PlayerLayout({
           The ask itself is on the finish screen of a session (A8). */}
       {!viewer.demo && <PushKeepAlive />}
       <MemberNav
-        tabs={memberTabs(player?.tier).filter((t) => !keptOutOfThisApp(t.href))}
+        tabs={tabs}
         name={viewer.profile.full_name}
         weekDone={weekDone}
         notifications={notifications}
+        photo={photoAddress(viewer.setup)}
       />
       <main className="relative mx-auto w-full max-w-3xl flex-1 px-4 pb-[calc(7.5rem+env(safe-area-inset-bottom))] pt-[calc(env(safe-area-inset-top)+1.25rem)] sm:px-6 lg:pb-12 lg:pt-8">
-        {children}
+        {/* On a phone, a sideways swipe moves to the next or previous tab. */}
+        <SwipeTabs tabs={tabs.map((t) => t.href)}>{children}</SwipeTabs>
       </main>
     </div>
   );

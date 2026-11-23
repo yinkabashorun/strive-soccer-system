@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient, createServiceClient } from "./supabase/server";
 import { removePlayerFiles } from "./account-server";
+import { removeTrackerFiles } from "./tracker-server";
+import { clearProfilePhoto } from "./account-profile-server";
 import { getViewer } from "./session";
 import { sendPlayerEmail } from "./email";
 import { sendPushToPlayer } from "./push";
@@ -224,6 +226,9 @@ export async function deletePlayer(playerId: string) {
     // Their uploaded clips first (the same step the family's own "Delete
     // my account" takes): deleting the row does not remove files.
     await removePlayerFiles(admin, playerId);
+    // and the profile photo (081), in the account's own photo folder
+    // (account-profile-server.ts)
+    await removeTrackerFiles(player.profile_id);
     const { error } = await admin.auth.admin.deleteUser(player.profile_id);
     if (error) return { ok: false as const };
   } else {
@@ -234,6 +239,22 @@ export async function deletePlayer(playerId: string) {
   }
 
   revalidatePath("/coach");
+  return { ok: true as const };
+}
+
+// Take a member's profile photo off (081): a photo that should not be
+// there. The photo is required, so the member is asked for a new one the
+// next time they open the app. The same as the free app's queue does for a
+// reported photo (tracker-actions.ts removeProfilePhoto).
+export async function removeMemberPhoto(playerId: string) {
+  if (!(await requireCoach())) return { ok: false as const };
+  const admin = createServiceClient();
+  if (!admin) return { ok: true as const };
+  const { data: player } = await admin.from("elite_players").select("profile_id").eq("id", playerId).maybeSingle();
+  const profileId = (player as { profile_id: string | null } | null)?.profile_id;
+  if (!profileId) return { ok: false as const };
+  if (!(await clearProfilePhoto(profileId))) return { ok: false as const };
+  revalidatePath(`/coach/players/${playerId}`);
   return { ok: true as const };
 }
 

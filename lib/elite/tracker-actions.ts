@@ -8,6 +8,7 @@ import { getViewer } from "./session";
 import { nyToday } from "./time";
 import { APP_URL } from "./app-url";
 import { textCoaches } from "./coach-alerts";
+import { SETUP_REFUSED, profileSetupDue } from "./account-profile";
 import {
   clubById,
   clubIdsOf,
@@ -157,6 +158,13 @@ export async function saveQuiz(input: {
   if (!days) return fail(PICK_A_DAY);
   const o = await owner();
   if (o.kind === "no") return fail(o.error);
+  // The free app's set-up is not finished without the profile photo and
+  // the @username (081, both required). The layout asks for them first;
+  // this holds it on the server too.
+  if (o.kind === "ok") {
+    const viewer = await getViewer();
+    if (viewer && profileSetupDue(viewer.setup)) return fail(SETUP_REFUSED);
+  }
   if (o.kind === "demo") {
     writeDemoState({ quiz: { ...answers, target }, days });
     return { ok: true };
@@ -740,19 +748,10 @@ export async function reportLine(targetId: string, whatInput: "line" | "photo" =
   return { ok: true };
 }
 
-// Take your own profile photo off.
-export async function removeMyPhoto(): Promise<{ ok: true } | Fail> {
-  const o = await owner();
-  if (o.kind === "no") return fail(o.error);
-  if (o.kind === "demo") {
-    writeDemoState({ avatar: false });
-    touch();
-    return { ok: true };
-  }
-  if (!(await clearAvatar(o.profileId))) return fail(OFFLINE);
-  touch();
-  return { ok: true };
-}
+// There is no "take my photo off" (Nov 23 2026): the profile photo is
+// required (081), so a player changes it (ProfilePhotoPicker) and never
+// leaves the profile without one. A coach can still take a reported photo
+// off (removeProfilePhoto below), which asks the player for a new one.
 
 // ---- Coach side (/coach/free) -----------------------------------------
 

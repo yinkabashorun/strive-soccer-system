@@ -11,6 +11,7 @@ import { IconBack, IconLock } from "./FreeIcons";
 import { JoinLanding, type JoinInvite } from "./JoinLanding";
 import { UnderAge } from "./UnderAge";
 import { Wheel, WheelColumn } from "./WheelPicker";
+import { useKeyboardInset } from "./OnboardingShell";
 
 type Step = "landing" | "age" | "name" | "contact" | "password" | "agree" | "young";
 const STEPS: Step[] = ["age", "name", "contact", "password", "agree"];
@@ -171,7 +172,7 @@ export function JoinForm({
       <Screen step="name" onBack={() => next("age")} onSubmit={(e) => nextIfValid(e, "name", "contact")}>
         <Question title="What's your name?" line="Your friends see your first name and last initial." />
         <div className="mt-8 space-y-3 px-[22px]">
-          <Input label="First name" value={firstName} onChange={setFirstName} autoComplete="given-name" />
+          <Input label="First name" value={firstName} onChange={setFirstName} autoComplete="given-name" autoFocus />
           <Input label="Last name" value={lastName} onChange={setLastName} autoComplete="family-name" />
         </div>
         <Foot loading={false} label="Next" error={error} />
@@ -191,6 +192,7 @@ export function JoinForm({
             onChange={setEmail}
             placeholder="you@example.com"
             autoComplete="username"
+            autoFocus
           />
           <Input
             label="Phone, so a coach can reach you"
@@ -219,6 +221,7 @@ export function JoinForm({
             placeholder="At least 8 characters"
             autoComplete="new-password"
             minLength={8}
+            autoFocus
           />
         </div>
         <Foot loading={false} label="Next" error={error} />
@@ -330,8 +333,11 @@ export function Foot({
   note?: string;
   error?: string | null;
 }) {
+  // pinned to the bottom, and riding just above the keyboard when it is up
+  // (the way Instagram's sign-up does it), so Next is always under the thumb
+  const kb = useKeyboardInset();
   return (
-    <div className="mt-auto px-[22px] pt-8">
+    <div className="sticky z-10 mt-auto bg-black px-[22px] pb-1 pt-8" style={{ bottom: kb }}>
       {error && (
         <p role="alert" className="mb-3.5 rounded-2xl bg-red-500/10 px-4 py-3 text-[15px] leading-snug text-red-300">
           {error}
@@ -369,6 +375,7 @@ export function Input({
   autoComplete,
   minLength,
   required = true,
+  autoFocus = false,
 }: {
   label: string;
   value: string;
@@ -378,6 +385,8 @@ export function Input({
   autoComplete?: string;
   minLength?: number;
   required?: boolean;
+  // the first field of a screen: the keyboard is up as the screen lands
+  autoFocus?: boolean;
 }) {
   return (
     <label className="block">
@@ -387,6 +396,8 @@ export function Input({
         required={required}
         value={value}
         minLength={minLength}
+        autoFocus={autoFocus}
+        enterKeyHint="next"
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         autoComplete={autoComplete}

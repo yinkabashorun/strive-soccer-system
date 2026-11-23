@@ -99,6 +99,7 @@ export function ProfileScreen({
 
       <div className="px-[18px] pt-4">
         <p className="text-[16px] font-bold">{profile.name}</p>
+        {profile.username && <p className="mt-[2px] text-[14px] text-white/60">@{profile.username}</p>}
         {profile.levelName && <p className="mt-[3px] text-[14px] text-white/60">{profile.levelName}</p>}
         {profile.playingFor && (
           <p className="mt-0.5 text-[14px]">

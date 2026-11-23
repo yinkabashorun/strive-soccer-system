@@ -16,6 +16,7 @@
 // With no database configured (a local build), the example data in
 // tracker-demo.ts stands in so the screens can be seen.
 import { createServiceClient, isSupabaseConfigured } from "./supabase/server";
+import { avatarUrlsOf, clearProfilePhoto, usernamesOf } from "./account-profile-server";
 import type { Viewer } from "./session";
 import { shiftDay } from "./time";
 import { clubRankingFor } from "./tracker-ranking";
@@ -501,61 +502,17 @@ export async function starredAmong(admin: Admin, ids: string[]): Promise<Set<str
 // Signed addresses for the profile photos of these accounts. A caller
 // passes only ids the viewer may see a photo of (mayViewAvatar: the
 // viewer, their friends, and every account for a coach); no id here is
-// ever taken from the browser.
+// ever taken from the browser. One photo per account, members and free
+// accounts alike: lib/elite/account-profile-server.ts (081).
 export async function avatarsOf(admin: Admin, ids: string[]): Promise<Map<string, string>> {
-  const paths = new Map<string, string>(); // path -> profile id
-  for (let i = 0; i < ids.length; i += 200) {
-    const { data } = await admin
-      .from("elite_trackers")
-      .select("profile_id, avatar_path")
-      .in("profile_id", ids.slice(i, i + 200))
-      .not("avatar_path", "is", null);
-    for (const r of (data as { profile_id: string; avatar_path: string }[] | null) ?? []) {
-      if (ownsAvatarPath(r.avatar_path, r.profile_id)) paths.set(r.avatar_path, r.profile_id);
-    }
-  }
-  const signed = await signPhotos(admin, [...paths.keys()]);
-  const out = new Map<string, string>();
-  for (const [path, url] of signed) {
-    const id = paths.get(path);
-    if (id) out.set(id, url);
-  }
-  return out;
+  return avatarUrlsOf(admin, ids);
 }
 
-// Store a new profile photo for the signed-in player, replacing the old
-// one. NOT a server action: called only by the photo route, with the id
-// it established from the session and a photo it already checked.
-export async function saveAvatar(profileId: string, photo: Uint8Array): Promise<boolean> {
-  const admin = createServiceClient();
-  if (!admin) return false;
-  if (!looksLikeJpeg(photo) || photo.length > AVATAR_MAX_BYTES) return false;
-  const path = avatarPath(profileId, crypto.randomUUID());
-  if (!path) return false;
-  const { data: before } = await admin.from("elite_trackers").select("avatar_path").eq("profile_id", profileId).maybeSingle();
-  const up = await admin.storage.from(POST_BUCKET).upload(path, photo, { contentType: "image/jpeg", upsert: false });
-  if (up.error) return false;
-  const { error } = await admin.from("elite_trackers").update({ avatar_path: path }).eq("profile_id", profileId);
-  if (error) {
-    await admin.storage.from(POST_BUCKET).remove([path]).catch(() => undefined);
-    return false;
-  }
-  const old = (before as { avatar_path: string | null } | null)?.avatar_path;
-  if (old && ownsAvatarPath(old, profileId)) await admin.storage.from(POST_BUCKET).remove([old]).catch(() => undefined);
-  return true;
-}
-
-// Take a player's profile photo off: the file and the pointer. Used by the
-// player for their own and by a coach from the queue.
+// Take a player's profile photo off: the file and the pointer. Used by a
+// coach from the queue. The photo is required (081), so the player is
+// asked for a new one the next time they open the app.
 export async function clearAvatar(profileId: string): Promise<boolean> {
-  const admin = createServiceClient();
-  if (!admin) return false;
-  const { data } = await admin.from("elite_trackers").select("avatar_path").eq("profile_id", profileId).maybeSingle();
-  const old = (data as { avatar_path: string | null } | null)?.avatar_path;
-  const { error } = await admin.from("elite_trackers").update({ avatar_path: null }).eq("profile_id", profileId);
-  if (error) return false;
-  if (old && ownsAvatarPath(old, profileId)) await admin.storage.from(POST_BUCKET).remove([old]).catch(() => undefined);
-  return true;
+  return clearProfilePhoto(profileId);
 }
 
 // The viewer's own photo, for their own screens.
@@ -1419,7 +1376,7 @@ export async function profileFor(viewer: Viewer, targetId: string, today: string
   const tracker = await getTracker(targetId);
   if (!tracker) return null;
 
-  const [names, clubIds, logs, photos, theirs, mineToday, reported] = await Promise.all([
+  const [names, clubIds, logs, photos, theirs, mineToday, reported, usernames] = await Promise.all([
     namesOf(admin, [targetId]),
     clubIdsOf(admin, targetId),
     auraLogsOf(admin, targetId),
@@ -1434,6 +1391,7 @@ export async function profileFor(viewer: Viewer, targetId: string, today: string
       .limit(GRID_FETCH),
     admin.from("elite_training_logs").select(POST_COLUMNS).eq("profile_id", meId).eq("trained_on", today),
     reportedBy(admin, meId),
+    usernamesOf(admin, [targetId]),
   ]);
   const clubs: { id: string; name: string }[] = [];
   for (const id of clubIds) {
@@ -1480,6 +1438,7 @@ export async function profileFor(viewer: Viewer, targetId: string, today: string
     levelName: labelOf(LEVELS, tracker.level) || null,
     playingFor: tracker.playing_for,
     starred: Boolean(tracker.starred_at),
+    username: usernames.get(targetId) ?? null,
   };
 }
 

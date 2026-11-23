@@ -55,7 +55,7 @@ describe("the quiz asks everything the intake stores", () => {
   });
 
   it("the field list is the action's own input type, every key", () => {
-    const src = read("lib/elite/player-actions.ts");
+    const src = read("lib/elite/onboarding-input.ts");
     const type = src.slice(src.indexOf("export type OnboardingInput = {"), src.indexOf("};", src.indexOf("export type OnboardingInput = {")));
     const keys = [...type.matchAll(/^\s+(\w+):/gm)].map((m) => m[1]);
     expect(keys.length).toBe(16);

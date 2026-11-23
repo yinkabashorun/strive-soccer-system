@@ -25,7 +25,8 @@ import { CoachingCallsCard } from "@/components/elite/CoachingCallsCard";
 import { CheckinBooking } from "@/components/elite/CheckinBooking";
 import { getPlayerCheckin } from "@/lib/elite/film-room-data";
 import { CheckinCard } from "@/components/elite/CheckinCard";
-import { fmtMonday, liveWeekFor, nextMondayNY, nyToday } from "@/lib/elite/time";
+import { liveWeekFor, nextMondayNY, nyToday } from "@/lib/elite/time";
+import { nextWeekLine as nextWeekLineFor } from "@/lib/elite/app-payload";
 import { timeAgo } from "@/lib/utils";
 import { WeekDrop, type DropCard } from "@/components/elite/WeekDrop";
 import { groupSessions, sessionProgress } from "@/lib/elite/session-flow";
@@ -121,17 +122,15 @@ export default async function DashboardPage({
   const weekDone = sessions.length > 0 && !current;
 
   // What to say about next week - never a false "it's ready".
-  const nextScheduled = plans.find(
-    (p) =>
-      p.week > contentWeek &&
-      p.unlocks_at &&
-      new Date(p.unlocks_at).getTime() > Date.now()
-  );
-  const nextWeekLine = nextScheduled
-    ? `Week ${nextScheduled.week} unlocks ${fmtMonday(nextMondayNY())}.`
-    : maxBuilt < live
-      ? `Your coach is building week ${live}. It lands the moment it's ready.`
-      : `Your coach is building week ${live + 1}. It drops Monday.`;
+  // One rule with the iPhone app's Home (lib/elite/app-payload.ts).
+  const nextWeekLine = nextWeekLineFor({
+    plans,
+    week: contentWeek,
+    live,
+    maxBuilt,
+    now: Date.now(),
+    nextMonday: nextMondayNY(),
+  });
 
   const checkedInThisWeek = checkins.some((c) => c.week === contentWeek);
 

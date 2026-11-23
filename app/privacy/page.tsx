@@ -4,7 +4,7 @@ import { SHEET_PARAM, shownInSheet } from "@/lib/elite/app-links";
 
 export const metadata = { title: "Privacy Policy · Strive Elite" };
 
-const UPDATED = "November 22, 2026";
+const UPDATED = "November 23, 2026";
 const CONTACT_EMAIL = "coach@strivesoccer100x.com";
 
 export default function PrivacyPage({
@@ -70,6 +70,17 @@ export default function PrivacyPage({
                 privately. Only your family and the coaches can open them.
                 A clip is never posted publicly unless a parent or guardian
                 has said yes to that specific clip.
+              </li>
+              <li>
+                <strong className="text-bone">Profile photo and username:</strong>{" "}
+                every account has one profile photo and one username, asked
+                for once when the account is set up. The photo is stored
+                privately, with where and when it was taken removed, and
+                shown only through our own server: to the player, to the
+                coaches, and in the free app to the friends the player
+                accepted. The username is checked against a list of words we
+                do not allow and can be changed at any time. A coach can
+                remove a photo; deleting the account deletes it.
               </li>
               <li>
                 <strong className="text-bone">A free account:</strong>{" "}

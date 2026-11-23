@@ -95,6 +95,14 @@ const config: Config = {
         "count-pop": "count-pop 0.8s cubic-bezier(0.22,1,0.36,1) both",
         spark: "spark 1.1s cubic-bezier(0.22,1,0.36,1) both",
         "tab-in": "fade-in 0.22s cubic-bezier(0.22,1,0.36,1) both",
+        // A member screen coming in (Nov 23 2026, components/elite/TabEntrance):
+        // from the side it was asked for, a little scale for depth, 280 ms.
+        // "backwards" so no transform is left on the screen afterwards.
+        "screen-in": "screen-in 0.28s cubic-bezier(0.22,1,0.36,1) backwards",
+        "screen-from-right": "screen-from-right 0.28s cubic-bezier(0.22,1,0.36,1) backwards",
+        "screen-from-left": "screen-from-left 0.28s cubic-bezier(0.22,1,0.36,1) backwards",
+        "screen-nudge-right": "screen-nudge-right 0.24s cubic-bezier(0.22,1,0.36,1) backwards",
+        "screen-nudge-left": "screen-nudge-left 0.24s cubic-bezier(0.22,1,0.36,1) backwards",
         "step-in": "step-in 0.4s cubic-bezier(0.22,1,0.36,1) both",
       },
       keyframes: {
@@ -113,6 +121,26 @@ const config: Config = {
         "fade-in": {
           "0%": { opacity: "0" },
           "100%": { opacity: "1" },
+        },
+        "screen-in": {
+          "0%": { opacity: "0", transform: "translate3d(0,8px,0) scale(0.985)" },
+          "100%": { opacity: "1", transform: "none" },
+        },
+        "screen-from-right": {
+          "0%": { opacity: "0", transform: "translate3d(28%,0,0) scale(0.96)" },
+          "100%": { opacity: "1", transform: "none" },
+        },
+        "screen-from-left": {
+          "0%": { opacity: "0", transform: "translate3d(-28%,0,0) scale(0.96)" },
+          "100%": { opacity: "1", transform: "none" },
+        },
+        "screen-nudge-right": {
+          "0%": { opacity: "0", transform: "translate3d(18px,0,0) scale(0.99)" },
+          "100%": { opacity: "1", transform: "none" },
+        },
+        "screen-nudge-left": {
+          "0%": { opacity: "0", transform: "translate3d(-18px,0,0) scale(0.99)" },
+          "100%": { opacity: "1", transform: "none" },
         },
         "sheet-in": {
           "0%": { opacity: "0", transform: "translateY(24px)" },

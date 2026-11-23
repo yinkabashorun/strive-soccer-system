@@ -52,3 +52,19 @@ export function cleanGuardianName(raw: unknown): string | null {
 
 export const AGREEMENT_REQUIRED_MESSAGE =
   "Tick both boxes to agree to the Terms and the Privacy Policy before creating the account.";
+
+// The in-app agreement screen (the website's and the iPhone app's): both
+// boxes ticked and the typed name of the adult agreeing. The name to
+// record, or the one line to show.
+export function inAppAgreement(input: {
+  guardian?: unknown;
+  terms?: unknown;
+  guardianName?: unknown;
+}): { ok: true; name: string } | { ok: false; error: string } {
+  if (!agreementComplete({ guardian: input.guardian, terms: input.terms })) {
+    return { ok: false, error: "Tick both boxes to continue." };
+  }
+  const name = cleanGuardianName(input.guardianName);
+  if (!name) return { ok: false, error: "Type the full name of the parent or guardian who is agreeing." };
+  return { ok: true, name };
+}

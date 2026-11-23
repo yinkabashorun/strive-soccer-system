@@ -5,7 +5,7 @@
 // and quizInput below hands that action exactly the shape it always took.
 // tests/quiz.test.ts fails when a field the server stores is not asked.
 import type { PlayerLevel, TrainingLoad, TrainingSpace } from "./types";
-import type { OnboardingInput } from "./player-actions";
+import type { OnboardingInput } from "./onboarding-input";
 
 // Every field the intake action takes. A Record over the input's own keys,
 // so TypeScript refuses this list the day a field is added or removed.
@@ -216,6 +216,25 @@ export const QUIZ_STEPS: readonly QuizStep[] = [
   { id: "parent", fields: ["parent_name", "parent_email", "parent_phone"], autoAdvance: false, section: "Your parent" },
 ];
 
+// The words of each question, shared by the website quiz and the iPhone
+// app. The team question carries the approved
+// video's own wording.
+export const QUIZ_QUESTIONS: Record<QuizStepId, { title: string; sub?: string }> = {
+  gender: { title: "Boy or girl?", sub: "So the updates about your training read right." },
+  team: { title: "How often does your team train?", sub: "Your week fits around it." },
+  age: { title: "How old are you?" },
+  position: { title: "What position do you play?", sub: "Your main one." },
+  foot: { title: "Which is your strong foot?" },
+  level: { title: "What level do you play at?" },
+  space: { title: "Where will you train most days?", sub: "Every drill will fit the space you have." },
+  nearby: { title: "What is near where you train?", sub: "Tick any you have. Your drills only use what is there." },
+  club: { title: "What team do you play for?", sub: "Club and age group, if you have one." },
+  goals: { title: "What are you chasing?", sub: "One goal a line. This one is optional." },
+  onBall: { title: "On the ball.", sub: "Rate yourself on each one, 1 to 5. Be honest: the lowest ones are where your training starts." },
+  offBall: { title: "Off the ball.", sub: "Your speed, your body and how you read the game. Same scale, 1 to 5." },
+  parent: { title: "Your parent or guardian.", sub: "We text them when your new week is ready." },
+};
+
 // Whether a screen has what it needs to move on. A typed screen that is
 // optional (the club, the goals) is always ready.
 export function stepReady(id: QuizStepId, a: QuizAnswers): boolean {
@@ -284,4 +303,41 @@ export function quizInput(a: QuizAnswers): OnboardingInput {
     training_load: team?.load ?? "in_season",
     space: a.space === "tight" ? "tight" : "open",
   };
+}
+
+// The answers as they arrive from somewhere that cannot be trusted (the
+// native iPhone app's request body, a draft saved on a phone): every field
+// is taken only when it is one of the choices above or a short string, so
+// nothing else ever reaches the intake action. Unknown keys are dropped.
+const MAX_TEXT = 200;
+const MAX_GOALS = 600;
+
+function text(v: unknown, max = MAX_TEXT): string {
+  return typeof v === "string" ? v.slice(0, max) : "";
+}
+
+export function cleanAnswers(raw: unknown): QuizAnswers {
+  const r = raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+  const a = emptyAnswers();
+  if (r.gender === "boy" || r.gender === "girl") a.gender = r.gender;
+  if (TEAM_TRAINING.some((t) => t.id === r.team)) a.team = r.team as TeamTraining;
+  if (typeof r.age === "number" && AGES.includes(r.age)) a.age = r.age;
+  if (typeof r.position === "string" && POSITIONS.includes(r.position)) a.position = r.position;
+  if ((FEET as readonly unknown[]).includes(r.foot)) a.foot = r.foot as QuizAnswers["foot"];
+  if ((LEVELS as unknown[]).includes(r.level)) a.level = r.level as PlayerLevel;
+  if (r.space === "open" || r.space === "tight") a.space = r.space;
+  a.wall = r.wall === true;
+  a.goal = r.goal === true;
+  if (r.nearbyAnswered === true) a.nearbyAnswered = true;
+  a.club = text(r.club);
+  a.goals = text(r.goals, MAX_GOALS);
+  const attrs = r.attrs && typeof r.attrs === "object" ? (r.attrs as Record<string, unknown>) : {};
+  for (const x of ATTRIBUTES) {
+    const v = attrs[x.id];
+    if (validRating(v)) a.attrs[x.id] = v;
+  }
+  a.parentName = text(r.parentName);
+  a.parentEmail = text(r.parentEmail);
+  a.parentPhone = text(r.parentPhone, 40);
+  return a;
 }

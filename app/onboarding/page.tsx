@@ -6,6 +6,10 @@ import { gateFor } from "@/lib/elite/gates";
 import { confirmProReturn } from "@/lib/elite/pro-server";
 import { isPro } from "@/lib/elite/tiers";
 import { cardName, cardTierLabel, memberSinceLabel } from "@/lib/elite/experience";
+import { setupSteps, type SetupStep } from "@/lib/elite/account-profile";
+import { suggestUsernames } from "@/lib/elite/account-profile-server";
+import { usernameIdeas } from "@/lib/elite/username";
+import { initials } from "@/lib/utils";
 
 export const metadata = { title: "Welcome · Strive Elite" };
 
@@ -47,6 +51,15 @@ export default async function OnboardingPage({
   }
 
   const fullName = player?.full_name ?? viewer.profile.full_name;
+  // The @username and the profile photo (081): the quiz's last screens,
+  // both required. The example tour walks them too (nothing is saved);
+  // nothing is owed before 081 is applied.
+  const steps: SetupStep[] = tour ? ["username", "photo"] : setupSteps(viewer.setup);
+  const ideas = !steps.includes("username")
+    ? []
+    : viewer.demo
+      ? usernameIdeas(fullName).slice(0, 3)
+      : await suggestUsernames(viewer.profile.id, fullName).catch(() => []);
   return (
     <div className="member-ui min-h-[100svh] bg-black text-bone">
       <div className="mx-auto w-full max-w-md">
@@ -57,6 +70,7 @@ export default async function OnboardingPage({
           tier={cardTierLabel(player?.tier)}
           // Already collected at signup - never ask for it twice.
           knownParentPhone={player?.parent_phone ?? ""}
+          setup={{ steps, ideas, initials: initials(fullName) }}
         />
       </div>
     </div>

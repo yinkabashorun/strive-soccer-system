@@ -22,6 +22,7 @@ import {
   firstUnanswered,
   quizInput,
   stepReady,
+  QUIZ_QUESTIONS,
   type QuizAnswers,
 } from "@/lib/elite/quiz";
 import {
@@ -29,13 +30,17 @@ import {
   FIRST_WEEK_WAIT_MS,
   weakSpotPhrase,
   type FirstWeekStatus,
+  buildingLines,
 } from "@/lib/elite/experience";
 import { sessionsFor, sessionsWord } from "@/lib/elite/training";
 import { feel } from "@/lib/elite/native";
 import { MemberCard } from "./MemberCard";
+import { ProfileSetup } from "./ProfileSetup";
+import { useKeyboardInset } from "./OnboardingShell";
+import type { SetupStep } from "@/lib/elite/account-profile";
 import { cn } from "@/lib/utils";
 
-type Stage = "door" | "quiz" | "building";
+type Stage = "door" | "quiz" | "profile" | "building";
 
 // The first minutes of membership (Nov 21 2026, experience.md): the door
 // ("You're in." and the member card rising), the quiz (one question a
@@ -49,12 +54,16 @@ export function QuizFlow({
   since,
   tier,
   knownParentPhone = "",
+  setup = { steps: [], ideas: [], initials: "" },
 }: {
   firstName: string;
   cardName: string;
   since: string | null;
   tier: string;
   knownParentPhone?: string;
+  // the @username and the profile photo still owed (081): the last screens
+  // of the quiz, both required, before the answers are saved
+  setup?: { steps: SetupStep[]; ideas: string[]; initials: string };
 }) {
   const router = useRouter();
   const [stage, setStage] = useState<Stage>("door");
@@ -65,6 +74,7 @@ export function QuizFlow({
   const [error, setError] = useState<string | null>(null);
   const [editingPhone, setEditingPhone] = useState(false);
   const advance = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const kb = useKeyboardInset();
 
   useEffect(() => () => {
     if (advance.current) clearTimeout(advance.current);
@@ -72,6 +82,8 @@ export function QuizFlow({
 
   const total = QUIZ_STEPS.length;
   const current = QUIZ_STEPS[step];
+  // the progress line runs through the photo and username screens too
+  const overall = total + setup.steps.length;
 
   function next() {
     setPicked(null);
@@ -102,15 +114,49 @@ export function QuizFlow({
       setError(missing === total - 1 ? "Enter a parent or guardian name so we know who to text." : "Answer this one first.");
       return;
     }
+    setError(null);
+    // the username and the photo come last, then everything is saved
+    if (setup.steps.length > 0) {
+      feel("drill");
+      setStage("profile");
+      return;
+    }
+    await save();
+  }
+
+  async function save() {
     setSaving(true);
     setError(null);
     const res = await completeOnboarding(quizInput(a));
     if (!res.ok) {
       setSaving(false);
+      // the server checks the photo and username itself (SETUP_REFUSED)
+      if ("needsSetup" in res && res.needsSetup && setup.steps.length > 0) {
+        setStage("profile");
+        return;
+      }
+      setStage("quiz");
       setError("Something went wrong saving your answers. Please try again.");
       return;
     }
     setStage("building");
+  }
+
+  if (stage === "profile") {
+    return (
+      <ProfileSetup
+        steps={setup.steps}
+        ideas={setup.ideas}
+        initials={setup.initials}
+        seenBy="your coaches"
+        progressBase={{ before: total, total: overall }}
+        onBackFromFirst={() => {
+          setStage("quiz");
+          setStep(total - 1);
+        }}
+        onDone={save}
+      />
+    );
   }
 
   if (stage === "door") {
@@ -160,8 +206,8 @@ export function QuizFlow({
             <ChevronLeft className="h-6 w-6" />
           </button>
           <div className="flex flex-1 gap-[3px]" aria-hidden>
-            {QUIZ_STEPS.map((s, i) => (
-              <i key={s.id} className={cn("h-1 flex-1 rounded-full transition-colors duration-300", i <= step ? "bg-bone" : "bg-fill-2")} />
+            {Array.from({ length: overall }, (_, i) => (
+              <i key={i} className={cn("h-1 flex-1 rounded-full transition-colors duration-300", i <= step ? "bg-bone" : "bg-fill-2")} />
             ))}
           </div>
         </div>
@@ -169,7 +215,7 @@ export function QuizFlow({
 
       <div key={current.id} className="flex min-h-0 flex-1 flex-col px-5 pb-[calc(env(safe-area-inset-bottom)+20px)] pt-5 animate-step-in">
         <div className="m-eyebrow">
-          {current.section} · {step + 1} of {total}
+          {current.section} · {step + 1} of {overall}
         </div>
         <Question id={current.id} />
 
@@ -252,6 +298,8 @@ export function QuizFlow({
               onChange={(e) => setA((p) => ({ ...p, club: e.target.value }))}
               placeholder="Riverside United U14"
               aria-label="Your club or team"
+              autoFocus
+              enterKeyHint="next"
               className={fieldCls}
             />
           )}
@@ -262,6 +310,7 @@ export function QuizFlow({
               onChange={(e) => setA((p) => ({ ...p, goals: e.target.value }))}
               placeholder={"Make the regional squad\nStart every game this season"}
               aria-label="Your goals, one per line"
+              autoFocus
               className={fieldCls}
             />
           )}
@@ -282,6 +331,9 @@ export function QuizFlow({
                 onChange={(e) => setA((p) => ({ ...p, parentName: e.target.value }))}
                 placeholder="Parent or guardian, full name"
                 aria-label="Parent or guardian name"
+                autoFocus
+                autoComplete="off"
+                enterKeyHint="next"
                 className={fieldCls}
               />
               <input
@@ -322,17 +374,19 @@ export function QuizFlow({
         )}
 
         {!current.autoAdvance && (
+          // pinned to the bottom, riding above the keyboard when it is up
+          <div className="sticky z-10 -mx-5 mt-5 bg-black px-5 pb-1 pt-3" style={{ bottom: kb }}>
           <button
             onClick={current.id === "parent" ? finish : next}
             disabled={saving || (current.id === "nearby" ? false : !ready)}
-            className="m-button mt-5 disabled:opacity-40"
+            className="m-button disabled:opacity-40"
             onClickCapture={() => {
               if (current.id === "nearby") setA((p) => ({ ...p, nearbyAnswered: true }));
             }}
           >
             {saving ? (
               "Saving your answers"
-            ) : current.id === "parent" ? (
+            ) : current.id === "parent" && setup.steps.length === 0 ? (
               "Build my week"
             ) : (current.id === "club" && !a.club.trim()) || (current.id === "goals" && !a.goals.trim()) ? (
               "Skip"
@@ -340,6 +394,7 @@ export function QuizFlow({
               "Next"
             )}
           </button>
+          </div>
         )}
       </div>
     </div>
@@ -403,26 +458,8 @@ function RatePage({
 const fieldCls =
   "w-full rounded-[18px] bg-fill px-4 py-4 text-bone shadow-[inset_0_0_0_1px_rgba(255,255,255,0.07)] placeholder:text-white/35 focus:shadow-[inset_0_0_0_1.5px_rgba(245,244,239,0.5)] focus:outline-none";
 
-// The words of each question. The team question carries the approved
-// video's own wording.
-const QUESTIONS: Record<string, { title: string; sub?: string }> = {
-  gender: { title: "Boy or girl?", sub: "So the updates about your training read right." },
-  team: { title: "How often does your team train?", sub: "Your week fits around it." },
-  age: { title: "How old are you?" },
-  position: { title: "What position do you play?", sub: "Your main one." },
-  foot: { title: "Which is your strong foot?" },
-  level: { title: "What level do you play at?" },
-  space: { title: "Where will you train most days?", sub: "Every drill will fit the space you have." },
-  nearby: { title: "What is near where you train?", sub: "Tick any you have. Your drills only use what is there." },
-  club: { title: "What team do you play for?", sub: "Club and age group, if you have one." },
-  goals: { title: "What are you chasing?", sub: "One goal a line. This one is optional." },
-  onBall: { title: "On the ball.", sub: "Rate yourself on each one, 1 to 5. Be honest: the lowest ones are where your training starts." },
-  offBall: { title: "Off the ball.", sub: "Your speed, your body and how you read the game. Same scale, 1 to 5." },
-  parent: { title: "Your parent or guardian.", sub: "We text them when your new week is ready." },
-};
-
 function Question({ id }: { id: string }) {
-  const q = QUESTIONS[id];
+  const q = QUIZ_QUESTIONS[id as keyof typeof QUIZ_QUESTIONS];
   return (
     <>
       <h1 className="mt-2.5 m-head text-[36px] leading-[1.04] text-balance">{q.title}</h1>
@@ -640,7 +677,7 @@ function Building({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const lines = ["Reading your answers", `Picking drills for ${weakSpot}`, `Setting ${sessions} sessions`];
+  const lines = buildingLines(weakSpot, sessions);
   const said = status && status !== "live" ? FIRST_WEEK_LINE[status] : null;
 
   return (

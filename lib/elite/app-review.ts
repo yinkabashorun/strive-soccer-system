@@ -60,6 +60,11 @@ export const SCREENS: readonly Screen[] = [
   // You (Nov 21 2026, the approved redesign): the member card, time
   // trained, the weekly chart and the medals; Progress and Account under it.
   { path: "/you", since: IN_FIRST_BUILD },
+  // Edit profile (081, Nov 23 2026): the member's photo and @username,
+  // both asked for at onboarding. In the first build, which is not
+  // submitted yet; the review notes describe the photo and the username
+  // (docs/app-store/listing.md).
+  { path: "/you/profile", since: IN_FIRST_BUILD },
   { path: "/film", since: IN_FIRST_BUILD },
   { path: "/messages", since: IN_FIRST_BUILD },
   { path: "/courses", since: IN_FIRST_BUILD },

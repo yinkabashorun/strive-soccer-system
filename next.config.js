@@ -13,6 +13,19 @@ const nextConfig = {
   // The weekly card (app/api/elite/tracker/card) reads its two brand fonts
   // from disk; this ships them with that route on the server.
   experimental: {
+    // How long a screen the phone already has is shown again without
+    // asking the server (Nov 23 2026, "when im clicking things there is a
+    // delay"). dynamic: a screen the member opened; static: a screen
+    // fetched ahead of the tap (every tab is, MemberNav). Anything a
+    // member does (Done on a drill, Extra Work, a check-in, a message)
+    // runs a server action that calls revalidatePath, and that empties
+    // this whole cache at once, so nothing is ever shown stale after an
+    // action; coming back to the app after a minute refreshes the screen
+    // too (FreshOnReturn). tests/app-feel.test.ts holds these numbers.
+    staleTimes: {
+      dynamic: 30,
+      static: 180,
+    },
     outputFileTracingIncludes: {
       "/api/elite/tracker/card": ["./lib/elite/fonts/*.ttf"],
     },

@@ -313,3 +313,48 @@ describe("the native shell (native/)", () => {
     expect(found).toEqual([]);
   });
 });
+
+describe("the iPhone app feels like an app (Nov 23 2026)", () => {
+  const project = read("native/ios/App/App.xcodeproj/project.pbxproj");
+  const controller = read("native/ios/App/App/StriveBridgeViewController.swift");
+
+  it("swipes back from the left edge, in the screen the app actually shows", () => {
+    expect(controller).toMatch(/class StriveBridgeViewController: CAPBridgeViewController/);
+    expect(controller).toMatch(/override func capacitorDidLoad\(\) \{\s*super\.capacitorDidLoad\(\)/);
+    expect(controller).toContain("webView?.allowsBackForwardNavigationGestures = true");
+    // The scene builds the window in code, so that is the line that counts;
+    // the storyboard says the same for anything that still loads it.
+    const scene = read("native/ios/App/App/SceneDelegate.swift");
+    expect(scene).toContain("window?.rootViewController = StriveBridgeViewController()");
+    expect(scene).not.toContain("= CAPBridgeViewController()");
+    expect(read("native/ios/App/App/Base.lproj/Main.storyboard")).toContain(
+      'customClass="StriveBridgeViewController" customModule="App" customModuleProvider="target"'
+    );
+  });
+
+  it("the new Swift file is compiled into the app target", () => {
+    // a file reference, a build file, the group and the Sources phase, as
+    // for SceneDelegate.swift
+    expect(project.match(/StriveBridgeViewController\.swift/g)!.length).toBe(project.match(/SceneDelegate\.swift/g)!.length);
+    expect(project).toContain("StriveBridgeViewController.swift in Sources");
+    expect(project).toMatch(/path = StriveBridgeViewController\.swift; sourceTree = "<group>";/);
+  });
+
+  it("a long press opens no web page preview", () => {
+    expect(read("native/capacitor.config.ts")).toMatch(/ios: \{[\s\S]*allowsLinkPreview: false/);
+  });
+
+  it("signing is untouched: automatic, never a hard-coded distribution identity", () => {
+    expect(project).not.toContain('CODE_SIGN_IDENTITY = "Apple Distribution"');
+    expect(project.match(/CODE_SIGN_STYLE = Automatic;/g)!.length).toBe(2);
+  });
+
+  it("the site's sideways swipe between tabs never starts at the edge the phone uses for back", async () => {
+    const { EDGE_PX, startsAtEdge } = await import("../lib/elite/tab-motion");
+    expect(EDGE_PX).toBeGreaterThanOrEqual(20);
+    expect(startsAtEdge(10, 393)).toBe(true);
+    expect(startsAtEdge(388, 393)).toBe(true);
+    expect(startsAtEdge(200, 393)).toBe(false);
+    expect(read("components/elite/SwipeTabs.tsx")).toContain("startsAtEdge(t.clientX, window.innerWidth)");
+  });
+});

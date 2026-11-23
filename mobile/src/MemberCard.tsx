@@ -15,14 +15,14 @@ export function MemberCard({
   name,
   since,
   tier,
-  photoUrl,
+  photo,
   username,
   rise = false,
 }: {
   name: string;
   since: string | null;
   tier: string;
-  photoUrl?: string | null;
+  photo?: { uri: string; headers?: Record<string, string> } | null;
   username?: string | null;
   rise?: boolean;
 }) {
@@ -68,8 +68,8 @@ export function MemberCard({
             ELITE
           </SvgText>
         </Svg>
-        {photoUrl ? (
-          <Image source={{ uri: photoUrl }} style={styles.photo} contentFit="cover" transition={200} />
+        {photo ? (
+          <Image source={photo} style={styles.photo} contentFit="cover" transition={200} cachePolicy="disk" />
         ) : (
           <Image source={require("../assets/splash.png")} style={styles.mark} contentFit="contain" />
         )}

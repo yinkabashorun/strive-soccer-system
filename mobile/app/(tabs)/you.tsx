@@ -4,6 +4,7 @@ import { fmtDuration } from "@shared/time-trained";
 import { keys, useMe, useYou } from "@/api/queries";
 import { queryClient } from "@/api/queryClient";
 import { MemberCard } from "@/MemberCard";
+import { useMyPhoto } from "@/usePhoto";
 import { Screen } from "@/Screen";
 import { Body, Card, Disc, Hairline, Head, Label, Ring, SettingRow, Skeleton } from "@/ui";
 import { color } from "@/theme";
@@ -16,6 +17,7 @@ export default function You() {
   const router = useRouter();
   const me = useMe();
   const { data: y } = useYou();
+  const photo = useMyPhoto();
   const card = y?.card ?? me.data?.player?.card;
   const max = Math.max(1, ...(y?.bars.map((b) => b.minutes) ?? [1]));
 
@@ -29,7 +31,11 @@ export default function You() {
       </View>
 
       <View style={{ marginHorizontal: 20, marginTop: 18 }}>
-        {card ? <MemberCard name={card.name} since={card.since} tier={card.tier} /> : <Skeleton height={204} r={22} />}
+        {card ? (
+          <MemberCard name={card.name} since={card.since} tier={card.tier} photo={photo} username={me.data?.profileSetup?.username} />
+        ) : (
+          <Skeleton height={204} r={22} />
+        )}
       </View>
 
       {!y ? (

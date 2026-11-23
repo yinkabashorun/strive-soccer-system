@@ -21,7 +21,13 @@ export class ApiError extends Error {
 
 export const OFFLINE_MESSAGE = "We could not reach Strive. Check your connection and try again.";
 
-type Options = { method?: "GET" | "POST" | "DELETE"; body?: unknown; timeoutMs?: number };
+type Options = { method?: "GET" | "POST" | "DELETE"; body?: unknown; form?: FormData; timeoutMs?: number };
+
+// The bearer header, for an image our own API serves (the profile photo).
+export async function authHeaders(): Promise<Record<string, string>> {
+  const token = await accessToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 let onGateMoved: (() => void) | null = null;
 export function setGateListener(fn: () => void) {
@@ -44,9 +50,10 @@ export async function api<T>(path: string, opts: Options = {}): Promise<T> {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
-        ...(opts.body !== undefined ? { "Content-Type": "application/json" } : {}),
+        ...(opts.body !== undefined && !opts.form ? { "Content-Type": "application/json" } : {}),
       },
-      body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+      // a file goes as multipart (the phone sets its own boundary)
+      body: opts.form ?? (opts.body !== undefined ? JSON.stringify(opts.body) : undefined),
       signal: controller.signal,
     });
   } catch {

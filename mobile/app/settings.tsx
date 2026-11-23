@@ -52,6 +52,18 @@ export default function Settings() {
       </Section>
 
       <Section title="Account">
+        {me.data?.profileSetup ? (
+          <>
+            <SettingRow
+              label="Username"
+              detail={me.data.profileSetup.username ? `@${me.data.profileSetup.username}` : undefined}
+              onPress={() => router.push("/profile-setup?edit=username")}
+            />
+            <Hairline />
+            <SettingRow label="Profile photo" onPress={() => router.push("/profile-setup?edit=photo")} />
+            <Hairline />
+          </>
+        ) : null}
         <SettingRow label="Change password" onPress={() => router.push("/change-password")} />
         <Hairline />
         <SettingRow label="Sign out" onPress={() => void signOutEverywhere()} />

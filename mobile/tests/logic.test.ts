@@ -4,7 +4,7 @@ import { applyDone } from "@/week-cache";
 import { areaFor, inArea } from "@/navigation";
 import { drillEyebrow, repsTiles } from "@/drill-view";
 import { isStep, nextStepId, stepOrder, stepPosition } from "@/quiz-steps";
-import { cleanUsername, usernameShapeProblem } from "@/username";
+import { USERNAME_MESSAGES, normalizeUsername, usernameProblem } from "@shared/username";
 import type { AppWeek } from "@shared/app-contract";
 import { QUIZ_STEPS } from "@shared/quiz";
 
@@ -136,6 +136,19 @@ describe("where the app belongs", () => {
     expect(areaFor(true, { kind: "membership", gate: { title: "", body: "", emailCoach: true } })).toBe("gate");
   });
 
+  it("asks a member from before 081 for the photo and username after the gate", () => {
+    const owed = { username: null, hasPhoto: false, photoUrl: null, steps: ["username", "photo"] as ("username" | "photo")[], ideas: [] };
+    expect(areaFor(true, { kind: "ok" }, owed)).toBe("profile");
+    expect(areaFor(true, { kind: "ok" }, { ...owed, steps: [] })).toBe("app");
+    // not applied yet: ask nothing
+    expect(areaFor(true, { kind: "ok" }, null)).toBe("app");
+    // the gate comes first, as on the website
+    expect(areaFor(true, { kind: "consent" }, owed)).toBe("agreement");
+    expect(inArea("profile", ["profile-setup"])).toBe(true);
+    expect(inArea("profile", ["(tabs)"])).toBe(false);
+    expect(inArea("app", ["profile-setup"])).toBe(true); // changing them from Settings
+  });
+
   it("keeps account pages reachable and lets building finish", () => {
     expect(inArea("app", ["(tabs)"])).toBe(true);
     expect(inArea("app", ["session", "[n]"])).toBe(true);
@@ -173,22 +186,23 @@ describe("a drill's tiles", () => {
 });
 
 describe("the quiz screens", () => {
-  it("are the website's questions, then the profile once it is live", () => {
-    expect(stepOrder(false)).toEqual(QUIZ_STEPS.map((s) => s.id));
-    expect(stepOrder(true).slice(-2)).toEqual(["photo", "username"]);
-    expect(isStep("photo", false)).toBe(false);
-    expect(isStep("gender", false)).toBe(true);
-    expect(nextStepId("gender", false)).toBe("age");
-    expect(nextStepId("parent", false)).toBeNull();
-    expect(nextStepId("parent", true)).toBe("photo");
-    expect(stepPosition("age", false)).toEqual({ index: 1, total: QUIZ_STEPS.length });
+  it("are the website's questions, then the profile while 081 is live", () => {
+    expect(stepOrder([])).toEqual(QUIZ_STEPS.map((s) => s.id));
+    expect(stepOrder(["username", "photo"]).slice(-2)).toEqual(["username", "photo"]);
+    expect(isStep("photo", [])).toBe(false);
+    expect(isStep("gender", [])).toBe(true);
+    expect(nextStepId("gender", [])).toBe("age");
+    expect(nextStepId("parent", [])).toBeNull();
+    expect(nextStepId("parent", ["username", "photo"])).toBe("username");
+    expect(nextStepId("photo", ["username", "photo"])).toBeNull();
+    expect(stepPosition("age", [])).toEqual({ index: 1, total: QUIZ_STEPS.length });
   });
 
-  it("a username has the right shape", () => {
-    expect(usernameShapeProblem("@Marcus.b")).toBeNull();
-    expect(cleanUsername(" @Marcus ")).toBe("marcus");
-    expect(usernameShapeProblem("ab")).toMatch(/3/);
-    expect(usernameShapeProblem("a".repeat(21))).toMatch(/20/);
-    expect(usernameShapeProblem("marc us")).toMatch(/Lowercase/);
+  it("the phone answers a username's shape with the website's own rule", () => {
+    expect(normalizeUsername(" @Marcus.B ")).toBe("marcus.b");
+    expect(usernameProblem("marcus.b")).toBeNull();
+    expect(USERNAME_MESSAGES[usernameProblem("ab")!]).toMatch(/at least 3/);
+    expect(usernameProblem("strive.official")).toBe("reserved");
   });
 });
+

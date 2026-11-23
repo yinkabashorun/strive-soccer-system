@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { Image } from "expo-image";
-import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -22,7 +21,9 @@ import {
   lowestAttributes,
   stepReady,
   type QuizAnswers,
+  type QuizStepId,
 } from "@shared/quiz";
+import type { SetupStep } from "@shared/account-profile";
 import { weakSpotPhrase } from "@shared/experience";
 import { sessionsFor, sessionsWord } from "@shared/training";
 import { useMe, useSubmitQuiz } from "@/api/queries";
@@ -31,7 +32,7 @@ import { MEDIA_BASE } from "@/config";
 import { tick } from "@/feel";
 import { useDraft } from "@/quiz-draft";
 import { isStep, nextStepId, stepPosition, type StepId } from "@/quiz-steps";
-import { savePhoto, saveUsername, usernameShapeProblem } from "@/profile-api";
+import { PhotoStep, UsernameStep } from "@/ProfileSteps";
 import { Body, Button, Eyebrow, Head, Icon, Label, Press } from "@/ui";
 import { color, font } from "@/theme";
 
@@ -43,7 +44,11 @@ export default function QuizStep() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const me = useMe();
-  const withProfile = Boolean(me.data?.profileSetup);
+  // While 081 is live the quiz ends on the @username and the photo (the
+  // website's order). Kept fixed for the whole quiz: a screen already done
+  // shows what was saved rather than disappearing under the player.
+  const setup = me.data?.profileSetup;
+  const withProfile: SetupStep[] = setup ? ["username", "photo"] : [];
   const { answers: a, set, clear } = useDraft();
   const submit = useSubmitQuiz();
   const [error, setError] = useState<string | null>(null);
@@ -88,12 +93,6 @@ export default function QuizStep() {
     setTimeout(() => next(), 180);
   }
 
-  const q =
-    id === "photo"
-      ? { title: "Your profile photo.", sub: "A clear photo of you. It sits on your member card." }
-      : id === "username"
-        ? { title: "Pick a username.", sub: "Lowercase letters, numbers, dots and underscores." }
-        : QUIZ_QUESTIONS[id];
   const ready = quiz ? stepReady(quiz.id, a) : true;
   const last = nextStepId(id, withProfile) === null;
 
@@ -108,27 +107,42 @@ export default function QuizStep() {
         </View>
       </View>
       <ScrollView contentContainerStyle={{ paddingHorizontal: 24, paddingBottom: insets.bottom + 120 }} keyboardShouldPersistTaps="handled">
-        <Animated.View entering={FadeInDown.duration(320)}>
-          <Eyebrow style={{ marginTop: 18 }}>{quiz?.section ?? "Your profile"}</Eyebrow>
-          <Head size={36} style={{ marginTop: 10 }}>
-            {q.title}
-          </Head>
-          {q.sub ? (
-            <Body dim style={{ marginTop: 10 }}>
-              {q.sub}
-            </Body>
-          ) : null}
-        </Animated.View>
-        <View style={{ marginTop: 24 }}>
-          <Answers id={id} a={a} pick={pick} set={set} />
-        </View>
+        {quiz ? (
+          <>
+            <Animated.View entering={FadeInDown.duration(320)}>
+              <Eyebrow style={{ marginTop: 18 }}>{quiz.section}</Eyebrow>
+              <Head size={36} style={{ marginTop: 10 }}>
+                {QUIZ_QUESTIONS[quiz.id].title}
+              </Head>
+              {QUIZ_QUESTIONS[quiz.id].sub ? (
+                <Body dim style={{ marginTop: 10 }}>
+                  {QUIZ_QUESTIONS[quiz.id].sub}
+                </Body>
+              ) : null}
+            </Animated.View>
+            <View style={{ marginTop: 24 }}>
+              <Answers id={quiz.id} a={a} pick={pick} set={set} />
+            </View>
+          </>
+        ) : (
+          <Animated.View entering={FadeInDown.duration(320)} style={{ marginTop: 18 }}>
+            <Eyebrow>Your profile</Eyebrow>
+            <View style={{ marginTop: 10 }}>
+              {id === "username" ? (
+                <UsernameStep ideas={setup?.ideas ?? []} initial={setup?.username} onDone={() => next()} />
+              ) : (
+                <PhotoStep seenBy="your coaches" initialUri={null} onDone={() => next()} />
+              )}
+            </View>
+          </Animated.View>
+        )}
         {error ? (
           <Body size={14} style={{ color: color.danger, marginTop: 14 }}>
             {error}
           </Body>
         ) : null}
       </ScrollView>
-      {!quiz?.autoAdvance ? (
+      {quiz && !quiz.autoAdvance ? (
         <View style={[styles.cta, { paddingBottom: insets.bottom + 16 }]}>
           <NextButton ready={ready || id === "nearby"} last={last} busy={submit.isPending} onNext={() => next(id === "nearby" ? { nearbyAnswered: true } : undefined)} />
         </View>
@@ -137,8 +151,6 @@ export default function QuizStep() {
   );
 }
 
-// The photo and the username are saved on their own screens and checked by
-// the server; the quiz's own screens need their answer first.
 function NextButton({ ready, last, busy, onNext }: { ready: boolean; last: boolean; busy: boolean; onNext: () => void }) {
   return <Button label={last ? "Finish" : "Next"} busy={busy} disabled={!ready} onPress={onNext} />;
 }
@@ -164,7 +176,7 @@ function Choice({ label, line, on, onPress, image }: { label: string; line?: str
   );
 }
 
-function Answers({ id, a, pick, set }: { id: StepId; a: QuizAnswers; pick: (p: Partial<QuizAnswers>) => void; set: (p: Partial<QuizAnswers>) => void }) {
+function Answers({ id, a, pick, set }: { id: QuizStepId; a: QuizAnswers; pick: (p: Partial<QuizAnswers>) => void; set: (p: Partial<QuizAnswers>) => void }) {
   switch (id) {
     case "gender":
       return (
@@ -282,10 +294,6 @@ function Answers({ id, a, pick, set }: { id: StepId; a: QuizAnswers; pick: (p: P
           <Field value={a.parentPhone} onChange={(parentPhone) => set({ parentPhone })} placeholder="Their phone" keyboard="phone-pad" />
         </View>
       );
-    case "photo":
-      return <PhotoStep />;
-    case "username":
-      return <UsernameStep />;
     default:
       return null;
   }
@@ -319,60 +327,6 @@ function Field({
   );
 }
 
-// The profile photo: picked or taken, cut square on the phone.
-function PhotoStep() {
-  const [uri, setUri] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  async function choose(camera: boolean) {
-    const res = camera
-      ? await ImagePicker.launchCameraAsync({ allowsEditing: true, aspect: [1, 1], quality: 0.9 })
-      : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], allowsEditing: true, aspect: [1, 1], quality: 0.9 });
-    if (res.canceled || !res.assets[0]) return;
-    setUri(res.assets[0].uri);
-    try {
-      await savePhoto(res.assets[0].uri);
-      setError(null);
-    } catch {
-      setError("That photo did not save. Try again.");
-    }
-  }
-  return (
-    <View style={{ alignItems: "center", gap: 14 }}>
-      <View style={styles.photo}>{uri ? <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" /> : null}</View>
-      <Button style={{ alignSelf: "stretch" }} quiet label="Take a photo" onPress={() => void choose(true)} />
-      <Button style={{ alignSelf: "stretch" }} quiet label="Choose from photos" onPress={() => void choose(false)} />
-      {error ? <Body style={{ color: color.danger }}>{error}</Body> : null}
-    </View>
-  );
-}
-
-function UsernameStep() {
-  const [value, setValue] = useState("");
-  const [msg, setMsg] = useState<string | null>(null);
-  return (
-    <View style={{ gap: 10 }}>
-      <TextInput
-        style={styles.input}
-        value={value}
-        onChangeText={(v) => {
-          const clean = v.toLowerCase().replace(/^@/, "");
-          setValue(clean);
-          setMsg(usernameShapeProblem(clean));
-        }}
-        onEndEditing={() => {
-          if (!usernameShapeProblem(value)) saveUsername(value).then(() => setMsg("Saved.")).catch((e) => setMsg(e instanceof ApiError ? e.message : "That username is taken. Try another."));
-        }}
-        placeholder="@username"
-        placeholderTextColor={color.faint}
-        autoCapitalize="none"
-        autoCorrect={false}
-        accessibilityLabel="Username"
-      />
-      {msg ? <Body dim size={13}>{msg}</Body> : null}
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   fill: { flex: 1, backgroundColor: color.black },
   head: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 14 },
@@ -391,5 +345,4 @@ const styles = StyleSheet.create({
   scaleWords: { flexDirection: "row", justifyContent: "space-between", marginTop: 6 },
   input: { minHeight: 56, borderRadius: 16, backgroundColor: color.fill, borderWidth: 1, borderColor: color.line, paddingHorizontal: 16, color: color.bone, fontFamily: font.body, fontSize: 16 },
   cta: { position: "absolute", left: 0, right: 0, bottom: 0, paddingHorizontal: 20, paddingTop: 12, backgroundColor: color.black },
-  photo: { width: 160, height: 160, borderRadius: 80, backgroundColor: color.fill2, overflow: "hidden" },
 });

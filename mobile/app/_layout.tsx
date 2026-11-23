@@ -30,7 +30,7 @@ function Gatekeeper() {
   const me = useMe();
   const segments = useSegments();
   const router = useRouter();
-  const area = ready ? areaFor(signedIn, me.data?.state) : null;
+  const area = ready ? areaFor(signedIn, me.data?.state, me.data?.profileSetup) : null;
 
   useEffect(() => {
     if (!area) return;
@@ -100,6 +100,7 @@ export default function RootLayout() {
               <Stack.Screen name="settings" />
               <Stack.Screen name="change-password" />
               <Stack.Screen name="delete-account" />
+              <Stack.Screen name="profile-setup" options={{ animation: "fade" }} />
             </Stack>
           </AuthProvider>
         </PersistQueryClientProvider>

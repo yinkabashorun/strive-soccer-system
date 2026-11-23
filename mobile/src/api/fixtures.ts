@@ -6,7 +6,7 @@ import { MEDIA_BASE } from "@/config";
 // (EXPO_PUBLIC_FIXTURES=1, browser build only; never on a phone). Names and
 // numbers are examples, the drills and their stills are the real bank's.
 // On the web the state can be chosen with ?state=ok|consent|onboarding|
-// membership|pro_checkout|signedout.
+// membership|pro_checkout|setup|signedout.
 
 function chosenState(): string {
   if (Platform.OS !== "web") return "ok";
@@ -244,7 +244,11 @@ export function fixtureBootstrap(): AppBootstrap {
       { key: "you", label: "You" },
     ],
     unread: 0,
-    profileSetup: null,
+    // ?state=setup: a member from before 081 who still owes both screens
+    profileSetup:
+      chosenState() === "setup"
+        ? { username: null, hasPhoto: false, photoUrl: null, steps: ["username", "photo"], ideas: ["marcus.b", "marcusbryant", "marcus_b"] }
+        : { username: "marcus.b", hasPhoto: false, photoUrl: null, steps: [], ideas: [] },
   };
 }
 
@@ -256,5 +260,6 @@ export function fixtureResponse(path: string, method: string): unknown {
   if (path.startsWith("/api/app/extra")) return method === "GET" ? FIXTURE_EXTRA : { ok: true, session: 5 };
   if (path.startsWith("/api/app/drill")) return { ok: true, totalMinutes: FIXTURE_WEEK.totalMinutes };
   if (path.startsWith("/api/app/first-week")) return { status: "live", line: null };
+  if (path.startsWith("/api/app/profile/username")) return { ok: true, name: "marcus.b" };
   return { ok: true };
 }

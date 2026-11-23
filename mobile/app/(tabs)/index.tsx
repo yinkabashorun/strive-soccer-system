@@ -10,6 +10,7 @@ import { keys, useMe, useWeek } from "@/api/queries";
 import { queryClient } from "@/api/queryClient";
 import { seenWeek } from "@/prefs";
 import { Screen } from "@/Screen";
+import { useMyPhoto } from "@/usePhoto";
 import { HERO_SHADE, Shade } from "@/Shade";
 import { Body, Button, Card, Disc, Eyebrow, Head, Icon, Label, Press, Ring, Skeleton } from "@/ui";
 import { color, radius } from "@/theme";
@@ -23,6 +24,7 @@ export default function Home() {
   const router = useRouter();
   const me = useMe();
   const week = useWeek();
+  const photo = useMyPhoto();
   const w = week.data;
 
   // The Monday drop, once per new week, before anything in it is done.
@@ -57,7 +59,11 @@ export default function Home() {
         <Press onPress={() => router.navigate("/you")} accessibilityLabel="You">
           <Ring size={58} stroke={4} value={doneShare} animate={false}>
             <View style={styles.initials}>
-              <Label size={14}>{initials(me.data?.viewer.name ?? "")}</Label>
+              {photo ? (
+                <Image source={photo} style={StyleSheet.absoluteFill} contentFit="cover" cachePolicy="disk" />
+              ) : (
+                <Label size={14}>{initials(me.data?.viewer.name ?? "")}</Label>
+              )}
             </View>
           </Ring>
         </Press>
@@ -225,7 +231,7 @@ function WeekComplete({ week, onCheckin }: { week: AppWeek; onCheckin: () => voi
 
 const styles = StyleSheet.create({
   top: { flexDirection: "row", alignItems: "flex-end", paddingHorizontal: 20, paddingTop: 44 },
-  initials: { width: 44, height: 44, borderRadius: 22, backgroundColor: "#1c1c1c", alignItems: "center", justifyContent: "center" },
+  initials: { width: 44, height: 44, borderRadius: 22, backgroundColor: "#1c1c1c", alignItems: "center", justifyContent: "center", overflow: "hidden" },
   hero: { marginHorizontal: 14, marginTop: 18, height: 452, borderRadius: radius.card, overflow: "hidden", backgroundColor: color.fill },
   heroIn: { position: "absolute", left: 0, right: 0, bottom: 0, padding: 20 },
   chips: { flexDirection: "row", gap: 8, marginTop: 12 },

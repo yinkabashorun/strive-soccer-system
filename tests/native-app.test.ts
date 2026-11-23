@@ -242,6 +242,11 @@ describe("the native shell (native/)", () => {
   it("is set up for native push", () => {
     expect(read("native/ios/App/App/App.entitlements")).toContain("aps-environment");
     expect(project).toContain("CODE_SIGN_ENTITLEMENTS = App/App.entitlements;");
+    // Automatic signing archives with a development identity and re-signs
+    // for distribution at export; a hard-coded distribution identity is
+    // refused ("conflicting provisioning settings", TestFlight run #3).
+    expect(project).not.toContain('CODE_SIGN_IDENTITY = "Apple Distribution";');
+    expect(project).toContain("CODE_SIGN_STYLE = Automatic;");
     const delegate = read("native/ios/App/App/AppDelegate.swift");
     expect(delegate).toContain("capacitorDidRegisterForRemoteNotifications");
     expect(delegate).toContain("capacitorDidFailToRegisterForRemoteNotifications");

@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { BookOpen, CalendarDays, Home, MessageSquare, UserRound, type LucideIcon } from "lucide-react";
 import { Wordmark } from "./Wordmark";
 import { NotificationBell } from "./NotificationBell";
 import { activeTab, type MemberTab } from "@/lib/elite/experience";
+import { entranceBetween, setEntrance } from "@/lib/elite/tab-motion";
 import { initials } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import type { EliteNotification } from "@/lib/elite/types";
@@ -28,15 +30,48 @@ export function MemberNav({
   name,
   weekDone,
   notifications,
+  photo = null,
 }: {
   tabs: MemberTab[];
   name: string;
-  // This week's sessions done, 0 to 1: the gold arc around the initials.
+  // This week's sessions done, 0 to 1: the gold arc around the photo.
   weekDone: number;
   notifications?: EliteNotification[];
+  // the member's own profile photo (081), else their initials
+  photo?: string | null;
 }) {
   const pathname = usePathname();
-  const lit = activeTab(pathname, tabs);
+  const router = useRouter();
+  const current = activeTab(pathname, tabs);
+  // The tab lights the moment a finger lands on it, not when the next
+  // screen has arrived (Nov 23 2026: "when im clicking things there is a
+  // delay"). Put back to the real tab once the screen has changed.
+  const [pressed, setPressed] = useState<string | null>(null);
+  useEffect(() => setPressed(null), [pathname]);
+  const lit = pressed ?? current;
+
+  // Every tab is fetched ahead, the moment the app opens and again when it
+  // comes back to the front, so the first tap on any of them is already on
+  // the phone (next.config.js staleTimes keeps it there).
+  const hrefs = tabs.map((t) => t.href).join("|");
+  useEffect(() => {
+    const all = hrefs.split("|").filter(Boolean);
+    const warm = () => all.forEach((h) => router.prefetch(h));
+    warm();
+    const onShow = () => {
+      if (document.visibilityState === "visible") warm();
+    };
+    document.addEventListener("visibilitychange", onShow);
+    return () => document.removeEventListener("visibilitychange", onShow);
+  }, [hrefs, router]);
+
+  const press = (href: string) => {
+    if (href === current) return;
+    setPressed(href);
+    const from = tabs.findIndex((t) => t.href === current);
+    const to = tabs.findIndex((t) => t.href === href);
+    setEntrance(entranceBetween(from, to, "tap"));
+  };
 
   return (
     <>
@@ -54,9 +89,12 @@ export function MemberNav({
               <Link
                 key={t.href}
                 href={t.href}
-                aria-current={on ? "page" : undefined}
+                prefetch
+                aria-current={t.href === current ? "page" : undefined}
+                data-lit={on ? "true" : undefined}
+                onPointerDown={() => press(t.href)}
                 className={cn(
-                  "flex min-h-[44px] items-center gap-3 rounded-xl px-3 text-[15px] font-semibold transition-colors",
+                  "no-press flex min-h-[44px] items-center gap-3 rounded-xl px-3 text-[15px] font-semibold transition-colors",
                   on ? "bg-white/[0.06] text-bone" : "text-white/55 hover:text-bone"
                 )}
               >
@@ -71,8 +109,8 @@ export function MemberNav({
       {/* Phone: the bell and the member's ring, top right */}
       <div className="pointer-events-none absolute right-3 top-[calc(env(safe-area-inset-top)+12px)] z-30 flex items-center gap-1 lg:hidden">
         <div className="pointer-events-auto">{notifications && <NotificationBell initial={notifications} />}</div>
-        <Link href="/you" aria-label="You" className="pointer-events-auto grid h-[52px] w-[52px] place-items-center">
-          <MemberRing name={name} done={weekDone} />
+        <Link href="/you" aria-label="You" onPointerDown={() => press("/you")} className="pointer-events-auto grid h-[52px] w-[52px] place-items-center">
+          <MemberRing name={name} done={weekDone} photo={photo} />
         </Link>
       </div>
 
@@ -92,12 +130,28 @@ export function MemberNav({
                 <Link
                   key={t.href}
                   href={t.href}
-                  aria-current={on ? "page" : undefined}
-                  className="flex min-h-[56px] flex-1 flex-col items-center justify-center pb-1"
+                  prefetch
+                  aria-current={t.href === current ? "page" : undefined}
+                  data-lit={on ? "true" : undefined}
+                  // pointerdown, not click: the tab answers as the finger lands
+                  onPointerDown={() => press(t.href)}
+                  // a finger that slides off the tab before it lifts did not choose it
+                  onPointerUp={(e) => {
+                    const r = e.currentTarget.getBoundingClientRect();
+                    if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) setPressed(null);
+                  }}
+                  onPointerCancel={() => setPressed(null)}
+                  className="no-press group flex min-h-[56px] flex-1 flex-col items-center justify-center pb-1"
                 >
-                  <Icon className={cn("h-6 w-6 transition-colors duration-150", on ? "text-bone" : "text-white/50")} strokeWidth={1.8} />
-                  <span className={cn("mt-1 text-[11.5px] font-semibold", on ? "text-bone" : "text-white/50")}>{t.label}</span>
-                  <span className={cn("mt-1 h-1 w-1 rounded-full", on ? "bg-gold" : "bg-transparent")} aria-hidden />
+                  <Icon
+                    className={cn(
+                      "h-6 w-6 transition-[color,transform] duration-150 ease-out group-active:scale-[0.86]",
+                      on ? "text-bone" : "text-white/50"
+                    )}
+                    strokeWidth={on ? 2.1 : 1.8}
+                  />
+                  <span className={cn("mt-1 text-[11.5px] font-semibold transition-colors duration-150", on ? "text-bone" : "text-white/50")}>{t.label}</span>
+                  <span className={cn("mt-1 h-1 w-1 rounded-full transition-[background-color,transform] duration-200", on ? "scale-100 bg-gold" : "scale-0 bg-transparent")} aria-hidden />
                 </Link>
               );
             })}
@@ -108,9 +162,9 @@ export function MemberNav({
   );
 }
 
-// The initials inside a ring that fills gold as the week's sessions are
+// The member's photo (or initials) inside a ring that fills gold as the week's sessions are
 // done. Only ever what was done: an empty ring is a fresh week.
-export function MemberRing({ name, done, size = 44 }: { name: string; done: number; size?: number }) {
+export function MemberRing({ name, done, size = 44, photo = null }: { name: string; done: number; size?: number; photo?: string | null }) {
   const r = 20;
   const c = 2 * Math.PI * r;
   const frac = Math.min(1, Math.max(0, done));
@@ -140,9 +194,16 @@ export function MemberRing({ name, done, size = 44 }: { name: string; done: numb
           />
         )}
       </svg>
-      <span className="grid h-[34px] w-[34px] place-items-center rounded-full bg-[linear-gradient(145deg,#262626,#141414)] text-[12px] font-semibold tracking-wide text-bone">
-        {initials(name)}
-      </span>
+      {photo ? (
+        // the member's own photo, from our own route: the same address for
+        // as long as the photo is the same, so it is loaded once
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={photo} alt="" decoding="async" className="rounded-full object-cover" style={{ width: Math.round(size * 0.773), height: Math.round(size * 0.773) }} />
+      ) : (
+        <span className="grid h-[34px] w-[34px] place-items-center rounded-full bg-[linear-gradient(145deg,#262626,#141414)] text-[12px] font-semibold tracking-wide text-bone">
+          {initials(name)}
+        </span>
+      )}
     </span>
   );
 }

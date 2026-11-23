@@ -10,6 +10,8 @@ import { fmtDuration, timeByArea, timeTrained } from "@/lib/elite/time-trained";
 import { TimeByArea } from "@/components/elite/TimeByArea";
 import { liveWeekFor } from "@/lib/elite/time";
 import { DEFAULT_DRILL_MIN } from "@/lib/elite/time-trained";
+import { photoAddress } from "@/lib/elite/account-profile";
+import { atName } from "@/lib/elite/username";
 
 export const metadata = { title: "You · Strive Elite" };
 
@@ -38,20 +40,35 @@ export default async function YouPage() {
   const bars = weeklyMinutes(homework, week, 7);
   const medals = hoursMedals(time.minutes, 4);
   const name = cardName(player.full_name);
+  // the @username, where they have one (081): it is how they show up
+  const handle = atName(viewer.setup.username);
 
   return (
     <div className="space-y-7">
       <header className="animate-tab-in pr-24">
         <h1 className="m-head text-[40px] leading-none">You</h1>
         <p className="mt-1.5 text-[13.5px] text-white/60">
-          {name}
+          {handle ?? name}
           {player.position ? ` · ${player.position}` : ""}
         </p>
       </header>
 
       {viewer.demo && <TourGuide page="progress" />}
 
-      <MemberCard name={name} since={memberSinceLabel(player.joined_at)} tier={cardTierLabel(player.tier)} />
+      <MemberCard
+        name={name}
+        since={memberSinceLabel(player.joined_at)}
+        tier={cardTierLabel(player.tier)}
+        photo={photoAddress(viewer.setup)}
+        handle={handle}
+      />
+
+      {viewer.setup.available && (
+        <Link href="/you/profile" className="m-card flex min-h-[56px] items-center justify-between px-4 text-[15px] font-semibold">
+          Edit profile
+          <ChevronRight className="h-5 w-5 text-white/55" aria-hidden />
+        </Link>
+      )}
 
       <section className="flex items-center gap-5" aria-label="Time trained">
         <GoldRing

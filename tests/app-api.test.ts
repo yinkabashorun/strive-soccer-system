@@ -126,6 +126,15 @@ vi.mock("@/app/api/elite/push/native/route", () => ({
     return new Response(JSON.stringify({ ok: true }), { status: 200 });
   },
 }));
+vi.mock("@/lib/elite/profile-actions", () => ({
+  checkUsername: async (n: string) => (s.calls.push({ fn: "checkUsername", args: [n] }), { ok: true, name: n }),
+  saveUsername: async (n: string) => (s.calls.push({ fn: "saveUsername", args: [n] }), { ok: true, name: n }),
+  myUsernameIdeas: async () => ["marcus.b"],
+}));
+vi.mock("@/app/api/elite/profile/photo/route", () => ({
+  GET: async () => (s.calls.push({ fn: "readPhoto", args: [] }), new Response("jpeg", { status: 200 })),
+  POST: async () => (s.calls.push({ fn: "storePhoto", args: [] }), new Response(JSON.stringify({ ok: true }), { status: 200 })),
+}));
 vi.mock("@/lib/elite/supabase/server", () => ({
   createClient: () => ({
     from: () => ({
@@ -158,6 +167,8 @@ const ROUTES = {
   pushToken: () => import("@/app/api/app/push-token/route"),
   accountDelete: () => import("@/app/api/app/account/delete/route"),
   accountPassword: () => import("@/app/api/app/account/password/route"),
+  username: () => import("@/app/api/app/profile/username/route"),
+  photo: () => import("@/app/api/app/profile/photo/route"),
 };
 
 // Every handler, its method and the access level it must declare.
@@ -176,6 +187,10 @@ const TABLE: { route: keyof typeof ROUTES; method: "GET" | "POST" | "DELETE"; ac
   { route: "pushToken", method: "DELETE", access: "player" },
   { route: "accountDelete", method: "POST", access: "account" },
   { route: "accountPassword", method: "POST", access: "account" },
+  { route: "username", method: "GET", access: "player" },
+  { route: "username", method: "POST", access: "player" },
+  { route: "photo", method: "GET", access: "player" },
+  { route: "photo", method: "POST", access: "player" },
 ];
 
 async function handler(route: keyof typeof ROUTES, method: string) {
@@ -359,6 +374,22 @@ describe("bodies are checked first", () => {
     const ok = await h(req("POST", { body: { guardian: true, terms: true, guardianName: "  Tatsiana   K " } }));
     expect(ok.status).toBe(200);
     expect(s.calls[0].args[0]).toMatchObject({ profileId: "u1", source: "in_app", guardianName: "Tatsiana K" });
+  });
+
+  it("username: a check or a save, through the website's own actions", async () => {
+    const h = await handler("username", "POST");
+    expect((await h(req("POST", { body: {} }))).status).toBe(400);
+    await h(req("POST", { body: { username: "Marcus.B", check: true } }));
+    await h(req("POST", { body: { username: "marcus.b" } }));
+    expect(s.calls.map((c) => c.fn)).toEqual(["checkUsername", "saveUsername"]);
+    const ideas = await (await (await handler("username", "GET"))(req("GET"))).json();
+    expect(ideas).toEqual({ ideas: ["marcus.b"] });
+  });
+
+  it("photo: the website's own route serves and stores it", async () => {
+    expect((await (await handler("photo", "GET"))(req("GET"))).status).toBe(200);
+    expect((await (await handler("photo", "POST"))(req("POST", { body: {} }))).status).toBe(200);
+    expect(s.calls.map((c) => c.fn)).toEqual(["readPhoto", "storePhoto"]);
   });
 
   it("password and delete pass the shared action's own answer through", async () => {

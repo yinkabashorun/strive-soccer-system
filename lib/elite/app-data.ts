@@ -14,7 +14,8 @@ import { settleBreaksForPlayer } from "./breaks-server";
 import { currentBreak } from "./breaks";
 import { programWeekFor } from "./program";
 import { liveWeekFor, nextMondayNY, nyToday } from "./time";
-import { unlockDueWeeks } from "./unlock";
+import { profileSetupDue, setupSteps } from "./account-profile";
+import { suggestUsernames } from "./account-profile-server";
 import { cardName, cardTierLabel, memberSinceLabel, memberTabs } from "./experience";
 import { AGREEMENT_POINTS, GUARDIAN_STATEMENT, LEGAL_VERSION, TERMS_STATEMENT } from "./legal";
 import { weekPayload, youPayload, type AppWeek, type AppYou } from "./app-payload";
@@ -24,9 +25,9 @@ import type { Viewer } from "./session";
 import type { Player } from "./types";
 
 export async function loadWeek(player: Player): Promise<AppWeek> {
-  // As the web member shell does on every open: weeks due to unlock flip,
-  // and a break that ended moves the program clock first.
-  await unlockDueWeeks().catch(() => undefined);
+  // As the web Home does on every open: a break that ended moves the
+  // program clock first. (The Monday unlock is the hourly builder's, never
+  // a member request's: tests/app-feel.test.ts.)
   const { week1Monday } = await settleBreaksForPlayer(player);
   const [homework, plans, breaks, program] = await Promise.all([
     getHomework(player.id),
@@ -106,6 +107,27 @@ export async function loadBootstrap(viewer: Viewer, state: MemberState, player: 
       : null,
     tabs: memberTabs(player?.tier).map((t) => ({ key: TAB_KEY[t.href] ?? t.href, label: t.label })),
     unread,
-    profileSetup: null,
+    profileSetup: await profileSetupFor(viewer),
+  };
+}
+
+// The photo and @username (081) as the phone needs them: what is owed, in
+// the website's order, ideas while the username is owed, and the photo at
+// our own address (fetched with the bearer token, kept while it is the
+// same photo). Null while 081 is not applied: ask nothing, refuse nothing.
+async function profileSetupFor(viewer: Viewer): Promise<AppBootstrap["profileSetup"]> {
+  const setup = viewer.setup;
+  if (!setup.available) return null;
+  const steps = setupSteps(setup);
+  const ideas =
+    profileSetupDue(setup) && !setup.username
+      ? await suggestUsernames(viewer.profile.id, viewer.profile.full_name).catch(() => [])
+      : [];
+  return {
+    username: setup.username,
+    hasPhoto: setup.hasPhoto,
+    photoUrl: setup.photoKey ? `${APP_URL}/api/app/profile/photo?v=${setup.photoKey}` : null,
+    steps,
+    ideas,
   };
 }

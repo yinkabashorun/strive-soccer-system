@@ -685,6 +685,10 @@ describe("free accounts are invisible to everything a member query reads", () =>
     "lib/elite/waitlist-server.ts",
     // the daily pull (078): who posted today, for a friend's notification
     "lib/elite/free-notices-server.ts",
+    // the one profile photo of every account (081): it lives in the
+    // tracker-posts bucket, and before 081 a free account's pointer is
+    // still read from elite_trackers
+    "lib/elite/account-profile-server.ts",
   ]);
   // (the post route stores nothing itself: it hands a checked photo to
   // savePost in tracker-server.ts)
@@ -1000,7 +1004,6 @@ describe("friends", () => {
       "newClubLink",
       "removeClubMember",
       "removeFriend",
-      "removeMyPhoto",
       "removePost",
       "removeProfilePhoto",
       "renameClub",

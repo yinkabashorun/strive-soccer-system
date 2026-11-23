@@ -14,5 +14,8 @@ export const POST = appRoute({ name: "onboarding", access: "player", limit: 10 }
   const missing = firstUnanswered(answers);
   if (missing !== -1) return appJson({ ok: false, error: "unanswered", step: missing }, 400);
   const res = await completeOnboarding(quizInput(answers));
-  return res.ok ? { ok: true } : appJson({ ok: false, error: "not_saved" }, 500);
+  if (res.ok) return { ok: true };
+  // The photo and @username (081) come first; the action says so itself.
+  if ("needsSetup" in res && res.needsSetup) return appJson({ ok: false, error: res.error, needsSetup: true }, 409);
+  return appJson({ ok: false, error: "not_saved" }, 500);
 });

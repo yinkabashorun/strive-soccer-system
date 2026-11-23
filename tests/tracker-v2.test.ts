@@ -103,16 +103,19 @@ describe("profile photos", () => {
   });
 
   it("the upload checks the account, the size and that it is a JPEG, and is never public", () => {
-    const route = code("app/api/elite/tracker/avatar/route.ts");
+    const route = code("app/api/elite/profile/photo/route.ts");
     expect(route).toContain("AVATAR_MAX_BYTES");
     expect(route).toContain("cleanJpeg(");
     expect(route).toContain("rateLimit(");
     const server = code("lib/elite/tracker-server.ts");
     expect(server).not.toMatch(/getPublicUrl/);
-    // a photo is signed only for the ids the caller was allowed to show
-    const avatars = server.slice(server.indexOf("async function avatarsOf("), server.indexOf("export async function saveAvatar("));
-    expect(avatars).toContain("ownsAvatarPath(");
-    expect(avatars).toContain("signPhotos(");
+    // a photo is signed only for the ids the caller was allowed to show:
+    // one photo per account, members and free alike (081)
+    expect(server).toMatch(/export async function avatarsOf\(admin: Admin, ids: string\[\]\)[^{]*\{\s*return avatarUrlsOf\(admin, ids\);/);
+    const shared = code("lib/elite/account-profile-server.ts");
+    expect(shared).not.toMatch(/getPublicUrl/);
+    expect(shared).toContain("ownsAvatarPath(");
+    expect(shared).toContain("createSignedUrls(");
   });
 
   it("a friend reports it from the profile, a coach removes it", () => {
@@ -125,9 +128,16 @@ describe("profile photos", () => {
     expect(read("supabase/migrations/069_free_training_log.sql")).toContain("check (what in ('line', 'photo'))");
   });
 
-  it("is never asked for at sign-up", () => {
+  it("is asked for right after sign-up, once the account exists, and is required (Nov 23 2026)", () => {
+    // the join form itself takes no file: a photo needs the account's own
+    // folder, so it is the first screen after it (the free layout's gate)
     const join = code("components/elite/JoinForm.tsx");
     expect(join).not.toMatch(/avatar|type="file"/i);
+    const layout = code("app/(free)/layout.tsx");
+    expect(layout).toContain("profileSetupDue(viewer.setup)");
+    expect(layout.indexOf("<ProfileSetupScreen")).toBeLessThan(layout.indexOf("<FreeShell"));
+    // there is no way for a player to take their own photo off
+    expect(code("components/elite/ProfilePhotoPicker.tsx")).not.toMatch(/Remove photo|removeMyPhoto/);
   });
 
   it("a visitor who is not signed in never sees anyone's photo on the invite", () => {
@@ -298,7 +308,9 @@ describe("the redrawn screens keep the house rules", () => {
 
   it("Settings is the free account's own; a member's Account page keeps no free-app setting", () => {
     const account = code("app/account/page.tsx");
-    expect(account).toContain("if (tracker && !(await consentDue(viewer.profile.id))) redirect(FREE_SETTINGS);");
+    // it stays on Account only while new terms or the photo and username
+    // (081) are owed, so it can still sign out or delete
+    expect(account).toContain("if (tracker && !profileSetupDue(viewer.setup) && !(await consentDue(viewer.profile.id))) redirect(FREE_SETTINGS);");
     expect(account).not.toMatch(/BlockedList|PlayingForField|FREE_QUIZ|FREE_DAYS/);
     const settings = code("components/elite/FreeSettings.tsx");
     for (const s of ["Weekly target", "My training days", "Send my link", "Blocked", "Support", "Privacy and terms", "Sign out", "Delete my account"]) {

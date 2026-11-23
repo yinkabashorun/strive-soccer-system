@@ -37,10 +37,21 @@ export type AppBootstrap = {
   // From memberTabs (lib/elite/experience.ts): home, week, courses, coach, you.
   tabs: { key: string; label: string }[];
   unread: number;
-  // The required profile photo and @username (migration 081, built on the
-  // website branch claude/app-feel-native). Null until that lands: the
-  // phone then skips those two onboarding screens.
-  profileSetup: null | { photoUrl: string | null; username: string | null; photoRequired: boolean; usernameRequired: boolean };
+  // The required profile photo and @username (migration 081,
+  // lib/elite/account-profile.ts). Null while 081 is not applied (or the
+  // profile row could not be read): then nothing is asked and nothing is
+  // refused, exactly as on the website.
+  profileSetup: null | {
+    username: string | null;
+    hasPhoto: boolean;
+    // our own address for the photo, fetched with the bearer token; the
+    // same for as long as the photo is the same
+    photoUrl: string | null;
+    // the screens still owed, in order (username first, then the photo)
+    steps: ("username" | "photo")[];
+    // a few usernames to offer, when the username is still owed
+    ideas: string[];
+  };
 };
 
 export type AppPickRow = { id: string; title: string; minutes: number; poster: string | null; doneBefore: boolean };
@@ -71,4 +82,8 @@ export const APP_API = {
   pushToken: "/api/app/push-token",
   accountDelete: "/api/app/account/delete",
   accountPassword: "/api/app/account/password",
+  username: "/api/app/profile/username",
+  photo: "/api/app/profile/photo",
 } as const;
+
+export type AppUsernameAnswer = { ok: true; name: string } | { ok: false; name: string; error: string; taken?: boolean };

@@ -52,8 +52,9 @@ export async function deleteOwnAccount(password: string): Promise<{ error: strin
   // with the login (on delete cascade). Known now, while it still exists,
   // so the coaches' text says the right thing.
   const free = viewer.role === "player" && !viewer.playerId && (await hasTracker(user.id));
-  // and its posted photos, which do not leave by cascade
-  if (free) await removeTrackerFiles(user.id);
+  // and its posted photos and its profile photo (every account has one,
+  // 081, in this same folder), which do not leave by cascade
+  await removeTrackerFiles(user.id);
 
   const { error } = await admin.auth.admin.deleteUser(user.id);
   if (error) {

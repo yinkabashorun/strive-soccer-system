@@ -49,8 +49,9 @@ describe("a stored photo", () => {
   });
 
   it("is cleaned on both upload routes before anything is stored", () => {
-    for (const r of ["post", "avatar"]) {
-      const route = read(`app/api/elite/tracker/${r}/route.ts`);
+    // the post route, and the one profile photo route for every account (081)
+    for (const r of ["app/api/elite/tracker/post/route.ts", "app/api/elite/profile/photo/route.ts"]) {
+      const route = read(r);
       expect(route, r).toContain("cleanJpeg(new Uint8Array(await file.arrayBuffer()))");
       expect(route, r).not.toContain("looksLikeJpeg(photo)");
     }

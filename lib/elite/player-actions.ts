@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { SETUP_REFUSED, profileSetupDue } from "./account-profile";
 import { createClient, createServiceClient } from "./supabase/server";
 import { getViewer } from "./session";
 import { maybeAwardAchievements } from "./achievements";
@@ -28,6 +29,10 @@ export async function completeOnboarding(input: OnboardingInput) {
   const viewer = await getViewer();
   if (!viewer?.playerId) return { ok: false as const };
   if (viewer.demo) return { ok: true as const }; // demo: nothing to persist
+  // The profile photo and @username come first (081, both required): a
+  // finished onboarding without them is refused here, not only on the
+  // phone. Before 081 is applied nothing is owed (account-profile.ts).
+  if (profileSetupDue(viewer.setup)) return { ok: false as const, needsSetup: true as const, error: SETUP_REFUSED };
 
   const admin = createServiceClient();
   if (!admin) return { ok: false as const };

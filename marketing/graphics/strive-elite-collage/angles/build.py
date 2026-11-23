@@ -1,5 +1,5 @@
-"""Writes the 5v5 co-post carousel, Baltimore County vs Northern Virginia
-(01.html to 08.html; Coach Yinka Nov 22: most players are Baltimore County vs NoVA). Render each with
+"""Writes the 5v5 co-post carousel, Maryland vs Virginia
+(01.html to 08.html; Coach Yinka Nov 22 and 23). Render each with
 node ../render.mjs 2 NN.png angles/NN.html from the folder above."""
 HEAD = """<!doctype html><html><head><meta charset="utf-8"><link rel="stylesheet" href="style.css"><style>{css}</style></head>
 <body><div class="stage">{bg}<div class="vig"></div>
@@ -28,14 +28,14 @@ pages = {}
 pages['01'] = dict(bg=STAD, css="", body=f"""
 <div class="big white" style="top:135px;font-size:122px;white-space:nowrap">WALK IN YO TRAP.</div>
 <div class="big gold" style="top:255px;font-size:122px;white-space:nowrap">TAKE OVER YO TRAP.</div>
-<div class="line" style="top:398px;font-size:30px">Virginia is coming to Maryland. Dec 21.</div>
+<div class="line" style="top:398px;font-size:30px">Virginia is pulling up to Maryland. Dec 21.</div>
 {VA}<div class="fade"></div>""")
 
 pages['02'] = dict(bg=STAD, css="", body=f"""
 <div class="big white" style="top:125px;font-size:118px">IT'S IN YOUR</div>
 <div class="big gold" style="top:228px;font-size:168px">BACKYARD,</div>
-<div class="big white" style="top:375px;font-size:118px">BALTIMORE.</div>
-<div class="line" style="top:500px;font-size:30px;letter-spacing:1px">No long drive. No away crowd. <b style="color:#efd287">No excuses.</b></div>
+<div class="big white" style="top:375px;font-size:118px">MARYLAND.</div>
+<div class="line" style="top:500px;font-size:30px;letter-spacing:1px">Home field. Home crowd. <b style="color:#efd287">No excuses.</b></div>
 {MD}<div class="fade"></div>""")
 
 pages['03'] = dict(bg='', css="""
@@ -51,7 +51,7 @@ pages['03'] = dict(bg='', css="""
 """, body="""
 <div class="poster">
  <div class="w" style="top:50px;font-size:170px;letter-spacing:10px">WANTED</div>
- <div class="w" style="top:262px;font-size:30px;letter-spacing:4px">ONE BALTIMORE TEAM THAT CAN HANG</div>
+ <div class="w" style="top:262px;font-size:30px;letter-spacing:4px">ONE MARYLAND TEAM THAT CAN HANG</div>
  <div style="position:absolute;left:230px;top:318px;width:320px;height:320px;border:3px solid #2a1d0a;background:rgba(42,29,10,.12)"></div>
  <div class="w" style="top:345px;font-size:230px;line-height:1;opacity:.85">?</div>
  <div class="w" style="top:665px;font-size:38px;letter-spacing:10px">REWARD</div>
@@ -72,10 +72,10 @@ pages['04'] = dict(bg=STAD, css="""
 <div class="big white" style="top:120px;font-size:92px;white-space:nowrap">&ldquo;THE AVERAGE MIAA TEAM</div>
 <div class="big gold" style="top:222px;font-size:220px">WIPES</div>
 <div class="big white" style="top:410px;font-size:84px;white-space:nowrap">ANY NOVA PUBLIC SCHOOL.&rdquo;</div>
-<div class="line" style="top:520px;font-size:24px;letter-spacing:3px;color:#cfc2a0">THE MIAA SIDE, LOUD AND CLEAR.</div>
+<div class="line" style="top:520px;font-size:24px;letter-spacing:3px;color:#cfc2a0">MARYLAND SAID IT. NOT US.</div>
 <div class="card"><img src="../cutouts5/loyola-card.jpg"><div class="cap">EXHIBIT A</div></div>
 <img class="p" src="../cutouts5/j1.png" style="left:610px;top:450px;height:690px;z-index:12;filter:drop-shadow(0 24px 30px rgba(0,0,0,.85)) contrast(1.08)">
-<div class="bub" style="left:40px;top:575px;transform:rotate(-6deg)">MIAA runs the DMV</div>
+<div class="bub" style="left:40px;top:575px;transform:rotate(-6deg)">Maryland runs the DMV</div>
 <div class="bub" style="left:700px;top:1120px;transform:rotate(4deg)">them NoVA boys phony</div>
 <div class="line" style="top:1225px;font-size:30px;font-weight:700;letter-spacing:5px;z-index:15">DEC 21 WE FIND OUT.</div>
 """)
@@ -87,12 +87,12 @@ pages['05'] = dict(bg=STAD, css="""
  color:#f1e9d6;background:rgba(5,5,5,.82);border:1px solid rgba(200,168,88,.5);border-radius:40px;padding:16px 34px}
 """, body="""
 <div class="line" style="top:130px;font-size:34px;font-weight:700;letter-spacing:14px;color:#c8a858">PREDICTION:</div>
-<div class="big white" style="top:190px;font-size:200px">NOVA</div>
-<div class="big gold" style="top:345px;font-size:216px">SWEEPS.</div>
+<div class="big white" style="top:195px;font-size:172px">VIRGINIA</div>
+<div class="big gold" style="top:350px;font-size:200px">SWEEPS.</div>
 <img class="p" src="../cutouts5/v2.png" style="left:-40px;top:560px;width:1160px;z-index:6">
 <div class="stamp">SAVED FOR DEC 21</div>
 <div class="fade" style="height:240px;z-index:20;background:linear-gradient(to bottom,rgba(5,5,5,0),rgba(5,5,5,.92) 70%)"></div>
-<div class="pill">Screenshot this, Baltimore. <b style="color:#efd287">Prove us wrong.</b></div>
+<div class="pill">Screenshot this, Maryland. <b style="color:#efd287">Prove us wrong.</b></div>
 """)
 
 pages['06'] = dict(bg='', css="""
@@ -115,13 +115,13 @@ pages['06'] = dict(bg='', css="""
 <div class="big gold" style="top:200px;font-size:72px;line-height:1">HAS HAD THIS ARGUMENT.</div>
 <div class="phone"><div class="top"><div class="av">DMV</div><div class="nm">the DMV chat</div></div>
 <div class="msgs">
- <div class="who">BALTIMORE</div><div class="m l">Baltimore &gt; NoVA no debate</div>
- <div class="who" style="text-align:right;margin-right:14px">NOVA</div><div class="m r">bet</div>
+ <div class="who">MARYLAND</div><div class="m l">Maryland &gt; Virginia. not even close</div>
+ <div class="who" style="text-align:right;margin-right:14px">VIRGINIA</div><div class="m r">bet</div>
  <div class="m r">$3,000 says prove it. Dec 21, SoFive Columbia</div>
  <div class="seen">Seen 9:41 PM</div>
- <div class="who">BALTIMORE</div><div class="typing"><i></i><i style="opacity:.7"></i><i style="opacity:.4"></i></div>
+ <div class="who">MARYLAND</div><div class="typing"><i></i><i style="opacity:.7"></i><i style="opacity:.4"></i></div>
 </div></div>
-<div class="line" style="top:1160px;font-size:30px;font-weight:600;letter-spacing:6px;z-index:31">DEC 21 ENDS IT.</div>
+<div class="line" style="top:1160px;font-size:30px;font-weight:600;letter-spacing:6px;z-index:31">STILL TYPING. DEC 21 SETTLES IT.</div>
 """)
 
 pages['07'] = dict(bg=STAD, css="""
@@ -141,7 +141,7 @@ pages['07'] = dict(bg=STAD, css="""
 </div>
 <img class="p" src="../cutouts5/v1.png" style="left:230px;top:500px;width:620px;z-index:11">
 <div class="fade" style="height:330px"></div>
-<div class="line" style="top:1090px;font-size:32px">So when Baltimore loses, <b style="color:#efd287">there's film.</b></div>
+<div class="line" style="top:1090px;font-size:32px">Every game on camera. So when Maryland loses, <b style="color:#efd287">there's proof.</b></div>
 """)
 
 CLOSE = dict(bg=STAD, css="""
@@ -153,13 +153,13 @@ CLOSE = dict(bg=STAD, css="""
 <div class="big gold" style="top:250px;font-size:150px">THE DMV?</div>
 <img class="tro" src="../trophy/photo-trophy-short.png">
 <div class="fade" style="height:520px"></div>
-<div class="row" style="top:900px;font-size:26px;letter-spacing:6px;color:#e9d9ad">MARYLAND VS VIRGINIA</div>
-<div class="row" style="top:950px;font-size:30px">3 games minimum. Every game recorded.</div>
+<div class="row" style="top:900px;font-size:26px;letter-spacing:6px;color:#e9d9ad">MARYLAND VS VIRGINIA. <b style="color:#efd287">PICK YOUR SIDE.</b></div>
+<div class="row" style="top:950px;font-size:30px">32 teams. 3 games minimum. Every game recorded.</div>
 <div class="row" style="top:995px;font-size:30px">Early bird <b style="color:#efd287">$450 a team</b> through Nov 25.</div>
 <div class="row" style="top:1040px;font-size:30px">Follow <b style="color:#efd287">@strivesoccerfc</b> for the schedule.</div>
 """)
-SWIPE = ('<div style="position:absolute;left:56px;right:120px;bottom:56px;z-index:30;display:flex;justify-content:space-between;'
-         'font-family:Inter;font-weight:600;font-size:20px;letter-spacing:6px;color:#cfc2a0"><span>{n} / 8</span>'
+SWIPE = ('<div style="position:absolute;left:56px;right:120px;bottom:56px;z-index:30;display:flex;justify-content:flex-end;'
+         'font-family:Inter;font-weight:600;font-size:20px;letter-spacing:6px;color:#cfc2a0">'
          '<span style="color:#c8a858">SWIPE &rarr;</span></div>')
 FULL = ('<div class="foot" style="bottom:44px;height:auto"><div class="prize"><b>$3,000</b> CASH<span style="color:#c8a858;margin:0 18px">•</span>32 TEAMS</div>'
         '<div class="meta">MON, DEC 21<i>•</i>SOFIVE COLUMBIA</div><div class="url">THESTRIVEAPP.COM/5V5</div></div>')

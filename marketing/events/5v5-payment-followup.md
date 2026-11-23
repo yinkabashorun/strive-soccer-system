@@ -12,7 +12,7 @@ page loads by script, so the amount could not be read from here.
 
 1. **Custom value** `5v5_payment_link` (Settings > Custom Values), set to the
    link above. Every text below uses `{{custom_values.5v5_payment_link}}`.
-   On **Thu Nov 26**, change this value to the $550 link. Every text picks up
+   On **Wed Dec 2**, change this value to the $550 link. Every text picks up
    the new link at once, including texts already scheduled.
 2. **Tags:** `5v5-registered` and `5v5-paid`.
 3. **Marking a team paid:** a Stripe Payment Link does not tell GHL when it
@@ -41,7 +41,7 @@ paid team.
 5. Wait 2 days.
 6. **SMS 3:**
    > Quick one {{contact.first_name}}, still want {{TEAM NAME FIELD}} in the 5v5? If anything is holding you up, just reply here. Payment link: {{custom_values.5v5_payment_link}}
-7. Wait until **Wed Nov 25, 10:00 AM ET**. If the contact registers after
+7. Wait until **Tue Dec 1, 10:00 AM ET**. If the contact registers after
    this time, the step is skipped.
 8. **SMS 4, early bird last day:**
    > Early bird for the Strive Elite 5v5 ends tonight at midnight. $450 per team today, $550 from tomorrow: {{custom_values.5v5_payment_link}}
@@ -50,7 +50,7 @@ paid team.
     > Registration for the Strive Elite 5v5 closes tomorrow, Sat, Dec 5. Pay here to lock your spot: {{custom_values.5v5_payment_link}}
 
 In GHL, set "Wait until a specific date" to skip the step if that date has
-passed. Otherwise a team that registers on Nov 27 would get the early bird
+passed. Otherwise a team that registers on Dec 3 would get the early bird
 text.
 
 ## Workflow 2: "5v5 paid > confirmation"
@@ -64,7 +64,7 @@ text.
 
 - `{{TEAM NAME FIELD}}`: insert the team name field from your form with
   GHL's field picker. Its key is set in GHL, not here.
-- Texts follow the page: 32 teams, $450 through Nov 25, $550 from Nov 26,
+- Texts follow the page: 32 teams, $450 through Dec 1, $550 from Dec 2,
   closes Dec 5, and a spot is held only once paid. No emojis, no em dashes,
   no price beyond those two.
 - Replies land in GHL Conversations. Answer them there.

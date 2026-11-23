@@ -21,8 +21,9 @@ export const FIVE_V_FIVE = {
   coverage: "@yslofficial", // the event is picked up by YSL Official
   earlyBird: 450,
   standard: 550,
-  // Early bird ends the instant Nov 26 starts in New York.
-  earlyBirdEndsIso: nyLocalToIso("2026-11-26", "00:00"),
+  // Early bird ends the instant Dec 2 starts in New York (moved from
+  // Nov 26 on Coach Yinka's word Nov 23: "put early bird december 1st").
+  earlyBirdEndsIso: nyLocalToIso("2026-12-02", "00:00"),
   // Final deadline: the whole of Dec 5 counts, so it closes as Dec 6 starts.
   registrationClosesIso: nyLocalToIso("2026-12-06", "00:00"),
   dmWord: "5V5",

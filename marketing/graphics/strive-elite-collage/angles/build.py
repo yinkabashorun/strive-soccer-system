@@ -155,7 +155,7 @@ CLOSE = dict(bg=STAD, css="""
 <div class="fade" style="height:520px"></div>
 <div class="row" style="top:900px;font-size:26px;letter-spacing:6px;color:#e9d9ad">MARYLAND VS VIRGINIA. <b style="color:#efd287">PICK YOUR SIDE.</b></div>
 <div class="row" style="top:950px;font-size:30px">32 teams. 3 games minimum. Every game recorded.</div>
-<div class="row" style="top:995px;font-size:30px">Early bird <b style="color:#efd287">$450 a team</b> through Nov 25.</div>
+<div class="row" style="top:995px;font-size:30px">Early bird <b style="color:#efd287">$450 a team</b> through Dec 1.</div>
 <div class="row" style="top:1040px;font-size:30px">Follow <b style="color:#efd287">@strivesoccerfc</b> for the schedule.</div>
 """)
 SWIPE = ('<div style="position:absolute;left:56px;right:120px;bottom:56px;z-index:30;display:flex;justify-content:flex-end;'

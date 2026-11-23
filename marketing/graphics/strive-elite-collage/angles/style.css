@@ -28,7 +28,3 @@ body{width:1080px;height:1350px;overflow:hidden;background:#050505}
 .meta{font-family:'Inter',sans-serif;font-weight:600;font-size:18px;letter-spacing:5px;padding-left:5px;color:#cfc2a0;margin-top:10px}
 .url{font-family:'Inter',sans-serif;font-weight:700;font-size:20px;letter-spacing:6px;padding-left:6px;color:#c8a858;margin-top:12px}
 .logo{position:absolute;right:40px;bottom:40px;width:44px;filter:invert(1);mix-blend-mode:screen;opacity:.95;z-index:31}
-.mdfull{position:absolute;inset:0;z-index:0;background:url(mdflag.svg) -200px -40px/2200px auto no-repeat;filter:brightness(.38) saturate(.9)}
-.vafull{position:absolute;inset:0;z-index:0;background:repeating-linear-gradient(115deg,rgba(255,255,255,.035) 0 2px,transparent 2px 26px),
- radial-gradient(ellipse 70% 60% at 50% 45%,#1d4a9e 0%,#0b2a66 45%,#03102b 100%)}
-.tshade{position:absolute;left:0;right:0;top:0;height:640px;z-index:1;background:linear-gradient(180deg,rgba(3,3,3,.9) 0%,rgba(3,3,3,.7) 55%,rgba(3,3,3,0) 100%)}

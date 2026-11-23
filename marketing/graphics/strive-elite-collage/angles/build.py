@@ -25,51 +25,20 @@ MD = MD.replace('../cutouts4/../cutouts3', '../cutouts3')
 
 pages = {}
 
-SPLIT_CSS = """
-.mdside{position:absolute;inset:0;z-index:1;clip-path:polygon(0 0,{tx}px 0,{bx}px 1350px,0 1350px);
- background:url(mdflag.svg) {fx}px {fy}px/{fw}px auto no-repeat;filter:brightness(.42) saturate(.9)}
-.vaside{position:absolute;inset:0;z-index:1;clip-path:polygon({tx}px 0,1080px 0,1080px 1350px,{bx}px 1350px);
- background:repeating-linear-gradient(115deg,rgba(255,255,255,.035) 0 2px,transparent 2px 26px),
- radial-gradient(ellipse 70% 60% at 75% 45%,#1d4a9e 0%,#0b2a66 45%,#03102b 100%)}
-.seam{position:absolute;inset:0;z-index:2;background:linear-gradient(transparent,transparent);
- clip-path:polygon({tx}px 0,{tx2}px 0,{bx2}px 1350px,{bx}px 1350px);background:linear-gradient(180deg,#fff6d8,#c8a858 50%,#8a6420)}
-.side{position:absolute;z-index:6;font-family:'Oswald',sans-serif;font-weight:700;letter-spacing:6px;text-transform:uppercase;
- -webkit-text-stroke:2px rgba(255,255,255,.55);color:transparent;line-height:1}
-.topshade{position:absolute;left:0;right:0;top:0;height:560px;z-index:3;background:linear-gradient(180deg,rgba(3,3,3,.92) 0%,rgba(3,3,3,.75) 55%,rgba(3,3,3,0) 100%)}
-.bust{-webkit-mask-image:linear-gradient(180deg,#000 80%,transparent 99%);mask-image:linear-gradient(180deg,#000 80%,transparent 99%)}
-.vs{position:absolute;z-index:26;font-family:'Oswald',sans-serif;font-weight:700;font-size:210px;line-height:1;
- background:linear-gradient(180deg,#fff6d8 0%,#efd287 40%,#c39a3c 80%,#8a6420 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
- filter:drop-shadow(0 0 30px rgba(232,190,90,.45)) drop-shadow(0 10px 20px rgba(0,0,0,.95))}
-"""
-def split_css(tx, bx, fx=-60, fy=0, fw=1500):
-    return (SPLIT_CSS.replace('{tx2}', str(tx+6)).replace('{bx2}', str(bx+6))
-            .replace('{tx}', str(tx)).replace('{bx}', str(bx))
-            .replace('{fx}', str(fx)).replace('{fy}', str(fy)).replace('{fw}', str(fw)))
-SPLIT = '<div class="mdside"></div><div class="vaside"></div><div class="seam"></div>'
+pages['01'] = dict(bg=STAD, css="", body=f"""
+<div class="big white" style="top:135px;font-size:122px;white-space:nowrap">WALK IN YO TRAP.</div>
+<div class="big gold" style="top:255px;font-size:122px;white-space:nowrap">TAKE OVER YO TRAP.</div>
+<div class="line" style="top:398px;font-size:30px">Virginia is pulling up to Maryland. Dec 21.</div>
+{VA}<div class="fade"></div>""")
 
-pages['01'] = dict(bg='', css=split_css(640, 440, fx=-120, fy=-40, fw=2100), body=f"""{SPLIT}
-<div class="big white" style="top:118px;font-size:122px;white-space:nowrap">WALK IN YO TRAP.</div>
-<div class="big gold" style="top:236px;font-size:122px;white-space:nowrap">TAKE OVER YO TRAP.</div>
-<div class="side" style="left:40px;top:395px;font-size:66px">MARYLAND</div>
-<div class="side" style="right:40px;top:395px;font-size:66px;text-align:right">VIRGINIA</div>
-<div class="topshade"></div>
-<img class="p bust" src="../cutouts4/m1.png" style="left:-70px;top:480px;height:620px;z-index:4">
-<img class="p" src="../cutouts4/m2.png" style="left:150px;top:545px;height:620px;z-index:7">
-<img class="p bust" src="../cutouts3/b3.png" style="left:600px;top:470px;height:620px;z-index:4">
-<img class="p" src="../cutouts3/b4n.png" style="left:510px;top:670px;height:495px;z-index:7">
-<div class="vs" style="left:428px;top:600px">VS</div>
-<div class="fade" style="height:200px;z-index:20;background:linear-gradient(to bottom,rgba(5,5,5,0),rgba(5,5,5,.9) 55%)"></div>
-<div class="line" style="top:1195px;font-size:30px;font-weight:600;letter-spacing:4px;z-index:25">VIRGINIA IS PULLING UP TO MARYLAND. DEC 21.</div>
-""")
-
-pages['02'] = dict(bg='<div class="mdfull"></div><div class="tshade"></div>', css="", body=f"""
+pages['02'] = dict(bg=STAD, css="", body=f"""
 <div class="big white" style="top:125px;font-size:118px">IT'S IN YOUR</div>
 <div class="big gold" style="top:228px;font-size:168px">BACKYARD,</div>
 <div class="big white" style="top:375px;font-size:118px">MARYLAND.</div>
 <div class="line" style="top:500px;font-size:30px;letter-spacing:1px">Home field. Home crowd. <b style="color:#efd287">No excuses.</b></div>
 {MD}<div class="fade"></div>""")
 
-pages['03'] = dict(bg='<div class="mdfull"></div>', css="""
+pages['03'] = dict(bg='', css="""
 .poster{position:absolute;left:150px;top:120px;width:780px;height:1000px;z-index:10;
  background:radial-gradient(ellipse at 50% 40%,#e9d7a6 0%,#d8bf83 55%,#a88a4e 100%);
  box-shadow:0 40px 80px rgba(0,0,0,.85),inset 0 0 120px rgba(90,60,20,.55);transform:rotate(-1.5deg)}
@@ -92,7 +61,7 @@ pages['03'] = dict(bg='<div class="mdfull"></div>', css="""
 <div class="pin" style="left:178px;top:140px"></div><div class="pin" style="left:880px;top:122px"></div>
 """)
 
-pages['04'] = dict(bg='<div class="mdfull"></div><div class="tshade"></div>', css="""
+pages['04'] = dict(bg=STAD, css="""
 .bub{position:absolute;z-index:14;font-family:'Inter',sans-serif;font-weight:600;color:#f1e9d6;background:rgba(40,36,30,.88);
  border:1px solid rgba(200,168,88,.45);border-radius:28px;padding:14px 24px;font-size:26px;box-shadow:0 10px 30px rgba(0,0,0,.7)}
 .card{position:absolute;left:90px;top:590px;width:700px;height:500px;z-index:10;transform:rotate(-3deg);background:#f4ecd8;padding:16px 16px 70px;
@@ -111,7 +80,7 @@ pages['04'] = dict(bg='<div class="mdfull"></div><div class="tshade"></div>', cs
 <div class="line" style="top:1225px;font-size:30px;font-weight:700;letter-spacing:5px;z-index:15">DEC 21 WE FIND OUT.</div>
 """)
 
-pages['05'] = dict(bg='<div class="vafull"></div><div class="tshade"></div>', css="""
+pages['05'] = dict(bg=STAD, css="""
 .stamp{position:absolute;white-space:nowrap;left:560px;top:520px;z-index:22;transform:rotate(-10deg);border:5px solid #c8a858;color:#c8a858;
  font-family:'Oswald',sans-serif;font-weight:700;font-size:38px;letter-spacing:6px;padding:10px 22px;background:rgba(5,5,5,.6)}
 .pill{position:absolute;left:50%;transform:translateX(-50%);bottom:130px;z-index:25;white-space:nowrap;font-family:'Inter';font-weight:600;font-size:30px;
@@ -126,7 +95,7 @@ pages['05'] = dict(bg='<div class="vafull"></div><div class="tshade"></div>', cs
 <div class="pill">Screenshot this, Maryland. <b style="color:#efd287">Prove us wrong.</b></div>
 """)
 
-pages['06'] = dict(bg=SPLIT + '<div class="topshade"></div>', css=split_css(640, 440, fx=-120, fy=-40, fw=2100) + """
+pages['06'] = dict(bg='', css="""
 .phone{position:absolute;left:210px;top:290px;width:660px;height:830px;z-index:10;border-radius:56px;background:#0d0d0f;
  border:3px solid #2b2b2e;box-shadow:0 40px 90px rgba(0,0,0,.9),0 0 0 10px #151517}
 .top{position:absolute;left:0;right:0;top:0;height:120px;border-bottom:1px solid #222;text-align:center;padding-top:30px}
@@ -175,12 +144,11 @@ pages['07'] = dict(bg=STAD, css="""
 <div class="line" style="top:1090px;font-size:32px">Every game on camera. So when Maryland loses, <b style="color:#efd287">there's proof.</b></div>
 """)
 
-CLOSE = dict(bg=SPLIT + '<div class="topshade"></div>', css=split_css(560, 520, fx=-120, fy=-40, fw=2100) + """
+CLOSE = dict(bg=STAD, css="""
 .tro{position:absolute;left:50%;top:430px;height:520px;transform:translateX(-50%);z-index:8;
  filter:drop-shadow(0 0 40px rgba(255,210,120,.3)) drop-shadow(0 40px 40px rgba(0,0,0,.85))}
 .row{position:absolute;left:0;right:0;text-align:center;font-family:'Inter';font-weight:600;color:#f1e9d6;z-index:20;letter-spacing:2px}
 """, body="""
-<div class="side" style="left:40px;top:470px;font-size:58px">MARYLAND</div><div class="side" style="right:40px;top:470px;font-size:58px;text-align:right">VIRGINIA</div>
 <div class="big white" style="top:120px;font-size:150px">WHO RUNS</div>
 <div class="big gold" style="top:250px;font-size:150px">THE DMV?</div>
 <img class="tro" src="../trophy/photo-trophy-short.png">

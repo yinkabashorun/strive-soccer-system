@@ -18,6 +18,8 @@ export function useMe() {
   return useQuery({
     queryKey: keys.me,
     queryFn: () => api<AppBootstrap>(APP_API.me),
+    // who this is and which screen they belong on is read on every open
+    staleTime: 0,
     enabled: signedIn,
   });
 }

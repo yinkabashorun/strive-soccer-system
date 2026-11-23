@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, StyleSheet, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useKeepAwake } from "expo-keep-awake";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -273,10 +273,14 @@ function Finish({
   const doneCount = plan.length - finish.left;
 
   return (
-    <View style={[styles.fill, { backgroundColor: "#050403" }]}>
+    <ScrollView
+      style={[styles.fill, { backgroundColor: "#050403" }]}
+      contentContainerStyle={{ flexGrow: 1, paddingBottom: insets.bottom + 20 }}
+      showsVerticalScrollIndicator={false}
+    >
       {!reduce ? <Sparks /> : null}
-      <View style={{ alignItems: "center", marginTop: insets.top + 70 }}>
-        <Ring size={240} stroke={12} value={1} track="rgba(200,168,88,0.16)">
+      <View style={{ alignItems: "center", marginTop: insets.top + (push === "ask" ? 30 : 70) }}>
+        <Ring size={push === "ask" ? 200 : 240} stroke={12} value={1} track="rgba(200,168,88,0.16)">
           <Head size={72} style={{ color: color.gold }}>{`+${shown}`}</Head>
           <Eyebrow gold={false}>Minutes</Eyebrow>
         </Ring>
@@ -312,7 +316,9 @@ function Finish({
           </View>
         </Animated.View>
       ) : null}
-      <View style={[styles.cta, { bottom: insets.bottom + 20, flexDirection: "column" }]}>
+      {/* In the flow under the rest (never laid over the medal), at the bottom. */}
+      <View style={{ flexGrow: 1 }} />
+      <View style={{ marginHorizontal: 20, marginTop: 16, gap: 10 }}>
         {push === "ask" ? (
           <View style={styles.ask}>
             <Label>Turn on notifications?</Label>
@@ -333,7 +339,7 @@ function Finish({
         ) : null}
         <Button label="Back home" onPress={onHome} />
       </View>
-    </View>
+    </ScrollView>
   );
 }
 

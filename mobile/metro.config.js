@@ -16,4 +16,16 @@ config.watchFolders = [...(config.watchFolders ?? []), shared];
 // Shared files resolve packages from the app's own node_modules only.
 config.resolver.nodeModulesPaths = [path.resolve(__dirname, "node_modules")];
 
+// The word filter the shared username rule uses (obscenity) is resolved to
+// its CommonJS build on every platform: the one iOS gets through its
+// "react-native" export, so the browser build used for review screenshots
+// runs the very code the phone runs (its ES module build breaks under
+// Metro's circular-import handling).
+const obscenityCjs = path.resolve(__dirname, "node_modules/obscenity/dist/index.js");
+const defaultResolve = config.resolver.resolveRequest;
+config.resolver.resolveRequest = (context, moduleName, platform) => {
+  if (moduleName === "obscenity") return { type: "sourceFile", filePath: obscenityCjs };
+  return defaultResolve ? defaultResolve(context, moduleName, platform) : context.resolveRequest(context, moduleName, platform);
+};
+
 module.exports = config;

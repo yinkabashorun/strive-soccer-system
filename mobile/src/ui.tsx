@@ -75,8 +75,10 @@ export function Press({ children, style, disabled, ...rest }: PressableProps & {
   const reduce = useReducedMotion();
   const s = useSharedValue(1);
   const a = useAnimatedStyle(() => ({ transform: [{ scale: s.value }], opacity: reduce ? (s.value < 1 ? 0.7 : 1) : 1 }));
+  // The style sits on the pressable itself, so a control laid out with
+  // flex (a segment, a rating box) takes its place in the row.
   return (
-    <Pressable
+    <AnimatedPressable
       {...rest}
       disabled={disabled}
       accessibilityRole={rest.accessibilityRole ?? "button"}
@@ -88,11 +90,14 @@ export function Press({ children, style, disabled, ...rest }: PressableProps & {
         s.value = withTiming(1, { duration: motion.tap * 1.5, easing: Easing.out(Easing.quad) });
         rest.onPressOut?.(e);
       }}
+      style={[style, a, disabled ? { opacity: 0.45 } : null]}
     >
-      <Animated.View style={[style, a, disabled ? { opacity: 0.45 } : null]}>{children}</Animated.View>
-    </Pressable>
+      {children}
+    </AnimatedPressable>
   );
 }
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 // The one main button: bone with black text, never gold.
 export function Button({

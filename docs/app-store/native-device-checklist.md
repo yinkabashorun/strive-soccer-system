@@ -30,7 +30,8 @@ how it is checked: a test that fails the build, or Coach Yinka's phone.
 ## What Coach Yinka checks on each new build
 
 Sign in, the username and photo screen (camera and photos), Home, start a
-session through to the finish ring, Week, You, Settings. A screenshot or
+session through to the finish ring, Week, Courses (open a course of drills,
+tap a clip; open a course of pages and read down it), You, Settings. A screenshot or
 screen recording of anything off is the fastest fix.
 
 ## Seeing the phone from here

@@ -64,12 +64,16 @@ const SHOTS = [
     await p.waitForTimeout(1600);
   }],
   ["14-week", "/week"],
+  ["14b-courses", "/courses"],
+  ["14c-course-drills", "/course/keep-it-up", 1800],
+  ["14d-course-lessons", "/course/general-nutrition-guide", 1200],
   ["15-you", "/you", 1500],
   ["16-extra", "/extra"],
   ["17-checkin", "/checkin"],
   ["18-settings", "/settings"],
   ["19-delete-account", "/delete-account"],
   ["20-gate", "/gate?state=membership"],
+  ["21-courses-locked", "/courses?state=locked"],
 ];
 
 const pwPath = process.env.PLAYWRIGHT ?? "playwright";

@@ -25,6 +25,7 @@ const s = {
   seenTokens: [] as (string | null)[],
   calls: [] as { fn: string; args: unknown[] }[],
   homeworkRow: { id: "", completed: true } as { id: string; completed: boolean } | null,
+  courses: [] as Record<string, unknown>[],
 };
 
 function player(over: Record<string, unknown> = {}) {
@@ -71,6 +72,93 @@ function call(fn: string) {
   };
 }
 
+// The Courses library as getCourses returns it: a drill course, a lesson
+// course, a link course with pages of its own, one with none, and one
+// that is switched off.
+function library(): Record<string, unknown>[] {
+  const step = (over: Record<string, unknown>) => ({
+    id: "s",
+    course_id: "c",
+    level_no: 1,
+    level_name: null,
+    tag: null,
+    drill_id: null,
+    drill: null,
+    title: null,
+    body: null,
+    video_url: null,
+    download_url: null,
+    cue: null,
+    pass_mark: null,
+    sort: 10,
+    ...over,
+  });
+  const drill = (id: string, title: string, file: string | null, active = true) => ({ id, title, video_url: file, active });
+  return [
+    {
+      id: "c1",
+      slug: "keep-it-up",
+      name: "Keep It Up",
+      subtitle: "The juggling ladder.",
+      intro: "Pass the catch version first.\nThen move up.",
+      kind: "drill",
+      external_url: null,
+      cover_url: null,
+      active: true,
+      sort: 10,
+      steps: [
+        step({ id: "k1", level_name: "One touch", tag: "beginner", drill_id: "d1", drill: drill("d1", "Juggling: one touch, catch", "/drills/juggling-one-touch-catch.mp4"), cue: "Lock the ankle.", pass_mark: "10 in a row" }),
+        step({ id: "k2", level_no: 2, level_name: "Two touches each foot", tag: "advanced", drill_id: "d2", drill: drill("d2", "Juggling: two touches each foot, keep it up", "https://files.example.com/clip.mp4") }),
+        // not filmed, and switched off in the bank: never sent
+        step({ id: "k3", level_no: 2, drill_id: "d3", drill: drill("d3", "Juggling: unfilmed", null) }),
+        step({ id: "k4", level_no: 2, drill_id: "d4", drill: drill("d4", "Juggling: off", "/drills/juggling-head-it-up.mp4", false) }),
+      ],
+    },
+    {
+      id: "c2",
+      slug: "college-recruiting",
+      name: "College Recruiting",
+      subtitle: "The college route, part by part.",
+      intro: null,
+      kind: "lesson",
+      external_url: null,
+      cover_url: "/courses/college-recruiting.jpg",
+      active: true,
+      sort: 20,
+      steps: [
+        step({ id: "l1", level_name: "The CV", title: "The one-page CV", body: "One page.\n\nTEMPLATE\n[Full name]\n[Graduation year]\n\nRULES OF THUMB\n\nFacts only.", download_url: "/downloads/cv.pdf" }),
+      ],
+    },
+    {
+      id: "c3",
+      slug: "dribbling-transformation",
+      name: "Dribbling Transformation",
+      subtitle: "Most dangerous dribbler on the team.",
+      intro: "The password is on this page.",
+      kind: "link",
+      external_url: "https://course.example.com/",
+      cover_url: null,
+      active: true,
+      sort: 15,
+      steps: [step({ id: "t1", level_name: "Start here", title: "Welcome", body: "Train five days a week." })],
+    },
+    { id: "c4", slug: "outside-only", name: "Outside Only", subtitle: null, intro: "pw", kind: "link", external_url: "https://course.example.com/x", cover_url: null, active: true, sort: 30, steps: [] },
+    {
+      id: "c5",
+      slug: "not-yet",
+      name: "Not Yet",
+      subtitle: null,
+      intro: null,
+      kind: "lesson",
+      external_url: null,
+      cover_url: null,
+      active: false,
+      sort: 40,
+      steps: [step({ id: "n1", title: "Soon", body: "Soon." })],
+    },
+  ];
+}
+
 vi.mock("@/lib/elite/session", async () => {
   const { bearerToken } = await import("@/lib/elite/supabase/bearer");
   return {
@@ -82,6 +170,9 @@ vi.mock("@/lib/elite/session", async () => {
 });
 vi.mock("@/lib/elite/data", () => ({
   getPlayer: async () => s.player,
+  // as the real getters: active courses for the shelf, any course by its slug
+  getCourses: async () => (s.calls.push({ fn: "getCourses", args: [] }), s.courses.filter((c) => c.active)),
+  getCourse: async (slug: string) => (s.calls.push({ fn: "getCourse", args: [slug] }), s.courses.find((c) => c.slug === slug) ?? null),
   getHomework: async () => [
     { id: "h1", week: 1, completed: true, duration_min: 20, title: "x", exercise: "", reps: "", video_url: null, notes: null, completed_at: null, sort: 0, player_id: "p1" },
   ],
@@ -169,6 +260,8 @@ const ROUTES = {
   accountPassword: () => import("@/app/api/app/account/password/route"),
   username: () => import("@/app/api/app/profile/username/route"),
   photo: () => import("@/app/api/app/profile/photo/route"),
+  courses: () => import("@/app/api/app/courses/route"),
+  course: () => import("@/app/api/app/courses/[slug]/route"),
 };
 
 // Every handler, its method and the access level it must declare.
@@ -191,10 +284,12 @@ const TABLE: { route: keyof typeof ROUTES; method: "GET" | "POST" | "DELETE"; ac
   { route: "username", method: "POST", access: "player" },
   { route: "photo", method: "GET", access: "player" },
   { route: "photo", method: "POST", access: "player" },
+  { route: "courses", method: "GET", access: "account" },
+  { route: "course", method: "GET", access: "member" },
 ];
 
 async function handler(route: keyof typeof ROUTES, method: string) {
-  const mod = (await ROUTES[route]()) as unknown as Record<string, (r: Request) => Promise<Response>>;
+  const mod = (await ROUTES[route]()) as unknown as Record<string, (r: Request, ctx?: unknown) => Promise<Response>>;
   return mod[method];
 }
 
@@ -206,6 +301,7 @@ beforeEach(() => {
   s.seenTokens = [];
   s.calls = [];
   s.homeworkRow = { id: "11111111-1111-4111-8111-111111111111", completed: true };
+  s.courses = library();
 });
 
 describe("the bearer token", () => {
@@ -401,6 +497,121 @@ describe("bodies are checked first", () => {
     const form = s.calls[1].args[1] as FormData;
     expect(form.get("current")).toBe("a");
     expect(form.get("next")).toBe("bbbbbbbb");
+  });
+});
+
+describe("the Courses library", () => {
+  const course = async (slug: string) => (await handler("course", "GET"))(req("GET"), { params: { slug } });
+
+  it("a member gets the shelf the website shows, open, in its order", async () => {
+    const body = await (await (await handler("courses", "GET"))(req("GET"))).json();
+    expect(body.locked).toBe(false);
+    // a link course is its own pages inside the app; one with none is left out; an off course is not there
+    expect(body.courses.map((c: { slug: string }) => c.slug)).toEqual(["keep-it-up", "dribbling-transformation", "college-recruiting"]);
+    expect(body.courses.every((c: { locked: boolean }) => c.locked === false)).toBe(true);
+    // the cover: the coach's picture, else the still of the first filmed drill, as a whole address
+    expect(body.courses[0].cover).toBe("https://thestriveapp.com/drills/posters/juggling-one-touch-catch.jpg");
+    expect(body.courses[2].cover).toBe("https://thestriveapp.com/courses/college-recruiting.jpg");
+    expect(body.courses[1].cover).toBeNull();
+  });
+
+  it("an account that is not a member gets the shelf locked: name, line and picture, never a step", async () => {
+    const locked = async () => {
+      const res = await (await handler("courses", "GET"))(req("GET"));
+      expect(res.status).toBe(200);
+      return res.json();
+    };
+    const check = (body: { locked: boolean; courses: Record<string, unknown>[] }) => {
+      expect(body.locked).toBe(true);
+      expect(body.courses.length).toBe(3);
+      for (const c of body.courses) {
+        expect(Object.keys(c).sort()).toEqual(["cover", "locked", "name", "slug", "subtitle"]);
+        expect(c.locked).toBe(true);
+      }
+      expect(JSON.stringify(body)).not.toMatch(/Lock the ankle|Facts only|password|Train five days|video|steps|levels/);
+    };
+    // a free account: no player record, a free training log
+    s.viewer = viewer({ playerId: null });
+    s.tracker = { id: "t1" };
+    check(await locked());
+    // and anyone else the gate keeps out of the member app
+    s.viewer = viewer();
+    s.player = player({ tier: "elite", subscription_status: "paused" });
+    check(await locked());
+    s.viewer = viewer({ role: "coach", playerId: null });
+    check(await locked());
+  });
+
+  it("a single course is refused to an account that is not a member, before it is read", async () => {
+    s.viewer = viewer({ playerId: null });
+    s.tracker = { id: "t1" };
+    const res = await course("keep-it-up");
+    expect(res.status).toBe(403);
+    expect((await res.json()).state.kind).toBe("free");
+    expect(s.calls).toEqual([]);
+  });
+
+  it("a member gets a course as the website shows it", async () => {
+    const res = await course("keep-it-up");
+    expect(res.status).toBe(200);
+    const { course: c } = await res.json();
+    expect(c).toMatchObject({ slug: "keep-it-up", name: "Keep It Up", kind: "drill", intro: ["Pass the catch version first.", "Then move up."] });
+    expect(c.levels.map((l: { label: string; name: string }) => [l.label, l.name])).toEqual([
+      ["Level 1", "One touch"],
+      ["Level 2", "Two touches each foot"],
+    ]);
+    // the drill's own name, its clip and still as whole addresses, the cue, the pass mark
+    expect(c.levels[0].steps).toEqual([
+      {
+        id: "k1",
+        kind: "drill",
+        title: "One touch, catch",
+        tag: "beginner",
+        cue: "Lock the ankle.",
+        passMark: "10 in a row",
+        blocks: [],
+        video: "https://thestriveapp.com/drills/juggling-one-touch-catch.mp4",
+        poster: "https://thestriveapp.com/drills/posters/juggling-one-touch-catch.jpg",
+        download: null,
+      },
+    ]);
+    // an unfilmed drill and one switched off in the bank are never sent; a clip hosted elsewhere has no still
+    expect(c.levels[1].steps.map((x: { id: string }) => x.id)).toEqual(["k2"]);
+    expect(c.levels[1].steps[0]).toMatchObject({ video: "https://files.example.com/clip.mp4", poster: null, tag: "advanced" });
+  });
+
+  it("a lesson course comes as pages, its words unchanged", async () => {
+    const { course: c } = await (await course("college-recruiting")).json();
+    expect(c.kind).toBe("lesson");
+    expect(c.levels[0]).toMatchObject({ label: "Part 1", name: "The CV" });
+    const page = c.levels[0].steps[0];
+    expect(page).toMatchObject({ kind: "lesson", title: "The one-page CV", video: null, download: "https://thestriveapp.com/downloads/cv.pdf" });
+    expect(page.blocks).toEqual([
+      { heading: null, text: "One page." },
+      { heading: "TEMPLATE", text: "[Full name]\n[Graduation year]" },
+      { heading: "RULES OF THUMB", text: "" },
+      { heading: null, text: "Facts only." },
+    ]);
+  });
+
+  it("a link course is its own pages, without its address or its password", async () => {
+    const res = await course("dribbling-transformation");
+    const text = await res.text();
+    expect(res.status).toBe(200);
+    expect(text).not.toMatch(/example\.com|password/);
+    const c = JSON.parse(text).course;
+    expect(c).toMatchObject({ kind: "lesson", intro: [] });
+    expect(c.levels[0].steps[0].title).toBe("Welcome");
+  });
+
+  it("answers 404 for a course that is not on the shelf", async () => {
+    for (const slug of ["nope", "not-yet", "outside-only", "../week", "Keep-It-Up", ""]) {
+      const res = await course(slug);
+      expect(res.status, slug).toBe(404);
+      expect(await res.json()).toEqual({ error: "not_found" });
+    }
+    // a slug that is not one never reaches the database
+    expect(s.calls.map((c) => c.args[0])).toEqual(["nope", "not-yet", "outside-only"]);
   });
 });
 

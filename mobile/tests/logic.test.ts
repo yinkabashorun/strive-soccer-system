@@ -2,7 +2,10 @@ import { describe, expect, it } from "vitest";
 import { chunkedStorage, CHUNK_SIZE, MAX_CHUNKS, parseCount, splitValue, type KV } from "@/auth/chunks";
 import { applyDone } from "@/week-cache";
 import { areaFor, inArea } from "@/navigation";
+import { clipOrder, clipsInView, liveClip, pickedAfterScroll, pickedAfterTap } from "@/course-view";
 import { drillEyebrow, repsTiles } from "@/drill-view";
+import { APP_TABS } from "@/tabs";
+import { APP_API, appCoursePath, type AppCourse } from "@shared/app-contract";
 import { isStep, nextStepId, stepOrder, stepPosition } from "@/quiz-steps";
 import { USERNAME_MESSAGES, normalizeUsername, usernameProblem } from "@shared/username";
 import type { AppWeek } from "@shared/app-contract";
@@ -152,6 +155,10 @@ describe("where the app belongs", () => {
   it("keeps account pages reachable and lets building finish", () => {
     expect(inArea("app", ["(tabs)"])).toBe(true);
     expect(inArea("app", ["session", "[n]"])).toBe(true);
+    // a course is one tap from the Courses tab, and only inside the app
+    expect(inArea("app", ["course", "[slug]"])).toBe(true);
+    expect(inArea("gate", ["course", "[slug]"])).toBe(false);
+    expect(inArea("agreement", ["course", "[slug]"])).toBe(false);
     expect(inArea("app", ["onboarding"])).toBe(false);
     expect(inArea("app", ["onboarding", "building"])).toBe(true);
     expect(inArea("gate", ["onboarding", "building"])).toBe(true);
@@ -203,6 +210,72 @@ describe("the quiz screens", () => {
     expect(usernameProblem("marcus.b")).toBeNull();
     expect(USERNAME_MESSAGES[usernameProblem("ab")!]).toMatch(/at least 3/);
     expect(usernameProblem("strive.official")).toBe("reserved");
+  });
+});
+
+describe("the tabs", () => {
+  it("are the server's, in its order, with Courses between Week and You", () => {
+    expect(APP_TABS.map((t) => t.key)).toEqual(["home", "week", "courses", "you"]);
+    expect(APP_TABS.map((t) => t.route)).toEqual(["index", "week", "courses", "you"]);
+  });
+});
+
+describe("a course's clips", () => {
+  const step = (id: string, video: string | null) => ({
+    id,
+    kind: "drill" as const,
+    title: id,
+    tag: null,
+    cue: null,
+    passMark: null,
+    blocks: [],
+    video,
+    poster: null,
+    download: null,
+  });
+  const course: Pick<AppCourse, "levels"> = {
+    levels: [
+      { no: 1, label: "Level 1", name: "One touch", steps: [step("a", "https://x/a.mp4"), step("page", null), step("b", "https://x/b.mp4")] },
+      { no: 2, label: "Level 2", name: null, steps: [step("c", "https://x/c.mp4")] },
+    ],
+  };
+  const order = clipOrder(course);
+
+  it("are the steps with a clip, in the course's order, however the list reports them", () => {
+    expect(order).toEqual(["a", "b", "c"]);
+    expect(clipsInView(order, ["c", "page", "b"])).toEqual(["b", "c"]);
+    expect(clipsInView(order, [])).toEqual([]);
+  });
+
+  it("play one at a time: the top one on screen when demos play on their own", () => {
+    expect(liveClip({ autoplay: true, picked: undefined, inView: ["b", "c"] })).toBe("b");
+    expect(liveClip({ autoplay: true, picked: undefined, inView: [] })).toBeNull();
+  });
+
+  it("stay still until tapped when demos are switched off", () => {
+    expect(liveClip({ autoplay: false, picked: undefined, inView: ["b", "c"] })).toBeNull();
+    const picked = pickedAfterTap(null, "c");
+    expect(liveClip({ autoplay: false, picked, inView: ["b", "c"] })).toBe("c");
+  });
+
+  it("a tap plays that clip, a tap on the live one pauses it", () => {
+    expect(pickedAfterTap("b", "c")).toBe("c");
+    expect(pickedAfterTap("b", "b")).toBeNull();
+    expect(liveClip({ autoplay: true, picked: null, inView: ["b", "c"] })).toBeNull();
+  });
+
+  it("a tapped clip plays while it is on screen, then the setting decides again", () => {
+    expect(pickedAfterScroll("c", ["b", "c"])).toBe("c");
+    expect(pickedAfterScroll("c", ["a"])).toBeUndefined();
+    // a pause by hand lasts until what is on screen changes
+    expect(pickedAfterScroll(null, ["a"])).toBeUndefined();
+    expect(pickedAfterScroll(undefined, ["a"])).toBeUndefined();
+  });
+
+  it("are asked for by the course's slug", () => {
+    expect(APP_API.courses).toBe("/api/app/courses");
+    expect(appCoursePath("keep-it-up")).toBe("/api/app/courses/keep-it-up");
+    expect(appCoursePath("a b/../c")).toBe("/api/app/courses/a%20b%2F..%2Fc");
   });
 });
 

@@ -41,12 +41,16 @@ SHOTS='
 12-drop|ok|drop|11|film
 13-session-drill|ok|session/3|16
 14-week|ok|week|11
+14b-courses|ok|courses|12
+14c-course-drills|ok|course/keep-it-up|14
+14d-course-lessons|ok|course/general-nutrition-guide|12
 15-you|ok|you|11
 16-extra|ok|extra|11
 17-checkin|ok|checkin|10
 18-settings|ok|settings|10
 19-change-password|ok|change-password|10
 20-delete-account|ok|delete-account|10
+21-courses-locked|locked|courses|12
 '
 
 last=""

@@ -4,12 +4,12 @@ import { useAuth } from "@/auth/session";
 import { Holding } from "@/Holding";
 import { areaFor } from "@/navigation";
 import { color } from "@/theme";
-import { PHASE_ONE_TABS } from "@/tabs";
+import { APP_TABS } from "@/tabs";
 
-// The real iPhone tab bar (UITabBarController): Home, Week and You in phase
-// 1, from the one rule the website uses (memberTabs, sent by the server).
-// Courses and the Elite Coach tab are phase 2; their routes slot in here
-// and show the moment the server lists them and the screens exist.
+// The real iPhone tab bar (UITabBarController): Home, Week, Courses and
+// You, from the one rule the website uses (memberTabs, sent by the server).
+// A tab shows when the server lists it for this member. The Elite Coach
+// tab slots in here the moment its screen exists.
 //
 // disableAutomaticContentInsets: each tab's page (src/Screen.tsx) leaves its
 // own room for the status bar and the tab bar. Left on, the tab bar adds the
@@ -32,7 +32,7 @@ export default function TabsLayout() {
   const show = (key: string) => listed.size === 0 || listed.has(key);
   return (
     <NativeTabs tintColor={color.bone} iconColor={{ default: color.faint, selected: color.bone }} backgroundColor={color.black}>
-      {PHASE_ONE_TABS.map((t) => (
+      {APP_TABS.map((t) => (
         <NativeTabs.Trigger key={t.route} name={t.route} hidden={!show(t.key)} disableAutomaticContentInsets>
           <NativeTabs.Trigger.Icon sf={{ default: t.sf, selected: t.sfSelected }} />
           <NativeTabs.Trigger.Label>{t.label}</NativeTabs.Trigger.Label>

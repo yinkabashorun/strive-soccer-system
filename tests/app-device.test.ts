@@ -247,3 +247,50 @@ describe("the sign-in screen", () => {
     expect(src).toContain("passwordField.current?.focus()");
   });
 });
+
+// The Courses tab (Nov 24 2026). A course can hold seventeen drills, and a
+// video player for each at once is a phone out of memory: one clip is live
+// at a time. An account that is not a member is sent the shelf locked, and
+// a locked card goes to the offer without asking the server for a course.
+describe("the Courses tab", () => {
+  const shelf = code(path.join(root, "src/CoursesList.tsx"));
+  const course = code(path.join(root, "app/course/[slug].tsx"));
+  const view = code(path.join(root, "src/course-view.ts"));
+
+  it("is a tab, and a course is a screen of the app", () => {
+    expect(code(path.join(root, "src/tabs.ts"))).toMatch(/key: "courses", route: "courses"/);
+    expect(code(path.join(root, "app/(tabs)/courses.tsx"))).toContain("<CoursesList />");
+    expect(code(path.join(root, "app/_layout.tsx"))).toContain('<Stack.Screen name="course/[slug]" />');
+    expect(code(path.join(root, "src/navigation.ts"))).toMatch(/APP_ROUTES = new Set\(\[[^\]]*"course"/);
+  });
+
+  it("a locked card opens the offer and never reads a course", () => {
+    expect(shelf).toContain('c.locked ? "/offer" : `/course/${c.slug}`');
+    expect(shelf).not.toMatch(/useCourse\b|appCoursePath|prefetch/);
+    // one course is asked for only from inside the member app
+    const hooks = read(path.join(root, "src/api/queries.ts"));
+    expect(hooks.slice(hooks.indexOf("export function useCourse("))).toMatch(/enabled: inApp && Boolean\(slug\)/);
+  });
+
+  it("plays one clip at a time, by the phone's own setting", () => {
+    // the player is mounted for the live clip only; every other tile is a still
+    expect(course.match(/<DrillVideo\b/g)?.length).toBe(1);
+    expect(course).toMatch(/\{live \? \(\s*<DrillVideo src=\{step\.video\} poster=\{step\.poster\} autoplay \/>/);
+    expect(course).toContain("liveClip({ autoplay: prefs.autoplay, picked, inView })");
+    expect(view).toContain("return i.autoplay ? i.inView[0] ?? null : null;");
+  });
+
+  it("opens a lesson's download in the sheet over the app, https only", () => {
+    expect(course).toContain("openLink(download)");
+    expect(course).not.toMatch(/Linking\.openURL/);
+    const links = code(path.join(root, "src/links.ts"));
+    expect(links).toMatch(/export function openLink\(url: string\)[^}]*if \(!isHttps\(url\)\) return Promise\.resolve\(\);/);
+    expect(links).toContain("PAGE_SHEET");
+  });
+
+  it("is a library: nothing is ticked, counted or tracked", () => {
+    for (const src of [shelf, course, view]) {
+      expect(src).not.toMatch(/completed|\bprogress|\bpercent|streak|useMutation|<Ring\b|<Disc\b/i);
+    }
+  });
+});

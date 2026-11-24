@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { View } from "react-native";
-import { Stack, useRouter, useSegments } from "expo-router";
+import { Stack, useRouter, useSegments, type Href } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import { useFonts } from "expo-font";
@@ -12,6 +12,8 @@ import { AuthProvider, useAuth } from "@/auth/session";
 import { keys, useMe } from "@/api/queries";
 import { PERSIST_MAX_AGE, persister, queryClient } from "@/api/queryClient";
 import { setGateListener } from "@/api/client";
+import { fixtureRoute } from "@/api/fixtures";
+import { FIXTURES } from "@/config";
 import { areaFor, AREA_ROOT, inArea } from "@/navigation";
 import { keepTokenFresh } from "@/push";
 import { loadPrefs } from "@/prefs";
@@ -44,6 +46,16 @@ function Gatekeeper() {
   useEffect(() => {
     if (area === "app") void keepTokenFresh();
   }, [area]);
+
+  // The example-data build only (review screenshots on GitHub's Mac): open
+  // the screen the run asked for, once, after the gate above has settled.
+  const fixtureOpened = useRef(false);
+  useEffect(() => {
+    if (!FIXTURES || fixtureOpened.current || !area || !inArea(area, segments)) return;
+    fixtureOpened.current = true;
+    const route = fixtureRoute();
+    if (route) router.push(route as Href);
+  }, [area, segments, router]);
 
   // A tapped notification opens the app on Home (every notification the
   // site sends is about the week or the coach).
@@ -83,6 +95,7 @@ export default function RootLayout() {
             <Stack
               screenOptions={{
                 headerShown: false,
+                statusBarStyle: "light",
                 contentStyle: { backgroundColor: color.black },
                 animation: "default",
                 gestureEnabled: true,

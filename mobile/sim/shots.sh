@@ -7,37 +7,41 @@
 #   sim/shots.sh <simulator id> <path to StriveElite.app> <output folder>
 #
 # Each line of SHOTS is: name | which example member | screen | seconds to
-# wait. The member is chosen by a launch argument (src/api/fixtures.ts); the
-# screen is opened by the app's own link (striveelite://...). The app is
-# reinstalled whenever the member changes, so nothing remembered from one
-# member shows under the next.
+# wait after launch. The member and the screen are both chosen by launch
+# arguments (-fixtureState, -fixtureRoute: src/api/fixtures.ts). The
+# simulator's "open this link" command is never used: iOS answers it with an
+# "Open in Strive Elite?" box that stays up and covers every later picture.
+# The app is reinstalled whenever the member changes, so nothing remembered
+# from one member shows under the next.
+#
+# The 3, 2, 1 count-in is not here (a picture timed from launch would miss
+# it); sim/flows/03-session.yaml takes it by tapping Start.
 set -uo pipefail
 UDID="$1"; APP="$2"; OUT="$3"
 BUNDLE="com.strivesoccer.elite"
 mkdir -p "$OUT"
 
 SHOTS='
-01-sign-in|signedout|-|3
-02-agreement|consent|-|3
-03-door|onboarding|-|4
-04-quiz-first|onboarding|onboarding/gender|3
-05-quiz-team|onboarding|onboarding/team|3
-06-quiz-on-ball|onboarding|onboarding/onBall|3
-07-quiz-space|onboarding|onboarding/space|3
-08-username|setup|-|3
-09-photo|setup|profile-setup?edit=photo|3
-10-gate|membership|-|3
-11-home|ok|-|5
-12-drop|ok|drop|4
-13-session-count-in|ok|session/4|1
-14-session-drill|ok|session/3|7
-15-week|ok|week|4
-16-you|ok|you|4
-17-extra|ok|extra|4
-18-checkin|ok|checkin|3
-19-settings|ok|settings|3
-20-change-password|ok|change-password|3
-21-delete-account|ok|delete-account|3
+01-sign-in|signedout|-|9
+02-agreement|consent|-|9
+03-door|onboarding|-|11
+04-quiz-first|onboarding|onboarding/gender|10
+05-quiz-team|onboarding|onboarding/team|10
+06-quiz-on-ball|onboarding|onboarding/onBall|10
+07-quiz-space|onboarding|onboarding/space|10
+08-username|setup|-|9
+09-photo|setup|profile-setup?edit=photo|10
+10-gate|membership|-|9
+11-home|ok|-|11
+12-drop|ok|drop|11
+13-session-drill|ok|session/3|16
+14-week|ok|week|11
+15-you|ok|you|11
+16-extra|ok|extra|11
+17-checkin|ok|checkin|10
+18-settings|ok|settings|10
+19-change-password|ok|change-password|10
+20-delete-account|ok|delete-account|10
 '
 
 last=""
@@ -50,12 +54,10 @@ while IFS='|' read -r name state route wait; do
     xcrun simctl install "$UDID" "$APP" || { echo "install failed"; exit 1; }
     last="$state"
   fi
-  if ! xcrun simctl launch "$UDID" "$BUNDLE" -fixtureState "$state" >/dev/null; then
+  args=(-fixtureState "$state")
+  [ "$route" != "-" ] && args+=(-fixtureRoute "$route")
+  if ! xcrun simctl launch "$UDID" "$BUNDLE" "${args[@]}" >/dev/null; then
     echo "MISSED $name: the app did not launch"; fail=1; continue
-  fi
-  sleep 6
-  if [ "$route" != "-" ]; then
-    xcrun simctl openurl "$UDID" "striveelite://$route" || echo "  (link striveelite://$route was refused)"
   fi
   sleep "$wait"
   if xcrun simctl io "$UDID" screenshot --type=png "$OUT/$name.png" >/dev/null 2>&1; then

@@ -6,6 +6,13 @@ import { color } from "./theme";
 // A tab's page: black, under the status bar, with pull to refresh. The page
 // is drawn from the cache at once; pulling (or coming back to the app)
 // fetches behind it.
+//
+// This is the ONE place a tab's page leaves room for the status bar at the
+// top and the floating tab bar at the bottom (the tab bar's own automatic
+// room is switched off in app/(tabs)/_layout.tsx). A page inside it adds
+// PAGE_TOP above its headline and nothing more.
+export const PAGE_TOP = 6;
+
 export function Screen({
   children,
   onRefresh,

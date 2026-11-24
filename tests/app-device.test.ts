@@ -113,6 +113,60 @@ describe("the keyboard", () => {
   });
 });
 
+// Found in the first simulator run (Nov 23 2026). The app is black on every
+// screen, but the project was generated as "follow the phone's setting": on
+// a phone in light mode the status bar clock and battery were drawn black
+// on black, and the phone's own boxes (alerts, the photo picker) were white.
+describe("the phone's own chrome", () => {
+  const config = JSON.parse(read(path.join(root, "app.json"))).expo as {
+    userInterfaceStyle?: string;
+    plugins: unknown[];
+  };
+  it("is dark, whatever the phone is set to", () => {
+    expect(config.userInterfaceStyle).toBe("dark");
+    // a dark variant on the launch screen makes the generated project
+    // "Automatic" again, over the line above
+    const splash = config.plugins.find((p) => Array.isArray(p) && p[0] === "expo-splash-screen") as [string, Record<string, unknown>];
+    expect(splash).toBeTruthy();
+    expect(Object.keys(splash[1])).not.toContain("dark");
+    expect(splash[1].backgroundColor).toBe("#000000");
+  });
+  it("has a light status bar on every screen", () => {
+    const layout = code(path.join(root, "app/_layout.tsx"));
+    expect(layout).toContain('statusBarStyle: "light"');
+    expect(layout).toContain('<StatusBar style="light" />');
+  });
+});
+
+// Also from the first simulator run: Home started a whole status bar too
+// low. The iPhone tab bar adds room for the status bar to a tab's page by
+// itself, and the page (src/Screen.tsx) was already leaving that room.
+describe("a tab's page", () => {
+  const tabs = files(path.join(root, "app/(tabs)")).filter((f) => !f.endsWith("_layout.tsx"));
+  it("leaves room for the status bar and the tab bar once, in one place", () => {
+    const layout = code(path.join(root, "app/(tabs)/_layout.tsx"));
+    expect(layout).toMatch(/<NativeTabs\.Trigger[^>]*disableAutomaticContentInsets/);
+    const screen = code(path.join(root, "src/Screen.tsx"));
+    expect(screen).toContain('contentInsetAdjustmentBehavior="never"');
+    expect(screen).toMatch(/paddingTop: insets\.top \+ \d+/);
+    expect(screen).toMatch(/paddingBottom: insets\.bottom \+ bottom/);
+    expect(tabs.length).toBeGreaterThanOrEqual(3);
+    for (const f of tabs) {
+      expect(code(f), rel(f)).toContain("<Screen");
+      expect(code(f), rel(f)).not.toContain("useSafeAreaInsets");
+    }
+  });
+  it("starts its headline right under the status bar", () => {
+    for (const f of tabs) {
+      expect(code(f), rel(f)).toContain("paddingTop: PAGE_TOP");
+      // no page pushes its top down by a number of its own
+      for (const m of code(f).matchAll(/paddingTop: (\d+)/g)) expect(Number(m[1]), rel(f)).toBeLessThanOrEqual(24);
+    }
+    const top = Number(read(path.join(root, "src/Screen.tsx")).match(/PAGE_TOP = (\d+)/)?.[1]);
+    expect(top).toBeLessThanOrEqual(12);
+  });
+});
+
 describe("the sign-in screen", () => {
   const src = read(path.join(root, "app/sign-in.tsx"));
   it("says whose app it is", () => {

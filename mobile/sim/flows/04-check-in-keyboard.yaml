@@ -5,13 +5,10 @@ appId: com.strivesoccer.elite
     clearState: true
     arguments:
       fixtureState: ok
-- extendedWaitUntil:
-    visible: "Start session"
-    timeout: 30000
-- openLink: striveelite://checkin
+      fixtureRoute: checkin
 - extendedWaitUntil:
     visible: "Send"
-    timeout: 15000
+    timeout: 30000
 - tapOn: "Anything else"
 - inputText: "Legs felt heavy on Thursday."
 - waitForAnimationToEnd:

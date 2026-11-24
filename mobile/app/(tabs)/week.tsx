@@ -5,7 +5,7 @@ import Animated, { FadeInDown } from "react-native-reanimated";
 import type { AppSession } from "@shared/app-contract";
 import { keys, useWeek } from "@/api/queries";
 import { queryClient } from "@/api/queryClient";
-import { Screen } from "@/Screen";
+import { PAGE_TOP, Screen } from "@/Screen";
 import { Body, Disc, Head, Icon, Press, Skeleton } from "@/ui";
 import { color, radius } from "@/theme";
 
@@ -19,7 +19,7 @@ export default function Week() {
 
   return (
     <Screen onRefresh={() => queryClient.invalidateQueries({ queryKey: keys.week })}>
-      <View style={{ paddingHorizontal: 20, paddingTop: 44 }}>
+      <View style={{ paddingHorizontal: 20, paddingTop: PAGE_TOP }}>
         <Head size={40}>{w && w.week > 0 ? `Week ${w.week}` : "Your week"}</Head>
         {w?.range ? (
           <Body dim size={13.5} style={{ marginTop: 6 }}>

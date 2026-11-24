@@ -13,6 +13,12 @@ import { MEDIA_BASE } from "@/config";
 //   browser    ?state=ok|consent|onboarding|membership|pro_checkout|setup|signedout
 //   simulator  the launch argument -fixtureState <the same words>, which
 //              iOS hands the app as a setting (sim/shots.sh, sim/flows)
+//
+// Which screen it opens on, simulator only: the launch argument
+// -fixtureRoute <screen> (week, session/3, profile-setup?edit=photo). The
+// simulator's "open this link" command cannot be used for that: iOS answers
+// it with an "Open in Strive Elite?" box that stays on screen and covers
+// every picture after it (the first simulator run, Nov 23 2026).
 export const FIXTURE_STATES = ["ok", "consent", "onboarding", "membership", "pro_checkout", "setup", "signedout"] as const;
 
 function chosenState(): string {
@@ -24,6 +30,20 @@ function chosenState(): string {
     raw = null;
   }
   return typeof raw === "string" && (FIXTURE_STATES as readonly string[]).includes(raw) ? raw : "ok";
+}
+
+// The screen the simulator run asked for, as a route the router takes, or
+// null. Letters, digits, dashes and slashes, with at most one ?name=value.
+export const FIXTURE_ROUTE = /^[A-Za-z0-9][A-Za-z0-9\-/]*(\?[A-Za-z]+=[A-Za-z0-9]+)?$/;
+
+export function fixtureRoute(): string | null {
+  let raw: unknown = null;
+  try {
+    if (Platform.OS === "ios") raw = Settings?.get?.("fixtureRoute");
+  } catch {
+    raw = null;
+  }
+  return typeof raw === "string" && FIXTURE_ROUTE.test(raw) ? `/${raw}` : null;
 }
 
 export function fixtureSignedIn(): boolean {

@@ -202,6 +202,47 @@ describe("the phone's build", () => {
     expect(elsewhere).toEqual([]);
   });
 
+  // The first simulator run (Nov 23 2026) opened each screen with the
+  // simulator's "open this link" command. iOS answered with an "Open in
+  // Strive Elite?" box that never went away: fifteen pictures of that box,
+  // and every tapping flow blocked by it, while the run still read as passed.
+  it("the simulator check opens a screen by launch argument, never by link", () => {
+    const sim = readFileSync(path.join(root, ".github/workflows/ios-simulator-screens.yml"), "utf8");
+    const shots = readFileSync(path.join(root, "mobile/sim/shots.sh"), "utf8");
+    const flows = readdirSync(path.join(root, "mobile/sim/flows")).map((n) => readFileSync(path.join(root, "mobile/sim/flows", n), "utf8"));
+    const live = (s: string) => s.split("\n").filter((l) => !l.trim().startsWith("#")).join("\n");
+    for (const s of [sim, shots, ...flows]) {
+      expect(live(s)).not.toMatch(/simctl openurl|openLink|striveelite:\/\//);
+    }
+    expect(live(shots)).toContain("-fixtureRoute");
+    // a failed tapping pass must fail its step (its output is piped to a log)
+    const maestro = sim.slice(sim.indexOf("Taps and typing (Maestro)"), sim.indexOf("Shrink the pictures"));
+    expect(maestro).toContain("set -o pipefail");
+    // every screen asked for has the shape the app accepts, and is a screen the app has
+    const fixtures = readFileSync(path.join(root, "mobile/src/api/fixtures.ts"), "utf8");
+    const shape = new RegExp(fixtures.match(/FIXTURE_ROUTE = \/(.+)\/;/)?.[1] ?? "never^");
+    const asked = new Set<string>();
+    for (const m of shots.matchAll(/^[\w-]+\|[a-z_]+\|([^|\n]+)\|\d+$/gm)) if (m[1] !== "-") asked.add(m[1]);
+    for (const f of flows) for (const m of f.matchAll(/fixtureRoute: (\S+)/g)) asked.add(m[1]);
+    expect(asked.size).toBeGreaterThan(8);
+    const appDir = path.join(root, "mobile/app");
+    const has = (dir: string, name: string) => readdirSync(dir).some((n) => n === name || n === `${name}.tsx`);
+    for (const route of asked) {
+      expect(route, route).toMatch(shape);
+      const first = route.split(/[/?]/)[0];
+      expect(has(appDir, first) || has(path.join(appDir, "(tabs)"), first), route).toBe(true);
+    }
+    // the screen is read from the launch argument only inside the example
+    // file, and opened only where the example data is on
+    const readers = files(path.join(root, "mobile/src"))
+      .concat(files(path.join(root, "mobile/app")))
+      .filter((f) => !f.endsWith("fixtures.ts") && /Settings\??\.get|"fixtureRoute"/.test(readFileSync(f, "utf8")));
+    expect(readers).toEqual([]);
+    const layout = readFileSync(path.join(appDir, "_layout.tsx"), "utf8");
+    expect(layout).toMatch(/if \(!FIXTURES \|\|[^\n]+\) return;\n\s+fixtureOpened\.current = true;\n\s+const route = fixtureRoute\(\);/);
+    expect(layout.match(/fixtureRoute\(/g)?.length).toBe(1);
+  });
+
   it("carries no secret", () => {
     for (const f of files(path.join(root, "mobile/src")).concat(files(path.join(root, "mobile/app")))) {
       expect(readFileSync(f, "utf8"), f).not.toMatch(/service_role|BEGIN PRIVATE KEY|sk_live_|sk_test_/);

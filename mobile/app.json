@@ -37,7 +37,7 @@
       ["expo-build-properties", { "ios": { "deploymentTarget": "16.4" } }],
       [
         "expo-splash-screen",
-        { "backgroundColor": "#000000", "image": "./assets/splash.png", "imageWidth": 140, "dark": { "backgroundColor": "#000000", "image": "./assets/splash.png" } }
+        { "backgroundColor": "#000000", "image": "./assets/splash.png", "imageWidth": 140 }
       ],
       [
         "expo-font",

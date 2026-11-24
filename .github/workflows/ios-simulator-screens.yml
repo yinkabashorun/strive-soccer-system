@@ -13,8 +13,8 @@
 # never uploaded anywhere: this workflow reads no Apple secret.
 #
 # Two passes over the same app:
-#   1. mobile/sim/shots.sh    every screen opened by its own link, one
-#                             picture each (plain simulator commands)
+#   1. mobile/sim/shots.sh    every screen opened by a launch argument,
+#                             one picture each (plain simulator commands)
 #   2. mobile/sim/flows/      taps and typing (the keyboard, a whole
 #                             session), driven by Maestro; a flow that fails
 #                             is reported and the rest still run
@@ -135,6 +135,9 @@ jobs:
         id: flows
         continue-on-error: true
         run: |
+          # without this the step reads as passed when Maestro failed,
+          # because its output is piped into the log file
+          set -o pipefail
           curl -fsSL "https://get.maestro.mobile.dev" | bash
           export PATH="$HOME/.maestro/bin:$PATH"
           maestro --version
@@ -152,10 +155,11 @@ jobs:
             [ -e "$f" ] || continue
             sips -s format jpeg -s formatOptions 72 -Z 1500 "$f" --out "${f%.png}.jpg" >/dev/null && rm "$f"
           done
-          # Maestro's own failure pictures and logs, when a flow failed
+          # Maestro's own failure pictures and its log, when a flow failed.
+          # Not the simulator's device log: one run's was 48 MB.
           if [ -d "$HOME/.maestro/tests" ]; then
             mkdir -p maestro-debug
-            find "$HOME/.maestro/tests" -type f \( -name "*.png" -o -name "*.log" \) -newer "$RUNNER_TEMP/devices.json" -exec cp {} maestro-debug/ \; || true
+            find "$HOME/.maestro/tests" -type f \( -name "*.png" -o -name "maestro.log" \) -size -4M -newer "$RUNNER_TEMP/devices.json" -exec cp {} maestro-debug/ \; || true
           fi
           {
             echo "# iPhone simulator screens"

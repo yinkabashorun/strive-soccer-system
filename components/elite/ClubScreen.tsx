@@ -8,6 +8,8 @@ import { fmtDuration } from "@/lib/elite/time-trained";
 import { CLUB_NAME_MAX, FREE_WEEK, clubLink, lastTrainedLabel, type MyClub } from "@/lib/elite/tracker";
 import { placeLine } from "@/lib/elite/club-teams";
 import type { ClubTeamView } from "@/lib/elite/club-teams-server";
+import type { MatchupView } from "@/lib/elite/club-matchups";
+import { MatchupCard } from "./MatchupCard";
 import { ActionSheet } from "./ActionSheet";
 import { Crest, FreeAvatar } from "./FreeAvatar";
 import { FreeTopBar } from "./FreeTopBar";
@@ -31,6 +33,7 @@ type Sheet = null | "menu" | "rename" | "end" | "report" | "leave" | "remove" | 
 export function ClubScreen({
   club,
   play,
+  matchup,
   weekTotal,
   heroUrl,
   appUrl,
@@ -38,6 +41,8 @@ export function ClubScreen({
 }: {
   club: MyClub;
   play: ClubTeamView;
+  // the weekly matchup (083); null until it is applied, and nothing is drawn
+  matchup: MatchupView | null;
   weekTotal: number;
   heroUrl: string | null;
   appUrl: string;
@@ -119,6 +124,14 @@ export function ClubScreen({
         <Num big={play.record} small="record" />
         <Num big={rank.big} small={rank.small} />
         <Num big={fmtDuration(weekTotal)} small="trained this week" last />
+      </div>
+
+      {/* the weekly matchup, right under the club's week, then the two
+          records, each its own line: games, and weeks won */}
+      {matchup && <MatchupCard matchup={matchup} />}
+      <div className="px-[18px] pt-3 text-[13px] leading-relaxed text-white/60">
+        <p>{play.recordLine}</p>
+        {matchup && <p>{matchup.recordLine}</p>}
       </div>
 
       {!club.ended && (

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { chunkedStorage, CHUNK_SIZE, MAX_CHUNKS, parseCount, splitValue, type KV } from "@/auth/chunks";
 import { applyDone } from "@/week-cache";
 import { overlay, outcomeOf, parseTicks, queueTick, REFUSED_LINE, retryDelayMs, settle, UNSENT_LINE, type Tick } from "@/outbox-core";
-import { areaFor, areaHome, inArea } from "@/navigation";
+import { areaFor, areaHome, inArea, pushRoute } from "@/navigation";
 import { clipOrder, clipsInView, liveClip, pickedAfterScroll, pickedAfterTap } from "@/course-view";
 import { drillEyebrow, repsTiles } from "@/drill-view";
 import { APP_TABS, FREE_TABS } from "@/tabs";
@@ -205,6 +205,13 @@ describe("where the app belongs", () => {
     for (const seg of ["(free)", "post", "offer", "week-plan", "profile-setup", "settings", "delete-account", "change-password"]) {
       expect(inArea("free", [seg])).toBe(true);
     }
+    // a club and everything one tap from it (start, join by code, its page,
+    // Manage, plan, clubs near you, how the matchup works)
+    for (const segs of [["club", "[id]"], ["club", "[id]", "manage"], ["club", "[id]", "plan"], ["club", "[id]", "near"], ["club", "start"], ["club", "join"], ["club", "how"]]) {
+      expect(inArea("free", segs), segs.join("/")).toBe(true);
+      // and never for a member, at a gate, or before the free app is open
+      for (const area of ["app", "gate", "free-offer", "free-quiz", "sign-in"] as const) expect(inArea(area, segs), `${area} ${segs.join("/")}`).toBe(false);
+    }
     // never a member's screens
     for (const seg of ["(tabs)", "session", "course", "extra", "checkin", "drop", "onboarding"]) {
       expect(inArea("free", [seg])).toBe(false);
@@ -319,10 +326,30 @@ describe("the tabs", () => {
     expect(APP_TABS.map((t) => t.route)).toEqual(["index", "week", "courses", "you"]);
   });
 
-  it("are four in the free app: Friends, Week, Courses, You", () => {
-    expect(FREE_TABS.map((t) => t.label)).toEqual(["Friends", "Week", "Courses", "You"]);
-    expect(FREE_TABS.map((t) => t.route)).toEqual(["friends", "my-week", "courses", "me"]);
+  it("are five in the free app: Friends, Week, Clubs, Courses, You", () => {
+    expect(FREE_TABS.map((t) => t.label)).toEqual(["Friends", "Week", "Clubs", "Courses", "You"]);
+    expect(FREE_TABS.map((t) => t.route)).toEqual(["friends", "my-week", "clubs", "courses", "me"]);
     expect(areaHome("free")).toBe(`/(free)/${FREE_TABS[0].route}`);
+  });
+});
+
+describe("a tapped notification", () => {
+  const CLUB = "22222222-2222-4222-8222-222222222222";
+  it("opens where the person lives", () => {
+    expect(pushRoute("app", "/dashboard")).toBe("/");
+    expect(pushRoute("free", "/log")).toBe("/(free)/friends");
+    expect(pushRoute("free", undefined)).toBe("/(free)/friends");
+    expect(pushRoute(null, "/log")).toBe("/");
+  });
+  it("opens the club itself for a club's session or game, in the free app only", () => {
+    expect(pushRoute("free", `/log/club/${CLUB}`)).toBe(`/club/${CLUB}`);
+    expect(pushRoute("app", `/log/club/${CLUB}`)).toBe("/");
+    expect(pushRoute("free-offer", `/log/club/${CLUB}`)).toBe("/offer");
+  });
+  it("never opens anything else an address asks for", () => {
+    for (const url of ["/log/club/../settings", "/log/club/abc", `https://evil.example/log/club/${CLUB}`, `/log/club/${CLUB}/manage`, 7, null]) {
+      expect(pushRoute("free", url), String(url)).toBe("/(free)/friends");
+    }
   });
 });
 

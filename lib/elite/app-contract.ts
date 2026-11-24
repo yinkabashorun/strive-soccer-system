@@ -9,6 +9,9 @@ import type { AreaMinutes } from "./time-trained";
 import type { FreeStage } from "./free-intake";
 import type { QuizStepId } from "./quiz";
 import type { BoardRow, Face, Kind, LockedCard, OpenCard, StripDay, TodayLine } from "./tracker";
+import type { ClubFace, ClubMemberRow, ClubWeek } from "./club-app";
+import type { PlanCard } from "./club-teams";
+import type { MatchupView } from "./club-matchups";
 import type { Squad } from "./squad-pass";
 
 export type { AppDrill, AppSession, AppWeek, AppYou, LadderRung, AreaMinutes };
@@ -121,7 +124,25 @@ export const APP_API = {
   freeFriend: "/api/app/free/friend",
   freeWeek: "/api/app/free/week",
   freeYou: "/api/app/free/you",
+  // clubs, in the free app
+  freeClubs: "/api/app/free/clubs",
+  freeClubJoin: "/api/app/free/clubs/join",
+  freePlans: "/api/app/free/plans",
+  freePlayTerms: "/api/app/free/play-terms",
 } as const;
+
+// One club: GET its page, POST something a member or its captain does.
+export function appClubPath(id: string): string {
+  return `${APP_API.freeClubs}/${encodeURIComponent(id)}`;
+}
+// Clubs near you, for the club's captain.
+export function appClubNearPath(id: string): string {
+  return `${appClubPath(id)}/near`;
+}
+// One session or game: POST what a player or a captain does with it.
+export function appPlanPath(id: string): string {
+  return `${APP_API.freePlans}/${encodeURIComponent(id)}`;
+}
 
 // One course, by its slug: GET /api/app/courses/<slug>.
 export function appCoursePath(slug: string): string {
@@ -219,3 +240,85 @@ export type AppFreeYou = {
 };
 
 export type AppUsernameAnswer = { ok: true; name: string } | { ok: false; name: string; error: string; taken?: boolean };
+
+
+// ---- Clubs in the free app (lib/elite/club-app-server.ts) -----------------
+
+export type { ClubFace, ClubMemberRow, ClubWeek, MatchupView, PlanCard };
+
+// A club on the Clubs tab: alive at a glance.
+export type AppClubCard = {
+  id: string;
+  name: string;
+  captain: boolean; // the viewer captains it
+  ended: boolean;
+  members: number;
+  // the club's training this week, as said ("14h")
+  weekTime: string;
+  // the newest training photo from the club this week that the viewer may
+  // see (the feed's own lock), behind the card; null when there is none
+  photo: string | null;
+  // the members who trained today, you first; nobody else is listed
+  today: ClubFace[];
+  // "Club training · Tue, Nov 24, 6:00 PM", or null
+  next: string | null;
+  // "This week: Renegados FC vs Sunday Pickup.", or null (083)
+  matchup: string | null;
+  // for its captain: answers waiting on them (players asking to join, a
+  // game request, a score to enter or confirm)
+  waiting: number;
+};
+
+export type AppClubs = { clubs: AppClubCard[]; canStart: boolean };
+
+// A training photo on the club page. A locked one (a teammate's post from
+// today, before the viewer has posted a photo today) carries whose it is
+// and how long, and no photo of the post at all.
+export type AppClubTile =
+  | { state: "open"; id: string; first: string; mine: boolean; time: string; photoUrl: string }
+  | { state: "locked"; id: string; first: string; initials: string; photo: string | null; time: string };
+
+export type AppClubRequest = { id: string; name: string; initials: string };
+export type AppGameAsk = { id: string; from: string; fromId: string; when: string; minutes: number; place: string };
+
+export type AppClubPage = {
+  id: string;
+  name: string;
+  // today in New York, so the phone lists the days a plan can be set for
+  // from the server's day, never its own clock
+  today: string;
+  captain: boolean;
+  ended: boolean;
+  byCoach: boolean; // a club a coach made: it has no captain
+  county: string | null;
+  countyName: string | null;
+  open: boolean; // open to games
+  record: string; // games: "4-1", or "New"
+  recordLine: string; // "Games won: 4. Games lost: 1. Draws: 0."
+  membersCount: number;
+  week: ClubWeek;
+  // the weekly matchup; null until 083 is applied (then nothing is drawn)
+  matchup: MatchupView | null;
+  members: ClubMemberRow[];
+  next: PlanCard[]; // coming up, the soonest first
+  results: PlanCard[]; // games that have started: their result, or waiting on one
+  accepted: { organizer: boolean; player: boolean };
+  photos: AppClubTile[];
+  // what the share sheet sends (the link and the code); null once ended
+  share: { text: string; link: string; code: string } | null;
+  // the captain's side; null for everyone else
+  manage: null | { requests: AppClubRequest[]; games: AppGameAsk[] };
+};
+
+// Clubs near you, for a captain: a club's crest, name, record and player
+// count, never a player. `refusal` says why a game cannot be sent now.
+export type AppNearClub = { id: string; name: string; record: string; members: number; refusal: string | null; played: boolean };
+export type AppClubNear = {
+  club: { id: string; name: string; county: string | null; countyName: string | null; open: boolean };
+  // set when the club already has as many game requests waiting as it may
+  fullLine: string | null;
+  rows: AppNearClub[];
+};
+
+// What a POST to a club, a plan or the play terms answers.
+export type AppClubAnswer = { ok: boolean; error?: string; needs?: "organizer" | "player"; id?: string; code?: string; line?: string };

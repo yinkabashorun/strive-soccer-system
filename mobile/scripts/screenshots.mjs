@@ -90,6 +90,33 @@ const SHOTS = [
   ["34-post", "/post?state=locked"],
   ["35-offer-again", "/offer?state=locked", 1800],
   ["36-free-settings", "/settings?state=locked"],
+  // clubs: the tab, a club as a member, as its captain, and the screens off it
+  ["37-clubs", "/clubs?state=locked", 1800],
+  ["38-club", "/club/c-renegados?state=locked", 1800],
+  ["38b-club-lower", "/club/c-renegados?state=locked", 1800, async (p) => {
+    await p.mouse.wheel(0, 900);
+    await p.waitForTimeout(700);
+  }],
+  ["38c-club-photos", "/club/c-renegados?state=locked", 1800, async (p) => {
+    await p.mouse.wheel(0, 1800);
+    await p.waitForTimeout(700);
+  }],
+  ["39-club-captain", "/club/c-pickup?state=locked", 1800],
+  ["39b-club-captain-lower", "/club/c-pickup?state=locked", 1800, async (p) => {
+    await p.mouse.wheel(0, 1100);
+    await p.waitForTimeout(700);
+  }],
+  ["40-club-manage", "/club/c-pickup/manage?state=locked", 1500],
+  ["40b-club-manage-lower", "/club/c-pickup/manage?state=locked", 1500, async (p) => {
+    await p.mouse.wheel(0, 900);
+    await p.waitForTimeout(700);
+  }],
+  ["41-clubs-near", "/club/c-pickup/near?state=locked", 1500],
+  ["42-club-plan", "/club/c-pickup/plan?state=locked", 1500],
+  ["43-club-join", "/club/join?state=locked"],
+  ["44-matchup-how", "/club/how?state=locked"],
+  ["45-club-week-decided", "/club/c-gainesville?state=locked", 1800],
+  ["46-club-start", "/club/start?state=locked"],
 ];
 
 const pwPath = process.env.PLAYWRIGHT ?? "playwright";

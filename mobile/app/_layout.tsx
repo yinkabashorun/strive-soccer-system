@@ -14,7 +14,7 @@ import { PERSIST_MAX_AGE, persister, queryClient } from "@/api/queryClient";
 import { setGateListener } from "@/api/client";
 import { fixtureRoute } from "@/api/fixtures";
 import { FIXTURES } from "@/config";
-import { areaFor, areaHome, inArea } from "@/navigation";
+import { areaFor, areaHome, inArea, pushRoute, type Area } from "@/navigation";
 import { keepTokenFresh } from "@/push";
 import { loadOutbox } from "@/outbox";
 import { loadPrefs } from "@/prefs";
@@ -79,12 +79,15 @@ function Gatekeeper() {
 
   // A tapped notification opens the app where this person lives: Home for
   // a member (the week, the coach), Friends for a free account (a friend
-  // posted, props).
-  const home = useRef("/");
-  home.current = area ? areaHome(area) : "/";
+  // posted, props), and the club itself for a club's session or game
+  // (src/navigation.ts pushRoute; the address rides on the notification as
+  // Apple delivers it, under trigger.payload).
+  const where = useRef<Area | null>(null);
+  where.current = area;
   useEffect(() => {
-    const sub = Notifications.addNotificationResponseReceivedListener(() => {
-      router.navigate(home.current as Href);
+    const sub = Notifications.addNotificationResponseReceivedListener((res) => {
+      const trigger = res.notification.request.trigger as { payload?: Record<string, unknown> } | null;
+      router.navigate(pushRoute(where.current, trigger?.payload?.url) as Href);
     });
     return () => sub.remove();
   }, [router]);
@@ -132,6 +135,13 @@ export default function RootLayout() {
               <Stack.Screen name="offer" options={{ animation: "fade" }} />
               <Stack.Screen name="week-plan" />
               <Stack.Screen name="post" options={{ presentation: "fullScreenModal" }} />
+              <Stack.Screen name="club/[id]/index" />
+              <Stack.Screen name="club/[id]/manage" />
+              <Stack.Screen name="club/[id]/plan" />
+              <Stack.Screen name="club/[id]/near" />
+              <Stack.Screen name="club/start" />
+              <Stack.Screen name="club/join" />
+              <Stack.Screen name="club/how" options={{ presentation: "modal" }} />
               <Stack.Screen name="agreement" options={{ animation: "fade", gestureEnabled: false }} />
               <Stack.Screen name="gate" options={{ animation: "fade", gestureEnabled: false }} />
               <Stack.Screen name="onboarding" options={{ animation: "fade", gestureEnabled: false }} />

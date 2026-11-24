@@ -187,9 +187,12 @@ describe("the words", () => {
   });
   it("every profile push takes its words from the list", () => {
     const src = code("lib/elite/free-notices-server.ts");
-    expect((src.match(/sendPushToProfile\(/g) ?? []).length).toBe(2);
+    expect((src.match(/sendPushToProfile\(/g) ?? []).length).toBe(3);
     expect(src).toContain("friendPostPush(first)");
     expect(src).toContain("propsPush(first)");
+    // the one about clubs (087): its words are the list's too
+    expect(src).toContain("const text = clubPlanPush({");
+    expect(src).toContain("sendPushToProfile(r.profileId, text)");
   });
 });
 

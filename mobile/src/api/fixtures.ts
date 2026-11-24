@@ -20,6 +20,7 @@ import { lessonBlocks } from "@shared/app-courses";
 import type { FreeStage } from "@shared/free-intake";
 import { auraLabel, friendsBoard, type Face } from "@shared/tracker";
 import { MEDIA_BASE } from "@/config";
+import { fixtureClubs } from "./fixtures-clubs";
 import { buildSquad } from "@shared/squad-pass";
 
 // The example player the screens are drawn with for review screenshots
@@ -34,9 +35,10 @@ import { buildSquad } from "@shared/squad-pass";
 //   simulator  the launch argument -fixtureState <the same words>, which
 //              iOS hands the app as a setting (sim/shots.sh, sim/flows)
 //
-// "locked" is a FREE account in the free app (Friends, Week, Courses, You):
-// friends, posts, a week under way, and the Courses shelf the way an
-// account that is not a member gets it (every course locked). "free_quiz"
+// "locked" is a FREE account in the free app (Friends, Week, Clubs, Courses,
+// You): friends, posts, a week under way, two clubs (fixtures-clubs.ts), and
+// the Courses shelf the way an account that is not a member gets it (every
+// course locked). "free_quiz"
 // is a free account that has not taken the quiz, "free_offer" one that has
 // and is at the offer. A run that starts "signedout" and taps Join free
 // becomes a new free account and moves on as it goes (the quiz, the
@@ -78,7 +80,7 @@ export function fixtureRoute(): string | null {
   const first = raw.split(/[/?]/)[0];
   return now().free && FREE_TABS.has(first) ? `/(free)/${raw}` : `/${raw}`;
 }
-const FREE_TABS = new Set(["friends", "my-week", "courses", "me"]);
+const FREE_TABS = new Set(["friends", "my-week", "clubs", "courses", "me"]);
 
 // Where the example account is. It starts as the run asked and, for a free
 // account, moves on as the screens are used. Memory only.
@@ -727,9 +729,11 @@ export function fixtureBootstrap(): AppBootstrap {
 }
 
 // The free app's calls, answered from the example and moved on by it.
-function fixtureFree(path: string, method: string): unknown {
+function fixtureFree(path: string, method: string, body?: unknown): unknown {
   const l = now();
   const at = path.slice("/api/app/free/".length);
+  // clubs, their sessions and games, and the two one-time sheets
+  if (/^(clubs|plans|play-terms)(\/|$)/.test(at)) return fixtureClubs(at, method, body, { mePhoto: ME_PHOTO, posted: l.posted });
   if (at === "open") return { open: true };
   if (at === "join") return { ok: true, signedIn: false };
   if (at === "intake") {
@@ -773,7 +777,7 @@ function fixtureTotalAfter(body: unknown): number {
 }
 
 export function fixtureResponse(path: string, method: string, body?: unknown): unknown {
-  if (path.startsWith("/api/app/free/")) return fixtureFree(path, method);
+  if (path.startsWith("/api/app/free/")) return fixtureFree(path, method, body);
   if (path.startsWith("/api/app/me")) return fixtureBootstrap();
   if (path.startsWith("/api/app/week")) return { week: FIXTURE_WEEK };
   if (path.startsWith("/api/app/you")) return { you: FIXTURE_YOU };

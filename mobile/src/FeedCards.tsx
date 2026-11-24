@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActionSheetIOS, Alert, Platform, StyleSheet, View } from "react-native";
+import { Alert, StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
 import { fmtDuration } from "@shared/time-trained";
 import { REPORT_REASONS, STAR_LABEL, lockedHeadline, lockedHeadlineLines, lockedLine, type LockedCard } from "@shared/tracker";
@@ -9,6 +9,7 @@ import { blockPlayer, deleteEntry, reportPost, toggleProps } from "./api/free";
 import { Avatar, MyAvatar, Star } from "./Avatar";
 import { feel } from "./feel";
 import { Shade } from "./Shade";
+import { sheet } from "./sheet";
 import { Body, Head, Label, Press } from "./ui";
 import { color, radius } from "./theme";
 
@@ -194,20 +195,6 @@ const POST_SHADE: [number, number][] = [
   [0.55, 0],
   [1, 0.78],
 ];
-
-// The iPhone's own bottom sheet. Anywhere else (the example build in a
-// browser) the same choices are asked as a plain alert.
-type SheetOptions = { title?: string; message?: string; options: string[]; cancelButtonIndex: number; destructiveButtonIndex?: number | number[] };
-function sheet(o: SheetOptions, picked: (index: number) => void) {
-  if (Platform.OS === "ios") {
-    return ActionSheetIOS.showActionSheetWithOptions({ ...o, userInterfaceStyle: "dark" }, picked);
-  }
-  Alert.alert(
-    o.title ?? "",
-    o.message,
-    o.options.map((text, i) => ({ text, style: i === o.cancelButtonIndex ? ("cancel" as const) : undefined, onPress: () => picked(i) }))
-  );
-}
 
 const styles = StyleSheet.create({
   locked: { marginHorizontal: 14, borderRadius: radius.card, backgroundColor: "#1c1b17", borderWidth: 1, borderColor: color.line, alignItems: "center", justifyContent: "center", paddingHorizontal: 30 },

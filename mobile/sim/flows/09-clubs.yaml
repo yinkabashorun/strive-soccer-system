@@ -1,0 +1,90 @@
+# Clubs by taps: the Clubs tab, a club's page, the weekly matchup's "How it
+# works", "I'm in" with the one-time sheet a player accepts before their
+# first session or game, then back to the tab and joining another club by
+# its code, which ASKS (the captain lets the player in).
+#
+# Example data only (src/api/fixtures-clubs.ts): every club and player is
+# made up, nothing is sent anywhere, and what is tapped here lives in the
+# app's memory until it is closed.
+appId: com.strivesoccer.elite
+---
+- launchApp:
+    clearState: true
+    arguments:
+      fixtureState: locked
+- extendedWaitUntil:
+    visible: "Post my training"
+    timeout: 30000
+- tapOn: "Clubs"
+
+# The tab: the player's clubs, each with its week, who trained today, this
+# week's matchup and what is next.
+- extendedWaitUntil:
+    visible: "Have a club code?"
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: t50-clubs
+- tapOn: "Renegados FC.*"
+
+# The club's page: its week, and this week's matchup right under it.
+- extendedWaitUntil:
+    visible: "How it works"
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: t51-club
+- tapOn: "How it works"
+- extendedWaitUntil:
+    visible: "Gym time does not count."
+    timeout: 15000
+- takeScreenshot: t52-matchup-how-it-works
+- tapOn: "Got it"
+
+# Next up: "I'm in". The first one shows the sheet, in the phone's own box.
+- scrollUntilVisible:
+    element: "I'm in"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+- takeScreenshot: t53-club-next-up
+- tapOn:
+    text: "I'm in"
+    index: 0
+- extendedWaitUntil:
+    visible: "Not now"
+    timeout: 15000
+- takeScreenshot: t54-player-sheet
+- tapOn: "Got it"
+- extendedWaitUntil:
+    visible: "You're in"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: t55-you-are-in
+
+# Back to the tab, and into another club by the code its captain sent.
+- scrollUntilVisible:
+    element: "Back"
+    direction: UP
+    timeout: 20000
+- tapOn: "Back"
+- extendedWaitUntil:
+    visible: "Have a club code?"
+    timeout: 15000
+- tapOn: "Have a club code?"
+- extendedWaitUntil:
+    visible: "Ask to join"
+    timeout: 15000
+- tapOn: "Club code"
+- inputText: "CATH2345"
+- takeScreenshot: t56-club-code-typing
+- tapOn: "Ask to join"
+- extendedWaitUntil:
+    visible: "Request sent.*"
+    timeout: 15000
+- takeScreenshot: t57-club-request-sent
+- tapOn: "Done"
+- extendedWaitUntil:
+    visible: "Have a club code?"
+    timeout: 15000

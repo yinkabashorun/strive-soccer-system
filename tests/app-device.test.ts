@@ -361,8 +361,8 @@ describe("the free app", () => {
   const layout = code(path.join(root, "app/(free)/_layout.tsx"));
   const names = (f: string) => path.basename(f).replace(/\.tsx$/, "");
 
-  it("has four tabs: Friends, Week, Courses, You", () => {
-    expect(pages.map(names).sort()).toEqual(["courses", "friends", "me", "my-week"]);
+  it("has five tabs: Friends, Week, Clubs, Courses, You", () => {
+    expect(pages.map(names).sort()).toEqual(["clubs", "courses", "friends", "me", "my-week"]);
     const tabs = code(path.join(root, "src/tabs.ts"));
     for (const p of pages) expect(tabs, names(p)).toContain(`route: "${names(p)}"`);
     expect(code(path.join(root, "app/_layout.tsx"))).toContain('<Stack.Screen name="(free)"');
@@ -440,6 +440,186 @@ describe("the free app", () => {
     for (const f of [...free, path.join(root, "app/post.tsx"), path.join(root, "app/week-plan.tsx"), path.join(root, "src/FeedCards.tsx")]) {
       expect(code(f), rel(f)).not.toMatch(/streak|missed|behind|\bpercent\b/i);
     }
+  });
+});
+
+// Clubs in the iPhone app (Nov 24 2026): the Clubs tab, the club's page and
+// the screens off it. What holds here is what a reader of the screens
+// cannot see: that no rule or sentence was copied onto the phone, that
+// nothing sells, that a locked photo is never drawn, and that the example
+// clubs are made up.
+describe("clubs", () => {
+  const clubFiles = sources.filter((f) =>
+    /^(app\/club\/|app\/\(free\)\/clubs\.tsx$|src\/(Crest|MatchupCard|PlanCards|CountyPicker|play-terms|sheet)\.tsx?$|src\/api\/clubs\.ts$)/.test(rel(f))
+  );
+  const at = (f: string) => code(path.join(root, f));
+
+  it("is a tab, a club's page, and the screens off it", () => {
+    expect(clubFiles.map(rel).sort()).toEqual([
+      "app/(free)/clubs.tsx",
+      "app/club/[id]/index.tsx",
+      "app/club/[id]/manage.tsx",
+      "app/club/[id]/near.tsx",
+      "app/club/[id]/plan.tsx",
+      "app/club/how.tsx",
+      "app/club/join.tsx",
+      "app/club/start.tsx",
+      "src/CountyPicker.tsx",
+      "src/Crest.tsx",
+      "src/MatchupCard.tsx",
+      "src/PlanCards.tsx",
+      "src/api/clubs.ts",
+      "src/play-terms.ts",
+      "src/sheet.ts",
+    ]);
+    const layout = at("app/_layout.tsx");
+    for (const name of ["club/[id]/index", "club/[id]/manage", "club/[id]/plan", "club/[id]/near", "club/start", "club/join", "club/how"]) {
+      expect(layout, name).toContain(`<Stack.Screen name="${name}"`);
+    }
+    // only a free account is ever let onto them
+    expect(at("src/navigation.ts")).toMatch(/FREE_ROUTES = new Set\(\[[^\]]*"club"/);
+  });
+
+  it("sells nothing: the one upgrade prompt stays on Week", () => {
+    for (const f of clubFiles) {
+      expect(code(f), rel(f)).not.toMatch(/upgrade|Strive Pro|\/offer|a month|membership|\bPro\b|unlock/i);
+    }
+  });
+
+  it("never counts what was missed, and has no streaks", () => {
+    for (const f of clubFiles) expect(code(f), rel(f)).not.toMatch(/streak|missed|behind|\bpercent\b|has not trained|did not train/i);
+  });
+
+  it("the matchup's words are the one shared file's, never written on the phone", () => {
+    const card = at("src/MatchupCard.tsx");
+    expect(card).toContain('from "@shared/club-matchup-words"');
+    expect(card).toContain("{matchupTitle(matchup.state)}");
+    expect(card).toContain("{matchup.line}");
+    expect(card).toContain("MATCHUP_PER_PLAYER");
+    expect(card).toContain('router.push("/club/how")');
+    const how = at("app/club/how.tsx");
+    expect(how).toContain("MATCHUP_HOW_LINES.map");
+    expect(how).toContain("{MATCHUP_HOW_TITLE}");
+    // no sentence about the matchup anywhere else on the phone
+    for (const f of clubFiles.filter((x) => !/fixtures/.test(rel(x)))) {
+      expect(code(f), rel(f)).not.toMatch(/won the week|per player\.|gets matched|Weeks won/);
+    }
+    // the record lines and the card line are the server's
+    const page = at("app/club/[id]/index.tsx");
+    expect(page).toContain("{c.recordLine}");
+    expect(page).toContain("{c.matchup.recordLine}");
+    expect(at("app/(free)/clubs.tsx")).toContain("{club.matchup}");
+  });
+
+  it("the two acceptance sheets are the website's words, recorded by the server", () => {
+    const terms = at("src/play-terms.ts");
+    expect(terms).toContain('from "@shared/club-teams"');
+    for (const w of ["ORGANIZER_SHEET_TITLE", "ORGANIZER_SHEET_LINE", "PLAYER_SHEET_TITLE", "PLAYER_SHEET_LINE"]) expect(terms, w).toContain(w);
+    expect(terms).toContain("acceptPlayTerms(kind)");
+    // the server says when one is owed; the phone remembers nothing
+    expect(terms).toContain("if (first.ok || !first.needs) return first;");
+    expect(terms).not.toMatch(/AsyncStorage|SecureStore|prefs/);
+    // every way to organize or to be in goes through it
+    expect(at("src/PlanCards.tsx")).toContain("withPlayTerms(() => setImIn(card.id, !imIn))");
+    expect(at("app/club/start.tsx")).toContain("withPlayTerms(");
+    expect(at("app/club/[id]/plan.tsx")).toContain("withPlayTerms(");
+    expect(at("app/club/[id]/manage.tsx")).toContain("withPlayTerms(() => answerGame(g.id, true))");
+  });
+
+  it("a session or game says which club organized it, never Strive", () => {
+    const cards = at("src/PlanCards.tsx");
+    expect(cards).toContain("{organizedBy(card.organizer.name)}");
+    expect(cards).toContain('from "@shared/club-teams"');
+    for (const f of clubFiles) expect(code(f), rel(f)).not.toMatch(/Organized by Strive|by Strive Elite/);
+  });
+
+  it("a locked photo is given no photo of the post to draw", () => {
+    const page = at("app/club/[id]/index.tsx");
+    const tile = page.slice(page.indexOf("function Tile("), page.indexOf("const styles"));
+    const locked = tile.slice(tile.indexOf('tile.state === "locked"'), tile.indexOf("return (", tile.indexOf("</Press>")));
+    expect(locked).toContain("<Avatar uri={tile.photo}");
+    expect(locked).not.toMatch(/photoUrl|<Image\b/);
+    // and the type itself carries none (lib/elite/app-contract.ts)
+    const contract = read(path.resolve(root, "../lib/elite/app-contract.ts"));
+    const type = contract.slice(contract.indexOf("export type AppClubTile"), contract.indexOf("export type AppClubRequest"));
+    expect(type).toMatch(/state: "locked";[^}]*\}/);
+    expect(type.slice(type.indexOf('state: "locked"')).split("}")[0]).not.toContain("photoUrl");
+  });
+
+  it("every member is drawn with their photo, and a crest is never a real logo", () => {
+    const page = at("app/club/[id]/index.tsx");
+    expect(page).toMatch(/<MyAvatar uri=\{m\.photo\}/);
+    expect(page).toMatch(/<Avatar uri=\{m\.photo\}/);
+    const tab = at("app/(free)/clubs.tsx");
+    expect(tab).toMatch(/<Avatar key=\{f\.id\} uri=\{f\.photo\}/);
+    const crest = at("src/Crest.tsx");
+    expect(crest).toContain('from "@shared/tracker"');
+    expect(crest).toContain("crestOf(club)");
+    expect(crest).not.toMatch(/<Image\b|uri:/);
+    // two crests on one screen never share a colour by accident
+    expect(crest).toContain("crest-${crestIndex(club.id)}");
+  });
+
+  it("joining asks, by a code typed or a whole link pasted, read by the one shared rule", () => {
+    const join = at("app/club/join.tsx");
+    expect(join).toContain('from "@shared/club-app"');
+    expect(join).toContain("clubCodeFrom(code)");
+    expect(join).toContain("CLUB_CODE_MESSAGE");
+    expect(join).toContain("{done.line}");
+    expect(join).toMatch(/<FormScreen\b/);
+    // sharing sends the link and the code, in the server's words
+    expect(at("app/club/[id]/index.tsx")).toContain("Share.share({ message: c.share!.text })");
+  });
+
+  it("a captain's tools sit behind one row, and a member is shown none of them", () => {
+    const page = at("app/club/[id]/index.tsx");
+    expect(page.match(/label="Manage"/g)?.length).toBe(1);
+    expect(page).toMatch(/\{c\.captain \? \(\s*<>\s*\{c\.share \? <Hairline \/> : null\}\s*<SettingRow\s+label="Manage"/);
+    // nothing planned: the captain is offered to plan, everyone else nothing
+    expect(page).toContain(") : c.captain && !c.ended ? (");
+    // a game is only ever sent to a club from the list of clubs near you
+    const near = at("app/club/[id]/near.tsx");
+    expect(near).toContain("plan?vs=");
+    expect(at("app/club/[id]/plan.tsx")).toMatch(/<FormScreen\b/);
+    expect(at("app/club/[id]/manage.tsx")).toMatch(/<FormScreen\b/);
+    expect(at("app/club/start.tsx")).toMatch(/<FormScreen\b/);
+  });
+
+  it("the tab leaves its room in the one place and asks for nothing", () => {
+    const tab = at("app/(free)/clubs.tsx");
+    expect(tab).toContain("<Screen");
+    expect(tab).toContain("paddingTop: PAGE_TOP");
+    for (const f of clubFiles) expect(code(f), rel(f)).not.toMatch(/turnOnNotifications|requestPermissionsAsync/);
+  });
+
+  it("a tapped club notification opens that club, and only for a free account", () => {
+    const nav = at("src/navigation.ts");
+    expect(nav).toContain("export function pushRoute(");
+    expect(at("app/_layout.tsx")).toContain("pushRoute(where.current,");
+    // the notification's words say what the notification is for
+    expect(at("app/settings.tsx")).toContain("or your club plans a session or a game. Nothing else.");
+  });
+
+  it("the example clubs are made up, and every picture is a drill still", () => {
+    const fx = read(path.join(root, "src/api/fixtures-clubs.ts"));
+    expect(fx).toContain("const m = (file: string) => `${MEDIA_BASE}/drills/posters/${file}.jpg`;");
+    // no other address, and no picture from anywhere but that one helper
+    expect(code(path.join(root, "src/api/fixtures-clubs.ts")).match(/https?:\/\/[^"`\s]+/g) ?? []).toEqual([
+      "https://thestriveapp.com/join?club=${code}",
+      "https://thestriveapp.com",
+    ]);
+    const posters = readdirSync(path.resolve(root, "../public/drills/posters"));
+    const stills = [...fx.matchAll(/m\("([a-z0-9-]+)"\)/g)].map((x) => x[1]).concat([...fx.matchAll(/open\("[a-z-]+", "[A-Za-z]+", "([a-z0-9-]+)"/g)].map((x) => x[1]));
+    expect(stills.length).toBeGreaterThan(8);
+    for (const s of stills) expect(posters, s).toContain(`${s}.jpg`);
+    for (const name of ["Renegados FC", "Sunday Pickup", "Gainesville HS", "Diego R.", "Nico A.", "Jalen T.", "Kai M.", "Marcus B."]) expect(fx, name).toContain(name);
+    // the example answers every clubs call the app makes
+    const api = at("src/api/clubs.ts");
+    expect(api).toContain("APP_API.freeClubs");
+    expect(api).toContain("APP_API.freeClubJoin");
+    expect(api).toContain("APP_API.freePlans");
+    expect(api).toContain("APP_API.freePlayTerms");
+    expect(read(path.join(root, "src/api/fixtures.ts"))).toContain("/^(clubs|plans|play-terms)(\\/|$)/.test(at)");
   });
 });
 

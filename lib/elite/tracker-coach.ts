@@ -4,6 +4,7 @@
 // comes from here: a player's screens read tracker-server.ts, which only
 // ever reads that player's own rows and their own friends'.
 import { createServiceClient } from "./supabase/server";
+import { everyRow } from "./supabase/every-row";
 import { SHARE_SOURCE } from "./share-link";
 import { nyToday } from "./time";
 import {
@@ -152,19 +153,7 @@ export async function getFreeOverview(): Promise<FreeOverview> {
   if (!admin) return demoOverview(today);
 
   // The database hands back at most 1,000 rows a request, so each list is
-  // read a page at a time until a short page says that is all.
-  const PAGE = 1000;
-  async function everyRow<T>(
-    page: (from: number, to: number) => PromiseLike<{ data: unknown }>
-  ): Promise<T[]> {
-    const out: T[] = [];
-    for (let from = 0; ; from += PAGE) {
-      const { data } = await page(from, from + PAGE - 1);
-      const batch = (data as T[] | null) ?? [];
-      out.push(...batch);
-      if (batch.length < PAGE) return out;
-    }
-  }
+  // read a page at a time (lib/elite/supabase/every-row.ts).
   type LogRow = {
     id: string;
     profile_id: string;

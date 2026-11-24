@@ -9,7 +9,7 @@ import type { AppSession, AppWeek } from "@shared/app-contract";
 import { keys, useMe, useWeek } from "@/api/queries";
 import { queryClient } from "@/api/queryClient";
 import { seenWeek } from "@/prefs";
-import { Screen } from "@/Screen";
+import { PAGE_TOP, Screen } from "@/Screen";
 import { useMyPhoto } from "@/usePhoto";
 import { HERO_SHADE, Shade } from "@/Shade";
 import { Body, Button, Card, Disc, Eyebrow, Head, Icon, Label, Press, Ring, Skeleton } from "@/ui";
@@ -230,7 +230,7 @@ function WeekComplete({ week, onCheckin }: { week: AppWeek; onCheckin: () => voi
 }
 
 const styles = StyleSheet.create({
-  top: { flexDirection: "row", alignItems: "flex-end", paddingHorizontal: 20, paddingTop: 44 },
+  top: { flexDirection: "row", alignItems: "flex-end", paddingHorizontal: 20, paddingTop: PAGE_TOP },
   initials: { width: 44, height: 44, borderRadius: 22, backgroundColor: "#1c1c1c", alignItems: "center", justifyContent: "center", overflow: "hidden" },
   hero: { marginHorizontal: 14, marginTop: 18, height: 452, borderRadius: radius.card, overflow: "hidden", backgroundColor: color.fill },
   heroIn: { position: "absolute", left: 0, right: 0, bottom: 0, padding: 20 },

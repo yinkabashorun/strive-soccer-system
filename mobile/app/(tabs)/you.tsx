@@ -5,7 +5,7 @@ import { keys, useMe, useYou } from "@/api/queries";
 import { queryClient } from "@/api/queryClient";
 import { MemberCard } from "@/MemberCard";
 import { useMyPhoto } from "@/usePhoto";
-import { Screen } from "@/Screen";
+import { PAGE_TOP, Screen } from "@/Screen";
 import { Body, Card, Disc, Hairline, Head, Label, Ring, SettingRow, Skeleton } from "@/ui";
 import { color } from "@/theme";
 
@@ -23,7 +23,7 @@ export default function You() {
 
   return (
     <Screen onRefresh={() => queryClient.invalidateQueries({ queryKey: keys.you })}>
-      <View style={{ paddingHorizontal: 20, paddingTop: 44 }}>
+      <View style={{ paddingHorizontal: 20, paddingTop: PAGE_TOP }}>
         <Head size={40}>You</Head>
         <Body dim size={13.5} style={{ marginTop: 6 }}>
           {[card?.name, y?.position ?? me.data?.player?.position].filter(Boolean).join(" · ")}

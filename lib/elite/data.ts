@@ -8,6 +8,7 @@ import type { TemplateContext, TemplateUsage } from "./bank-conform";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { unstable_noStore as noStore } from "next/cache";
 import { createClient, createServiceClient } from "./supabase/server";
+import { everyRow } from "./supabase/every-row";
 import { recentAppErrors } from "./app-errors-server";
 import { perRequest } from "./request-cache";
 import {
@@ -108,11 +109,10 @@ export async function getPlanCoverage(): Promise<Record<string, number>> {
     }
     return out;
   }
-  const { data, error } = await supabase
-    .from("elite_homework")
-    .select("player_id, week");
-  if (error || !data) return out;
-  for (const h of data as { player_id: string; week: number }[]) {
+  const rows = await everyRow<{ player_id: string; week: number }>((from, to) =>
+    supabase.from("elite_homework").select("player_id, week").order("id").range(from, to)
+  );
+  for (const h of rows) {
     out[h.player_id] = Math.max(out[h.player_id] ?? 0, h.week ?? 0);
   }
   return out;
@@ -204,13 +204,18 @@ export async function backfillHomeworkVideos(
   let fixed = 0;
 
   // Pass 1: ID-linked rows, re-synced from their drill's current video.
-  const { data: linked } = await admin
-    .from("elite_homework")
-    .select("id, drill_id, video_url")
-    .not("drill_id", "is", null);
-  const linkedMissing = (
-    (linked ?? []) as { id: string; drill_id: string; video_url: string | null }[]
-  ).filter((h) => !h.video_url);
+  // Only the rows that need it: a linked row with no video. (Asked for as
+  // every linked row, this read stopped at 1,000 and the rest were never
+  // looked at.)
+  const linkedMissing = await everyRow<{ id: string; drill_id: string; video_url: string | null }>((from, to) =>
+    admin
+      .from("elite_homework")
+      .select("id, drill_id, video_url")
+      .not("drill_id", "is", null)
+      .is("video_url", null)
+      .order("id")
+      .range(from, to)
+  );
   if (linkedMissing.length > 0) {
     const { data: drills } = await admin
       .from("elite_drills")
@@ -238,17 +243,16 @@ export async function backfillHomeworkVideos(
   // even a row that already has a video graduates onto the robust id path
   // and picks up any future update to that drill's video too, not just
   // today's gap.
-  const { data: unlinked } = await admin
-    .from("elite_homework")
-    .select("id, title")
-    .is("drill_id", null);
-  if (unlinked && unlinked.length > 0) {
+  const unlinked = await everyRow<{ id: string; title: string }>((from, to) =>
+    admin.from("elite_homework").select("id, title").is("drill_id", null).order("id").range(from, to)
+  );
+  if (unlinked.length > 0) {
     const { data: bank } = await admin.from("elite_drills").select("id, title, video_url");
     const byTitle = new Map<string, { id: string; video_url: string | null }>();
     for (const d of bank ?? []) {
       byTitle.set(normalizeTitle(String(d.title)), { id: d.id as string, video_url: d.video_url as string | null });
     }
-    for (const h of unlinked as { id: string; title: string }[]) {
+    for (const h of unlinked) {
       const match = byTitle.get(normalizeTitle(h.title));
       if (!match) continue;
       const update: { drill_id: string; video_url?: string } = { drill_id: match.id };
@@ -942,20 +946,26 @@ export async function getCoachInbox(): Promise<CoachInbox> {
   }
 
   const inbox: CoachInbox = { ...empty, byPlayer: {} };
-  const { data: checkins } = await supabase
-    .from("elite_checkins")
-    .select("player_id, coach_feedback")
-    .or("coach_feedback.is.null,coach_feedback.eq.");
-  for (const c of (checkins as { player_id: string }[] | null) ?? [])
-    bump(inbox, c.player_id, "checkins");
+  const checkins = await everyRow<{ player_id: string }>((from, to) =>
+    supabase
+      .from("elite_checkins")
+      .select("player_id, coach_feedback")
+      .or("coach_feedback.is.null,coach_feedback.eq.")
+      .order("id")
+      .range(from, to)
+  );
+  for (const c of checkins) bump(inbox, c.player_id, "checkins");
 
-  const { data: msgs } = await supabase
-    .from("elite_messages")
-    .select("player_id, from_role, read")
-    .eq("from_role", "player")
-    .eq("read", false);
-  for (const m of (msgs as { player_id: string }[] | null) ?? [])
-    bump(inbox, m.player_id, "messages");
+  const msgs = await everyRow<{ player_id: string }>((from, to) =>
+    supabase
+      .from("elite_messages")
+      .select("player_id, from_role, read")
+      .eq("from_role", "player")
+      .eq("read", false)
+      .order("id")
+      .range(from, to)
+  );
+  for (const m of msgs) bump(inbox, m.player_id, "messages");
 
   return inbox;
 }

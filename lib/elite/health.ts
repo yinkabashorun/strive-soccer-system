@@ -17,6 +17,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { liveWeekFor, nyToday } from "./time";
 import { isOnBreak } from "./breaks";
+import { everyRow } from "./supabase/every-row";
 
 export type HealthIssue = { name: string; issue: string };
 
@@ -85,10 +86,6 @@ export async function auditLiveWeeks(admin: SupabaseClient): Promise<HealthIssue
   const roster = await withoutPlayersOnBreak(admin, everyone);
   if (roster.length === 0) return [];
 
-  const { data: hw } = await admin
-    .from("elite_homework")
-    .select("player_id, week, session, video_url, drill_id, template_id, elite_drills(active)")
-    .in("player_id", roster.map((p) => p.id));
   type Raw = {
     player_id: string;
     week: number;
@@ -98,9 +95,19 @@ export async function auditLiveWeeks(admin: SupabaseClient): Promise<HealthIssue
     template_id?: string | null;
     elite_drills: { active: boolean } | { active: boolean }[] | null;
   };
+  // Every row, a page at a time: read in one go this stopped at 1,000 and
+  // the audit reported weeks as unbuilt that were built (every-row.ts).
+  const hw = await everyRow<Raw>((from, to) =>
+    admin
+      .from("elite_homework")
+      .select("player_id, week, session, video_url, drill_id, template_id, elite_drills(active)")
+      .in("player_id", roster.map((p) => p.id))
+      .order("id")
+      .range(from, to)
+  );
   const byPlayer = new Map<string, WeekRow[]>();
   const tplByPlayer = new Map<string, TemplateRow[]>();
-  for (const r of ((hw as Raw[] | null) ?? [])) {
+  for (const r of hw) {
     const d = Array.isArray(r.elite_drills) ? r.elite_drills[0] : r.elite_drills;
     const list = byPlayer.get(r.player_id) ?? [];
     list.push({

@@ -6,6 +6,7 @@
 // that runs this twice in an hour can never send a second push that day.
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServiceClient } from "./supabase/server";
+import { everyRow } from "./supabase/every-row";
 import { isPushConfigured, sendPushToPlayer } from "./push";
 import { isNativePushConfigured } from "./apns";
 import { trainingReminderPush } from "./push-texts";
@@ -56,15 +57,19 @@ export async function sendTrainingReminders(): Promise<ReminderRun> {
   const ids = roster.map((p) => p.id);
   const today = nyToday();
   const hour = nyHour();
-  const [{ data: rows }, { data: breaks }] = await Promise.all([
-    admin
-      .from("elite_homework")
-      .select("id, player_id, week, session, is_extra, completed, completed_at, sort, title")
-      .in("player_id", ids),
+  const [rows, { data: breaks }] = await Promise.all([
+    everyRow<Homework>((from, to) =>
+      admin
+        .from("elite_homework")
+        .select("id, player_id, week, session, is_extra, completed, completed_at, sort, title")
+        .in("player_id", ids)
+        .order("id")
+        .range(from, to)
+    ),
     admin.from("elite_training_breaks").select("player_id, since, until").in("player_id", ids).gte("until", today),
   ]);
   const hwBy = new Map<string, Homework[]>();
-  for (const h of (rows as Homework[] | null) ?? []) hwBy.set(h.player_id, [...(hwBy.get(h.player_id) ?? []), h]);
+  for (const h of rows) hwBy.set(h.player_id, [...(hwBy.get(h.player_id) ?? []), h]);
   const breaksBy = new Map<string, Pick<TrainingBreak, "since" | "until">[]>();
   for (const b of (breaks as (Pick<TrainingBreak, "since" | "until"> & { player_id: string })[] | null) ?? []) {
     breaksBy.set(b.player_id, [...(breaksBy.get(b.player_id) ?? []), b]);

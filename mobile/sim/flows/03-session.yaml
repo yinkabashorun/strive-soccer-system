@@ -1,0 +1,41 @@
+# A whole session by taps: Start, the count-in, a drill, Done, the set
+# timer, the rest of the drills, the finish screen.
+appId: com.strivesoccer.elite
+---
+- launchApp:
+    clearState: true
+    arguments:
+      fixtureState: ok
+- extendedWaitUntil:
+    visible: "Start session"
+    timeout: 30000
+- tapOn: "Start session"
+- takeScreenshot: t07-session-count-in
+- extendedWaitUntil:
+    visible: "Done"
+    timeout: 20000
+- takeScreenshot: t08-session-first-drill
+- tapOn: "Done"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: t09-session-second-drill
+- tapOn: "Start the set timer"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: t10-session-set-timer
+- tapOn:
+    text: "Back to the drill"
+    optional: true
+- tapOn:
+    text: "Close"
+    optional: true
+- tapOn: "Done"
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn: "Done"
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn: "Done"
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: t11-session-finish

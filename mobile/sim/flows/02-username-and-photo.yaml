@@ -1,0 +1,31 @@
+# The @username screen with the keyboard up, then the photo screen and the
+# phone's own photo picker.
+appId: com.strivesoccer.elite
+---
+- launchApp:
+    clearState: true
+    arguments:
+      fixtureState: setup
+- extendedWaitUntil:
+    visible: "Next"
+    timeout: 30000
+- tapOn: "Username"
+- inputText: "marcus.b"
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: t04-username-typing
+- tapOn: "Next"
+- extendedWaitUntil:
+    visible: "Choose from photos"
+    timeout: 15000
+- takeScreenshot: t05-photo-screen
+- tapOn: "Choose from photos"
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: t06-photo-picker
+# the phone's own picker can take a moment to draw the first time
+- extendedWaitUntil:
+    visible: "Cancel"
+    timeout: 12000
+    optional: true
+- takeScreenshot: t06b-photo-picker-later

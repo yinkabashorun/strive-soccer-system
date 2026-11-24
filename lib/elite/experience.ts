@@ -124,8 +124,8 @@ export function firstWeekStatus(i: { active: boolean; built: boolean; week1Monda
 }
 
 export const FIRST_WEEK_LINE: Record<Exclude<FirstWeekStatus, "live">, { title: string; body: string }> = {
-  monday: { title: "Your first week starts Monday.", body: "It is built and waiting. It opens Monday morning, and we'll text you when it does." },
-  waiting: { title: "Your week lands within the hour.", body: "We'll text you the moment it is ready." },
+  monday: { title: "Your first week starts Monday.", body: "It is built and waiting. It opens right here Monday morning." },
+  waiting: { title: "Your week lands within the hour.", body: "It shows up right here the moment it is ready." },
   off: { title: "Your answers are in.", body: "Your coach switches your membership on, then your first week lands within the hour." },
 };
 

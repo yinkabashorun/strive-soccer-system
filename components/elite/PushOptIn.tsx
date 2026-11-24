@@ -1,5 +1,6 @@
 "use client";
 
+import { whyNotifications } from "@/lib/elite/notices";
 import { useCallback, useEffect, useState } from "react";
 import { Bell, Share } from "lucide-react";
 import {
@@ -106,9 +107,9 @@ export function useNotificationsAsk(enabled: boolean): { ask: FinishAsk; shown: 
 const COPY = {
   member: {
     title: "Turn on notifications",
-    body: "So you know the moment your new week is live, your coach messages you, or a Film Room is announced. Nothing else.",
+    body: null as string | null, // said by whyNotifications, below: only what this member really gets
     install:
-      "Tap the Share button in your browser, then tap Add to Home Screen. Open Strive Elite from your home screen and turn on notifications, so you know the moment your new week is live or your coach messages you.",
+      "Tap the Share button in your browser, then tap Add to Home Screen. Open Strive Elite from your home screen and turn on notifications, so you know the moment your new week is here.",
     where: "You can change this any time on your Account page.",
   },
   free: {
@@ -124,12 +125,16 @@ export function PushOptIn({
   ask,
   onDone,
   variant = "member",
+  coachTime = true,
 }: {
   ask: Exclude<FinishAsk, null>;
   onDone: () => void;
   variant?: keyof typeof COPY;
+  // the member's offer has the coach's own time (chat, Film Room): false
+  // for Strive Pro, who is never told about either
+  coachTime?: boolean;
 }) {
-  const copy = COPY[variant];
+  const copy = { ...COPY[variant], body: COPY[variant].body ?? whyNotifications({ coachTime, friends: false }) };
   const [busy, setBusy] = useState(false);
   // A member who just said yes is asked one more thing, once, on this same
   // step: when they usually train, so the one daily reminder comes then.

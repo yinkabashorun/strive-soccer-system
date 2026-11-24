@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter, type Href } from "expo-router";
 import { POST_SESSION_ROW } from "@shared/one-app";
+import { whyNotifications, type NoticeWho } from "@shared/notices";
+import { featureOn } from "@shared/tiers";
 import { hasTrain } from "@/navigation";
 import { useKeepAwake } from "expo-keep-awake";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -164,6 +166,8 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
         drillIds={drills.map((d) => d.id)}
         finish={finish}
         askPush={!prefs.pushAsked}
+        // only what this player will really be told about
+        who={{ coachTime: featureOn(me.data?.player?.tier, "coachChat"), friends: hasTrain(me.data?.state) }}
         onHome={() => router.back()}
         // a member with friends in the app (one-app.ts): one quiet row. A
         // session that added no time has nothing to post.
@@ -274,6 +278,7 @@ function Finish({
   askPush,
   onHome,
   onPost,
+  who,
 }: {
   name: string;
   week: AppWeek;
@@ -282,6 +287,7 @@ function Finish({
   askPush: boolean;
   onHome: () => void;
   onPost?: () => void;
+  who: NoticeWho;
 }) {
   const insets = useSafeAreaInsets();
   const reduce = useReducedMotion();
@@ -378,7 +384,7 @@ function Finish({
           <View style={styles.ask}>
             <Label>Turn on notifications?</Label>
             <Body dim size={13} style={{ marginTop: 4 }}>
-              So you know the moment your new week is live, your coach messages you, or a Film Room is announced. Nothing else.
+              {whyNotifications(who)}
             </Body>
             <View style={{ flexDirection: "row", gap: 10, marginTop: 12 }}>
               <Button style={{ flex: 1 }} quiet label="Not now" onPress={() => setPush("skip")} />

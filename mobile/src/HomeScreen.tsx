@@ -116,7 +116,7 @@ export function HomeScreen({ train = false }: { train?: boolean }) {
         <Card style={styles.note}>
           <Head size={30}>Your first week is coming, {firstName}</Head>
           <Body dim style={{ marginTop: 12 }}>
-            It is being built around your answers. It shows up here the moment it is ready, and you get a notification when it does.
+            It is being built around your answers. It shows up right here the moment it is ready.
           </Body>
         </Card>
       ) : current ? (

@@ -109,13 +109,13 @@ export function FriendsFeed({
       {feed.friendCount === 0 ? (
         <Empty
           title="Your friends' training lands here"
-          line="Send your link to a teammate. When they join, accept their friend request and you see each other's training every day."
+          line="Send your link to a teammate. Accept their request, and you see each other's training every day."
           inviteLink={squad ? undefined : inviteLink}
         />
       ) : cards.length === 0 ? (
         <Empty
-          title="Nobody has posted yet this week"
-          line="Post a photo of your training and be the first your friends see."
+          title="Nobody has posted this week"
+          line="Be the first. Post a photo of your training."
         />
       ) : (
         <ul className="mt-3.5 space-y-3.5">

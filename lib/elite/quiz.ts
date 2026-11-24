@@ -242,7 +242,7 @@ export const QUIZ_QUESTIONS: Record<QuizStepId, { title: string; sub?: string }>
   goals: { title: "What are you chasing?", sub: "One goal a line. This one is optional." },
   onBall: { title: "On the ball.", sub: "Rate yourself on each one, 1 to 5. Be honest: the lowest ones are where your training starts." },
   offBall: { title: "Off the ball.", sub: "Your speed, your body and how you read the game. Same scale, 1 to 5." },
-  parent: { title: "Your parent or guardian.", sub: "We text them when your new week is ready." },
+  parent: { title: "Your parent or guardian.", sub: "So we can reach them about your training." },
 };
 
 // Whether a screen has what it needs to move on. A typed screen that is

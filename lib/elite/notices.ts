@@ -397,6 +397,25 @@ export function topicsFor(who: { member: boolean; free: boolean; coachTime: bool
   return mine.filter((t) => used.has(t));
 }
 
+// WHY we ask to send notifications (the finish screen's one ask) and WHAT
+// arrives (the row in Settings): only what this person will really get.
+// A Strive Pro player has no coach chat and no Film Room, so neither is
+// named to them; a player with friends in the app is told about friends.
+// One place, so the website and the iPhone app can never promise more.
+export type NoticeWho = { coachTime: boolean; friends: boolean };
+
+export function whyNotifications(who: NoticeWho): string {
+  if (who.coachTime) return "So you know the moment your new week is here, your coach messages you, or a Film Room is announced. Nothing else.";
+  if (who.friends) return "So you know when your new week is here, when a friend posts, and what your club plans. Nothing else.";
+  return "So you know the moment your new week is here, and when today's session is ready. Nothing else.";
+}
+
+export function whatNotifications(who: NoticeWho): string {
+  if (who.coachTime) return "Your new week, your coach, a Film Room. Nothing else.";
+  if (who.friends) return "Your new week, a friend's post or props, and what your club plans. Nothing else.";
+  return "Your new week, and one reminder on a day you have a session left. Nothing else.";
+}
+
 // What is stored (elite_profiles.notify_off): only topics we know, once
 // each. Anything else in the request is dropped.
 export function cleanTopicsOff(raw: unknown): NoticeTopic[] {

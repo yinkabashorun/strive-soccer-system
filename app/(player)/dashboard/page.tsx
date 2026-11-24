@@ -219,8 +219,8 @@ export default async function DashboardPage({
         <section className="m-card px-6 py-8 text-center">
           <p className="m-head text-[30px] leading-[1.02]">Your first week is coming, {firstName}</p>
           <p className="mx-auto mt-3 max-w-sm text-[15px] leading-relaxed text-white/65">
-            Your coach is building it around your answers. It shows up here the moment it is ready,
-            and you get a notification when it does.
+            Your coach is building it around your answers. It shows up right here the moment it is
+            ready.
           </p>
         </section>
       )}

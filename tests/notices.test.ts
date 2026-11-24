@@ -499,3 +499,36 @@ describe("migration 088", () => {
     expect(reminders).toMatch(/id, profile_id, week1_monday, current_week"/);
   });
 });
+
+// Nov 24 2026, the copy pass: a line that promises something this player
+// never gets is not copy, it is a mistake. Strive Pro has no coach chat and
+// no Film Room; nobody is texted about a new week any more.
+describe("the words around notifications only promise what arrives", () => {
+  it("a Strive Pro player is never told about a coach or a Film Room", async () => {
+    const { whyNotifications, whatNotifications } = await import("@/lib/elite/notices");
+    for (const say of [whyNotifications, whatNotifications]) {
+      const pro = say({ coachTime: false, friends: false });
+      const proWithFriends = say({ coachTime: false, friends: true });
+      for (const line of [pro, proWithFriends]) expect(line).not.toMatch(/coach|Film Room/i);
+      expect(pro).toMatch(/new week/);
+      expect(proWithFriends).toMatch(/friend/);
+      expect(say({ coachTime: true, friends: false })).toMatch(/coach/);
+      for (const line of [pro, proWithFriends, say({ coachTime: true, friends: false })]) expect(line).toMatch(/Nothing else\.$/);
+    }
+  });
+
+  it("the phone and the website both say it from that one place", () => {
+    expect(read("mobile/app/session/[n].tsx")).toContain("{whyNotifications(who)}");
+    expect(read("mobile/app/settings.tsx")).toContain("whatNotifications({");
+    expect(read("components/elite/PushOptIn.tsx")).toContain("whyNotifications({ coachTime, friends: false })");
+    for (const f of ["mobile/app/session/[n].tsx", "mobile/app/settings.tsx", "components/elite/PushOptIn.tsx"]) {
+      expect(read(f), f).not.toContain("a Film Room is announced");
+    }
+  });
+
+  it("nobody is promised a text about a new week", () => {
+    for (const f of ["lib/elite/experience.ts", "lib/elite/quiz.ts", "mobile/src/HomeScreen.tsx", "app/(player)/dashboard/page.tsx"]) {
+      expect(read(f), f).not.toMatch(/we(?:'| wi)ll text you|We text them when your new week|you get a notification when it does/i);
+    }
+  });
+});

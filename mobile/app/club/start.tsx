@@ -91,7 +91,7 @@ export default function StartClub() {
         Start a club
       </Head>
       <Body dim style={{ marginTop: 10 }}>
-        {`Your club team, a tournament team, the players you train with. You are its captain: you let in each player who asks, and they become friends with everyone in the club. You can be in ${CLUBS_PER_PLAYER} clubs.`}
+        {`Your team. Your pickup crew. The players you train with. You are the captain: you let each player in, and they become friends with everyone in the club. You can be in ${CLUBS_PER_PLAYER} clubs.`}
       </Body>
       <TextInput
         style={styles.input}

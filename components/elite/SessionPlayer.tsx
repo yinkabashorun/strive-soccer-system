@@ -264,7 +264,8 @@ export function SessionPlayer({
   );
 
   const body = asking && ask ? (
-    <PushOptIn ask={ask} onDone={onClose} />
+    // an offer without Send a clip is Strive Pro: no coach chat, no Film Room
+    <PushOptIn ask={ask} onDone={onClose} coachTime={sendClips !== false} />
   ) : finished ? (
     <Finish
       title={title}

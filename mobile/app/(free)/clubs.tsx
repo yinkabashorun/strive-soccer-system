@@ -52,7 +52,7 @@ export default function Clubs() {
             Your club lives here
           </Head>
           <Body dim style={{ textAlign: "center", marginTop: 10 }}>
-            {`Your club team, a tournament team, the players you train with. Start a club, or join one with the code your captain sends you. You can be in ${CLUBS_PER_PLAYER} clubs.`}
+            {`Your team. Your pickup crew. The players you train with. Start a club, or join one with your captain's code. You can be in ${CLUBS_PER_PLAYER} clubs.`}
           </Body>
           <Button style={{ marginTop: 20 }} label="Start a club" onPress={start} />
           <Button quiet style={{ marginTop: 10 }} label="Have a club code?" onPress={join} />

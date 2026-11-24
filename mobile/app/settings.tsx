@@ -1,3 +1,5 @@
+import { whatNotifications } from "@shared/notices";
+import { featureOn } from "@shared/tiers";
 import { hasTrain } from "@/navigation";
 import { Linking, ScrollView, View } from "react-native";
 import { useRouter } from "expo-router";
@@ -51,9 +53,7 @@ export default function Settings() {
           detail={
             free
               ? "A friend posts or gives you props, or your club plans a session or a game. Nothing else."
-              : hasTrain(me.data?.state)
-                ? "Your new week, a friend's post or props, and what your club plans. Nothing else."
-                : "Your new week, your coach, a Film Room. Nothing else."
+              : whatNotifications({ coachTime: featureOn(me.data?.player?.tier, "coachChat"), friends: hasTrain(me.data?.state) })
           }
           value={p.pushOn}
           onValue={(v) => void (v ? turnOnNotifications() : turnOffNotifications())}

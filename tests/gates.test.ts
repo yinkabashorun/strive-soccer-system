@@ -59,7 +59,7 @@ describe("the screens a member sees instead of the app", () => {
 
 describe("empty states say what happens next", () => {
   it("no week built yet", () => {
-    expect(read("app/(player)/dashboard/page.tsx")).toMatch(/It shows up here the\s+moment it is ready/);
+    expect(read("app/(player)/dashboard/page.tsx")).toMatch(/It shows up right here the\s+moment it is\s+ready/);
     expect(read("components/elite/WeekList.tsx")).toContain("It lands here the moment it is ready");
   });
 

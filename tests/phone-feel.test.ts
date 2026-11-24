@@ -109,7 +109,7 @@ describe("notifications are asked for once, right after a finish screen", () => 
     // screen itself stays the ring, the minutes and Done.
     expect(player).toContain("useNotificationsAsk(Boolean(playerId) && !example)");
     expect(player).toMatch(/function leaveFinish\(\) \{\s*if \(!ask\) return onClose\(\);\s*shown\(\);\s*setAsking\(true\);/);
-    expect(player).toContain("<PushOptIn ask={ask} onDone={onClose} />");
+    expect(player).toContain("<PushOptIn ask={ask} onDone={onClose} coachTime={sendClips !== false} />");
     expect(player).toContain("onClose={leaveFinish}");
     const finish = player.slice(player.indexOf("function Finish("));
     expect(finish).not.toContain("PushOptIn");
@@ -125,7 +125,11 @@ describe("notifications are asked for once, right after a finish screen", () => 
 
   it("the ask is one plain line of why, in the house voice", () => {
     const card = code("components/elite/PushOptIn.tsx");
-    expect(card).toContain("So you know the moment your new week is live");
+    // the line is said from one place for the website and the iPhone app
+    // (lib/elite/notices.ts whyNotifications): only what this member gets
+    expect(card).toContain("whyNotifications({ coachTime, friends: false })");
+    const why = code("lib/elite/notices.ts");
+    expect(why).toContain("So you know the moment your new week is here");
     expect(card).not.toMatch(/—|\bAI\b|automated|algorithm|don't miss|hurry/i);
   });
 });

@@ -157,17 +157,17 @@ export default function Friends() {
             Your friends' training lands here
           </Head>
           <Body dim style={{ textAlign: "center", marginTop: 10 }}>
-            Send your link to a teammate. When they join, accept their friend request and you see each other's training every day.
+            Send your link to a teammate. Accept their request, and you see each other's training every day.
           </Body>
           {f.squad ? null : <Button quiet style={{ marginTop: 18 }} label="Send my link" onPress={invite} />}
         </Card>
       ) : cards.length === 0 ? (
         <Card style={styles.empty}>
           <Head size={28} style={{ textAlign: "center" }}>
-            Nobody has posted yet this week
+            Nobody has posted this week
           </Head>
           <Body dim style={{ textAlign: "center", marginTop: 10 }}>
-            Post a photo of your training and be the first your friends see.
+            Be the first. Post a photo of your training.
           </Body>
         </Card>
       ) : (

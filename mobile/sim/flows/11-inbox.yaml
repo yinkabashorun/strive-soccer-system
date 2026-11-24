@@ -24,8 +24,10 @@ appId: com.strivesoccer.elite
 - takeScreenshot: t71-inbox
 - tapOn: "10 Sessions.*"
 - extendedWaitUntil:
-    visible: "Settings"
+    notVisible: "Week 7 is here, Marcus"
     timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 3000
 - takeScreenshot: t72-note-opened-you
 - tapOn: "Home"
 - extendedWaitUntil:

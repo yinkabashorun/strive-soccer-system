@@ -17,7 +17,7 @@ import {
   waitingLine,
 } from "@/lib/elite/squad-pass";
 import { PRO_PRODUCT_NAME } from "@/lib/elite/pro";
-import { squadPassPush } from "@/lib/elite/push-texts";
+import { squadPassNotice } from "@/lib/elite/notices";
 
 // BRING YOUR SQUAD (Nov 24 2026, Coach Yinka: "take deep thought on the
 // best referral loops we can implement and do exactly that"): three
@@ -74,7 +74,7 @@ describe("three teammates who train earn a month", () => {
     expect(waitingLine(people(1))).toBe("Player 0 joined. They count once they post their first training.");
     expect(waitingLine(people(3))).toBe("Player 0 and 2 more joined. Each counts once they post their first training.");
     expect(runningLine("Thu, Dec 24")).toBe("Your earned month of Strive Pro runs until Thu, Dec 24.");
-    const push = squadPassPush();
+    const push = squadPassNotice({ number: 1 });
     for (const line of [SQUAD_TITLE, SQUAD_BODY, SQUAD_READY_TITLE, SQUAD_READY_BODY, push.title, push.body]) {
       expect(line).not.toMatch(/—|\$|free trial|referral|unlock|AI\b|automated/i);
       expect(line).toContain(line.trim());
@@ -100,7 +100,7 @@ describe("on the server", () => {
 
   it("a month is earned once (the database's key), and its owner is told once", () => {
     expect(sql).toContain("unique (profile_id, number)");
-    expect(server).toContain("if (fresh > 0) await sendPushToProfile(profileId, squadPassPush())");
+    expect(server).toContain("if (fresh > 0) await notifyProfile(profileId, squadPassNotice({ number: earned }))");
   });
 
   it("only the server writes a count or a month", () => {

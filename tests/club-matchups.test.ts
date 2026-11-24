@@ -432,6 +432,6 @@ describe("where it runs and what it writes to", () => {
 
   it("sends no notification: the card is the pull", () => {
     expect(run).not.toMatch(/sendPush|sendSms|textCoaches|notice/);
-    expect(code("lib/elite/push-texts.ts")).not.toMatch(/matchup/i);
+    expect(code("lib/elite/notices.ts")).not.toMatch(/matchup/i);
   });
 });

@@ -34,6 +34,8 @@ const s = {
   readFails: false,
   courses: [] as Record<string, unknown>[],
   // clubs: is the club one of the caller's, and are the two one-time sheets accepted
+  // whether a notification choice is stored
+  prefsSave: true,
   clubFound: true,
   organizerOk: true,
   playerOk: true,
@@ -80,6 +82,11 @@ function call(fn: string) {
     if (fn === "recordConsent") return true;
     if (fn === "loadWeek") return { week: 1 };
     if (fn === "loadYou") return { allTimeMinutes: 0 };
+    if (fn === "loadInbox") return { notices: [] };
+    if (fn === "loadNoticePrefs") return { topics: [], reminder: null };
+    if (fn === "saveNoticeTopic" || fn === "saveReminderChoice") {
+      return s.prefsSave ? { ok: true, prefs: { topics: [], reminder: null } } : { ok: false, error: "That could not be saved. Try again in a minute." };
+    }
     if (fn === "loadBootstrap") return { state: args[1] };
     if (fn === "startProFromFree") return { ok: true, url: "https://checkout.stripe.com/c/pay/cs_test_1" };
     if (fn === "confirmUpgrade") return { active: false };
@@ -273,6 +280,7 @@ vi.mock("@/app/api/elite/tracker/post/route", () => ({
   POST: async () => (s.calls.push({ fn: "storePost", args: [] }), new Response(JSON.stringify({ ok: true, id: "l1" }), { status: 200 })),
 }));
 vi.mock("@/lib/elite/player-actions", () => ({
+  markAllNotificationsRead: call("markAllNotificationsRead"),
   toggleHomework: call("toggleHomework"),
   submitCheckin: call("submitCheckin"),
   completeOnboarding: call("completeOnboarding"),
@@ -296,6 +304,14 @@ vi.mock("@/lib/elite/app-data", () => ({
   loadWeek: call("loadWeek"),
   loadYou: call("loadYou"),
   loadBootstrap: call("loadBootstrap"),
+  loadInbox: call("loadInbox"),
+}));
+// the notification choices: the savers answer for themselves (their own
+// rules are held in tests/notices.test.ts)
+vi.mock("@/lib/elite/notice-prefs-server", () => ({
+  loadNoticePrefs: call("loadNoticePrefs"),
+  saveNoticeTopic: call("saveNoticeTopic"),
+  saveReminderChoice: call("saveReminderChoice"),
 }));
 vi.mock("@/app/api/elite/push/native/route", () => ({
   POST: async () => {
@@ -372,6 +388,8 @@ const ROUTES = {
   freeYou: () => import("@/app/api/app/free/you/route"),
   courses: () => import("@/app/api/app/courses/route"),
   course: () => import("@/app/api/app/courses/[slug]/route"),
+  notices: () => import("@/app/api/app/notices/route"),
+  noticePrefs: () => import("@/app/api/app/notices/prefs/route"),
   // clubs, in the free app
   freeClubs: () => import("@/app/api/app/free/clubs/route"),
   freeClubJoin: () => import("@/app/api/app/free/clubs/join/route"),
@@ -428,6 +446,11 @@ const TABLE: { route: keyof typeof ROUTES; method: "GET" | "POST" | "DELETE"; ac
   { route: "freeYou", method: "GET", access: "free_app" },
   { route: "courses", method: "GET", access: "account" },
   { route: "course", method: "GET", access: "member" },
+  // the Inbox is a member's; the notification choices are anyone's own
+  { route: "notices", method: "GET", access: "member" },
+  { route: "notices", method: "POST", access: "member" },
+  { route: "noticePrefs", method: "GET", access: "person" },
+  { route: "noticePrefs", method: "POST", access: "person" },
   // clubs: only ever an account in the free app
   { route: "freeClubs", method: "GET", access: "free_app" },
   { route: "freeClubs", method: "POST", access: "free_app" },
@@ -473,6 +496,7 @@ async function handler(route: keyof typeof ROUTES, method: string) {
 }
 
 beforeEach(() => {
+  s.prefsSave = true;
   s.viewer = viewer();
   s.player = player();
   s.consentDue = false;
@@ -814,6 +838,53 @@ describe("bodies are checked first", () => {
     const form = s.calls[1].args[1] as FormData;
     expect(form.get("current")).toBe("a");
     expect(form.get("next")).toBe("bbbbbbbb");
+  });
+});
+
+describe("the Inbox and the notification choices", () => {
+  it("the Inbox is read for the member the token names, with the website's own bell rule", async () => {
+    const res = await (await handler("notices", "GET"))(req("GET"));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ notices: [] });
+    expect(s.calls).toEqual([{ fn: "loadInbox", args: [s.player] }]);
+  });
+
+  it("opening the Inbox marks everything read through the website's own action, and takes nothing from the body", async () => {
+    const res = await (await handler("notices", "POST"))(req("POST", { body: { player_id: "someone-else", ids: ["x"] } }));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ ok: true });
+    expect(s.calls).toEqual([{ fn: "markAllNotificationsRead", args: [] }]);
+  });
+
+  it("the choices are read for the caller, a member or a free account", async () => {
+    const get = await handler("noticePrefs", "GET");
+    expect(await (await get(req("GET"))).json()).toEqual({ prefs: { topics: [], reminder: null } });
+    expect(s.calls[0]).toEqual({ fn: "loadNoticePrefs", args: [s.viewer] });
+    freeAccount();
+    s.calls = [];
+    expect((await get(req("GET"))).status).toBe(200);
+    expect(s.calls[0].fn).toBe("loadNoticePrefs");
+  });
+
+  it("one change a request: a switch, or the reminder time, never both and never neither", async () => {
+    const post = await handler("noticePrefs", "POST");
+    const send = async (body: unknown) => (await post(req("POST", { body }))).status;
+    expect(await send({})).toBe(400);
+    expect(await send({ topic: "week", on: false, reminder: "evening" })).toBe(400);
+    expect(await send({ topic: 3, on: false })).toBe(400);
+    expect(await send({ reminder: 16 })).toBe(400);
+    expect(s.calls).toEqual([]);
+    expect(await send({ topic: "week", on: false })).toBe(200);
+    expect(s.calls[0]).toEqual({ fn: "saveNoticeTopic", args: [s.viewer, "week", false] });
+    expect(await send({ reminder: "after_school" })).toBe(200);
+    expect(s.calls[1]).toEqual({ fn: "saveReminderChoice", args: [s.viewer, "after_school"] });
+  });
+
+  it("a choice that cannot be stored says so, with a line the screen can show", async () => {
+    s.prefsSave = false;
+    const res = await (await handler("noticePrefs", "POST"))(req("POST", { body: { topic: "week", on: false } }));
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ ok: false, error: "That could not be saved. Try again in a minute." });
   });
 });
 

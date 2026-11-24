@@ -421,8 +421,9 @@ export function agoLabel(iso: string, now: number): string {
 // The rule, as a check a test (or anything else) can run on a notice's
 // words. Returns what is wrong, or an empty list.
 // ---------------------------------------------------------------------
+// ("Check-in calls are open" names a thing; "Check your week" is an order.)
 const ORDERS =
-  /^(go|do|don'?t|hurry|open|tap|click|check|buy|join|upgrade|get|grab|train|start|finish|log|come|act|claim|unlock|renew|pay|subscribe|sign|download|watch|remember|post|upload|pick|send|add|make sure|you need|you must|you should|time to|last chance|only \d|still haven'?t|you (have )?missed)\b/i;
+  /^(go|do|don'?t|hurry|open|tap|click|check(?!-in\b)|buy|join|upgrade|get|grab|train|start|finish|log|come|act|claim|unlock|renew|pay|subscribe|sign|download|watch|remember|post|upload|pick|send|add|make sure|you need|you must|you should|time to|last chance|only \d|still haven'?t|you (have )?missed)\b/i;
 // A price, however it is written ("$29", "29 a month"), or the words of a
 // sale. "You earned a month of Strive Pro" is not a price: a length of
 // time with no amount in front of it is left alone.

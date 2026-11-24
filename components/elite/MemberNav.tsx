@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { BookOpen, CalendarDays, Home, MessageSquare, UserRound, type LucideIcon } from "lucide-react";
+import { Users, BookOpen, CalendarDays, Home, MessageSquare, UserRound, type LucideIcon } from "lucide-react";
 import { Wordmark } from "./Wordmark";
 import { NotificationBell } from "./NotificationBell";
 import { activeTab, type MemberTab } from "@/lib/elite/experience";
@@ -18,6 +18,7 @@ const ICONS: Record<MemberTab["icon"], LucideIcon> = {
   courses: BookOpen,
   coach: MessageSquare,
   you: UserRound,
+  friends: Users,
 };
 
 // The member app's navigation (approved mock v4, Nov 20 2026): on a phone,

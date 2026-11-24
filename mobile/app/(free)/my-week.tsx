@@ -1,9 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert, Share, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { fmtDuration } from "@shared/time-trained";
 import { BOARD_EMPTY_LINE, BOARD_TITLE, STAR_LABEL, initialsOf, stripDayLabel } from "@shared/tracker";
+import { PRO_ENDED_DISMISS, PRO_ENDED_LINE } from "@shared/one-app";
 import { OFFLINE_MESSAGE } from "@/api/client";
+import { useMe } from "@/api/queries";
+import { hasTrain } from "@/navigation";
+import { setPref, usePrefs } from "@/prefs";
 import { deleteEntry, refreshFree, useFreeWeek } from "@/api/free";
 import { Avatar, MyAvatar, Star } from "@/Avatar";
 import { PAGE_TOP, Screen } from "@/Screen";
@@ -23,6 +27,16 @@ export default function MyWeek() {
   const router = useRouter();
   const week = useFreeWeek();
   const w = week.data;
+  const me = useMe();
+  const [prefs] = usePrefs();
+  // Strive Pro is on: this is a member, and the one upgrade card is not
+  // for them. Strive Pro ended: one calm line, put away with a tap.
+  const train = hasTrain(me.data?.state);
+  const ended = me.data?.free?.proEnded === true && !prefs.proEndedSeen;
+  // Strive Pro is on again: if it ever ends again, the line is said again.
+  useEffect(() => {
+    if (train && prefs.proEndedSeen) void setPref("proEndedSeen", false);
+  }, [train, prefs.proEndedSeen]);
   const [gone, setGone] = useState<ReadonlySet<string>>(new Set());
 
   function remove(id: string) {
@@ -77,6 +91,17 @@ export default function MyWeek() {
         </Body>
       </View>
 
+      {ended ? (
+        <Card style={styles.ended}>
+          <Body size={14.5}>{PRO_ENDED_LINE}</Body>
+          <Press onPress={() => void setPref("proEndedSeen", true)} style={styles.endedGot} accessibilityLabel={PRO_ENDED_DISMISS}>
+            <Label dim size={14}>
+              {PRO_ENDED_DISMISS}
+            </Label>
+          </Press>
+        </Card>
+      ) : null}
+
       <View style={styles.ringRow}>
         <Ring size={132} stroke={10} value={w.target > 0 ? w.minutes / w.target : 0}>
           <Head size={28}>{fmtDuration(w.minutes)}</Head>
@@ -122,7 +147,7 @@ export default function MyWeek() {
         </Press>
       </View>
 
-      <UpgradeCard place="week" member={false} area={w.upgrade.area} sessions={w.upgrade.sessions} />
+      <UpgradeCard place="week" member={train} area={w.upgrade.area} sessions={w.upgrade.sessions} />
 
       <View style={{ marginHorizontal: 20, marginTop: 26 }}>
         <Label size={17}>{BOARD_TITLE}</Label>
@@ -194,5 +219,7 @@ const styles = StyleSheet.create({
   planned: { backgroundColor: "transparent", borderWidth: 1.5, borderColor: "rgba(242,239,232,0.45)" },
   trained: { backgroundColor: color.gold },
   planRow: { flexDirection: "row", alignItems: "center", marginHorizontal: 20, marginTop: 8 },
+  ended: { marginHorizontal: 20, marginTop: 18, padding: 16 },
+  endedGot: { minHeight: 44, justifyContent: "center", alignSelf: "flex-start", marginTop: 4 },
   row: { minHeight: 58, flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 16 },
 });

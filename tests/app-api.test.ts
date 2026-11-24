@@ -685,16 +685,17 @@ describe("a free account stays free until a membership is on", () => {
     const week = await (await handler("week", "GET"))(req("GET"));
     expect(week.status).toBe(403);
     expect((await week.json()).state.kind).toBe("free");
-    // once paid, the free routes close and the member routes open
+    // once paid, the member routes open AND the free routes stay open:
+    // Strive Pro adds to the free app, it never takes it away (one-app.ts)
     s.player = player({ subscription_status: "active" });
-    expect((await (await handler("freeFeed", "GET"))(req("GET"))).status).toBe(403);
+    expect((await (await handler("freeFeed", "GET"))(req("GET"))).status).toBe(200);
     expect((await (await handler("week", "GET"))(req("GET"))).status).toBe(200);
   });
 
   it("the website's member shell and its free shell use the same rule", async () => {
     const { readFileSync } = await import("node:fs");
     const layout = readFileSync("app/(player)/layout.tsx", "utf8");
-    expect(layout).toContain("mayBeFree(player) ? await getTracker(viewer.profile.id) : null");
+    expect(layout).toContain("mayHaveFreeApp(player) ? await getTracker(viewer.profile.id) : null");
     expect(layout).toContain('if (state.kind === "free" && freeAccount) redirect(freeLanding(quizDone(freeAccount)));');
     expect(readFileSync("lib/elite/tracker-server.ts", "utf8")).toContain("livesInFreeApp({ hasTracker: true, hasPlayer: true, player })");
   });

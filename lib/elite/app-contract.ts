@@ -34,7 +34,9 @@ export type AppMemberState =
   | { kind: "pro_checkout"; gate: AppGate }
   | { kind: "onboarding" }
   | { kind: "membership"; gate: AppGate }
-  | { kind: "ok" };
+  // social: a member who also has the free app; Strive Pro adds the Train
+  // tab to the free tabs (lib/elite/one-app.ts)
+  | { kind: "ok"; social?: boolean };
 
 export type AppBootstrap = {
   viewer: { name: string; firstName: string; email: string };
@@ -50,12 +52,17 @@ export type AppBootstrap = {
   // From memberTabs (lib/elite/experience.ts): home, week, courses, coach, you.
   tabs: { key: string; label: string }[];
   unread: number;
-  // A free account (069), as the free tabs need it. Null for everyone else.
+  // The free app (069), as its tabs need it: a free account, and a Strive
+  // Pro member who has one behind them (state ok + social). Null for
+  // everyone else.
   free: null | {
     // "Marcus B.", the name friends see
     name: string;
     // logs gym work apart from training (high school and older)
     gym: boolean;
+    // Strive Pro was on for this player and has ended: said once, calmly,
+    // at the top of Week (lib/elite/one-app.ts)
+    proEnded?: boolean;
   };
   // A member whose quiz was answered while the account was free
   // (lib/elite/free-intake.ts): only the screens still owed are shown, in

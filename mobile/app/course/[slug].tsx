@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { RefreshControl, SectionList, StyleSheet, View, type ListViewToken } from "react-native";
 import { Image } from "expo-image";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter, type Href } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { AppCourse, AppCourseLevel, AppCourseStep } from "@shared/app-contract";
 import { OFFLINE_MESSAGE } from "@/api/client";
-import { keys, useCourse } from "@/api/queries";
+import { keys, useCourse, useMe } from "@/api/queries";
+import { hasTrain, homeOf } from "@/navigation";
 import { queryClient } from "@/api/queryClient";
 import { clipOrder, clipsInView, liveClip, pickedAfterScroll, pickedAfterTap, type Picked } from "@/course-view";
 import { DrillVideo } from "@/DrillVideo";
@@ -29,8 +30,9 @@ export default function CourseScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const me = useMe();
   const found = useCourse(typeof slug === "string" ? slug : undefined);
-  const back = () => (router.canGoBack() ? router.back() : router.replace("/courses"));
+  const back = () => (router.canGoBack() ? router.back() : router.replace((hasTrain(me.data?.state) ? homeOf(me.data?.state) : "/courses") as Href));
   // Past the course's picture and name, the top of the page is a solid bar
   // with the course's name: the words that scroll up go under it, never
   // under the back button and the clock (simulator, Nov 24 2026: the back

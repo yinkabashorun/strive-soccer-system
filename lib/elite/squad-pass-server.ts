@@ -162,6 +162,18 @@ export async function startPass(viewer: Viewer, userAgent: string | null): Promi
 // membership goes back to "none" (a free account again, its log, friends
 // and clubs untouched) unless another earned month is still running or the
 // family has started paying in the meantime.
+// Has this account ever had an earned month that has since ended?
+export async function hadEarnedMonth(profileId: string): Promise<boolean> {
+  const admin = createServiceClient();
+  if (!admin) return false;
+  const { count, error } = await admin
+    .from("elite_pro_passes")
+    .select("id", { count: "exact", head: true })
+    .eq("profile_id", profileId)
+    .not("ended_at", "is", null);
+  return !error && (count ?? 0) > 0;
+}
+
 export async function endDuePasses(): Promise<{ ended: number }> {
   const admin = createServiceClient();
   if (!admin) return { ended: 0 };

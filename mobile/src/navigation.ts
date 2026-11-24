@@ -1,6 +1,7 @@
 import type { AppBootstrap, AppMemberState } from "@shared/app-contract";
 import { nativeRouteFor } from "@shared/notice-routes";
 import { NOTICE_TOPICS, type NoticeTopic } from "@shared/notices";
+import { firstTab, type OneAppTabKey } from "@shared/one-app";
 
 // Where the app belongs for who is signed in, the same order as the
 // website's member shell (app/(player)/layout.tsx, lib/elite/member-gate.ts),
@@ -19,7 +20,11 @@ import { NOTICE_TOPICS, type NoticeTopic } from "@shared/notices";
 //   free-quiz   a free account that has not taken the quiz: the same quiz
 //   free-offer  a free account after the quiz: the offer, then the week's
 //               set-up (a target and the days)
-//   free        the free tabs and everything one tap from them
+//   free        the free tabs and everything one tap from them. ONE APP
+//               (lib/elite/one-app.ts): a Strive Pro member who came
+//               through the free app lives here too, with every free tab
+//               and one more, Train. Upgrading never moves them to another
+//               set of tabs and never takes their friends or clubs away.
 // Pure, tested in tests/logic.test.ts.
 export type Area = "sign-in" | "agreement" | "onboarding" | "gate" | "profile" | "app" | "free-quiz" | "free-offer" | "free";
 
@@ -33,7 +38,9 @@ export function areaFor(
   const owed = Boolean(setup && setup.steps.length > 0);
   switch (state.kind) {
     case "ok":
-      return owed ? "profile" : "app";
+      if (owed) return "profile";
+      // a member with the free app behind them keeps it, and gains Train
+      return state.social ? "free" : "app";
     case "consent":
       return "agreement";
     case "onboarding":
@@ -64,11 +71,41 @@ export const AREA_ROOT: Record<Area, string> = {
   free: "(free)",
 };
 
-// Where the gatekeeper sends someone who is outside their area.
-export function areaHome(area: Area): string {
+// Strive Pro is on for someone who lives in the free tabs: they have Train.
+export function hasTrain(state: AppMemberState | null | undefined): boolean {
+  return state?.kind === "ok" && state.social === true;
+}
+
+// Who the free app's data is for: a free account, and a Strive Pro member
+// who came through it. The second one is why no screen may ask "is this a
+// free account?" before loading Friends, Week, Clubs or You: they are the
+// same tabs and must load the same way.
+export function hasFreeApp(state: AppMemberState | null | undefined, stage?: "ready"): boolean {
+  if (hasTrain(state)) return true;
+  if (state?.kind !== "free") return false;
+  return stage ? state.stage === stage : true;
+}
+
+// The screen of each tab of the one app, by the key the shared rule uses.
+export const ONE_APP_ROUTE: Record<OneAppTabKey, string> = {
+  train: "/(free)/train",
+  friends: "/(free)/friends",
+  week: "/(free)/my-week",
+  clubs: "/(free)/clubs",
+  you: "/(free)/me",
+};
+
+// Where the gatekeeper sends someone who is outside their area. `train`:
+// this person has the Train tab (a Pro member opens the app to train).
+export function areaHome(area: Area, train = false): string {
   if (area === "app") return "/";
-  if (area === "free") return "/(free)/friends";
+  if (area === "free") return ONE_APP_ROUTE[firstTab(train)];
   return `/${AREA_ROOT[area]}`;
+}
+
+// Home for whoever is signed in, for a screen that has nowhere to go back to.
+export function homeOf(state: AppMemberState | null | undefined): string {
+  return state?.kind === "free" || hasTrain(state) ? areaHome("free", hasTrain(state)) : "/";
 }
 
 // Routes outside the tabs that still belong to the app area (the Inbox,
@@ -79,6 +116,9 @@ const APP_ROUTES = new Set(["(tabs)", "session", "course", "drop", "extra", "che
 // on Week, or a locked course), the week's set-up, a club and everything
 // one tap from it, and the profile screens.
 const FREE_ROUTES = new Set(["(free)", "post", "offer", "week-plan", "club", "settings", "change-password", "delete-account", "profile-setup"]);
+// What Strive Pro adds to the free tabs, one tap from Train: the session,
+// the Monday drop, extra work, the check-in, a course and the Inbox.
+const TRAIN_ROUTES = new Set(["session", "drop", "extra", "checkin", "course", "inbox"]);
 // After the quiz and before the free app: the offer, then the week's set-up.
 const FREE_OFFER_ROUTES = new Set(["offer", "week-plan"]);
 // Signed out: the sign-in screen, and joining free one question a screen.
@@ -87,7 +127,7 @@ const SIGNED_OUT_ROUTES = new Set(["sign-in", "join"]);
 // (App Review 5.1.1(v): deleting the account is never behind the gate).
 const ALWAYS = new Set(["settings", "change-password", "delete-account"]);
 
-export function inArea(area: Area, segments: readonly string[]): boolean {
+export function inArea(area: Area, segments: readonly string[], train = false): boolean {
   const seg = segments[0] ?? "";
   if (area === "sign-in") return SIGNED_OUT_ROUTES.has(seg);
   if (ALWAYS.has(seg)) return true;
@@ -96,7 +136,7 @@ export function inArea(area: Area, segments: readonly string[]): boolean {
   // family waits for the coach, and the screen says so).
   if (seg === "onboarding" && segments[1] === "building") return true;
   if (area === "app") return APP_ROUTES.has(seg) || seg === "";
-  if (area === "free") return FREE_ROUTES.has(seg);
+  if (area === "free") return FREE_ROUTES.has(seg) || (train && TRAIN_ROUTES.has(seg));
   if (area === "free-offer") return FREE_OFFER_ROUTES.has(seg);
   if (area === "onboarding" || area === "free-quiz") return seg === "onboarding";
   return seg === AREA_ROOT[area];
@@ -112,11 +152,11 @@ export function inArea(area: Area, segments: readonly string[]): boolean {
 // Someone who is not in the app or the free app yet (the agreement, a
 // gate, the quiz) is sent where they belong instead; a notice never jumps
 // a gate.
-export function pushRoute(area: Area | null, url: unknown, topic?: unknown): string {
+export function pushRoute(area: Area | null, url: unknown, topic?: unknown, train = false): string {
   if (!area) return "/";
   if (area !== "app" && area !== "free") return areaHome(area);
   const t = (NOTICE_TOPICS as readonly unknown[]).includes(topic) ? (topic as NoticeTopic) : null;
-  return nativeRouteFor(url, area === "app" ? "member" : "free", t);
+  return nativeRouteFor(url, area === "app" ? "member" : train ? "social" : "free", t);
 }
 
 // What a tapped notification carries. The site sends straight to Apple

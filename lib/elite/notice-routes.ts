@@ -13,12 +13,16 @@
 // opens the website page in the sheet over the app.
 import { cleanNoticePath, type NoticeTopic } from "./notices";
 
-// Whose app it is: the member tabs, or the free app's.
-export type NoticeAudience = "member" | "free";
+// Whose app it is: the member tabs, the free app's, or the free app's with
+// Train (a Strive Pro member who came through the free app:
+// lib/elite/one-app.ts). That last one gets notices of both kinds: their
+// week opens Train, a friend's post opens Friends.
+export type NoticeAudience = "member" | "free" | "social";
 
 export const NATIVE_HOME: Record<NoticeAudience, string> = {
   member: "/",
   free: "/(free)/friends",
+  social: "/(free)/train",
 };
 export const NATIVE_INBOX = "/inbox";
 
@@ -52,14 +56,25 @@ export function nativeRouteFor(
     return home;
   }
 
+  if (who === "social") {
+    if (topic === "coach" || WEBSITE_ONLY.some((p) => under(path, p))) return NATIVE_INBOX;
+    // the week, a session and the Courses shelf all live on Train
+    if (path === "/" || path === "/dashboard" || path === "/homework" || path === "/week" || path === "/courses") return home;
+    if (path === "/you" || under(path, "/progress") || under(path, "/you")) return "/(free)/me";
+    const course = COURSE_PAGE.exec(path)?.[1];
+    if (course) return `/course/${course}`;
+    if (path === "/log") return "/(free)/friends";
+  }
+
   // the free app
   if (path === "/log") return home;
   if (path === "/log/week") return "/(free)/my-week";
   if (path === "/log/clubs") return "/(free)/clubs";
   const club = CLUB_PAGE.exec(path)?.[1];
   if (club) return `/club/${club}`;
-  // every course is locked for a free account: the shelf, never a course
-  if (under(path, "/courses")) return "/(free)/courses";
+  // every course is locked for a free account, and the free tabs have no
+  // shelf: a course's notice opens where they live
+  if (under(path, "/courses")) return home;
   if (under(path, "/log/u") || under(path, "/log/settings")) return "/(free)/me";
   return home;
 }

@@ -2,7 +2,11 @@ import { Share, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { fmtDuration } from "@shared/time-trained";
 import { STAR_LABEL, initialsOf } from "@shared/tracker";
-import { useMe } from "@/api/queries";
+import { useMe, useYou } from "@/api/queries";
+import { MemberCard } from "@/MemberCard";
+import { hasTrain } from "@/navigation";
+import { useMyPhoto } from "@/usePhoto";
+import { YouEarned } from "@/YouEarned";
 import { OFFLINE_MESSAGE } from "@/api/client";
 import { refreshFree, useFreeYou } from "@/api/free";
 import { MyAvatar, Star } from "@/Avatar";
@@ -14,6 +18,10 @@ import { Body, Button, Card, Hairline, Head, Label, Ring, SettingRow, Skeleton }
 // time, and Settings. Sign out and Delete my account are in Settings, as
 // for everyone.
 //
+// Strive Pro adds to this screen and takes nothing off it: the member
+// card, the earned month's line when there is one, time by area and the
+// medals (src/YouEarned.tsx, the member app's own).
+//
 // There is no upgrade wording on this screen.
 export default function Me() {
   const router = useRouter();
@@ -22,6 +30,12 @@ export default function Me() {
   const y = you.data;
   const name = y?.name ?? me.data?.free?.name ?? "";
   const username = me.data?.profileSetup?.username;
+  // Strive Pro is on (lib/elite/one-app.ts): the SAME You tab, with the
+  // member card and what their sessions have earned added under it.
+  const train = hasTrain(me.data?.state);
+  const { data: member } = useYou();
+  const photo = useMyPhoto();
+  const card = member?.card ?? me.data?.player?.card;
 
   return (
     <Screen onRefresh={refreshFree}>
@@ -88,6 +102,30 @@ export default function Me() {
           {y.gymLine}
         </Body>
       ) : null}
+
+      {train ? (
+        <View style={{ marginHorizontal: 20, marginTop: 22 }}>
+          {card ? (
+            <MemberCard name={card.name} since={card.since} tier={card.tier} photo={photo} username={username} />
+          ) : (
+            <Skeleton height={204} r={22} />
+          )}
+          {member?.earned ? (
+            <Card style={{ marginTop: 16 }}>
+              <Body size={14}>{member.earned.line}</Body>
+              {member.earned.parent ? (
+                <Button
+                  quiet
+                  style={{ marginTop: 12 }}
+                  label={member.earned.parent.label}
+                  onPress={() => void Share.share({ message: member.earned!.parent!.text }).catch(() => undefined)}
+                />
+              ) : null}
+            </Card>
+          ) : null}
+        </View>
+      ) : null}
+      {train && member ? <YouEarned y={member} /> : null}
 
       <Card style={{ marginHorizontal: 20, marginTop: 26, padding: 0 }}>
         {y ? (

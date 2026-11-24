@@ -10,7 +10,7 @@
 // choices to show" and a save answers that it could not be stored. Nothing
 // else in the app depends on either.
 import { createServiceClient } from "./supabase/server";
-import { trackerFor } from "./tracker-server";
+import { freeAccountFor, trackerFor } from "./tracker-server";
 import { memberTier } from "./pro-server";
 import { featureOn } from "./tiers";
 import { NOTICE_TOPICS, topicsFor, type NoticeTopic } from "./notices";
@@ -26,8 +26,14 @@ type Who = { member: boolean; free: boolean; coachTime: boolean };
 // time), a free account, or neither (a coach, the example player).
 async function whoIs(viewer: Viewer): Promise<Who> {
   if (viewer.role !== "player" || viewer.demo) return { member: false, free: false, coachTime: false };
-  const free = (await trackerFor(viewer).catch(() => null)) !== null;
-  const member = Boolean(viewer.playerId) && !free;
+  // A Strive Pro member who came through the free app is both: their week
+  // AND their friends and clubs (lib/elite/one-app.ts).
+  const [has, lives] = await Promise.all([
+    trackerFor(viewer).catch(() => null),
+    freeAccountFor(viewer).catch(() => null),
+  ]);
+  const free = has !== null;
+  const member = Boolean(viewer.playerId) && lives === null;
   if (!member || !viewer.playerId) return { member: false, free, coachTime: false };
   const tier = await memberTier(viewer.playerId);
   const coachTime = featureOn(tier, "coachChat") || featureOn(tier, "filmRoom") || featureOn(tier, "monthlyCheckin");

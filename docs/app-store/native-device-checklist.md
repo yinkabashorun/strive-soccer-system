@@ -99,6 +99,29 @@ on his iPhone, with notifications turned on and migration 088 applied.
 The simulator run pictures the Inbox (18b) and taps through the bell, a
 note and the choices (`mobile/sim/flows/11-inbox.yaml`) with example data.
 
+## One app for free and Strive Pro, on a phone only (Nov 24 2026)
+
+A free player who starts Strive Pro keeps every tab and gains one, Train
+(`lib/elite/one-app.ts`). The rule and the screens are tested and pictured;
+these are what only a phone shows.
+
+1. **Train arrives without a restart.** On a free account, start Strive Pro
+   (card, or an earned month). After "You're in" and the quiz's last
+   screen, the bar reads Train, Friends, Week, Clubs, You, and the app is
+   on Train. Friends still shows the same friends and posts, Clubs the
+   same clubs.
+2. **Five tabs fit.** No tab sits under a "More" button, on the smallest
+   iPhone the app supports.
+3. **A session counts once.** Finish a session on Train. Open Week: the
+   time is on the ring and on the friends board, once. Tap "Post it to
+   your friends" on the finish screen, add a photo: the time on Week does
+   not change, and the post is in the Friends feed.
+4. **Both kinds of notification arrive.** As a Pro member: a friend's post
+   opens Friends, the new week opens Train.
+5. **Train goes, the rest stays.** When Strive Pro ends, the bar is the
+   four free tabs again, Week says so once ("Got it" puts it away), and
+   every friend, post and club is still there.
+
 ## Seeing the phone from here
 
 `.github/workflows/ios-simulator-screens.yml` (built Nov 23 2026 on his

@@ -6,7 +6,9 @@ import { getViewer } from "@/lib/elite/session";
 import { isSupabaseConfigured } from "@/lib/elite/supabase/server";
 import { nyToday } from "@/lib/elite/time";
 import { rateLimit } from "@/lib/rate-limit";
-import { savePost, trackerFor } from "@/lib/elite/tracker-server";
+import { attachSessionPhoto, savePost, trackerFor } from "@/lib/elite/tracker-server";
+import { parseSessionRef, sessionLogId, settleSessionLog } from "@/lib/elite/session-log";
+import { POST_SESSION_NOT_READY } from "@/lib/elite/one-app";
 import { tagTogether } from "@/lib/elite/club-teams-server";
 import { readDemoState, writeDemoState } from "@/lib/elite/tracker-demo";
 import {
@@ -39,6 +41,11 @@ const no = (error: string, status: number) => NextResponse.json({ ok: false, err
 //
 // POST multipart { photo, minutes, kind, caption?, with? } -> { ok, id } | { ok: false, error }
 // ("with" is the ids of club teammates who trained with them, comma separated)
+//
+// A member posting a session they just finished sends { photo, session:
+// "<week>-<n>", caption? } instead: the photo goes onto that session's own
+// entry, whose minutes the server already wrote from the session itself
+// (lib/elite/session-log.ts). The phone names the session and nothing else.
 export async function POST(req: Request) {
   const viewer = await getViewer();
   if (!viewer || viewer.role !== "player") return no("Sign in first.", 401);
@@ -54,8 +61,10 @@ export async function POST(req: Request) {
   } catch {
     return no("We could not read that. Try again.", 400);
   }
-  const minutes = validateMinutes(Number(form.get("minutes")));
-  const kind = cleanKind(form.get("kind"));
+  const sessionRef = form.has("session") ? parseSessionRef(form.get("session")) : null;
+  if (form.has("session") && (!sessionRef || !viewer.playerId || viewer.demo)) return no(POST_SESSION_NOT_READY, 409);
+  const minutes = sessionRef ? 0 : validateMinutes(Number(form.get("minutes")));
+  const kind = sessionRef ? "training" : cleanKind(form.get("kind"));
   if (minutes === null || kind === null) return no("Pick how long you trained.", 400);
   if (!mayLog(kind, tracker.grade)) return no(GYM_REFUSED_MESSAGE, 403);
   // the word filter on what friends will read (text-filter.ts)
@@ -80,6 +89,23 @@ export async function POST(req: Request) {
       today: [...kept, { id, day: today, minutes, kind, caption, photo: true, at: new Date().toISOString() }],
     });
     return NextResponse.json({ ok: true, id });
+  }
+
+  if (sessionRef && viewer.playerId) {
+    const ref = { playerId: viewer.playerId, profileId: viewer.profile.id, ...sessionRef };
+    // the session's entry is there if the session is finished (written
+    // again here in case its last tick's own write did not land)
+    if (!(await settleSessionLog(ref))) return no(POST_SESSION_NOT_READY, 409);
+    const logId = sessionLogId(ref.playerId, ref.week, ref.session);
+    const put = await attachSessionPhoto({ profileId: viewer.profile.id, logId, caption, photo });
+    if (put === "missing") return no(POST_SESSION_NOT_READY, 409);
+    if (put === "posted") return no("You already posted this session.", 409);
+    if (put === "error") return no("Your post was not saved. Check your connection and try again.", 502);
+    await noticeFriendPost(viewer.profile.id, today).catch(() => 0);
+    await countTeammate(viewer.profile.id).catch(() => undefined);
+    revalidatePath(FREE_HOME);
+    revalidatePath(FREE_WEEK);
+    return NextResponse.json({ ok: true, id: logId });
   }
 
   const saved = await savePost({

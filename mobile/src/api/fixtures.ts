@@ -28,6 +28,7 @@ import type { NoticePrefs } from "@shared/notice-prefs";
 import { buildNoticePrefs, withTopic } from "@shared/notice-prefs";
 import { earnedNotice, newWeekNotice, welcomeNotice, type NoticeTopic } from "@shared/notices";
 import { reminderChoice } from "@shared/reminders";
+import { oneAppTabs } from "@shared/one-app";
 
 // The example player the screens are drawn with for review screenshots
 // (EXPO_PUBLIC_FIXTURES=1): the browser build (scripts/screenshots.mjs) and
@@ -37,14 +38,16 @@ import { reminderChoice } from "@shared/reminders";
 // stills are the real bank's.
 //
 // Which member the example is, chosen per run:
-//   browser    ?state=ok|consent|onboarding|membership|pro_checkout|setup|locked|free_quiz|free_offer|signedout
+//   browser    ?state=ok|consent|onboarding|membership|pro_checkout|setup|locked|free_quiz|free_offer|social|ended|signedout
 //   simulator  the launch argument -fixtureState <the same words>, which
 //              iOS hands the app as a setting (sim/shots.sh, sim/flows)
 //
-// "locked" is a FREE account in the free app (Friends, Week, Clubs, Courses,
-// You): friends, posts, a week under way, two clubs (fixtures-clubs.ts), and
-// the Courses shelf the way an account that is not a member gets it (every
-// course locked). "free_quiz"
+// "locked" is a FREE account in the free app (Friends, Week, Clubs, You):
+// friends, posts, a week under way and two clubs (fixtures-clubs.ts).
+// "social" is that same account with Strive Pro on (lib/elite/one-app.ts):
+// the same four tabs, the same friends and clubs, and Train added in
+// front. "ended" is the free account again after Strive Pro ended, with
+// the one calm line on Week. "free_quiz"
 // is a free account that has not taken the quiz, "free_offer" one that has
 // and is at the offer. A run that starts "signedout" and taps Join free
 // becomes a new free account and moves on as it goes (the quiz, the
@@ -56,7 +59,7 @@ import { reminderChoice } from "@shared/reminders";
 // simulator's "open this link" command cannot be used for that: iOS answers
 // it with an "Open in Strive Elite?" box that stays on screen and covers
 // every picture after it (the first simulator run, Nov 23 2026).
-export const FIXTURE_STATES = ["ok", "consent", "onboarding", "membership", "pro_checkout", "setup", "locked", "free_quiz", "free_offer", "signedout"] as const;
+export const FIXTURE_STATES = ["ok", "consent", "onboarding", "membership", "pro_checkout", "setup", "locked", "free_quiz", "free_offer", "social", "ended", "signedout"] as const;
 
 function chosenState(): string {
   let raw: unknown = null;
@@ -84,15 +87,19 @@ export function fixtureRoute(): string | null {
   // A free tab is named with its group: the member tabs have a Courses
   // screen at the same address, and the run must open the free one.
   const first = raw.split(/[/?]/)[0];
-  return now().free && FREE_TABS.has(first) ? `/(free)/${raw}` : `/${raw}`;
+  return (now().free || now().train) && FREE_TABS.has(first) ? `/(free)/${raw}` : `/${raw}`;
 }
-const FREE_TABS = new Set(["friends", "my-week", "clubs", "courses", "me"]);
+const FREE_TABS = new Set(["train", "friends", "my-week", "clubs", "me"]);
 
 // Where the example account is. It starts as the run asked and, for a free
 // account, moves on as the screens are used. Memory only.
 type Live = {
   signedIn: boolean;
   free: boolean;
+  // Strive Pro is on for an account with the free app: the free tabs + Train
+  train: boolean;
+  // Strive Pro was on for this free account and has ended
+  ended: boolean;
   stage: FreeStage;
   owed: ("username" | "photo")[];
   username: string | null;
@@ -104,10 +111,12 @@ const watchers = new Set<() => void>();
 function now(): Live {
   if (!live) {
     const s = chosenState();
-    const free = s === "locked" || s === "free_quiz" || s === "free_offer";
+    const free = s === "locked" || s === "ended" || s === "free_quiz" || s === "free_offer";
     live = {
       signedIn: s !== "signedout",
       free,
+      train: s === "social",
+      ended: s === "ended",
       stage: s === "free_quiz" ? "quiz" : s === "free_offer" ? "offer" : "ready",
       owed: s === "setup" ? ["username", "photo"] : [],
       username: s === "setup" ? null : "marcus.b",
@@ -133,7 +142,7 @@ export function fixtureSignedIn(): boolean {
 // "Create my account" on the join screens: a new free account, at the quiz,
 // that still owes its @username and its photo.
 export function fixtureJoin(): void {
-  live = { signedIn: true, free: true, stage: "quiz", owed: ["username", "photo"], username: null, posted: false };
+  live = { signedIn: true, free: true, train: false, ended: false, stage: "quiz", owed: ["username", "photo"], username: null, posted: false };
   moved();
 }
 
@@ -686,7 +695,7 @@ const FIXTURE_PLAN: AppFreePlan = {
 
 export function fixtureBootstrap(): AppBootstrap {
   const l = now();
-  const state: AppMemberState = l.free ? { kind: "free", stage: l.stage } : stateFor(chosenState());
+  const state: AppMemberState = l.free ? { kind: "free", stage: l.stage } : l.train ? { kind: "ok", social: true } : stateFor(chosenState());
   const photo = l.owed.includes("photo") ? null : ME_PHOTO;
   return {
     viewer: { name: "Marcus Bryant", firstName: "Marcus", email: "marcus@example.com" },
@@ -713,14 +722,17 @@ export function fixtureBootstrap(): AppBootstrap {
           position: "Attacking midfield",
           knownParentPhone: "",
         },
-    free: l.free ? { name: "Marcus B.", gym: true } : null,
+    free: l.free || l.train ? { name: "Marcus B.", gym: true, ...(l.ended ? { proEnded: true } : {}) } : null,
     quizOwed: null,
-    tabs: [
-      { key: "home", label: "Home" },
-      { key: "week", label: "Week" },
-      { key: "courses", label: "Courses" },
-      { key: "you", label: "You" },
-    ],
+    tabs:
+      l.free || l.train
+        ? oneAppTabs(l.train)
+        : [
+            { key: "home", label: "Home" },
+            { key: "week", label: "Week" },
+            { key: "courses", label: "Courses" },
+            { key: "you", label: "You" },
+          ],
     // one note the example member has not read: Home's bell shows its dot
     unread: l.free || inboxRead ? 0 : 1,
     // ?state=setup: a member from before 081 who still owes both screens,

@@ -204,7 +204,7 @@ describe("where a notice opens in the iPhone app: one map", () => {
     expect(nativeRouteFor("/log/week", "free")).toBe("/(free)/my-week");
     expect(nativeRouteFor("/log/clubs", "free")).toBe("/(free)/clubs");
     expect(nativeRouteFor(`/log/club/${CLUB}`, "free", "clubs")).toBe(`/club/${CLUB}`);
-    expect(nativeRouteFor("/courses/keep-it-up", "free")).toBe("/(free)/courses");
+    expect(nativeRouteFor("/courses/keep-it-up", "free")).toBe("/(free)/friends");
     // a member's page means nothing in the free app, and the other way round
     expect(nativeRouteFor("/dashboard", "free")).toBe("/(free)/friends");
     expect(nativeRouteFor(`/log/club/${CLUB}`, "member")).toBe("/");
@@ -232,7 +232,7 @@ describe("where a notice opens in the iPhone app: one map", () => {
   it("the tap on a notification and the tap on an Inbox row use the same map", () => {
     const nav = read("mobile/src/navigation.ts");
     expect(nav).toContain('import { nativeRouteFor } from "@shared/notice-routes";');
-    expect(nav).toMatch(/return nativeRouteFor\(url, area === "app" \? "member" : "free", t\);/);
+    expect(nav).toMatch(/return nativeRouteFor\(url, area === "app" \? "member" : train \? "social" : "free", t\);/);
     const inbox = read("mobile/app/inbox.tsx");
     expect(inbox).toContain('nativeRouteFor(note.path, "member", note.topic)');
     expect(inbox).toContain("inboxWebRow(note)");
@@ -245,12 +245,12 @@ describe("where a notice opens in the iPhone app: one map", () => {
     const layout = read("mobile/app/_layout.tsx");
     expect(read("mobile/src/navigation.ts")).toMatch(/trigger as \{ payload\?/);
     expect(layout).toContain("tappedNotice(res)");
-    expect(layout).toContain("pushRoute(where.current, notice.url, notice.topic)");
+    expect(layout).toContain("pushRoute(where.current, notice.url, notice.topic, withTrain.current)");
     // the notification that started the app
     expect(layout).toContain("Notifications.getLastNotificationResponse()");
     expect(layout).toContain("Notifications.clearLastNotificationResponse()");
     // never before the person is in the app or the free app
-    expect(layout).toMatch(/const inside = \(area === "app" \|\| area === "free"\) && inArea\(area, segments\);/);
+    expect(layout).toMatch(/const inside = \(area === "app" \|\| area === "free"\) && inArea\(area, segments, train\);/);
     expect(layout).toContain("else waiting.current = notice;");
     expect(layout).toMatch(/if \(!inside \|\| !waiting\.current\) return;/);
   });
@@ -258,7 +258,10 @@ describe("where a notice opens in the iPhone app: one map", () => {
   it("the Inbox is a screen of the member app, opened by a small bell with a quiet gold dot", () => {
     expect(read("mobile/src/navigation.ts")).toMatch(/APP_ROUTES = new Set\(\[[^\]]*"inbox"/);
     expect(read("mobile/app/_layout.tsx")).toContain('<Stack.Screen name="inbox" />');
-    const home = read("mobile/app/(tabs)/index.tsx");
+    // Home is one screen, shown as the member app's Home tab and as the
+    // Train tab Strive Pro adds to the free tabs (src/HomeScreen.tsx)
+    expect(read("mobile/app/(tabs)/index.tsx")).toContain("<HomeScreen />");
+    const home = read("mobile/src/HomeScreen.tsx");
     expect(home).toContain('router.push("/inbox")');
     expect(home).toContain("backgroundColor: color.gold");
     // never a number

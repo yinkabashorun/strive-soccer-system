@@ -1,3 +1,4 @@
+import { hasFreeApp } from "@/navigation";
 import { useQuery } from "@tanstack/react-query";
 import {
   APP_API,
@@ -39,9 +40,7 @@ export function useJoinOpen() {
 }
 
 function useIsFree(stage?: "ready"): boolean {
-  const state = useMe().data?.state;
-  if (state?.kind !== "free") return false;
-  return stage ? state.stage === stage : true;
+  return hasFreeApp(useMe().data?.state, stage);
 }
 
 export function useOffer() {

@@ -494,14 +494,17 @@ describe("where a signed-in person belongs", () => {
     expect(code("app/page.tsx")).toContain("homePathFor(viewer)");
     const free = code("app/(free)/layout.tsx");
     expect(free).toContain('if (viewer.role !== "player") redirect("/coach")');
-    expect(free).toContain('if (!tracker) redirect("/dashboard")');
+    expect(free).toContain('if (!side) redirect("/dashboard")');
     expect(free).toMatch(/!viewer\.demo && \(await consentDue/);
-    // a member has a player record, so trackerFor answers null for them;
-    // the one exception is a free account whose Strive Pro row is not
-    // switched on (lib/elite/member-gate.ts livesInFreeApp)
+    // an invite family or a member who joined Strive Pro directly has no
+    // free account, so trackerFor answers null for them. A free account
+    // keeps its free app before, during and after Strive Pro
+    // (lib/elite/one-app.ts keepsFreeApp); freeAccountFor is the one that
+    // is not switched on (lib/elite/member-gate.ts livesInFreeApp).
     const server = code("lib/elite/tracker-server.ts");
-    expect(server).toContain("if (!viewer.playerId) return getTracker(viewer.profile.id);");
-    expect(server).toContain("return livesInFreeApp({ hasTracker: true, hasPlayer: true, player }) ? tracker : null;");
+    expect(server).toContain("if (!viewer.playerId) return { tracker, lives: true };");
+    expect(server).toContain("if (!keepsFreeApp({ hasTracker: true, hasPlayer: true, tier: player?.tier })) return null;");
+    expect(server).toContain("return { tracker, lives: livesInFreeApp({ hasTracker: true, hasPlayer: true, player }) };");
   });
 
   it("signing in takes a free account to its screen in one redirect after /dashboard", () => {
@@ -704,6 +707,9 @@ describe("free accounts are invisible to everything a member query reads", () =>
     // training of a matchup's stored players; what leaves it is a club's
     // name and its time per player, never a player
     "lib/elite/club-matchups-server.ts",
+    // a member's finished session, put on their own free-app week once
+    // (one-app.ts): the signed-in member's own row, from the tick's action
+    "lib/elite/session-log.ts",
   ]);
   // (the post route stores nothing itself: it hands a checked photo to
   // savePost in tracker-server.ts)

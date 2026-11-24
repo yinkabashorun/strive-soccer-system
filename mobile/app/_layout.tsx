@@ -14,7 +14,7 @@ import { PERSIST_MAX_AGE, persister, queryClient } from "@/api/queryClient";
 import { setGateListener } from "@/api/client";
 import { fixtureRoute } from "@/api/fixtures";
 import { FIXTURES } from "@/config";
-import { areaFor, areaHome, inArea, pushRoute, tappedNotice, type Area, type TappedNotice } from "@/navigation";
+import { areaFor, areaHome, inArea, pushRoute, tappedNotice, type Area, type TappedNotice, hasTrain } from "@/navigation";
 import { clearBadge, keepTokenFresh } from "@/push";
 import { loadOutbox } from "@/outbox";
 import { loadPrefs } from "@/prefs";
@@ -37,11 +37,13 @@ function Gatekeeper() {
   const segments = useSegments();
   const router = useRouter();
   const area = ready ? areaFor(signedIn, me.data?.state, me.data?.profileSetup) : null;
+  // Strive Pro is on for someone who lives in the free tabs (one-app.ts)
+  const train = hasTrain(me.data?.state);
 
   useEffect(() => {
     if (!area) return;
-    if (!inArea(area, segments)) router.replace(areaHome(area) as Href);
-  }, [area, segments, router]);
+    if (!inArea(area, segments, train)) router.replace(areaHome(area, train) as Href);
+  }, [area, segments, router, train]);
 
   // A phone that already said yes stays on file, for a member and for a
   // free account alike (the server keeps each under its own kind).
@@ -52,15 +54,15 @@ function Gatekeeper() {
   // Drills ticked with no signal the last time the app was open are read
   // back from the phone and sent (src/outbox.ts).
   useEffect(() => {
-    if (area === "app") void loadOutbox();
-  }, [area]);
+    if (area === "app" || (area === "free" && train)) void loadOutbox();
+  }, [area, train]);
 
   // The launch screen stays up until the first screen is the right one:
   // the person is where they belong, or it is known that this cannot be
   // read (the holding screen says so). A few seconds at most, whatever
   // happens: the launch screen must never be where the app gets stuck.
   const unreadable = ready && signedIn && !me.data && (me.isError || me.isPaused);
-  const settled = unreadable || (area !== null && inArea(area, segments));
+  const settled = unreadable || (area !== null && inArea(area, segments, train));
   useEffect(() => {
     if (settled) return void SplashScreen.hideAsync().catch(() => undefined);
     const id = setTimeout(() => void SplashScreen.hideAsync().catch(() => undefined), LAUNCH_SCREEN_MAX_MS);
@@ -71,11 +73,11 @@ function Gatekeeper() {
   // the screen the run asked for, once, after the gate above has settled.
   const fixtureOpened = useRef(false);
   useEffect(() => {
-    if (!FIXTURES || fixtureOpened.current || !area || !inArea(area, segments)) return;
+    if (!FIXTURES || fixtureOpened.current || !area || !inArea(area, segments, train)) return;
     fixtureOpened.current = true;
     const route = fixtureRoute();
     if (route) router.push(route as Href);
-  }, [area, segments, router]);
+  }, [area, segments, router, train]);
 
   // A tapped notification opens the screen it is about (ONE map from the
   // address the notice carries to a screen here: src/navigation.ts
@@ -92,7 +94,9 @@ function Gatekeeper() {
   where.current = area;
   const waiting = useRef<TappedNotice | null>(null);
   const lastTap = useRef<string | null>(null);
-  const inside = (area === "app" || area === "free") && inArea(area, segments);
+  const inside = (area === "app" || area === "free") && inArea(area, segments, train);
+  const withTrain = useRef(false);
+  withTrain.current = train;
   const settledIn = useRef(false);
   settledIn.current = inside;
 
@@ -105,7 +109,7 @@ function Gatekeeper() {
       if (lastTap.current === id) return;
       lastTap.current = id;
       const notice = tappedNotice(res);
-      if (settledIn.current) router.navigate(pushRoute(where.current, notice.url, notice.topic) as Href);
+      if (settledIn.current) router.navigate(pushRoute(where.current, notice.url, notice.topic, withTrain.current) as Href);
       else waiting.current = notice;
     };
     try {
@@ -122,7 +126,7 @@ function Gatekeeper() {
     if (!inside || !waiting.current) return;
     const notice = waiting.current;
     waiting.current = null;
-    router.navigate(pushRoute(where.current, notice.url, notice.topic) as Href);
+    router.navigate(pushRoute(where.current, notice.url, notice.topic, withTrain.current) as Href);
   }, [inside, router]);
 
   // No number sits on the app's icon: whatever is there is cleared each

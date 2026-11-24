@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter, type Href } from "expo-router";
+import { POST_SESSION_ROW } from "@shared/one-app";
+import { hasTrain } from "@/navigation";
 import { useKeepAwake } from "expo-keep-awake";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
@@ -163,6 +165,13 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
         finish={finish}
         askPush={!prefs.pushAsked}
         onHome={() => router.back()}
+        // a member with friends in the app (one-app.ts): one quiet row. A
+        // session that added no time has nothing to post.
+        onPost={
+          hasTrain(me.data?.state) && finish.added >= 1
+            ? () => router.replace(`/post?session=${week.week}-${session.n}` as Href)
+            : undefined
+        }
       />
     );
   }
@@ -264,6 +273,7 @@ function Finish({
   finish,
   askPush,
   onHome,
+  onPost,
 }: {
   name: string;
   week: AppWeek;
@@ -271,6 +281,7 @@ function Finish({
   finish: { added: number; weekDone: boolean; left: number };
   askPush: boolean;
   onHome: () => void;
+  onPost?: () => void;
 }) {
   const insets = useSafeAreaInsets();
   const reduce = useReducedMotion();
@@ -400,6 +411,13 @@ function Finish({
           </View>
         ) : null}
         <Button label="Back home" onPress={onHome} />
+        {onPost ? (
+          <Press onPress={onPost} style={styles.postRow} accessibilityLabel={POST_SESSION_ROW}>
+            <Label dim size={15}>
+              {POST_SESSION_ROW}
+            </Label>
+          </Press>
+        ) : null}
       </View>
     </ScrollView>
   );
@@ -430,6 +448,7 @@ function Sparks() {
 
 const styles = StyleSheet.create({
   fill: { flex: 1, backgroundColor: color.black },
+  postRow: { minHeight: 44, alignItems: "center", justifyContent: "center" },
   center: { alignItems: "center", justifyContent: "center" },
   video: { position: "absolute", left: 0, right: 0, top: 0, height: 560 },
   topBar: { position: "absolute", left: 14, right: 20, flexDirection: "row", alignItems: "center", gap: 12 },

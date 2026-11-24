@@ -2,9 +2,10 @@ import { useState } from "react";
 import { Linking, StyleSheet, TextInput, View } from "react-native";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CAPTION_MAX, KINDS, LOG_CHIPS, NO_PHOTO_LINK, POST_RULES_LINE, chipLabel, type Kind } from "@shared/tracker";
+import { POST_SESSION_DETAIL, POST_SESSION_ROW } from "@shared/one-app";
 import { useMe } from "@/api/queries";
 import { ApiError, OFFLINE_MESSAGE } from "@/api/client";
 import { logTraining, refreshFree } from "@/api/free";
@@ -28,8 +29,16 @@ import { color, font } from "@/theme";
 //
 // The first time a post goes up, the phone asks once whether to say when
 // a friend posts, with the reason. Nothing else is asked or offered here.
+//
+// Opened from a finished session's "Post it to your friends" (a member
+// with the free app: lib/elite/one-app.ts) it carries `session`: only the
+// photo and the line are asked. The time is already on the week, counted
+// by the server from the session itself, so there is no length to pick and
+// it can never count twice.
 export default function Post() {
   const router = useRouter();
+  const { session: sessionParam } = useLocalSearchParams<{ session?: string }>();
+  const session = typeof sessionParam === "string" && /^\d{1,3}-\d{1,2}$/.test(sessionParam) ? sessionParam : null;
   const insets = useSafeAreaInsets();
   const me = useMe();
   const [prefs] = usePrefs();
@@ -72,13 +81,15 @@ export default function Post() {
   }
 
   async function send() {
-    if (minutes === null) return;
+    if (session ? !photo : minutes === null) return;
     setError(null);
     setBusy(true);
     try {
-      if (photo) {
+      if (photo && session) {
+        await postTraining({ photo, session, caption });
+      } else if (photo && minutes !== null) {
         await postTraining({ photo, minutes, kind, caption });
-      } else {
+      } else if (minutes !== null) {
         const res = await logTraining(minutes, kind);
         if (!res.ok) throw new ApiError(400, null, res.error ?? "Your time was not saved. Try again.");
       }
@@ -151,10 +162,10 @@ export default function Post() {
       {!ready ? (
         <>
           <Head size={36} style={{ marginTop: 12 }}>
-            Post my training
+            {session ? POST_SESSION_ROW : "Post my training"}
           </Head>
           <Body dim style={{ marginTop: 10 }}>
-            {POST_RULES_LINE}
+            {session ? POST_SESSION_DETAIL : POST_RULES_LINE}
           </Body>
           <View style={{ gap: 10, marginTop: 24 }}>
             <Button label="Take a photo" onPress={() => void choose(true)} />
@@ -169,26 +180,33 @@ export default function Post() {
             </View>
           ) : null}
           {error ? <Body style={{ color: color.danger, marginTop: 12 }}>{error}</Body> : null}
-          <Press
-            onPress={() => {
-              setError(null);
-              setPlain(true);
-            }}
-            style={[styles.link, { alignSelf: "center", marginTop: 14 }]}
-            accessibilityLabel={NO_PHOTO_LINK}
-          >
-            <Label dim size={14}>
-              {NO_PHOTO_LINK}
-            </Label>
-          </Press>
+          {session ? null : (
+            <Press
+              onPress={() => {
+                setError(null);
+                setPlain(true);
+              }}
+              style={[styles.link, { alignSelf: "center", marginTop: 14 }]}
+              accessibilityLabel={NO_PHOTO_LINK}
+            >
+              <Label dim size={14}>
+                {NO_PHOTO_LINK}
+              </Label>
+            </Press>
+          )}
         </>
       ) : (
         <>
           <Head size={36} style={{ marginTop: 18 }}>
-            How long did you train?
+            {session ? "Your session, your photo" : "How long did you train?"}
           </Head>
+          {session ? (
+            <Body dim style={{ marginTop: 10 }}>
+              Your time is already on your week.
+            </Body>
+          ) : null}
 
-          {gym ? (
+          {gym && !session ? (
             <View style={styles.kinds} accessibilityRole="radiogroup" accessibilityLabel="What you are posting">
               {KINDS.map((k) => (
                 <Press
@@ -208,7 +226,7 @@ export default function Post() {
             </View>
           ) : null}
 
-          <View style={styles.chips} accessibilityRole="radiogroup" accessibilityLabel="How long">
+          <View style={[styles.chips, session ? { display: "none" } : null]} accessibilityRole="radiogroup" accessibilityLabel="How long">
             {LOG_CHIPS.map((m) => (
               <Press
                 key={m}
@@ -247,7 +265,7 @@ export default function Post() {
           ) : null}
 
           {error ? <Body style={{ color: color.danger, marginTop: 12 }}>{error}</Body> : null}
-          <Button style={{ marginTop: 16 }} label={photo ? "Post to my friends" : "Log my training"} busy={busy} disabled={minutes === null} onPress={() => void send()} />
+          <Button style={{ marginTop: 16 }} label={photo ? "Post to my friends" : "Log my training"} busy={busy} disabled={session ? !photo : minutes === null} onPress={() => void send()} />
           <Press
             onPress={() => {
               setPhoto(null);

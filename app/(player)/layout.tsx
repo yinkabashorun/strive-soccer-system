@@ -15,7 +15,7 @@ import { photoAddress, profileSetupDue, setupSteps } from "@/lib/elite/account-p
 import { suggestUsernames } from "@/lib/elite/account-profile-server";
 import { consentDue } from "@/lib/elite/legal-server";
 import { NO_PROFILE_GATE, type GateCopy } from "@/lib/elite/gates";
-import { mayBeFree, memberState } from "@/lib/elite/member-gate";
+import { mayHaveFreeApp, memberState } from "@/lib/elite/member-gate";
 import { memberTabs } from "@/lib/elite/experience";
 import { groupSessions } from "@/lib/elite/session-flow";
 import { liveWeekFor } from "@/lib/elite/time";
@@ -76,13 +76,16 @@ export default async function PlayerLayout({
   //     (demo players are pre-onboarded)
   //   - any other membership not switched on sees the coach screen
   // A free account that started Strive Pro and has not paid (or whose
-  // Strive Pro ended) still lives in the free training log: the free
-  // account is read only for such a row (mayBeFree).
-  const freeAccount = !viewer.demo && mayBeFree(player) ? await getTracker(viewer.profile.id) : null;
+  // Strive Pro ended) still lives in the free training log.
+  // ONE APP (lib/elite/one-app.ts): a member who came through the free
+  // app keeps it, so the free account is read for every Strive Pro row,
+  // on or not (mayHaveFreeApp); state.social says they have both.
+  const freeAccount = !viewer.demo && mayHaveFreeApp(player) ? await getTracker(viewer.profile.id) : null;
   const state = memberState({
     role: viewer.role,
     playerId: viewer.playerId,
     isFree: Boolean(freeAccount),
+    hasFreeApp: Boolean(freeAccount),
     consentDue: consent,
     player: viewer.demo && player ? { ...player, onboarded_at: player.onboarded_at ?? "demo" } : player,
   });
@@ -122,7 +125,8 @@ export default async function PlayerLayout({
   const week = Math.max(1, Math.min(live, maxBuilt || 1));
   const sessions = groupSessions(homework.filter((h) => h.week === week && !h.is_extra));
   const weekDone = sessions.length ? sessions.filter((s) => s.list.every((h) => h.completed)).length / sessions.length : 0;
-  const tabs = memberTabs(player?.tier).filter((t) => !keptOutOfThisApp(t.href));
+  const social = state.kind === "ok" && state.social === true;
+  const tabs = memberTabs(player?.tier, social).filter((t) => !keptOutOfThisApp(t.href));
 
   return (
     <div className="member-ui min-h-[100svh] bg-black text-bone lg:flex">

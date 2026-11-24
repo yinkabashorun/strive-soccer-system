@@ -1,3 +1,4 @@
+import { hasTrain } from "@/navigation";
 import { Linking, ScrollView, View } from "react-native";
 import { useRouter } from "expo-router";
 import Constants from "expo-constants";
@@ -47,7 +48,13 @@ export default function Settings() {
       <Section title="This phone">
         <SettingRow
           label="Notifications"
-          detail={free ? "A friend posts or gives you props, or your club plans a session or a game. Nothing else." : "Your new week, your coach, a Film Room. Nothing else."}
+          detail={
+            free
+              ? "A friend posts or gives you props, or your club plans a session or a game. Nothing else."
+              : hasTrain(me.data?.state)
+                ? "Your new week, a friend's post or props, and what your club plans. Nothing else."
+                : "Your new week, your coach, a Film Room. Nothing else."
+          }
           value={p.pushOn}
           onValue={(v) => void (v ? turnOnNotifications() : turnOffNotifications())}
         />

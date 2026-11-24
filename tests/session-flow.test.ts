@@ -178,7 +178,7 @@ describe("the player shell", () => {
     for (const tier of ["pro", "elite", "complete", null] as const) {
       expect(memberTabs(tier).length).toBeLessThanOrEqual(5);
     }
-    expect(read("app/(player)/layout.tsx")).toContain("memberTabs(player?.tier)");
+    expect(read("app/(player)/layout.tsx")).toContain("memberTabs(player?.tier, social)");
   });
 
   it("sign out is not a one-tap icon in the phone header", () => {

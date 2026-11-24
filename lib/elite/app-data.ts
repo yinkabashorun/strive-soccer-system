@@ -27,7 +27,8 @@ import type { Tracker } from "./tracker-server";
 import { shortName, tracksGym } from "./tracker";
 import { owedMemberSteps } from "./free-intake";
 import { memberAnswersFor } from "./free-upgrade-server";
-import { squadFor } from "./squad-pass-server";
+import { hadEarnedMonth, squadFor } from "./squad-pass-server";
+import { oneAppTabs, proEnded } from "./one-app";
 import { runningLine } from "./squad-pass";
 import { parentLinkFor } from "./parent-link-server";
 import { inboxRows, unreadCount } from "./bell";
@@ -121,6 +122,8 @@ export async function loadBootstrap(
     state.kind === "ok" && player
       ? unreadCount(await getNotifications(player.id).catch(() => []))
       : 0;
+  const social = state.kind === "ok" && state.social === true;
+  const inFreeApp = state.kind === "free" || social;
   return {
     viewer: {
       name: viewer.profile.full_name,
@@ -141,15 +144,33 @@ export async function loadBootstrap(
           knownParentPhone: player.parent_phone ?? "",
         }
       : null,
-    tabs: memberTabs(player?.tier).map((t) => ({ key: TAB_KEY[t.href] ?? t.href, label: t.label })),
+    // ONE APP (lib/elite/one-app.ts): a free player, and a member with the
+    // free app behind them, get the free tabs; Strive Pro adds Train.
+    tabs: inFreeApp
+      ? oneAppTabs(social)
+      : memberTabs(player?.tier).map((t) => ({ key: TAB_KEY[t.href] ?? t.href, label: t.label })),
     unread,
     free:
-      state.kind === "free" && tracker
-        ? { name: shortName(viewer.profile.full_name), gym: tracksGym(tracker.grade) }
+      inFreeApp && tracker
+        ? {
+            name: shortName(viewer.profile.full_name),
+            gym: tracksGym(tracker.grade),
+            ...(state.kind === "free" && (await proEndedFor(viewer, player)) ? { proEnded: true } : {}),
+          }
         : null,
     quizOwed: carried ? owedMemberSteps(carried) : null,
     profileSetup: await profileSetupFor(viewer),
   };
+}
+
+// Strive Pro was on for this free player and has ended (one-app.ts). A
+// read that fails says nothing.
+async function proEndedFor(viewer: Viewer, player: Player | null): Promise<boolean> {
+  if (!player) return false;
+  const maybe = proEnded({ tier: player.tier, status: player.subscription_status, hadEarnedMonth: true });
+  if (!maybe) return false;
+  if (player.subscription_status === "canceled") return true;
+  return hadEarnedMonth(viewer.profile.id).catch(() => false);
 }
 
 // The photo and @username (081) as the phone needs them: what is owed, in

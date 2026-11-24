@@ -1,3 +1,4 @@
+import { hasFreeApp } from "@/navigation";
 import { useQuery } from "@tanstack/react-query";
 import {
   APP_API,
@@ -27,8 +28,8 @@ export const clubKeys = {
 };
 
 function useInFreeApp(): boolean {
-  const state = useMe().data?.state;
-  return state?.kind === "free" && state.stage === "ready";
+  // a free account in the free app, or a Pro member who keeps it (one-app.ts)
+  return hasFreeApp(useMe().data?.state, "ready");
 }
 
 export function useClubs() {

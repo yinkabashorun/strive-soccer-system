@@ -23,7 +23,10 @@
 # The example members: "ok" a member, "onboarding" a new member at the door
 # (03-door: the member card with their photo), "setup" one who still owes
 # the photo and @username, "locked" a FREE account in the free app (its
-# five tabs; 21 is its Courses shelf), "free_quiz" a new free account at
+# four tabs: Friends, Week, Clubs, You), "social" that same account with
+# Strive Pro on (the same four tabs and Train in front: 47 to 50; nothing
+# of the free app is taken away), "ended" the free account after Strive Pro
+# ended (51: the one calm line on Week), "free_quiz" a new free account at
 # the quiz, "free_offer" one at the offer after it. 15-you is the member's
 # card with the photo; 33 is the free account's You.
 #
@@ -71,7 +74,6 @@ SHOTS='
 18b-inbox|ok|inbox|11
 19-change-password|ok|change-password|10
 20-delete-account|ok|delete-account|10
-21-courses-locked|locked|courses|12
 22-join-age|signedout|join/age|9
 23-join-name|signedout|join/name|9
 24-join-agree|signedout|join/agree|9
@@ -97,6 +99,11 @@ SHOTS='
 44-matchup-how|locked|club/how|10
 45-club-week-decided|locked|club/c-gainesville|13
 46-club-start|locked|club/start|10
+47-train|social|-|13|film
+48-train-friends|social|friends|12
+49-train-week|social|my-week|12
+50-train-you|social|me|12
+51-pro-ended|ended|my-week|12
 '
 
 last=""

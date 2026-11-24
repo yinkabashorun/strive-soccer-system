@@ -21,7 +21,7 @@ const NY = "America/New_York";
 // on Home and a link on the Coach screen, never a tab of its own. The
 // routes are the ones that already exist: Week is /homework.
 // ---------------------------------------------------------------------
-export type MemberTab = { href: string; label: string; icon: "home" | "week" | "courses" | "coach" | "you" };
+export type MemberTab = { href: string; label: string; icon: "home" | "week" | "courses" | "coach" | "you" | "friends" };
 
 export const HOME_TAB: MemberTab = { href: "/dashboard", label: "Home", icon: "home" };
 export const WEEK_TAB: MemberTab = { href: "/homework", label: "Week", icon: "week" };
@@ -29,8 +29,15 @@ export const COURSES_TAB: MemberTab = { href: "/courses", label: "Courses", icon
 export const COACH_TAB: MemberTab = { href: "/messages", label: "Coach", icon: "coach" };
 export const YOU_TAB: MemberTab = { href: "/you", label: "You", icon: "you" };
 
-export function memberTabs(tier: MembershipTier | string | null | undefined): MemberTab[] {
-  const tabs = [HOME_TAB, WEEK_TAB, COURSES_TAB];
+// ONE APP on the website (lib/elite/one-app.ts): a member who came through
+// the free app keeps it. Their member pages carry a Friends tab that opens
+// the free pages (Friends, My week, their clubs), and those pages carry a
+// Train tab back (components/elite/FreeShell.tsx). Strive Pro adds; it
+// never takes the free pages away.
+export const FRIENDS_TAB: MemberTab = { href: "/log", label: "Friends", icon: "friends" };
+
+export function memberTabs(tier: MembershipTier | string | null | undefined, social = false): MemberTab[] {
+  const tabs = social ? [HOME_TAB, FRIENDS_TAB, WEEK_TAB, COURSES_TAB] : [HOME_TAB, WEEK_TAB, COURSES_TAB];
   if (tabOn(tier, COACH_TAB.href)) tabs.push(COACH_TAB);
   tabs.push(YOU_TAB);
   return tabs;

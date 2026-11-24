@@ -143,8 +143,15 @@ describe("the phone's own chrome", () => {
 // Also from the first simulator run: Home started a whole status bar too
 // low. The iPhone tab bar adds room for the status bar to a tab's page by
 // itself, and the page (src/Screen.tsx) was already leaving that room.
+// A tab whose page is the one shared Home (src/HomeScreen.tsx: the member
+// app's Home tab, and the Train tab Strive Pro adds to the free tabs) is
+// held to the rules through that file.
+const pageOf = (f: string) => (/<HomeScreen\b/.test(code(f)) ? path.join(root, "src/HomeScreen.tsx") : f);
+
 describe("a tab's page", () => {
-  const tabs = files(path.join(root, "app/(tabs)")).filter((f) => !f.endsWith("_layout.tsx"));
+  const tabs = files(path.join(root, "app/(tabs)"))
+    .filter((f) => !f.endsWith("_layout.tsx"))
+    .map(pageOf);
   it("leaves room for the status bar and the tab bar once, in one place", () => {
     const layout = code(path.join(root, "app/(tabs)/_layout.tsx"));
     expect(layout).toMatch(/<NativeTabs\.Trigger[^>]*disableAutomaticContentInsets/);
@@ -177,7 +184,8 @@ describe("a tab's page", () => {
 // cut short ("doesn't look like an achievement"), and the Week tab was five
 // equal cards ("I don't think that screen is super addicting").
 describe("what was earned, and the week's path", () => {
-  const you = code(path.join(root, "app/(tabs)/you.tsx"));
+  // what was earned is ONE component, on both You tabs (src/YouEarned.tsx)
+  const you = code(path.join(root, "src/YouEarned.tsx"));
   const week = code(path.join(root, "app/(tabs)/week.tsx"));
   it("a badge is a gold medal with its whole line, never cut short", () => {
     const badges = you.slice(you.indexOf("y.achievements.map"), you.indexOf("</>", you.indexOf("y.achievements.map")));
@@ -356,7 +364,7 @@ describe("the first screen", () => {
   it("comes out from under the launch screen only once it is the right one, and never waits forever", () => {
     // one place hides the launch screen: when the gate has settled, or the clock runs out
     expect(layout.match(/SplashScreen\.hideAsync\(/g)?.length).toBe(2);
-    expect(layout).toMatch(/const settled = unreadable \|\| \(area !== null && inArea\(area, segments\)\);/);
+    expect(layout).toMatch(/const settled = unreadable \|\| \(area !== null && inArea\(area, segments, train\)\);/);
     expect(layout).toMatch(/setTimeout\(\(\) => void SplashScreen\.hideAsync\(\)[^;]*LAUNCH_SCREEN_MAX_MS\)/);
     const max = Number(layout.match(/LAUNCH_SCREEN_MAX_MS = (\d+)/)?.[1]);
     expect(max).toBeGreaterThanOrEqual(2000);
@@ -475,10 +483,19 @@ describe("the free app", () => {
   const layout = code(path.join(root, "app/(free)/_layout.tsx"));
   const names = (f: string) => path.basename(f).replace(/\.tsx$/, "");
 
-  it("has five tabs: Friends, Week, Clubs, Courses, You", () => {
-    expect(pages.map(names).sort()).toEqual(["clubs", "courses", "friends", "me", "my-week"]);
+  // Nov 24 2026, "pro should just add tabs": four tabs for a free player,
+  // and Train is the one screen Strive Pro adds (lib/elite/one-app.ts).
+  it("has four tabs, Friends, Week, Clubs, You, and the one Strive Pro adds, Train", () => {
+    expect(pages.map(names).sort()).toEqual(["clubs", "friends", "me", "my-week", "train"]);
     const tabs = code(path.join(root, "src/tabs.ts"));
     for (const p of pages) expect(tabs, names(p)).toContain(`route: "${names(p)}"`);
+    // which of them a person sees is the shared rule's, never this app's
+    expect(tabs).toContain("oneAppTabs(train)");
+    expect(layout).toContain("oneAppTabBar(train)");
+    // a tab they do not have is hidden, and the bar is built again when
+    // Train arrives or goes
+    expect(layout).toMatch(/<NativeTabs key=\{train \? "pro" : "free"\}/);
+    expect(layout).toMatch(/name=\{ONE_APP_SCREENS\[k\]\.route\} hidden/);
     expect(code(path.join(root, "app/_layout.tsx"))).toContain('<Stack.Screen name="(free)"');
   });
 
@@ -490,17 +507,33 @@ describe("the free app", () => {
   });
 
   it("every tab's page leaves its room in the one place, like a member's", () => {
-    for (const f of pages) {
+    for (const f of pages.map(pageOf)) {
       expect(code(f), rel(f)).toContain("<Screen");
       expect(code(f), rel(f)).not.toContain("useSafeAreaInsets");
       expect(code(f), rel(f)).toContain("paddingTop: PAGE_TOP");
     }
   });
 
-  it("shows the same Courses shelf, locked by the server, with no word about it", () => {
-    const courses = code(path.join(root, "app/(free)/courses.tsx"));
-    expect(courses).toContain("<CoursesList />");
-    expect(courses).not.toMatch(/upgrade|offer|Pro\b|unlock|member/i);
+  it("Train is the member's own Home with the Courses shelf under the week, and a free player has no Courses tab", () => {
+    expect(code(path.join(root, "app/(free)/train.tsx"))).toContain("<HomeScreen train />");
+    const home = code(path.join(root, "src/HomeScreen.tsx"));
+    expect(home).toMatch(/\{train \? \([\s\S]{0,600}<CoursesList \/>/);
+    // the truth about saving is said on Train (the member app says it on Week)
+    expect(home).toContain("REFUSED_LINE : UNSENT_LINE");
+    expect(files(path.join(root, "app/(free)")).map(names)).not.toContain("courses");
+  });
+
+  it("Strive Pro adds to the You tab and the finish screen, and takes nothing off", () => {
+    const me = code(path.join(root, "app/(free)/me.tsx"));
+    expect(me).toContain("{train && member ? <YouEarned y={member} /> : null}");
+    // the free numbers, the invite row and Settings are there for everyone
+    expect(me).toContain("y.weekMinutes");
+    expect(me).toContain('label="Send my link to a teammate"');
+    const session = code(path.join(root, "app/session/[n].tsx"));
+    expect(session).toMatch(/hasTrain\(me\.data\?\.state\) && finish\.added >= 1/);
+    expect(session).toContain("/post?session=${week.week}-${session.n}");
+    // one quiet row under the main button, never a second big button
+    expect(session.match(/POST_SESSION_ROW\}/g)?.length).toBe(2);
   });
 
   // "Not too much CTAs": one prompt in the whole free app, on Week.
@@ -742,7 +775,7 @@ describe("the member card", () => {
   const withCard = sources.filter((f) => rel(f).startsWith("app/") && /<MemberCard\b/.test(code(f)));
 
   it("is given the photo and the @username wherever it is shown", () => {
-    expect(withCard.map(rel).sort()).toEqual(["app/(tabs)/you.tsx", "app/offer.tsx", "app/onboarding/index.tsx"]);
+    expect(withCard.map(rel).sort()).toEqual(["app/(free)/me.tsx", "app/(tabs)/you.tsx", "app/offer.tsx", "app/onboarding/index.tsx"]);
     for (const f of withCard) {
       const src = code(f);
       for (const tag of src.match(/<MemberCard\b[^>]*\/>/g) ?? []) {

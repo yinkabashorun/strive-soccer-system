@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 import { chunkedStorage, CHUNK_SIZE, MAX_CHUNKS, parseCount, splitValue, type KV } from "@/auth/chunks";
 import { applyDone } from "@/week-cache";
 import { overlay, outcomeOf, parseTicks, queueTick, REFUSED_LINE, retryDelayMs, settle, UNSENT_LINE, type Tick } from "@/outbox-core";
-import { areaFor, areaHome, inArea, pushRoute, tappedNotice } from "@/navigation";
+import { ONE_APP_ROUTE, hasFreeApp, areaFor, areaHome, hasTrain, homeOf, inArea, pushRoute, tappedNotice } from "@/navigation";
 import { clipOrder, clipsInView, liveClip, pickedAfterScroll, pickedAfterTap } from "@/course-view";
 import { drillEyebrow, repsTiles } from "@/drill-view";
-import { APP_TABS, FREE_TABS } from "@/tabs";
+import { APP_TABS, oneAppTabBar } from "@/tabs";
 import { APP_API, appCoursePath, type AppCourse } from "@shared/app-contract";
 import { isStep, nextStepId, quizStepIds, stepPosition } from "@/quiz-steps";
 import { JOIN_STEPS, isJoinStep } from "@/join-draft";
@@ -327,10 +327,79 @@ describe("the tabs", () => {
     expect(APP_TABS.map((t) => t.route)).toEqual(["index", "week", "courses", "you"]);
   });
 
-  it("are five in the free app: Friends, Week, Clubs, Courses, You", () => {
-    expect(FREE_TABS.map((t) => t.label)).toEqual(["Friends", "Week", "Clubs", "Courses", "You"]);
-    expect(FREE_TABS.map((t) => t.route)).toEqual(["friends", "my-week", "clubs", "courses", "me"]);
-    expect(areaHome("free")).toBe(`/(free)/${FREE_TABS[0].route}`);
+  it("are four for a free player: Friends, Week, Clubs, You", () => {
+    const free = oneAppTabBar(false);
+    expect(free.map((t) => t.label)).toEqual(["Friends", "Week", "Clubs", "You"]);
+    expect(free.map((t) => t.route)).toEqual(["friends", "my-week", "clubs", "me"]);
+    expect(areaHome("free")).toBe(`/(free)/${free[0].route}`);
+  });
+});
+
+// Coach Yinka, Nov 24 2026: "pro should just add tabs" (after "why would
+// they lose friends when they upgrade"). lib/elite/one-app.ts.
+describe("one app: Strive Pro adds a tab and takes nothing away", () => {
+  const set = { username: "marcus.b", hasPhoto: true, photoUrl: null, steps: [], ideas: [] };
+  const pro = { kind: "ok", social: true } as const;
+
+  it("a Pro member who came through the free app stays in the same tabs", () => {
+    expect(areaFor(true, pro, set)).toBe("free");
+    // a member with no free app behind them keeps the member app
+    expect(areaFor(true, { kind: "ok" }, set)).toBe("app");
+    expect(hasTrain(pro)).toBe(true);
+    expect(hasTrain({ kind: "ok" })).toBe(false);
+    expect(hasTrain({ kind: "free", stage: "ready" })).toBe(false);
+  });
+
+  it("their bar is the free bar with Train in front: every free tab, same order, same screen", () => {
+    const free = oneAppTabBar(false);
+    const withPro = oneAppTabBar(true);
+    expect(withPro.map((t) => t.label)).toEqual(["Train", "Friends", "Week", "Clubs", "You"]);
+    expect(withPro.slice(1)).toEqual(free);
+    // an iPhone tab bar holds five: a sixth would hide a tab under "More"
+    expect(withPro.length).toBeLessThanOrEqual(5);
+    for (const t of withPro) expect(ONE_APP_ROUTE[t.key]).toBe(`/(free)/${t.route}`);
+  });
+
+  it("their Friends, Week, Clubs and You load the same data a free player's do", () => {
+    // the fault the first preview showed: those tabs asked "is this a free
+    // account?" before loading, and a Pro member got four empty screens
+    expect(hasFreeApp(pro)).toBe(true);
+    expect(hasFreeApp(pro, "ready")).toBe(true);
+    expect(hasFreeApp({ kind: "free", stage: "ready" }, "ready")).toBe(true);
+    expect(hasFreeApp({ kind: "free", stage: "offer" }, "ready")).toBe(false);
+    expect(hasFreeApp({ kind: "free", stage: "offer" })).toBe(true);
+    // a member with no free app behind them has none of it
+    expect(hasFreeApp({ kind: "ok" })).toBe(false);
+    expect(hasFreeApp(null)).toBe(false);
+  });
+
+  it("they open on Train; a free player opens on Friends", () => {
+    expect(areaHome("free", true)).toBe("/(free)/train");
+    expect(areaHome("free", false)).toBe("/(free)/friends");
+    expect(homeOf(pro)).toBe("/(free)/train");
+    expect(homeOf({ kind: "free", stage: "ready" })).toBe("/(free)/friends");
+    expect(homeOf({ kind: "ok" })).toBe("/");
+  });
+
+  it("what Train opens (a session, the drop, extra work, a course, the Inbox) is theirs, and only theirs", () => {
+    for (const seg of ["session", "drop", "extra", "checkin", "course", "inbox"]) {
+      expect(inArea("free", [seg], true), seg).toBe(true);
+      expect(inArea("free", [seg], false), seg).toBe(false);
+    }
+    // everything the free app had is still one tap away
+    for (const seg of ["(free)", "post", "club", "week-plan", "settings"]) expect(inArea("free", [seg], true), seg).toBe(true);
+  });
+
+  it("their notices open the right tab: the week on Train, a friend on Friends, a medal on You", () => {
+    expect(pushRoute("free", "/dashboard", "week", true)).toBe("/(free)/train");
+    expect(pushRoute("free", "/homework", "week", true)).toBe("/(free)/train");
+    expect(pushRoute("free", "/log", "friends", true)).toBe("/(free)/friends");
+    expect(pushRoute("free", "/log/week", undefined, true)).toBe("/(free)/my-week");
+    expect(pushRoute("free", "/you", undefined, true)).toBe("/(free)/me");
+    expect(pushRoute("free", "/courses/keep-it-up", undefined, true)).toBe("/course/keep-it-up");
+    expect(pushRoute("free", undefined, undefined, true)).toBe("/(free)/train");
+    // a free player's notices are unchanged
+    expect(pushRoute("free", "/dashboard", "week", false)).toBe("/(free)/friends");
   });
 });
 

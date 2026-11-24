@@ -16,7 +16,7 @@ import { getPlayer } from "./data";
 import { consentDue } from "./legal-server";
 import { getTracker, type Tracker } from "./tracker-server";
 import { readIntake, stageOf, type StoredIntake } from "./free-intake-server";
-import { mayBeFree, memberState, type MemberState } from "./member-gate";
+import { mayHaveFreeApp, memberState, type MemberState } from "./member-gate";
 import { profileSetupDue } from "./account-profile";
 import type { Player } from "./types";
 
@@ -69,10 +69,12 @@ export function accessAllowed(access: AppAccess, state: MemberState, setupDue = 
   if (access === "account") return true;
   const player = state.kind !== "coach" && state.kind !== "free" && state.kind !== "no_profile" && state.kind !== "consent";
   const free = state.kind === "free" && state.stage !== "web";
+  // a member who also has the free app keeps every free route (one-app.ts)
+  const social = state.kind === "ok" && state.social === true;
   if (access === "player") return player;
   if (access === "person") return player || state.kind === "free";
-  if (access === "free") return free;
-  if (access === "free_app") return free && state.stage === "ready" && !setupDue;
+  if (access === "free") return free || social;
+  if (access === "free_app") return (free && state.stage === "ready" && !setupDue) || (social && !setupDue);
   return state.kind === "ok";
 }
 
@@ -102,17 +104,21 @@ export async function loadMemberState(viewer: Viewer): Promise<Loaded> {
     return { state, player: null, tracker, intake };
   }
   const [player, due] = await Promise.all([getPlayer(viewer.playerId), consentDue(viewer.profile.id)]);
-  const { tracker, intake } = mayBeFree(player) ? await freeSide() : { tracker: null, intake: null };
+  // The free account is read for every Strive Pro row: one whose
+  // membership is not on still lives in the free app, and one whose
+  // membership IS on keeps the free app and gains the Train tab.
+  const { tracker, intake } = mayHaveFreeApp(player) ? await freeSide() : { tracker: null, intake: null };
   const state = memberState({
     role: viewer.role,
     playerId: viewer.playerId,
     isFree: Boolean(tracker),
     freeStage: tracker && intake ? stageOf(tracker, intake) : "web",
+    hasFreeApp: Boolean(tracker),
     consentDue: due,
     player,
   });
-  const inFree = state.kind === "free";
-  return { state, player, tracker: inFree ? tracker : null, intake: inFree ? intake : null };
+  const keepsFree = state.kind === "free" || (state.kind === "ok" && state.social === true);
+  return { state, player, tracker: keepsFree ? tracker : null, intake: keepsFree ? intake : null };
 }
 
 export function appRoute(

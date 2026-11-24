@@ -1,5 +1,6 @@
 "use server";
 
+import { settleSessionLogForDrill } from "./session-log";
 import { revalidatePath } from "next/cache";
 import { SETUP_REFUSED, profileSetupDue } from "./account-profile";
 import { createClient, createServiceClient } from "./supabase/server";
@@ -124,11 +125,15 @@ export async function toggleHomework(id: string, completed: boolean, seconds?: n
       if (readError) return { ok: false as const, again: true };
       if (!row || Boolean(row.completed) !== completed) return { ok: false as const, again: false };
     }
-    if (completed) {
-      const viewer = await getViewer();
-      if (viewer?.playerId) {
-        await maybeAwardAchievements(viewer.playerId).catch(() => undefined);
-      }
+    const viewer = await getViewer();
+    if (completed && viewer?.playerId) {
+      await maybeAwardAchievements(viewer.playerId).catch(() => undefined);
+    }
+    // A member with friends and clubs in the app: a finished session goes
+    // on their week once, and an unfinished one comes back off
+    // (lib/elite/session-log.ts). Never throws, never refuses the tick.
+    if (viewer?.playerId) {
+      await settleSessionLogForDrill({ playerId: viewer.playerId, profileId: viewer.profile.id, homeworkId: id });
     }
     revalidatePath("/homework");
     revalidatePath("/dashboard");

@@ -28,7 +28,11 @@ export type MemberState =
   | { kind: "pro_checkout"; gate: GateCopy }
   | { kind: "onboarding" }
   | { kind: "membership"; gate: GateCopy }
-  | { kind: "ok" };
+  // `social`: a member who also has the free app (a free account that
+  // started Strive Pro). They keep every free tab; Strive Pro ADDS the
+  // Train tab (lib/elite/one-app.ts). Coach Yinka, Nov 24 2026: "pro
+  // should just add tabs."
+  | { kind: "ok"; social?: true };
 
 export type MemberGateInput = {
   role: Role;
@@ -39,6 +43,9 @@ export type MemberGateInput = {
   // Where that free account is (lib/elite/free-intake.ts). Left out by a
   // caller that only needs to know the account is free (the web shell).
   freeStage?: FreeStage;
+  // This member has a free app account behind them (read for a Strive Pro
+  // row whether or not its membership is on).
+  hasFreeApp?: boolean;
   consentDue: boolean;
   player: {
     subscription_status?: string | null;
@@ -54,6 +61,13 @@ export type MemberGateInput = {
 // when this says so, so an ordinary member costs no extra read.
 export function mayBeFree(player: MemberGateInput["player"]): boolean {
   return Boolean(player) && isPro(player?.tier) && proMembershipGate(player?.subscription_status ?? "none") !== null;
+}
+
+// Whether a member row can have a free app account behind it at all: only
+// a Strive Pro row (the row a free account gets when it taps Start, and
+// the row of a member who joined Strive Pro directly, who has none).
+export function mayHaveFreeApp(player: MemberGateInput["player"]): boolean {
+  return Boolean(player) && isPro(player?.tier);
 }
 
 // A free account stays a free account until a membership is actually on.
@@ -73,5 +87,5 @@ export function memberState(i: MemberGateInput): MemberState {
   // (undefined) and nobody is trapped in the quiz.
   if (i.player && i.player.onboarded_at === null) return { kind: "onboarding" };
   if (gate) return { kind: "membership", gate };
-  return { kind: "ok" };
+  return i.hasFreeApp ? { kind: "ok", social: true } : { kind: "ok" };
 }

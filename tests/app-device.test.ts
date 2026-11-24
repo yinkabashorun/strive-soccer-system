@@ -653,8 +653,12 @@ describe("clubs", () => {
     }
     // the record lines and the card line are the server's
     const page = at("app/club/[id]/index.tsx");
-    expect(page).toContain("{c.recordLine}");
-    expect(page).toContain("{c.matchup.recordLine}");
+    // (Nov 24 2026: the page shows each record as the two numbers a player
+    // says, "4-1", read from the server's own line; the plain sentence is
+    // what a screen reader says)
+    expect(page).toContain("says={c.recordLine}");
+    expect(page).toContain("says={c.matchup!.recordLine}");
+    expect(page).toContain("recordShort(c?.matchup?.recordLine)");
     expect(at("app/(free)/clubs.tsx")).toContain("{club.matchup}");
   });
 
@@ -852,5 +856,57 @@ describe("a button under a typed question rides on the keyboard", () => {
       }
     }
     expect(code(path.join(root, "app/onboarding/[step].tsx"))).toMatch(/\bcta: \{ paddingHorizontal/);
+  });
+});
+
+// Nov 24 2026 (Coach Yinka: "polish the social half to match the training
+// loop"): Friends, Week, Clubs and You are held to the standard Train set:
+// one picture and one button at the top, numbers a player can read at a
+// glance, and never a plain grey box.
+describe("the social half is built like the training loop", () => {
+  const friends = code(path.join(root, "app/(free)/friends.tsx"));
+  const hero = code(path.join(root, "src/TodayHero.tsx"));
+
+  it("Friends opens on one card with one button until today's post is up", () => {
+    expect(friends).toMatch(/\{f\.unlocked \? \([\s\S]{0,260}<Button quiet label="Post my training"[\s\S]{0,120}\) : \(\s*<TodayHero/);
+    // the card IS the feed's first locked post, so it is not said twice
+    expect(friends).toContain("cards.filter((c) => c.id !== heroCard.id)");
+    expect(hero.match(/<Button\b/g)?.length).toBe(1);
+    // its words are the feed's own
+    expect(hero).toContain("lockedHeadlineLines(locked.first, locked.minutes, locked.kind)");
+    // behind them: the friend's profile photo, blurred. Never the post.
+    expect(hero).toMatch(/source=\{\{ uri: locked\.photo \}\}[^>]*blurRadius=/);
+    expect(hero).not.toMatch(/photoUrl/);
+    // nobody is named as not having trained
+    expect(friends).toContain("f.faces.filter((x) => !x.you && x.active)");
+    expect(hero).not.toMatch(/has not|hasn't|missed|behind/i);
+  });
+
+  it("the first-days list never pushes the photos off the first screen", () => {
+    expect(friends).toContain("const listAfterFirstPost = f.friendCount > 0 && feedCards.length > 0;");
+    expect(friends).toContain("{i === 0 && listAfterFirstPost ? firstDays : null}");
+  });
+
+  it("the friends board shows who is ahead at a glance, and the player's own time is the gold one", () => {
+    const week = code(path.join(root, "app/(free)/my-week.tsx"));
+    expect(week).toContain("barShare(r.minutes, boardTop)");
+    expect(week).toMatch(/r\.me \? styles\.barMe : null/);
+    expect(week).toMatch(/barMe: \{ backgroundColor: color\.gold \}/);
+  });
+
+  it("a club leads with its own picture or its own colour, and its record is numbers", () => {
+    const page = code(path.join(root, "app/club/[id]/index.tsx"));
+    expect(page).toMatch(/\{heroPhoto \? \([\s\S]{0,400}\) : \(\s*<CrestGlow club=\{c\} \/>/);
+    expect(page).toContain("<RecordChip big={c.record}");
+    expect(code(path.join(root, "app/(free)/clubs.tsx"))).toMatch(/\) : \(\s*<CrestGlow club=\{club\} \/>/);
+    expect(code(path.join(root, "src/MatchupCard.tsx"))).toContain("matchupSplit(matchup.mine.minutes, matchup.theirs.minutes)");
+  });
+
+  it("You is one card: who they are, the level their training earned, their two numbers", () => {
+    const me = code(path.join(root, "app/(free)/me.tsx"));
+    expect(me).toContain("<Eyebrow>{y.aura.label}</Eyebrow>");
+    expect(me).toMatch(/fill: \{[^}]*backgroundColor: color\.gold/);
+    // gold stays on what was earned, never on a button
+    expect(me).not.toMatch(/<Button[^>]*gold/);
   });
 });

@@ -1,3 +1,4 @@
+import { matchupSplit } from "@/social-view";
 import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import type { MatchupView } from "@shared/app-contract";
@@ -40,6 +41,13 @@ export function MatchupCard({ matchup }: { matchup: MatchupView }) {
           ))}
         </View>
       ) : null}
+      {/* the race at a glance: this club's share of the two times */}
+      {matchup.mine && matchup.theirs ? (
+        <View style={styles.split} accessible={false} importantForAccessibility="no-hide-descendants">
+          <View style={[styles.mine, { flex: matchupSplit(matchup.mine.minutes, matchup.theirs.minutes) }]} />
+          <View style={[styles.theirs, { flex: 1 - matchupSplit(matchup.mine.minutes, matchup.theirs.minutes) }]} />
+        </View>
+      ) : null}
       <Label size={15.5} style={{ marginTop: sides ? 14 : 10, lineHeight: 21 }}>
         {matchup.line}
       </Label>
@@ -62,5 +70,8 @@ const styles = StyleSheet.create({
   card: { marginHorizontal: 14, marginTop: 14, paddingBottom: 4 },
   sides: { flexDirection: "row", gap: 14, marginTop: 14 },
   who: { flexDirection: "row", alignItems: "center", gap: 8, minHeight: 36 },
+  split: { flexDirection: "row", gap: 3, height: 8, marginTop: 14 },
+  mine: { height: 8, borderRadius: 4, backgroundColor: color.bone },
+  theirs: { height: 8, borderRadius: 4, backgroundColor: "rgba(242,239,232,0.22)" },
   how: { minHeight: 44, flexDirection: "row", alignItems: "center", gap: 4, marginTop: 4 },
 });

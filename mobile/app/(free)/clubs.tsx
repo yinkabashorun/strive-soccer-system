@@ -6,7 +6,7 @@ import { CLUB_CAP_MESSAGE, CLUBS_PER_PLAYER } from "@shared/tracker";
 import { OFFLINE_MESSAGE } from "@/api/client";
 import { refreshClubs, useClubs } from "@/api/clubs";
 import { Avatar, MyAvatar } from "@/Avatar";
-import { Crest } from "@/Crest";
+import { CrestGlow, Crest } from "@/Crest";
 import { PAGE_TOP, Screen } from "@/Screen";
 import { Shade } from "@/Shade";
 import { Body, Button, Card, Eyebrow, Head, Label, Press, Skeleton } from "@/ui";
@@ -104,7 +104,9 @@ function ClubCard({ club, onPress }: { club: AppClubCard; onPress: () => void })
           <Image source={{ uri: club.photo }} style={StyleSheet.absoluteFill} contentFit="cover" transition={200} cachePolicy="disk" />
           <Shade id={`club-${club.id}`} stops={CLUB_SHADE} />
         </>
-      ) : null}
+      ) : (
+        <CrestGlow club={club} />
+      )}
       <View style={styles.head}>
         <Crest club={club} size={52} />
         <View style={{ flex: 1 }}>

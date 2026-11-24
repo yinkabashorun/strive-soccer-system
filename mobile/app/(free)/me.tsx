@@ -11,7 +11,8 @@ import { OFFLINE_MESSAGE } from "@/api/client";
 import { refreshFree, useFreeYou } from "@/api/free";
 import { MyAvatar, Star } from "@/Avatar";
 import { PAGE_TOP, Screen } from "@/Screen";
-import { Body, Button, Card, Hairline, Head, Label, Ring, SettingRow, Skeleton } from "@/ui";
+import { Body, Button, Card, Eyebrow, Hairline, Head, Ring, SettingRow, Skeleton } from "@/ui";
+import { color } from "@/theme";
 
 // You, in the free app: your photo and @username, your aura level (earned
 // by training and by nothing else; it only goes up), this week and all
@@ -43,60 +44,68 @@ export default function Me() {
         <Head size={40}>You</Head>
       </View>
 
-      <View style={styles.who}>
-        <Ring size={116} stroke={5} value={y?.aura.progress ?? 0}>
-          <MyAvatar initials={initialsOf(name)} size={98} />
-        </Ring>
-        <View style={{ flex: 1 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }} accessible accessibilityLabel={y?.starred ? `${name}. ${STAR_LABEL}` : name}>
-            <Head size={26} numberOfLines={1}>
-              {name}
-            </Head>
-            {y?.starred ? <Star size={16} /> : null}
+      {/* One card, the way a member has their card: who you are, the level
+          your training has earned (it only goes up), and your two numbers. */}
+      <Card style={styles.card}>
+        <View style={styles.who}>
+          <Ring size={104} stroke={5} value={y?.aura.progress ?? 0}>
+            <MyAvatar initials={initialsOf(name)} size={88} />
+          </Ring>
+          <View style={{ flex: 1 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }} accessible accessibilityLabel={y?.starred ? `${name}. ${STAR_LABEL}` : name}>
+              <Head size={28} numberOfLines={1}>
+                {name}
+              </Head>
+              {y?.starred ? <Star size={16} /> : null}
+            </View>
+            {username ? (
+              <Body dim size={14} style={{ marginTop: 2 }}>
+                @{username}
+              </Body>
+            ) : null}
           </View>
-          {username ? (
-            <Body dim size={14} style={{ marginTop: 2 }}>
-              @{username}
-            </Body>
-          ) : null}
-          {y ? (
-            <Label size={14} style={{ marginTop: 10 }}>
-              {y.aura.label}
-            </Label>
-          ) : null}
-          {y?.aura.next ? (
-            <Body dim size={12.5} style={{ marginTop: 2 }}>
-              {y.aura.next}
-            </Body>
-          ) : null}
         </View>
-      </View>
 
-      {!y ? (
-        you.isError || you.isPaused ? (
-          <View style={{ margin: 20 }}>
-            <Body dim>{OFFLINE_MESSAGE}</Body>
-            <Button quiet style={{ marginTop: 16 }} label="Try again" busy={you.isFetching} onPress={() => void you.refetch()} />
-          </View>
+        {!y ? (
+          you.isError || you.isPaused ? (
+            <View style={{ marginTop: 18 }}>
+              <Body dim>{OFFLINE_MESSAGE}</Body>
+              <Button quiet style={{ marginTop: 16 }} label="Try again" busy={you.isFetching} onPress={() => void you.refetch()} />
+            </View>
+          ) : (
+            <Skeleton height={110} style={{ marginTop: 18 }} />
+          )
         ) : (
-          <Skeleton height={110} style={{ margin: 20 }} />
-        )
-      ) : (
-        <View style={styles.numbers}>
-          <Card style={styles.number}>
-            <Head size={34}>{fmtDuration(y.weekMinutes)}</Head>
-            <Body dim size={13}>
-              this week
-            </Body>
-          </Card>
-          <Card style={styles.number}>
-            <Head size={34}>{fmtDuration(y.allMinutes)}</Head>
-            <Body dim size={13}>
-              all time. It only ever goes up.
-            </Body>
-          </Card>
-        </View>
-      )}
+          <>
+            <View style={styles.level} accessible accessibilityLabel={[y.aura.label, y.aura.next].filter(Boolean).join(". ")}>
+              <Eyebrow>{y.aura.label}</Eyebrow>
+              <View style={styles.track}>
+                <View style={[styles.fill, { width: `${Math.round(Math.min(1, Math.max(0, y.aura.progress)) * 100)}%` }]} />
+              </View>
+              {y.aura.next ? (
+                <Body dim size={12.5} style={{ marginTop: 7 }}>
+                  {y.aura.next}
+                </Body>
+              ) : null}
+            </View>
+            <View style={styles.numbers}>
+              <View style={styles.number}>
+                <Head size={36}>{fmtDuration(y.weekMinutes)}</Head>
+                <Body dim size={13}>
+                  this week
+                </Body>
+              </View>
+              <View style={styles.divider} />
+              <View style={styles.number}>
+                <Head size={36}>{fmtDuration(y.allMinutes)}</Head>
+                <Body dim size={13}>
+                  all time. It only ever goes up.
+                </Body>
+              </View>
+            </View>
+          </>
+        )}
+      </Card>
       {y?.gymLine ? (
         <Body dim size={13.5} style={{ marginHorizontal: 20, marginTop: 10 }}>
           {y.gymLine}
@@ -145,7 +154,13 @@ export default function Me() {
 }
 
 const styles = StyleSheet.create({
-  who: { flexDirection: "row", alignItems: "center", gap: 18, marginHorizontal: 20, marginTop: 20 },
-  numbers: { flexDirection: "row", gap: 12, marginHorizontal: 20, marginTop: 22 },
-  number: { flex: 1, padding: 16 },
+  card: { marginHorizontal: 14, marginTop: 18, padding: 20, overflow: "hidden", borderColor: "rgba(200,168,88,0.28)" },
+  who: { flexDirection: "row", alignItems: "center", gap: 16 },
+  level: { marginTop: 20 },
+  track: { height: 6, borderRadius: 3, backgroundColor: color.fill2, marginTop: 9, overflow: "hidden" },
+  // earned by training and by nothing else: gold
+  fill: { height: 6, borderRadius: 3, backgroundColor: color.gold },
+  numbers: { flexDirection: "row", alignItems: "stretch", marginTop: 20, paddingTop: 18, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: color.line },
+  number: { flex: 1 },
+  divider: { width: StyleSheet.hairlineWidth, backgroundColor: color.line, marginHorizontal: 16 },
 });

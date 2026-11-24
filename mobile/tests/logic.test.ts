@@ -1,3 +1,4 @@
+import { BAR_MIN, barShare, matchupSplit, recordShort } from "@/social-view";
 import { describe, expect, it } from "vitest";
 import { chunkedStorage, CHUNK_SIZE, MAX_CHUNKS, parseCount, splitValue, type KV } from "@/auth/chunks";
 import { applyDone } from "@/week-cache";
@@ -751,5 +752,32 @@ describe("the shade under words on a photo", () => {
       expect(stops[0][1]).toBe(0);
       expect(stops[stops.length - 1][1]).toBe(1);
     }
+  });
+});
+
+// The social half's pictures (Nov 24 2026: polished to the training loop).
+describe("the social half's small rules", () => {
+  it("a board bar is this player's time against the most on the board, and never nothing for someone who trained", () => {
+    expect(barShare(195, 195)).toBe(1);
+    expect(barShare(120, 240)).toBe(0.5);
+    expect(barShare(1, 600)).toBe(BAR_MIN);
+    expect(barShare(0, 600)).toBe(0);
+    expect(barShare(30, 0)).toBe(0);
+  });
+
+  it("a matchup bar is this club's share of the two times, level at half, and never empties a side", () => {
+    expect(matchupSplit(60, 60)).toBe(0.5);
+    expect(matchupSplit(0, 0)).toBe(0.5);
+    expect(matchupSplit(111, 99)).toBeCloseTo(111 / 210);
+    expect(matchupSplit(500, 0)).toBe(0.94);
+    expect(matchupSplit(0, 500)).toBe(0.06);
+  });
+
+  it("a record reads as the numbers a player says, from the plain line the server sends", () => {
+    expect(recordShort("Weeks won: 3. Weeks lost: 1. Draws: 0.")).toBe("3-1");
+    expect(recordShort("Games won: 4. Games lost: 1. Draws: 2.")).toBe("4-1-2");
+    expect(recordShort("Weeks won: 0. Weeks lost: 0. Draws: 0.")).toBe("0-0");
+    expect(recordShort("")).toBeNull();
+    expect(recordShort(null)).toBeNull();
   });
 });

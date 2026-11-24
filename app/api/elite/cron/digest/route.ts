@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/elite/supabase/server";
+import { everyRow } from "@/lib/elite/supabase/every-row";
 import { sendCoachDigest } from "@/lib/elite/email";
 import { liveWeekNumber, nyHour } from "@/lib/elite/time";
 import { latestCronRun, PLAN_BUILDER_JOB } from "@/lib/elite/cron-log";
@@ -37,22 +38,35 @@ export async function GET(req: Request) {
   const admin = createServiceClient();
   if (!admin) return NextResponse.json({ ok: false, reason: "no service client" });
 
-  const [{ data: players }, { data: homework }, { data: checkins }, { data: messages }] =
-    await Promise.all([
-      admin
-        .from("elite_players")
-        .select("id, full_name, week1_monday, current_week, subscription_status"),
-      admin.from("elite_homework").select("player_id, week, completed, completed_at"),
+  // Every row of each, a page at a time (lib/elite/supabase/every-row.ts):
+  // read in one go, elite_homework stopped at 1,000 rows and "to build" and
+  // "quiet" were worked out from part of the table.
+  type Hw = { player_id: string; week: number; completed: boolean; completed_at: string | null };
+  const [{ data: players }, hw, checkins, messages] = await Promise.all([
+    admin
+      .from("elite_players")
+      .select("id, full_name, week1_monday, current_week, subscription_status"),
+    everyRow<Hw>((from, to) =>
+      admin.from("elite_homework").select("player_id, week, completed, completed_at").order("id").range(from, to)
+    ),
+    everyRow<{ player_id: string }>((from, to) =>
       admin
         .from("elite_checkins")
         .select("player_id, coach_feedback")
-        .or("coach_feedback.is.null,coach_feedback.eq."),
+        .or("coach_feedback.is.null,coach_feedback.eq.")
+        .order("id")
+        .range(from, to)
+    ),
+    everyRow<{ player_id: string }>((from, to) =>
       admin
         .from("elite_messages")
         .select("player_id, from_role, read")
         .eq("from_role", "player")
-        .eq("read", false),
-    ]);
+        .eq("read", false)
+        .order("id")
+        .range(from, to)
+    ),
+  ]);
 
   type Row = { id: string; full_name: string; week1_monday: string | null; current_week: number; subscription_status: string };
   // A player on a break (034) is owed nothing and is not "quiet".
@@ -60,7 +74,6 @@ export async function GET(req: Request) {
     admin,
     ((players as Row[] | null) ?? []).filter((p) => p.subscription_status !== "canceled")
   );
-  const hw = (homework as { player_id: string; week: number; completed: boolean; completed_at: string | null }[] | null) ?? [];
 
   const builtThrough = new Map<string, number>();
   const lastActive = new Map<string, number>();

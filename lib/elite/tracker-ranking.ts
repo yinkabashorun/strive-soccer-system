@@ -5,10 +5,9 @@
 // name, no member list, no player's own minutes. Players are still only
 // ever ranked next to their friends.
 import { createServiceClient } from "./supabase/server";
+import { everyRow } from "./supabase/every-row";
 import type { Viewer } from "./session";
 import { clubRanking, rankedClubCount, weekOf, type ClubRankingView } from "./tracker";
-
-const PAGE = 1000;
 
 export async function clubRankingFor(viewer: Viewer, today: string): Promise<ClubRankingView> {
   if (viewer.demo) return demoRanking();
@@ -18,15 +17,7 @@ export async function clubRankingFor(viewer: Viewer, today: string): Promise<Clu
   type Club = { id: string; name: string };
   type Member = { club_id: string; profile_id: string };
   type Log = { profile_id: string; minutes: number };
-  async function every<T>(page: (from: number, to: number) => PromiseLike<{ data: unknown }>): Promise<T[]> {
-    const out: T[] = [];
-    for (let from = 0; ; from += PAGE) {
-      const { data } = await page(from, from + PAGE - 1);
-      const batch = (data as T[] | null) ?? [];
-      out.push(...batch);
-      if (batch.length < PAGE) return out;
-    }
-  }
+  const every = everyRow;
 
   const { monday, sunday } = weekOf(today);
   const [clubs, members, logs] = await Promise.all([

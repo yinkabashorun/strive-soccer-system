@@ -183,6 +183,10 @@ export function dropStartLabel(first: Pick<SessionGroup, "n" | "extra"> | null):
   return first ? `Start ${sessionName(first).toLowerCase()}` : "Let's go";
 }
 
+// After a full week (the leaders' finding: players who train more than one
+// kind of thing stay longer): the two ways to keep going, said once.
+export const AFTER_WEEK_MORE = "Still want to train this week? Add extra work, or open a course.";
+
 // What the finish screen says comes next. Never a nag, never a count of
 // what is left undone beyond the plain fact.
 export function afterSessionLine(sessionsLeft: number): string {

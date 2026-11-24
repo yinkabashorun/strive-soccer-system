@@ -3,9 +3,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Check, Play } from "lucide-react";
+import { Check, ChevronRight, Play } from "lucide-react";
 import type { Homework } from "@/lib/elite/types";
 import {
+  AFTER_WEEK_MORE,
   drillKind,
   groupSessions,
   isDone,
@@ -360,9 +361,14 @@ export function VictoryLap({
           <div className="mt-1 text-[12px] text-white/60">trained, all time</div>
         </div>
       </div>
-      <p className="mt-5 text-[15px] leading-relaxed text-white/75">
-        Want more? Tap Extra work below to add a session. Every minute goes on your total.
-      </p>
+      <p className="mt-5 text-[15px] leading-relaxed text-white/75">{AFTER_WEEK_MORE}</p>
+      <Link
+        href="/courses"
+        className="press mt-3 flex min-h-[48px] items-center justify-between rounded-2xl border border-white/[0.1] bg-white/[0.03] px-4 text-[15px] font-semibold text-bone"
+      >
+        Courses
+        <ChevronRight className="h-4 w-4 text-white/50" aria-hidden />
+      </Link>
       <p className="mt-2 text-[15px] font-semibold text-bone">{nextWeekLine}</p>
     </section>
   );

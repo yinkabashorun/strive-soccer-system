@@ -745,13 +745,29 @@ function fixtureFree(path: string, method: string): unknown {
 }
 
 // What each call answers with in the example build.
-export function fixtureResponse(path: string, method: string, _body?: unknown): unknown {
+// The example server's own count of what was ticked, so its answer to a
+// saved drill adds up the way the real one does (the all-time minutes with
+// that drill in or out), not a fixed figure.
+const fixtureDone = new Map<string, boolean>();
+function fixtureTotalAfter(body: unknown): number {
+  const b = body as { id?: string; completed?: boolean } | undefined;
+  if (b?.id && typeof b.completed === "boolean") fixtureDone.set(b.id, b.completed);
+  let total = FIXTURE_WEEK.totalMinutes;
+  for (const s of FIXTURE_WEEK.sessions)
+    for (const d of s.drills) {
+      const now = fixtureDone.get(d.id);
+      if (now !== undefined && now !== d.completed) total += now ? d.minutes : -d.minutes;
+    }
+  return total;
+}
+
+export function fixtureResponse(path: string, method: string, body?: unknown): unknown {
   if (path.startsWith("/api/app/free/")) return fixtureFree(path, method);
   if (path.startsWith("/api/app/me")) return fixtureBootstrap();
   if (path.startsWith("/api/app/week")) return { week: FIXTURE_WEEK };
   if (path.startsWith("/api/app/you")) return { you: FIXTURE_YOU };
   if (path.startsWith("/api/app/extra")) return method === "GET" ? FIXTURE_EXTRA : { ok: true, session: 5 };
-  if (path.startsWith("/api/app/drill")) return { ok: true, totalMinutes: FIXTURE_WEEK.totalMinutes };
+  if (path.startsWith("/api/app/drill")) return { ok: true, totalMinutes: fixtureTotalAfter(body) };
   if (path.startsWith("/api/app/first-week")) return { status: "live", line: null };
   if (path.startsWith("/api/app/profile/username")) return { ok: true, name: "marcus.b" };
   if (path.startsWith(COURSE_PATH)) {

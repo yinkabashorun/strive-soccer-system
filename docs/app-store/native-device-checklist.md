@@ -30,6 +30,7 @@ how it is checked: a test that fails the build, or Coach Yinka's phone.
 | 16 | The iPhone's own sheets opened from a post or a button: the action sheet (Report this post, Block, Delete my post), the confirm box, and the share sheet (Send my link) all come up dark, and Cancel leaves everything as it was | phone |
 | 17 | A photo from the library that is not a JPEG (the iPhone's own HEIC) is posted: the image tool turns it into a JPEG before it is sent, and the server takes it | phone; the simulator's flow picks a sample photo but the example build sends nothing |
 | 18 | Two tab groups (a member's and the free app's): the tab bar shown is the right one for the account, and a tab with the same name in both (Courses) opens the one in the group being used | test for who sees which tabs; the simulator pictures for the rest |
+| 19 | A drill ticked with no signal: it stays ticked, the finish and Week screens say it is saved on this phone, it survives the app being closed, and it reaches the coach side by itself when the signal is back | tests for the rules (`lib/elite/tick-outbox.ts`); phone, in airplane mode, for the rest |
 
 ## What Coach Yinka checks on each new build
 

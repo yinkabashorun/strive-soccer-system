@@ -21,6 +21,7 @@ import type { FilmReview, GeneratedPlan, TrainingLoad, TrainingSpace } from "./t
 
 import { APP_URL } from "./app-url";
 import { claimWeekAnnouncement, maySend, mustRefuseRebuild, weekWasAnnounced } from "./announce";
+import { realMinutes } from "./time-trained";
 
 async function requireCoach() {
   const viewer = await getViewer();
@@ -694,7 +695,7 @@ export async function applyGeneratedPlanCore(
   // player gets a week of drills with no videos. Now it throws, the cron
   // logs it as an error, and the coach gets a text, before any row is
   // written. (The database refuses such rows too - migration 031.)
-  const byTitle = new Map<string, { id: string; video_url: string | null }>();
+  const byTitle = new Map<string, { id: string; video_url: string | null; minutes: number | null }>();
   const { drills: wholeBank } = await getDrillBank({ onlyWithVideo: true, client: supabase });
   if (wholeBank.length === 0) {
     throw new Error("Refusing to publish: the drill bank has no filmed drills reachable");
@@ -741,12 +742,20 @@ export async function applyGeneratedPlanCore(
   const sessionsSaid = sessionsWord(sessionCount);
   const SessionsSaid = sessionsSaid[0].toUpperCase() + sessionsSaid.slice(1);
   for (const b of bank) {
-    byTitle.set(normalizeTitle(b.title), { id: b.id, video_url: b.video_url || null });
+    byTitle.set(normalizeTitle(b.title), { id: b.id, video_url: b.video_url || null, minutes: realMinutes(b.minutes) });
   }
 
   const rows = sessionsToPublish.flatMap((s, si) =>
     s.drills.map((d, di) => {
       const match = byTitle.get(normalizeTitle(d.title));
+      // The minutes a player is credited for a drill are the plan's own, or
+      // the ones the coach gave the drill in the bank. Never a made-up
+      // figure: a drill with neither stops the publish before a row is
+      // written (it used to be written as 15).
+      const minutes = realMinutes(d.minutes) ?? match?.minutes ?? null;
+      if (minutes === null) {
+        throw new Error(`Refusing to publish: "${d.title}" has no minutes in the plan or in the drill bank`);
+      }
       return {
         player_id: playerId,
         week,
@@ -754,7 +763,7 @@ export async function applyGeneratedPlanCore(
         title: d.title,
         exercise: d.exercise,
         reps: d.reps,
-        duration_min: d.minutes ?? 15,
+        duration_min: minutes,
         notes: d.notes ?? null,
         video_url: match?.video_url ?? null,
         drill_id: match?.id ?? null,

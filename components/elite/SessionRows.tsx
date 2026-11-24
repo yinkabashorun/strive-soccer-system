@@ -1,25 +1,34 @@
 "use client";
 
-import { useCallback, useState, useTransition } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { Homework } from "@/lib/elite/types";
-import { toggleHomework } from "@/lib/elite/player-actions";
 import { drillMinutes, isDone, type DoneMap } from "@/lib/elite/session-flow";
+import { tickOnWeb, useWebConfirmed, useWebTicks } from "./web-ticks";
 
 // The player's ticks, kept on the screen first and saved behind it, so a
 // tap answers instantly. Shared by the home card and the week list, which
 // both open the session player (the drill list that used to sit under
 // them gave way to the photo cards of the redesign, Nov 21 2026).
+//
+// "Saved behind it" means kept in the browser and sent until the server
+// answers (web-ticks.ts), not sent once and hoped for: a tick the server
+// has not confirmed yet still shows as done after a reload.
 export function useDrillState() {
-  const [done, setDone] = useState<DoneMap>({});
-  const [, start] = useTransition();
+  const [tapped, setTapped] = useState<DoneMap>({});
+  const unsent = useWebTicks();
+  const confirmed = useWebConfirmed();
 
   const toggle = useCallback((id: string, next: boolean) => {
-    setDone((s) => ({ ...s, [id]: next }));
-    start(() => {
-      void toggleHomework(id, next);
-    });
+    setTapped((s) => ({ ...s, [id]: next }));
+    tickOnWeb(id, next);
   }, []);
 
+  // oldest knowledge first: what the server confirmed since the page was
+  // drawn, then what is still on its way, then what was tapped just now
+  const done = useMemo<DoneMap>(
+    () => ({ ...confirmed, ...Object.fromEntries(unsent.map((t) => [t.id, t.completed])), ...tapped }),
+    [confirmed, unsent, tapped]
+  );
   return { done, toggle };
 }
 

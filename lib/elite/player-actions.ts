@@ -91,14 +91,33 @@ export async function completeOnboarding(input: OnboardingInput) {
 // a safe no-op in demo mode (the UI keeps optimistic state).
 export async function toggleHomework(id: string, completed: boolean) {
   const supabase = createClient();
+  // the signed-out example tour ticks drills on its own screen and saves nothing
+  if (supabase && (await getViewer())?.demo) return { ok: true as const };
   if (supabase) {
-    await supabase
+    // Only a row that is changing is written (the row is the member's own,
+    // under RLS). A tick sent twice (the phone sends until it is answered)
+    // must not move the time the drill was done: that time is what "trained
+    // today" and the usual training hour are read from.
+    const { data: changed, error } = await supabase
       .from("elite_homework")
       .update({
         completed,
         completed_at: completed ? new Date().toISOString() : null,
       })
-      .eq("id", id);
+      .eq("id", id)
+      .neq("completed", completed)
+      .select("id");
+    // `again`: asking again could work (the database was busy), as against
+    // a row the database will never take (a guard or a constraint said no).
+    if (error) return { ok: false as const, again: !/^(P0|22|23|42)/.test(String(error.code ?? "")) };
+    if (!changed?.length) {
+      // Nothing changed. Either the row already read that way (the same
+      // tick sent twice: fine), or it is not this member's row to change,
+      // which must never be answered as saved.
+      const { data: row, error: readError } = await supabase.from("elite_homework").select("completed").eq("id", id).maybeSingle();
+      if (readError) return { ok: false as const, again: true };
+      if (!row || Boolean(row.completed) !== completed) return { ok: false as const, again: false };
+    }
     if (completed) {
       const viewer = await getViewer();
       if (viewer?.playerId) {
@@ -108,7 +127,7 @@ export async function toggleHomework(id: string, completed: boolean) {
     revalidatePath("/homework");
     revalidatePath("/dashboard");
   }
-  return { ok: true };
+  return { ok: true as const };
 }
 
 // Player submits their monthly film LINK (Veo/Hudl/YouTube/etc.) for the

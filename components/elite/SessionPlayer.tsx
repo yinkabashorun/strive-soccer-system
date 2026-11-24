@@ -35,6 +35,8 @@ import { SendClip } from "./SendClip";
 import { SetTimer } from "./SetTimer";
 import { PushOptIn, useNotificationsAsk } from "./PushOptIn";
 import { cn } from "@/lib/utils";
+import { REFUSED_LINE, UNSENT_LINE_WEB } from "@/lib/elite/tick-outbox";
+import { useWebRefused, useWebTicks } from "./web-ticks";
 
 // Where the session grows from: the Home card's box on screen.
 export type Origin = { top: number; left: number; width: number; height: number };
@@ -701,6 +703,9 @@ function Finish({
   weekDoneLine?: string;
   onClose: () => void;
 }) {
+  // the truth about saving: ticks still on their way, or one the server refused
+  const unsent = useWebTicks().length > 0;
+  const notSaved = useWebRefused().length > 0;
   const weekDone = sessionsLeftAfter <= 0;
   const added = useCountUp(minutes);
   const total = minutesBefore + added;
@@ -764,6 +769,11 @@ function Finish({
           <p className="mt-2 max-w-xs text-[15px] leading-relaxed text-white/65 animate-rise [animation-delay:340ms]">
             {weekDone ? weekDoneLine ?? "Every session of the week, done." : afterSessionLine(sessionsLeftAfter)}
           </p>
+          {notSaved || unsent ? (
+            <p className={cn("mt-2 max-w-xs text-[13px] leading-relaxed", notSaved ? "text-white" : "text-white/60")}>
+              {notSaved ? REFUSED_LINE : UNSENT_LINE_WEB}
+            </p>
+          ) : null}
           <span className="sr-only">{title}</span>
 
           <div className="mt-6 flex w-full max-w-sm gap-2.5 text-left animate-rise [animation-delay:440ms]">

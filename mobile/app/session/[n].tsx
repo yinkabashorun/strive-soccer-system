@@ -17,6 +17,8 @@ import { parseReps } from "@shared/set-timer";
 import { fmtDuration } from "@shared/time-trained";
 import type { AppSession, AppWeek } from "@shared/app-contract";
 import { useMe, useToggleDrill, useWeek } from "@/api/queries";
+import { useRefused, useTicks } from "@/outbox";
+import { REFUSED_LINE, UNSENT_LINE } from "@/outbox-core";
 import { DrillVideo } from "@/DrillVideo";
 import { SetTimer } from "@/SetTimer";
 import { Shade } from "@/Shade";
@@ -70,10 +72,9 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
   );
   const [count, setCount] = useState<CountInState>("intro");
   const [timerOpen, setTimerOpen] = useState(false);
-  const before = useRef(week.totalMinutes);
   // The minutes this sitting adds: the drills ticked since the session opened.
   const doneHere = useRef(new Set<string>());
-  const [finish, setFinish] = useState<{ added: number; total: number; weekDone: boolean; left: number } | null>(null);
+  const [finish, setFinish] = useState<{ added: number; weekDone: boolean; left: number } | null>(null);
 
   // The count-in: the session's name, then 3, 2, 1 with a tap felt on each.
   useEffect(() => {
@@ -109,7 +110,7 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
       const plan = week.sessions.filter((s) => !s.extra);
       const left = plan.filter((s) => !s.complete && s.n !== session.n).length;
       const weekDone = !session.extra && left === 0;
-      setFinish({ added, total: before.current + added, weekDone, left });
+      setFinish({ added, weekDone, left });
       setPhase("finish");
       setTimeout(() => feel(weekDone ? "week" : "session"), 450);
     } else {
@@ -144,6 +145,7 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
       <Finish
         name={me.data?.viewer.firstName ?? ""}
         week={week}
+        drillIds={drills.map((d) => d.id)}
         finish={finish}
         askPush={!prefs.pushAsked}
         onHome={() => router.back()}
@@ -240,13 +242,15 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
 function Finish({
   name,
   week,
+  drillIds,
   finish,
   askPush,
   onHome,
 }: {
   name: string;
   week: AppWeek;
-  finish: { added: number; total: number; weekDone: boolean; left: number };
+  drillIds: string[];
+  finish: { added: number; weekDone: boolean; left: number };
   askPush: boolean;
   onHome: () => void;
 }) {
@@ -267,8 +271,18 @@ function Finish({
     return () => clearInterval(id);
   }, [finish.added, reduce]);
 
-  const crossed = milestoneCrossed(finish.total - finish.added, finish.total);
-  const next = nextMilestone(finish.total);
+  // All time is the week's own figure (the server's total with this phone's
+  // unsent ticks laid over it), never a sum kept on the side: once every
+  // tick is saved it IS the server's number.
+  const total = week.totalMinutes;
+  const crossed = milestoneCrossed(Math.max(0, total - finish.added), total);
+  const next = nextMilestone(total);
+  // The truth about saving: a drill the server refused, or ticks still on
+  // their way.
+  const ticks = useTicks();
+  const refused = useRefused();
+  const notSaved = drillIds.some((id) => refused.includes(id));
+  const unsent = ticks.length > 0;
   const plan = week.sessions.filter((s) => !s.extra);
   const doneCount = plan.length - finish.left;
 
@@ -299,7 +313,7 @@ function Finish({
           <Body dim size={12}>sessions this week</Body>
         </View>
         <View style={styles.stat}>
-          <Head size={26}>{fmtDuration(finish.total)}</Head>
+          <Head size={26}>{fmtDuration(total)}</Head>
           <Body dim size={12}>trained, all time</Body>
         </View>
       </Animated.View>
@@ -315,6 +329,11 @@ function Finish({
             </Body>
           </View>
         </Animated.View>
+      ) : null}
+      {notSaved || unsent ? (
+        <Body dim={!notSaved} size={13} style={{ marginHorizontal: 24, marginTop: 14, textAlign: "center" }}>
+          {notSaved ? REFUSED_LINE : UNSENT_LINE}
+        </Body>
       ) : null}
       {/* In the flow under the rest (never laid over the medal), at the bottom. */}
       <View style={{ flexGrow: 1 }} />

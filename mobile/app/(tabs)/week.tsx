@@ -4,6 +4,8 @@ import { useRouter } from "expo-router";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import type { AppSession } from "@shared/app-contract";
 import { keys, useWeek } from "@/api/queries";
+import { useRefused, useTicks } from "@/outbox";
+import { REFUSED_LINE, UNSENT_LINE } from "@/outbox-core";
 import { queryClient } from "@/api/queryClient";
 import { PAGE_TOP, Screen } from "@/Screen";
 import { HERO_SHADE, Shade } from "@/Shade";
@@ -21,6 +23,10 @@ export default function Week() {
   const { data: w } = useWeek();
   const rows = w ? weekRows(w) : [];
   const summary = w ? weekSummary(w) : "";
+  // the truth about saving, said once, here
+  const unsent = useTicks().length > 0;
+  const refused = useRefused();
+  const notSaved = Boolean(w?.sessions.some((s) => s.drills.some((d) => refused.includes(d.id))));
 
   return (
     <Screen onRefresh={() => queryClient.invalidateQueries({ queryKey: keys.week })}>
@@ -55,6 +61,12 @@ export default function Week() {
             <Label size={14} style={{ marginHorizontal: 20, marginTop: 8 }}>
               {w.oneMore}
             </Label>
+          ) : null}
+
+          {notSaved || unsent ? (
+            <Body dim={!notSaved} size={13} style={{ marginHorizontal: 20, marginTop: 8 }}>
+              {notSaved ? REFUSED_LINE : UNSENT_LINE}
+            </Body>
           ) : null}
 
           {w.weekDone ? (

@@ -3,11 +3,23 @@
 // counts what was missed, and a gap of any length changes none of these
 // numbers. The rules are the ones computeSummary (lib/elite/data.ts)
 // already uses for the coach - a session is done when every drill in it
-// is checked off, a drill with no minutes counts 15 - so the coach's
-// numbers and the family's numbers never disagree.
+// is checked off - so the coach's numbers and the family's numbers never
+// disagree. Every drill row carries its own minutes: the column is required
+// and has no default (migration 084), so DEFAULT_DRILL_MIN below is only
+// ever met by a row read without that column, never by a stored drill.
 import type { Homework } from "./types";
 
 export const DEFAULT_DRILL_MIN = 15;
+
+// Minutes that can be credited to a player: a whole number from 1 to 120.
+// Anything else is "no minutes", and the writers (the publish gate, extra
+// work) refuse it rather than put a figure in its place. The database holds
+// the same line (migration 084).
+export const MINUTES_MIN = 1;
+export const MINUTES_MAX = 120;
+export function realMinutes(v: unknown): number | null {
+  return typeof v === "number" && Number.isInteger(v) && v >= MINUTES_MIN && v <= MINUTES_MAX ? v : null;
+}
 
 export type PillarMinutes = { pillar: string; minutes: number };
 

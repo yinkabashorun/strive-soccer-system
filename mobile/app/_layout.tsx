@@ -16,6 +16,7 @@ import { fixtureRoute } from "@/api/fixtures";
 import { FIXTURES } from "@/config";
 import { areaFor, areaHome, inArea } from "@/navigation";
 import { keepTokenFresh } from "@/push";
+import { loadOutbox } from "@/outbox";
 import { loadPrefs } from "@/prefs";
 import { color } from "@/theme";
 
@@ -46,6 +47,12 @@ function Gatekeeper() {
   // free account alike (the server keeps each under its own kind).
   useEffect(() => {
     if (area === "app" || area === "free") void keepTokenFresh();
+  }, [area]);
+
+  // Drills ticked with no signal the last time the app was open are read
+  // back from the phone and sent (src/outbox.ts).
+  useEffect(() => {
+    if (area === "app") void loadOutbox();
   }, [area]);
 
   // The launch screen stays up until the first screen is the right one:

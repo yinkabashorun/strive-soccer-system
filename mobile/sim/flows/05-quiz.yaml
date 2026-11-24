@@ -15,11 +15,6 @@ appId: com.strivesoccer.elite
 - waitForAnimationToEnd:
     timeout: 4000
 - takeScreenshot: t14b-door-settled
-- extendedWaitUntil:
-    visible: "This text is never on the door"
-    timeout: 6000
-    optional: true
-- takeScreenshot: t14c-door-ten-seconds
 - stopRecording
 - tapOn: "Build my week"
 - extendedWaitUntil:

@@ -39,9 +39,15 @@ export function MemberCard({
     sheen.value = withDelay(1400, withTiming(2, { duration: 1100, easing: Easing.inOut(Easing.quad) }));
   }, [rise, reduce, up, sheen]);
 
+  // The rise is flat: up 60 points and from 96% to full size, fading in.
+  // It used to tilt in 3D (a perspective and a turn about its top edge),
+  // over a black shadow on a black screen. Filmed in the simulator (Nov 24
+  // 2026), everything above the card (the mark, the gold line, "You're
+  // in.") went blank on the display the frame the card appeared and never
+  // came back. A tilt of 14 degrees is not worth the headline.
   const cardStyle = useAnimatedStyle(() => ({
     opacity: up.value,
-    transform: reduce ? [] : [{ translateY: (1 - up.value) * 60 }, { perspective: 900 }, { rotateX: `${(1 - up.value) * 14}deg` }],
+    transform: reduce ? [] : [{ translateY: (1 - up.value) * 60 }, { scale: 0.96 + 0.04 * up.value }],
   }));
   const sheenStyle = useAnimatedStyle(() => ({ transform: [{ translateX: sheen.value * 320 }, { rotate: "18deg" }] }));
 
@@ -110,10 +116,6 @@ const styles = StyleSheet.create({
     borderColor: "rgba(200,168,88,0.32)",
     padding: 22,
     justifyContent: "space-between",
-    shadowColor: "#000",
-    shadowOpacity: 0.6,
-    shadowRadius: 30,
-    shadowOffset: { width: 0, height: 20 },
   },
   top: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" },
   mark: { width: 38, height: 38, opacity: 0.9 },

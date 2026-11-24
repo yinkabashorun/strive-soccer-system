@@ -219,6 +219,24 @@ describe("the first screen", () => {
   });
 });
 
+// Filmed in the simulator (Nov 24 2026): on "You're in", the mark, the gold
+// line and the headline went blank on the display the frame the member card
+// started to rise, and stayed blank. The card was the one view in the app
+// with a 3D tilt and a shadow (a black one, on a black screen).
+describe("nothing in the app is tilted in 3D or casts a shadow", () => {
+  it("so no view can blank its neighbours while it moves", () => {
+    for (const f of sources) {
+      expect(code(f), rel(f)).not.toMatch(/perspective|rotateX|rotateY|shadowColor|shadowOpacity|shadowRadius|shadowOffset/);
+    }
+  });
+  it("the member card still rises: up, a touch larger, fading in", () => {
+    const card = code(path.join(root, "src/MemberCard.tsx"));
+    expect(card).toContain("translateY: (1 - up.value) * 60");
+    expect(card).toContain("scale: 0.96 + 0.04 * up.value");
+    expect(card).toContain("opacity: up.value");
+  });
+});
+
 describe("the sign-in screen", () => {
   const src = read(path.join(root, "app/sign-in.tsx"));
   it("says whose app it is", () => {

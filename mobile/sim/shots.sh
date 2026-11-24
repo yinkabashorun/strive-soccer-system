@@ -30,7 +30,6 @@ SHOTS='
 01-sign-in|signedout|-|9
 02-agreement|consent|-|9
 03-door|onboarding|-|12|film
-03b-door-second-open|onboarding|-|12|film
 04-quiz-first|onboarding|onboarding/gender|10
 05-quiz-team|onboarding|onboarding/team|10
 06-quiz-on-ball|onboarding|onboarding/onBall|10

@@ -7,6 +7,7 @@ import { PRO_ENDED_DISMISS, PRO_ENDED_LINE } from "@shared/one-app";
 import { OFFLINE_MESSAGE } from "@/api/client";
 import { useMe } from "@/api/queries";
 import { hasTrain } from "@/navigation";
+import { barShare } from "@/social-view";
 import { setPref, usePrefs } from "@/prefs";
 import { deleteEntry, refreshFree, useFreeWeek } from "@/api/free";
 import { Avatar, MyAvatar, Star } from "@/Avatar";
@@ -79,6 +80,7 @@ export default function MyWeek() {
   }
 
   const entries = w.entries.filter((e) => !gone.has(e.id));
+  const boardTop = Math.max(0, ...w.board.map((r) => r.minutes));
   const alone = w.board.length <= 1;
   const invite = () => void Share.share({ url: w.invite }).catch(() => undefined);
 
@@ -156,17 +158,24 @@ export default function MyWeek() {
             <View key={r.id}>
               {i > 0 ? <Hairline /> : null}
               <View style={styles.row} accessible accessibilityLabel={`${r.place}. ${r.me ? "You" : r.name}${r.starred ? `, ${STAR_LABEL}` : ""}. ${r.time}`}>
-                <Label dim size={14} style={{ width: 22 }}>
-                  {r.place}
-                </Label>
-                {r.me ? <MyAvatar uri={r.photo} initials={initialsOf(r.name)} size={36} /> : <Avatar uri={r.photo} initials={initialsOf(r.name)} size={36} />}
-                <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 6 }}>
-                  <Label numberOfLines={1} style={{ color: r.me ? color.bone : color.dim }}>
-                    {r.me ? "You" : r.name}
-                  </Label>
-                  {r.starred ? <Star /> : null}
+                <Head size={20} style={{ width: 24, color: r.me ? color.bone : color.faint }}>
+                  {String(r.place)}
+                </Head>
+                {r.me ? <MyAvatar uri={r.photo} initials={initialsOf(r.name)} size={40} /> : <Avatar uri={r.photo} initials={initialsOf(r.name)} size={40} />}
+                <View style={{ flex: 1 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                    <Label numberOfLines={1} style={{ color: r.me ? color.bone : color.dim }}>
+                      {r.me ? "You" : r.name}
+                    </Label>
+                    {r.starred ? <Star /> : null}
+                  </View>
+                  {/* the week side by side: each bar is that player's
+                      time against the most anyone on the board trained */}
+                  <View style={styles.track}>
+                    <View style={[styles.bar, { width: `${barShare(r.minutes, boardTop) * 100}%` }, r.me ? styles.barMe : null]} />
+                  </View>
                 </View>
-                <Label>{r.time}</Label>
+                <Head size={20}>{r.time}</Head>
               </View>
             </View>
           ))}
@@ -221,5 +230,9 @@ const styles = StyleSheet.create({
   planRow: { flexDirection: "row", alignItems: "center", marginHorizontal: 20, marginTop: 8 },
   ended: { marginHorizontal: 20, marginTop: 18, padding: 16 },
   endedGot: { minHeight: 44, justifyContent: "center", alignSelf: "flex-start", marginTop: 4 },
-  row: { minHeight: 58, flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 16 },
+  track: { height: 5, borderRadius: 3, backgroundColor: color.fill2, marginTop: 7, overflow: "hidden" },
+  bar: { height: 5, borderRadius: 3, backgroundColor: "rgba(242,239,232,0.42)" },
+  // their own time is the gold one, like the ring above it
+  barMe: { backgroundColor: color.gold },
+  row: { minHeight: 66, flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 16 },
 });

@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
-import Svg, { Circle, Defs, LinearGradient, Path, Stop } from "react-native-svg";
+import Svg, { Circle, Defs, LinearGradient, Path, Rect, Stop } from "react-native-svg";
 import { crestIndex, crestOf } from "@shared/tracker";
 import { font } from "./theme";
 
@@ -29,6 +29,28 @@ export function Crest({ club, size }: { club: { id: string; name: string }; size
           {c.letters}
         </Text>
       </View>
+    </View>
+  );
+}
+
+// The club's own colour as a soft light behind its card or its page, for a
+// club with no training photo to show yet: every club has a look of its
+// own from its first minute, never a plain grey box.
+export function CrestGlow({ club }: { club: { id: string; name: string } }) {
+  const c = crestOf(club);
+  const fill = `glow-${crestIndex(club.id)}`;
+  return (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none" accessible={false} importantForAccessibility="no-hide-descendants">
+      <Svg width="100%" height="100%" preserveAspectRatio="none">
+        <Defs>
+          <LinearGradient id={fill} x1="0" y1="0" x2="1" y2="1">
+            <Stop offset="0" stopColor={c.from} stopOpacity={0.42} />
+            <Stop offset="0.55" stopColor={c.to} stopOpacity={0.14} />
+            <Stop offset="1" stopColor="#000" stopOpacity={0} />
+          </LinearGradient>
+        </Defs>
+        <Rect x="0" y="0" width="100%" height="100%" fill={`url(#${fill})`} />
+      </Svg>
     </View>
   );
 }

@@ -9,13 +9,16 @@ import { ApiError, OFFLINE_MESSAGE } from "@/api/client";
 import { leaveClub, refreshClubs, reportClub, useClub } from "@/api/clubs";
 import { blockPlayer, refreshFree } from "@/api/free";
 import { Avatar, MyAvatar, Star } from "@/Avatar";
-import { Crest } from "@/Crest";
+import Animated, { FadeIn } from "react-native-reanimated";
+import { Crest, CrestGlow } from "@/Crest";
+import { HERO_SHADE, Shade } from "@/Shade";
+import { recordShort } from "@/social-view";
 import { MatchupCard } from "@/MatchupCard";
 import { PlanCardView } from "@/PlanCards";
 import { choose } from "@/sheet";
 import { Body, Button, Card, Eyebrow, Hairline, Head, Icon, Label, Press, SettingRow, Skeleton } from "@/ui";
 import { useBelowClock } from "@/Screen";
-import { color } from "@/theme";
+import { color, radius } from "@/theme";
 
 // One club, top to bottom:
 //   the crest, the name, its county and players, and its two records, each
@@ -40,6 +43,10 @@ export default function Club() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const club = useClub(id);
   const c = club.data;
+  // the club's picture: this week's newest training photo the viewer may see
+  const open = c?.photos.find((t) => t.state === "open");
+  const heroPhoto = open && open.state === "open" ? open.photoUrl : null;
+  const weeks = recordShort(c?.matchup?.recordLine);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -156,25 +163,34 @@ export default function Club() {
         )
       ) : (
         <>
-          <View style={styles.head}>
-            <Crest club={c} size={68} />
-            <View style={{ flex: 1 }}>
-              <Head size={32}>{c.name}</Head>
-              <Body dim size={13.5} style={{ marginTop: 4 }}>
+          {/* The club leads with its own picture, the way Train leads with
+              today's session: this week's newest training photo the viewer
+              may see, or the club's own colour until there is one. The
+              record is two numbers a player says out loud ("4-1"); the
+              plain sentence stays what a screen reader says. */}
+          <Animated.View entering={FadeIn.duration(300)} style={[styles.hero, heroPhoto ? styles.heroPhoto : null]}>
+            {heroPhoto ? (
+              <>
+                <Image source={{ uri: heroPhoto }} style={StyleSheet.absoluteFill} contentFit="cover" transition={250} cachePolicy="disk" />
+                <Shade id="club-hero" stops={HERO_SHADE} />
+              </>
+            ) : (
+              <CrestGlow club={c} />
+            )}
+            <View style={styles.heroIn}>
+              <Crest club={c} size={64} />
+              <Head size={36} style={{ marginTop: 12 }} numberOfLines={2}>
+                {c.name}
+              </Head>
+              <Body size={13.5} style={{ marginTop: 4, color: "rgba(242,239,232,0.8)" }}>
                 {[c.countyName, `${c.membersCount} ${c.membersCount === 1 ? "player" : "players"}`, c.ended ? "Ended" : null].filter(Boolean).join(" · ")}
               </Body>
+              <View style={styles.chips}>
+                <RecordChip big={c.record} small={c.record === "New" ? "no games yet" : "games won-lost"} says={c.recordLine} />
+                {weeks ? <RecordChip big={weeks} small="weeks won-lost" says={c.matchup!.recordLine} /> : null}
+              </View>
             </View>
-          </View>
-          <View style={styles.records}>
-            <Body dim size={13.5}>
-              {c.recordLine}
-            </Body>
-            {c.matchup ? (
-              <Body dim size={13.5}>
-                {c.matchup.recordLine}
-              </Body>
-            ) : null}
-          </View>
+          </Animated.View>
           {error ? (
             <Body size={13.5} style={{ color: color.danger, marginHorizontal: 20, marginTop: 10 }}>
               {error}
@@ -293,6 +309,18 @@ export default function Club() {
   );
 }
 
+// One number of the club's record on its picture.
+function RecordChip({ big, small, says }: { big: string; small: string; says: string }) {
+  return (
+    <View style={styles.chip} accessible accessibilityLabel={says}>
+      <Head size={22}>{big}</Head>
+      <Body size={11.5} style={{ color: "rgba(242,239,232,0.72)" }}>
+        {small}
+      </Body>
+    </View>
+  );
+}
+
 // What waits on the captain, in words, or what Manage holds.
 function manageLine(c: AppClubPage): string {
   const requests = c.manage?.requests.length ?? 0;
@@ -373,8 +401,22 @@ const styles = StyleSheet.create({
   bar: { flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 20 },
   barButton: { width: 44, height: 44, justifyContent: "center" },
   dot: { width: 4, height: 4, borderRadius: 2, backgroundColor: color.bone },
-  head: { flexDirection: "row", alignItems: "center", gap: 14, marginHorizontal: 20, marginTop: 8 },
-  records: { marginHorizontal: 20, marginTop: 12, gap: 2 },
+  hero: {
+    marginHorizontal: 14,
+    marginTop: 4,
+    borderRadius: radius.card,
+    overflow: "hidden",
+    backgroundColor: "#111",
+    borderWidth: 1,
+    borderColor: color.line,
+    justifyContent: "flex-end",
+  },
+  // room for the picture above the words; a club with no photo yet is
+  // only as tall as its words
+  heroPhoto: { minHeight: 300 },
+  heroIn: { padding: 20 },
+  chips: { flexDirection: "row", gap: 8, marginTop: 14 },
+  chip: { minWidth: 96, paddingHorizontal: 14, paddingVertical: 9, borderRadius: 16, backgroundColor: "rgba(0,0,0,0.46)", borderWidth: 1, borderColor: "rgba(255,255,255,0.14)" },
   week: { marginHorizontal: 14, marginTop: 18, padding: 20 },
   members: { marginHorizontal: 14, marginTop: 14, padding: 0 },
   member: { minHeight: 62, flexDirection: "row", alignItems: "center", gap: 10, paddingHorizontal: 14 },

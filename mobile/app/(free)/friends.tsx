@@ -5,7 +5,9 @@ import { fmtDuration } from "@shared/time-trained";
 import { ApiError, OFFLINE_MESSAGE } from "@/api/client";
 import { answerFriend, refreshFree, useFeed } from "@/api/free";
 import { Avatar, MyAvatar, Star } from "@/Avatar";
+import type { LockedCard } from "@shared/tracker";
 import { LockedPost, OpenPost } from "@/FeedCards";
+import { TodayHero } from "@/TodayHero";
 import { PAGE_TOP, Screen } from "@/Screen";
 import { Body, Button, Card, Eyebrow, Hairline, Head, Label, Press, Ring, Skeleton } from "@/ui";
 import { color } from "@/theme";
@@ -60,7 +62,7 @@ export default function Friends() {
         ) : (
           <View style={{ margin: 14, gap: 14 }}>
             <Skeleton height={84} />
-            <Skeleton height={400} r={30} />
+            <Skeleton height={388} r={30} />
           </View>
         )}
       </Screen>
@@ -69,8 +71,15 @@ export default function Friends() {
 
   const cards = f.cards.filter((c) => !gone.has(c.id));
   const requests = f.requests.filter((r) => !gone.has(`r:${r.id}`));
-  const firstLocked = cards.find((c) => c.state === "locked")?.id;
+  // the first of today's locked posts is the hero at the top, not a card
+  // further down saying the same thing twice
+  const heroCard = f.unlocked ? null : (cards.find((c): c is LockedCard => c.state === "locked") ?? null);
+  const feedCards = heroCard ? cards.filter((c) => c.id !== heroCard.id) : cards;
   const me = f.faces.find((x) => x.you);
+  const firstDays = f.firstDays ? (
+    <FirstDaysCard list={f.firstDays} onPost={post} onInvite={invite} onClubs={() => router.navigate("/clubs")} />
+  ) : null;
+  const listAfterFirstPost = f.friendCount > 0 && feedCards.length > 0;
 
   return (
     <Screen onRefresh={refreshFree}>
@@ -108,9 +117,20 @@ export default function Friends() {
         </ScrollView>
       ) : null}
 
-      <View style={{ marginHorizontal: 14, marginTop: 16 }}>
-        <Button quiet={f.unlocked} label="Post my training" onPress={post} />
-      </View>
+      {/* Before today's post: one card, one button, the way Train opens
+          (src/TodayHero.tsx). After it: a quiet button, and the feed. */}
+      {f.unlocked ? (
+        <View style={{ marginHorizontal: 14, marginTop: 16 }}>
+          <Button quiet label="Post my training" onPress={post} />
+        </View>
+      ) : (
+        <TodayHero
+          locked={heroCard}
+          faces={f.faces.filter((x) => !x.you && x.active)}
+          friendsToday={f.friendsToday}
+          onPost={post}
+        />
+      )}
 
       {requests.length ? (
         <Card style={{ marginHorizontal: 14, marginTop: 16, padding: 0 }}>
@@ -147,9 +167,10 @@ export default function Friends() {
         </Card>
       ) : null}
 
-      {f.firstDays ? (
-        <FirstDaysCard list={f.firstDays} onPost={post} onInvite={invite} onClubs={() => router.navigate("/clubs")} />
-      ) : null}
+      {/* The first-days list is a new player's to-do: right under the top
+          while they have no feed yet, and under the first post once they
+          do, so the photos are never pushed off the first screen. */}
+      {firstDays && !listAfterFirstPost ? firstDays : null}
 
       {f.friendCount === 0 ? (
         <Card style={styles.empty}>
@@ -172,13 +193,16 @@ export default function Friends() {
         </Card>
       ) : (
         <View style={{ gap: 14, marginTop: 16 }}>
-          {cards.map((c) =>
-            c.state === "locked" ? (
-              <LockedPost key={c.id} card={c} first={c.id === firstLocked} friendsToday={f.friendsToday} />
-            ) : (
-              <OpenPost key={c.id} card={c} onGone={() => hide(c.id)} />
-            )
-          )}
+          {feedCards.map((c, i) => (
+            <View key={c.id} style={{ gap: 14 }}>
+              {c.state === "locked" ? (
+                <LockedPost card={c} first={false} friendsToday={f.friendsToday} />
+              ) : (
+                <OpenPost card={c} onGone={() => hide(c.id)} />
+              )}
+              {i === 0 && listAfterFirstPost ? firstDays : null}
+            </View>
+          ))}
         </View>
       )}
 

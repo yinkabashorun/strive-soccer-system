@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, Share, StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -98,11 +98,11 @@ export default function Offer() {
                 <Eyebrow style={{ marginHorizontal: 20, marginTop: 24 }}>{o.drillsLabel}</Eyebrow>
                 <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.drills}>
                   {o.drills.map((d) => (
-                    <View key={d.title} style={styles.drill} accessible accessibilityLabel={d.title}>
+                    <View key={d.poster} style={styles.drill} accessible accessibilityRole="image" accessibilityLabel={o.drillLocked}>
                       <Image source={{ uri: d.poster }} style={styles.still} contentFit="cover" transition={200} cachePolicy="disk" />
-                      <Label size={13} numberOfLines={2} style={{ marginTop: 8 }}>
-                        {d.title}
-                      </Label>
+                      <View style={styles.lock}>
+                        <Icon name="lock" size={15} stroke={color.bone} />
+                      </View>
                     </View>
                   ))}
                 </ScrollView>
@@ -142,6 +142,14 @@ export default function Offer() {
             </Body>
           ) : null}
           <Button style={{ marginTop: 12 }} label={o.start} busy={busy} onPress={() => void start()} />
+          {o.parent ? (
+            <Button
+              quiet
+              style={{ marginTop: 10 }}
+              label={o.parent.label}
+              onPress={() => void Share.share({ message: o.parent!.text }).catch(() => undefined)}
+            />
+          ) : null}
           <Press onPress={later} disabled={busy} style={styles.later} accessibilityLabel={o.later}>
             <Label dim size={15}>
               {o.later}
@@ -169,6 +177,7 @@ const styles = StyleSheet.create({
   drills: { paddingHorizontal: 20, gap: 10, marginTop: 12 },
   drill: { width: 124 },
   still: { width: 124, height: 156, borderRadius: 16, backgroundColor: color.fill2 },
+  lock: { position: "absolute", top: 8, right: 8, width: 30, height: 30, borderRadius: 15, backgroundColor: "rgba(0,0,0,0.55)", alignItems: "center", justifyContent: "center" },
   get: { flexDirection: "row", alignItems: "flex-start", gap: 10 },
   foot: { paddingHorizontal: 20, paddingTop: 12, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: "rgba(255,255,255,0.12)", backgroundColor: color.black },
   later: { minHeight: 44, alignItems: "center", justifyContent: "center", marginTop: 2 },

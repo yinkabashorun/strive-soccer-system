@@ -50,6 +50,7 @@ import type {
   WeeklyPlan, CronRun, AppError,
   TrainingBreak,
 } from "./types";
+import { creditedMinutes } from "./time-trained";
 
 // Server-side data access for Strive Elite. Reads from Supabase when
 // configured, otherwise returns the demo dataset. The UI is identical in
@@ -741,7 +742,6 @@ export async function getProgressHistory(
 // Player-loop metrics
 // ---------------------------------------------------------------------------
 
-const DEFAULT_DRILL_MIN = 15;
 
 function nyDay(iso: string): string {
   // America/New_York local calendar date, YYYY-MM-DD.
@@ -788,10 +788,7 @@ export function computeSummary(hw: Homework[]): PlayerSummary {
 
   const total = hw.length;
   const done = completed.length;
-  const minutes = completed.reduce(
-    (s, h) => s + (h.duration_min ?? DEFAULT_DRILL_MIN),
-    0
-  );
+  const minutes = completed.reduce((s, h) => s + creditedMinutes(h), 0);
   const lastActive = completed.reduce<string | null>(
     (m, h) => (!m || (h.completed_at as string) > m ? (h.completed_at as string) : m),
     null

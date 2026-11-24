@@ -1,5 +1,5 @@
 -- =====================================================================
--- 084: ONE NOTIFICATION WHEN A CLUB PLANS A SESSION OR A GAME (Nov 24 2026)
+-- 087: ONE NOTIFICATION WHEN A CLUB PLANS A SESSION OR A GAME (Nov 24 2026)
 -- =====================================================================
 -- The free app's third notification, and the only one about clubs: when a
 -- club's training session is planned, or a game between two clubs is on

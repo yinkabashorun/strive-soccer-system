@@ -677,6 +677,10 @@ describe("free accounts are invisible to everything a member query reads", () =>
     "lib/elite/tracker-actions.ts",
     "app/api/elite/auth/join/route.ts",
     "lib/elite/tracker-ranking.ts", // the club ranking: club names and averages only
+    // bring your squad (086): who a player brought, and their first names
+    "lib/elite/squad-pass-server.ts",
+    // send to a parent (086): the player's own code for the page a parent pays from
+    "lib/elite/parent-link-server.ts",
     // clubs as teams (077): sessions, games, events and trained together
     "lib/elite/club-teams-server.ts",
     "lib/elite/club-teams-actions.ts",

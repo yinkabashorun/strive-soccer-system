@@ -21,6 +21,7 @@ import type { FreeStage } from "@shared/free-intake";
 import { auraLabel, friendsBoard, type Face } from "@shared/tracker";
 import { MEDIA_BASE } from "@/config";
 import { fixtureClubs } from "./fixtures-clubs";
+import { buildSquad } from "@shared/squad-pass";
 
 // The example player the screens are drawn with for review screenshots
 // (EXPO_PUBLIC_FIXTURES=1): the browser build (scripts/screenshots.mjs) and
@@ -156,6 +157,7 @@ function drill(id: string, title: string, name: string, kind: AppDrill["kind"], 
     how: "",
     notes: null,
     minutes,
+    trained: completed ? minutes : 0,
     video: m(`/drills/${file}.mp4`),
     poster: m(`/drills/posters/${file}.jpg`),
     completed,
@@ -275,8 +277,10 @@ export const FIXTURE_YOU: AppYou = {
   ],
   next: { hours: 5, minutesAway: 38 },
   achievements: [
-    { id: "a1", title: "10 Sessions", detail: "Ten sessions done" },
-    { id: "a2", title: "First Week", detail: "Every session of a week" },
+    // the badges' own titles and lines (lib/elite/achievement-rules.ts)
+    { id: "a1", title: "10 Sessions", detail: "Ten full sessions in the bank" },
+    { id: "a2", title: "Week Conquered", detail: "Every drill in a week, done" },
+    { id: "a3", title: "First Session", detail: "Your first full session, done" },
   ],
 };
 
@@ -532,13 +536,15 @@ const TARGET = 240;
 export const FIXTURE_OFFER: Omit<AppOffer, "later"> = {
   card: { name: "Marcus B.", tier: "Pro" },
   headline: "Marcus, your first week goes after your weak foot and first touch.",
-  drillsLabel: "Drills like these",
+  parent: { label: "Send to a parent", text: "Can you look at this for me? It is the soccer training I want to do. https://thestriveapp.com/pro/for/exampleexampleexampleexamp" },
+  drillsLabel: "Inside your first week",
   drills: [
-    { title: "Weak foot tap, pull, push", poster: m("/drills/posters/weak-foot-tap-pull-push.jpg") },
-    { title: "2 touch ball mastery variation 1", poster: m("/drills/posters/two-touch-ball-mastery-v1.jpg") },
-    { title: "Weak foot outside pull, inside pull", poster: m("/drills/posters/weak-foot-outside-pull-inside-pull.jpg") },
-    { title: "L turn, roll, touch", poster: m("/drills/posters/l-turn-roll-touch.jpg") },
+    { poster: m("/drills/posters/weak-foot-tap-pull-push.jpg") },
+    { poster: m("/drills/posters/two-touch-ball-mastery-v1.jpg") },
+    { poster: m("/drills/posters/weak-foot-outside-pull-inside-pull.jpg") },
+    { poster: m("/drills/posters/l-turn-roll-touch.jpg") },
   ],
+  drillLocked: "A drill from your first week. It opens when you start.",
   gets: ["A new week every Monday, built around what you told us.", "One drill at a time, with the video.", "Every course is included."],
   price: "$29 a month. Cancel anytime.",
   start: "Start Strive Pro",
@@ -599,6 +605,13 @@ function fixtureFeed(): AppFreeFeed {
     requests: l.posted ? [] : [{ id: "r-kai", name: "Kai M.", initials: "KM" }],
     week: { minutes, target: TARGET, percent: Math.round((minutes / TARGET) * 100) },
     invite: "https://thestriveapp.com/join?ref=EXAMPLE2",
+    // bring your squad: one teammate trained, one joined and has not posted
+    squad: buildSquad({
+      trained: [{ id: "t1", name: "Diego R." }],
+      joined: [{ id: "t2", name: "Kai M." }],
+      passes: [],
+      runningUntil: null,
+    }),
   };
 }
 
@@ -746,13 +759,29 @@ function fixtureFree(path: string, method: string, body?: unknown): unknown {
 }
 
 // What each call answers with in the example build.
+// The example server's own count of what was ticked, so its answer to a
+// saved drill adds up the way the real one does (the all-time minutes with
+// that drill in or out), not a fixed figure.
+const fixtureDone = new Map<string, boolean>();
+function fixtureTotalAfter(body: unknown): number {
+  const b = body as { id?: string; completed?: boolean } | undefined;
+  if (b?.id && typeof b.completed === "boolean") fixtureDone.set(b.id, b.completed);
+  let total = FIXTURE_WEEK.totalMinutes;
+  for (const s of FIXTURE_WEEK.sessions)
+    for (const d of s.drills) {
+      const now = fixtureDone.get(d.id);
+      if (now !== undefined && now !== d.completed) total += now ? d.minutes : -d.minutes;
+    }
+  return total;
+}
+
 export function fixtureResponse(path: string, method: string, body?: unknown): unknown {
   if (path.startsWith("/api/app/free/")) return fixtureFree(path, method, body);
   if (path.startsWith("/api/app/me")) return fixtureBootstrap();
   if (path.startsWith("/api/app/week")) return { week: FIXTURE_WEEK };
   if (path.startsWith("/api/app/you")) return { you: FIXTURE_YOU };
   if (path.startsWith("/api/app/extra")) return method === "GET" ? FIXTURE_EXTRA : { ok: true, session: 5 };
-  if (path.startsWith("/api/app/drill")) return { ok: true, totalMinutes: FIXTURE_WEEK.totalMinutes };
+  if (path.startsWith("/api/app/drill")) return { ok: true, totalMinutes: fixtureTotalAfter(body) };
   if (path.startsWith("/api/app/first-week")) return { status: "live", line: null };
   if (path.startsWith("/api/app/profile/username")) return { ok: true, name: "marcus.b" };
   if (path.startsWith(COURSE_PATH)) {

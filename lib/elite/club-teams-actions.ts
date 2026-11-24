@@ -71,7 +71,7 @@ import { DAY_CAP_MESSAGE, FREE_HOME, FREE_WEEK, GYM_REFUSED_MESSAGE, mayLog, sho
 //
 // Nothing here sends a player a text or an email: every request a player
 // answers is a card in the app. The one notification is noticeClubPlan
-// (084): when a club's training session is planned, or a game is on, the
+// (087): when a club's training session is planned, or a game is on, the
 // members of the club(s) hear once, if they left notifications on. The one
 // text is to the coaches, once, when a session or game is first reported
 // (the same as a reported post or club name).

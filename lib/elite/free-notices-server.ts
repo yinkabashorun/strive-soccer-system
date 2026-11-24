@@ -123,9 +123,9 @@ export async function noticeProps(input: {
 
 // A club's training session was planned, or a game between two clubs is
 // on (the other captain accepted): the members of the club(s) hear once.
-// Each send is claimed first in elite_plan_notices (084), keyed (plan,
+// Each send is claimed first in elite_plan_notices (087), keyed (plan,
 // player): a retry, or the same plan announced again, sends nothing, and
-// so does a ledger that cannot be written (084 not applied). Never to the
+// so does a ledger that cannot be written (087 not applied). Never to the
 // player who planned or accepted it, never at night, and only to a phone
 // whose player left notifications on.
 export async function noticeClubPlan(input: { planId: string; byId: string }): Promise<number> {

@@ -35,7 +35,7 @@ import {
 } from "./experience";
 import { drillPoster } from "./drill-poster";
 import { goalLadder, type LadderRung } from "./home";
-import { DEFAULT_DRILL_MIN, timeByArea, timeTrained, type AreaMinutes } from "./time-trained";
+import { creditedMinutes, timeByArea, timeTrained, type AreaMinutes } from "./time-trained";
 import { fmtMonday, liveWeekFor } from "./time";
 import { fmtBreakDate } from "./breaks";
 import { sessionsWord } from "./training";
@@ -65,7 +65,10 @@ export type AppDrill = {
   reps: string;
   how: string;
   notes: string | null;
+  // the minutes the plan gives the drill
   minutes: number;
+  // the actual minutes it added once done (0 until then): lib/elite/time-trained.ts
+  trained: number;
   video: string | null;
   poster: string | null;
   completed: boolean;
@@ -117,6 +120,7 @@ function appDrill(h: Homework, base: string): AppDrill {
     how: h.exercise ?? "",
     notes: h.notes ?? null,
     minutes: drillMinutes(h),
+    trained: creditedMinutes(h),
     video: absoluteMedia(h.video_url, base),
     poster: absoluteMedia(drillPoster(h.video_url), base),
     completed: Boolean(h.completed),
@@ -222,6 +226,9 @@ export type AppYou = {
   medals: { hours: number; earned: boolean }[];
   next: { hours: number; minutesAway: number } | null;
   achievements: { id: string; title: string; detail: string }[];
+  // An earned month of Strive Pro that is running (squad-pass.ts): the line
+  // saying when it runs to, and the way to keep the weeks coming after it.
+  earned?: { line: string; parent: { label: string; text: string } | null };
 };
 
 export function youPayload(i: {
@@ -240,8 +247,9 @@ export function youPayload(i: {
   const unlocked = i.homework.filter((h) => h.week <= live);
   const time = timeTrained(unlocked);
   const thisWeek = i.homework.filter((h) => h.week === week);
-  const planned = thisWeek.reduce((s, h) => s + (h.duration_min ?? DEFAULT_DRILL_MIN), 0);
-  const done = thisWeek.filter((h) => h.completed).reduce((s, h) => s + (h.duration_min ?? DEFAULT_DRILL_MIN), 0);
+  // planned is the plan; done is the actual time of what is done
+  const planned = thisWeek.reduce((s, h) => s + drillMinutes(h), 0);
+  const done = thisWeek.reduce((s, h) => s + creditedMinutes(h), 0);
   return {
     card: { name: cardName(i.fullName), since: memberSinceLabel(i.joinedAt), tier: cardTierLabel(i.tier) },
     position: i.position?.trim() || null,

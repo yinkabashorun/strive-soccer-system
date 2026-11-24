@@ -27,6 +27,10 @@ import type { Tracker } from "./tracker-server";
 import { shortName, tracksGym } from "./tracker";
 import { owedMemberSteps } from "./free-intake";
 import { memberAnswersFor } from "./free-upgrade-server";
+import { squadFor } from "./squad-pass-server";
+import { runningLine } from "./squad-pass";
+import { parentLinkFor } from "./parent-link-server";
+import { PARENT_SEND, parentShareText } from "./parent-link";
 
 export async function loadWeek(player: Player): Promise<AppWeek> {
   // As the web Home does on every open: a break that ended moves the
@@ -61,17 +65,34 @@ export async function loadWeek(player: Player): Promise<AppWeek> {
 }
 
 export async function loadYou(player: Player): Promise<AppYou> {
-  const [homework, achievements] = await Promise.all([getHomework(player.id), getAchievements(player.id)]);
-  return youPayload({
-    fullName: player.full_name,
-    joinedAt: player.joined_at,
-    tier: player.tier,
-    position: player.position,
-    homework,
-    achievements,
-    week1Monday: player.week1_monday,
-    currentWeek: player.current_week,
-  });
+  const [homework, achievements, earned] = await Promise.all([
+    getHomework(player.id),
+    getAchievements(player.id),
+    earnedMonthFor(player).catch(() => undefined),
+  ]);
+  return {
+    ...youPayload({
+      fullName: player.full_name,
+      joinedAt: player.joined_at,
+      tier: player.tier,
+      position: player.position,
+      homework,
+      achievements,
+      week1Monday: player.week1_monday,
+      currentWeek: player.current_week,
+    }),
+    ...(earned ? { earned } : {}),
+  };
+}
+
+// A member on an EARNED month (no card behind it) is told when it runs to
+// and handed the link to send a parent, so the weeks do not just stop.
+async function earnedMonthFor(player: Player): Promise<AppYou["earned"]> {
+  if (player.subscription_status !== "trialing" || !player.profile_id) return undefined;
+  const squad = await squadFor(player.profile_id);
+  if (!squad.runningUntil) return undefined;
+  const link = await parentLinkFor(player.profile_id).catch(() => null);
+  return { line: runningLine(squad.runningUntil), parent: link ? { label: PARENT_SEND, text: parentShareText(link) } : null };
 }
 
 // The tabs the app shows, from the one rule (memberTabs). The phone draws

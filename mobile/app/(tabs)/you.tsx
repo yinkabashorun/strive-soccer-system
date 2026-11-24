@@ -1,12 +1,13 @@
-import { StyleSheet, View } from "react-native";
+import { Share, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
+import { achievementMark } from "@shared/achievement-rules";
 import { fmtDuration } from "@shared/time-trained";
 import { keys, useMe, useYou } from "@/api/queries";
 import { queryClient } from "@/api/queryClient";
 import { MemberCard } from "@/MemberCard";
 import { useMyPhoto } from "@/usePhoto";
 import { PAGE_TOP, Screen } from "@/Screen";
-import { Body, Card, Disc, Hairline, Head, Label, Ring, SettingRow, Skeleton } from "@/ui";
+import { Body, Button, Card, Disc, Hairline, Head, Label, Medal, Ring, SettingRow, Skeleton } from "@/ui";
 import { color } from "@/theme";
 
 // You (approved mock v4): the member card, this week's time in the gold
@@ -38,6 +39,20 @@ export default function You() {
         )}
       </View>
 
+      {y?.earned ? (
+        <Card style={{ marginHorizontal: 20, marginTop: 16 }}>
+          <Body size={14}>{y.earned.line}</Body>
+          {y.earned.parent ? (
+            <Button
+              quiet
+              style={{ marginTop: 12 }}
+              label={y.earned.parent.label}
+              onPress={() => void Share.share({ message: y.earned!.parent!.text }).catch(() => undefined)}
+            />
+          ) : null}
+        </Card>
+      ) : null}
+
       {!y ? (
         <View style={{ margin: 20, gap: 14 }}>
           <Skeleton height={132} />
@@ -46,7 +61,7 @@ export default function You() {
       ) : (
         <>
           <View style={styles.ringRow}>
-            <Ring size={132} stroke={10} value={y.weekMinutesPlanned > 0 ? y.weekMinutesDone / y.weekMinutesPlanned : 0}>
+            <Ring size={132} stroke={10} value={y.weekMinutesPlanned > 0 ? Math.min(1, y.weekMinutesDone / y.weekMinutesPlanned) : 0}>
               <Head size={28}>{fmtDuration(y.weekMinutesDone)}</Head>
               <Body dim size={11.5}>this week</Body>
             </Ring>
@@ -118,12 +133,15 @@ export default function You() {
             {y.achievements.length ? (
               <View style={styles.badges}>
                 {y.achievements.map((a) => (
-                  <Card key={a.id} style={styles.badge}>
-                    <Label numberOfLines={1}>{a.title}</Label>
-                    <Body dim size={12} numberOfLines={1}>
+                  <View key={a.id} style={styles.badge} accessible accessibilityLabel={`Earned: ${a.title}. ${a.detail}`}>
+                    <Medal size={58} mark={achievementMark(a.title)} />
+                    <Head size={18} style={styles.badgeTitle}>
+                      {a.title}
+                    </Head>
+                    <Body dim size={12.5} style={styles.badgeDetail}>
                       {a.detail}
                     </Body>
-                  </Card>
+                  </View>
                 ))}
               </View>
             ) : null}
@@ -145,6 +163,20 @@ const styles = StyleSheet.create({
   bar: { width: "100%", borderTopLeftRadius: 8, borderTopRightRadius: 8, borderBottomLeftRadius: 4, borderBottomRightRadius: 4, backgroundColor: color.fill2 },
   area: { minHeight: 52, flexDirection: "row", alignItems: "center", paddingHorizontal: 16 },
   medals: { flexDirection: "row", marginTop: 14 },
-  badges: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 16 },
-  badge: { width: "48%", padding: 14 },
+  badges: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", rowGap: 10, marginTop: 18 },
+  // A badge is a medal, not a grey tile: the gold medal, its name in the
+  // headline face and the whole line of what it was for, never cut short.
+  badge: {
+    width: "48.5%",
+    alignItems: "center",
+    paddingTop: 10,
+    paddingBottom: 16,
+    paddingHorizontal: 10,
+    borderRadius: 22,
+    backgroundColor: color.fill,
+    borderWidth: 1,
+    borderColor: "rgba(200,168,88,0.32)",
+  },
+  badgeTitle: { textAlign: "center", marginTop: 2 },
+  badgeDetail: { textAlign: "center", marginTop: 5 },
 });

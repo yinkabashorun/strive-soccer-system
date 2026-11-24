@@ -29,6 +29,9 @@ const s = {
   seenTokens: [] as (string | null)[],
   calls: [] as { fn: string; args: unknown[] }[],
   homeworkRow: { id: "", completed: true } as { id: string; completed: boolean } | null,
+  // what the website's own tick action answers, and whether the database read fails
+  toggle: { ok: true } as { ok: true } | { ok: false; again: boolean },
+  readFails: false,
   courses: [] as Record<string, unknown>[],
   // clubs: is the club one of the caller's, and are the two one-time sheets accepted
   clubFound: true,
@@ -66,6 +69,7 @@ function viewer(over: Partial<Viewer> = {}): Viewer {
 function call(fn: string) {
   return async (...args: unknown[]) => {
     s.calls.push({ fn, args });
+    if (fn === "toggleHomework") return s.toggle;
     if (fn === "completeOnboarding") return { ok: true };
     if (fn === "buildMyFirstWeek") return { status: "waiting" };
     if (fn === "submitCheckin") return { ok: true };
@@ -315,7 +319,13 @@ vi.mock("@/app/api/elite/profile/photo/route", () => ({
 vi.mock("@/lib/elite/supabase/server", () => ({
   createClient: () => ({
     from: () => ({
-      select: () => ({ eq: () => ({ eq: () => ({ maybeSingle: async () => ({ data: s.homeworkRow }) }) }) }),
+      select: () => ({
+        eq: () => ({
+          eq: () => ({
+            maybeSingle: async () => (s.readFails ? { data: null, error: { code: "57014" } } : { data: s.homeworkRow, error: null }),
+          }),
+        }),
+      }),
     }),
   }),
 }));
@@ -473,6 +483,8 @@ beforeEach(() => {
   s.seenTokens = [];
   s.calls = [];
   s.homeworkRow = { id: "11111111-1111-4111-8111-111111111111", completed: true };
+  s.toggle = { ok: true };
+  s.readFails = false;
   s.courses = library();
   s.clubFound = true;
   s.organizerOk = true;
@@ -692,7 +704,7 @@ describe("the gate, one rule with the website", () => {
 });
 
 describe("bodies are checked first", () => {
-  it("drill: needs a uuid and a boolean, and says when the row did not change", async () => {
+  it("drill: needs a uuid and a boolean, and the row must be the member's own", async () => {
     const h = await handler("drill", "POST");
     expect((await h(req("POST", { body: { id: "x", completed: true } }))).status).toBe(400);
     expect((await h(req("POST", { body: { id: s.homeworkRow!.id } }))).status).toBe(400);
@@ -700,8 +712,36 @@ describe("bodies are checked first", () => {
     const ok = await h(req("POST", { body: { id: s.homeworkRow!.id, completed: true } }));
     expect(ok.status).toBe(200);
     expect(await ok.json()).toMatchObject({ ok: true, completed: true, totalMinutes: 20 });
-    s.homeworkRow = null; // not the member's row, or RLS refused it
-    expect((await h(req("POST", { body: { id: "11111111-1111-4111-8111-111111111111", completed: true } }))).status).toBe(409);
+    // not the member's row: nothing is written, and asking again will not help
+    s.calls = [];
+    s.homeworkRow = null;
+    expect((await h(req("POST", { body: { id: "11111111-1111-4111-8111-111111111111", completed: true } }))).status).toBe(404);
+    expect(s.calls).toEqual([]);
+  });
+
+  // The phone keeps a tick and sends it until it is answered
+  // (mobile/src/outbox.ts). The status tells it which of two things a
+  // failure was: 503 "ask again" or 4xx "asking again will not change it".
+  it("drill: says whether a tick that did not save is worth sending again", async () => {
+    const h = await handler("drill", "POST");
+    const body = { id: s.homeworkRow!.id, completed: true };
+    s.toggle = { ok: false, again: true }; // the database was busy
+    expect((await h(req("POST", { body }))).status).toBe(503);
+    s.toggle = { ok: false, again: false }; // a guard in the database said no
+    expect((await h(req("POST", { body }))).status).toBe(409);
+    s.toggle = { ok: true };
+    s.homeworkRow = { id: body.id, completed: false }; // written, but the row reads otherwise
+    expect((await h(req("POST", { body }))).status).toBe(409);
+    s.readFails = true; // the row could not be read at all
+    expect((await h(req("POST", { body }))).status).toBe(503);
+  });
+
+  it("drill: the same tick twice gets the same answer", async () => {
+    const h = await handler("drill", "POST");
+    const body = { id: s.homeworkRow!.id, completed: true };
+    const a = await (await h(req("POST", { body }))).json();
+    const b = await (await h(req("POST", { body }))).json();
+    expect(b).toEqual(a);
   });
 
   it("extra: a shelf it knows, or a list of picks", async () => {

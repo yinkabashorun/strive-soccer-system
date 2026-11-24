@@ -16,6 +16,7 @@ import {
   shortName,
   weekProgress,
 } from "@/lib/elite/tracker";
+import { squadFor } from "@/lib/elite/squad-pass-server";
 
 export const metadata = { title: "Today · Strive Elite" };
 export const dynamic = "force-dynamic";
@@ -69,6 +70,7 @@ export default async function FriendsPage({
       clubRequests={clubRequests}
       teamAsks={teamAsks}
       inviteLink={joinLink(APP_URL, tracker.referral_code)}
+      squad={await squadFor(viewer.profile.id).catch(() => null)}
     />
   );
 }

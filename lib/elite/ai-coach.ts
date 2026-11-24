@@ -148,9 +148,13 @@ function extractJSON<T>(raw: string): T | null {
   }
 }
 
-function clampMin(v: unknown): number {
+// The plan's own minutes for a drill, kept within reason. With none given
+// there is NO made-up figure: the drill keeps the minutes its bank row
+// carries (bank-conform.ts keepTailoring, then the publish gate).
+function clampMin(v: unknown): number | undefined {
+  if (v === null || v === undefined || v === "") return undefined;
   const n = Math.round(Number(v));
-  if (!Number.isFinite(n)) return 10;
+  if (!Number.isFinite(n)) return undefined;
   return Math.max(5, Math.min(15, n));
 }
 

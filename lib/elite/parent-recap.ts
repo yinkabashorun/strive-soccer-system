@@ -12,6 +12,7 @@ import { createServiceClient } from "./supabase/server";
 import { isOnBreak } from "./breaks";
 import { featureOn } from "./tiers";
 import type { Homework, TrainingBreak } from "./types";
+import { creditedMinutes } from "./time-trained";
 
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-opus-4-8";
 
@@ -86,7 +87,7 @@ export async function buildParentRecap(
   ).length;
   const minutes = rows
     .filter((h) => h.completed)
-    .reduce((s, h) => s + (h.duration_min ?? 15), 0);
+    .reduce((s, h) => s + creditedMinutes(h), 0);
 
   const first = player.full_name.split(" ")[0];
   const parentFirst = (player.parent_name || first || "").trim().split(" ")[0];

@@ -8,7 +8,7 @@
 // rule, docs/product-principles.md).
 import type { Homework, MembershipTier } from "./types";
 import { drillKind } from "./session-flow";
-import { DEFAULT_DRILL_MIN } from "./time-trained";
+import { creditedMinutes } from "./time-trained";
 import { MILESTONE_HOURS } from "./session-flow";
 import { tabOn, tierOf } from "./tiers";
 import { drillPoster } from "./drill-poster";
@@ -231,14 +231,14 @@ export function hoursMedals(minutes: number, upTo = 4): { hours: number; earned:
 // live week last. A week with nothing done is a short grey bar, never a
 // mark against them.
 // ---------------------------------------------------------------------
-export function weeklyMinutes(rows: Pick<Homework, "week" | "completed" | "duration_min">[], throughWeek: number, count = 7): { week: number; minutes: number }[] {
+export function weeklyMinutes(rows: Pick<Homework, "week" | "completed" | "duration_min" | "actual_seconds">[], throughWeek: number, count = 7): { week: number; minutes: number }[] {
   const last = Math.max(1, throughWeek);
   const first = Math.max(1, last - count + 1);
   const out: { week: number; minutes: number }[] = [];
   for (let w = first; w <= last; w++) {
     const minutes = rows
       .filter((h) => h.week === w && h.completed)
-      .reduce((s, h) => s + (h.duration_min ?? DEFAULT_DRILL_MIN), 0);
+      .reduce((s, h) => s + creditedMinutes(h), 0);
     out.push({ week: w, minutes });
   }
   return out;

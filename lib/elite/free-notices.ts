@@ -7,7 +7,7 @@
 //     day.
 //   - "<Club>: Club training Tue, Nov 24 at 6:00 PM. Tap I'm in.": when a
 //     club they are on plans a training session, or a game between two
-//     clubs is on. Once per plan, claimed in elite_plan_notices (084). The
+//     clubs is on. Once per plan, claimed in elite_plan_notices (087). The
 //     only notification about clubs.
 // Nothing between 9:30 PM and 7:00 AM New York time: a notice that would
 // land then is dropped, not held. Each send is claimed first in

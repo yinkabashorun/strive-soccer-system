@@ -15,6 +15,7 @@ import {
   sessionName,
   sessionProgress,
   type SessionGroup,
+  doneMinutes,
 } from "@/lib/elite/session-flow";
 import { sessionHeadline, sessionImage } from "@/lib/elite/experience";
 import { drillPoster } from "@/lib/elite/drill-poster";
@@ -57,13 +58,13 @@ export function TodaySession({
   focus?: string | null; // the 3-month program's focus this week, by name
 }) {
   const router = useRouter();
-  const { done, toggle } = useDrillState();
+  const { done, toggle, trained } = useDrillState();
   const [open, setOpen] = useState<{ group: SessionGroup; index: number; origin: Origin | null } | null>(null);
   const cardRef = useRef<HTMLElement>(null);
 
   const sessions = useMemo(() => groupSessions(rows), [rows]);
   const current = sessions.find((s) => s.list.some((h) => !isDone(h, done)));
-  const allTime = liveMinutes(totalMinutes, rows, done);
+  const allTime = liveMinutes(totalMinutes, rows, done, trained);
 
   const close = useCallback(() => {
     setOpen(null);
@@ -88,7 +89,8 @@ export function TodaySession({
       origin={open.origin}
       weekLabel={`Week ${week}`}
       firstName={firstName}
-      minutesBefore={allTime - sessionProgress(open.group.list, done).minutesDone}
+      trained={trained}
+      minutesBefore={allTime - sessionProgress(open.group.list, done, trained).minutesDone}
       sessionsLeftAfter={planSessionsLeft(sessions, done, open.group.n)}
       sessionsTotal={planSessionCount(sessions)}
       weekDoneLine={nextWeekLine}
@@ -102,7 +104,7 @@ export function TodaySession({
   const weekline = <WeekLine sessions={sessions} done={done} current={current ?? null} minutes={allTime} />;
 
   if (!current) {
-    const weekMin = rows.filter((h) => isDone(h, done)).reduce((s, h) => s + (h.duration_min ?? 15), 0);
+    const weekMin = rows.reduce((s, h) => s + doneMinutes(h, done, trained), 0);
     return (
       <>
         <VictoryLap

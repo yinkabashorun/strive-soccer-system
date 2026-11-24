@@ -20,6 +20,7 @@ import {
 import { composePickedSession, pickGroups, type PickGroup } from "./extra-pick";
 import { DEMO_PLAYERS } from "./demo";
 import type { Drill, Player } from "./types";
+import { realMinutes } from "./time-trained";
 
 // Extra Work (offer stack item 1, Oct 12 2026): "I've got more today."
 //
@@ -143,6 +144,11 @@ async function insertExtra(
   ctx: ExtraContext,
   drills: { title: string; exercise: string; reps: string; minutes?: number; notes?: string; drill_id: string | null; video_url: string | null }[]
 ): Promise<{ ok: true; session: number } | Fail> {
+  // every drill comes from the bank with the minutes the coach gave it; one
+  // without is not written with a made-up figure
+  if (drills.some((d) => realMinutes(d.minutes) === null)) {
+    return { ok: false, error: "Couldn't add that session. Your coach has been flagged." };
+  }
   const inserts = drills.map((d, di) => ({
     player_id: ctx.player.id,
     week: ctx.week,
@@ -150,7 +156,7 @@ async function insertExtra(
     title: d.title,
     exercise: d.exercise,
     reps: d.reps,
-    duration_min: d.minutes ?? 10,
+    duration_min: d.minutes as number,
     notes: d.notes ?? null,
     video_url: d.video_url,
     drill_id: d.drill_id,

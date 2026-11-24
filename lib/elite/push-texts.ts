@@ -18,7 +18,7 @@
 //     filmRoomAnnouncement and checkinAnnouncement (film-room.ts)
 //   - free-notices-server.ts (sendPushToProfile, the free app): friendPostPush
 //     and propsPush, each claimed first in elite_free_notices (078), and
-//     clubPlanPush, claimed first in elite_plan_notices (084)
+//     clubPlanPush, claimed first in elite_plan_notices (087)
 //   - reminders-server.ts sendTrainingReminders, the hourly cron at the
 //     member's usual time: trainingReminderPush (at most one a day,
 //     claimed first in elite_training_reminders, 078)
@@ -85,6 +85,12 @@ export function trainingReminderPush(input: { sessionsLeft: number }): PushText 
 // friend's first name.
 export function friendPostPush(first: string): PushText {
   return { title: `${first} just posted`, body: "Post yours to see it.", url: "/log" };
+}
+
+// Bring your squad (squad-pass-server.ts grantPasses): sent once, by the
+// insert that made the month, when a third teammate posts a first training.
+export function squadPassPush(): PushText {
+  return { title: "You earned a month of Strive Pro", body: "Three teammates trained. Start it when you are ready.", url: "/log" };
 }
 
 export function propsPush(first: string): PushText {

@@ -16,7 +16,11 @@ import { afterSessionLine, milestoneCrossed, milestoneLabel, nextStep } from "@s
 import { parseReps } from "@shared/set-timer";
 import { fmtDuration } from "@shared/time-trained";
 import type { AppSession, AppWeek } from "@shared/app-contract";
+import { newClock, resetDrill, secondsOn, showDrill } from "@shared/drill-clock";
+import { cappedSeconds, creditedMinutes } from "@shared/time-trained";
 import { useMe, useToggleDrill, useWeek } from "@/api/queries";
+import { useRefused, useTicks } from "@/outbox";
+import { REFUSED_LINE, UNSENT_LINE } from "@/outbox-core";
 import { DrillVideo } from "@/DrillVideo";
 import { SetTimer } from "@/SetTimer";
 import { Shade } from "@/Shade";
@@ -70,10 +74,12 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
   );
   const [count, setCount] = useState<CountInState>("intro");
   const [timerOpen, setTimerOpen] = useState(false);
-  const before = useRef(week.totalMinutes);
-  // The minutes this sitting adds: the drills ticked since the session opened.
-  const doneHere = useRef(new Set<string>());
-  const [finish, setFinish] = useState<{ added: number; total: number; weekDone: boolean; left: number } | null>(null);
+  // The ACTUAL minutes this sitting adds: for each drill ticked since the
+  // session opened, the time it really took (the clock below), counted by
+  // the server's own rule.
+  const doneHere = useRef(new Map<string, number>());
+  const clock = useRef(newClock());
+  const [finish, setFinish] = useState<{ added: number; weekDone: boolean; left: number } | null>(null);
 
   // The count-in: the session's name, then 3, 2, 1 with a tap felt on each.
   useEffect(() => {
@@ -91,6 +97,11 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
   }, [phase, count]);
 
   const drill = drills[index];
+  // the clock runs for the drill that is on screen, and for nothing else
+  const onScreen = phase === "drill" && drill ? drill.id : null;
+  useEffect(() => {
+    clock.current = showDrill(clock.current, onScreen, Date.now());
+  }, [onScreen]);
   const skills = drills.filter((d) => d.kind === "skill");
   const plan = useMemo(() => (drill ? parseReps(drill.reps) : null), [drill]);
 
@@ -98,18 +109,21 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
     if (!drill) return;
     if (!drill.completed) {
       feel("drill");
-      doneHere.current.add(drill.id);
-      toggle.mutate({ id: drill.id, completed: true });
+      const now = Date.now();
+      const seconds = secondsOn(clock.current, drill.id, now);
+      clock.current = resetDrill(clock.current, drill.id, now);
+      doneHere.current.set(drill.id, creditedMinutes({ completed: true, actual_seconds: cappedSeconds(seconds, drill.minutes) }));
+      toggle.mutate({ id: drill.id, completed: true, seconds });
     }
     const doneMap = Object.fromEntries(drills.map((d) => [d.id, d.id === drill.id ? true : d.completed]));
     // nextStep reads only each row's id and completed (lib/elite/session-flow.ts)
     const next = nextStep(drills as unknown as Parameters<typeof nextStep>[0], doneMap, index);
     if (next === -1) {
-      const added = drills.filter((d) => doneHere.current.has(d.id)).reduce((sum, d) => sum + d.minutes, 0);
+      const added = [...doneHere.current.values()].reduce((sum, m) => sum + m, 0);
       const plan = week.sessions.filter((s) => !s.extra);
       const left = plan.filter((s) => !s.complete && s.n !== session.n).length;
       const weekDone = !session.extra && left === 0;
-      setFinish({ added, total: before.current + added, weekDone, left });
+      setFinish({ added, weekDone, left });
       setPhase("finish");
       setTimeout(() => feel(weekDone ? "week" : "session"), 450);
     } else {
@@ -144,6 +158,7 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
       <Finish
         name={me.data?.viewer.firstName ?? ""}
         week={week}
+        drillIds={drills.map((d) => d.id)}
         finish={finish}
         askPush={!prefs.pushAsked}
         onHome={() => router.back()}
@@ -222,7 +237,11 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
       </View>
       {drill?.completed ? (
         <Pressable
-          onPress={() => toggle.mutate({ id: drill.id, completed: false })}
+          onPress={() => {
+            doneHere.current.delete(drill.id);
+            clock.current = resetDrill(clock.current, drill.id, Date.now());
+            toggle.mutate({ id: drill.id, completed: false });
+          }}
           style={[styles.undo, { bottom: insets.bottom + 88 }]}
           accessibilityRole="button"
         >
@@ -240,13 +259,15 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
 function Finish({
   name,
   week,
+  drillIds,
   finish,
   askPush,
   onHome,
 }: {
   name: string;
   week: AppWeek;
-  finish: { added: number; total: number; weekDone: boolean; left: number };
+  drillIds: string[];
+  finish: { added: number; weekDone: boolean; left: number };
   askPush: boolean;
   onHome: () => void;
 }) {
@@ -267,8 +288,18 @@ function Finish({
     return () => clearInterval(id);
   }, [finish.added, reduce]);
 
-  const crossed = milestoneCrossed(finish.total - finish.added, finish.total);
-  const next = nextMilestone(finish.total);
+  // All time is the week's own figure (the server's total with this phone's
+  // unsent ticks laid over it), never a sum kept on the side: once every
+  // tick is saved it IS the server's number.
+  const total = week.totalMinutes;
+  const crossed = milestoneCrossed(Math.max(0, total - finish.added), total);
+  const next = nextMilestone(total);
+  // The truth about saving: a drill the server refused, or ticks still on
+  // their way.
+  const ticks = useTicks();
+  const refused = useRefused();
+  const notSaved = drillIds.some((id) => refused.includes(id));
+  const unsent = ticks.length > 0;
   const plan = week.sessions.filter((s) => !s.extra);
   const doneCount = plan.length - finish.left;
 
@@ -299,7 +330,7 @@ function Finish({
           <Body dim size={12}>sessions this week</Body>
         </View>
         <View style={styles.stat}>
-          <Head size={26}>{fmtDuration(finish.total)}</Head>
+          <Head size={26}>{fmtDuration(total)}</Head>
           <Body dim size={12}>trained, all time</Body>
         </View>
       </Animated.View>
@@ -315,6 +346,11 @@ function Finish({
             </Body>
           </View>
         </Animated.View>
+      ) : null}
+      {notSaved || unsent ? (
+        <Body dim={!notSaved} size={13} style={{ marginHorizontal: 24, marginTop: 14, textAlign: "center" }}>
+          {notSaved ? REFUSED_LINE : UNSENT_LINE}
+        </Body>
       ) : null}
       {/* In the flow under the rest (never laid over the medal), at the bottom. */}
       <View style={{ flexGrow: 1 }} />

@@ -274,7 +274,7 @@ describe("the one notification that pulls a club together", () => {
     expect(fn.slice(0, fn.indexOf("\n}\n"))).not.toMatch(/place/);
   });
 
-  it("is claimed first, once per plan and player, in its own ledger (084)", () => {
+  it("is claimed first, once per plan and player, in its own ledger (087)", () => {
     const src = code("lib/elite/free-notices-server.ts");
     const fn = src.slice(src.indexOf("export async function noticeClubPlan"));
     expect(fn.indexOf("claimPlan(admin, plan.id, r.profileId)")).toBeGreaterThan(-1);
@@ -286,7 +286,7 @@ describe("the one notification that pulls a club together", () => {
     expect(fn).toContain("withDevices(admin,");
     // only for a plan that is on and has not started
     expect(fn).toContain('plan.status !== "on"');
-    const sql = read("supabase/migrations/084_club_plan_notices.sql");
+    const sql = read("supabase/migrations/087_club_plan_notices.sql");
     expect(sql).toContain("primary key (plan_id, profile_id)");
     expect(sql).toContain("enable row level security");
     expect(sql.split("\n").filter((l) => !l.trim().startsWith("--")).join("\n")).not.toMatch(/\bdrop\b/i);

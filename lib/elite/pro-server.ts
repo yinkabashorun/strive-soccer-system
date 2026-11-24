@@ -67,7 +67,12 @@ export async function openProCheckout(input: {
   profileId: string;
   playerId: string;
   email: string;
-  returnTo?: "site" | "app";
+  returnTo?: "site" | "app" | "parent";
+  cancelPath?: string;
+  // The account is on an EARNED month (lib/elite/squad-pass.ts), which is
+  // "trialing" with no card behind it: a card may be started over it, and
+  // paying turns the membership "active" with nothing lost in between.
+  overEarnedMonth?: boolean;
 }): Promise<ProCheckout> {
   const off: ProCheckout = { ok: false, status: 503, error: PAYMENTS_OFF_MESSAGE, reason: "payments_off" };
   if (!isStripeConfigured()) return off;
@@ -81,7 +86,8 @@ export async function openProCheckout(input: {
   if (!player || !isPro(player.tier as string | null)) {
     return { ok: false, status: 403, error: "This account is not a Strive Pro account.", reason: "not_pro" };
   }
-  if (player.subscription_status === "active" || player.subscription_status === "trialing") {
+  const earnedOnly = player.subscription_status === "trialing" && input.overEarnedMonth === true;
+  if ((player.subscription_status === "active" || player.subscription_status === "trialing") && !earnedOnly) {
     return { ok: false, status: 409, error: PRO_ALREADY_ACTIVE_MESSAGE, reason: "active" };
   }
   try {
@@ -92,6 +98,7 @@ export async function openProCheckout(input: {
         appUrl: APP_URL,
         customerId: await stripeCustomerFor(input.profileId),
         returnTo: input.returnTo,
+        cancelPath: input.cancelPath,
       })
     );
     if (!session.url) throw new Error("no_url");

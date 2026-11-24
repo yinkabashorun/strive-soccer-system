@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import {
   ACHIEVEMENT_RULES,
+  MARK_MAX,
+  achievementMark,
   fullWeeks,
   newlyEarned,
   presentAchievement,
@@ -122,5 +124,32 @@ describe("no streak wording on any member-facing screen", () => {
         .replace(/\/\/.*$/gm, "");
       expect(copy, rel(f)).not.toMatch(/streak|leaderboard|perfect weeks?|weeks? at 100|in a row/i);
     }
+  });
+});
+
+// The iPhone app shows each badge as a gold medal with a short engraving,
+// the way the hours medals read "1H" (Nov 24 2026, Coach Yinka on the grey
+// tile it was: "doesn't look like an achievement").
+describe("the engraving on a badge", () => {
+  it("every badge has one, short enough for the medal, and no two share it", () => {
+    const marks = ACHIEVEMENT_RULES.map((r) => r.mark);
+    for (const m of marks) {
+      expect(m.length).toBeGreaterThan(0);
+      expect(m.length).toBeLessThanOrEqual(MARK_MAX);
+      expect(m).toBe(m.toUpperCase());
+      expect(m).not.toMatch(/%|streak/i);
+    }
+    expect(new Set(marks).size).toBe(marks.length);
+  });
+  it("is found by the title the member reads, old wording included", () => {
+    for (const r of ACHIEVEMENT_RULES) {
+      expect(achievementMark(r.title)).toBe(r.mark);
+      for (const was of r.formerly ?? []) expect(achievementMark(was)).toBe(r.mark);
+    }
+    expect(achievementMark("7-Day Streak")).toBe("7D");
+    expect(achievementMark(presentAchievement({ title: "7-Day Streak", detail: "" }).title)).toBe("7D");
+  });
+  it("makes nothing up for a title no rule knows", () => {
+    expect(achievementMark("Something else")).toBeNull();
   });
 });

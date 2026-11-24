@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { chunkedStorage, CHUNK_SIZE, MAX_CHUNKS, parseCount, splitValue, type KV } from "@/auth/chunks";
 import { applyDone } from "@/week-cache";
+import { overlay, outcomeOf, parseTicks, queueTick, REFUSED_LINE, retryDelayMs, settle, UNSENT_LINE, type Tick } from "@/outbox-core";
 import { areaFor, areaHome, inArea, pushRoute } from "@/navigation";
 import { clipOrder, clipsInView, liveClip, pickedAfterScroll, pickedAfterTap } from "@/course-view";
 import { drillEyebrow, repsTiles } from "@/drill-view";
@@ -11,7 +12,8 @@ import { JOIN_STEPS, isJoinStep } from "@/join-draft";
 import { FREE_STEPS } from "@shared/free-intake";
 import { UPGRADE_CARD_PLACES, UPGRADE_CARD_REST_DAYS, upgradeCard } from "@shared/upgrade-card";
 import { USERNAME_MESSAGES, normalizeUsername, usernameProblem } from "@shared/username";
-import type { AppWeek } from "@shared/app-contract";
+import type { AppDrill, AppSession, AppWeek } from "@shared/app-contract";
+import { NEXT_STILLS, nextCard, nextStills, rowLine, weekMinutesDone, weekRows, weekSummary } from "@/week-view";
 import { QUIZ_STEPS } from "@shared/quiz";
 
 function memoryKV(): KV & { map: Map<string, string> } {
@@ -65,6 +67,7 @@ function week(): AppWeek {
     how: "",
     notes: null,
     minutes,
+    trained: completed ? minutes : 0,
     video: null,
     poster: null,
     completed,
@@ -431,3 +434,185 @@ describe("a course's clips", () => {
   });
 });
 
+
+// The Week tab (Nov 24 2026, Coach Yinka on build 7: five equal cards,
+// "I don't think that screen is super addicting"): the week is a path with
+// one big card, the session it is waiting on.
+describe("the Week tab's path", () => {
+  const drillOf = (id: string, minutes: number, completed: boolean): AppDrill => ({
+    id,
+    title: id,
+    name: id,
+    kind: "skill",
+    kindLabel: "Drill",
+    reps: "3 x 1 min",
+    how: "",
+    notes: null,
+    minutes,
+    trained: completed ? minutes : 0,
+    video: null,
+    poster: `https://example.test/${id}.jpg`,
+    completed,
+  });
+  const session = (n: number, done: number, total = 4, extra = false): AppSession => {
+    const drills = Array.from({ length: total }, (_, i) => drillOf(`s${n}d${i}`, 5, i < done));
+    return { n, name: extra ? "Extra session" : `Session ${n}`, extra, headline: "Weak foot and passing", image: null, minutesTotal: total * 5, done, total, complete: done === total, drills };
+  };
+  const week = (sessions: AppSession[], current: number | null) => ({ sessions, current });
+
+  it("a finished session is done, the one the week waits on is next, the rest are ahead", () => {
+    const rows = weekRows(week([session(1, 4), session(2, 4), session(3, 0), session(4, 0)], 3));
+    expect(rows.map((r) => r.state)).toEqual(["done", "done", "next", "open"]);
+    // one big card, never two
+    expect(rows.filter((r) => r.state === "next")).toHaveLength(1);
+  });
+
+  it("the line is gold as far as the player has got, and stops at both ends", () => {
+    const rows = weekRows(week([session(1, 4), session(2, 4), session(3, 0), session(4, 0)], 3));
+    expect(rows.map((r) => [r.lineAbove, r.lineBelow])).toEqual([
+      [null, "gold"],
+      ["gold", "gold"],
+      ["gold", "grey"],
+      ["grey", null],
+    ]);
+  });
+
+  it("a session done out of order is still done, and nothing is marked as missed", () => {
+    const rows = weekRows(week([session(1, 4), session(2, 0), session(3, 4), session(4, 0)], 2));
+    expect(rows.map((r) => r.state)).toEqual(["done", "next", "done", "open"]);
+    const words = JSON.stringify([rows.map((r) => rowLine(r.s, r.state)), weekSummary(week([session(1, 4), session(2, 0)], 2))]);
+    expect(words).not.toMatch(/miss|late|behind|overdue|streak|%/i);
+  });
+
+  it("a finished week has no big card", () => {
+    expect(weekRows(week([session(1, 4), session(2, 4)], null)).map((r) => r.state)).toEqual(["done", "done"]);
+  });
+
+  it("the summary counts the plan and the minutes ticked off, extra work included", () => {
+    expect(weekSummary(week([session(1, 0), session(2, 0)], 1))).toBe("2 sessions this week");
+    expect(weekSummary(week([session(1, 4), session(2, 1), session(3, 0)], 2))).toBe("1 of 3 sessions done · 25 min trained");
+    expect(weekSummary(week([session(1, 4), session(2, 4)], null))).toBe("All 2 sessions done · 40 min trained");
+    expect(weekSummary(week([session(1, 0)], 1))).toBe("1 session this week");
+    // an extra session adds minutes, never a session to the plan's count
+    expect(weekSummary(week([session(1, 4), session(2, 0), session(3, 4, 4, true)], 2))).toBe("1 of 2 sessions done · 40 min trained");
+    expect(weekMinutesDone([session(1, 2), session(2, 4)])).toBe(30);
+  });
+
+  it("the big card says Start, or Continue once a drill of it is done", () => {
+    expect(nextCard(session(3, 0))).toEqual({ eyebrow: "Up next", line: "4 drills · 20 min", button: "Start" });
+    expect(nextCard(session(3, 1))).toEqual({ eyebrow: "Keep going", line: "1 of 4 drills done · 20 min", button: "Continue" });
+    expect(nextCard(session(3, 0, 1)).line).toBe("1 drill · 5 min");
+  });
+
+  it("shows five drill stills at most, then how many more", () => {
+    expect(nextStills(session(3, 1)).more).toBe(0);
+    const big = nextStills(session(3, 2, 8));
+    expect(big.stills).toHaveLength(NEXT_STILLS);
+    expect(big.more).toBe(3);
+    expect(big.stills.map((d) => d.done)).toEqual([true, true, false, false, false]);
+  });
+
+  it("the other rows carry what the session works on", () => {
+    expect(rowLine(session(1, 4), "done")).toBe("Weak foot and passing · 20 min");
+    expect(rowLine(session(4, 0), "open")).toBe("Weak foot and passing · 4 drills · 20 min");
+    expect(rowLine({ ...session(4, 0), headline: null }, "open")).toBe("4 drills · 20 min");
+  });
+});
+
+// Session tracking (Nov 24 2026, Coach Yinka: "absolutely and utterly on
+// point"). A tick is kept on the phone and sent until the server answers;
+// it is never taken back off the screen because the signal dropped, and
+// never counted as saved when it is not.
+describe("a drill ticked on the phone", () => {
+  const d = (id: string, minutes: number, completed: boolean): AppDrill => ({
+    id, title: id, name: id, kind: "skill", kindLabel: "Drill", reps: "", how: "", notes: null, minutes, trained: completed ? minutes : 0, video: null, poster: null, completed,
+  });
+  const serverWeek = (): AppWeek => {
+    const s1 = [d("a", 5, true), d("b", 6, true)];
+    const s2 = [d("c", 7, false), d("e", 8, false)];
+    const session = (n: number, drills: AppDrill[]): AppSession => {
+      const done = drills.filter((x) => x.completed).length;
+      return { n, name: `Session ${n}`, extra: false, headline: null, image: null, minutesTotal: drills.reduce((a, x) => a + x.minutes, 0), done, total: drills.length, complete: done === drills.length, drills };
+    };
+    return {
+      week: 3, range: null, focus: null, sessions: [session(1, s1), session(2, s2)], current: 2, planCount: 2, sessionsLeft: 1, weekDone: false,
+      oneMore: null, nextWeekLine: "", dropLine: "", ladder: [], totalMinutes: 100, onBreak: null, hasWall: true,
+    };
+  };
+
+  it("the newest tap on a drill is the one that is sent", () => {
+    let list: Tick[] = queueTick([], "c", true, 1);
+    list = queueTick(list, "e", true, 2);
+    list = queueTick(list, "c", false, 3);
+    expect(list.map((t) => [t.id, t.completed])).toEqual([["e", true], ["c", false]]);
+  });
+
+  it("an unsent tick shows as done over the server's week, minutes and all", () => {
+    const shown = overlay(serverWeek(), queueTick(queueTick([], "c", true, 1), "e", true, 2));
+    expect(shown.sessions[1].complete).toBe(true);
+    expect(shown.weekDone).toBe(true);
+    expect(shown.totalMinutes).toBe(115);
+    // and a refresh that brings the same server week back changes nothing
+    expect(overlay(serverWeek(), queueTick(queueTick([], "c", true, 1), "e", true, 2))).toEqual(shown);
+  });
+
+  it("once the server holds it, laying the tick over again adds nothing twice", () => {
+    const tick = queueTick([], "c", true, 1);
+    const saved = { ...applyDone(serverWeek(), "c", true), totalMinutes: 107 };
+    expect(overlay(saved, tick).totalMinutes).toBe(107);
+    expect(overlay(saved, []).totalMinutes).toBe(107);
+  });
+
+  it("a tick carries the time the drill really took, and that is what it adds", () => {
+    // drill c is planned at 7 minutes; it took 4m10s
+    const shown = overlay(serverWeek(), queueTick([], "c", true, 1, 250));
+    expect(shown.totalMinutes).toBe(104);
+    expect(shown.sessions[1].drills[0]).toMatchObject({ completed: true, trained: 4 });
+    // ticked off in a few seconds: done, and nothing added
+    const quick = overlay(serverWeek(), queueTick([], "c", true, 1, 12));
+    expect(quick.totalMinutes).toBe(100);
+    expect(quick.sessions[1].drills[0]).toMatchObject({ completed: true, trained: 0 });
+    // left open all night: capped at twice the plan
+    expect(overlay(serverWeek(), queueTick([], "c", true, 1, 30000)).totalMinutes).toBe(114);
+    // unticking a done drill takes back exactly what it had added
+    expect(applyDone(shown, "c", false).totalMinutes).toBe(100);
+  });
+
+  it("no answer keeps the tick; only an answer removes it", () => {
+    const list = queueTick([], "c", true, 1);
+    const sent = list[0];
+    expect(settle(list, sent, "retry")).toEqual([{ ...sent, tries: 1 }]);
+    expect(settle(list, sent, "saved")).toEqual([]);
+    expect(settle(list, sent, "refused")).toEqual([]);
+  });
+
+  it("a tap made while the first was on its way is kept whatever the answer", () => {
+    const first = queueTick([], "c", true, 1)[0];
+    const now = queueTick([first], "c", false, 2);
+    expect(settle(now, first, "saved")).toEqual(now);
+    expect(settle(now, first, "refused")).toEqual(now);
+  });
+
+  it("no signal, a busy server or a session being renewed mean send again", () => {
+    for (const status of [0, 401, 408, 429, 500, 502, 503, 504]) expect(outcomeOf(status), String(status)).toBe("retry");
+    for (const status of [400, 403, 404, 409, 422]) expect(outcomeOf(status), String(status)).toBe("refused");
+  });
+
+  it("waits a little longer each time, and never gives up", () => {
+    expect([0, 1, 2, 3, 4, 5, 50].map(retryDelayMs)).toEqual([2000, 5000, 15000, 30000, 60000, 60000, 60000]);
+  });
+
+  it("reads back only well-formed ticks from the phone's storage", () => {
+    expect(parseTicks(null)).toEqual([]);
+    expect(parseTicks("not json")).toEqual([]);
+    expect(parseTicks(JSON.stringify({ id: "c" }))).toEqual([]);
+    expect(parseTicks(JSON.stringify([{ id: "c", completed: true, at: 5, tries: 9 }, { id: 1 }, null]))).toEqual([{ id: "c", completed: true, at: 5, tries: 0 }]);
+  });
+
+  it("says what is true about saving, in plain words", () => {
+    for (const line of [UNSENT_LINE, REFUSED_LINE]) {
+      expect(line).not.toMatch(/\u2014|sync|queue|outbox|error|server|retry/i);
+      expect(line.endsWith(".")).toBe(true);
+    }
+  });
+});

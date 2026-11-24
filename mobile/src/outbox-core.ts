@@ -10,5 +10,5 @@ export * from "@shared/tick-outbox";
 
 // The server's week as this phone should show it.
 export function overlay(week: AppWeek, list: readonly Tick[]): AppWeek {
-  return list.reduce((w, t) => applyDone(w, t.id, t.completed), week);
+  return list.reduce((w, t) => applyDone(w, t.id, t.completed, t.seconds), week);
 }

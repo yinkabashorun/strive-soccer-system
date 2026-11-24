@@ -2,8 +2,9 @@
 
 import { useCallback, useMemo, useState } from "react";
 import type { Homework } from "@/lib/elite/types";
-import { drillMinutes, isDone, type DoneMap } from "@/lib/elite/session-flow";
-import { tickOnWeb, useWebConfirmed, useWebTicks } from "./web-ticks";
+import { doneMinutes, type DoneMap, type TrainedMap } from "@/lib/elite/session-flow";
+import { creditedMinutes } from "@/lib/elite/time-trained";
+import { tickOnWeb, useWebConfirmed, useWebMeasured, useWebTicks } from "./web-ticks";
 
 // The player's ticks, kept on the screen first and saved behind it, so a
 // tap answers instantly. Shared by the home card and the week list, which
@@ -18,9 +19,12 @@ export function useDrillState() {
   const unsent = useWebTicks();
   const confirmed = useWebConfirmed();
 
-  const toggle = useCallback((id: string, next: boolean) => {
+  // `seconds`: the time the drill really took, from the session player's
+  // clock. `trained` is that time for every drill ticked in this browser.
+  const trained: TrainedMap = useWebMeasured();
+  const toggle = useCallback((id: string, next: boolean, seconds?: number) => {
     setTapped((s) => ({ ...s, [id]: next }));
-    tickOnWeb(id, next);
+    tickOnWeb(id, next, seconds);
   }, []);
 
   // oldest knowledge first: what the server confirmed since the page was
@@ -29,17 +33,17 @@ export function useDrillState() {
     () => ({ ...confirmed, ...Object.fromEntries(unsent.map((t) => [t.id, t.completed])), ...tapped }),
     [confirmed, unsent, tapped]
   );
-  return { done, toggle };
+  return { done, toggle, trained };
 }
 
 // All-time minutes as the screen knows them right now: the server's total
-// with this week's rows re-counted from the player's own ticks.
-export function liveMinutes(totalMinutes: number, weekRows: Homework[], done: DoneMap): number {
+// with this week's rows re-counted from the player's own ticks, each at the
+// time it really took (doneMinutes).
+export function liveMinutes(totalMinutes: number, weekRows: Homework[], done: DoneMap, trained: TrainedMap = {}): number {
   let total = totalMinutes;
   for (const h of weekRows) {
-    const m = drillMinutes(h);
-    if (h.completed) total -= m;
-    if (isDone(h, done)) total += m;
+    total -= creditedMinutes(h);
+    total += doneMinutes(h, done, trained);
   }
   return Math.max(0, total);
 }

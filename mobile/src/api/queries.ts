@@ -112,7 +112,7 @@ export function useExtra(enabled: boolean) {
 // A drill done (or undone): on screen at once, kept on the phone and sent
 // until the server answers (src/outbox.ts). Never sent once and forgotten.
 export function useToggleDrill() {
-  return { mutate: (v: { id: string; completed: boolean }) => tickDrill(v.id, v.completed) };
+  return { mutate: (v: { id: string; completed: boolean; seconds?: number }) => tickDrill(v.id, v.completed, v.seconds) };
 }
 
 export function useAddExtra() {

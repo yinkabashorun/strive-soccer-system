@@ -47,7 +47,7 @@ export default function You() {
       ) : (
         <>
           <View style={styles.ringRow}>
-            <Ring size={132} stroke={10} value={y.weekMinutesPlanned > 0 ? y.weekMinutesDone / y.weekMinutesPlanned : 0}>
+            <Ring size={132} stroke={10} value={y.weekMinutesPlanned > 0 ? Math.min(1, y.weekMinutesDone / y.weekMinutesPlanned) : 0}>
               <Head size={28}>{fmtDuration(y.weekMinutesDone)}</Head>
               <Body dim size={11.5}>this week</Body>
             </Ring>

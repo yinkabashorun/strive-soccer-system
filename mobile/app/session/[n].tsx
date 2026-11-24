@@ -16,6 +16,8 @@ import { afterSessionLine, milestoneCrossed, milestoneLabel, nextStep } from "@s
 import { parseReps } from "@shared/set-timer";
 import { fmtDuration } from "@shared/time-trained";
 import type { AppSession, AppWeek } from "@shared/app-contract";
+import { newClock, resetDrill, secondsOn, showDrill } from "@shared/drill-clock";
+import { cappedSeconds, creditedMinutes } from "@shared/time-trained";
 import { useMe, useToggleDrill, useWeek } from "@/api/queries";
 import { useRefused, useTicks } from "@/outbox";
 import { REFUSED_LINE, UNSENT_LINE } from "@/outbox-core";
@@ -72,8 +74,11 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
   );
   const [count, setCount] = useState<CountInState>("intro");
   const [timerOpen, setTimerOpen] = useState(false);
-  // The minutes this sitting adds: the drills ticked since the session opened.
-  const doneHere = useRef(new Set<string>());
+  // The ACTUAL minutes this sitting adds: for each drill ticked since the
+  // session opened, the time it really took (the clock below), counted by
+  // the server's own rule.
+  const doneHere = useRef(new Map<string, number>());
+  const clock = useRef(newClock());
   const [finish, setFinish] = useState<{ added: number; weekDone: boolean; left: number } | null>(null);
 
   // The count-in: the session's name, then 3, 2, 1 with a tap felt on each.
@@ -92,6 +97,11 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
   }, [phase, count]);
 
   const drill = drills[index];
+  // the clock runs for the drill that is on screen, and for nothing else
+  const onScreen = phase === "drill" && drill ? drill.id : null;
+  useEffect(() => {
+    clock.current = showDrill(clock.current, onScreen, Date.now());
+  }, [onScreen]);
   const skills = drills.filter((d) => d.kind === "skill");
   const plan = useMemo(() => (drill ? parseReps(drill.reps) : null), [drill]);
 
@@ -99,14 +109,17 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
     if (!drill) return;
     if (!drill.completed) {
       feel("drill");
-      doneHere.current.add(drill.id);
-      toggle.mutate({ id: drill.id, completed: true });
+      const now = Date.now();
+      const seconds = secondsOn(clock.current, drill.id, now);
+      clock.current = resetDrill(clock.current, drill.id, now);
+      doneHere.current.set(drill.id, creditedMinutes({ completed: true, actual_seconds: cappedSeconds(seconds, drill.minutes) }));
+      toggle.mutate({ id: drill.id, completed: true, seconds });
     }
     const doneMap = Object.fromEntries(drills.map((d) => [d.id, d.id === drill.id ? true : d.completed]));
     // nextStep reads only each row's id and completed (lib/elite/session-flow.ts)
     const next = nextStep(drills as unknown as Parameters<typeof nextStep>[0], doneMap, index);
     if (next === -1) {
-      const added = drills.filter((d) => doneHere.current.has(d.id)).reduce((sum, d) => sum + d.minutes, 0);
+      const added = [...doneHere.current.values()].reduce((sum, m) => sum + m, 0);
       const plan = week.sessions.filter((s) => !s.extra);
       const left = plan.filter((s) => !s.complete && s.n !== session.n).length;
       const weekDone = !session.extra && left === 0;
@@ -224,7 +237,11 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
       </View>
       {drill?.completed ? (
         <Pressable
-          onPress={() => toggle.mutate({ id: drill.id, completed: false })}
+          onPress={() => {
+            doneHere.current.delete(drill.id);
+            clock.current = resetDrill(clock.current, drill.id, Date.now());
+            toggle.mutate({ id: drill.id, completed: false });
+          }}
           style={[styles.undo, { bottom: insets.bottom + 88 }]}
           accessibilityRole="button"
         >

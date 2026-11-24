@@ -21,10 +21,53 @@ export function realMinutes(v: unknown): number | null {
   return typeof v === "number" && Number.isInteger(v) && v >= MINUTES_MIN && v <= MINUTES_MAX ? v : null;
 }
 
+// ---------------------------------------------------------------------
+// MINUTES TRAINED ARE THE ACTUAL MINUTES (Nov 24 2026, Coach Yinka:
+// "Minutes trained should be ACTUAL minutes trained").
+//
+// The session player times each drill: from the moment it comes on screen
+// to the tap on Done, on the phone and on the website. That measured time
+// is stored on the drill's row (elite_homework.actual_seconds, migration
+// 085) and is what every total here adds up: time trained, the week, the
+// bars, time by area, the hours medals, the coach's numbers.
+//
+// Three rules, the same in the database (085):
+//   - a drill counts the whole minutes it really took (rounded to the
+//     nearest minute); one ticked off in a few seconds counts nothing
+//   - one drill never counts more than ACTUAL_CAP_FACTOR times the minutes
+//     the plan gives it, so a phone left open overnight is not five hours
+//   - a drill finished BEFORE the app measured time (or from an app build
+//     that does not send it) has no measured time. It keeps the minutes the
+//     plan gave it: the only figure there is, and taking it away would make
+//     a total go down, which nothing here ever does.
+// The minutes written on a drill by the plan (duration_min) are now only
+// the PLAN: "4 drills, 22 min" on a session card, the grey of the ring.
+// ---------------------------------------------------------------------
+export const ACTUAL_CAP_FACTOR = 2;
+
+// The measured time that is kept for a drill: whole seconds, never under
+// zero, never over the cap. null when nothing was measured.
+export function cappedSeconds(seconds: unknown, plannedMinutes: number): number | null {
+  if (typeof seconds !== "number" || !Number.isFinite(seconds) || seconds < 0) return null;
+  return Math.min(Math.round(seconds), Math.max(1, plannedMinutes) * 60 * ACTUAL_CAP_FACTOR);
+}
+
+// Whole minutes for a measured time.
+export function minutesOfSeconds(seconds: number): number {
+  return Math.round(seconds / 60);
+}
+
+// THE one rule for what a drill adds to time trained.
+export function creditedMinutes(h: { completed?: boolean | null; duration_min?: number | null; actual_seconds?: number | null }): number {
+  if (!h.completed) return 0;
+  if (typeof h.actual_seconds === "number") return minutesOfSeconds(h.actual_seconds);
+  return h.duration_min ?? DEFAULT_DRILL_MIN;
+}
+
 export type PillarMinutes = { pillar: string; minutes: number };
 
 export type TimeTrained = {
-  minutes: number; // every completed drill, every week, extras included
+  minutes: number; // the actual minutes of every completed drill, every week, extras included
   sessions: number; // (week, session) groups with every drill completed
   weeks: number; // distinct weeks with at least one completed drill
   byPillar: PillarMinutes[]; // completed minutes per pillar, largest first
@@ -38,7 +81,7 @@ export function timeTrained(rows: Homework[]): TimeTrained {
   const pillars = new Map<string, number>();
   let lastActive: string | null = null;
   for (const h of completed) {
-    const m = h.duration_min ?? DEFAULT_DRILL_MIN;
+    const m = creditedMinutes(h);
     minutes += m;
     weeks.add(h.week);
     if (h.pillar) pillars.set(h.pillar, (pillars.get(h.pillar) ?? 0) + m);
@@ -67,7 +110,7 @@ export function timeTrained(rows: Homework[]): TimeTrained {
 export function weekMinutes(rows: Homework[], week: number): number {
   return rows
     .filter((h) => h.week === week && h.completed)
-    .reduce((s, h) => s + (h.duration_min ?? DEFAULT_DRILL_MIN), 0);
+    .reduce((s, h) => s + creditedMinutes(h), 0);
 }
 
 // "4h 20m" / "45m" / "0m" - the one way time trained is written anywhere
@@ -111,7 +154,7 @@ export function timeByArea(rows: Homework[], week: number): AreaMinutes[] {
   for (const h of rows) {
     if (!h.completed || !h.pillar) continue;
     const area = areaName(h.pillar);
-    const m = h.duration_min ?? DEFAULT_DRILL_MIN;
+    const m = creditedMinutes(h);
     const a = areas.get(area) ?? { area, minutes: 0, thisWeek: 0 };
     a.minutes += m;
     if (h.week === week) a.thisWeek += m;

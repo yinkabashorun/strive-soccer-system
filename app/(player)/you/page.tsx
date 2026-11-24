@@ -9,7 +9,8 @@ import { cardName, cardTierLabel, hoursMedals, memberSinceLabel, weeklyMinutes }
 import { fmtDuration, timeByArea, timeTrained } from "@/lib/elite/time-trained";
 import { TimeByArea } from "@/components/elite/TimeByArea";
 import { liveWeekFor } from "@/lib/elite/time";
-import { DEFAULT_DRILL_MIN } from "@/lib/elite/time-trained";
+import { creditedMinutes } from "@/lib/elite/time-trained";
+import { drillMinutes } from "@/lib/elite/session-flow";
 import { photoAddress } from "@/lib/elite/account-profile";
 import { atName } from "@/lib/elite/username";
 
@@ -35,8 +36,8 @@ export default async function YouPage() {
   const week = Math.max(1, Math.min(live, maxBuilt || 1));
   const time = timeTrained(homework.filter((h) => h.week <= live));
   const thisWeek = homework.filter((h) => h.week === week);
-  const weekPlanned = thisWeek.reduce((s, h) => s + (h.duration_min ?? DEFAULT_DRILL_MIN), 0);
-  const weekDone = thisWeek.filter((h) => h.completed).reduce((s, h) => s + (h.duration_min ?? DEFAULT_DRILL_MIN), 0);
+  const weekPlanned = thisWeek.reduce((s, h) => s + drillMinutes(h), 0);
+  const weekDone = thisWeek.reduce((s, h) => s + creditedMinutes(h), 0);
   const bars = weeklyMinutes(homework, week, 7);
   const medals = hoursMedals(time.minutes, 4);
   const name = cardName(player.full_name);

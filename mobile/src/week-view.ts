@@ -36,10 +36,10 @@ export function weekRows(w: Pick<AppWeek, "sessions" | "current">): WeekRow[] {
   });
 }
 
-// Minutes of the drills ticked off this week, extra sessions included.
+// The actual minutes of the drills done this week, extra sessions included.
 export function weekMinutesDone(sessions: readonly AppSession[]): number {
   let m = 0;
-  for (const s of sessions) for (const d of s.drills) if (d.completed) m += d.minutes;
+  for (const s of sessions) for (const d of s.drills) if (d.completed) m += d.trained ?? 0;
   return m;
 }
 
@@ -74,7 +74,10 @@ export function nextCard(s: AppSession): { eyebrow: string; line: string; button
 // The line on a session that is not the big card.
 export function rowLine(s: AppSession, state: RowState): string {
   const what = s.headline ? `${s.headline} · ` : "";
-  return state === "done" ? `${what}${s.minutesTotal} min` : `${what}${count(s.total, "drill", "drills")} · ${s.minutesTotal} min`;
+  if (state !== "done") return `${what}${count(s.total, "drill", "drills")} · ${s.minutesTotal} min`;
+  // a finished session shows the time it really took
+  const trained = s.drills.reduce((m, d) => m + (d.completed ? d.trained ?? 0 : 0), 0);
+  return `${what}${trained} min`;
 }
 
 // The drill stills on the big card: five at most, then "+N".

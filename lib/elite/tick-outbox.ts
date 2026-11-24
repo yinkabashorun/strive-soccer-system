@@ -24,13 +24,16 @@
 // (components/elite/web-ticks.ts). Pure: no storage and no network here.
 // Tested in tests/session-tracking.test.ts and mobile/tests/logic.test.ts.
 
-export type Tick = { id: string; completed: boolean; at: number; tries: number };
+// `seconds`: the time the drill really took, measured by the session player
+// (only on a tick that marks a drill done).
+export type Tick = { id: string; completed: boolean; at: number; tries: number; seconds?: number };
 export type Outcome = "saved" | "refused" | "retry";
 
 // The newest tap on a drill is the one that counts: Done then Undo before
 // the first was sent leaves one tick, the Undo.
-export function queueTick(list: readonly Tick[], id: string, completed: boolean, at: number): Tick[] {
-  return [...list.filter((t) => t.id !== id), { id, completed, at, tries: 0 }];
+export function queueTick(list: readonly Tick[], id: string, completed: boolean, at: number, seconds?: number): Tick[] {
+  const measured = completed && typeof seconds === "number" && Number.isFinite(seconds) && seconds >= 0 ? { seconds: Math.round(seconds) } : {};
+  return [...list.filter((t) => t.id !== id), { id, completed, at, tries: 0, ...measured }];
 }
 
 // What an answer to a send means. A status of 0 is "no answer at all".
@@ -63,7 +66,7 @@ export function parseTicks(raw: string | null): Tick[] {
     if (!Array.isArray(v)) return [];
     return v.flatMap((t) =>
       t && typeof t.id === "string" && typeof t.completed === "boolean" && typeof t.at === "number"
-        ? [{ id: t.id, completed: t.completed, at: t.at, tries: 0 }]
+        ? [{ id: t.id, completed: t.completed, at: t.at, tries: 0, ...(t.completed && typeof t.seconds === "number" && t.seconds >= 0 ? { seconds: t.seconds } : {}) }]
         : []
     );
   } catch {

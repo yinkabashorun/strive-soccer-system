@@ -67,6 +67,7 @@ function week(): AppWeek {
     how: "",
     notes: null,
     minutes,
+    trained: completed ? minutes : 0,
     video: null,
     poster: null,
     completed,
@@ -421,6 +422,7 @@ describe("the Week tab's path", () => {
     how: "",
     notes: null,
     minutes,
+    trained: completed ? minutes : 0,
     video: null,
     poster: `https://example.test/${id}.jpg`,
     completed,
@@ -496,7 +498,7 @@ describe("the Week tab's path", () => {
 // never counted as saved when it is not.
 describe("a drill ticked on the phone", () => {
   const d = (id: string, minutes: number, completed: boolean): AppDrill => ({
-    id, title: id, name: id, kind: "skill", kindLabel: "Drill", reps: "", how: "", notes: null, minutes, video: null, poster: null, completed,
+    id, title: id, name: id, kind: "skill", kindLabel: "Drill", reps: "", how: "", notes: null, minutes, trained: completed ? minutes : 0, video: null, poster: null, completed,
   });
   const serverWeek = (): AppWeek => {
     const s1 = [d("a", 5, true), d("b", 6, true)];
@@ -532,6 +534,21 @@ describe("a drill ticked on the phone", () => {
     const saved = { ...applyDone(serverWeek(), "c", true), totalMinutes: 107 };
     expect(overlay(saved, tick).totalMinutes).toBe(107);
     expect(overlay(saved, []).totalMinutes).toBe(107);
+  });
+
+  it("a tick carries the time the drill really took, and that is what it adds", () => {
+    // drill c is planned at 7 minutes; it took 4m10s
+    const shown = overlay(serverWeek(), queueTick([], "c", true, 1, 250));
+    expect(shown.totalMinutes).toBe(104);
+    expect(shown.sessions[1].drills[0]).toMatchObject({ completed: true, trained: 4 });
+    // ticked off in a few seconds: done, and nothing added
+    const quick = overlay(serverWeek(), queueTick([], "c", true, 1, 12));
+    expect(quick.totalMinutes).toBe(100);
+    expect(quick.sessions[1].drills[0]).toMatchObject({ completed: true, trained: 0 });
+    // left open all night: capped at twice the plan
+    expect(overlay(serverWeek(), queueTick([], "c", true, 1, 30000)).totalMinutes).toBe(114);
+    // unticking a done drill takes back exactly what it had added
+    expect(applyDone(shown, "c", false).totalMinutes).toBe(100);
   });
 
   it("no answer keeps the tick; only an answer removes it", () => {

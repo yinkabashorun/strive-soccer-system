@@ -57,8 +57,9 @@ export async function loadOutbox(): Promise<void> {
   void sendOutbox();
 }
 
-export function tickDrill(id: string, completed: boolean): void {
-  ticks = queueTick(ticks, id, completed, Date.now());
+// `seconds`: the time the drill really took, from the session player.
+export function tickDrill(id: string, completed: boolean, seconds?: number): void {
+  ticks = queueTick(ticks, id, completed, Date.now(), seconds);
   if (refused.includes(id)) refused = refused.filter((r) => r !== id);
   save();
   emit();
@@ -88,11 +89,11 @@ export async function sendOutbox(): Promise<void> {
       try {
         const res = await api<{ ok: true; totalMinutes: number }>(APP_API.drill, {
           method: "POST",
-          body: { id: next.id, completed: next.completed },
+          body: { id: next.id, completed: next.completed, ...(next.seconds !== undefined ? { seconds: next.seconds } : {}) },
         });
         // The phone's copy of the week takes in what the server now holds.
         const week = queryClient.getQueryData<AppWeek>(WEEK_KEY);
-        if (week) queryClient.setQueryData(WEEK_KEY, { ...applyDone(week, next.id, next.completed), totalMinutes: res.totalMinutes });
+        if (week) queryClient.setQueryData(WEEK_KEY, { ...applyDone(week, next.id, next.completed, next.seconds), totalMinutes: res.totalMinutes });
         ticks = settle(ticks, next, "saved");
         void queryClient.invalidateQueries({ queryKey: YOU_KEY });
       } catch (e) {

@@ -19,6 +19,10 @@ let refused: string[] = [];
 // were read before that, so the screen keeps the tick from here.
 let confirmed: Record<string, boolean> = {};
 const NOTHING: Record<string, boolean> = {};
+// The time each drill ticked in this browser really took (the session
+// player's clock), kept after the save so the screen's minutes stay true.
+let measured: Record<string, number> = {};
+const UNMEASURED: Record<string, number> = {};
 let loaded = false;
 let sending = false;
 let timer: ReturnType<typeof setTimeout> | null = null;
@@ -45,6 +49,7 @@ function load() {
   }
   const made = new Set(ticks.map((t) => t.id));
   ticks = [...stored.filter((t) => !made.has(t.id)), ...ticks];
+  for (const t of ticks) if (t.completed && t.seconds !== undefined && measured[t.id] === undefined) measured = { ...measured, [t.id]: t.seconds };
   window.addEventListener("online", () => void sendWebTicks());
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") void sendWebTicks();
@@ -74,9 +79,19 @@ export function useWebConfirmed(): Record<string, boolean> {
   return useSyncExternalStore(subscribe, () => confirmed, () => NOTHING);
 }
 
-export function tickOnWeb(id: string, completed: boolean): void {
+// Seconds measured for the drills ticked in this browser, by drill id.
+export function useWebMeasured(): Record<string, number> {
+  return useSyncExternalStore(subscribe, () => measured, () => UNMEASURED);
+}
+
+// `seconds`: the time the drill really took, from the session player.
+export function tickOnWeb(id: string, completed: boolean, seconds?: number): void {
   load();
-  ticks = queueTick(ticks, id, completed, Date.now());
+  ticks = queueTick(ticks, id, completed, Date.now(), seconds);
+  const kept = { ...measured };
+  delete kept[id];
+  const now = ticks[ticks.length - 1];
+  measured = now.seconds !== undefined ? { ...kept, [id]: now.seconds } : kept;
   if (refused.includes(id)) refused = refused.filter((r) => r !== id);
   save();
   emit();
@@ -96,7 +111,7 @@ export async function sendWebTicks(): Promise<void> {
       if (!next) return;
       let outcome: Outcome;
       try {
-        const res = await toggleHomework(next.id, next.completed);
+        const res = await toggleHomework(next.id, next.completed, next.seconds);
         outcome = res.ok ? "saved" : res.again ? "retry" : "refused";
       } catch {
         outcome = "retry"; // no answer at all

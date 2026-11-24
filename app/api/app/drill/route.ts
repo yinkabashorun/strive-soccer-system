@@ -20,6 +20,8 @@ export const POST = appRoute({ name: "drill", access: "member" }, async ({ req, 
   const id = typeof body?.id === "string" && UUID.test(body.id) ? body.id : null;
   if (!id || typeof body?.completed !== "boolean") return appJson({ error: "bad_request" }, 400);
   const completed = body.completed;
+  // the time the drill really took, from the session player's own clock
+  const seconds = typeof body.seconds === "number" && Number.isFinite(body.seconds) && body.seconds >= 0 ? body.seconds : undefined;
 
   // The row must be this member's own before anything is written.
   const supabase = createClient();
@@ -30,7 +32,7 @@ export const POST = appRoute({ name: "drill", access: "member" }, async ({ req, 
 
   // 503 = "not saved, ask again" (the phone keeps the tick and resends);
   // 409 = "not saved, and asking again will not change that".
-  const wrote = await toggleHomework(id, completed);
+  const wrote = await toggleHomework(id, completed, seconds);
   if (!wrote.ok) return appJson({ error: "not_saved" }, wrote.again ? 503 : 409);
 
   // Read back, so the phone is told what the database holds, not what was asked.

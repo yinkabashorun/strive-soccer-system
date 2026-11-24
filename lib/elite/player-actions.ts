@@ -19,6 +19,7 @@ import { NOT_IN_PLAN_MESSAGE } from "./tiers";
 import { memberHasFeature } from "./pro-server";
 
 import type { OnboardingInput } from "./onboarding-input";
+import { MINUTES_MAX, cappedSeconds } from "./time-trained";
 export type { OnboardingInput } from "./onboarding-input";
 
 // Complete a player's intake. Players cannot UPDATE their own elite_players
@@ -89,7 +90,11 @@ export async function completeOnboarding(input: OnboardingInput) {
 
 // Toggle a homework item's completion. Persists to Supabase in real mode;
 // a safe no-op in demo mode (the UI keeps optimistic state).
-export async function toggleHomework(id: string, completed: boolean) {
+// `seconds`: the time the drill really took, measured by the session player
+// (Nov 24 2026: minutes trained are the ACTUAL minutes). Kept on the row as
+// actual_seconds; the database holds the cap (migration 085). A drill
+// unticked loses its measured time with its tick.
+export async function toggleHomework(id: string, completed: boolean, seconds?: number) {
   const supabase = createClient();
   // the signed-out example tour ticks drills on its own screen and saves nothing
   if (supabase && (await getViewer())?.demo) return { ok: true as const };
@@ -103,6 +108,7 @@ export async function toggleHomework(id: string, completed: boolean) {
       .update({
         completed,
         completed_at: completed ? new Date().toISOString() : null,
+        actual_seconds: completed ? cappedSeconds(seconds, MINUTES_MAX) : null,
       })
       .eq("id", id)
       .neq("completed", completed)

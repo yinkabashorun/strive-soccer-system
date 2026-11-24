@@ -7,7 +7,7 @@
 // as time trained (a drill with no minutes counts 15), so the "+38 min"
 // a player sees when a session ends is exactly what lands on their total.
 import type { Homework } from "./types";
-import { DEFAULT_DRILL_MIN } from "./time-trained";
+import { DEFAULT_DRILL_MIN, cappedSeconds, creditedMinutes } from "./time-trained";
 
 export type DrillKind = "warmup" | "finisher" | "skill";
 
@@ -41,11 +41,31 @@ export function canSendClip(title: string): boolean {
   return drillKind(title) === "skill";
 }
 
+// The minutes the PLAN gives a drill (what a session card promises).
 export function drillMinutes(h: Pick<Homework, "duration_min">): number {
   return h.duration_min ?? DEFAULT_DRILL_MIN;
 }
 
 export type DoneMap = Record<string, boolean | undefined>;
+
+// Seconds measured on this device for drills ticked on it (the session
+// player's own clock), by drill id.
+export type TrainedMap = Record<string, number | undefined>;
+
+// The ACTUAL minutes a drill adds, as the screen shows it right now: a
+// drill ticked on this device counts the time just measured (capped by the
+// same rule the server uses); one the server already holds counts what the
+// server holds (lib/elite/time-trained.ts creditedMinutes).
+export function doneMinutes(
+  h: Pick<Homework, "id" | "completed" | "duration_min" | "actual_seconds">,
+  done: DoneMap,
+  trained: TrainedMap = {}
+): number {
+  if (!isDone(h, done)) return 0;
+  const here = done[h.id] === true ? trained[h.id] : undefined;
+  if (here !== undefined) return creditedMinutes({ completed: true, actual_seconds: cappedSeconds(here, drillMinutes(h)) });
+  return creditedMinutes({ ...h, completed: true });
+}
 
 // A drill is done when the player's own tap says so; a drill the screen has
 // no tap for yet reads what the server last said.
@@ -62,7 +82,8 @@ export type SessionProgress = {
   minutesTotal: number;
 };
 
-export function sessionProgress(drills: Homework[], done: DoneMap): SessionProgress {
+// minutesTotal is the plan; minutesDone is the actual time of what is done.
+export function sessionProgress(drills: Homework[], done: DoneMap, trained: TrainedMap = {}): SessionProgress {
   let count = 0;
   let minutesDone = 0;
   let minutesTotal = 0;
@@ -72,7 +93,7 @@ export function sessionProgress(drills: Homework[], done: DoneMap): SessionProgr
     minutesTotal += m;
     if (isDone(d, done)) {
       count++;
-      minutesDone += m;
+      minutesDone += doneMinutes(d, done, trained);
     } else if (nextIndex === -1) {
       nextIndex = i;
     }

@@ -36,6 +36,8 @@ import { SetTimer } from "./SetTimer";
 import { PushOptIn, useNotificationsAsk } from "./PushOptIn";
 import { cn } from "@/lib/utils";
 import { REFUSED_LINE, UNSENT_LINE_WEB } from "@/lib/elite/tick-outbox";
+import { newClock, resetDrill, secondsOn, showDrill } from "@/lib/elite/drill-clock";
+import type { TrainedMap } from "@/lib/elite/session-flow";
 import { useWebRefused, useWebTicks } from "./web-ticks";
 
 // Where the session grows from: the Home card's box on screen.
@@ -62,6 +64,7 @@ export function SessionPlayer({
   drills,
   done,
   onToggle,
+  trained,
   startIndex,
   title,
   headline,
@@ -80,7 +83,9 @@ export function SessionPlayer({
 }: {
   drills: Homework[];
   done: DoneMap;
-  onToggle: (id: string, next: boolean) => void;
+  onToggle: (id: string, next: boolean, seconds?: number) => void;
+  // seconds measured for the drills ticked in this browser (the clock below)
+  trained?: TrainedMap;
   startIndex: number;
   title: string; // "Session 3" or "Extra session"
   headline?: string | null; // "Weak foot and ball mastery" (experience.ts sessionHeadline)
@@ -113,13 +118,21 @@ export function SessionPlayer({
     countInWanted(drills, done, startIndex) ? "intro" : null
   );
   const advance = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clock = useRef(newClock());
   const sheet = useRef<HTMLDivElement | null>(null);
   // Notifications are asked for once, on its own screen after the finish
   // screen of a member's own session (A8). Never the example player.
   const { ask, shown } = useNotificationsAsk(Boolean(playerId) && !example);
   const [asking, setAsking] = useState(false);
 
-  const progress = useMemo(() => sessionProgress(drills, done), [drills, done]);
+  const progress = useMemo(() => sessionProgress(drills, done, trained), [drills, done, trained]);
+
+  // The clock runs for the drill that is on screen and for nothing else:
+  // not the count-in, not the finish, not the notifications ask.
+  const onScreen = !finished && !asking && countIn === null ? drills[index]?.id ?? null : null;
+  useEffect(() => {
+    clock.current = showDrill(clock.current, onScreen, Date.now());
+  }, [onScreen]);
 
   useEffect(() => {
     setMounted(true);
@@ -206,7 +219,11 @@ export function SessionPlayer({
       return;
     }
     const after: DoneMap = { ...done, [drill.id]: true };
-    onToggle(drill.id, true);
+    // the time this drill really took, from the moment it came on screen
+    const now = Date.now();
+    const seconds = secondsOn(clock.current, drill.id, now);
+    clock.current = resetDrill(clock.current, drill.id, now);
+    onToggle(drill.id, true, seconds);
     setJustTicked(true);
     const n = nextStep(drills, after, index);
     if (n === -1) {
@@ -224,6 +241,7 @@ export function SessionPlayer({
   }
 
   function undo() {
+    clock.current = resetDrill(clock.current, drill.id, Date.now());
     onToggle(drill.id, false);
     setJustTicked(false);
   }
@@ -253,7 +271,7 @@ export function SessionPlayer({
       weekLabel={weekLabel}
       firstName={firstName}
       sessionsTotal={sessionsTotal}
-      minutes={progress.minutesTotal}
+      minutes={progress.minutesDone}
       minutesBefore={minutesBefore}
       sessionsLeftAfter={sessionsLeftAfter}
       weekDoneLine={weekDoneLine}

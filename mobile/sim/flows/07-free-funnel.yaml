@@ -42,7 +42,28 @@ appId: com.strivesoccer.elite
 - tapOn: "Email"
 - inputText: "marcus@example.com"
 - tapOn: "Phone, so a coach can reach you"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: t24b-join-phone-focused
 - inputText: "7035550100"
+# The number pad: on this simulator typed text has not always reached it
+# (run of Nov 24 2026 left the box empty). When it has not, the pad's own
+# keys are tapped, the way a player's thumb does it.
+- runFlow:
+    when:
+      notVisible: "7035550100"
+    commands:
+      - tapOn: "7"
+      - tapOn: "0"
+      - tapOn: "3"
+      - tapOn: "5"
+      - tapOn: "5"
+      - tapOn: "5"
+      - tapOn: "0"
+      - tapOn: "1"
+      - tapOn: "0"
+      - tapOn: "0"
+- takeScreenshot: t24c-join-phone-typed
 - tapOn: "Next"
 - extendedWaitUntil:
     visible: "Password"

@@ -20,6 +20,7 @@ import { lessonBlocks } from "@shared/app-courses";
 import type { FreeStage } from "@shared/free-intake";
 import { auraLabel, friendsBoard, type Face } from "@shared/tracker";
 import { MEDIA_BASE } from "@/config";
+import { buildSquad } from "@shared/squad-pass";
 
 // The example player the screens are drawn with for review screenshots
 // (EXPO_PUBLIC_FIXTURES=1): the browser build (scripts/screenshots.mjs) and
@@ -533,6 +534,7 @@ const TARGET = 240;
 export const FIXTURE_OFFER: Omit<AppOffer, "later"> = {
   card: { name: "Marcus B.", tier: "Pro" },
   headline: "Marcus, your first week goes after your weak foot and first touch.",
+  parent: { label: "Send to a parent", text: "Can you look at this for me? It is the soccer training I want to do. https://thestriveapp.com/pro/for/exampleexampleexampleexamp" },
   drillsLabel: "Inside your first week",
   drills: [
     { poster: m("/drills/posters/weak-foot-tap-pull-push.jpg") },
@@ -601,6 +603,13 @@ function fixtureFeed(): AppFreeFeed {
     requests: l.posted ? [] : [{ id: "r-kai", name: "Kai M.", initials: "KM" }],
     week: { minutes, target: TARGET, percent: Math.round((minutes / TARGET) * 100) },
     invite: "https://thestriveapp.com/join?ref=EXAMPLE2",
+    // bring your squad: one teammate trained, one joined and has not posted
+    squad: buildSquad({
+      trained: [{ id: "t1", name: "Diego R." }],
+      joined: [{ id: "t2", name: "Kai M." }],
+      passes: [],
+      runningUntil: null,
+    }),
   };
 }
 

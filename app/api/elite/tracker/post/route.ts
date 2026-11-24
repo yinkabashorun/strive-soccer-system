@@ -22,6 +22,7 @@ import {
   validateMinutes,
   DAY_CAP_MESSAGE,
 } from "@/lib/elite/tracker";
+import { countTeammate } from "@/lib/elite/squad-pass-server";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -99,6 +100,9 @@ export async function POST(req: Request) {
   // Friends who have not posted today hear about it (078): one a day at
   // most, accepted friends only, never across a block, never at night.
   await noticeFriendPost(viewer.profile.id, today).catch(() => 0);
+  // Bring your squad (086): a player a teammate brought counts for that
+  // teammate on their first training post, once.
+  await countTeammate(viewer.profile.id).catch(() => undefined);
   revalidatePath(FREE_HOME);
   revalidatePath(FREE_WEEK);
   return NextResponse.json({ ok: true, id: saved.id });

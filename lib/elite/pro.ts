@@ -25,6 +25,8 @@ export const PRO_PAGE = "/pro";
 export const PRO_JOIN = "/pro/join";
 export const PRO_AFTER_PAYMENT = "/onboarding"; // the quiz, then Home
 export const PRO_SESSION_PARAM = "session_id";
+// on the page a checkout comes back to: it was a parent who paid
+export const PRO_PARENT_PARAM = "parent";
 // Where a checkout opened from inside the iPhone app comes back to: a plain
 // page in the sheet that says what happened and to close it. The sheet has
 // no sign-in of its own, so it can never be a page that needs one.
@@ -91,10 +93,15 @@ export function proCheckoutParams(input: {
   appUrl: string;
   customerId?: string | null;
   // "app": opened in a sheet over the iPhone app (PRO_APP_RETURN).
-  returnTo?: "site" | "app";
+  // "parent": opened by a parent from the link their player sent them
+  // (lib/elite/parent-link.ts); nobody is signed in on that browser.
+  returnTo?: "site" | "app" | "parent";
+  // where a parent who backs out of the checkout lands: their player's page
+  cancelPath?: string;
 }): Stripe.Checkout.SessionCreateParams {
   const base = input.appUrl.replace(/\/+$/, "");
   const inApp = input.returnTo === "app";
+  const byParent = input.returnTo === "parent";
   return {
     mode: "subscription",
     client_reference_id: input.profileId,
@@ -114,8 +121,10 @@ export function proCheckoutParams(input: {
     ...(input.customerId ? { customer: input.customerId } : { customer_email: input.email }),
     // Stripe fills in {CHECKOUT_SESSION_ID}; the quiz page reads it to
     // switch the membership on if the webhook has not landed yet.
-    success_url: `${base}${inApp ? PRO_APP_RETURN : PRO_AFTER_PAYMENT}?${PRO_SESSION_PARAM}={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${base}${inApp ? PRO_APP_RETURN : PRO_PAGE}`,
+    success_url: byParent
+      ? `${base}${PRO_APP_RETURN}?${PRO_PARENT_PARAM}=1&${PRO_SESSION_PARAM}={CHECKOUT_SESSION_ID}`
+      : `${base}${inApp ? PRO_APP_RETURN : PRO_AFTER_PAYMENT}?${PRO_SESSION_PARAM}={CHECKOUT_SESSION_ID}`,
+    cancel_url: byParent && input.cancelPath ? `${base}${input.cancelPath}` : `${base}${inApp ? PRO_APP_RETURN : PRO_PAGE}`,
   };
 }
 

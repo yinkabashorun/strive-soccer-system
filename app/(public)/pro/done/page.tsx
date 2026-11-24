@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { Wordmark } from "@/components/elite/Wordmark";
-import { PRO_SESSION_PARAM } from "@/lib/elite/pro";
+import { PRO_PARENT_PARAM, PRO_SESSION_PARAM } from "@/lib/elite/pro";
+import { PARENT_DONE } from "@/lib/elite/parent-link";
 import { confirmProSession } from "@/lib/elite/pro-server";
 import { rateLimit } from "@/lib/rate-limit";
 
@@ -26,6 +27,8 @@ export default async function ProDonePage({
 }) {
   const raw = searchParams?.[PRO_SESSION_PARAM];
   const sessionId = typeof raw === "string" ? raw : "";
+  // a parent paid from the link their player sent: there is no app to go back to
+  const byParent = searchParams?.[PRO_PARENT_PARAM] === "1";
   const ip = headers().get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
   const paid = sessionId && rateLimit(`pro-done:${ip}`, 20, 10 * 60_000) ? await confirmProSession(sessionId) : false;
 
@@ -36,11 +39,17 @@ export default async function ProDonePage({
         {paid ? "You're in." : sessionId ? "Almost there." : "No charge was made."}
       </h1>
       <p className="mt-3 max-w-sm text-[15px] leading-relaxed text-white/70">
-        {paid
-          ? "Your membership is on. Tap Done at the top to go back to the app."
-          : sessionId
-            ? "Your payment is being confirmed. Tap Done at the top to go back to the app."
-            : "Nothing was started. Tap Done at the top to go back to the app."}
+        {byParent
+          ? paid
+            ? PARENT_DONE.paid
+            : sessionId
+              ? PARENT_DONE.confirming
+              : PARENT_DONE.nothing
+          : paid
+            ? "Your membership is on. Tap Done at the top to go back to the app."
+            : sessionId
+              ? "Your payment is being confirmed. Tap Done at the top to go back to the app."
+              : "Nothing was started. Tap Done at the top to go back to the app."}
       </p>
     </div>
   );

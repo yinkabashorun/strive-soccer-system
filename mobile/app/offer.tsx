@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ScrollView, StyleSheet, View } from "react-native";
+import { ScrollView, Share, StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -142,6 +142,14 @@ export default function Offer() {
             </Body>
           ) : null}
           <Button style={{ marginTop: 12 }} label={o.start} busy={busy} onPress={() => void start()} />
+          {o.parent ? (
+            <Button
+              quiet
+              style={{ marginTop: 10 }}
+              label={o.parent.label}
+              onPress={() => void Share.share({ message: o.parent!.text }).catch(() => undefined)}
+            />
+          ) : null}
           <Press onPress={later} disabled={busy} style={styles.later} accessibilityLabel={o.later}>
             <Label dim size={15}>
               {o.later}

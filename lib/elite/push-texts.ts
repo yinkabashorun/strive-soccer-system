@@ -86,6 +86,12 @@ export function friendPostPush(first: string): PushText {
   return { title: `${first} just posted`, body: "Post yours to see it.", url: "/log" };
 }
 
+// Bring your squad (squad-pass-server.ts grantPasses): sent once, by the
+// insert that made the month, when a third teammate posts a first training.
+export function squadPassPush(): PushText {
+  return { title: "You earned a month of Strive Pro", body: "Three teammates trained. Start it when you are ready.", url: "/log" };
+}
+
 export function propsPush(first: string): PushText {
   return { title: `${first} gave you props`, body: "On your training post.", url: "/log" };
 }

@@ -226,6 +226,9 @@ export type AppYou = {
   medals: { hours: number; earned: boolean }[];
   next: { hours: number; minutesAway: number } | null;
   achievements: { id: string; title: string; detail: string }[];
+  // An earned month of Strive Pro that is running (squad-pass.ts): the line
+  // saying when it runs to, and the way to keep the weeks coming after it.
+  earned?: { line: string; parent: { label: string; text: string } | null };
 };
 
 export function youPayload(i: {

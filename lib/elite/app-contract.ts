@@ -9,6 +9,7 @@ import type { AreaMinutes } from "./time-trained";
 import type { FreeStage } from "./free-intake";
 import type { QuizStepId } from "./quiz";
 import type { BoardRow, Face, Kind, LockedCard, OpenCard, StripDay, TodayLine } from "./tracker";
+import type { Squad } from "./squad-pass";
 
 export type { AppDrill, AppSession, AppWeek, AppYou, LadderRung, AreaMinutes };
 // The Courses library (lib/elite/app-courses.ts): the shelf, and one course.
@@ -109,6 +110,7 @@ export const APP_API = {
   freeOffer: "/api/app/free/offer",
   freePlan: "/api/app/free/plan",
   freeUpgrade: "/api/app/free/upgrade",
+  freePass: "/api/app/free/pass",
   freeUpgradeConfirm: "/api/app/free/upgrade/confirm",
   freeFeed: "/api/app/free/feed",
   freePost: "/api/app/free/post",
@@ -147,6 +149,9 @@ export type AppOffer = {
   start: string;
   later: string;
   terms: string;
+  // Send to a parent (parent-link.ts): the button's words and the text it
+  // shares, with the player's own link to the page their parent pays from
+  parent?: { label: string; text: string };
 };
 
 export type AppUpgradeStart = { ok: true; url: string } | { ok: false; error: string };
@@ -178,6 +183,8 @@ export type AppFreeFeed = {
   requests: { id: string; name: string; initials: string }[];
   week: { minutes: number; target: number; percent: number };
   invite: string;
+  // Bring your squad: three teammates who train earn a month (squad-pass.ts)
+  squad?: Squad;
 };
 
 export type AppFreeWeek = {

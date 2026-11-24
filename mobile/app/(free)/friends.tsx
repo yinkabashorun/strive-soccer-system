@@ -9,6 +9,7 @@ import { LockedPost, OpenPost } from "@/FeedCards";
 import { PAGE_TOP, Screen } from "@/Screen";
 import { Body, Button, Card, Eyebrow, Hairline, Head, Label, Press, Ring, Skeleton } from "@/ui";
 import { color } from "@/theme";
+import { SquadCard } from "@/SquadCard";
 
 // Friends (the free app's first tab; the website's /log): who trained
 // today, friend requests, and the feed. A friend's post from today stays
@@ -153,7 +154,7 @@ export default function Friends() {
           <Body dim style={{ textAlign: "center", marginTop: 10 }}>
             Send your link to a teammate. When they join, accept their friend request and you see each other's training every day.
           </Body>
-          <Button quiet style={{ marginTop: 18 }} label="Send my link" onPress={invite} />
+          {f.squad ? null : <Button quiet style={{ marginTop: 18 }} label="Send my link" onPress={invite} />}
         </Card>
       ) : cards.length === 0 ? (
         <Card style={styles.empty}>
@@ -176,7 +177,10 @@ export default function Friends() {
         </View>
       )}
 
-      {f.friendCount > 0 ? (
+      {/* Bring your squad: one card, where the invite has always been. */}
+      {f.squad ? (
+        <SquadCard squad={f.squad} onSend={invite} />
+      ) : f.friendCount > 0 ? (
         <Press onPress={invite} style={styles.invite} accessibilityLabel="Send my link to a teammate">
           <Label dim size={14}>
             Send my link to a teammate

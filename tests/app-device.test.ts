@@ -493,7 +493,12 @@ describe("the offer", () => {
     expect(offer).toContain("{o.price}");
     expect(offer).toContain("label={o.start}");
     expect(offer).toContain("{o.later}");
-    expect(offer.match(/<Button\b[^>]*label=\{o\./g)?.length).toBe(1);
+    // ONE main button (Start). The only other button is the quiet "Send
+    // to a parent" (lib/elite/parent-link.ts): the same offer, for the one
+    // who pays, not a second ask of the player.
+    const buttons = offer.match(/<Button\b[\s\S]*?\/>/g)?.filter((b) => /label=\{o\./.test(b)) ?? [];
+    expect(buttons.filter((b) => !/\bquiet\b/.test(b))).toHaveLength(1);
+    expect(buttons.filter((b) => /\bquiet\b/.test(b)).map((b) => /label=\{(o\.[\w.]+)\}/.exec(b)?.[1])).toEqual(["o.parent.label"]);
     expect(offer).not.toMatch(/countdown|left today|spots|guarantee|\d+% off|testimonial/i);
   });
   it("opens the checkout in the sheet over the app, then asks the server what happened", () => {

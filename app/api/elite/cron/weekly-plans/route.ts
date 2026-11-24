@@ -3,6 +3,7 @@ import { runPlanBuilder } from "@/lib/elite/auto-plan";
 import { createServiceClient } from "@/lib/elite/supabase/server";
 import { unlockDueWeeks } from "@/lib/elite/unlock";
 import { sendTrainingReminders } from "@/lib/elite/reminders-server";
+import { endDuePasses } from "@/lib/elite/squad-pass-server";
 import { isSundayEveNY, nyHour } from "@/lib/elite/time";
 
 export const runtime = "nodejs";
@@ -56,6 +57,10 @@ export async function GET(req: Request) {
   // The reminder at each member's usual time (claimed per player per day,
   // so a second run this hour sends nothing). Never on a Sunday.
   const reminders = await sendTrainingReminders().catch(() => ({ checked: 0, sent: 0 }));
+
+  // Earned months of Strive Pro whose time is up are closed (086): the
+  // account is a free account again, nothing of its own is lost.
+  await endDuePasses().catch(() => ({ ended: 0 }));
 
   if (isSundayEveNY() && nyHour() < 15) {
     return NextResponse.json({ ok: true, skipped: "sunday before 3pm ET", reminders });

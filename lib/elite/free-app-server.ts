@@ -63,6 +63,9 @@ import {
 } from "./tracker";
 import type { AppFeedCard, AppFreeFeed, AppFreePlan, AppFreeWeek, AppFreeYou, AppOffer } from "./app-contract";
 import type { Viewer } from "./session";
+import { squadFor } from "./squad-pass-server";
+import { parentLinkFor } from "./parent-link-server";
+import { PARENT_SEND, parentShareText } from "./parent-link";
 
 // The areas this player's first week would go after and a few of its
 // drills, from their own ratings and the filmed bank (weekPreview).
@@ -80,7 +83,7 @@ function sessionsFrom(answers: FreeAnswers): number {
 }
 
 export async function offerFor(viewer: Viewer, answers: FreeAnswers, stage: FreeStage): Promise<AppOffer> {
-  const preview = await previewFor(answers);
+  const [preview, link] = await Promise.all([previewFor(answers), parentLinkFor(viewer.profile.id).catch(() => null)]);
   return {
     card: { name: cardName(viewer.profile.full_name), tier: OFFER_CARD_TIER },
     headline: offerHeadline(firstNameOf(viewer.profile.full_name), preview.areas),
@@ -95,6 +98,8 @@ export async function offerFor(viewer: Viewer, answers: FreeAnswers, stage: Free
     start: OFFER_START,
     later: stage === "ready" ? OFFER_LATER : OFFER_LATER_FIRST,
     terms: OFFER_TERMS,
+    // the player is not the one who pays: the same offer, sent to a parent
+    ...(link ? { parent: { label: PARENT_SEND, text: parentShareText(link) } } : {}),
   };
 }
 
@@ -110,10 +115,11 @@ export async function planFor(tracker: Tracker): Promise<AppFreePlan> {
 }
 
 export async function freeFeedFor(viewer: Viewer, tracker: Tracker, today: string): Promise<AppFreeFeed> {
-  const [feed, requests, logs] = await Promise.all([
+  const [feed, requests, logs, squad] = await Promise.all([
     feedFor(viewer, today),
     friendRequestsFor(viewer),
     getWeekLogs(viewer.profile.id, today),
+    squadFor(viewer.profile.id).catch(() => undefined),
   ]);
   const week = weekProgress(logs, tracker.target_minutes ?? 0, today);
   // the same cards the website draws; a locked one carries no photo of the post
@@ -128,6 +134,7 @@ export async function freeFeedFor(viewer: Viewer, tracker: Tracker, today: strin
     requests,
     week: { minutes: week.minutes, target: week.target, percent: week.percent },
     invite: joinLink(APP_URL, tracker.referral_code),
+    squad,
   };
 }
 

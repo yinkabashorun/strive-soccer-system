@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { Share, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { achievementMark } from "@shared/achievement-rules";
 import { fmtDuration } from "@shared/time-trained";
@@ -7,7 +7,7 @@ import { queryClient } from "@/api/queryClient";
 import { MemberCard } from "@/MemberCard";
 import { useMyPhoto } from "@/usePhoto";
 import { PAGE_TOP, Screen } from "@/Screen";
-import { Body, Card, Disc, Hairline, Head, Label, Medal, Ring, SettingRow, Skeleton } from "@/ui";
+import { Body, Button, Card, Disc, Hairline, Head, Label, Medal, Ring, SettingRow, Skeleton } from "@/ui";
 import { color } from "@/theme";
 
 // You (approved mock v4): the member card, this week's time in the gold
@@ -38,6 +38,20 @@ export default function You() {
           <Skeleton height={204} r={22} />
         )}
       </View>
+
+      {y?.earned ? (
+        <Card style={{ marginHorizontal: 20, marginTop: 16 }}>
+          <Body size={14}>{y.earned.line}</Body>
+          {y.earned.parent ? (
+            <Button
+              quiet
+              style={{ marginTop: 12 }}
+              label={y.earned.parent.label}
+              onPress={() => void Share.share({ message: y.earned!.parent!.text }).catch(() => undefined)}
+            />
+          ) : null}
+        </Card>
+      ) : null}
 
       {!y ? (
         <View style={{ margin: 20, gap: 14 }}>

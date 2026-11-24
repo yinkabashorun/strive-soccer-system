@@ -25,6 +25,10 @@ export const PRO_PAGE = "/pro";
 export const PRO_JOIN = "/pro/join";
 export const PRO_AFTER_PAYMENT = "/onboarding"; // the quiz, then Home
 export const PRO_SESSION_PARAM = "session_id";
+// Where a checkout opened from inside the iPhone app comes back to: a plain
+// page in the sheet that says what happened and to close it. The sheet has
+// no sign-in of its own, so it can never be a page that needs one.
+export const PRO_APP_RETURN = "/pro/done";
 export const PRO_PLAN = "pro"; // the checkout's metadata.plan
 
 // ---- Copy ---------------------------------------------------------------
@@ -86,8 +90,11 @@ export function proCheckoutParams(input: {
   email: string;
   appUrl: string;
   customerId?: string | null;
+  // "app": opened in a sheet over the iPhone app (PRO_APP_RETURN).
+  returnTo?: "site" | "app";
 }): Stripe.Checkout.SessionCreateParams {
   const base = input.appUrl.replace(/\/+$/, "");
+  const inApp = input.returnTo === "app";
   return {
     mode: "subscription",
     client_reference_id: input.profileId,
@@ -107,8 +114,8 @@ export function proCheckoutParams(input: {
     ...(input.customerId ? { customer: input.customerId } : { customer_email: input.email }),
     // Stripe fills in {CHECKOUT_SESSION_ID}; the quiz page reads it to
     // switch the membership on if the webhook has not landed yet.
-    success_url: `${base}${PRO_AFTER_PAYMENT}?${PRO_SESSION_PARAM}={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${base}${PRO_PAGE}`,
+    success_url: `${base}${inApp ? PRO_APP_RETURN : PRO_AFTER_PAYMENT}?${PRO_SESSION_PARAM}={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${base}${inApp ? PRO_APP_RETURN : PRO_PAGE}`,
   };
 }
 

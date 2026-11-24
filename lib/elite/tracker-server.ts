@@ -21,6 +21,7 @@ import type { Viewer } from "./session";
 import { shiftDay } from "./time";
 import { clubRankingFor } from "./tracker-ranking";
 import { withLine } from "./club-teams";
+import { livesInFreeApp } from "./member-gate";
 import {
   CLUB_CAP,
   CLUB_REFUSED,
@@ -79,6 +80,7 @@ import {
   type TargetRow,
   type TrainingLog,
   limitHit,
+  setUpDone,
   CLUB_REQUESTS_PENDING_MAX,
 } from "./tracker";
 import {
@@ -193,7 +195,7 @@ export async function isFreeSignupOpen(): Promise<boolean> {
 export function quizDone(
   tracker: Pick<Tracker, "quiz_done_at" | "target_minutes" | "plan_days">
 ): boolean {
-  return Boolean(tracker.quiz_done_at && tracker.target_minutes && tracker.plan_days.length > 0);
+  return setUpDone(tracker);
 }
 
 // Where this signed-in person belongs (lib/elite/tracker.ts homeFor).
@@ -210,11 +212,27 @@ export async function homePathFor(viewer: Viewer): Promise<string> {
 
 // The free account behind this viewer, or null when they do not have one.
 // The example player stands in only when there is no database at all.
+//
+// A member never sees the free app, with one exception that is the same
+// rule everywhere (lib/elite/member-gate.ts livesInFreeApp): a free account
+// that started Strive Pro and has not paid, or whose Strive Pro ended, is
+// still a free account. Its member row is read only then, so an ordinary
+// member costs no extra read.
 export async function trackerFor(viewer: Viewer): Promise<Tracker | null> {
   if (viewer.role !== "player") return null;
   if (viewer.demo) return isSupabaseConfigured() ? null : demoTracker(viewer.profile.id);
-  if (viewer.playerId) return null;
-  return getTracker(viewer.profile.id);
+  if (!viewer.playerId) return getTracker(viewer.profile.id);
+  const tracker = await getTracker(viewer.profile.id);
+  if (!tracker) return null;
+  const admin = createServiceClient();
+  if (!admin) return null;
+  const { data } = await admin
+    .from("elite_players")
+    .select("tier, subscription_status")
+    .eq("id", viewer.playerId)
+    .maybeSingle();
+  const player = (data as { tier: string | null; subscription_status: string | null } | null) ?? null;
+  return livesInFreeApp({ hasTracker: true, hasPlayer: true, player }) ? tracker : null;
 }
 
 export async function weekLogsFor(

@@ -6,11 +6,19 @@ import type {
   AppCourseStep,
   AppDrill,
   AppExtra,
+  AppFeedCard,
+  AppFreeFeed,
+  AppFreePlan,
+  AppFreeWeek,
+  AppFreeYou,
   AppMemberState,
+  AppOffer,
   AppWeek,
   AppYou,
 } from "@shared/app-contract";
 import { lessonBlocks } from "@shared/app-courses";
+import type { FreeStage } from "@shared/free-intake";
+import { auraLabel, friendsBoard, type Face } from "@shared/tracker";
 import { MEDIA_BASE } from "@/config";
 
 // The example player the screens are drawn with for review screenshots
@@ -21,20 +29,25 @@ import { MEDIA_BASE } from "@/config";
 // stills are the real bank's.
 //
 // Which member the example is, chosen per run:
-//   browser    ?state=ok|consent|onboarding|membership|pro_checkout|setup|locked|signedout
+//   browser    ?state=ok|consent|onboarding|membership|pro_checkout|setup|locked|free_quiz|free_offer|signedout
 //   simulator  the launch argument -fixtureState <the same words>, which
 //              iOS hands the app as a setting (sim/shots.sh, sim/flows)
 //
-// "locked" is the member with the Courses shelf answered the way an account
-// that is not a member gets it (every course locked), so the locked cards
-// can be looked at on the Courses tab.
+// "locked" is a FREE account in the free app (Friends, Week, Courses, You):
+// friends, posts, a week under way, and the Courses shelf the way an
+// account that is not a member gets it (every course locked). "free_quiz"
+// is a free account that has not taken the quiz, "free_offer" one that has
+// and is at the offer. A run that starts "signedout" and taps Join free
+// becomes a new free account and moves on as it goes (the quiz, the
+// @username and photo, the offer, the week's set-up, a post), all of it
+// kept in memory only.
 //
 // Which screen it opens on, simulator only: the launch argument
 // -fixtureRoute <screen> (week, session/3, profile-setup?edit=photo). The
 // simulator's "open this link" command cannot be used for that: iOS answers
 // it with an "Open in Strive Elite?" box that stays on screen and covers
 // every picture after it (the first simulator run, Nov 23 2026).
-export const FIXTURE_STATES = ["ok", "consent", "onboarding", "membership", "pro_checkout", "setup", "locked", "signedout"] as const;
+export const FIXTURE_STATES = ["ok", "consent", "onboarding", "membership", "pro_checkout", "setup", "locked", "free_quiz", "free_offer", "signedout"] as const;
 
 function chosenState(): string {
   let raw: unknown = null;
@@ -58,11 +71,74 @@ export function fixtureRoute(): string | null {
   } catch {
     raw = null;
   }
-  return typeof raw === "string" && FIXTURE_ROUTE.test(raw) ? `/${raw}` : null;
+  if (typeof raw !== "string" || !FIXTURE_ROUTE.test(raw)) return null;
+  // A free tab is named with its group: the member tabs have a Courses
+  // screen at the same address, and the run must open the free one.
+  const first = raw.split(/[/?]/)[0];
+  return now().free && FREE_TABS.has(first) ? `/(free)/${raw}` : `/${raw}`;
+}
+const FREE_TABS = new Set(["friends", "my-week", "courses", "me"]);
+
+// Where the example account is. It starts as the run asked and, for a free
+// account, moves on as the screens are used. Memory only.
+type Live = {
+  signedIn: boolean;
+  free: boolean;
+  stage: FreeStage;
+  owed: ("username" | "photo")[];
+  username: string | null;
+  posted: boolean;
+};
+let live: Live | null = null;
+const watchers = new Set<() => void>();
+
+function now(): Live {
+  if (!live) {
+    const s = chosenState();
+    const free = s === "locked" || s === "free_quiz" || s === "free_offer";
+    live = {
+      signedIn: s !== "signedout",
+      free,
+      stage: s === "free_quiz" ? "quiz" : s === "free_offer" ? "offer" : "ready",
+      owed: s === "setup" ? ["username", "photo"] : [],
+      username: s === "setup" ? null : "marcus.b",
+      posted: false,
+    };
+  }
+  return live;
+}
+
+function moved() {
+  watchers.forEach((w) => w());
+}
+
+export function onFixtureChange(fn: () => void): () => void {
+  watchers.add(fn);
+  return () => void watchers.delete(fn);
 }
 
 export function fixtureSignedIn(): boolean {
-  return chosenState() !== "signedout";
+  return now().signedIn;
+}
+
+// "Create my account" on the join screens: a new free account, at the quiz,
+// that still owes its @username and its photo.
+export function fixtureJoin(): void {
+  live = { signedIn: true, free: true, stage: "quiz", owed: ["username", "photo"], username: null, posted: false };
+  moved();
+}
+
+// The example sign-in: the member the run asked for.
+export function fixtureSignIn(): void {
+  now().signedIn = true;
+  moved();
+}
+
+// A profile step saved on the example account.
+export function fixtureProfileSaved(step: "username" | "photo", username?: string): void {
+  const l = now();
+  l.owed = l.owed.filter((s) => s !== step);
+  if (step === "username" && username) l.username = username;
 }
 
 const m = (p: string) => `${MEDIA_BASE}${p}`;
@@ -404,7 +480,7 @@ export const FIXTURE_COURSES: AppCourse[] = [
 
 // The shelf, as the server would cut it from those courses.
 export function fixtureShelf(): AppCourseList {
-  const locked = chosenState() === "locked";
+  const locked = now().free;
   return {
     locked,
     courses: FIXTURE_COURSES.map((c) => ({ slug: c.slug, name: c.name, subtitle: c.subtitle, cover: c.cover, locked })),
@@ -438,8 +514,156 @@ function stateFor(kind: string): AppMemberState {
   }
 }
 
+// ---- The free app's example: Marcus and three friends -------------------
+// Every picture is a still of one of our own drill clips, standing in for a
+// profile photo or a training photo. Nobody here is a real person.
+const ME_PHOTO = m("/drills/posters/juggling-one-touch-keep-it-up.jpg");
+const FRIENDS = [
+  { id: "f-diego", name: "Diego R.", first: "Diego", initials: "DR", photo: m("/drills/posters/weak-foot-pop-and-juggle.jpg"), minutes: 195, today: 75 },
+  { id: "f-nico", name: "Nico A.", first: "Nico", initials: "NA", photo: m("/drills/posters/two-touch-ball-mastery-v1.jpg"), minutes: 150, today: 45 },
+  { id: "f-jalen", name: "Jalen T.", first: "Jalen", initials: "JT", photo: m("/drills/posters/speed-kneel-and-drive.jpg"), minutes: 90, today: 0 },
+] as const;
+const MY_WEEK_MINUTES = 120;
+const POST_MINUTES = 45;
+const TARGET = 240;
+
+export const FIXTURE_OFFER: Omit<AppOffer, "later"> = {
+  card: { name: "Marcus B.", tier: "Pro" },
+  headline: "Marcus, your first week goes after your weak foot and first touch.",
+  drillsLabel: "Drills like these",
+  drills: [
+    { title: "Weak foot tap, pull, push", poster: m("/drills/posters/weak-foot-tap-pull-push.jpg") },
+    { title: "2 touch ball mastery variation 1", poster: m("/drills/posters/two-touch-ball-mastery-v1.jpg") },
+    { title: "Weak foot outside pull, inside pull", poster: m("/drills/posters/weak-foot-outside-pull-inside-pull.jpg") },
+    { title: "L turn, roll, touch", poster: m("/drills/posters/l-turn-roll-touch.jpg") },
+  ],
+  gets: ["A new week every Monday, built around what you told us.", "One drill at a time, with the video.", "Every course is included."],
+  price: "$29 a month. Cancel anytime.",
+  start: "Start Strive Pro",
+  terms: "Strive Pro is $29 a month, charged every month until you cancel. By starting you agree to the Terms of Service and the Privacy Policy.",
+};
+
+function fixtureFeed(): AppFreeFeed {
+  const l = now();
+  const open = (id: string, f: (typeof FRIENDS)[number], day: string, ago: string, minutes: number, file: string, caption: string | null, props: number): AppFeedCard => ({
+    state: "open",
+    id,
+    ownerId: f.id,
+    mine: false,
+    name: f.name,
+    first: f.first,
+    initials: f.initials,
+    kind: "training",
+    minutes,
+    caption,
+    day,
+    photoUrl: m(`/drills/posters/${file}.jpg`),
+    ago,
+    props,
+    propped: false,
+    together: null,
+    starred: false,
+    photo: f.photo,
+  });
+  const today: AppFeedCard[] = l.posted
+    ? [
+        {
+          state: "open", id: "p-me", ownerId: "me", mine: true, name: "You", first: "You", initials: "MB", kind: "training", minutes: POST_MINUTES,
+          caption: "Weak foot only.", day: "2026-11-24", photoUrl: m("/drills/posters/weak-foot-tap-pull-push.jpg"), ago: "Just now", props: 0, propped: false, together: null, starred: false, photo: ME_PHOTO,
+        },
+        open("p-diego", FRIENDS[0], "2026-11-24", "42 min ago", 75, "wall-pass-touch-stepover", "Wall work before school.", 2),
+        open("p-nico", FRIENDS[1], "2026-11-24", "2h ago", 45, "l-turn-roll-touch", null, 1),
+      ]
+    : [
+        { state: "locked", id: "p-diego", ownerId: FRIENDS[0].id, photo: FRIENDS[0].photo, first: "Diego", initials: "DR", kind: "training", minutes: 75 },
+        { state: "locked", id: "p-nico", ownerId: FRIENDS[1].id, photo: FRIENDS[1].photo, first: "Nico", initials: "NA", kind: "training", minutes: 45 },
+      ];
+  const faces: Face[] = [
+    { id: "me", first: "You", initials: "MB", you: true, active: l.posted, starred: false, photo: ME_PHOTO },
+    ...FRIENDS.map((f) => ({ id: f.id, first: f.first, initials: f.initials, you: false, active: f.today > 0, starred: false, photo: f.photo })),
+  ];
+  const minutes = MY_WEEK_MINUTES + (l.posted ? POST_MINUTES : 0);
+  return {
+    date: "Tuesday, Nov 24",
+    unlocked: l.posted,
+    faces,
+    friendCount: FRIENDS.length,
+    friendsToday: 2,
+    cards: [
+      ...today,
+      open("p-jalen-y", FRIENDS[2], "2026-11-23", "Yesterday", 60, "speed-zigzag-sprint", "Sprints at the park.", 3),
+      open("p-diego-y", FRIENDS[0], "2026-11-23", "Yesterday", 60, "juggling-thighs-high", null, 1),
+    ],
+    requests: l.posted ? [] : [{ id: "r-kai", name: "Kai M.", initials: "KM" }],
+    week: { minutes, target: TARGET, percent: Math.round((minutes / TARGET) * 100) },
+    invite: "https://thestriveapp.com/join?ref=EXAMPLE2",
+  };
+}
+
+function fixtureFreeWeek(): AppFreeWeek {
+  const l = now();
+  const minutes = MY_WEEK_MINUTES + (l.posted ? POST_MINUTES : 0);
+  const days = ["2026-11-23", "2026-11-24", "2026-11-25", "2026-11-26", "2026-11-27", "2026-11-28", "2026-11-29"];
+  const letters = ["M", "T", "W", "T", "F", "S", "S"];
+  const plan = [0, 1, 3, 5];
+  return {
+    today: "2026-11-24",
+    label: "Nov 23 to Nov 29",
+    minutes,
+    gymMinutes: 30,
+    target: TARGET,
+    percent: Math.round((minutes / TARGET) * 100),
+    planDays: plan,
+    strip: days.map((day, index) => ({
+      day,
+      index,
+      letter: letters[index],
+      planned: plan.includes(index),
+      trained: index === 0 || (index === 1 && l.posted),
+      today: index === 1,
+      minutes: index === 0 ? MY_WEEK_MINUTES : index === 1 && l.posted ? POST_MINUTES : 0,
+    })),
+    todayLine: l.posted ? { strong: "Trained today.", rest: "Next up: Thursday, about 1h." } : { strong: "Today is a training day.", rest: "About 1h." },
+    splitLine: "4 days. About 1h a day.",
+    gymLine: "Gym this week: 30m",
+    entries: [
+      ...(l.posted ? [{ id: "e-today", day: "2026-11-24", label: "Tue, Nov 24", minutes: POST_MINUTES, kind: "training" as const, photo: true }] : []),
+      { id: "e-mon", day: "2026-11-23", label: "Mon, Nov 23", minutes: MY_WEEK_MINUTES, kind: "training" as const, photo: true },
+      { id: "e-gym", day: "2026-11-23", label: "Mon, Nov 23", minutes: 30, kind: "gym" as const, photo: false },
+    ],
+    board: friendsBoard(
+      [{ id: "me", name: "Marcus B.", minutes, photo: ME_PHOTO }, ...FRIENDS.map((f) => ({ id: f.id, name: f.name, minutes: f.minutes, photo: f.photo }))],
+      "me"
+    ),
+    invite: "https://thestriveapp.com/join?ref=EXAMPLE2",
+    upgrade: { area: "Weak foot", sessions: 4 },
+  };
+}
+
+function fixtureFreeYou(): AppFreeYou {
+  const minutes = MY_WEEK_MINUTES + (now().posted ? POST_MINUTES : 0);
+  return {
+    name: "Marcus B.",
+    aura: { level: 3, label: auraLabel(3), progress: 0.4, next: "3h of training to Level 4" },
+    weekMinutes: minutes,
+    allMinutes: 420 + (now().posted ? POST_MINUTES : 0),
+    gymLine: "Gym this week: 30m",
+    starred: false,
+    invite: "https://thestriveapp.com/join?ref=EXAMPLE2",
+  };
+}
+
+const FIXTURE_PLAN: AppFreePlan = {
+  recommended: TARGET,
+  line: "We recommend 4 hours a week on your own, outside team training.",
+  target: TARGET,
+  days: [],
+};
+
 export function fixtureBootstrap(): AppBootstrap {
-  const state = stateFor(chosenState());
+  const l = now();
+  const state: AppMemberState = l.free ? { kind: "free", stage: l.stage } : stateFor(chosenState());
+  const photo = l.owed.includes("photo") ? null : ME_PHOTO;
   return {
     viewer: { name: "Marcus Bryant", firstName: "Marcus", email: "marcus@example.com" },
     state,
@@ -456,13 +680,17 @@ export function fixtureBootstrap(): AppBootstrap {
             terms: "I agree to the Terms of Service and the Privacy Policy.",
           }
         : null,
-    player: {
-      id: "p-example",
-      tier: "pro",
-      card: FIXTURE_YOU.card,
-      position: "Attacking midfield",
-      knownParentPhone: "",
-    },
+    player: l.free
+      ? null
+      : {
+          id: "p-example",
+          tier: "pro",
+          card: FIXTURE_YOU.card,
+          position: "Attacking midfield",
+          knownParentPhone: "",
+        },
+    free: l.free ? { name: "Marcus B.", gym: true } : null,
+    quizOwed: null,
     tabs: [
       { key: "home", label: "Home" },
       { key: "week", label: "Week" },
@@ -470,16 +698,52 @@ export function fixtureBootstrap(): AppBootstrap {
       { key: "you", label: "You" },
     ],
     unread: 0,
-    // ?state=setup: a member from before 081 who still owes both screens
-    profileSetup:
-      chosenState() === "setup"
-        ? { username: null, hasPhoto: false, photoUrl: null, steps: ["username", "photo"], ideas: ["marcus.b", "marcusbryant", "marcus_b"] }
-        : { username: "marcus.b", hasPhoto: false, photoUrl: null, steps: [], ideas: [] },
+    // ?state=setup: a member from before 081 who still owes both screens,
+    // and a new free account until it has picked them. Everyone else has a
+    // photo (a drill still standing in for one), so every card and every
+    // face is drawn with it.
+    profileSetup: {
+      username: l.username,
+      hasPhoto: photo !== null,
+      photoUrl: photo,
+      steps: [...l.owed],
+      ideas: l.owed.includes("username") ? ["marcus.b", "marcusbryant", "marcus_b"] : [],
+    },
   };
 }
 
+// The free app's calls, answered from the example and moved on by it.
+function fixtureFree(path: string, method: string): unknown {
+  const l = now();
+  const at = path.slice("/api/app/free/".length);
+  if (at === "open") return { open: true };
+  if (at === "join") return { ok: true, signedIn: false };
+  if (at === "intake") {
+    l.stage = "offer";
+    return { ok: true };
+  }
+  if (at === "offer") return { ...FIXTURE_OFFER, later: l.stage === "ready" ? "Not now" : "Not now, start free" } satisfies AppOffer;
+  if (at === "plan") {
+    if (method === "GET") return l.stage === "ready" ? { ...FIXTURE_PLAN, days: [0, 1, 3, 5] } : FIXTURE_PLAN;
+    l.stage = "ready";
+    return { ok: true };
+  }
+  if (at === "upgrade") return { ok: false, error: "Payments are not switched on yet, so Strive Pro cannot be started today. Check back soon." };
+  if (at === "upgrade/confirm") return { active: false };
+  if (at === "feed") return fixtureFeed();
+  if (at === "post" || (at === "log" && method === "POST")) {
+    if (at === "post") l.posted = true;
+    return { ok: true, id: "e-today" };
+  }
+  if (at === "week") return fixtureFreeWeek();
+  if (at === "you") return fixtureFreeYou();
+  if (at === "props") return { ok: true, propped: true };
+  return { ok: true };
+}
+
 // What each call answers with in the example build.
-export function fixtureResponse(path: string, method: string): unknown {
+export function fixtureResponse(path: string, method: string, _body?: unknown): unknown {
+  if (path.startsWith("/api/app/free/")) return fixtureFree(path, method);
   if (path.startsWith("/api/app/me")) return fixtureBootstrap();
   if (path.startsWith("/api/app/week")) return { week: FIXTURE_WEEK };
   if (path.startsWith("/api/app/you")) return { you: FIXTURE_YOU };

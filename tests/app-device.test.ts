@@ -81,6 +81,8 @@ describe("the camera", () => {
       expect(src, rel(f)).toContain("Linking.openSettings()");
     }
     expect(code(path.join(root, "src/ProfileSteps.tsx"))).toContain("launchCameraAsync");
+    // posting a training photo opens the camera too
+    expect(code(path.join(root, "app/post.tsx"))).toContain("launchCameraAsync");
   });
 });
 
@@ -292,5 +294,156 @@ describe("the Courses tab", () => {
     for (const src of [shelf, course, view]) {
       expect(src).not.toMatch(/completed|\bprogress|\bpercent|streak|useMutation|<Ring\b|<Disc\b/i);
     }
+  });
+});
+
+// The free app (Nov 24 2026): a free account lives in the app, in its own
+// tabs. The rules below are the owner's, each held to the files.
+describe("the free app", () => {
+  const free = files(path.join(root, "app/(free)"));
+  const pages = free.filter((f) => !f.endsWith("_layout.tsx"));
+  const layout = code(path.join(root, "app/(free)/_layout.tsx"));
+  const names = (f: string) => path.basename(f).replace(/\.tsx$/, "");
+
+  it("has four tabs: Friends, Week, Courses, You", () => {
+    expect(pages.map(names).sort()).toEqual(["courses", "friends", "me", "my-week"]);
+    const tabs = code(path.join(root, "src/tabs.ts"));
+    for (const p of pages) expect(tabs, names(p)).toContain(`route: "${names(p)}"`);
+    expect(code(path.join(root, "app/_layout.tsx"))).toContain('<Stack.Screen name="(free)"');
+  });
+
+  it("draws its tabs only for an account that belongs in it", () => {
+    expect(layout.indexOf('if (area !== "free")')).toBeGreaterThan(-1);
+    expect(layout.indexOf('if (area !== "free")')).toBeLessThan(layout.indexOf("<NativeTabs"));
+    expect(layout).toContain("<Holding");
+    expect(layout).toMatch(/<NativeTabs\.Trigger[^>]*disableAutomaticContentInsets/);
+  });
+
+  it("every tab's page leaves its room in the one place, like a member's", () => {
+    for (const f of pages) {
+      expect(code(f), rel(f)).toContain("<Screen");
+      expect(code(f), rel(f)).not.toContain("useSafeAreaInsets");
+      expect(code(f), rel(f)).toContain("paddingTop: PAGE_TOP");
+    }
+  });
+
+  it("shows the same Courses shelf, locked by the server, with no word about it", () => {
+    const courses = code(path.join(root, "app/(free)/courses.tsx"));
+    expect(courses).toContain("<CoursesList />");
+    expect(courses).not.toMatch(/upgrade|offer|Pro\b|unlock|member/i);
+  });
+
+  // "Not too much CTAs": one prompt in the whole free app, on Week.
+  it("has ONE upgrade prompt, on the Week tab, and none anywhere else", () => {
+    const users = sources.filter((f) => /<UpgradeCard\b/.test(code(f))).map(rel);
+    expect(users).toEqual(["app/(free)/my-week.tsx"]);
+    expect(code(path.join(root, "app/(free)/my-week.tsx")).match(/<UpgradeCard\b/g)?.length).toBe(1);
+    // the only ways to the offer: that card, and a locked course
+    const toOffer = sources.filter((f) => /["`]\/offer["`]/.test(code(f))).map(rel).sort();
+    expect(toOffer).toEqual(["src/CoursesList.tsx", "src/UpgradeCard.tsx"]);
+    // nothing on Friends, on You, or after a post
+    for (const f of ["app/(free)/friends.tsx", "app/(free)/me.tsx", "app/post.tsx", "src/FeedCards.tsx"]) {
+      expect(code(path.join(root, f)), f).not.toMatch(/upgrade|Strive Pro|\/offer|a month|membership/i);
+    }
+  });
+
+  it("the card is a card in the page: whether it shows is the one shared rule", () => {
+    const card = code(path.join(root, "src/UpgradeCard.tsx"));
+    expect(card).toContain('from "@shared/upgrade-card"');
+    expect(card).toContain("upgradeCard({ place, member, area, sessions, dismissedAt, now: Date.now() })");
+    expect(card).not.toMatch(/<Modal\b|Alert\.alert|presentation/);
+    // the price is never written on the phone: the offer's words are the
+    // server's (the example data stands in for the server, and says so)
+    for (const f of sources.filter((x) => rel(x) !== "src/api/fixtures.ts")) {
+      expect(code(f), rel(f)).not.toMatch(/\$29|\$\s?\d+ a month/);
+    }
+  });
+
+  it("a post can be reported and its poster blocked, from the post itself", () => {
+    const cards = code(path.join(root, "src/FeedCards.tsx"));
+    expect(cards).toContain('"Report this post"');
+    expect(cards).toContain("`Block ${card.first}`");
+    expect(cards).toContain("reportPost(card.id, reason.id)");
+    expect(cards).toContain("blockPlayer(card.ownerId)");
+    expect(cards).toContain("REPORT_REASONS");
+    // a locked post shows nothing of the post: it is given no photo to draw
+    const locked = cards.slice(cards.indexOf("export function LockedPost"), cards.indexOf("export function OpenPost"));
+    expect(locked).not.toMatch(/photoUrl|caption/);
+  });
+
+  it("asks for notifications once, after a post, with the reason", () => {
+    const post = code(path.join(root, "app/post.tsx"));
+    expect(post).toContain("if (photo && !prefs.pushAsked)");
+    expect(post).toContain("Know the moment your friends post?");
+    expect(post).toContain("turnOnNotifications()");
+    // and never from the tabs themselves
+    for (const f of pages) expect(code(f), rel(f)).not.toMatch(/turnOnNotifications|requestPermissionsAsync/);
+  });
+
+  it("never counts what was missed", () => {
+    for (const f of [...free, path.join(root, "app/post.tsx"), path.join(root, "app/week-plan.tsx"), path.join(root, "src/FeedCards.tsx")]) {
+      expect(code(f), rel(f)).not.toMatch(/streak|missed|behind|\bpercent\b/i);
+    }
+  });
+});
+
+// "When it shows the player card it should show the pfp" (Nov 24 2026).
+describe("the member card", () => {
+  const withCard = sources.filter((f) => rel(f).startsWith("app/") && /<MemberCard\b/.test(code(f)));
+
+  it("is given the photo and the @username wherever it is shown", () => {
+    expect(withCard.map(rel).sort()).toEqual(["app/(tabs)/you.tsx", "app/offer.tsx", "app/onboarding/index.tsx"]);
+    for (const f of withCard) {
+      const src = code(f);
+      for (const tag of src.match(/<MemberCard\b[^>]*\/>/g) ?? []) {
+        expect(tag, rel(f)).toMatch(/\bphoto=\{photo\}/);
+        expect(tag, rel(f)).toMatch(/\busername=\{/);
+      }
+      expect(src.match(/<MemberCard\b/g)?.length, rel(f)).toBe(src.match(/<MemberCard\b[^>]*\/>/g)?.length);
+      expect(src, rel(f)).toContain("const photo = useMyPhoto();");
+    }
+  });
+
+  it("shows the photo whenever there is one, never the mark in its place", () => {
+    const card = code(path.join(root, "src/MemberCard.tsx"));
+    expect(card).toMatch(/\{photo \? \(\s*<Image source=\{photo\}/);
+  });
+
+  it("the photo is picked before any screen that shows the card", () => {
+    const nav = code(path.join(root, "src/navigation.ts"));
+    // a new member: before the door. A free account: before the offer.
+    expect(nav).toMatch(/case "onboarding":\s*return owed \? "profile" : "onboarding";/);
+    expect(nav).toMatch(/if \(owed\) return "profile";\s*return state\.stage === "offer" \? "free-offer" : "free";/);
+    // and it is one screen, never a step of the quiz, so nobody is asked twice
+    const quiz = code(path.join(root, "app/onboarding/[step].tsx"));
+    expect(quiz).not.toMatch(/PhotoStep|UsernameStep/);
+    const asks = sources.filter((f) => /<PhotoStep\b/.test(code(f))).map(rel);
+    expect(asks).toEqual(["app/profile-setup.tsx"]);
+  });
+
+  it("every example account has a photo to show, and none is a real person's", () => {
+    const fixtures = read(path.join(root, "src/api/fixtures.ts"));
+    expect(fixtures).toMatch(/const ME_PHOTO = m\("\/drills\/posters\/[a-z0-9-]+\.jpg"\);/);
+    expect(fixtures).toContain("const photo = l.owed.includes(\"photo\") ? null : ME_PHOTO;");
+    // every picture in the example is a drill still from our own site
+    for (const m of fixtures.matchAll(/photo(?:Url)?: m\((["`])([^"`]+)\1\)/g)) expect(m[2]).toMatch(/^\/drills\/posters\//);
+  });
+});
+
+describe("the offer", () => {
+  const offer = code(path.join(root, "app/offer.tsx"));
+  it("is the server's words and price, with one button and a quiet way on", () => {
+    expect(offer).toContain("{o.headline}");
+    expect(offer).toContain("{o.price}");
+    expect(offer).toContain("label={o.start}");
+    expect(offer).toContain("{o.later}");
+    expect(offer.match(/<Button\b[^>]*label=\{o\./g)?.length).toBe(1);
+    expect(offer).not.toMatch(/countdown|left today|spots|guarantee|\d+% off|testimonial/i);
+  });
+  it("opens the checkout in the sheet over the app, then asks the server what happened", () => {
+    expect(offer).toContain("await openLink(res.url);");
+    expect(offer.indexOf("await openLink(res.url);")).toBeLessThan(offer.indexOf("await confirmUpgrade()"));
+    expect(offer.indexOf("await confirmUpgrade()")).toBeLessThan(offer.indexOf("await rereadMe();"));
+    expect(offer).not.toMatch(/Linking\.openURL/);
   });
 });

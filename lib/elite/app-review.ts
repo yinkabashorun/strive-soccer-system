@@ -92,6 +92,10 @@ export const SCREENS: readonly Screen[] = [
   // review notes must describe it before that build is submitted.
   { path: "/pro", since: IN_FIRST_BUILD },
   { path: "/pro/join", since: IN_FIRST_BUILD },
+  // Where a Strive Pro checkout opened from the native iPhone app comes
+  // back to, in the sheet over the app (Nov 24 2026): one line saying what
+  // happened and to close the sheet. Nothing is sold on it.
+  { path: "/pro/done", since: IN_FIRST_BUILD },
 
   // The free app (photo posts between players, clubs, rankings). In the
   // first build on Coach Yinka's word (Nov 20 2026, "App store asap"):

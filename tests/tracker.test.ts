@@ -496,8 +496,12 @@ describe("where a signed-in person belongs", () => {
     expect(free).toContain('if (viewer.role !== "player") redirect("/coach")');
     expect(free).toContain('if (!tracker) redirect("/dashboard")');
     expect(free).toMatch(/!viewer\.demo && \(await consentDue/);
-    // a member has a player record, so trackerFor answers null for them
-    expect(code("lib/elite/tracker-server.ts")).toContain("if (viewer.playerId) return null;");
+    // a member has a player record, so trackerFor answers null for them;
+    // the one exception is a free account whose Strive Pro row is not
+    // switched on (lib/elite/member-gate.ts livesInFreeApp)
+    const server = code("lib/elite/tracker-server.ts");
+    expect(server).toContain("if (!viewer.playerId) return getTracker(viewer.profile.id);");
+    expect(server).toContain("return livesInFreeApp({ hasTracker: true, hasPlayer: true, player }) ? tracker : null;");
   });
 
   it("signing in takes a free account to its screen in one redirect after /dashboard", () => {
@@ -689,6 +693,9 @@ describe("free accounts are invisible to everything a member query reads", () =>
     // tracker-posts bucket, and before 081 a free account's pointer is
     // still read from elite_trackers
     "lib/elite/account-profile-server.ts",
+    // the quiz a free account takes in the iPhone app (082) and the week's
+    // set-up after it: the account's own row, after the app API's gate
+    "lib/elite/free-intake-server.ts",
   ]);
   // (the post route stores nothing itself: it hands a checked photo to
   // savePost in tracker-server.ts)
@@ -829,7 +836,8 @@ describe("planning the week", () => {
     const actions = code("lib/elite/tracker-actions.ts");
     expect(actions).toContain("export async function setPlanDays(");
     // the set-up is not finished without at least one day
-    expect(code("lib/elite/tracker-server.ts")).toContain("tracker.plan_days.length > 0");
+    expect(code("lib/elite/tracker-server.ts")).toContain("return setUpDone(tracker);");
+    expect(code("lib/elite/tracker.ts")).toContain("(t.plan_days ?? []).length > 0");
   });
 
   it("logging stays today only", () => {

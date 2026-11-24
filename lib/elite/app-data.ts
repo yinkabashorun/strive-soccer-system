@@ -23,6 +23,10 @@ import type { MemberState } from "./member-gate";
 import type { AppBootstrap } from "./app-contract";
 import type { Viewer } from "./session";
 import type { Player } from "./types";
+import type { Tracker } from "./tracker-server";
+import { shortName, tracksGym } from "./tracker";
+import { owedMemberSteps } from "./free-intake";
+import { memberAnswersFor } from "./free-upgrade-server";
 
 export async function loadWeek(player: Player): Promise<AppWeek> {
   // As the web Home does on every open: a break that ended moves the
@@ -81,7 +85,15 @@ const TAB_KEY: Record<string, string> = {
   "/you": "you",
 };
 
-export async function loadBootstrap(viewer: Viewer, state: MemberState, player: Player | null): Promise<AppBootstrap> {
+export async function loadBootstrap(
+  viewer: Viewer,
+  state: MemberState,
+  player: Player | null,
+  tracker: Tracker | null = null
+): Promise<AppBootstrap> {
+  // A member at the quiz whose answers were given while the account was
+  // free: only the screens still owed are asked (lib/elite/free-intake.ts).
+  const carried = state.kind === "onboarding" ? await memberAnswersFor(viewer.profile.id).catch(() => null) : null;
   const unread =
     state.kind === "ok" && player
       ? (await getNotifications(player.id).catch(() => [])).filter((n) => !n.read).length
@@ -108,6 +120,11 @@ export async function loadBootstrap(viewer: Viewer, state: MemberState, player: 
       : null,
     tabs: memberTabs(player?.tier).map((t) => ({ key: TAB_KEY[t.href] ?? t.href, label: t.label })),
     unread,
+    free:
+      state.kind === "free" && tracker
+        ? { name: shortName(viewer.profile.full_name), gym: tracksGym(tracker.grade) }
+        : null,
+    quizOwed: carried ? owedMemberSteps(carried) : null,
     profileSetup: await profileSetupFor(viewer),
   };
 }

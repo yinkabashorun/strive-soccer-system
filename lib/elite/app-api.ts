@@ -14,8 +14,10 @@ import { parseBearer, runWithBearer } from "./supabase/bearer";
 import { getViewer, type Viewer } from "./session";
 import { getPlayer } from "./data";
 import { consentDue } from "./legal-server";
-import { getTracker } from "./tracker-server";
-import { memberState, type MemberState } from "./member-gate";
+import { getTracker, type Tracker } from "./tracker-server";
+import { readIntake, stageOf, type StoredIntake } from "./free-intake-server";
+import { mayBeFree, memberState, type MemberState } from "./member-gate";
+import { profileSetupDue } from "./account-profile";
 import type { Player } from "./types";
 
 // Who may call a route:
@@ -25,13 +27,25 @@ import type { Player } from "./types";
 //            (the quiz, the first-week build, this phone's push token)
 //   member   in the member app (the gate says "ok"): the week, a drill
 //            done, Extra work, the check-in, You
-export type AppAccess = "account" | "player" | "member";
+//   person   a player account of either kind, a member or a free account,
+//            that has accepted the agreement: its own photo, its
+//            @username, this phone's push token
+//   free     a free account (069) the app can serve: the quiz, the offer,
+//            the week's set-up, starting a membership
+//   free_app in the free app itself (the set-up is finished and the photo
+//            and @username are in, as the website's free shell requires):
+//            the feed, posting, the week, friends
+export type AppAccess = "account" | "player" | "member" | "person" | "free" | "free_app";
 
 export type AppContext = {
   req: Request;
   viewer: Viewer;
   state: MemberState;
   player: Player | null;
+  // the free account behind this viewer and its quiz, when it lives in
+  // the free app (state.kind is "free")
+  tracker: Tracker | null;
+  intake: StoredIntake | null;
 };
 
 export type AppRouteOptions = {
@@ -51,25 +65,54 @@ export function appJson(body: unknown, status = 200): Response {
 }
 
 // Whether a member state may use a route of a given access level.
-export function accessAllowed(access: AppAccess, state: MemberState): boolean {
+export function accessAllowed(access: AppAccess, state: MemberState, setupDue = false): boolean {
   if (access === "account") return true;
-  if (access === "player") return state.kind !== "coach" && state.kind !== "free" && state.kind !== "no_profile" && state.kind !== "consent";
+  const player = state.kind !== "coach" && state.kind !== "free" && state.kind !== "no_profile" && state.kind !== "consent";
+  const free = state.kind === "free" && state.stage !== "web";
+  if (access === "player") return player;
+  if (access === "person") return player || state.kind === "free";
+  if (access === "free") return free;
+  if (access === "free_app") return free && state.stage === "ready" && !setupDue;
   return state.kind === "ok";
 }
 
+type Loaded = { state: MemberState; player: Player | null; tracker: Tracker | null; intake: StoredIntake | null };
+
 // The member state of a signed-in viewer, read with the same calls the web
-// member shell makes.
-export async function loadMemberState(viewer: Viewer): Promise<{ state: MemberState; player: Player | null }> {
-  if (viewer.role !== "player") return { state: { kind: "coach" }, player: null };
-  if (!viewer.playerId) {
+// member shell makes. The free account is read when there is no member
+// row, and for a Strive Pro row whose membership is not on (a free account
+// that tapped Start and has not paid still lives in the free app).
+export async function loadMemberState(viewer: Viewer): Promise<Loaded> {
+  if (viewer.role !== "player") return { state: { kind: "coach" }, player: null, tracker: null, intake: null };
+  const freeSide = async (): Promise<{ tracker: Tracker | null; intake: StoredIntake | null }> => {
     const tracker = await getTracker(viewer.profile.id).catch(() => null);
-    return { state: memberState({ role: viewer.role, playerId: null, isFree: Boolean(tracker), consentDue: false, player: null }), player: null };
+    const intake = tracker ? await readIntake(viewer.profile.id).catch(() => null) : null;
+    return { tracker, intake };
+  };
+  if (!viewer.playerId) {
+    const { tracker, intake } = await freeSide();
+    const state = memberState({
+      role: viewer.role,
+      playerId: null,
+      isFree: Boolean(tracker),
+      freeStage: tracker && intake ? stageOf(tracker, intake) : "web",
+      consentDue: false,
+      player: null,
+    });
+    return { state, player: null, tracker, intake };
   }
   const [player, due] = await Promise.all([getPlayer(viewer.playerId), consentDue(viewer.profile.id)]);
-  return {
-    state: memberState({ role: viewer.role, playerId: viewer.playerId, isFree: false, consentDue: due, player }),
+  const { tracker, intake } = mayBeFree(player) ? await freeSide() : { tracker: null, intake: null };
+  const state = memberState({
+    role: viewer.role,
+    playerId: viewer.playerId,
+    isFree: Boolean(tracker),
+    freeStage: tracker && intake ? stageOf(tracker, intake) : "web",
+    consentDue: due,
     player,
-  };
+  });
+  const inFree = state.kind === "free";
+  return { state, player, tracker: inFree ? tracker : null, intake: inFree ? intake : null };
 }
 
 export function appRoute(
@@ -88,10 +131,10 @@ export function appRoute(
     return runWithBearer(token, async () => {
       const viewer = await getViewer();
       if (!viewer || viewer.demo) return appJson(SIGNED_OUT, 401);
-      const { state, player } = await loadMemberState(viewer);
-      if (!accessAllowed(opts.access, state)) return appJson({ error: "gate", state }, 403);
+      const { state, player, tracker, intake } = await loadMemberState(viewer);
+      if (!accessAllowed(opts.access, state, profileSetupDue(viewer.setup))) return appJson({ error: "gate", state }, 403);
       try {
-        const out = await handler({ req, viewer, state, player });
+        const out = await handler({ req, viewer, state, player, tracker, intake });
         return out instanceof Response ? out : appJson(out);
       } catch (e) {
         // A redirect or not-found thrown by a shared server action is a web
@@ -101,6 +144,27 @@ export function appRoute(
         return appJson({ error: "server" }, 500);
       }
     });
+  };
+}
+
+// A route with nobody signed in yet: whether free sign-up is open, and the
+// sign-up itself. Rate limited by caller like every other route; it reads
+// no token and resolves no viewer.
+export function publicAppRoute(
+  opts: { name: string; limit?: number; windowMs?: number },
+  handler: (req: Request) => Promise<unknown>
+): (req: Request) => Promise<Response> {
+  return async (req: Request) => {
+    const limit = opts.limit ?? (req.method === "GET" ? 120 : 20);
+    if (!rateLimit(`app:${opts.name}:${clientIp(req)}`, limit, opts.windowMs ?? 60_000)) {
+      return appJson(SLOW_DOWN, 429);
+    }
+    try {
+      const out = await handler(req);
+      return out instanceof Response ? out : appJson(out);
+    } catch {
+      return appJson({ error: "server" }, 500);
+    }
   };
 }
 

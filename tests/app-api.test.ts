@@ -16,12 +16,16 @@ type Viewer = {
   role: string;
   playerId: string | null;
   demo: boolean;
+  setup: { available: boolean; username: string | null; hasPhoto: boolean; photoKey: string | null };
 };
 const s = {
   viewer: null as Viewer | null,
   player: null as Record<string, unknown> | null,
   consentDue: false,
   tracker: null as unknown,
+  intake: null as unknown,
+  carried: null as unknown,
+  signupOpen: true,
   seenTokens: [] as (string | null)[],
   calls: [] as { fn: string; args: unknown[] }[],
   homeworkRow: { id: "", completed: true } as { id: string; completed: boolean } | null,
@@ -51,6 +55,7 @@ function viewer(over: Partial<Viewer> = {}): Viewer {
     role: "player",
     playerId: "p1",
     demo: false,
+    setup: { available: true, username: "marcus.b", hasPhoto: true, photoKey: "k" },
     ...over,
   };
 }
@@ -68,6 +73,10 @@ function call(fn: string) {
     if (fn === "loadWeek") return { week: 1 };
     if (fn === "loadYou") return { allTimeMinutes: 0 };
     if (fn === "loadBootstrap") return { state: args[1] };
+    if (fn === "startProFromFree") return { ok: true, url: "https://checkout.stripe.com/c/pay/cs_test_1" };
+    if (fn === "confirmUpgrade") return { active: false };
+    if (fn === "toggleProps") return { ok: true, propped: true };
+    if (fn === "logTraining") return { ok: true, id: "l1" };
     return { ok: true };
   };
 }
@@ -181,7 +190,45 @@ vi.mock("@/lib/elite/legal-server", () => ({
   consentDue: async () => s.consentDue,
   recordConsent: call("recordConsent"),
 }));
-vi.mock("@/lib/elite/tracker-server", () => ({ getTracker: async () => s.tracker }));
+vi.mock("@/lib/elite/tracker-server", () => ({
+  getTracker: async () => s.tracker,
+  getTargetTable: async () => [],
+  isFreeSignupOpen: async () => s.signupOpen,
+}));
+// the quiz a free account takes: its rules are real, its reads and writes stood in for
+vi.mock("@/lib/elite/free-intake-server", async (actual) => ({
+  ...(await actual<typeof import("@/lib/elite/free-intake-server")>()),
+  readIntake: async () => s.intake ?? { available: false, answers: null, checkout: null },
+  intakeColumnsReady: async () => true,
+  saveFreeIntake: call("saveFreeIntake"),
+  saveFreePlan: call("saveFreePlan"),
+}));
+vi.mock("@/lib/elite/free-app-server", () => ({
+  offerFor: call("offerFor"),
+  planFor: call("planFor"),
+  freeFeedFor: call("freeFeedFor"),
+  freeWeekFor: call("freeWeekFor"),
+  freeYouFor: call("freeYouFor"),
+}));
+vi.mock("@/lib/elite/free-upgrade-server", () => ({
+  startProFromFree: call("startProFromFree"),
+  confirmUpgrade: call("confirmUpgrade"),
+  memberAnswersFor: async () => s.carried,
+}));
+vi.mock("@/lib/elite/tracker-actions", () => ({
+  logTraining: call("logTraining"),
+  deleteLog: call("deleteLog"),
+  toggleProps: call("toggleProps"),
+  reportPost: call("reportPost"),
+  blockPlayer: call("blockPlayer"),
+  answerFriendRequest: call("answerFriendRequest"),
+}));
+vi.mock("@/app/api/elite/auth/join/route", () => ({
+  POST: async () => (s.calls.push({ fn: "join", args: [] }), new Response(JSON.stringify({ ok: true, signedIn: true }), { status: 200 })),
+}));
+vi.mock("@/app/api/elite/tracker/post/route", () => ({
+  POST: async () => (s.calls.push({ fn: "storePost", args: [] }), new Response(JSON.stringify({ ok: true, id: "l1" }), { status: 200 })),
+}));
 vi.mock("@/lib/elite/player-actions", () => ({
   toggleHomework: call("toggleHomework"),
   submitCheckin: call("submitCheckin"),
@@ -260,12 +307,33 @@ const ROUTES = {
   accountPassword: () => import("@/app/api/app/account/password/route"),
   username: () => import("@/app/api/app/profile/username/route"),
   photo: () => import("@/app/api/app/profile/photo/route"),
+  freeIntake: () => import("@/app/api/app/free/intake/route"),
+  freeOffer: () => import("@/app/api/app/free/offer/route"),
+  freePlan: () => import("@/app/api/app/free/plan/route"),
+  freeUpgrade: () => import("@/app/api/app/free/upgrade/route"),
+  freeUpgradeConfirm: () => import("@/app/api/app/free/upgrade/confirm/route"),
+  freeFeed: () => import("@/app/api/app/free/feed/route"),
+  freePost: () => import("@/app/api/app/free/post/route"),
+  freeLog: () => import("@/app/api/app/free/log/route"),
+  freeProps: () => import("@/app/api/app/free/props/route"),
+  freeReport: () => import("@/app/api/app/free/report/route"),
+  freeBlock: () => import("@/app/api/app/free/block/route"),
+  freeFriend: () => import("@/app/api/app/free/friend/route"),
+  freeWeek: () => import("@/app/api/app/free/week/route"),
+  freeYou: () => import("@/app/api/app/free/you/route"),
   courses: () => import("@/app/api/app/courses/route"),
   course: () => import("@/app/api/app/courses/[slug]/route"),
 };
+// The two routes nobody is signed in for yet.
+const PUBLIC = {
+  freeOpen: () => import("@/app/api/app/free/open/route"),
+  freeJoin: () => import("@/app/api/app/free/join/route"),
+};
+
+type Access = "account" | "player" | "member" | "person" | "free" | "free_app";
 
 // Every handler, its method and the access level it must declare.
-const TABLE: { route: keyof typeof ROUTES; method: "GET" | "POST" | "DELETE"; access: "account" | "player" | "member" }[] = [
+const TABLE: { route: keyof typeof ROUTES; method: "GET" | "POST" | "DELETE"; access: Access }[] = [
   { route: "me", method: "GET", access: "account" },
   { route: "week", method: "GET", access: "member" },
   { route: "you", method: "GET", access: "member" },
@@ -276,17 +344,61 @@ const TABLE: { route: keyof typeof ROUTES; method: "GET" | "POST" | "DELETE"; ac
   { route: "onboarding", method: "POST", access: "player" },
   { route: "firstWeek", method: "POST", access: "player" },
   { route: "consent", method: "POST", access: "account" },
-  { route: "pushToken", method: "POST", access: "player" },
-  { route: "pushToken", method: "DELETE", access: "player" },
+  { route: "pushToken", method: "POST", access: "person" },
+  { route: "pushToken", method: "DELETE", access: "person" },
   { route: "accountDelete", method: "POST", access: "account" },
   { route: "accountPassword", method: "POST", access: "account" },
-  { route: "username", method: "GET", access: "player" },
-  { route: "username", method: "POST", access: "player" },
-  { route: "photo", method: "GET", access: "player" },
-  { route: "photo", method: "POST", access: "player" },
+  { route: "username", method: "GET", access: "person" },
+  { route: "username", method: "POST", access: "person" },
+  { route: "photo", method: "GET", access: "person" },
+  { route: "photo", method: "POST", access: "person" },
+  // the free app
+  { route: "freeIntake", method: "POST", access: "free" },
+  { route: "freeOffer", method: "GET", access: "free" },
+  { route: "freePlan", method: "GET", access: "free" },
+  { route: "freePlan", method: "POST", access: "free" },
+  { route: "freeUpgrade", method: "POST", access: "free" },
+  { route: "freeUpgradeConfirm", method: "POST", access: "account" },
+  { route: "freeFeed", method: "GET", access: "free_app" },
+  { route: "freePost", method: "POST", access: "free_app" },
+  { route: "freeLog", method: "POST", access: "free_app" },
+  { route: "freeLog", method: "DELETE", access: "free_app" },
+  { route: "freeProps", method: "POST", access: "free_app" },
+  { route: "freeReport", method: "POST", access: "free_app" },
+  { route: "freeBlock", method: "POST", access: "free_app" },
+  { route: "freeFriend", method: "POST", access: "free_app" },
+  { route: "freeWeek", method: "GET", access: "free_app" },
+  { route: "freeYou", method: "GET", access: "free_app" },
   { route: "courses", method: "GET", access: "account" },
   { route: "course", method: "GET", access: "member" },
 ];
+const FOR_FREE = new Set<Access>(["free", "free_app"]);
+
+// A free account in the free app: its week is set, its quiz is stored.
+const ANSWERS = {
+  gender: "boy",
+  grade: "high_school",
+  position: "Winger",
+  foot: "Right",
+  level: "Competitive",
+  club: "",
+  attrs: {
+    first_touch: 3, close_control: 4, weak_foot: 1, dribbling: 4, short_passing: 3, long_passing: 3, shooting: 4,
+    speed: 4, agility: 4, strength: 3, fitness: 4, scanning: 3, decisions: 3, movement: 4, defending: 3,
+  },
+  aim: "higher_team",
+  team: "3-4",
+  space: "open",
+  wall: true,
+  goal: false,
+  nearbyAnswered: true,
+};
+function freeAccount(over: Record<string, unknown> = {}) {
+  s.viewer = viewer({ playerId: null });
+  s.player = null;
+  s.tracker = { profile_id: "u1", grade: "high_school", season: "in_season", target_minutes: 240, plan_days: [0, 2], quiz_done_at: "2026-11-24T00:00:00Z", referral_code: "ABCDEFGH", ...over };
+  s.intake = { available: true, answers: ANSWERS, checkout: null };
+}
 
 async function handler(route: keyof typeof ROUTES, method: string) {
   const mod = (await ROUTES[route]()) as unknown as Record<string, (r: Request, ctx?: unknown) => Promise<Response>>;
@@ -298,6 +410,9 @@ beforeEach(() => {
   s.player = player();
   s.consentDue = false;
   s.tracker = null;
+  s.intake = null;
+  s.carried = null;
+  s.signupOpen = true;
   s.seenTokens = [];
   s.calls = [];
   s.homeworkRow = { id: "11111111-1111-4111-8111-111111111111", completed: true };
@@ -379,12 +494,114 @@ describe("every route", () => {
       const h = await handler(row.route, row.method);
       s.player = player({ tier: "elite", subscription_status: "none" });
       const res = await h(req(row.method, { body: {} }));
-      if (row.access === "member") {
+      if (row.access === "member" || FOR_FREE.has(row.access)) {
         expect(res.status).toBe(403);
         expect((await res.json()).state.kind).toBe("membership");
       } else expect(res.status).not.toBe(403);
     });
+
+    it(`${label}: a free account reaches its own routes and no member route`, async () => {
+      const h = await handler(row.route, row.method);
+      freeAccount();
+      const res = await h(req(row.method, { body: {} }));
+      if (row.access === "player" || row.access === "member") {
+        expect(res.status).toBe(403);
+        expect((await res.json()).state).toEqual({ kind: "free", stage: "ready" });
+        expect(s.calls).toEqual([]);
+      } else expect(res.status).not.toBe(403);
+    });
+
+    it(`${label}: the free app itself opens only once the week is set and the photo and username are in`, async () => {
+      const h = await handler(row.route, row.method);
+      // the quiz is answered, the week is not set yet: the offer and the set-up only
+      freeAccount({ quiz_done_at: null, plan_days: [] });
+      let res = await h(req(row.method, { body: {} }));
+      if (row.access === "free_app") expect((await res.json()).state).toEqual({ kind: "free", stage: "offer" });
+      expect(res.status === 403).toBe(row.access === "free_app" || row.access === "player" || row.access === "member");
+      // the photo or the username is still owed
+      freeAccount();
+      s.viewer = { ...s.viewer!, setup: { available: true, username: null, hasPhoto: false, photoKey: null } };
+      res = await h(req(row.method, { body: {} }));
+      expect(res.status === 403).toBe(row.access === "free_app" || row.access === "player" || row.access === "member");
+      // the quiz cannot be stored yet (082 not applied): the free app is the website's
+      freeAccount();
+      s.intake = { available: false, answers: null, checkout: null };
+      res = await h(req(row.method, { body: {} }));
+      expect(res.status === 403).toBe(FOR_FREE.has(row.access) || row.access === "player" || row.access === "member");
+    });
   }
+});
+
+describe("nobody is signed in yet", () => {
+  it("says whether free sign-up is open, from the coaches' own switch", async () => {
+    const { GET } = await PUBLIC.freeOpen();
+    const ask = () => GET(new Request("https://thestriveapp.com/api/app/free/open", { headers: { "x-forwarded-for": `11.0.0.${ip++ % 250}` } }));
+    expect(await (await ask()).json()).toEqual({ open: true });
+    s.signupOpen = false;
+    const closed = await ask();
+    expect(await closed.json()).toEqual({ open: false });
+    expect(closed.headers.get("cache-control")).toContain("no-store");
+    expect(s.seenTokens).toEqual([]); // no viewer is resolved
+  });
+
+  it("joining free is the website's own route, and is rate limited", async () => {
+    const { POST } = await PUBLIC.freeJoin();
+    const join = () =>
+      POST(new Request("https://thestriveapp.com/api/app/free/join", { method: "POST", headers: { "x-forwarded-for": "12.12.12.12" }, body: "{}" }));
+    const codes: number[] = [];
+    for (let i = 0; i < 12; i++) codes.push((await join()).status);
+    expect(codes.slice(0, 10).every((c) => c === 200)).toBe(true);
+    expect(codes.slice(10)).toEqual([429, 429]);
+    expect(s.calls.filter((c) => c.fn === "join")).toHaveLength(10);
+    const src = (await import("node:fs")).readFileSync("app/api/app/free/join/route.ts", "utf8");
+    expect(src).toContain('import { POST as join } from "@/app/api/elite/auth/join/route"');
+  });
+});
+
+describe("a free account stays free until a membership is on", () => {
+  it("a Strive Pro row that is not switched on does not take the free app away", async () => {
+    const { memberState, livesInFreeApp, mayBeFree } = await import("@/lib/elite/member-gate");
+    const base = { role: "player" as const, playerId: "p1", isFree: true, freeStage: "ready" as const, consentDue: false };
+    // tapped Start, has not paid: still free
+    expect(memberState({ ...base, player: player({ subscription_status: "none", onboarded_at: null }) })).toEqual({ kind: "free", stage: "ready" });
+    // Strive Pro ended: back in the free app
+    expect(memberState({ ...base, player: player({ subscription_status: "canceled" }) }).kind).toBe("free");
+    // paid: a member, at the quiz (only what is still owed is asked)
+    expect(memberState({ ...base, player: player({ subscription_status: "active", onboarded_at: null }) }).kind).toBe("onboarding");
+    expect(memberState({ ...base, player: player() }).kind).toBe("ok");
+    // with no free account behind it, a Strive Pro row that has not paid is the checkout, as before
+    expect(memberState({ ...base, isFree: false, player: player({ subscription_status: "none" }) }).kind).toBe("pro_checkout");
+    // an Elite family is never read as a free account
+    expect(mayBeFree(player({ tier: "elite", subscription_status: "none" }))).toBe(false);
+    expect(mayBeFree(player({ subscription_status: "active" }))).toBe(false);
+    expect(mayBeFree(player({ subscription_status: "none" }))).toBe(true);
+    expect(livesInFreeApp({ hasTracker: false, hasPlayer: false, player: null })).toBe(false);
+    expect(livesInFreeApp({ hasTracker: true, hasPlayer: false, player: null })).toBe(true);
+    expect(livesInFreeApp({ hasTracker: true, hasPlayer: true, player: player() })).toBe(false);
+  });
+
+  it("the app API reads it the same way", async () => {
+    freeAccount();
+    s.viewer = viewer(); // the member row exists now
+    s.player = player({ subscription_status: "none", onboarded_at: null });
+    const feed = await (await handler("freeFeed", "GET"))(req("GET"));
+    expect(feed.status).toBe(200);
+    const week = await (await handler("week", "GET"))(req("GET"));
+    expect(week.status).toBe(403);
+    expect((await week.json()).state.kind).toBe("free");
+    // once paid, the free routes close and the member routes open
+    s.player = player({ subscription_status: "active" });
+    expect((await (await handler("freeFeed", "GET"))(req("GET"))).status).toBe(403);
+    expect((await (await handler("week", "GET"))(req("GET"))).status).toBe(200);
+  });
+
+  it("the website's member shell and its free shell use the same rule", async () => {
+    const { readFileSync } = await import("node:fs");
+    const layout = readFileSync("app/(player)/layout.tsx", "utf8");
+    expect(layout).toContain("mayBeFree(player) ? await getTracker(viewer.profile.id) : null");
+    expect(layout).toContain('if (state.kind === "free" && freeAccount) redirect(freeLanding(quizDone(freeAccount)));');
+    expect(readFileSync("lib/elite/tracker-server.ts", "utf8")).toContain("livesInFreeApp({ hasTracker: true, hasPlayer: true, player })");
+  });
 });
 
 describe("the gate, one rule with the website", () => {
@@ -497,6 +714,77 @@ describe("bodies are checked first", () => {
     const form = s.calls[1].args[1] as FormData;
     expect(form.get("current")).toBe("a");
     expect(form.get("next")).toBe("bbbbbbbb");
+  });
+});
+
+describe("the free app's bodies are checked first", () => {
+  it("intake: the answers go to the one saver, which answers for itself", async () => {
+    freeAccount({ quiz_done_at: null, plan_days: [] });
+    const h = await handler("freeIntake", "POST");
+    expect((await h(req("POST", { body: { answers: ANSWERS } }))).status).toBe(200);
+    expect(s.calls[0].fn).toBe("saveFreeIntake");
+    expect(s.calls[0].args.slice(0, 2)).toEqual(["u1", ANSWERS]); // the account comes from the token
+  });
+
+  it("the offer needs the quiz", async () => {
+    freeAccount();
+    const h = await handler("freeOffer", "GET");
+    expect((await h(req("GET"))).status).toBe(200);
+    s.intake = { available: true, answers: null, checkout: null };
+    expect((await h(req("GET"))).status).toBe(409);
+  });
+
+  it("starting a membership takes nothing from the request", async () => {
+    freeAccount();
+    const h = await handler("freeUpgrade", "POST");
+    const res = await h(req("POST", { body: { profileId: "someone-else", price: 1 } }));
+    expect(await res.json()).toEqual({ ok: true, url: "https://checkout.stripe.com/c/pay/cs_test_1" });
+    expect((s.calls[0].args[0] as { profile: { id: string } }).profile.id).toBe("u1");
+    expect(s.calls[0].args).toHaveLength(2); // the viewer and the phone's user agent, nothing else
+  });
+
+  it("log, props, report, block and friend need well-formed ids and choices", async () => {
+    freeAccount();
+    const id = "11111111-1111-4111-8111-111111111111";
+    const post = async (route: keyof typeof ROUTES, body: unknown, method = "POST") => (await (await handler(route, method))(req(method, { body }))).status;
+    expect(await post("freeLog", { minutes: "30", kind: "training" })).toBe(400);
+    expect(await post("freeLog", { minutes: 30, kind: "training" })).toBe(200);
+    expect(await post("freeLog", { id: "x" }, "DELETE")).toBe(400);
+    expect(await post("freeLog", { id }, "DELETE")).toBe(200);
+    expect(await post("freeProps", { id: "nope" })).toBe(400);
+    expect(await post("freeProps", { id })).toBe(200);
+    expect(await post("freeReport", { id, reason: "because" })).toBe(400);
+    expect(await post("freeReport", { id, reason: "bullying" })).toBe(200);
+    expect(await post("freeBlock", { id: 7 })).toBe(400);
+    expect(await post("freeBlock", { id })).toBe(200);
+    expect(await post("freeFriend", { id, accept: "yes" })).toBe(400);
+    expect(await post("freeFriend", { id, accept: true })).toBe(200);
+    expect(s.calls.map((c) => c.fn)).toEqual(["logTraining", "deleteLog", "toggleProps", "reportPost", "blockPlayer", "answerFriendRequest"]);
+  });
+
+  it("a post is stored by the website's own route", async () => {
+    freeAccount();
+    expect((await (await handler("freePost", "POST"))(req("POST", { body: {} }))).status).toBe(200);
+    expect(s.calls.map((c) => c.fn)).toEqual(["storePost"]);
+  });
+
+  it("a member who took the quiz as a free account is asked only what is still owed", async () => {
+    const h = await handler("onboarding", "POST");
+    s.player = player({ subscription_status: "active", onboarded_at: null });
+    const { cleanFreeAnswers, memberAnswersFrom } = await import("@/lib/elite/free-intake");
+    s.carried = memberAnswersFrom(cleanFreeAnswers(ANSWERS), 15);
+    // the parent screen is the one a free account was never shown
+    const short = await h(req("POST", { body: { answers: {} } }));
+    expect(short.status).toBe(400);
+    const ok = await h(req("POST", { body: { answers: { parentName: "Dana Bryant", level: "Elite", attrs: { weak_foot: 5 } } } }));
+    expect(ok.status).toBe(200);
+    const input = s.calls[0].args[0] as { parent_name: string; level: string; age: number; weaknesses: string[]; goals: string[] };
+    expect(input.parent_name).toBe("Dana Bryant");
+    // nothing already answered can be rewritten from the phone
+    expect(input.level).toBe("Competitive");
+    expect(input.weaknesses[0]).toBe("Weak foot");
+    expect(input.age).toBe(15);
+    expect(input.goals).toEqual(["Make a higher team"]);
   });
 });
 

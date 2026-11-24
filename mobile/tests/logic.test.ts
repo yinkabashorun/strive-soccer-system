@@ -1,12 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { chunkedStorage, CHUNK_SIZE, MAX_CHUNKS, parseCount, splitValue, type KV } from "@/auth/chunks";
 import { applyDone } from "@/week-cache";
-import { areaFor, inArea } from "@/navigation";
+import { areaFor, areaHome, inArea } from "@/navigation";
 import { clipOrder, clipsInView, liveClip, pickedAfterScroll, pickedAfterTap } from "@/course-view";
 import { drillEyebrow, repsTiles } from "@/drill-view";
-import { APP_TABS } from "@/tabs";
+import { APP_TABS, FREE_TABS } from "@/tabs";
 import { APP_API, appCoursePath, type AppCourse } from "@shared/app-contract";
-import { isStep, nextStepId, stepOrder, stepPosition } from "@/quiz-steps";
+import { isStep, nextStepId, quizStepIds, stepPosition } from "@/quiz-steps";
+import { JOIN_STEPS, isJoinStep } from "@/join-draft";
+import { FREE_STEPS } from "@shared/free-intake";
+import { UPGRADE_CARD_PLACES, UPGRADE_CARD_REST_DAYS, upgradeCard } from "@shared/upgrade-card";
 import { USERNAME_MESSAGES, normalizeUsername, usernameProblem } from "@shared/username";
 import type { AppWeek } from "@shared/app-contract";
 import { QUIZ_STEPS } from "@shared/quiz";
@@ -152,6 +155,75 @@ describe("where the app belongs", () => {
     expect(inArea("app", ["profile-setup"])).toBe(true); // changing them from Settings
   });
 
+  it("asks a new member for the photo BEFORE the door, so its card carries one", () => {
+    const owed = { username: null, hasPhoto: false, photoUrl: null, steps: ["username", "photo"] as ("username" | "photo")[], ideas: [] };
+    expect(areaFor(true, { kind: "onboarding" }, owed)).toBe("profile");
+    expect(areaFor(true, { kind: "onboarding" }, { ...owed, steps: [] })).toBe("onboarding");
+    // the photo is never a screen of the quiz, so nobody is asked twice
+    expect(quizStepIds({ state: { kind: "onboarding" }, quizOwed: null })).not.toContain("photo");
+    expect(quizStepIds({ state: { kind: "onboarding" }, quizOwed: null })).not.toContain("username");
+  });
+
+  it("walks a free account: the quiz, the photo, the offer, the free app", () => {
+    const owed = { username: null, hasPhoto: false, photoUrl: null, steps: ["username", "photo"] as ("username" | "photo")[], ideas: [] };
+    const set = { ...owed, username: "marcus.b", hasPhoto: true, steps: [] };
+    // the quiz first, whatever else is owed
+    expect(areaFor(true, { kind: "free", stage: "quiz" }, owed)).toBe("free-quiz");
+    // then the photo and @username, before the offer that shows their card
+    expect(areaFor(true, { kind: "free", stage: "offer" }, owed)).toBe("profile");
+    expect(areaFor(true, { kind: "free", stage: "offer" }, set)).toBe("free-offer");
+    expect(areaFor(true, { kind: "free", stage: "ready" }, set)).toBe("free");
+    expect(areaFor(true, { kind: "free", stage: "ready" }, owed)).toBe("profile");
+    // a server that cannot store the quiz yet: the log is the website's
+    expect(areaFor(true, { kind: "free", stage: "web" }, set)).toBe("gate");
+    // a free account never lands on the member tabs or the member gate
+    for (const stage of ["quiz", "offer", "ready"] as const) {
+      expect(areaFor(true, { kind: "free", stage }, set)).not.toBe("app");
+      expect(areaFor(true, { kind: "free", stage }, set)).not.toBe("gate");
+    }
+  });
+
+  it("keeps each free area to its own screens", () => {
+    expect(areaHome("free")).toBe("/(free)/friends");
+    expect(areaHome("free-offer")).toBe("/offer");
+    expect(areaHome("free-quiz")).toBe("/onboarding");
+    expect(areaHome("app")).toBe("/");
+    expect(areaHome("profile")).toBe("/profile-setup");
+    expect(inArea("free-quiz", ["onboarding", "grade"])).toBe(true);
+    expect(inArea("free-quiz", ["offer"])).toBe(false);
+    expect(inArea("free-quiz", ["(free)"])).toBe(false);
+    // after the quiz: the offer, then the week's set-up, and nothing else
+    expect(inArea("free-offer", ["offer"])).toBe(true);
+    expect(inArea("free-offer", ["week-plan"])).toBe(true);
+    expect(inArea("free-offer", ["(free)"])).toBe(false);
+    expect(inArea("free-offer", ["post"])).toBe(false);
+    // the free app: its tabs, posting, the offer again, its week, the profile
+    for (const seg of ["(free)", "post", "offer", "week-plan", "profile-setup", "settings", "delete-account", "change-password"]) {
+      expect(inArea("free", [seg])).toBe(true);
+    }
+    // never a member's screens
+    for (const seg of ["(tabs)", "session", "course", "extra", "checkin", "drop", "onboarding"]) {
+      expect(inArea("free", [seg])).toBe(false);
+    }
+    // and a member never the free app's
+    expect(inArea("app", ["(free)"])).toBe(false);
+    expect(inArea("app", ["post"])).toBe(false);
+    expect(inArea("app", ["offer"])).toBe(false);
+    // deleting the account is never behind anything
+    expect(inArea("free-quiz", ["delete-account"])).toBe(true);
+    expect(inArea("free-offer", ["settings"])).toBe(true);
+  });
+
+  it("lets someone signed out join free, and nothing else", () => {
+    expect(inArea("sign-in", ["sign-in"])).toBe(true);
+    expect(inArea("sign-in", ["join", "[step]"])).toBe(true);
+    expect(inArea("sign-in", ["offer"])).toBe(false);
+    expect(inArea("sign-in", ["(free)"])).toBe(false);
+    expect(JOIN_STEPS[0]).toBe("age"); // the birthday first: nothing is typed by someone under 13
+    expect(isJoinStep("agree")).toBe(true);
+    expect(isJoinStep("offer")).toBe(false);
+  });
+
   it("keeps account pages reachable and lets building finish", () => {
     expect(inArea("app", ["(tabs)"])).toBe(true);
     expect(inArea("app", ["session", "[n]"])).toBe(true);
@@ -193,16 +265,40 @@ describe("a drill's tiles", () => {
 });
 
 describe("the quiz screens", () => {
-  it("are the website's questions, then the profile while 081 is live", () => {
-    expect(stepOrder([])).toEqual(QUIZ_STEPS.map((s) => s.id));
-    expect(stepOrder(["username", "photo"]).slice(-2)).toEqual(["username", "photo"]);
-    expect(isStep("photo", [])).toBe(false);
-    expect(isStep("gender", [])).toBe(true);
-    expect(nextStepId("gender", [])).toBe("age");
-    expect(nextStepId("parent", [])).toBeNull();
-    expect(nextStepId("parent", ["username", "photo"])).toBe("username");
-    expect(nextStepId("photo", ["username", "photo"])).toBeNull();
-    expect(stepPosition("age", [])).toEqual({ index: 1, total: QUIZ_STEPS.length });
+  const member = quizStepIds({ state: { kind: "onboarding" }, quizOwed: null });
+  const free = quizStepIds({ state: { kind: "free", stage: "quiz" }, quizOwed: null });
+
+  it("are the website's questions for a member, in its order", () => {
+    expect(member).toEqual(QUIZ_STEPS.map((s) => s.id));
+    expect(quizStepIds(null)).toEqual(member);
+    expect(isStep("photo", member)).toBe(false);
+    expect(isStep("gender", member)).toBe(true);
+    expect(isStep(undefined, member)).toBe(false);
+    expect(nextStepId("gender", member)).toBe("age");
+    expect(nextStepId("parent", member)).toBeNull();
+    expect(stepPosition("age", member)).toEqual({ index: 1, total: QUIZ_STEPS.length });
+  });
+
+  it("are the same quiz for a free account, minus what only a member is asked", () => {
+    expect(free).toEqual(FREE_STEPS.map((s) => s.id));
+    // a tap instead of a typed age and typed goals; the parent is a member's
+    expect(free).toContain("grade");
+    expect(free).toContain("aim");
+    expect(free).not.toContain("age");
+    expect(free).not.toContain("goals");
+    expect(free).not.toContain("parent");
+    // every other screen is the member's own
+    const own = new Set(["grade", "aim"]);
+    expect(free.filter((s) => !own.has(s)).every((s) => member.includes(s))).toBe(true);
+    expect(nextStepId(free[free.length - 1], free)).toBeNull();
+  });
+
+  it("asks a member who took it while free only what is still owed", () => {
+    const owed = quizStepIds({ state: { kind: "onboarding" }, quizOwed: ["parent"] });
+    expect(owed).toEqual(["parent"]);
+    expect(stepPosition("parent", owed)).toEqual({ index: 0, total: 1 });
+    // nothing owed at all: the door builds the week at once
+    expect(quizStepIds({ state: { kind: "onboarding" }, quizOwed: [] })).toEqual([]);
   });
 
   it("the phone answers a username's shape with the website's own rule", () => {
@@ -217,6 +313,35 @@ describe("the tabs", () => {
   it("are the server's, in its order, with Courses between Week and You", () => {
     expect(APP_TABS.map((t) => t.key)).toEqual(["home", "week", "courses", "you"]);
     expect(APP_TABS.map((t) => t.route)).toEqual(["index", "week", "courses", "you"]);
+  });
+
+  it("are four in the free app: Friends, Week, Courses, You", () => {
+    expect(FREE_TABS.map((t) => t.label)).toEqual(["Friends", "Week", "Courses", "You"]);
+    expect(FREE_TABS.map((t) => t.route)).toEqual(["friends", "my-week", "courses", "me"]);
+    expect(areaHome("free")).toBe(`/(free)/${FREE_TABS[0].route}`);
+  });
+});
+
+describe("the one upgrade card", () => {
+  const base = { place: "week" as const, member: false, area: "Weak foot", sessions: 4, dismissedAt: null, now: Date.parse("2026-11-24T12:00:00Z") };
+
+  it("has one place in the whole free app", () => {
+    expect(UPGRADE_CARD_PLACES).toEqual(["week"]);
+    expect(upgradeCard(base)).not.toBeNull();
+  });
+
+  it("is never shown to a member, and stays away thirty days after Not now", () => {
+    expect(upgradeCard({ ...base, member: true })).toBeNull();
+    expect(UPGRADE_CARD_REST_DAYS).toBe(30);
+    const day = 24 * 60 * 60 * 1000;
+    expect(upgradeCard({ ...base, dismissedAt: base.now - 29 * day })).toBeNull();
+    expect(upgradeCard({ ...base, dismissedAt: base.now - 31 * day })).not.toBeNull();
+  });
+
+  it("says what a week would be, with no price, pressure or invented number", () => {
+    const said = JSON.stringify(upgradeCard(base));
+    expect(said).toMatch(/weak foot/);
+    expect(said).not.toMatch(/\$|%|only|last chance|hurry|limited|guarantee|\bAI\b|automated|algorithm|\u2014/i);
   });
 });
 

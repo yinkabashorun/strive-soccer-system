@@ -17,7 +17,15 @@
 # A fifth word, "film", also records the launch as a short video
 # (<name>.mp4): a picture shows where a screen ended up, a video shows how it
 # got there, and what moved after it. Kept to the screens that build
-# themselves in (the door, the gate, Home, the week arriving).
+# themselves in (the door, the gate, Home, the week arriving, the offer and
+# the free app's first screen).
+#
+# The example members: "ok" a member, "onboarding" a new member at the door
+# (03-door: the member card with their photo), "setup" one who still owes
+# the photo and @username, "locked" a FREE account in the free app (its
+# four tabs; 21 is its Courses shelf), "free_quiz" a new free account at
+# the quiz, "free_offer" one at the offer after it. 15-you is the member's
+# card with the photo; 33 is the free account's You.
 #
 # The 3, 2, 1 count-in is not here (a picture timed from launch would miss
 # it); sim/flows/03-session.yaml takes it by tapping Start.
@@ -51,6 +59,21 @@ SHOTS='
 19-change-password|ok|change-password|10
 20-delete-account|ok|delete-account|10
 21-courses-locked|locked|courses|12
+22-join-age|signedout|join/age|9
+23-join-name|signedout|join/name|9
+24-join-agree|signedout|join/agree|9
+25-free-start|free_quiz|-|11|film
+26-free-quiz-grade|free_quiz|onboarding/grade|10
+27-free-quiz-on-ball|free_quiz|onboarding/onBall|10
+28-free-quiz-aim|free_quiz|onboarding/aim|10
+29-offer|free_offer|-|13|film
+30-week-plan|free_offer|week-plan|10
+31-friends|locked|-|12|film
+32-free-week|locked|my-week|12
+33-free-you|locked|me|11
+34-post|locked|post|10
+35-offer-again|locked|offer|12
+36-free-settings|locked|settings|10
 '
 
 last=""

@@ -20,6 +20,7 @@
 import type { Drill, GeneratedDrill, GeneratedSession, Player, SessionTemplate, TrainingSpace } from "./types";
 import { PLYO_PILLAR, STRENGTH_PILLAR } from "./types";
 import { FOCUS_DRILLS_PER_SESSION, levelOf, type ProgramWeek } from "./program";
+import { drillPoster } from "./drill-poster";
 
 // What the builder knows about where a player trains (019 wall, 033 space)
 // and which course drills the coach has offered them (040).
@@ -213,6 +214,50 @@ function pillarFor(text: string): string | null {
   const hay = text.toLowerCase();
   for (const [re, pillar] of PILLAR_HINTS) if (re.test(hay)) return pillar;
   return null;
+}
+
+// The week a player WOULD get, shown before one is built (the offer a free
+// account sees after the quiz, Nov 24 2026). Given the areas the player
+// rated, weakest first, it names the first ones the filmed bank can really
+// train and a few of the drills for them, by the same mapping the builder
+// uses for a week (PILLAR_HINTS) and the same rules about who can do a
+// drill (drillFitsPlayer). Nothing is invented and nothing is promised
+// that the bank does not hold:
+//   - an area counts only when its own pillar has a drill this player can
+//     do (no fall-through to another pillar: the offer names the area)
+//   - only skill drills, never a warm-up, a finisher or a course drill
+//   - only a drill whose still is on our own domain, so it can be shown
+export function weekPreview(
+  bank: Drill[],
+  weakestFirst: readonly string[],
+  env?: PlayerEnv | null,
+  want: { areas: number; drills: number } = { areas: 2, drills: 4 }
+): { areas: string[]; drills: Drill[] } {
+  const pool = skillBank(bank)
+    .filter((d) => d.active && drillPoster(d.video_url) !== null && drillFitsPlayer(d, env))
+    .sort((a, b) => a.sort - b.sort || a.title.localeCompare(b.title));
+  const lists: Drill[][] = [];
+  const areas: string[] = [];
+  for (const label of weakestFirst) {
+    if (areas.length >= want.areas) break;
+    const pillar = pillarFor(label);
+    const list = pillar ? pool.filter((d) => d.pillar === pillar) : [];
+    if (list.length === 0) continue;
+    areas.push(label);
+    lists.push(list);
+  }
+  // one drill from each area in turn, so every named area is shown
+  const drills: Drill[] = [];
+  const seen = new Set<string>();
+  for (let i = 0; drills.length < want.drills && lists.some((l) => i < l.length); i++) {
+    for (const list of lists) {
+      const d = list[i];
+      if (!d || seen.has(d.id) || drills.length >= want.drills) continue;
+      seen.add(d.id);
+      drills.push(d);
+    }
+  }
+  return { areas, drills };
 }
 
 export function fromBank(d: Drill): GeneratedDrill {

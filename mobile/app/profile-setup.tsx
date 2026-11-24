@@ -12,15 +12,25 @@ import { FormScreen } from "@/FormScreen";
 import { Body, Eyebrow, Icon, Label, Press } from "@/ui";
 import { color } from "@/theme";
 
-// The profile photo and @username (081) outside the quiz: once for a member
-// who joined before they were part of onboarding (no skip, like the
-// website's one-time screen; Settings and Sign out stay reachable), and from
-// Settings to change either (?edit=username or ?edit=photo, with Back).
+// The profile photo and @username (081), the ONE screen that asks for them
+// (lib/elite/account-profile.ts profileSetupDue is the one rule that says
+// who owes them; src/navigation.ts says when):
+//   a new member        before the door, so the member card on it carries
+//                       their photo
+//   a free account      after its quiz and before the offer, which shows
+//                       their card
+//   a member from       once, before the app (no skip, like the website's
+//   before 081          one-time screen)
+// Settings and Sign out stay reachable. From Settings it changes either
+// one (?edit=username or ?edit=photo, with Back).
 export default function ProfileSetup() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { edit } = useLocalSearchParams<{ edit?: string }>();
-  const setup = useMe().data?.profileSetup;
+  const me = useMe().data;
+  const setup = me?.profileSetup;
+  // who sees the photo, in the website's words for each kind of account
+  const seenBy = me?.state.kind === "free" ? "your friends and the coaches" : "your coaches";
   const editing: SetupStep | null = edit === "username" || edit === "photo" ? edit : null;
   // The screens owed, fixed when this opens.
   const [steps] = useState<SetupStep[]>(() => (editing ? [editing] : setup?.steps ?? []));
@@ -49,7 +59,7 @@ export default function ProfileSetup() {
               {step === "username" ? (
                 <UsernameStep ideas={setup?.ideas ?? []} initial={setup?.username} onDone={() => void done()} />
               ) : (
-                <PhotoStep seenBy="your coaches" onDone={() => void done()} />
+                <PhotoStep seenBy={seenBy} onDone={() => void done()} />
               )}
             </View>
           </Animated.View>

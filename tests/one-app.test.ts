@@ -61,6 +61,14 @@ describe("who keeps the free app", () => {
     for (const access of ["account", "player", "person", "member", "free", "free_app"] as const) {
       expect(accessAllowed(access, social, false), access).toBe(true);
     }
+    // ...except the three that only make sense before Strive Pro is on:
+    // the quiz, the offer and the checkout. A member is never sent to pay
+    // a second time.
+    expect(accessAllowed("free_only", social, false)).toBe(false);
+    expect(accessAllowed("free_only", { kind: "free", stage: "offer" }, false)).toBe(true);
+    for (const [file, name] of [["intake", "free-intake"], ["offer", "free-offer"], ["upgrade", "free-upgrade"]]) {
+      expect(src(`app/api/app/free/${file}/route.ts`), file).toContain(`name: "${name}", access: "free_only"`);
+    }
     // a member with no free app is still refused the free routes
     expect(accessAllowed("free_app", { kind: "ok" }, false)).toBe(false);
     expect(accessAllowed("free", { kind: "ok" }, false)).toBe(false);

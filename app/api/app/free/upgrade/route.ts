@@ -8,7 +8,7 @@ import { startProFromFree } from "@/lib/elite/free-upgrade-server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export const POST = appRoute({ name: "free-upgrade", access: "free", limit: 10, windowMs: 10 * 60_000 }, async ({ req, viewer }) => {
+export const POST = appRoute({ name: "free-upgrade", access: "free_only", limit: 10, windowMs: 10 * 60_000 }, async ({ req, viewer }) => {
   const res = await startProFromFree(viewer, req.headers.get("user-agent"));
   return res.ok ? { ok: true, url: res.url } : appJson({ ok: false, error: res.error }, res.status);
 });

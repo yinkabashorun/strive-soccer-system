@@ -6,7 +6,7 @@ import { offerFor } from "@/lib/elite/free-app-server";
 // bank, and the membership's own words and price (lib/elite/offer.ts).
 export const dynamic = "force-dynamic";
 
-export const GET = appRoute({ name: "free-offer", access: "free" }, async ({ viewer, state, intake }) => {
+export const GET = appRoute({ name: "free-offer", access: "free_only" }, async ({ viewer, state, intake }) => {
   if (state.kind !== "free" || !intake?.answers) return appJson({ error: "quiz_first" }, 409);
   return offerFor(viewer, intake.answers, state.stage);
 });

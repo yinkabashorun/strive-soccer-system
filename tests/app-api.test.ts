@@ -405,7 +405,7 @@ const PUBLIC = {
   freeJoin: () => import("@/app/api/app/free/join/route"),
 };
 
-type Access = "account" | "player" | "member" | "person" | "free" | "free_app";
+type Access = "account" | "player" | "member" | "person" | "free" | "free_only" | "free_app";
 
 // Every handler, its method and the access level it must declare.
 const TABLE: { route: keyof typeof ROUTES; method: "GET" | "POST" | "DELETE"; access: Access }[] = [
@@ -428,11 +428,11 @@ const TABLE: { route: keyof typeof ROUTES; method: "GET" | "POST" | "DELETE"; ac
   { route: "photo", method: "GET", access: "person" },
   { route: "photo", method: "POST", access: "person" },
   // the free app
-  { route: "freeIntake", method: "POST", access: "free" },
-  { route: "freeOffer", method: "GET", access: "free" },
+  { route: "freeIntake", method: "POST", access: "free_only" },
+  { route: "freeOffer", method: "GET", access: "free_only" },
   { route: "freePlan", method: "GET", access: "free" },
   { route: "freePlan", method: "POST", access: "free" },
-  { route: "freeUpgrade", method: "POST", access: "free" },
+  { route: "freeUpgrade", method: "POST", access: "free_only" },
   { route: "freeUpgradeConfirm", method: "POST", access: "account" },
   { route: "freeFeed", method: "GET", access: "free_app" },
   { route: "freePost", method: "POST", access: "free_app" },
@@ -462,7 +462,7 @@ const TABLE: { route: keyof typeof ROUTES; method: "GET" | "POST" | "DELETE"; ac
   { route: "freeClubPlan", method: "POST", access: "free_app" },
   { route: "freePlayTerms", method: "POST", access: "free_app" },
 ];
-const FOR_FREE = new Set<Access>(["free", "free_app"]);
+const FOR_FREE = new Set<Access>(["free", "free_only", "free_app"]);
 
 // A free account in the free app: its week is set, its quiz is stored.
 const ANSWERS = {

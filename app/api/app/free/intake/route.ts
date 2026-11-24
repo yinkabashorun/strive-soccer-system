@@ -8,7 +8,7 @@ import { getTargetTable } from "@/lib/elite/tracker-server";
 // app's own four answers worked out from them.
 export const dynamic = "force-dynamic";
 
-export const POST = appRoute({ name: "free-intake", access: "free", limit: 10 }, async ({ req, viewer }) => {
+export const POST = appRoute({ name: "free-intake", access: "free_only", limit: 10 }, async ({ req, viewer }) => {
   const body = await readJson(req);
   const res = await saveFreeIntake(viewer.profile.id, body?.answers, await getTargetTable());
   if (res.ok) return { ok: true };

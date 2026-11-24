@@ -30,20 +30,25 @@ import type { Player } from "./types";
 //   person   a player account of either kind, a member or a free account,
 //            that has accepted the agreement: its own photo, its
 //            @username, this phone's push token
-//   free     a free account (069) the app can serve: the quiz, the offer,
-//            the week's set-up, starting a membership
+//   free     a free account (069) the app can serve: the week's set-up
+//            and an earned month. A Strive Pro member who came through
+//            the free app keeps these (lib/elite/one-app.ts).
+//   free_only a free account with NO membership on: the quiz, the offer
+//            and starting Strive Pro. Refused once Strive Pro is on, so a
+//            member can never be sent to a second checkout.
 //   free_app in the free app itself (the set-up is finished and the photo
 //            and @username are in, as the website's free shell requires):
 //            the feed, posting, the week, friends
-export type AppAccess = "account" | "player" | "member" | "person" | "free" | "free_app";
+export type AppAccess = "account" | "player" | "member" | "person" | "free" | "free_only" | "free_app";
 
 export type AppContext = {
   req: Request;
   viewer: Viewer;
   state: MemberState;
   player: Player | null;
-  // the free account behind this viewer and its quiz, when it lives in
-  // the free app (state.kind is "free")
+  // the free account behind this viewer and its quiz: a free account
+  // (state.kind is "free"), and a Strive Pro member who keeps the free app
+  // (state ok + social)
   tracker: Tracker | null;
   intake: StoredIntake | null;
 };
@@ -73,6 +78,7 @@ export function accessAllowed(access: AppAccess, state: MemberState, setupDue = 
   const social = state.kind === "ok" && state.social === true;
   if (access === "player") return player;
   if (access === "person") return player || state.kind === "free";
+  if (access === "free_only") return free;
   if (access === "free") return free || social;
   if (access === "free_app") return (free && state.stage === "ready" && !setupDue) || (social && !setupDue);
   return state.kind === "ok";

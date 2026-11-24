@@ -121,6 +121,7 @@ export default function RootLayout() {
               <Stack.Screen name="onboarding" options={{ animation: "fade", gestureEnabled: false }} />
               <Stack.Screen name="session/[n]" options={{ presentation: "fullScreenModal", animation: "fade", gestureEnabled: false }} />
               <Stack.Screen name="drop" options={{ presentation: "fullScreenModal", animation: "fade" }} />
+              <Stack.Screen name="course/[slug]" />
               <Stack.Screen name="extra" options={{ presentation: "modal" }} />
               <Stack.Screen name="checkin" options={{ presentation: "modal" }} />
               <Stack.Screen name="settings" />

@@ -3,10 +3,13 @@
 // phone can import this file without pulling in anything that runs on the
 // server (tests/app-shared.test.ts walks every import to hold that).
 import type { AppDrill, AppSession, AppWeek, AppYou } from "./app-payload";
+import type { AppCourse, AppCourseCard, AppCourseLevel, AppCourseList, AppCourseStep, AppLessonBlock } from "./app-courses";
 import type { LadderRung } from "./home";
 import type { AreaMinutes } from "./time-trained";
 
 export type { AppDrill, AppSession, AppWeek, AppYou, LadderRung, AreaMinutes };
+// The Courses library (lib/elite/app-courses.ts): the shelf, and one course.
+export type { AppCourse, AppCourseCard, AppCourseLevel, AppCourseList, AppCourseStep, AppLessonBlock };
 
 // lib/elite/gates.ts GateCopy, as the phone receives it.
 export type AppGate = { title: string; body: string; emailCoach: boolean; startPro?: boolean };
@@ -84,6 +87,12 @@ export const APP_API = {
   accountPassword: "/api/app/account/password",
   username: "/api/app/profile/username",
   photo: "/api/app/profile/photo",
+  courses: "/api/app/courses",
 } as const;
+
+// One course, by its slug: GET /api/app/courses/<slug>.
+export function appCoursePath(slug: string): string {
+  return `${APP_API.courses}/${encodeURIComponent(slug)}`;
+}
 
 export type AppUsernameAnswer = { ok: true; name: string } | { ok: false; name: string; error: string; taken?: boolean };

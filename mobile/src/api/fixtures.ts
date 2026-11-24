@@ -1,5 +1,16 @@
 import { Platform, Settings } from "react-native";
-import type { AppBootstrap, AppDrill, AppExtra, AppMemberState, AppWeek, AppYou } from "@shared/app-contract";
+import type {
+  AppBootstrap,
+  AppCourse,
+  AppCourseList,
+  AppCourseStep,
+  AppDrill,
+  AppExtra,
+  AppMemberState,
+  AppWeek,
+  AppYou,
+} from "@shared/app-contract";
+import { lessonBlocks } from "@shared/app-courses";
 import { MEDIA_BASE } from "@/config";
 
 // The example player the screens are drawn with for review screenshots
@@ -10,16 +21,20 @@ import { MEDIA_BASE } from "@/config";
 // stills are the real bank's.
 //
 // Which member the example is, chosen per run:
-//   browser    ?state=ok|consent|onboarding|membership|pro_checkout|setup|signedout
+//   browser    ?state=ok|consent|onboarding|membership|pro_checkout|setup|locked|signedout
 //   simulator  the launch argument -fixtureState <the same words>, which
 //              iOS hands the app as a setting (sim/shots.sh, sim/flows)
+//
+// "locked" is the member with the Courses shelf answered the way an account
+// that is not a member gets it (every course locked), so the locked cards
+// can be looked at on the Courses tab.
 //
 // Which screen it opens on, simulator only: the launch argument
 // -fixtureRoute <screen> (week, session/3, profile-setup?edit=photo). The
 // simulator's "open this link" command cannot be used for that: iOS answers
 // it with an "Open in Strive Elite?" box that stays on screen and covers
 // every picture after it (the first simulator run, Nov 23 2026).
-export const FIXTURE_STATES = ["ok", "consent", "onboarding", "membership", "pro_checkout", "setup", "signedout"] as const;
+export const FIXTURE_STATES = ["ok", "consent", "onboarding", "membership", "pro_checkout", "setup", "locked", "signedout"] as const;
 
 function chosenState(): string {
   let raw: unknown = null;
@@ -216,6 +231,188 @@ export const FIXTURE_EXTRA: AppExtra = {
   error: null,
 };
 
+// The Courses library: four of the real courses, cut short. The drills,
+// their clips and stills are the real bank's and the words are the
+// courses' own (supabase/migrations 041, 043, 044, 048 to 053, 057).
+function courseDrill(id: string, title: string, file: string, more: Partial<AppCourseStep> = {}): AppCourseStep {
+  return {
+    id,
+    kind: "drill",
+    title,
+    tag: null,
+    cue: null,
+    passMark: null,
+    blocks: [],
+    video: m(`/drills/${file}.mp4`),
+    poster: m(`/drills/posters/${file}.jpg`),
+    download: null,
+    ...more,
+  };
+}
+
+function coursePage(id: string, title: string, body: string): AppCourseStep {
+  return { id, kind: "lesson", title, tag: null, cue: null, passMark: null, blocks: lessonBlocks(body), video: null, poster: null, download: null };
+}
+
+export const FIXTURE_COURSES: AppCourse[] = [
+  {
+    slug: "keep-it-up",
+    name: "Keep It Up",
+    subtitle: "The Juggling Ladder",
+    kind: "drill",
+    intro: [
+      "Start at Level 1, even if you can already juggle.",
+      "Pass the catch version, then work the keep it up version, then move up.",
+      "A pass mark is in a row. A drop ends the attempt.",
+      "Film the day you pass a level.",
+    ],
+    cover: m("/drills/posters/juggling-one-touch-catch.jpg"),
+    levels: [
+      {
+        no: 1,
+        label: "Level 1",
+        name: "One touch",
+        steps: [
+          courseDrill("k11", "One touch, catch", "juggling-one-touch-catch", {
+            tag: "beginner",
+            cue: "Toe up, ankle locked, hit the middle of the ball.",
+            passMark: "10 in a row",
+          }),
+          courseDrill("k12", "One touch, keep it up", "juggling-one-touch-keep-it-up", { tag: "advanced", cue: "Small touches, both feet." }),
+        ],
+      },
+      {
+        no: 2,
+        label: "Level 2",
+        name: "Two touches each foot",
+        steps: [
+          courseDrill("k21", "Two touches each foot, catch", "juggling-two-touches-each-foot-catch", {
+            tag: "beginner",
+            cue: "The first touch is small, the second one sends it to your chest for the catch.",
+            passMark: "10 in a row",
+          }),
+          courseDrill("k22", "Two touches each foot, keep it up", "juggling-two-touches-each-foot-keep-it-up", {
+            tag: "advanced",
+            cue: "Small touches, stay on the balls of your feet.",
+          }),
+        ],
+      },
+    ],
+  },
+  {
+    slug: "weak-foot",
+    name: "Weak Foot",
+    subtitle: "Both feet, no excuses.",
+    kind: "drill",
+    intro: [],
+    cover: m("/drills/posters/weak-foot-tap-pull-push.jpg"),
+    levels: [
+      {
+        no: 1,
+        label: "Level 1",
+        name: "Touches",
+        steps: [
+          courseDrill("w11", "Weak foot tap, pull, push", "weak-foot-tap-pull-push", { tag: "beginner" }),
+          courseDrill("w12", "Weak foot outside pull, inside pull", "weak-foot-outside-pull-inside-pull", { tag: "advanced" }),
+        ],
+      },
+      {
+        no: 2,
+        label: "Level 2",
+        name: "Off the ground",
+        steps: [
+          courseDrill("w21", "Weak foot pop and settle", "weak-foot-pop-and-settle", { tag: "beginner" }),
+          courseDrill("w22", "Weak foot pop and juggle", "weak-foot-pop-and-juggle", { tag: "advanced" }),
+        ],
+      },
+    ],
+  },
+  {
+    slug: "speed",
+    name: "Speed",
+    subtitle: "Explosive first steps and quick feet.",
+    kind: "drill",
+    intro: ["Warm up first, every time.", "Work one level at a time. Full rest between reps; speed is never tired work.", "Land soft, leave fast."],
+    cover: m("/drills/posters/plyo-pogo-jumps.jpg"),
+    levels: [
+      {
+        no: 1,
+        label: "Level 1",
+        name: "Warm-up",
+        steps: [
+          courseDrill("s11", "Pogo jumps", "plyo-pogo-jumps"),
+          courseDrill("s12", "Lateral hops over object", "plyo-lateral-hops"),
+          courseDrill("s13", "Broad jumps", "plyo-broad-jumps"),
+        ],
+      },
+      {
+        no: 2,
+        label: "Level 2",
+        name: "Technique",
+        steps: [
+          courseDrill("s21", "Stop and go", "speed-stop-and-go"),
+          courseDrill("s22", "50%, 100%, 25%", "speed-50-100-25"),
+          courseDrill("s23", "Sprint around the cones", "speed-sprint-around-the-cones"),
+        ],
+      },
+    ],
+  },
+  {
+    slug: "general-nutrition-guide",
+    name: "General Nutrition Guide",
+    subtitle: "Fuel for a training day, a match day, and the hours between.",
+    kind: "lesson",
+    intro: [
+      "A guide, not a plan. General food guidance for a young player, nothing more.",
+      "No calorie counts, no supplements, no weight targets. Allergies, a medical condition or anything about weight is a conversation with your doctor, not a page in an app.",
+      "Ask us anything here. We will tell you what we know and when to ask someone else.",
+    ],
+    cover: m("/courses/general-nutrition-guide.jpg"),
+    levels: [
+      {
+        no: 1,
+        label: "Part 1",
+        name: "Start here",
+        steps: [
+          coursePage(
+            "n11",
+            "Three rules",
+            "Everything in this guide comes back to three things.\n\nEAT ENOUGH\nA player who trains four times a week and plays on the weekend needs more food than a kid who does not. Hungry is normal. Eat.\n\nEAT ON TIME\nThe same food at the wrong time is a heavy stomach at kickoff or an empty tank at the hour mark. The pages here are mostly about when.\n\nDRINK BEFORE YOU ARE THIRSTY\nBy the time you feel thirsty you are already behind. Water through the day, a bottle at every session.\n\nRULES OF THUMB\n\nThis is general guidance for healthy young players. It is not medical advice. Allergies, a condition, or any question about weight go to your doctor first.\n\nNothing here needs a supplement, a powder or a special product. Food from the grocery store does the job."
+          ),
+          coursePage(
+            "n12",
+            "The plate",
+            "The simplest picture of a good meal, and it works for breakfast, lunch and dinner.\n\nHALF THE PLATE\nFruit and vegetables. Any kind, any color, cooked or raw. More color, more good.\n\nA QUARTER\nCarbs. Rice, pasta, potatoes, bread, oats, tortillas. This is the fuel for the session; players who cut carbs run out of gas.\n\nA QUARTER\nProtein. Chicken, fish, eggs, beef, beans, yogurt, tofu. This is what repairs the legs after the work.\n\nRULES OF THUMB\n\nOn a training day or a match day, the carb quarter grows. That is the only change.\n\nPortions: roughly your own fist for carbs, your own palm for protein. Hands grow with the player, so the portion does too.\n\nWater with the meal. Milk is fine. Soda and energy drinks are not food."
+          ),
+        ],
+      },
+      {
+        no: 2,
+        label: "Part 2",
+        name: "A training day",
+        steps: [
+          coursePage(
+            "n21",
+            "Before training",
+            "Train on a full tank, never a full stomach.\n\nTWO TO THREE HOURS BEFORE\nA normal meal from the plate. Lunch before an after-school session; dinner early before an evening one.\n\nTHIRTY TO SIXTY MINUTES BEFORE\nSomething small and mostly carbs. A banana. Toast with peanut butter or jam. A granola bar. Pretzels. A small bowl of cereal.\n\nRULES OF THUMB\n\nIf practice is straight after school, the snack in the bag matters more than anything else on this page. Pack it in the morning.\n\nNothing new and nothing heavy close to a session. Fried food, a big burger or a milkshake an hour before is a stomach ache, not fuel.\n\nWater with the snack, and the bottle goes to the session full."
+          ),
+        ],
+      },
+    ],
+  },
+];
+
+// The shelf, as the server would cut it from those courses.
+export function fixtureShelf(): AppCourseList {
+  const locked = chosenState() === "locked";
+  return {
+    locked,
+    courses: FIXTURE_COURSES.map((c) => ({ slug: c.slug, name: c.name, subtitle: c.subtitle, cover: c.cover, locked })),
+  };
+}
+
+const COURSE_PATH = "/api/app/courses/";
+
 function stateFor(kind: string): AppMemberState {
   switch (kind) {
     case "consent":
@@ -290,5 +487,12 @@ export function fixtureResponse(path: string, method: string): unknown {
   if (path.startsWith("/api/app/drill")) return { ok: true, totalMinutes: FIXTURE_WEEK.totalMinutes };
   if (path.startsWith("/api/app/first-week")) return { status: "live", line: null };
   if (path.startsWith("/api/app/profile/username")) return { ok: true, name: "marcus.b" };
+  if (path.startsWith(COURSE_PATH)) {
+    const course = FIXTURE_COURSES.find((c) => c.slug === decodeURIComponent(path.slice(COURSE_PATH.length)));
+    // as the server: a course that is not on the shelf is not found
+    if (!course) throw Object.assign(new Error("not_found"), { status: 404 });
+    return { course };
+  }
+  if (path.startsWith("/api/app/courses")) return fixtureShelf();
   return { ok: true };
 }

@@ -268,6 +268,11 @@ export type EliteNotification = {
   body: string;
   read: boolean;
   created_at: string;
+  // Where the note opens: a path on our own site (088). Null on a row from
+  // before it, which stays plain text.
+  url?: string | null;
+  // The notice's key (088): one row per player per key.
+  dedupe_key?: string | null;
 };
 
 // One roster row for the coach (elite_coach_roster RPC / TS fallback).

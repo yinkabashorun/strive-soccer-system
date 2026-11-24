@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { DeviceSettings } from "./DeviceSettings";
+import { NoticeChoices } from "./NoticeChoices";
+import type { NoticePrefs } from "@/lib/elite/notice-prefs";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
@@ -22,6 +24,7 @@ export function FreeSettings({
   blockedCount,
   inviteLink,
   canChangePassword,
+  notices,
   signOut,
 }: {
   me: { name: string; initials: string; photo: string | null; level: number; progress: number };
@@ -30,6 +33,8 @@ export function FreeSettings({
   blockedCount: number;
   inviteLink: string;
   canChangePassword: boolean;
+  // what this player may be told about (088): Friends, Clubs
+  notices: NoticePrefs;
   signOut: () => Promise<void>;
 }) {
   const router = useRouter();
@@ -67,6 +72,15 @@ export function FreeSettings({
         <div className="-ml-4">
           <DeviceSettings showNotifications variant="free" />
         </div>
+
+        {notices.topics.length > 0 && (
+          <>
+            <Head>Notifications</Head>
+            <div className="-ml-4">
+              <NoticeChoices prefs={notices} />
+            </div>
+          </>
+        )}
 
         <Head>Friends</Head>
         <Row onClick={send} icon={<IconLink />} label={copied ? "Link copied" : "Send my link"} chevron />

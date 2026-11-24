@@ -35,6 +35,10 @@
 # plan screen; 43 join by code; 44 the matchup's "How it works" sheet; 45 a
 # club whose week is decided ("Your club won the week."); 46 Start a club.
 #
+# 18b is the Inbox (the small bell on Home): the member's notes, the newest
+# with its gold dot. 18-settings carries the Notifications choices under
+# This phone; sim/flows/11-inbox.yaml opens the Inbox by the bell.
+#
 # The 3, 2, 1 count-in is not here (a picture timed from launch would miss
 # it); sim/flows/03-session.yaml takes it by tapping Start.
 set -uo pipefail
@@ -64,6 +68,7 @@ SHOTS='
 16-extra|ok|extra|11
 17-checkin|ok|checkin|10
 18-settings|ok|settings|10
+18b-inbox|ok|inbox|11
 19-change-password|ok|change-password|10
 20-delete-account|ok|delete-account|10
 21-courses-locked|locked|courses|12

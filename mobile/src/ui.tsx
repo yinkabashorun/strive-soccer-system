@@ -288,7 +288,7 @@ export function Icon({ name, size = 22, stroke = color.bone, fill }: { name: Ico
   );
 }
 
-export type IconName = "play" | "check" | "close" | "timer" | "chevron" | "back" | "plus" | "lock" | "download";
+export type IconName = "play" | "check" | "close" | "timer" | "chevron" | "back" | "plus" | "lock" | "download" | "bell";
 const ICONS: Record<IconName, string> = {
   play: "M7 4.5v15l13-7.5z",
   check: "m5 12.5 4.5 4.5L19 7.5",
@@ -299,6 +299,7 @@ const ICONS: Record<IconName, string> = {
   plus: "M12 5v14M5 12h14",
   lock: "M7.5 11V8a4.5 4.5 0 0 1 9 0v3M6.5 11h11a1.5 1.5 0 0 1 1.5 1.5v6a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 18.5v-6A1.5 1.5 0 0 1 6.5 11z",
   download: "M12 4v11M7.5 10.5 12 15l4.5-4.5M5 20h14",
+  bell: "M6 9.5a6 6 0 1 1 12 0c0 4.5 1.8 6 1.8 6H4.2S6 14 6 9.5zM10 19a2.1 2.1 0 0 0 4 0",
 };
 
 export function SettingRow({
@@ -321,7 +322,7 @@ export function SettingRow({
       <View style={{ flex: 1 }}>
         <Label style={danger ? { color: color.danger } : null}>{label}</Label>
         {detail ? (
-          <Body dim size={13} style={{ marginTop: 2 }} numberOfLines={2}>
+          <Body dim size={13} style={{ marginTop: 2 }} numberOfLines={3}>
             {detail}
           </Body>
         ) : null}

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { APP_URL } from "@/lib/elite/app-url";
 import { createServiceClient } from "@/lib/elite/supabase/server";
 import { sendPlayerSMS } from "@/lib/elite/sms";
+import { NUDGE_LAST_DAY, onboardingNudgeDue } from "@/lib/elite/onboarding-nudge";
 
 export const runtime = "nodejs";
 // Never let Next prerender this at build time: a GET route handler with no
@@ -18,10 +19,11 @@ export const fetchCache = "force-no-store";
 export const maxDuration = 60;
 
 // Nudges families who redeemed an invite code but never finished the
-// in-app intake (elite_players.onboarded_at is still null) - previously
-// there was nothing at all reminding them, so a stalled signup just sat
-// silently forever. Runs daily; gives a family a full day before the
-// first nudge, then re-nudges at most every 3 days so it doesn't spam.
+// in-app intake (elite_players.onboarded_at is still null). Runs daily.
+// WHEN is one pure rule, lib/elite/onboarding-nudge.ts: at most three
+// texts, on days 1, 4 and 7 after joining, and never after day 8. (It used
+// to go out every three days for as long as the profile stayed unfinished,
+// with no end.) The words are Coach Yinka's own and are not changed here.
 export async function GET(req: Request) {
   const secret = process.env.CRON_SECRET;
   if (secret && req.headers.get("authorization") !== `Bearer ${secret}`) {
@@ -31,18 +33,26 @@ export async function GET(req: Request) {
   const admin = createServiceClient();
   if (!admin) return NextResponse.json({ ok: true, reminded: 0 });
 
-  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
-  const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString();
+  const now = Date.now();
+  const DAY_MS = 24 * 60 * 60 * 1000;
+  const oneDayAgo = new Date(now - DAY_MS).toISOString();
+  // Nobody past the last day is read at all.
+  const tooOld = new Date(now - (NUDGE_LAST_DAY + 1) * DAY_MS).toISOString();
   const appUrl = APP_URL;
 
   const { data: stale } = await admin
     .from("elite_players")
     .select("id, full_name, joined_at, onboarding_reminder_sent_at")
     .is("onboarded_at", null)
-    .lt("joined_at", oneDayAgo);
+    .lt("joined_at", oneDayAgo)
+    .gt("joined_at", tooOld);
 
-  const targets = (stale ?? []).filter(
-    (p) => !p.onboarding_reminder_sent_at || p.onboarding_reminder_sent_at < threeDaysAgo
+  const targets = (stale ?? []).filter((p) =>
+    onboardingNudgeDue({
+      joinedAt: p.joined_at as string | null,
+      lastSentAt: p.onboarding_reminder_sent_at as string | null,
+      now,
+    })
   );
 
   let reminded = 0;

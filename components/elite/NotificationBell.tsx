@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { Bell } from "lucide-react";
 import type { EliteNotification } from "@/lib/elite/types";
 import { markAllNotificationsRead } from "@/lib/elite/player-actions";
 import { badgeText, bellList, openBell, unreadCount } from "@/lib/elite/bell";
+import { cleanNoticePath } from "@/lib/elite/notices";
 import { cn, timeAgo } from "@/lib/utils";
 
 // In-app notification bell for the player. Opening the list is reading
@@ -12,6 +14,11 @@ import { cn, timeAgo } from "@/lib/utils";
 // example player) and the red count clears at once. The notes that were
 // new stay marked with a gold dot until the list is closed. Rules in
 // lib/elite/bell.ts.
+//
+// A note that says where it goes (elite_notifications.url, migration 088)
+// is a link to that page of ours: a tap opens it in this same window and
+// closes the list, so nothing ever leaves the app for Safari. A note from
+// before 088 has no address and stays plain text.
 export function NotificationBell({
   initial,
 }: {
@@ -85,14 +92,14 @@ export function NotificationBell({
               ) : (
                 shown.map((n) => {
                   const isFresh = fresh.includes(n.id);
-                  return (
-                    <div
-                      key={n.id}
-                      className={cn(
-                        "flex gap-3 border-b border-white/5 px-4 py-3 last:border-b-0",
-                        isFresh && "bg-accent/[0.04]"
-                      )}
-                    >
+                  const path = cleanNoticePath(n.url);
+                  const row = cn(
+                    "flex min-h-[44px] gap-3 border-b border-white/5 px-4 py-3 last:border-b-0",
+                    isFresh && "bg-accent/[0.04]",
+                    path && "transition-colors hover:bg-white/[0.04] active:bg-white/[0.06]"
+                  );
+                  const inside = (
+                    <>
                       <span
                         aria-hidden
                         className={cn(
@@ -100,7 +107,7 @@ export function NotificationBell({
                           isFresh ? "bg-accent" : "bg-transparent"
                         )}
                       />
-                      <span className="min-w-0 flex-1 select-text">
+                      <span className={cn("min-w-0 flex-1", !path && "select-text")}>
                         <span className="block text-sm font-semibold text-bone">
                           {isFresh && <span className="sr-only">New: </span>}
                           {n.title}
@@ -112,6 +119,15 @@ export function NotificationBell({
                           {timeAgo(n.created_at)}
                         </span>
                       </span>
+                    </>
+                  );
+                  return path ? (
+                    <Link key={n.id} href={path} onClick={close} className={row}>
+                      {inside}
+                    </Link>
+                  ) : (
+                    <div key={n.id} className={row}>
+                      {inside}
                     </div>
                   );
                 })

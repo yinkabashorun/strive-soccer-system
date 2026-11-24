@@ -7,8 +7,8 @@
 
 import { createServiceClient } from "./supabase/server";
 import { sendPlayerEmail } from "./email";
-import { sendPushToPlayer } from "./push";
-import { weekUnlockedPush } from "./push-texts";
+import { notifyPlayer } from "./notify";
+import { newWeekNotice } from "./notices";
 import { sendPlayerSMS } from "./sms";
 import { buildParentRecap } from "./parent-recap";
 import { SESSIONS_PER_WEEK, sessionsWord } from "./training";
@@ -80,22 +80,17 @@ export async function unlockDueWeeks(): Promise<void> {
     // claim for this week.
     if (!maySend(await claimWeekAnnouncement(admin, plan.player_id as string, plan.week as number))) continue;
 
-    await admin.from("elite_notifications").insert({
-      player_id: plan.player_id,
-      kind: "new_week",
-      title: first ? `Week ${plan.week} is ready, ${first}` : `Week ${plan.week} is ready`,
-      body: plan.focus || "Your coach set your focus for the week.",
-    });
+    // The bell row, the push and the email subject are one notice
+    // (lib/elite/notices.ts newWeekNotice, the same builder a week that
+    // goes live at once uses). At 6:00 AM New York it arrives quietly.
+    const notice = newWeekNotice({ first, week: plan.week, firstWeek: plan.week === 1, focus: plan.focus });
+    await notifyPlayer(plan.player_id as string, notice);
 
     await sendPlayerEmail(plan.player_id, {
       event: "new_week",
-      subject: first ? `Week ${plan.week} is live, ${first}` : `Week ${plan.week} is live`,
+      subject: notice.title,
       body: `The new training week just unlocked.\n\nThis week's focus: ${plan.focus}\n\n${sessionsSaid} sessions, plyo warm-up first, every time. Open the app and start Session 1.`,
     }).catch(() => undefined);
-    await sendPushToPlayer(
-      plan.player_id,
-      weekUnlockedPush({ first, week: plan.week, focus: plan.focus })
-    ).catch(() => undefined);
     await sendPlayerSMS(plan.player_id, {
       event: "new_week",
       message: `${greeting}${first || "Your player"}'s week ${plan.week} just went live. This week: ${plan.focus} Let's have ${first || "them"} open the app and get started on Session 1: ${APP_URL}/dashboard`,

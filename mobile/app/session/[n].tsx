@@ -18,7 +18,7 @@ import { fmtDuration } from "@shared/time-trained";
 import type { AppSession, AppWeek } from "@shared/app-contract";
 import { newClock, resetDrill, secondsOn, showDrill } from "@shared/drill-clock";
 import { cappedSeconds, creditedMinutes } from "@shared/time-trained";
-import { useMe, useToggleDrill, useWeek } from "@/api/queries";
+import { useMe, useNoticePrefs, useSaveNoticePrefs, useToggleDrill, useWeek } from "@/api/queries";
 import { useRefused, useTicks } from "@/outbox";
 import { REFUSED_LINE, UNSENT_LINE } from "@/outbox-core";
 import { DrillVideo } from "@/DrillVideo";
@@ -28,6 +28,7 @@ import { drillEyebrow, repsTiles } from "@/drill-view";
 import { cue, feel, tick } from "@/feel";
 import { usePrefs } from "@/prefs";
 import { turnOnNotifications } from "@/push";
+import { ReminderChips } from "@/NoticeChoices";
 import { Body, Button, Disc, Eyebrow, Head, Icon, Label, Press, Ring } from "@/ui";
 import { color } from "@/theme";
 
@@ -274,7 +275,14 @@ function Finish({
   const insets = useSafeAreaInsets();
   const reduce = useReducedMotion();
   const [shown, setShown] = useState(reduce ? finish.added : 0);
-  const [push, setPush] = useState<"ask" | "done" | "skip">(askPush ? "ask" : "skip");
+  // "time": they just said yes, and are asked once when they usually
+  // train, so the one daily reminder comes then. One tap answers and it is
+  // gone; doing nothing skips it. Never asked at sign-up or at launch, and
+  // not asked at all while the answer cannot be stored.
+  const [push, setPush] = useState<"ask" | "time" | "done" | "skip">(askPush ? "ask" : "skip");
+  const noticePrefs = useNoticePrefs();
+  const saveNoticePrefs = useSaveNoticePrefs();
+  const reminder = noticePrefs.data?.reminder ?? null;
 
   // The minutes count up while the ring closes.
   useEffect(() => {
@@ -367,10 +375,28 @@ function Finish({
                 style={{ flex: 1 }}
                 label="Turn on"
                 onPress={() => {
-                  void turnOnNotifications().finally(() => setPush("done"));
+                  void turnOnNotifications()
+                    .then((on) => setPush(on && reminder ? "time" : "done"))
+                    .catch(() => setPush("done"));
                 }}
               />
             </View>
+          </View>
+        ) : null}
+        {push === "time" && reminder ? (
+          <View style={styles.ask}>
+            <Label>{reminder.question}</Label>
+            <Body dim size={13} style={{ marginTop: 4 }}>
+              One reminder a day, at that time, on days you have a session left.
+            </Body>
+            <ReminderChips
+              choices={reminder.choices}
+              chosen={null}
+              onPick={(key) => {
+                saveNoticePrefs.mutate({ reminder: key });
+                setPush("done");
+              }}
+            />
           </View>
         ) : null}
         <Button label="Back home" onPress={onHome} />

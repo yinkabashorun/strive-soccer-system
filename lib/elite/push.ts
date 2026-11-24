@@ -7,7 +7,7 @@
 import webpush from "web-push";
 import { createServiceClient } from "./supabase/server";
 import type { PushStatus } from "./install";
-import { isNativePushConfigured, sendApns } from "./apns";
+import { isNativePushConfigured, sendApns, type ApnsPayload } from "./apns";
 
 const PUBLIC_KEY = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 const PRIVATE_KEY = process.env.VAPID_PRIVATE_KEY;
@@ -53,7 +53,26 @@ export async function getPushStatus(): Promise<PushStatus> {
   return status;
 }
 
-export type PushPayload = { title: string; body: string; url?: string };
+// A push as lib/elite/notify.ts hands it over: the notice's words, where a
+// tap opens, the topic and kind, a collapse id, and whether it arrives
+// quietly. Callers never build one by hand: every push is a notice
+// (lib/elite/notices.ts), sent by notifyPlayer / notifyProfile.
+export type PushPayload = ApnsPayload;
+
+// What a browser is sent (public/sw.js reads it): `tag` is the collapse id
+// (a later notification with the same tag replaces the earlier one) and
+// `silent` the quiet delivery.
+export function webPushBody(payload: PushPayload): string {
+  return JSON.stringify({
+    title: payload.title,
+    body: payload.body,
+    url: payload.url ?? "/",
+    ...(payload.topic ? { topic: payload.topic } : {}),
+    ...(payload.kind ? { kind: payload.kind } : {}),
+    ...(payload.collapse ? { tag: payload.collapse } : {}),
+    ...(payload.quiet ? { silent: true } : {}),
+  });
+}
 
 // Push to every device a player has on file: browsers and home-screen web
 // apps through Web Push, the App Store app through Apple's push service
@@ -102,7 +121,7 @@ async function sendToDevices(
               endpoint: s.endpoint,
               keys: { p256dh: s.p256dh, auth: s.auth },
             },
-            JSON.stringify(payload)
+            webPushBody(payload)
           );
           sent++;
         } catch (err: unknown) {

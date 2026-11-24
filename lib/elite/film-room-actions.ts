@@ -24,7 +24,7 @@ import {
 } from "./film-room";
 import { withoutPlayersOnBreak } from "./health";
 import { sendPlayerOwnSMS, sendPlayerSMS } from "./sms";
-import { sendPushToPlayer } from "./push";
+import { notifyPlayer } from "./notify";
 import { sendCoachEmail, sendPlayerEmail } from "./email";
 import { coachCallsUrl, filmRoomText, textCoaches } from "./coach-alerts";
 
@@ -53,12 +53,15 @@ function refresh() {
   revalidatePath("/dashboard");
 }
 
-// Tell every active member (not on a break) by a text to the parent and one to the player's own phone, push,
-// email and the in-app bell. Best-effort per channel, never throws.
+// Tell every active member (not on a break) by a text to the parent and one
+// to the player's own phone, and by the announcement's notice: the bell
+// row and the push through the one sender (lib/elite/notify.ts, once per
+// Film Room or check-in day for each member), and the email under the same
+// title. Best-effort per channel, never throws. `event` names the text and
+// the email for the texting provider.
 async function notifyMembers(
   db: SupabaseClient,
-  kind: string,
-  url: string,
+  event: string,
   // Only members whose offer includes this (Strive Pro has no Film Room
   // and no check-in calls, lib/elite/tiers.ts): nobody is told about
   // something they cannot use.
@@ -79,19 +82,15 @@ async function notifyMembers(
   await Promise.all(
     members.map(async (p) => {
       const m = build(p);
-      await db
-        .from("elite_notifications")
-        .insert({ player_id: p.id, kind, title: m.inAppTitle, body: m.inAppBody })
-        .then(() => undefined, () => undefined);
-      const [sms, own, push] = await Promise.all([
-        sendPlayerSMS(p.id, { event: kind, message: m.sms }).catch(() => false),
-        sendPlayerOwnSMS(p.id, { event: kind, message: m.playerSms }).catch(() => false),
-        sendPushToPlayer(p.id, { title: m.pushTitle, body: m.pushBody, url }).catch(() => ({ sent: 0 })),
-        sendPlayerEmail(p.id, { event: kind, subject: m.inAppTitle, body: m.inAppBody }).catch(() => false),
+      const [sms, own, told] = await Promise.all([
+        sendPlayerSMS(p.id, { event, message: m.sms }).catch(() => false),
+        sendPlayerOwnSMS(p.id, { event, message: m.playerSms }).catch(() => false),
+        notifyPlayer(p.id, m.notice, { db }),
+        sendPlayerEmail(p.id, { event, subject: m.notice.title, body: m.notice.body }).catch(() => false),
       ]);
       if (sms) texted++;
       if (own) texted++;
-      pushed += push.sent;
+      pushed += told.pushed;
     })
   );
   return { members: members.length, texted, pushed };
@@ -155,8 +154,9 @@ export async function saveFilmRoom(input: {
           : "Couldn't save. Run database migration 062 first.",
     };
   }
-  const counts = await notifyMembers(db, "film_room", "/film", "filmRoom", (p) =>
+  const counts = await notifyMembers(db, "film_room", "filmRoom", (p) =>
     filmRoomAnnouncement({
+      roomId: room.id,
       parentName: p.parent_name,
       playerName: p.full_name,
       scheduledAt: room.scheduled_at,
@@ -270,8 +270,9 @@ export async function announceCheckinDay(id: string, again = false) {
     return { ok: false as const, error: "That day has already happened." };
   }
   await db.from("elite_checkin_days").update({ announced_at: day.announced_at ?? new Date().toISOString() }).eq("id", id);
-  const counts = await notifyMembers(db, "checkin_open", "/dashboard", "monthlyCheckin", (p) =>
+  const counts = await notifyMembers(db, "checkin_open", "monthlyCheckin", (p) =>
     checkinAnnouncement({
+      dayId: day.id,
       parentName: p.parent_name,
       playerName: p.full_name,
       startsAt: day.starts_at,

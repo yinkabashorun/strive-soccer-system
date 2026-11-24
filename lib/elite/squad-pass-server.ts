@@ -3,8 +3,8 @@
 // client: no player can write a count or a month for themselves.
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServiceClient } from "./supabase/server";
-import { sendPushToProfile } from "./push";
-import { squadPassPush } from "./push-texts";
+import { notifyProfile } from "./notify";
+import { squadPassNotice } from "./notices";
 import { recordConsent } from "./legal-server";
 import { createProMember } from "./pro-server";
 import { getTracker, type Tracker } from "./tracker-server";
@@ -64,7 +64,7 @@ async function grantPasses(admin: SupabaseClient, profileId: string): Promise<vo
     if (!error) fresh++;
   }
   // told once: only the insert that made the month sends
-  if (fresh > 0) await sendPushToProfile(profileId, squadPassPush()).catch(() => ({ sent: 0 }));
+  if (fresh > 0) await notifyProfile(profileId, squadPassNotice({ number: earned }));
 }
 
 // What the invite card shows a free player.

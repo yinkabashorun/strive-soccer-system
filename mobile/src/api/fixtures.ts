@@ -23,6 +23,11 @@ import { MEDIA_BASE } from "@/config";
 import { fixtureClubs } from "./fixtures-clubs";
 import { buildSquad } from "@shared/squad-pass";
 import { firstDays } from "@shared/first-days";
+import type { AppInbox } from "@shared/app-contract";
+import type { NoticePrefs } from "@shared/notice-prefs";
+import { buildNoticePrefs, withTopic } from "@shared/notice-prefs";
+import { earnedNotice, newWeekNotice, welcomeNotice, type NoticeTopic } from "@shared/notices";
+import { reminderChoice } from "@shared/reminders";
 
 // The example player the screens are drawn with for review screenshots
 // (EXPO_PUBLIC_FIXTURES=1): the browser build (scripts/screenshots.mjs) and
@@ -716,7 +721,8 @@ export function fixtureBootstrap(): AppBootstrap {
       { key: "courses", label: "Courses" },
       { key: "you", label: "You" },
     ],
-    unread: 0,
+    // one note the example member has not read: Home's bell shows its dot
+    unread: l.free || inboxRead ? 0 : 1,
     // ?state=setup: a member from before 081 who still owes both screens,
     // and a new free account until it has picked them. Everyone else has a
     // photo (a drill still standing in for one), so every card and every
@@ -767,6 +773,44 @@ function fixtureFree(path: string, method: string, body?: unknown): unknown {
 // saved drill adds up the way the real one does (the all-time minutes with
 // that drill in or out), not a fixed figure.
 const fixtureDone = new Map<string, boolean>();
+// The Inbox of the example member: the words are the catalogue's own
+// (lib/elite/notices.ts), so a picture of this screen is a picture of what
+// a member is really sent. The first is new until the Inbox is opened.
+let inboxRead = false;
+const HOUR = 3_600_000;
+function fixtureInbox(): AppInbox {
+  const week = newWeekNotice({ first: "Marcus", week: FIXTURE_WEEK.week, firstWeek: false, focus: FIXTURE_WEEK.focus });
+  const medal = earnedNotice({ title: "10 Sessions", detail: "Ten full sessions in the bank" });
+  const first = earnedNotice({ title: "First Session", detail: "Your first full session, done" });
+  const welcome = welcomeNotice();
+  const at = (hoursAgo: number) => new Date(Date.now() - hoursAgo * HOUR).toISOString();
+  return {
+    notices: [
+      { id: "n1", kind: week.kind, topic: week.topic, title: week.title, body: week.body, at: at(3), fresh: !inboxRead, path: week.path },
+      { id: "n2", kind: medal.kind, topic: medal.topic, title: medal.title, body: medal.body, at: at(52), fresh: false, path: medal.path },
+      { id: "n3", kind: first.kind, topic: first.topic, title: first.title, body: first.body, at: at(24 * 40), fresh: false, path: first.path },
+      { id: "n4", kind: welcome.kind, topic: welcome.topic, title: welcome.title, body: welcome.body, at: at(24 * 44), fresh: false, path: welcome.path },
+    ],
+  };
+}
+
+// The notification choices of the example account, kept in memory: a
+// member's ("Your week", and the reminder time) or a free account's
+// ("Friends", "Clubs").
+let noticeOff: NoticeTopic[] = [];
+let reminderHour: number | null = null;
+function fixtureNoticePrefs(): NoticePrefs {
+  const free = now().free;
+  return buildNoticePrefs({ member: !free, free, coachTime: false, off: noticeOff, reminderHour: free ? undefined : reminderHour });
+}
+function fixtureSavePrefs(body: unknown): unknown {
+  const b = (body ?? {}) as { topic?: unknown; on?: unknown; reminder?: unknown };
+  if (typeof b.topic === "string" && typeof b.on === "boolean") noticeOff = withTopic(noticeOff, b.topic as NoticeTopic, b.on);
+  const choice = reminderChoice(b.reminder);
+  if (choice) reminderHour = choice.hour;
+  return { ok: true, prefs: fixtureNoticePrefs() };
+}
+
 function fixtureTotalAfter(body: unknown): number {
   const b = body as { id?: string; completed?: boolean } | undefined;
   if (b?.id && typeof b.completed === "boolean") fixtureDone.set(b.id, b.completed);
@@ -782,6 +826,12 @@ function fixtureTotalAfter(body: unknown): number {
 export function fixtureResponse(path: string, method: string, body?: unknown): unknown {
   if (path.startsWith("/api/app/free/")) return fixtureFree(path, method, body);
   if (path.startsWith("/api/app/me")) return fixtureBootstrap();
+  if (path.startsWith("/api/app/notices/prefs")) return method === "GET" ? { prefs: fixtureNoticePrefs() } : fixtureSavePrefs(body);
+  if (path.startsWith("/api/app/notices")) {
+    if (method === "GET") return fixtureInbox();
+    inboxRead = true;
+    return { ok: true };
+  }
   if (path.startsWith("/api/app/week")) return { week: FIXTURE_WEEK };
   if (path.startsWith("/api/app/you")) return { you: FIXTURE_YOU };
   if (path.startsWith("/api/app/extra")) return method === "GET" ? FIXTURE_EXTRA : { ok: true, session: 5 };

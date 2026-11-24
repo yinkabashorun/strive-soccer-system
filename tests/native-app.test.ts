@@ -50,11 +50,19 @@ describe("Apple push: the provider token", () => {
 
 describe("Apple push: the message and dead devices", () => {
   it("carries the title, the body and the screen to open", () => {
-    expect(JSON.parse(apnsBody({ title: "Week 4 is live", body: "Open it.", url: "/dashboard" }))).toEqual({
-      aps: { alert: { title: "Week 4 is live", body: "Open it." }, sound: "default" },
+    expect(JSON.parse(apnsBody({ title: "Week 4 is here", body: "Your new training week is ready.", url: "/dashboard" }))).toEqual({
+      aps: { alert: { title: "Week 4 is here", body: "Your new training week is ready." }, "interruption-level": "active", sound: "default" },
       url: "/dashboard",
     });
     expect(JSON.parse(apnsBody({ title: "a", body: "b" }))).not.toHaveProperty("url");
+    // with its topic and kind (lib/elite/notify.ts): the lock screen groups
+    // by topic, and a tap knows what it was about
+    expect(JSON.parse(apnsBody({ title: "a", body: "b", url: "/you", topic: "week", kind: "earned", quiet: true }))).toEqual({
+      aps: { alert: { title: "a", body: "b" }, "interruption-level": "passive", "thread-id": "week" },
+      url: "/you",
+      topic: "week",
+      kind: "earned",
+    });
   });
 
   it("forgets a device only when Apple says it is gone for good", () => {

@@ -28,7 +28,7 @@ import {
   type PlanCard,
 } from "@/lib/elite/club-teams";
 import { clubPlanReceivers } from "@/lib/elite/free-notices";
-import { clubPlanPush, pushTextProblems } from "@/lib/elite/push-texts";
+import { clubPlanNotice, noticeProblems } from "@/lib/elite/notices";
 import { friendsBoard, type MyClub } from "@/lib/elite/tracker";
 
 // Clubs in the native iPhone app (Nov 24 2026). The owner: "What happened
@@ -263,14 +263,21 @@ describe("the one notification that pulls a club together", () => {
   it("says what, when, and one thing to tap", () => {
     const when = planDayAt("2026-11-24T23:00:00.000Z");
     expect(when).toBe("Tue, Nov 24 at 6:00 PM");
-    const training = clubPlanPush({ club: "Renegados FC", clubId: "c1", what: planWhat({ kind: "training", title: null }, null), when });
-    expect(training).toEqual({ title: "Renegados FC", body: "Club training Tue, Nov 24 at 6:00 PM.", url: "/log/club/c1" });
-    const game = clubPlanPush({ club: "Renegados FC", clubId: "c1", what: planWhat({ kind: "game", title: null }, "Sunday Pickup"), when });
+    const training = clubPlanNotice({ planId: "p1", club: "Renegados FC", clubId: "c1", what: planWhat({ kind: "training", title: null }, null), when });
+    expect({ title: training.title, body: training.body, path: training.path }).toEqual({
+      title: "Renegados FC",
+      body: "Club training Tue, Nov 24 at 6:00 PM.",
+      path: "/log/club/c1",
+    });
+    // its own topic, so "Clubs" in Settings switches it and nothing else
+    expect(training.topic).toBe("clubs");
+    expect(training.key).toBe("club_plan:p1");
+    const game = clubPlanNotice({ planId: "p1", club: "Renegados FC", clubId: "c1", what: planWhat({ kind: "game", title: null }, "Sunday Pickup"), when });
     expect(game.body).toBe("Game against Sunday Pickup Tue, Nov 24 at 6:00 PM.");
-    for (const t of [training, game]) expect(pushTextProblems(t)).toEqual([]);
+    for (const t of [training, game]) expect(noticeProblems(t)).toEqual([]);
     // the place is never on a lock screen
-    const texts = code("lib/elite/push-texts.ts");
-    const fn = texts.slice(texts.indexOf("export function clubPlanPush"));
+    const texts = code("lib/elite/notices.ts");
+    const fn = texts.slice(texts.indexOf("export function clubPlanNotice"));
     expect(fn.slice(0, fn.indexOf("\n}\n"))).not.toMatch(/place/);
   });
 
@@ -278,7 +285,7 @@ describe("the one notification that pulls a club together", () => {
     const src = code("lib/elite/free-notices-server.ts");
     const fn = src.slice(src.indexOf("export async function noticeClubPlan"));
     expect(fn.indexOf("claimPlan(admin, plan.id, r.profileId)")).toBeGreaterThan(-1);
-    expect(fn.indexOf("claimPlan(admin, plan.id, r.profileId)")).toBeLessThan(fn.indexOf("sendPushToProfile(r.profileId, text)"));
+    expect(fn.indexOf("claimPlan(admin, plan.id, r.profileId)")).toBeLessThan(fn.indexOf("notifyProfile(r.profileId, notice)"));
     expect(fn).toContain("if (!maySend(await claimPlan(admin, plan.id, r.profileId))) continue;");
     expect(fn).toContain('.from("elite_plan_notices").insert({ plan_id: planId, profile_id: profileId })');
     // inside the free app's quiet hours, and only to a phone left on
@@ -301,7 +308,7 @@ describe("the one notification that pulls a club together", () => {
     const planGame = actions.slice(actions.indexOf("export async function planGame"), actions.indexOf("export async function answerGame"));
     expect(planGame).not.toContain("noticeClubPlan");
     // and it is the only new notification: three profile pushes in all
-    expect((code("lib/elite/free-notices-server.ts").match(/sendPushToProfile\(/g) ?? []).length).toBe(3);
+    expect((code("lib/elite/free-notices-server.ts").match(/notifyProfile\(/g) ?? []).length).toBe(3);
   });
 });
 

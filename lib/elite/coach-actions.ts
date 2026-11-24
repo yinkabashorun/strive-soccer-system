@@ -8,8 +8,14 @@ import { removeTrackerFiles } from "./tracker-server";
 import { clearProfilePhoto } from "./account-profile-server";
 import { getViewer } from "./session";
 import { sendPlayerEmail } from "./email";
-import { sendPushToPlayer } from "./push";
-import { coachMessagePush, newWeekPush } from "./push-texts";
+import { notifyPlayer } from "./notify";
+import {
+  checkinFeedbackNotice,
+  coachAttendingNotice,
+  coachMessageNotice,
+  filmFeedbackNotice,
+  newWeekNotice,
+} from "./notices";
 import { normalizePhone, sendPlayerSMS } from "./sms";
 import { isSundayEveNY, liveWeekFor, mondayOfWeekNY, nextMondayNY, unlockInstant } from "./time";
 import { getDrillBank, loadProgramWeek, loadTemplateContext, normalizeTitle } from "./data";
@@ -339,19 +345,16 @@ export async function sendCoachMessage(playerId: string, body: string) {
       from_name: viewer.profile.full_name,
       body,
     });
-    // In-app notification + email for the player (best-effort).
-    await supabase.from("elite_notifications").insert({
-      player_id: playerId,
-      kind: "coach_message",
-      title: "Message from your coach",
-      body: body.slice(0, 140),
-    });
+    // The bell and the push are one notice (lib/elite/notices.ts), sent
+    // by the one sender; the email carries the same title. Best-effort.
+    const notice = coachMessageNotice({ coach: viewer.profile.full_name, message: body });
+    await notifyPlayer(playerId, notice, { db: supabase });
     await sendPlayerEmail(playerId, {
       event: "coach_message",
-      subject: "Your coach sent you a message",
+      // the notice's title is the coach's name: a whole sentence for an inbox
+      subject: `${notice.title} sent you a message`,
       body: `${viewer.profile.full_name}: "${body}"`,
     }).catch(() => undefined);
-    await sendPushToPlayer(playerId, coachMessagePush(body)).catch(() => undefined);
     await sendPlayerSMS(playerId, {
       event: "coach_message",
       message: `${viewer.profile.full_name}: "${body}"`,
@@ -367,7 +370,8 @@ export async function addCheckinFeedback(
   playerId: string,
   feedback: string
 ) {
-  if (!(await requireCoach())) return { ok: false };
+  const viewer = await requireCoach();
+  if (!viewer) return { ok: false };
   const supabase = createClient();
   if (supabase) {
     await supabase
@@ -377,15 +381,11 @@ export async function addCheckinFeedback(
         coach_feedback_at: new Date().toISOString(),
       })
       .eq("id", checkinId);
-    await supabase.from("elite_notifications").insert({
-      player_id: playerId,
-      kind: "checkin_feedback",
-      title: "Coach replied to your check-in",
-      body: feedback.slice(0, 140),
-    });
+    const notice = checkinFeedbackNotice({ coach: viewer.profile.full_name, feedback });
+    await notifyPlayer(playerId, notice, { db: supabase });
     await sendPlayerEmail(playerId, {
       event: "checkin_feedback",
-      subject: "Your coach replied to your check-in",
+      subject: notice.title,
       body: feedback,
     }).catch(() => undefined);
     revalidatePath(`/coach/players/${playerId}`);
@@ -458,15 +458,12 @@ export async function setGameAttendance(
       .update({ coach_attending: attending })
       .eq("id", gameId);
     if (attending) {
-      await supabase.from("elite_notifications").insert({
-        player_id: playerId,
-        kind: "coach_attending",
-        title: "Coach is coming to your game",
-        body: gameDate ? `See you out there on ${gameDate}. Play brave.` : "See you out there. Play brave.",
-      });
+      // one note per game, however often attendance is switched (the key)
+      const notice = coachAttendingNotice({ gameId, gameDate });
+      await notifyPlayer(playerId, notice, { db: supabase });
       await sendPlayerEmail(playerId, {
         event: "coach_attending",
-        subject: "Coach is coming to the game",
+        subject: notice.title,
         body: `Coach marked himself as attending${gameDate ? ` the game on ${gameDate}` : " the upcoming game"}. See you out there.`,
       }).catch(() => undefined);
     }
@@ -547,15 +544,11 @@ export async function sendFilmReview(
         .update({ coach_notes: flattenReview(review), status: "Reviewed" })
         .eq("id", filmId);
     }
-    await supabase.from("elite_notifications").insert({
-      player_id: playerId,
-      kind: "film_feedback",
-      title: "Your film breakdown is in",
-      body: review.summary.slice(0, 140),
-    });
+    const notice = filmFeedbackNotice({ filmId, summary: review.summary });
+    await notifyPlayer(playerId, notice, { db: supabase });
     await sendPlayerEmail(playerId, {
       event: "film_feedback",
-      subject: "Coach broke down your film",
+      subject: notice.title,
       body: `Your monthly film breakdown is in:\n\n${flattenReview(review)}\n\nOpen the app to see it with your film.`,
     }).catch(() => undefined);
     revalidatePath(`/coach/players/${playerId}`);
@@ -895,29 +888,17 @@ export async function applyGeneratedPlanCore(
       revalidatePath(`/coach/players/${playerId}`);
       return { ok: true, week, goesLiveNow, unlocksAt, announced };
     }
-    await supabase.from("elite_notifications").insert({
-      player_id: playerId,
-      kind: "new_week",
-      title: first ? `Week ${week} is ready, ${first}` : `Week ${week} is ready`,
-      body: plan.weekly_focus || "Your coach set your focus for the week.",
-    });
+    // The bell row, the push and the email subject are one notice
+    // (lib/elite/notices.ts newWeekNotice, the same builder unlock.ts uses).
+    const notice = newWeekNotice({ first, week, firstWeek, focus: plan.weekly_focus });
+    await notifyPlayer(playerId, notice, { db: supabase });
     await sendPlayerEmail(playerId, {
       event: "new_week",
-      subject: firstWeek
-        ? first
-          ? `${first}, your first week is live`
-          : "Your first week is live"
-        : first
-          ? `${first}, week ${week} just dropped`
-          : `Week ${week} just dropped`,
+      subject: notice.title,
       body: firstWeek
         ? `Your Strive Elite training starts now.\n\nThis week's focus: ${plan.weekly_focus}\n\n${SessionsSaid} sessions, each opening with your plyometric warm-up. Open the app and start Session 1.`
         : `Your new training week is live.\n\nThis week's focus: ${plan.weekly_focus}\n\n${SessionsSaid} sessions, plyo warm-up first. Open the app and start Session 1.`,
     }).catch(() => undefined);
-    await sendPushToPlayer(
-      playerId,
-      newWeekPush({ first, week, firstWeek, focus: plan.weekly_focus })
-    ).catch(() => undefined);
     const greeting = parentFirst ? `Hey ${parentFirst}, ` : "";
     await sendPlayerSMS(playerId, {
       event: "new_week",

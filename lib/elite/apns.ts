@@ -62,15 +62,68 @@ function providerToken(cfg: ApnsConfig): string {
   return cached.token;
 }
 
-export type ApnsPayload = { title: string; body: string; url?: string };
+// What a push carries beyond its words (lib/elite/notify.ts fills these
+// from the notice): where a tap opens, the topic it stacks under, the kind,
+// a collapse id so a later one replaces an earlier one, and whether it
+// arrives quietly.
+export type ApnsPayload = {
+  title: string;
+  body: string;
+  url?: string;
+  topic?: string;
+  kind?: string;
+  collapse?: string;
+  quiet?: boolean;
+};
 
-// What goes to the phone. `url` rides beside `aps` so a tap on the
-// notification can open the right screen.
+// What goes to the phone. `url`, `topic` and `kind` ride beside `aps` so a
+// tap on the notification can open the right screen.
+//   thread-id            the topic: a week's notices stack under one group
+//                        on the lock screen, the coach's under another
+//   interruption-level   "passive" for a quiet delivery (straight to the
+//                        list, no sound, the screen stays dark), "active"
+//                        otherwise. Never "time-sensitive".
+// No badge is ever sent: the app shows no number that could get stuck.
 export function apnsBody(payload: ApnsPayload): string {
+  const aps: Record<string, unknown> = {
+    alert: { title: payload.title, body: payload.body },
+    "interruption-level": payload.quiet ? "passive" : "active",
+  };
+  if (!payload.quiet) aps.sound = "default";
+  if (payload.topic) aps["thread-id"] = payload.topic;
   return JSON.stringify({
-    aps: { alert: { title: payload.title, body: payload.body }, sound: "default" },
+    aps,
     ...(payload.url ? { url: payload.url } : {}),
+    ...(payload.topic ? { topic: payload.topic } : {}),
+    ...(payload.kind ? { kind: payload.kind } : {}),
   });
+}
+
+// Apple's collapse id: at most 64 bytes, or it refuses the push.
+export function apnsCollapseId(raw: string | null | undefined): string | null {
+  const id = (raw ?? "").trim();
+  return id && Buffer.byteLength(id) <= 64 ? id : null;
+}
+
+// The request headers of one push. A quiet one is sent at the lower
+// priority Apple asks for when nothing has to light the screen.
+export function apnsHeaders(input: {
+  token: string;
+  jwt: string;
+  bundleId: string;
+  payload: Pick<ApnsPayload, "collapse" | "quiet">;
+}): Record<string, string> {
+  const collapse = apnsCollapseId(input.payload.collapse);
+  return {
+    ":method": "POST",
+    ":path": `/3/device/${input.token}`,
+    authorization: `bearer ${input.jwt}`,
+    "apns-topic": input.bundleId,
+    "apns-push-type": "alert",
+    "apns-priority": input.payload.quiet ? "5" : "10",
+    ...(collapse ? { "apns-collapse-id": collapse } : {}),
+    "content-type": "application/json",
+  };
 }
 
 // A device token that will never work again (the app was deleted, the token
@@ -124,15 +177,7 @@ export async function sendApns(tokens: string[], payload: ApnsPayload): Promise<
     client.on("error", finish);
 
     for (const token of tokens) {
-      const req = client.request({
-        ":method": "POST",
-        ":path": `/3/device/${token}`,
-        authorization: `bearer ${jwt}`,
-        "apns-topic": cfg.bundleId,
-        "apns-push-type": "alert",
-        "apns-priority": "10",
-        "content-type": "application/json",
-      });
+      const req = client.request(apnsHeaders({ token, jwt, bundleId: cfg.bundleId, payload }));
       let status = 0;
       let text = "";
       req.on("response", (headers) => {

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { chunkedStorage, CHUNK_SIZE, MAX_CHUNKS, parseCount, splitValue, type KV } from "@/auth/chunks";
 import { applyDone } from "@/week-cache";
 import { overlay, outcomeOf, parseTicks, queueTick, REFUSED_LINE, retryDelayMs, settle, UNSENT_LINE, type Tick } from "@/outbox-core";
-import { areaFor, areaHome, inArea, pushRoute } from "@/navigation";
+import { areaFor, areaHome, inArea, pushRoute, tappedNotice } from "@/navigation";
 import { clipOrder, clipsInView, liveClip, pickedAfterScroll, pickedAfterTap } from "@/course-view";
 import { drillEyebrow, repsTiles } from "@/drill-view";
 import { APP_TABS, FREE_TABS } from "@/tabs";
@@ -346,6 +346,47 @@ describe("a tapped notification", () => {
     expect(pushRoute("free", `/log/club/${CLUB}`)).toBe(`/club/${CLUB}`);
     expect(pushRoute("app", `/log/club/${CLUB}`)).toBe("/");
     expect(pushRoute("free-offer", `/log/club/${CLUB}`)).toBe("/offer");
+  });
+  it("opens the screen the notice is about", () => {
+    // a new week, a reminder: Home. A medal: You. The week itself: Week.
+    expect(pushRoute("app", "/dashboard", "week")).toBe("/");
+    expect(pushRoute("app", "/you", "week")).toBe("/you");
+    expect(pushRoute("app", "/homework", "week")).toBe("/week");
+    expect(pushRoute("app", "/courses/keep-it-up")).toBe("/course/keep-it-up");
+    expect(pushRoute("free", "/log/week", "friends")).toBe("/(free)/my-week");
+    expect(pushRoute("free", "/log/clubs", "clubs")).toBe("/(free)/clubs");
+  });
+  it("opens the Inbox for anything from the coach: the note is read there", () => {
+    expect(pushRoute("app", "/messages", "coach")).toBe("/inbox");
+    expect(pushRoute("app", "/film", "coach")).toBe("/inbox");
+    expect(pushRoute("app", "/dashboard", "coach")).toBe("/inbox");
+    expect(pushRoute("app", "/messages")).toBe("/inbox");
+    // a topic the app does not know changes nothing
+    expect(pushRoute("app", "/dashboard", "sales")).toBe("/");
+    expect(pushRoute("app", "/dashboard", 7)).toBe("/");
+  });
+  it("never jumps a gate: someone not in the app yet is sent where they belong", () => {
+    for (const area of ["sign-in", "agreement", "onboarding", "gate", "profile", "free-quiz", "free-offer"] as const) {
+      expect(pushRoute(area, "/messages", "coach"), area).toBe(areaHome(area));
+      expect(pushRoute(area, "/you", "week"), area).toBe(areaHome(area));
+    }
+  });
+  it("the Inbox belongs to the member app, and to nobody else", () => {
+    expect(inArea("app", ["inbox"])).toBe(true);
+    expect(inArea("free", ["inbox"])).toBe(false);
+    expect(inArea("gate", ["inbox"])).toBe(false);
+    expect(inArea("agreement", ["inbox"])).toBe(false);
+    expect(inArea("sign-in", ["inbox"])).toBe(false);
+  });
+  it("reads the address and the topic from Apple's own payload", () => {
+    const res = (trigger: unknown, data?: unknown) => ({ notification: { request: { trigger, content: { data } } } });
+    expect(tappedNotice(res({ type: "push", payload: { aps: {}, url: "/you", topic: "week", kind: "earned" } }))).toEqual({ url: "/you", topic: "week" });
+    // the library's own data, when a relay filled it
+    expect(tappedNotice(res({ type: "push", payload: null }, { url: "/log", topic: "friends" }))).toEqual({ url: "/log", topic: "friends" });
+    // a local notification, or nothing at all
+    expect(tappedNotice(res(null))).toEqual({ url: undefined, topic: undefined });
+    expect(tappedNotice(null)).toEqual({ url: undefined, topic: undefined });
+    expect(tappedNotice({})).toEqual({ url: undefined, topic: undefined });
   });
   it("never opens anything else an address asks for", () => {
     for (const url of ["/log/club/../settings", "/log/club/abc", `https://evil.example/log/club/${CLUB}`, `/log/club/${CLUB}/manage`, 7, null]) {

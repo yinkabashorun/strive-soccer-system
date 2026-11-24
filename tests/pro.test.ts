@@ -262,8 +262,8 @@ describe("what Pro sees is one rule", () => {
     expect(room).toContain('memberHasFeature(viewer.playerId, "filmRoom")');
     expect(room).toContain('memberHasFeature(viewer.playerId, "monthlyCheckin")');
     // announcements reach only members whose offer includes them
-    expect(room).toContain('"film_room", "/film", "filmRoom"');
-    expect(room).toContain('"checkin_open", "/dashboard", "monthlyCheckin"');
+    expect(room).toContain('"film_room", "filmRoom"');
+    expect(room).toContain('"checkin_open", "monthlyCheckin"');
     expect(read("lib/elite/program-actions.ts")).toContain('featureOn((player as { tier?: string | null }).tier, "program")');
     expect(read("lib/elite/parent-recap.ts")).toContain('"parentReport"');
   });

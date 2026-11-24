@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { View } from "react-native";
+import { AppState, View } from "react-native";
 import { Stack, useRouter, useSegments, type Href } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -14,8 +14,8 @@ import { PERSIST_MAX_AGE, persister, queryClient } from "@/api/queryClient";
 import { setGateListener } from "@/api/client";
 import { fixtureRoute } from "@/api/fixtures";
 import { FIXTURES } from "@/config";
-import { areaFor, areaHome, inArea, pushRoute, type Area } from "@/navigation";
-import { keepTokenFresh } from "@/push";
+import { areaFor, areaHome, inArea, pushRoute, tappedNotice, type Area, type TappedNotice } from "@/navigation";
+import { clearBadge, keepTokenFresh } from "@/push";
 import { loadOutbox } from "@/outbox";
 import { loadPrefs } from "@/prefs";
 import { color } from "@/theme";
@@ -77,20 +77,63 @@ function Gatekeeper() {
     if (route) router.push(route as Href);
   }, [area, segments, router]);
 
-  // A tapped notification opens the app where this person lives: Home for
-  // a member (the week, the coach), Friends for a free account (a friend
-  // posted, props), and the club itself for a club's session or game
-  // (src/navigation.ts pushRoute; the address rides on the notification as
-  // Apple delivers it, under trigger.payload).
+  // A tapped notification opens the screen it is about (ONE map from the
+  // address the notice carries to a screen here: src/navigation.ts
+  // pushRoute, lib/elite/notice-routes.ts). A new week opens Home, a medal
+  // opens You, the coach opens the Inbox, a friend's post opens Friends, a
+  // club's session or game opens that club.
+  //
+  // A tap that arrives before the app knows who this is waits: the
+  // notification that STARTED the app (read once, below), or one tapped
+  // while the agreement or a gate is up. It is opened the moment the person
+  // is in the app or the free app, and never before: a notice does not
+  // jump a gate.
   const where = useRef<Area | null>(null);
   where.current = area;
+  const waiting = useRef<TappedNotice | null>(null);
+  const lastTap = useRef<string | null>(null);
+  const inside = (area === "app" || area === "free") && inArea(area, segments);
+  const settledIn = useRef(false);
+  settledIn.current = inside;
+
   useEffect(() => {
-    const sub = Notifications.addNotificationResponseReceivedListener((res) => {
-      const trigger = res.notification.request.trigger as { payload?: Record<string, unknown> } | null;
-      router.navigate(pushRoute(where.current, trigger?.payload?.url) as Href);
-    });
+    const take = (res: Notifications.NotificationResponse | null) => {
+      if (!res || res.actionIdentifier !== Notifications.DEFAULT_ACTION_IDENTIFIER) return;
+      // the same tap can be handed over twice (as the one that started the
+      // app, and again to the listener): it is opened once
+      const id = `${res.notification.request.identifier}:${res.notification.date}`;
+      if (lastTap.current === id) return;
+      lastTap.current = id;
+      const notice = tappedNotice(res);
+      if (settledIn.current) router.navigate(pushRoute(where.current, notice.url, notice.topic) as Href);
+      else waiting.current = notice;
+    };
+    try {
+      take(Notifications.getLastNotificationResponse());
+      Notifications.clearLastNotificationResponse();
+    } catch {
+      // no notification started the app
+    }
+    const sub = Notifications.addNotificationResponseReceivedListener(take);
     return () => sub.remove();
   }, [router]);
+
+  useEffect(() => {
+    if (!inside || !waiting.current) return;
+    const notice = waiting.current;
+    waiting.current = null;
+    router.navigate(pushRoute(where.current, notice.url, notice.topic) as Href);
+  }, [inside, router]);
+
+  // No number sits on the app's icon: whatever is there is cleared each
+  // time the app comes to the front (src/push.ts).
+  useEffect(() => {
+    clearBadge();
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state === "active") clearBadge();
+    });
+    return () => sub.remove();
+  }, []);
 
   return null;
 }
@@ -150,6 +193,7 @@ export default function RootLayout() {
               <Stack.Screen name="course/[slug]" />
               <Stack.Screen name="extra" options={{ presentation: "modal" }} />
               <Stack.Screen name="checkin" options={{ presentation: "modal" }} />
+              <Stack.Screen name="inbox" />
               <Stack.Screen name="settings" />
               <Stack.Screen name="change-password" />
               <Stack.Screen name="delete-account" />

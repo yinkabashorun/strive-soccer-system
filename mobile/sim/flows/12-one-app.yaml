@@ -47,6 +47,13 @@ appId: com.strivesoccer.elite
 - extendedWaitUntil:
     visible: "Done"
     timeout: 20000
+# Stay on the first drill for a little over half a minute, so the session
+# adds a real minute: one tapped through in seconds adds nothing, and a
+# session that added no time has nothing to post (the row is not shown).
+- extendedWaitUntil:
+    visible: "This line is never on the screen"
+    timeout: 36000
+    optional: true
 - tapOn: "Done"
 - waitForAnimationToEnd:
     timeout: 3000

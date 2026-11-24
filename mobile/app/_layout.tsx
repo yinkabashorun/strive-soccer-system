@@ -102,7 +102,10 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: color.black }}>
       <SafeAreaProvider>
-        <PersistQueryClientProvider client={queryClient} persistOptions={{ persister, maxAge: PERSIST_MAX_AGE, buster: "1" }}>
+        {/* buster: raised when what is kept on the phone changes shape (2: a
+            free account's stage, and what a member still owes of the quiz),
+            so a screen saved by the version before is read fresh once. */}
+        <PersistQueryClientProvider client={queryClient} persistOptions={{ persister, maxAge: PERSIST_MAX_AGE, buster: "2" }}>
           <AuthProvider>
             <StatusBar style="light" />
             <Gatekeeper />

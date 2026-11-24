@@ -97,15 +97,15 @@ describe("whether to send", () => {
     expect(reminderDecision({ ...base, topicOff: true })).toEqual({ send: false, why: "turned off" });
   });
 
-  it("at the default hour, never on the day the week went live", () => {
-    // nothing of theirs chose the hour: the new week's own notice is today's
-    expect(reminderDecision({ ...base, fromDefault: true, wentLiveToday: true })).toEqual({
-      send: false,
-      why: "the week went live today",
-    });
-    expect(reminderDecision({ ...base, fromDefault: true, wentLiveToday: false }).send).toBe(true);
-    // an hour they chose or trained at is theirs: it holds on any day
-    expect(reminderDecision({ ...base, fromDefault: false, wentLiveToday: true }).send).toBe(true);
+  it("never on the day their week is announced, whatever their hour", () => {
+    // the 4:00 PM announcement is the one thing they hear from us that day
+    for (const fromDefault of [true, false]) {
+      expect(reminderDecision({ ...base, fromDefault, wentLiveToday: true })).toEqual({
+        send: false,
+        why: "the week went live today",
+      });
+      expect(reminderDecision({ ...base, fromDefault, wentLiveToday: false }).send).toBe(true);
+    }
   });
 
   it("never to a member who did not turn notifications on", () => {

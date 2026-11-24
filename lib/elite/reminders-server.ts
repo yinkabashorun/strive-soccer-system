@@ -17,7 +17,7 @@ import { isPushConfigured } from "./push";
 import { isNativePushConfigured } from "./apns";
 import { notifyPlayer } from "./notify";
 import { reminderNotice, remindersPausedNotice, topicIsOff } from "./notices";
-import { claimOutcome, maySend } from "./announce";
+import { claimOutcome, maySend, weekIsLiveUnannounced } from "./announce";
 import { currentBreak } from "./breaks";
 import { groupSessions, planSessionsLeft } from "./session-flow";
 import { liveWeekFor, nyDayNumber, nyHour, nyToday } from "./time";
@@ -81,8 +81,11 @@ async function weekTopicOff(admin: SupabaseClient, profileIds: string[]): Promis
   }
 }
 
-// The New York date a player's week was announced (went live), or null.
-async function wentLiveOn(admin: SupabaseClient, playerId: string, week: number): Promise<string | null> {
+// Whether a player's week is announced today (New York date): the ledger
+// says it was announced today, or the week has opened and is still waiting
+// for its 4:00 PM announcement (announce.ts). Either way the announcement
+// is the one thing they hear from us that day.
+async function announcedToday(admin: SupabaseClient, playerId: string, week: number, today: string): Promise<boolean> {
   try {
     const { data } = await admin
       .from("elite_week_announcements")
@@ -91,9 +94,10 @@ async function wentLiveOn(admin: SupabaseClient, playerId: string, week: number)
       .eq("week", week)
       .maybeSingle();
     const at = (data as { announced_at?: string } | null)?.announced_at;
-    return at ? nyDateOf(at) : null;
+    if (at) return nyDateOf(at) === today;
+    return await weekIsLiveUnannounced(admin, playerId, week);
   } catch {
-    return null;
+    return false;
   }
 }
 
@@ -176,9 +180,9 @@ export async function sendTrainingReminders(): Promise<ReminderRun> {
       trainedToday: ticks.some((t) => nyDateOf(t) === today),
     };
     if (!reminderDecision(input).send) continue;
-    // A member on the default hour hears nothing the day their week went
-    // live: the week going live already told them that day.
-    if (at.fromDefault && !reminderDecision({ ...input, wentLiveToday: (await wentLiveOn(admin, p.id, week)) === today }).send) continue;
+    // Nobody gets a reminder the day their week is announced: the
+    // announcement at 4:00 PM already tells them that day.
+    if (!reminderDecision({ ...input, wentLiveToday: await announcedToday(admin, p.id, week, today) }).send) continue;
 
     const facts = reminderFacts(sessions);
     if (!facts) continue;

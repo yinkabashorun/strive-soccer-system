@@ -35,9 +35,10 @@ export const fetchCache = "force-no-store";
 //                           push a day at most, only at their hour, never
 //                           on a break, once the week is done or if they
 //                           trained today (lib/elite/reminders.ts, 078).
-//   Every hour            - unlock Monday-held weeks that are due (so the
-//                           Monday 6am ET unlock + texts no longer depend
-//                           on someone opening the app); then heal any
+//   Every hour            - open the weeks that are due (early Monday,
+//                           New York) and, from 4:00 PM, announce them
+//                           (lib/elite/unlock.ts; nobody is texted about a
+//                           new week); then heal any
 //                           homework whose drill got its video later and
 //                           AUDIT every live week (lib/elite/health.ts),
 //                           texting the coach about anything new.

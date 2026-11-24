@@ -550,17 +550,18 @@ describe("no notice is written anywhere but the one sender", () => {
     for (const f of files) expect(src(f), rel(f)).not.toMatch(/from ["'][^"']*push-texts["']/);
   });
 
-  it("a new week is announced once, whichever of its two senders gets there first", () => {
-    // one notice per event: both new-week senders sit behind the same
-    // database claim (announce.ts), which only one caller can win, and the
-    // bell row's own key (new_week:<week>) refuses a second one after it
-    for (const file of ["lib/elite/coach-actions.ts", "lib/elite/unlock.ts"]) {
-      const text = read(file);
-      const claim = text.indexOf("claimWeekAnnouncement(");
-      const notice = text.indexOf("newWeekNotice({");
-      expect(claim, file).toBeGreaterThan(-1);
-      expect(notice, file).toBeGreaterThan(claim);
-    }
+  it("a new week is announced once, from the one place that announces a week", () => {
+    // one notice per event: the announcer (unlock.ts) takes the database
+    // claim (announce.ts) before the notice, and the bell row's own key
+    // (new_week:<week>) refuses a second one after it. The publish step
+    // announces nothing itself: it hands over to the announcer.
+    const unlock = read("lib/elite/unlock.ts");
+    const claim = unlock.indexOf("claimWeekAnnouncement(");
+    expect(claim).toBeGreaterThan(-1);
+    expect(unlock.indexOf("newWeekNotice({")).toBeGreaterThan(claim);
+    const publish = read("lib/elite/coach-actions.ts");
+    expect(publish).not.toContain("newWeekNotice(");
+    expect(publish).toContain("unlockDueWeeks({ force: true })");
   });
 
   it("the reminder is claimed for the day before it is sent", () => {

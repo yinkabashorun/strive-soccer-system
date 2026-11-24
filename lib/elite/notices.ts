@@ -143,7 +143,7 @@ export function cleanNoticePath(raw: unknown): string | null {
 // How a push arrives. "active": the ordinary way. "passive": straight to
 // the list, no sound, the screen stays dark. Between 9:30 PM and 7:00 AM
 // New York time every notice is passive: nothing is dropped, nothing wakes
-// anyone (the Monday week arrives at 6:00 AM). Never "time-sensitive":
+// anyone (a new week is announced from 4:00 PM, announce.ts). Never "time-sensitive":
 // nothing Strive sends is worth breaking through a Focus.
 export type Interruption = "active" | "passive";
 

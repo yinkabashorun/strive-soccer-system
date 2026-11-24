@@ -117,7 +117,9 @@ export type ReminderInput = {
   // their hour today (reminderHourFor), and whether it is only the default
   hour: number;
   fromDefault: boolean;
-  // the week being trained went live today (New York date)
+  // the week being trained is announced today (New York date): it was
+  // announced earlier today, or it opened and its 4:00 PM announcement is
+  // still to come. That announcement is the one thing they hear that day.
   wentLiveToday: boolean;
   notificationsOn: boolean; // a browser or the iPhone app has a device on file
   topicOff: boolean; // they turned "Your week" off (elite_profiles.notify_off)
@@ -137,7 +139,7 @@ export function reminderDecision(i: ReminderInput): ReminderDecision {
   if (!i.hasWeek) return { send: false, why: "no week yet" };
   if (i.sessionsLeft <= 0) return { send: false, why: "week complete" };
   if (i.trainedToday) return { send: false, why: "trained today" };
-  if (i.fromDefault && i.wentLiveToday) return { send: false, why: "the week went live today" };
+  if (i.wentLiveToday) return { send: false, why: "the week went live today" };
   if (i.hour !== i.nyHour) return { send: false, why: "not their hour" };
   return { send: true };
 }

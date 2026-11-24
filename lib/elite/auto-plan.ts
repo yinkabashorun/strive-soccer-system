@@ -10,7 +10,8 @@
 // WHAT A RUN BUILDS, by day (America/New_York):
 //   Sunday (3pm ET slot only, gated in the route) - the week that starts
 //     tomorrow, for every player, even one whose current week was never
-//     built. Held until Monday 6am ET, then unlocked + announced.
+//     built. Held until early Monday (New York), when it opens; announced
+//     Monday from 4:00 PM (unlock.ts).
 //   Monday-Saturday, every hour - catch-up only: a player whose LIVE week
 //     has no plan gets it right now. Nothing is pre-built mid-week, so in
 //     the steady state these runs do nothing but prove the cron is alive.

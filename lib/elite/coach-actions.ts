@@ -14,7 +14,6 @@ import {
   coachAttendingNotice,
   coachMessageNotice,
   filmFeedbackNotice,
-  newWeekNotice,
 } from "./notices";
 import { normalizePhone, sendPlayerSMS } from "./sms";
 import { isSundayEveNY, liveWeekFor, mondayOfWeekNY, nextMondayNY, unlockInstant } from "./time";
@@ -22,11 +21,10 @@ import { getDrillBank, loadProgramWeek, loadTemplateContext, normalizeTitle } fr
 import { conformSessionsToBank, offeredBank, strengthRequired } from "./bank-conform";
 import { sessionsWord, TRAINING_LOADS } from "./training";
 import { resolveWeekTarget } from "./week-target";
-import { buildParentRecap } from "./parent-recap";
 import type { FilmReview, GeneratedPlan, TrainingLoad, TrainingSpace } from "./types";
 
-import { APP_URL } from "./app-url";
-import { claimWeekAnnouncement, maySend, mustRefuseRebuild, weekWasAnnounced } from "./announce";
+import { mustRefuseRebuild, weekIsLiveUnannounced, weekWasAnnounced } from "./announce";
+import { unlockDueWeeks } from "./unlock";
 import { realMinutes } from "./time-trained";
 
 async function requireCoach() {
@@ -649,7 +647,7 @@ export async function applyGeneratedPlanCore(
   // exactly that, every hour. Checked here against the announcement
   // ledger, before a single row is touched; the builder logs the throw
   // and the coach is texted.
-  if (goesLiveNow && (await weekWasAnnounced(supabase, playerId, week))) {
+  if (goesLiveNow && ((await weekWasAnnounced(supabase, playerId, week)) || (await weekIsLiveUnannounced(supabase, playerId, week)))) {
     const { count } = await supabase
       .from("elite_homework")
       .select("id", { count: "exact", head: true })
@@ -832,7 +830,9 @@ export async function applyGeneratedPlanCore(
     objectives: plan.next_week_objectives,
     homework: plan.sessions,
     unlocks_at: unlocksAt,
-    notified: goesLiveNow, // live-now weeks are notified inline below
+    // Every week waits for its announcement (unlock.ts): a week that is
+    // live at once is open now and announced from 4:00 PM New York.
+    notified: false,
   });
   if (planErr) {
     // pre-014 database - fall back to the legacy shape
@@ -860,16 +860,15 @@ export async function applyGeneratedPlanCore(
     .update({ last_session_at: new Date().toISOString() })
     .eq("id", playerId);
 
-  // Whether this publish told the family. Stays true for a held week
-  // (Monday's unlock does the telling).
+  // False only when the week is live and its announcement could not be
+  // recorded (the builder logs that loudly). True otherwise: told now, or
+  // waiting for 4:00 PM.
   let announced = true;
   if (goesLiveNow) {
     // Live immediately: a player's first week (anchor the program clock
     // to this NY week's Monday - next Monday if today is Sunday, so week
     // 1 is never a one-day week) or a catch-up publish for the live week
     // (never re-anchor - the calendar keeps counting).
-    const first = player?.full_name?.split(" ")[0] ?? "";
-    const parentFirst = (player?.parent_name || first || "").trim().split(" ")[0];
     await supabase
       .from("elite_players")
       .update({
@@ -878,59 +877,16 @@ export async function applyGeneratedPlanCore(
         ...(firstWeek ? { week1_monday: mondayOfWeekNY(target.anchorOffsetWeeks) } : {}),
       })
       .eq("id", playerId);
-    // One announcement per player per week, enforced by the database
-    // (announce.ts, migration 066). Everything below this line - the note,
-    // the email, the push, the text, the parent report - goes out only if
-    // this claim is the first for this week.
-    const claim = await claimWeekAnnouncement(supabase, playerId, week);
-    announced = claim !== "failed";
-    if (!maySend(claim)) {
-      revalidatePath(`/coach/players/${playerId}`);
-      return { ok: true, week, goesLiveNow, unlocksAt, announced };
-    }
-    // The bell row, the push and the email subject are one notice
-    // (lib/elite/notices.ts newWeekNotice, the same builder unlock.ts uses).
-    const notice = newWeekNotice({ first, week, firstWeek, focus: plan.weekly_focus });
-    await notifyPlayer(playerId, notice, { db: supabase });
-    await sendPlayerEmail(playerId, {
-      event: "new_week",
-      subject: notice.title,
-      body: firstWeek
-        ? `Your Strive Elite training starts now.\n\nThis week's focus: ${plan.weekly_focus}\n\n${SessionsSaid} sessions, each opening with your plyometric warm-up. Open the app and start Session 1.`
-        : `Your new training week is live.\n\nThis week's focus: ${plan.weekly_focus}\n\n${SessionsSaid} sessions, plyo warm-up first. Open the app and start Session 1.`,
-    }).catch(() => undefined);
-    const greeting = parentFirst ? `Hey ${parentFirst}, ` : "";
-    await sendPlayerSMS(playerId, {
-      event: "new_week",
-      message: firstWeek
-        ? `${greeting}${first || "Your player"}'s first Strive Elite training week is officially live. This week: ${plan.weekly_focus} Let's have ${first || "them"} open the app and get after Session 1: ${APP_URL}/dashboard`
-        : `${greeting}${first || "Your player"}'s week ${week} just went live. This week: ${plan.weekly_focus} Let's have ${first || "them"} open the app and get started on Session 1: ${APP_URL}/dashboard`,
-    }).catch(() => undefined);
-
-    // Parent weekly report for the week that just ended. This path
-    // (goesLiveNow) writes notified:true up front, so unlockDueWeeks() in
-    // unlock.ts, which sends the same report for Monday-held weeks, never
-    // sees these plans as "due" - the report has to go out from here.
-    // Best-effort; a recap failure never blocks the week from publishing.
-    try {
-      const recap = await buildParentRecap(playerId, week - 1);
-      if (recap) {
-        await sendPlayerEmail(playerId, {
-          event: "parent_weekly_report",
-          subject: `${recap.playerFirst}'s week ${recap.week} report`,
-          body: recap.text,
-        });
-        await sendPlayerSMS(playerId, {
-          event: "parent_weekly_report",
-          message: recap.text,
-        });
-      }
-    } catch {
-      /* recap is a bonus - the week already published successfully */
-    }
+    // The announcement (the bell note, the notification, the email, the
+    // parent report) has ONE sender, unlock.ts: it goes out now when it is
+    // between 4:00 PM and 9:00 PM New York, otherwise the hourly job sends
+    // it at 4:00 PM. Once per player per week, held by the database
+    // (announce.ts, migration 066). Nobody is texted about a new week.
+    const told = await unlockDueWeeks({ force: true }).catch(() => null);
+    if (told?.unrecorded.some((u) => u.playerId === playerId && u.week === week)) announced = false;
   }
-  // Scheduled weeks stay silent until Monday morning - unlockDueWeeks()
-  // flips them live and notifies then.
+  // A held week opens Monday morning and is announced Monday from 4:00 PM
+  // (unlock.ts).
 
   revalidatePath(`/coach/players/${playerId}`);
   return { ok: true, week, goesLiveNow, unlocksAt, announced };

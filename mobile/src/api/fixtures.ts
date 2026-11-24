@@ -22,6 +22,7 @@ import { auraLabel, friendsBoard, type Face } from "@shared/tracker";
 import { MEDIA_BASE } from "@/config";
 import { fixtureClubs } from "./fixtures-clubs";
 import { buildSquad } from "@shared/squad-pass";
+import { firstDays } from "@shared/first-days";
 
 // The example player the screens are drawn with for review screenshots
 // (EXPO_PUBLIC_FIXTURES=1): the browser build (scripts/screenshots.mjs) and
@@ -606,6 +607,8 @@ function fixtureFeed(): AppFreeFeed {
     requests: l.posted ? [] : [{ id: "r-kai", name: "Kai M.", initials: "KM" }],
     week: { minutes, target: TARGET, percent: Math.round((minutes / TARGET) * 100) },
     invite: "https://thestriveapp.com/join?ref=EXAMPLE2",
+    // the first-days list: posted and on a club, friends and props still open
+    firstDays: firstDays({ joinedAt: new Date(Date.now() - 2 * 86_400_000).toISOString(), posted: true, friends: 1, clubs: 1, gaveProps: false }, Date.now()),
     // bring your squad: one teammate trained, one joined and has not posted
     squad: buildSquad({
       trained: [{ id: "t1", name: "Diego R." }],

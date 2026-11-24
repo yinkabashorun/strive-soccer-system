@@ -4,7 +4,8 @@ import { getViewer } from "@/lib/elite/session";
 import { APP_URL } from "@/lib/elite/app-url";
 import { nyToday } from "@/lib/elite/time";
 import { teamAsksFor } from "@/lib/elite/club-teams-server";
-import { clubAskFor, clubRequestsFor, feedFor, friendAskFor, friendRequestsFor, quizDone, trackerFor, weekLogsFor } from "@/lib/elite/tracker-server";
+import { clubAskFor, clubRequestsFor, feedFor, firstDaysFacts, friendAskFor, friendRequestsFor, quizDone, trackerFor, weekLogsFor } from "@/lib/elite/tracker-server";
+import { firstDays } from "@/lib/elite/first-days";
 import {
   FREE_HOME,
   FREE_QUIZ,
@@ -53,6 +54,8 @@ export default async function FriendsPage({
     teamAsksFor(viewer, today),
   ]);
   const week = weekProgress(logs, tracker.target_minutes, today);
+  // the first-days list (first-days.ts): null once it is done or over
+  const first = await firstDaysFacts(viewer.profile.id).catch(() => null);
 
   return (
     <FriendsFeed
@@ -71,6 +74,7 @@ export default async function FriendsPage({
       teamAsks={teamAsks}
       inviteLink={joinLink(APP_URL, tracker.referral_code)}
       squad={await squadFor(viewer.profile.id).catch(() => null)}
+      firstDays={first ? firstDays({ joinedAt: tracker.created_at, friends: feed.friendCount, ...first }, Date.now()) : null}
     />
   );
 }

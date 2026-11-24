@@ -21,6 +21,8 @@ import type { TeamAsks } from "@/lib/elite/club-teams-server";
 import { sendLink } from "./send-link";
 import { StarMark } from "./StarMark";
 import type { Squad } from "@/lib/elite/squad-pass";
+import type { FirstDays } from "@/lib/elite/first-days";
+import { FirstDaysCard } from "./FirstDaysCard";
 import { SquadCard } from "./SquadCard";
 
 // The Friends tab, as the approved mock draws it: TODAY and the date, the
@@ -40,6 +42,7 @@ export function FriendsFeed({
   teamAsks,
   inviteLink,
   squad,
+  firstDays = null,
 }: {
   date: string; // "Wednesday, Nov 18"
   feed: FeedView;
@@ -52,6 +55,7 @@ export function FriendsFeed({
   teamAsks?: TeamAsks;
   inviteLink: string;
   squad?: Squad | null;
+  firstDays?: FirstDays | null;
 }) {
   const { post, profile } = usePostLauncher();
   const [hidden, setHidden] = useState<Set<string>>(new Set());
@@ -99,6 +103,8 @@ export function FriendsFeed({
           ))}
         </ul>
       )}
+
+      {firstDays ? <FirstDaysCard list={firstDays} inviteLink={inviteLink} onPost={post} /> : null}
 
       {feed.friendCount === 0 ? (
         <Empty

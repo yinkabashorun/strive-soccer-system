@@ -15,6 +15,7 @@ import type { MatchupView } from "./club-matchups";
 import type { Squad } from "./squad-pass";
 import type { InboxRow } from "./bell";
 import type { NoticePrefs } from "./notice-prefs";
+import type { FirstDays } from "./first-days";
 
 export type { AppDrill, AppSession, AppWeek, AppYou, LadderRung, AreaMinutes };
 // The Courses library (lib/elite/app-courses.ts): the shelf, and one course.
@@ -218,6 +219,8 @@ export type AppFreeFeed = {
   invite: string;
   // Bring your squad: three teammates who train earn a month (squad-pass.ts)
   squad?: Squad;
+  // The first-days list (first-days.ts), or null once it is done or over
+  firstDays?: FirstDays | null;
 };
 
 export type AppFreeWeek = {

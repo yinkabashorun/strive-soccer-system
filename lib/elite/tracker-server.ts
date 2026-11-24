@@ -145,6 +145,22 @@ export async function hasTracker(profileId: string): Promise<boolean> {
   return (await getTracker(profileId)) !== null;
 }
 
+// The facts behind the first-days list (lib/elite/first-days.ts): has this
+// player ever posted a training photo, how many clubs are they on, have
+// they ever given props. Three counts, never the rows. A read that fails
+// says "nothing yet", which only leaves a step open.
+export async function firstDaysFacts(profileId: string): Promise<{ posted: boolean; clubs: number; gaveProps: boolean }> {
+  const admin = createServiceClient();
+  if (!admin) return { posted: false, clubs: 0, gaveProps: false };
+  const count = { count: "exact" as const, head: true };
+  const [posts, clubs, props] = await Promise.all([
+    admin.from("elite_training_logs").select("id", count).eq("profile_id", profileId).not("photo_path", "is", null),
+    admin.from("elite_tracker_club_members").select("club_id", count).eq("profile_id", profileId),
+    admin.from("elite_log_props").select("log_id", count).eq("profile_id", profileId),
+  ]);
+  return { posted: (posts.count ?? 0) > 0, clubs: clubs.count ?? 0, gaveProps: (props.count ?? 0) > 0 };
+}
+
 // This week's entries (Monday to Sunday, New York), newest first. The
 // player's screens only ever show the week.
 export async function getWeekLogs(profileId: string, today: string): Promise<TrainingLog[]> {

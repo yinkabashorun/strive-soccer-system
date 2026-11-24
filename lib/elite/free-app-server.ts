@@ -31,6 +31,7 @@ import {
 import {
   auraLogsOf,
   feedFor,
+  firstDaysFacts,
   friendRequestsFor,
   friendsWeekFor,
   getTargetTable,
@@ -64,6 +65,7 @@ import {
 import type { AppFeedCard, AppFreeFeed, AppFreePlan, AppFreeWeek, AppFreeYou, AppOffer } from "./app-contract";
 import type { Viewer } from "./session";
 import { squadFor } from "./squad-pass-server";
+import { firstDays } from "./first-days";
 import { parentLinkFor } from "./parent-link-server";
 import { PARENT_SEND, parentShareText } from "./parent-link";
 
@@ -115,11 +117,12 @@ export async function planFor(tracker: Tracker): Promise<AppFreePlan> {
 }
 
 export async function freeFeedFor(viewer: Viewer, tracker: Tracker, today: string): Promise<AppFreeFeed> {
-  const [feed, requests, logs, squad] = await Promise.all([
+  const [feed, requests, logs, squad, first] = await Promise.all([
     feedFor(viewer, today),
     friendRequestsFor(viewer),
     getWeekLogs(viewer.profile.id, today),
     squadFor(viewer.profile.id).catch(() => undefined),
+    firstDaysFacts(viewer.profile.id).catch(() => null),
   ]);
   const week = weekProgress(logs, tracker.target_minutes ?? 0, today);
   // the same cards the website draws; a locked one carries no photo of the post
@@ -135,6 +138,9 @@ export async function freeFeedFor(viewer: Viewer, tracker: Tracker, today: strin
     week: { minutes: week.minutes, target: week.target, percent: week.percent },
     invite: joinLink(APP_URL, tracker.referral_code),
     squad,
+    firstDays: first
+      ? firstDays({ joinedAt: tracker.created_at, friends: feed.friendCount, ...first }, Date.now())
+      : null,
   };
 }
 

@@ -10,6 +10,7 @@ import { PAGE_TOP, Screen } from "@/Screen";
 import { Body, Button, Card, Eyebrow, Hairline, Head, Label, Press, Ring, Skeleton } from "@/ui";
 import { color } from "@/theme";
 import { SquadCard } from "@/SquadCard";
+import { FirstDaysCard } from "@/FirstDaysCard";
 
 // Friends (the free app's first tab; the website's /log): who trained
 // today, friend requests, and the feed. A friend's post from today stays
@@ -144,6 +145,10 @@ export default function Friends() {
             </Body>
           ) : null}
         </Card>
+      ) : null}
+
+      {f.firstDays ? (
+        <FirstDaysCard list={f.firstDays} onPost={post} onInvite={invite} onClubs={() => router.navigate("/clubs")} />
       ) : null}
 
       {f.friendCount === 0 ? (

@@ -83,7 +83,7 @@ export type AppBootstrap = {
 export type AppNotice = InboxRow;
 export type AppInbox = { notices: AppNotice[] };
 // The notification choices (lib/elite/notice-prefs.ts).
-export type AppNoticePrefs = NoticePrefs;
+export type AppNoticePrefs = { prefs: NoticePrefs };
 export type AppNoticePrefsSaved = { ok: true; prefs: NoticePrefs } | { ok: false; error: string };
 
 export type AppPickRow = { id: string; title: string; minutes: number; poster: string | null; doneBefore: boolean };

@@ -43,6 +43,7 @@ export default function Home() {
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: keys.week });
   const firstName = me.data?.viewer.firstName ?? "";
+  const unread = (me.data?.unread ?? 0) > 0;
   const planSessions = w?.sessions.filter((s) => !s.extra) ?? [];
   const doneShare = planSessions.length ? planSessions.filter((s) => s.complete).length / planSessions.length : 0;
   const current = w?.sessions.find((s) => s.n === w.current) ?? null;
@@ -57,6 +58,16 @@ export default function Home() {
             {shortDate()}
           </Body>
         </View>
+        {/* The Inbox: a small bell, and a quiet gold dot while a note has
+            not been read. Never a red number. */}
+        <Press
+          onPress={() => router.push("/inbox")}
+          style={styles.bell}
+          accessibilityLabel={unread ? "Inbox, something new" : "Inbox"}
+        >
+          <Icon name="bell" size={22} stroke={color.dim} />
+          {unread ? <View style={styles.bellDot} /> : null}
+        </Press>
         <Press onPress={() => router.navigate("/you")} accessibilityLabel="You">
           <Ring size={58} stroke={4} value={doneShare} animate={false}>
             <View style={styles.initials}>
@@ -251,6 +262,8 @@ function WeekComplete({ week, onCheckin }: { week: AppWeek; onCheckin: () => voi
 
 const styles = StyleSheet.create({
   top: { flexDirection: "row", alignItems: "flex-end", paddingHorizontal: 20, paddingTop: PAGE_TOP },
+  bell: { width: 44, height: 44, alignItems: "center", justifyContent: "center", marginRight: 6, marginBottom: 7 },
+  bellDot: { position: "absolute", top: 9, right: 9, width: 8, height: 8, borderRadius: 4, backgroundColor: color.gold },
   initials: { width: 44, height: 44, borderRadius: 22, backgroundColor: "#1c1c1c", alignItems: "center", justifyContent: "center", overflow: "hidden" },
   hero: { marginHorizontal: 14, marginTop: 18, height: 452, borderRadius: radius.card, overflow: "hidden", backgroundColor: color.fill },
   heroIn: { position: "absolute", left: 0, right: 0, bottom: 0, padding: 20 },

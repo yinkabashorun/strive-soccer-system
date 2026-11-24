@@ -8,11 +8,14 @@ import { signOutEverywhere } from "@/account";
 import { openSite } from "@/links";
 import { usePrefs } from "@/prefs";
 import { turnOffNotifications, turnOnNotifications } from "@/push";
+import { NoticeChoices } from "@/NoticeChoices";
 import { Body, Card, Hairline, Head, Icon, Label, Press, SettingRow } from "@/ui";
 import { color } from "@/theme";
 
 // Settings: what this phone does (notifications, vibration, the timer's
-// tones, drill demos), the account (password, sign out, delete), and help.
+// tones, drill demos), what the account is told about (one switch per kind
+// of notification, and a member's reminder time: src/NoticeChoices.tsx),
+// the account (password, sign out, delete), and help.
 // Reachable from every screen of the app, the gate and the agreement
 // included, so deleting the account is never behind anything.
 export default function Settings() {
@@ -57,6 +60,8 @@ export default function Settings() {
           </>
         )}
       </Section>
+
+      <NoticeChoices>{(rows) => <Section title="Notifications">{rows}</Section>}</NoticeChoices>
 
       <Section title="Account">
         {me.data?.profileSetup ? (

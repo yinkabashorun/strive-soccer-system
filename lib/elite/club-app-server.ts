@@ -75,10 +75,12 @@ export async function appClubsFor(viewer: Viewer, today: string): Promise<AppClu
   ]);
   const cards = await Promise.all(
     clubs.map(async (c) => {
-      const [team, matchup] = await Promise.all([
+      const [team, matchup, photos] = await Promise.all([
         clubTeamFor(viewer, c.id, c.captain),
         admin && !c.ended ? matchupFor(admin, { id: c.id, name: c.name, members: c.members.length }, today) : Promise.resolve(null),
+        admin ? clubPhotosFor(admin, viewer, c, today) : Promise.resolve([]),
       ]);
+      const newest = photos.find((t) => t.state === "open");
       const plans = splitPlans(team.plans);
       const next = plans.next.find((p) => p.status === "on") ?? null;
       return {
@@ -88,6 +90,7 @@ export async function appClubsFor(viewer: Viewer, today: string): Promise<AppClu
         ended: c.ended,
         members: c.members.length,
         weekTime: fmtDuration(weekMinutesOf(c)),
+        photo: newest?.state === "open" ? newest.photoUrl : null,
         today: trainedToday(c.members, today),
         next: next ? nextLine(next, c.id) : null,
         matchup: matchup?.cardLine ?? null,
@@ -166,6 +169,7 @@ export async function appClubPageFor(viewer: Viewer, clubId: string, today: stri
   return {
     id: club.id,
     name: club.name,
+    today,
     captain: club.captain,
     ended: club.ended,
     byCoach: club.kind === "coach",

@@ -246,6 +246,9 @@ export type AppClubCard = {
   members: number;
   // the club's training this week, as said ("14h")
   weekTime: string;
+  // the newest training photo from the club this week that the viewer may
+  // see (the feed's own lock), behind the card; null when there is none
+  photo: string | null;
   // the members who trained today, you first; nobody else is listed
   today: ClubFace[];
   // "Club training · Tue, Nov 24, 6:00 PM", or null
@@ -272,6 +275,9 @@ export type AppGameAsk = { id: string; from: string; fromId: string; when: strin
 export type AppClubPage = {
   id: string;
   name: string;
+  // today in New York, so the phone lists the days a plan can be set for
+  // from the server's day, never its own clock
+  today: string;
   captain: boolean;
   ended: boolean;
   byCoach: boolean; // a club a coach made: it has no captain

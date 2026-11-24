@@ -122,7 +122,7 @@ export default function QuizStep() {
 
   return (
     <FormScreen
-      contentStyle={{ paddingHorizontal: 24, paddingBottom: insets.bottom + 120 }}
+      contentStyle={{ paddingHorizontal: 24, paddingBottom: 24 }}
       header={
           <View style={[styles.head, { paddingTop: insets.top + 8 }]}>
             <Press onPress={() => router.back()} style={styles.back} accessibilityLabel="Back">
@@ -378,5 +378,9 @@ const styles = StyleSheet.create({
   dotOn: { backgroundColor: color.bone, borderColor: color.bone },
   scaleWords: { flexDirection: "row", justifyContent: "space-between", marginTop: 6 },
   input: { minHeight: 56, borderRadius: 16, backgroundColor: color.fill, borderWidth: 1, borderColor: color.line, paddingHorizontal: 16, color: color.bone, fontFamily: font.body, fontSize: 16 },
-  cta: { position: "absolute", left: 0, right: 0, bottom: 0, paddingHorizontal: 20, paddingTop: 12, backgroundColor: color.black },
+  // In the page's own flow, never pinned with position absolute: a pinned
+  // button ignores the room the page makes for the keyboard and sits BEHIND
+  // it (the simulator, Nov 24 2026: "What team do you play for?" with the
+  // keyboard up and no Next to tap). In the flow it rides on the keyboard.
+  cta: { paddingHorizontal: 20, paddingTop: 12, backgroundColor: color.black },
 });

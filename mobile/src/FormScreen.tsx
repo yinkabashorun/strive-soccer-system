@@ -11,7 +11,9 @@ import { color } from "./theme";
 //   - a tap on a button works on the first tap, with the keyboard still up
 //   - dragging the page down drags the keyboard away with it
 // `header` stays fixed above the page; `footer` stays fixed below it and
-// rides on top of the keyboard.
+// rides on top of the keyboard. A footer is laid out in the flow, NEVER
+// with position absolute: a pinned footer ignores the room made for the
+// keyboard and ends up behind it (tests/app-device.test.ts).
 //
 // How the page makes room is the iPhone's own way: the scroll view takes the
 // keyboard as an inset and scrolls the box being typed in into view

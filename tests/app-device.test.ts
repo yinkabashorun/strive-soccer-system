@@ -835,3 +835,22 @@ describe("the offer", () => {
     expect(offer).not.toMatch(/Linking\.openURL/);
   });
 });
+
+// The simulator, Nov 24 2026: on the quiz's typed questions ("What team do
+// you play for?") the Next button was pinned to the bottom of the screen
+// with position absolute, so it sat behind the keyboard and there was
+// nothing to tap. A footer rides on the keyboard only when it is laid out
+// in the page's own flow.
+describe("a button under a typed question rides on the keyboard", () => {
+  const withFooter = sources.filter((f) => rel(f).startsWith("app/") && /<FormScreen[\s\S]*?\bfooter=\{/.test(code(f)));
+  it("no screen pins its footer with position absolute", () => {
+    expect(withFooter.length).toBeGreaterThanOrEqual(2);
+    for (const f of withFooter) {
+      const src = code(f);
+      for (const m of src.matchAll(/\b(cta|foot|footer)\w*: \{([^}]*)\}/g)) {
+        expect(m[2], `${rel(f)} ${m[1]}`).not.toMatch(/position: "absolute"/);
+      }
+    }
+    expect(code(path.join(root, "app/onboarding/[step].tsx"))).toMatch(/\bcta: \{ paddingHorizontal/);
+  });
+});

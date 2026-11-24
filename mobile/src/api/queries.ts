@@ -1,5 +1,15 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { APP_API, type AppBootstrap, type AppExtra, type AppFirstWeek, type AppWeek, type AppYou } from "@shared/app-contract";
+import {
+  APP_API,
+  appCoursePath,
+  type AppBootstrap,
+  type AppCourse,
+  type AppCourseList,
+  type AppExtra,
+  type AppFirstWeek,
+  type AppWeek,
+  type AppYou,
+} from "@shared/app-contract";
 import type { QuizAnswers } from "@shared/quiz";
 import { useAuth } from "@/auth/session";
 import { api } from "./client";
@@ -11,6 +21,8 @@ export const keys = {
   week: ["week"] as const,
   you: ["you"] as const,
   extra: ["extra"] as const,
+  // every Courses query starts with this, so one call refreshes them all
+  courses: ["courses"] as const,
 };
 
 export function useMe() {
@@ -44,6 +56,44 @@ export function useYou() {
     queryKey: keys.you,
     queryFn: async () => (await api<{ you: AppYou }>(APP_API.you)).you,
     enabled: inApp,
+  });
+}
+
+// The Courses library changes when a coach edits it, not while a player
+// trains: it is drawn from the phone's copy and looked up again after five
+// minutes, or at once on a pull.
+const LIBRARY_STALE_MS = 5 * 60_000;
+
+// The shelf. A member gets it open; any other signed-in account gets the
+// same shelf locked (lib/elite/app-courses.ts). The two are kept apart on
+// the phone, so an account that becomes a member never opens on its old
+// locked shelf.
+export function useCourses() {
+  const { signedIn } = useAuth();
+  const me = useMe();
+  const member = me.data?.state.kind === "ok";
+  return useQuery({
+    queryKey: [...keys.courses, member ? "open" : "locked"],
+    queryFn: () => api<AppCourseList>(APP_API.courses),
+    enabled: signedIn && Boolean(me.data),
+    staleTime: LIBRARY_STALE_MS,
+  });
+}
+
+// One course: a member's only (the server refuses anyone else, so nobody
+// else asks). A course that is no longer in the library answers 404, which
+// asking again does not change.
+export function useCourse(slug: string | undefined) {
+  const inApp = useInApp();
+  return useQuery({
+    queryKey: [...keys.courses, "course", slug ?? ""],
+    queryFn: async () => (await api<{ course: AppCourse }>(appCoursePath(slug ?? ""))).course,
+    enabled: inApp && Boolean(slug),
+    staleTime: LIBRARY_STALE_MS,
+    retry: (count, error) => {
+      const status = (error as { status?: number })?.status ?? 0;
+      return status !== 401 && status !== 403 && status !== 404 && count < 2;
+    },
   });
 }
 

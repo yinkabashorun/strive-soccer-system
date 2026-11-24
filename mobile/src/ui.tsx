@@ -53,9 +53,10 @@ export function Eyebrow({ children, style, gold = true }: TProps & { gold?: bool
   );
 }
 
-export function Body({ children, style, dim, size = 15, numberOfLines }: TProps & { dim?: boolean; size?: number }) {
+// selectable: words a player is meant to copy out (a lesson's templates).
+export function Body({ children, style, dim, size = 15, numberOfLines, selectable }: TProps & { dim?: boolean; size?: number }) {
   return (
-    <Text numberOfLines={numberOfLines} style={[{ fontFamily: font.body, fontSize: size, lineHeight: Math.round(size * 1.4), color: dim ? color.dim : color.bone }, style]}>
+    <Text numberOfLines={numberOfLines} selectable={selectable} style={[{ fontFamily: font.body, fontSize: size, lineHeight: Math.round(size * 1.4), color: dim ? color.dim : color.bone }, style]}>
       {children}
     </Text>
   );
@@ -251,7 +252,7 @@ export function Icon({ name, size = 22, stroke = color.bone, fill }: { name: Ico
   );
 }
 
-export type IconName = "play" | "check" | "close" | "timer" | "chevron" | "back" | "plus";
+export type IconName = "play" | "check" | "close" | "timer" | "chevron" | "back" | "plus" | "lock" | "download";
 const ICONS: Record<IconName, string> = {
   play: "M7 4.5v15l13-7.5z",
   check: "m5 12.5 4.5 4.5L19 7.5",
@@ -260,6 +261,8 @@ const ICONS: Record<IconName, string> = {
   chevron: "m9 6 6 6-6 6",
   back: "m15 6-6 6 6 6",
   plus: "M12 5v14M5 12h14",
+  lock: "M7.5 11V8a4.5 4.5 0 0 1 9 0v3M6.5 11h11a1.5 1.5 0 0 1 1.5 1.5v6a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 18.5v-6A1.5 1.5 0 0 1 6.5 11z",
+  download: "M12 4v11M7.5 10.5 12 15l4.5-4.5M5 20h14",
 };
 
 export function SettingRow({

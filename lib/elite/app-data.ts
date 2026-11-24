@@ -75,7 +75,8 @@ export async function loadYou(player: Player): Promise<AppYou> {
 }
 
 // The tabs the app shows, from the one rule (memberTabs). The phone draws
-// the tabs it has screens for; the Coach tab and Courses come in phase 2.
+// the tabs it has screens for (mobile/src/tabs.ts): Home, Week, Courses
+// and You today; the Coach tab when its screen exists.
 const TAB_KEY: Record<string, string> = {
   "/dashboard": "home",
   "/homework": "week",

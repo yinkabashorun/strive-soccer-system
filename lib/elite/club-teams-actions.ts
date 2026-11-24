@@ -7,6 +7,7 @@ import { nyToday } from "./time";
 import { clubIdsOf, getTracker, insertLog, type Admin } from "./tracker-server";
 import { APP_URL } from "./app-url";
 import { textCoaches } from "./coach-alerts";
+import { noticeClubPlan } from "./free-notices-server";
 import {
   EVENT_COLUMNS,
   captainsOf,
@@ -68,10 +69,12 @@ import { DAY_CAP_MESSAGE, FREE_HOME, FREE_WEEK, GYM_REFUSED_MESSAGE, mayLog, sho
 // comes from the session, never from the browser, and only then is the
 // service client used. The example account answers ok and saves nothing.
 //
-// Nothing here sends a player a text, a push or an email: every request a
-// player answers is a card on their Friends tab (in-app only). The one text
-// is to the coaches, once, when a session or game is first reported (the
-// same as a reported post or club name).
+// Nothing here sends a player a text or an email: every request a player
+// answers is a card in the app. The one notification is noticeClubPlan
+// (084): when a club's training session is planned, or a game is on, the
+// members of the club(s) hear once, if they left notifications on. The one
+// text is to the coaches, once, when a session or game is first reported
+// (the same as a reported post or club name).
 //
 // Sessions and games are organized by clubs, never by Strive: a captain
 // accepts that once before planning (the organizer sheet), a player once
@@ -223,6 +226,8 @@ export async function planTraining(clubId: string, input: PlanInput): Promise<{ 
     .single();
   if (error || !data) return fail(OFFLINE);
   touch(`/log/club/${clubId}`);
+  // the club's members hear about it, once (best effort)
+  await noticeClubPlan({ planId: data.id as string, byId: p.profileId }).catch(() => 0);
   return { ok: true, id: data.id as string };
 }
 
@@ -289,6 +294,8 @@ export async function answerGame(planId: string, accept: boolean): Promise<Ok | 
     .eq("status", "pending");
   if (error) return fail(OFFLINE);
   touch(`/log/club/${plan.club_id}`, `/log/club/${plan.opponent_id}`, `/log/plan/${plan.id}`);
+  // the game is on: both clubs' members hear about it, once (best effort)
+  if (accept === true) await noticeClubPlan({ planId: plan.id, byId: p.profileId }).catch(() => 0);
   return { ok: true };
 }
 

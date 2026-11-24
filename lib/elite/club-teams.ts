@@ -175,6 +175,21 @@ export function looksLikeAddress(text: string): boolean {
   return ADDRESS_AT_START.test(text) || ADDRESS_ANYWHERE.test(text);
 }
 
+// Start times a captain can pick: every half hour, 6:00 AM to 9:30 PM New
+// York time.
+export const PLAN_TIMES: readonly string[] = [...Array(32).keys()].map((i) => {
+  const h = 6 + Math.floor(i / 2);
+  return `${String(h).padStart(2, "0")}:${i % 2 ? "30" : "00"}`;
+});
+export const PLAN_TIME_DEFAULT = "18:00";
+
+// "6:00 PM" for "18:00".
+export function timeLabel(time: string): string {
+  const [h, m] = time.split(":").map(Number);
+  const hour = h % 12 === 0 ? 12 : h % 12;
+  return `${hour}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`;
+}
+
 // A place: plain words, one line, 60 letters at most, never an address, a
 // link, a handle, a run of digits (a phone number, a zip) or anything the
 // word filter stops.
@@ -358,6 +373,73 @@ export function organizedBy(club: string): string {
   return `Organized by ${club}`;
 }
 
+// ---- One session or game, as a card ------------------------------------------------
+
+// What a screen draws for one plan (built by club-teams-server.ts toCard,
+// only ever for a viewer who may see the plan). The type lives here, with
+// the pure rules, so the iPhone app's contract can name it.
+export type PlanCard = {
+  id: string;
+  kind: PlanKind;
+  title: string | null;
+  organizer: { id: string; name: string };
+  opponent: { id: string; name: string } | null;
+  when: string; // "Tue, Nov 24, 6:00 PM"
+  minutes: number;
+  place: string;
+  status: PlanStatus;
+  started: boolean;
+  ins: number;
+  names: string[]; // only players in for the viewer's own club(s), never across a block
+  imIn: boolean;
+  canJoin: boolean;
+  canCancel: boolean;
+  canAnswer: boolean; // the other captain, on a game request
+  result: null | {
+    state: ResultState;
+    score: [number, number] | null; // organizer first
+    line: string | null;
+    canEnter: boolean;
+    canAnswer: boolean;
+  };
+};
+
+// "Tue, Nov 24 at 6:00 PM", New York time: when a plan starts, as a
+// notification says it.
+export function planDayAt(startsAt: string): string {
+  const d = new Date(startsAt);
+  const day = d.toLocaleString("en-US", { timeZone: "America/New_York", weekday: "short", month: "short", day: "numeric" });
+  const time = d.toLocaleString("en-US", { timeZone: "America/New_York", hour: "numeric", minute: "2-digit" });
+  return `${day} at ${time}`;
+}
+
+// What a plan is, in a few words, as one of its clubs reads it.
+export function planWhat(plan: { kind: PlanKind; title: string | null }, otherClub: string | null): string {
+  if (plan.kind === "training") return plan.title ?? "Club training";
+  return otherClub ? `Game against ${otherClub}` : "Game";
+}
+
+// The small line over a card: what it is and who it is for.
+export function planLabel(card: Pick<PlanCard, "kind" | "status" | "result">): string {
+  if (card.kind === "training") return "Club training · Members only";
+  if (card.status === "pending") return "Game · Waiting on their captain";
+  return card.result?.state === "confirmed" ? "Game · Final" : "Game · Club vs club";
+}
+
+// The two clubs of a card as one club's members read it: their own first.
+export function planSides(card: Pick<PlanCard, "organizer" | "opponent">, perspective: string) {
+  const ours = card.opponent && card.opponent.id === perspective ? card.opponent : card.organizer;
+  const theirs = card.opponent ? (ours.id === card.organizer.id ? card.opponent : card.organizer) : null;
+  return { ours, theirs };
+}
+
+// The score with the reader's own club first.
+export function planScore(card: Pick<PlanCard, "organizer" | "opponent" | "result">, perspective: string): [number, number] | null {
+  const score = card.result?.score;
+  if (!score) return null;
+  return planSides(card, perspective).ours.id === card.organizer.id ? score : [score[1], score[0]];
+}
+
 // ---- The result of a game ---------------------------------------------------------
 
 export const CONFIRM_HOURS = 24; // the owner's number, Nov 22 2026
@@ -452,6 +534,12 @@ export function recordOf(records: ReadonlyMap<string, ClubRecord>, id: string): 
 export function recordLabel(r: ClubRecord): string {
   if (r.played === 0) return "New";
   return r.draws ? `${r.wins}-${r.losses}-${r.draws}` : `${r.wins}-${r.losses}`;
+}
+
+// The games record as a plain line, beside the matchup record's own line
+// (club-matchup-words.ts): the two are never mixed.
+export function gamesRecordLine(r: ClubRecord): string {
+  return `Games won: ${r.wins}. Games lost: ${r.losses}. Draws: ${r.draws}.`;
 }
 
 export type CountyRow = { id: string; name: string; place: number; record: ClubRecord; members: number; mine: boolean };

@@ -484,7 +484,8 @@ export async function reportPost(logId: string, reasonInput: string): Promise<{ 
 
 // ---- Clubs -------------------------------------------------------------
 
-type ClubOk = { ok: true; code: string };
+// id: the new club, so a caller can go on to set its county.
+type ClubOk = { ok: true; code: string; id: string };
 const NOT_A_CLUB = "That club is not there any more.";
 
 // "Ask to join" on "Ask to join <club>?", from a club's link opened while
@@ -546,8 +547,9 @@ export async function startClub(nameInput: string): Promise<ClubOk | Fail> {
     const mine = demoClubs();
     if (!mayStartClub(mine.length)) return fail(CLUB_CAP_MESSAGE);
     const code = "NEWCLUBX";
-    writeDemoState({ clubs: [...mine, { id: `demo-club-new-${Date.now()}`, name, code, captain: true, kind: "player" }] });
-    return { ok: true, code };
+    const id = `demo-club-new-${Date.now()}`;
+    writeDemoState({ clubs: [...mine, { id, name, code, captain: true, kind: "player" }] });
+    return { ok: true, code, id };
   }
   if (!mayStartClub((await clubIdsOf(o.admin, o.profileId)).length)) return fail(CLUB_CAP_MESSAGE);
   const club = await newClub({ name, kind: "player", captainId: o.profileId, createdBy: o.profileId });
@@ -558,7 +560,7 @@ export async function startClub(nameInput: string): Promise<ClubOk | Fail> {
     return fail(joined === "too_many" ? CLUB_CAP_MESSAGE : OFFLINE);
   }
   touch();
-  return { ok: true, code: club.join_code };
+  return { ok: true, code: club.join_code, id: club.id };
 }
 
 // Leave a club. Friendships made through it stay as they are: a block is
@@ -875,11 +877,11 @@ export async function createClub(nameInput: string): Promise<ClubOk | Fail> {
   if (!name) return fail(CLUB_NAME_MESSAGE);
   const c = await coach();
   if (c.kind === "no") return fail("Only a coach can do this.");
-  if (c.kind === "demo") return { ok: true, code: "NEWCLUBX" };
+  if (c.kind === "demo") return { ok: true, code: "NEWCLUBX", id: "demo-club-new" };
   const club = await newClub({ name, kind: "coach", captainId: null, createdBy: c.profileId });
   if (!club) return fail(OFFLINE);
   revalidatePath("/coach/free");
-  return { ok: true, code: club.join_code };
+  return { ok: true, code: club.join_code, id: club.id };
 }
 
 async function closeClubReports(c: { admin: Admin; profileId: string }, clubId: string, action: "renamed" | "archived" | "none") {

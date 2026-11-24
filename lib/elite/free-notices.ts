@@ -1,10 +1,14 @@
-// THE DAILY PULL (Nov 22 2026): the free app's two notifications, as pure
+// THE DAILY PULL (Nov 22 2026): the free app's notifications, as pure
 // rules. A free player who turned notifications on hears:
 //   - "Diego just posted": when an accepted friend posts and they have not
 //     posted today. At most ONE a day: the first friend post triggers it,
 //     later ones that day do not. Never across a block.
 //   - "Diego gave you props": at most one per post, and at most three a
 //     day.
+//   - "<Club>: Club training Tue, Nov 24 at 6:00 PM. Tap I'm in.": when a
+//     club they are on plans a training session, or a game between two
+//     clubs is on. Once per plan, claimed in elite_plan_notices (084). The
+//     only notification about clubs.
 // Nothing between 9:30 PM and 7:00 AM New York time: a notice that would
 // land then is dropped, not held. Each send is claimed first in
 // elite_free_notices (078), keyed (profile, kind, NY date, ref), the same
@@ -79,4 +83,25 @@ export function propsWithinDay(sentTodayIncludingThis: number): boolean {
 // The first name a notice uses, from "Diego R." or a full name.
 export function noticeName(name: string): string {
   return name.trim().split(/\s+/)[0] || "A friend";
+}
+
+// Who hears that a club's session or game is on: the members of the
+// club(s) in it with a device on file, each once and for their own club
+// (the organizing club first for a player on both), and never the player
+// who planned or accepted it.
+export function clubPlanReceivers(input: {
+  clubIds: string[]; // the organizing club first
+  members: { club_id: string; profile_id: string }[];
+  byId: string;
+  withDevice: ReadonlySet<string>;
+}): { profileId: string; clubId: string }[] {
+  const out = new Map<string, string>();
+  for (const clubId of input.clubIds) {
+    for (const m of input.members) {
+      if (m.club_id !== clubId || m.profile_id === input.byId) continue;
+      if (!input.withDevice.has(m.profile_id) || out.has(m.profile_id)) continue;
+      out.set(m.profile_id, clubId);
+    }
+  }
+  return [...out.entries()].map(([profileId, clubId]) => ({ profileId, clubId }));
 }

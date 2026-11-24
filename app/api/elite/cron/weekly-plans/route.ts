@@ -64,7 +64,7 @@ export async function GET(req: Request) {
 
   // The reminder at each member's usual time (claimed per player per day,
   // so a second run this hour sends nothing). Never on a Sunday.
-  const reminders = await sendTrainingReminders().catch(() => ({ checked: 0, sent: 0 }));
+  const reminders = await sendTrainingReminders().catch(() => ({ checked: 0, sent: 0, paused: 0 }));
 
   // Earned months of Strive Pro whose time is up are closed (086): the
   // account is a free account again, nothing of its own is lost.

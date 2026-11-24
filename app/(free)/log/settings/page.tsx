@@ -7,6 +7,8 @@ import { nyToday } from "@/lib/elite/time";
 import { fmtDuration } from "@/lib/elite/time-trained";
 import { blockedFor, profileFor, trackerFor } from "@/lib/elite/tracker-server";
 import { FREE_HOME, joinLink, planDaysLabel, seasonWord } from "@/lib/elite/tracker";
+import { loadNoticePrefs } from "@/lib/elite/notice-prefs-server";
+import { NO_NOTICE_PREFS } from "@/lib/elite/notice-prefs";
 
 export const metadata = { title: "Settings · Strive Elite" };
 export const dynamic = "force-dynamic";
@@ -19,7 +21,11 @@ export default async function FreeSettingsPage() {
   const tracker = await trackerFor(viewer);
   if (!tracker) redirect("/account");
   const today = nyToday();
-  const [profile, blocked] = await Promise.all([profileFor(viewer, viewer.profile.id, today), blockedFor(viewer)]);
+  const [profile, blocked, notices] = await Promise.all([
+    profileFor(viewer, viewer.profile.id, today),
+    blockedFor(viewer),
+    viewer.demo ? Promise.resolve(NO_NOTICE_PREFS) : loadNoticePrefs(viewer).catch(() => NO_NOTICE_PREFS),
+  ]);
   if (!profile) redirect(FREE_HOME);
 
   const target = tracker.target_minutes ? fmtDuration(tracker.target_minutes) : "Not set";
@@ -38,6 +44,7 @@ export default async function FreeSettingsPage() {
       blockedCount={blocked.length}
       inviteLink={joinLink(APP_URL, tracker.referral_code)}
       canChangePassword={!viewer.demo}
+      notices={notices}
       signOut={signOut}
     />
   );

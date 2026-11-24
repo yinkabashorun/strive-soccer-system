@@ -1,7 +1,7 @@
 import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import type { MatchupView } from "@shared/app-contract";
-import { MATCHUP_HOW_LINK, MATCHUP_LAST_WEEK, MATCHUP_PER_PLAYER, MATCHUP_TITLE } from "@shared/club-matchup-words";
+import { MATCHUP_HOW_LINK, MATCHUP_LAST_WEEK, MATCHUP_PER_PLAYER, matchupTitle } from "@shared/club-matchup-words";
 import { Crest } from "./Crest";
 import { Body, Card, Eyebrow, Head, Icon, Label, Press } from "./ui";
 import { color } from "./theme";
@@ -19,7 +19,7 @@ export function MatchupCard({ matchup }: { matchup: MatchupView }) {
   const sides = matchup.mine && matchup.theirs ? [matchup.mine, matchup.theirs] : null;
   return (
     <Card style={styles.card}>
-      <Eyebrow gold={false}>{MATCHUP_TITLE}</Eyebrow>
+      <Eyebrow gold={false}>{matchupTitle(matchup.state)}</Eyebrow>
       {sides ? (
         <View style={styles.sides}>
           {sides.map((side) => (

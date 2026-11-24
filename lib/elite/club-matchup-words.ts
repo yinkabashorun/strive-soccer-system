@@ -11,6 +11,11 @@
 // Pure: no imports.
 
 export const MATCHUP_TITLE = "This week's matchup";
+// A week that is decided, shown until the next one is matched on Monday.
+export const MATCHUP_TITLE_OVER = "Last week's matchup";
+export function matchupTitle(state: "on" | "over" | "none"): string {
+  return state === "over" ? MATCHUP_TITLE_OVER : MATCHUP_TITLE;
+}
 export const MATCHUP_LAST_WEEK = "Last week";
 export const MATCHUP_PER_PLAYER = "time per player";
 export const MATCHUP_HOW_LINK = "How it works";
@@ -69,6 +74,7 @@ export function everyMatchupSentence(): string[] {
   const other = "Sunday Pickup";
   return [
     MATCHUP_TITLE,
+    MATCHUP_TITLE_OVER,
     MATCHUP_LAST_WEEK,
     MATCHUP_PER_PLAYER,
     MATCHUP_HOW_LINK,

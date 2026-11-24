@@ -151,16 +151,15 @@ export default function Manage() {
           {requests.map((r, i) => (
             <View key={r.id}>
               {i > 0 ? <Hairline /> : null}
-              <View style={styles.ask}>
+              <View style={[styles.ask, { alignItems: "flex-start", paddingVertical: 14 }]}>
                 <Avatar initials={r.initials} size={40} />
                 <View style={{ flex: 1 }}>
-                  <Label numberOfLines={1}>{r.name}</Label>
-                  <Body dim size={12.5}>
-                    Wants to join your club
-                  </Body>
+                  <Label>{`${r.name} wants to join your club`}</Label>
+                  <View style={styles.answers}>
+                    <Answer label="Decline" says={`Decline ${r.name}`} onPress={() => void act(`r${r.id}`, () => answerJoinRequest(c.id, r.id, false))} />
+                    <Answer main label="Let in" says={`Let ${r.name} in`} onPress={() => void act(`r${r.id}`, () => answerJoinRequest(c.id, r.id, true))} />
+                  </View>
                 </View>
-                <Answer label="Decline" says={`Decline ${r.name}`} onPress={() => void act(`r${r.id}`, () => answerJoinRequest(c.id, r.id, false))} />
-                <Answer main label="Let in" says={`Let ${r.name} in`} onPress={() => void act(`r${r.id}`, () => answerJoinRequest(c.id, r.id, true))} />
               </View>
             </View>
           ))}
@@ -240,13 +239,15 @@ export default function Manage() {
         <Card style={{ padding: 0, marginTop: 12 }}>
           <SettingRow
             label="Open to games"
-            detail={OPEN_TO_GAMES_LINE}
             value={c.open}
             onValue={(v) => {
               tick();
               void act("open", () => setClubCounty(c.id, c.county, v));
             }}
           />
+          <Body dim size={13} style={{ marginHorizontal: 16, marginBottom: 14, marginTop: -6 }}>
+            {OPEN_TO_GAMES_LINE}
+          </Body>
         </Card>
 
         <Card style={{ padding: 0, marginTop: 12 }}>

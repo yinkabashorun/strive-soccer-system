@@ -8,7 +8,7 @@ import {
   MATCHUP_HOW_TITLE,
   MATCHUP_LAST_WEEK,
   MATCHUP_PER_PLAYER,
-  MATCHUP_TITLE,
+  matchupTitle,
 } from "@/lib/elite/club-matchup-words";
 import { ActionSheet } from "./ActionSheet";
 import { Crest } from "./FreeAvatar";
@@ -22,8 +22,8 @@ import { Crest } from "./FreeAvatar";
 export function MatchupCard({ matchup }: { matchup: MatchupView }) {
   const [how, setHow] = useState(false);
   return (
-    <section className="mx-[18px] mt-3 rounded-[22px] bg-[#141414] px-[18px] pb-3 pt-[15px]" aria-label={MATCHUP_TITLE}>
-      <h2 className="text-[11px] font-bold uppercase tracking-[2.2px] text-white/60">{MATCHUP_TITLE}</h2>
+    <section className="mx-[18px] mt-3 rounded-[22px] bg-[#141414] px-[18px] pb-3 pt-[15px]" aria-label={matchupTitle(matchup.state)}>
+      <h2 className="text-[11px] font-bold uppercase tracking-[2.2px] text-white/60">{matchupTitle(matchup.state)}</h2>
       {matchup.mine && matchup.theirs && (
         <div className="mt-3 flex items-start gap-3">
           {[matchup.mine, matchup.theirs].map((side) => (

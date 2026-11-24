@@ -23,9 +23,17 @@
 # The example members: "ok" a member, "onboarding" a new member at the door
 # (03-door: the member card with their photo), "setup" one who still owes
 # the photo and @username, "locked" a FREE account in the free app (its
-# four tabs; 21 is its Courses shelf), "free_quiz" a new free account at
+# five tabs; 21 is its Courses shelf), "free_quiz" a new free account at
 # the quiz, "free_offer" one at the offer after it. 15-you is the member's
 # card with the photo; 33 is the free account's You.
+#
+# Clubs (37 to 46), all the "locked" free account, every club made up
+# (src/api/fixtures-clubs.ts): 37 the Clubs tab; 38 a club's page as a
+# member, with this week's matchup under the club's week (filmed); 39 a
+# club's page as its captain; 40 Manage, with a player asking to join, a
+# game another club sent and a score to confirm; 41 Clubs near you; 42 the
+# plan screen; 43 join by code; 44 the matchup's "How it works" sheet; 45 a
+# club whose week is decided ("Your club won the week."); 46 Start a club.
 #
 # The 3, 2, 1 count-in is not here (a picture timed from launch would miss
 # it); sim/flows/03-session.yaml takes it by tapping Start.
@@ -74,6 +82,16 @@ SHOTS='
 34-post|locked|post|10
 35-offer-again|locked|offer|12
 36-free-settings|locked|settings|10
+37-clubs|locked|clubs|12
+38-club|locked|club/c-renegados|13|film
+39-club-captain|locked|club/c-pickup|13
+40-club-manage|locked|club/c-pickup/manage|12
+41-clubs-near|locked|club/c-pickup/near|12
+42-club-plan|locked|club/c-pickup/plan|12
+43-club-join|locked|club/join|10
+44-matchup-how|locked|club/how|10
+45-club-week-decided|locked|club/c-gainesville|13
+46-club-start|locked|club/start|10
 '
 
 last=""

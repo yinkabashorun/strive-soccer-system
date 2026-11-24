@@ -224,8 +224,8 @@ export default function Club() {
                 Next up
               </Eyebrow>
               <View style={styles.plan}>
-                <Button quiet style={{ flex: 1 }} label="Plan a session" onPress={() => router.push(`/club/${c.id}/plan` as Href)} />
-                <Button quiet style={{ flex: 1 }} label="Plan a game" onPress={() => router.push(`/club/${c.id}/near` as Href)} />
+                <Button quiet label="Plan a session" onPress={() => router.push(`/club/${c.id}/plan` as Href)} />
+                <Button quiet label="Plan a game" onPress={() => router.push(`/club/${c.id}/near` as Href)} />
               </View>
             </>
           ) : null}
@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
   place: { width: 18, textAlign: "center" },
   captain: { backgroundColor: color.bone, borderRadius: 6, paddingHorizontal: 6, paddingVertical: 2 },
   section: { marginHorizontal: 20, marginTop: 28 },
-  plan: { flexDirection: "row", gap: 10, marginHorizontal: 14, marginTop: 10 },
+  plan: { gap: 10, marginHorizontal: 14, marginTop: 10 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 4, marginHorizontal: 14, marginTop: 10 },
   tile: { width: "32.4%", aspectRatio: 1, borderRadius: 12, overflow: "hidden", backgroundColor: color.fill2 },
   lockedTile: { alignItems: "center", justifyContent: "center", backgroundColor: "#1c1b17", borderWidth: 1, borderColor: color.line },

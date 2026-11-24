@@ -27,6 +27,7 @@ import {
   everyMatchupSentence,
   matchupAheadLine,
   matchupCardLine,
+  matchupTitle,
   matchupRecordLine,
   matchupResultLine,
   matchupSmallLine,
@@ -351,6 +352,13 @@ describe("the words, for a 9 year old", () => {
       expect(s, s).not.toMatch(/\p{Extended_Pictographic}/u);
       expect(s, s).not.toMatch(/!/);
     }
+  });
+
+  it("a decided week is called last week's, never this week's", () => {
+    expect(matchupTitle("on")).toBe("This week's matchup");
+    expect(matchupTitle("none")).toBe("This week's matchup");
+    expect(matchupTitle("over")).toBe("Last week's matchup");
+    expect(code("components/elite/MatchupCard.tsx")).toContain("{matchupTitle(matchup.state)}");
   });
 
   it("says a minute as a minute", () => {

@@ -19,6 +19,7 @@ import type { FreeAnswers, FreeStage } from "./free-intake";
 import {
   OFFER_CARD_TIER,
   OFFER_DRILLS_LABEL,
+  OFFER_DRILL_LOCKED,
   OFFER_GETS,
   OFFER_LATER,
   OFFER_LATER_FIRST,
@@ -86,8 +87,9 @@ export async function offerFor(viewer: Viewer, answers: FreeAnswers, stage: Free
     drillsLabel: OFFER_DRILLS_LABEL,
     drills: preview.drills.flatMap((d) => {
       const poster = drillPoster(d.video_url);
-      return poster ? [{ title: d.title, poster: `${APP_URL}${poster}` }] : [];
+      return poster ? [{ poster: `${APP_URL}${poster}` }] : [];
     }),
+    drillLocked: OFFER_DRILL_LOCKED,
     gets: [...OFFER_GETS],
     price: OFFER_PRICE,
     start: OFFER_START,

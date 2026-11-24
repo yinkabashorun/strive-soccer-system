@@ -139,7 +139,9 @@ export type AppOffer = {
   card: { name: string; tier: string };
   headline: string;
   drillsLabel: string;
-  drills: { title: string; poster: string }[];
+  // Stills only: the drills' names are never sent with the offer.
+  drills: { poster: string }[];
+  drillLocked: string;
   gets: string[];
   price: string;
   start: string;

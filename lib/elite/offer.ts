@@ -30,7 +30,16 @@ export function offerHeadline(firstName: string, areas: readonly string[]): stri
   return who ? `${who}, your first week goes after ${what}.` : `Your first week goes after ${what}.`;
 }
 
-export const OFFER_DRILLS_LABEL = "Drills like these";
+// The stills under the headline are a taste, not a list: real drills from
+// the filmed bank for the areas the headline names, shown locked, WITHOUT
+// their names. (Nov 24 2026, the owner: "Drills like these" did not work,
+// it was showing them the exact drills. A free player who is handed the
+// drill names has no reason to start; the names and the videos open with
+// the membership.) The server sends the picture and nothing else about
+// the drill, so the names are not on the phone at all.
+export const OFFER_DRILLS_LABEL = "Inside your first week";
+// What a screen reader says for one of them.
+export const OFFER_DRILL_LOCKED = "A drill from your first week. It opens when you start.";
 
 export const OFFER_GETS: readonly string[] = [
   "A new week every Monday, built around what you told us.",

@@ -239,6 +239,31 @@ describe("nothing in the app is tilted in 3D or casts a shadow", () => {
   });
 });
 
+// Nov 24 2026, the owner on the offer: "Drills like these" did not work,
+// it was showing them the exact drills. The stills are a taste, shown
+// locked; the drills' names never reach a free player's phone.
+describe("the offer's drills", () => {
+  const site = path.resolve(root, "..");
+  it("are locked stills with no names, on the screen and in what the server sends", () => {
+    const offer = read(path.join(site, "lib/elite/offer.ts"));
+    expect(offer).toContain('OFFER_DRILLS_LABEL = "Inside your first week"');
+    expect(offer).not.toMatch(/OFFER_DRILLS_LABEL = "Drills like these"/);
+    const contract = read(path.join(site, "lib/elite/app-contract.ts"));
+    expect(contract).toContain("drills: { poster: string }[];");
+    const server = read(path.join(site, "lib/elite/free-app-server.ts"));
+    const sent = server.slice(server.indexOf("drills: preview.drills.flatMap"), server.indexOf("gets: [...OFFER_GETS]"));
+    expect(sent).toContain("[{ poster:");
+    expect(sent).not.toMatch(/title/);
+    const screen = code(path.join(root, "app/offer.tsx"));
+    expect(screen).not.toMatch(/d\.title/);
+    expect(screen).toContain('<Icon name="lock"');
+    expect(screen).toContain("accessibilityLabel={o.drillLocked}");
+    const fixtures = read(path.join(root, "src/api/fixtures.ts"));
+    const example = fixtures.slice(fixtures.indexOf("FIXTURE_OFFER"), fixtures.indexOf("gets:", fixtures.indexOf("FIXTURE_OFFER")));
+    expect(example).not.toMatch(/title:/);
+  });
+});
+
 describe("the sign-in screen", () => {
   const src = read(path.join(root, "app/sign-in.tsx"));
   it("says whose app it is", () => {

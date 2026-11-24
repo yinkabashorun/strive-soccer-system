@@ -11,10 +11,11 @@ import { ageOf } from "./free-upgrade-server";
 import { readIntake, setUpgradeCheckout } from "./free-intake-server";
 import { attributesWeakestFirst } from "./quiz";
 import { areasPhrase } from "./free-intake";
-import { getTracker } from "./tracker-server";
+import { getTracker, getWeekLogs } from "./tracker-server";
+import { fmtDuration } from "./time-trained";
 import { nyToday } from "./time";
 import { isPro } from "./tiers";
-import { PARENT_ALREADY_ON, PARENT_NEEDS_BOXES, PARENT_NOT_FOUND, cleanParentCode, parentLink, parentPath } from "./parent-link";
+import { PARENT_ALREADY_ON, PARENT_NEEDS_BOXES, PARENT_NOT_FOUND, cleanParentCode, parentLink, parentPath, parentProofLine } from "./parent-link";
 
 const ALPHABET = "abcdefghijklmnopqrstuvwxyz234567";
 function newCode(): string {
@@ -54,7 +55,7 @@ async function ownerOf(code: string): Promise<Owner | null> {
   return { profileId, fullName: (p as { full_name: string }).full_name, email: (p as { email: string }).email };
 }
 
-export type ParentPage = { first: string; areas: string | null; price: string; on: boolean };
+export type ParentPage = { first: string; areas: string | null; proof: string | null; price: string; on: boolean };
 
 // What the parent's page shows: the player's first name, what their first
 // week goes after (from the quiz they took, when they took it), the price.
@@ -64,15 +65,19 @@ export async function parentPageFor(rawCode: unknown): Promise<ParentPage | null
   const owner = await ownerOf(code);
   if (!owner) return null;
   const admin = createServiceClient();
-  const [intake, row] = await Promise.all([
+  const [intake, row, logs] = await Promise.all([
     readIntake(owner.profileId).catch(() => null),
     admin ? admin.from("elite_players").select("subscription_status").eq("profile_id", owner.profileId).maybeSingle() : null,
+    getWeekLogs(owner.profileId, nyToday()).catch(() => []),
   ]);
+  const first = owner.fullName.trim().split(/\s+/)[0] || "Your player";
+  const trained = logs.filter((l) => l.kind !== "gym").reduce((sum, l) => sum + l.minutes, 0);
   const status = (row?.data as { subscription_status: string | null } | null)?.subscription_status ?? "none";
   const weakest = intake?.answers ? attributesWeakestFirst(intake.answers.attrs).slice(0, 2) : [];
   return {
-    first: owner.fullName.trim().split(/\s+/)[0] || "Your player",
+    first,
     areas: areasPhrase(weakest),
+    proof: parentProofLine(first, trained, fmtDuration(trained)),
     price: PRO_PRICE_LINE,
     on: status === "active",
   };

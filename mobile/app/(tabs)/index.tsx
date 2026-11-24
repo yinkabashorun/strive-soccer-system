@@ -5,6 +5,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { dropDue, shortDate, todayName } from "@shared/experience";
 import { fmtDuration } from "@shared/time-trained";
+import { AFTER_WEEK_MORE } from "@shared/session-flow";
 import type { AppSession, AppWeek } from "@shared/app-contract";
 import { keys, useMe, useWeek } from "@/api/queries";
 import { queryClient } from "@/api/queryClient";
@@ -129,6 +130,11 @@ export default function Home() {
               {w.oneMore}
             </Body>
           ) : null}
+          {w.weekDone ? (
+            <Body dim size={14} style={{ textAlign: "center", marginBottom: 4 }}>
+              {AFTER_WEEK_MORE}
+            </Body>
+          ) : null}
           <Press
             onPress={() => {
               tick();
@@ -141,6 +147,20 @@ export default function Home() {
             <Label style={{ flex: 1 }}>Extra work</Label>
             <Icon name="chevron" size={16} stroke={color.faint} />
           </Press>
+          {w.weekDone ? (
+            <Press
+              onPress={() => {
+                tick();
+                router.push("/courses");
+              }}
+              style={styles.quietRow}
+              accessibilityLabel="Courses"
+            >
+              <Icon name="play" size={16} fill={color.bone} />
+              <Label style={{ flex: 1 }}>Courses</Label>
+              <Icon name="chevron" size={16} stroke={color.faint} />
+            </Press>
+          ) : null}
         </View>
       ) : null}
     </Screen>

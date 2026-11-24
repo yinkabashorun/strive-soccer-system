@@ -7,10 +7,12 @@ import {
   canSendClip,
   drillKind,
   drillName,
+  dropStartLabel,
   feelEnabled,
   groupSessions,
   hapticFor,
   isDone,
+  lastWeekLine,
   nextStep,
   sessionName,
   sessionProgress,
@@ -189,5 +191,38 @@ describe("the player shell", () => {
     const member = read("components/elite/MemberNav.tsx");
     expect(member).not.toContain("signOut");
     expect(member).toContain('href="/you" aria-label="You"');
+  });
+});
+
+// The drop: what it says about the week before, and its one button.
+describe("the drop: last week's line and the start button", () => {
+  const row = (week: number, session: number, completed: boolean, duration_min = 5, actual_seconds: number | null = null) =>
+    ({ id: `${week}-${session}-${Math.random()}`, week, session, sort: 0, completed, duration_min, actual_seconds, is_extra: false }) as unknown as import("../lib/elite/types").Homework;
+
+  it("says the sessions finished and the time trained, in whole words", () => {
+    const rows = [row(3, 1, true, 10), row(3, 1, true, 12), row(3, 2, true, 20), row(3, 3, true, 30), row(3, 3, false)];
+    expect(lastWeekLine(rows, 4)).toBe("Last week you finished 2 sessions and trained 1h 12m.");
+    expect(lastWeekLine([row(3, 1, true, 20)], 4)).toBe("Last week you finished 1 session and trained 20m.");
+  });
+
+  it("counts the measured time when a drill has one", () => {
+    expect(lastWeekLine([row(2, 1, true, 20, 300)], 3)).toBe("Last week you finished 1 session and trained 5m.");
+  });
+
+  it("time without a finished session is still said; nothing trained says nothing", () => {
+    expect(lastWeekLine([row(3, 1, true, 8), row(3, 1, false)], 4)).toBe("Last week you trained 8m.");
+    expect(lastWeekLine([row(3, 1, false), row(3, 2, false)], 4)).toBeNull();
+    expect(lastWeekLine([], 4)).toBeNull();
+    expect(lastWeekLine([row(1, 1, true)], 1)).toBeNull();
+  });
+
+  it("never counts what was left undone", () => {
+    const line = lastWeekLine([row(3, 1, true, 10), row(3, 2, false), row(3, 3, false), row(3, 4, false)], 4) ?? "";
+    expect(line).not.toMatch(/missed|left|of 4|behind|only/i);
+  });
+
+  it("the button names the first session", () => {
+    expect(dropStartLabel({ n: 1, extra: false })).toBe("Start session 1");
+    expect(dropStartLabel(null)).toBe("Let's go");
   });
 });

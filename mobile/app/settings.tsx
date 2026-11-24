@@ -42,7 +42,7 @@ export default function Settings() {
       <Section title="This phone">
         <SettingRow
           label="Notifications"
-          detail={free ? "A friend posts, or gives you props. Nothing else." : "Your new week, your coach, a Film Room. Nothing else."}
+          detail={free ? "A friend posts or gives you props, or your club plans a session or a game. Nothing else." : "Your new week, your coach, a Film Room. Nothing else."}
           value={p.pushOn}
           onValue={(v) => void (v ? turnOnNotifications() : turnOffNotifications())}
         />

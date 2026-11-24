@@ -27,6 +27,7 @@ import {
   eventDay,
   eventWhen,
   gameDecision,
+  gamesRecordLine,
   hasAccepted,
   mayAnswerGame,
   mayAnswerScore,
@@ -49,6 +50,7 @@ import {
   type CountyRow,
   type EntryState,
   type NearClubView,
+  type PlanCard,
   type PlanKind,
   type PlanRefusal,
   type PlanRow,
@@ -190,31 +192,7 @@ export async function playAcceptancesOf(admin: Admin, profileId: string): Promis
 
 // ---- One session or game, as a card ----------------------------------------------------
 
-export type PlanCard = {
-  id: string;
-  kind: PlanKind;
-  title: string | null;
-  organizer: { id: string; name: string };
-  opponent: { id: string; name: string } | null;
-  when: string; // "Tue, Nov 24, 6:00 PM"
-  minutes: number;
-  place: string;
-  status: PlanStatus;
-  started: boolean;
-  ins: number;
-  names: string[]; // only players in for the viewer's own club(s), never across a block
-  imIn: boolean;
-  canJoin: boolean;
-  canCancel: boolean;
-  canAnswer: boolean; // the other captain, on a game request
-  result: null | {
-    state: ResultState;
-    score: [number, number] | null; // organizer first
-    line: string | null;
-    canEnter: boolean;
-    canAnswer: boolean;
-  };
-};
+export type { PlanCard } from "./club-teams";
 
 type CardContext = {
   viewerId: string;
@@ -340,6 +318,7 @@ export type ClubTeamView = {
   countyName: string | null;
   open: boolean;
   record: string;
+  recordLine: string; // "Games won: 4. Games lost: 1. Draws: 0."
   place: number | null;
   canPlan: boolean; // the viewer captains it
   plans: PlanCard[]; // coming up, and games of the last week waiting on a result
@@ -362,6 +341,7 @@ export async function clubTeamFor(viewer: Viewer, clubId: string, captain: boole
     countyName: null,
     open: false,
     record: "New",
+    recordLine: gamesRecordLine(recordOf(new Map(), clubId)),
     place: null,
     canPlan: false,
     plans: [],
@@ -403,6 +383,7 @@ export async function clubTeamFor(viewer: Viewer, clubId: string, captain: boole
     countyName: countyName(me.county),
     open: me.open,
     record: recordLabel(recordOf(records, clubId)),
+    recordLine: gamesRecordLine(recordOf(records, clubId)),
     place: countyPlaceOf(ranking, clubId),
     canPlan: captain && !me.archived,
     plans,
@@ -419,6 +400,7 @@ function demoClubTeam(clubId: string, captain: boolean, nowMs: number): ClubTeam
     countyName: countyName(club?.county),
     open: club?.open ?? false,
     record: demoRecordLabel(clubId),
+    recordLine: gamesRecordLine(recordOf(DEMO_RECORDS, clubId)),
     place: countyPlaceOf(ranked, clubId),
     canPlan: captain,
     plans: demoCards(new Set(["demo-club-1", "demo-club-2"]), nowMs).filter((c) => c.organizer.id === clubId || c.opponent?.id === clubId),
@@ -531,8 +513,10 @@ export async function opponentsFor(viewer: Viewer, clubId: string): Promise<{ id
 
 // ---- Requests on the Friends tab ----------------------------------------------------
 
-export type GameAsk = { id: string; from: string; fromId: string; to: string; when: string; minutes: number; place: string };
-export type ScoreAsk = { id: string; from: string; to: string; score: [number, number]; enteredBy: string };
+// toId: the club that is asked (the one this viewer captains).
+export type GameAsk = { id: string; from: string; fromId: string; to: string; toId: string; when: string; minutes: number; place: string };
+// toId: the club whose captain answers (the one that did not enter it).
+export type ScoreAsk = { id: string; from: string; to: string; toId: string; score: [number, number]; enteredBy: string };
 export type RosterAsk = { entryId: string; event: string; when: string; club: string; waiverUrl: string; minor: boolean };
 export type TogetherAsk = { logId: string; from: string; initials: string; minutes: number; kind: Kind; day: string };
 export type TeamAsks = { games: GameAsk[]; scores: ScoreAsk[]; rosters: RosterAsk[]; together: TogetherAsk[]; organizerOk: boolean };
@@ -541,7 +525,7 @@ export type TeamAsks = { games: GameAsk[]; scores: ScoreAsk[]; rosters: RosterAs
 function demoAsks(): TeamAsks {
   const nowMs = Date.now();
   return {
-    games: [{ id: "demo-plan-2", from: "Sunday Pickup", fromId: "demo-near-4", to: "Bull Run 2010s", when: eventWhen(new Date(nowMs + 6 * 86_400_000).toISOString()), minutes: 60, place: "Braemar Park, Bristow" }],
+    games: [{ id: "demo-plan-2", from: "Sunday Pickup", fromId: "demo-near-4", to: "Bull Run 2010s", toId: "demo-club-2", when: eventWhen(new Date(nowMs + 6 * 86_400_000).toISOString()), minutes: 60, place: "Braemar Park, Bristow" }],
     scores: [],
     rosters: [
       {
@@ -574,10 +558,11 @@ export async function teamAsksFor(viewer: Viewer, today: string): Promise<TeamAs
     const n = (id: string | null) => (id ? names.get(id) ?? "A club" : "A club");
     for (const p of plans) {
       if (mayAnswerGame(p, captainOf) && Date.parse(p.starts_at) > nowMs) {
-        games.push({ id: p.id, from: n(p.club_id), fromId: p.club_id, to: n(p.opponent_id), when: eventWhen(p.starts_at), minutes: p.minutes, place: p.place });
+        games.push({ id: p.id, from: n(p.club_id), fromId: p.club_id, to: n(p.opponent_id), toId: p.opponent_id ?? "", when: eventWhen(p.starts_at), minutes: p.minutes, place: p.place });
       }
       if (mayAnswerScore(p, captainOf, nowMs) && p.score_club !== null && p.score_opponent !== null) {
-        scores.push({ id: p.id, from: n(p.club_id), to: n(p.opponent_id), score: [p.score_club, p.score_opponent], enteredBy: n(p.score_by_club) });
+        const asked = p.score_by_club === p.club_id ? p.opponent_id : p.club_id;
+        scores.push({ id: p.id, from: n(p.club_id), to: n(p.opponent_id), toId: asked ?? "", score: [p.score_club, p.score_opponent], enteredBy: n(p.score_by_club) });
       }
     }
   }

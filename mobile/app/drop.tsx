@@ -7,7 +7,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useMe, useWeek } from "@/api/queries";
 import { markWeekSeen } from "@/prefs";
 import { feel } from "@/feel";
-import { Body, Button, Eyebrow, Head } from "@/ui";
+import { dropStartLabel } from "@shared/session-flow";
+import { Body, Button, Eyebrow, Head, Press, Label } from "@/ui";
 import { color, radius } from "@/theme";
 
 // The drop (experience.md, moment 4): "Your week is here." and the week's
@@ -27,6 +28,8 @@ export default function Drop() {
   }, [pid, w]);
 
   const plan = w?.sessions.filter((s) => !s.extra) ?? [];
+  // the one button starts the week: its first session, one tap from here
+  const first = plan[0] ?? null;
   return (
     <View style={[styles.fill, { paddingTop: insets.top + 60, paddingBottom: insets.bottom + 24 }]}>
       <Animated.View entering={FadeIn.duration(400)}>
@@ -37,6 +40,11 @@ export default function Drop() {
         {w ? (
           <Body dim style={{ marginTop: 10 }}>
             {w.dropLine}
+          </Body>
+        ) : null}
+        {w?.lastWeekLine ? (
+          <Body size={13.5} style={{ marginTop: 8, color: color.gold }}>
+            {w.lastWeekLine}
           </Body>
         ) : null}
       </Animated.View>
@@ -54,7 +62,14 @@ export default function Drop() {
         ))}
       </View>
       <Animated.View entering={FadeIn.delay(500 + plan.length * 160).duration(300)}>
-        <Button label="Let's go" onPress={() => router.back()} />
+        <Button label={dropStartLabel(first)} onPress={() => (first ? router.replace(`/session/${first.n}`) : router.back())} />
+        {first ? (
+          <Press onPress={() => router.back()} accessibilityLabel="Not now" style={styles.later}>
+            <Label size={14} dim>
+              Not now
+            </Label>
+          </Press>
+        ) : null}
       </Animated.View>
     </View>
   );
@@ -62,5 +77,6 @@ export default function Drop() {
 
 const styles = StyleSheet.create({
   fill: { flex: 1, backgroundColor: color.black, paddingHorizontal: 20 },
+  later: { minHeight: 44, alignItems: "center", justifyContent: "center", marginTop: 4 },
   card: { height: 92, borderRadius: radius.tile, overflow: "hidden", backgroundColor: "#060606", justifyContent: "center" },
 });

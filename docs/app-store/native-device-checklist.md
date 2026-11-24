@@ -31,6 +31,9 @@ how it is checked: a test that fails the build, or Coach Yinka's phone.
 | 17 | A photo from the library that is not a JPEG (the iPhone's own HEIC) is posted: the image tool turns it into a JPEG before it is sent, and the server takes it | phone; the simulator's flow picks a sample photo but the example build sends nothing |
 | 18 | Two tab groups (a member's and the free app's): the tab bar shown is the right one for the account, and a tab with the same name in both (Courses) opens the one in the group being used | test for who sees which tabs; the simulator pictures for the rest |
 | 19 | A drill ticked with no signal: it stays ticked, the finish and Week screens say it is saved on this phone, it survives the app being closed, and it reaches the coach side by itself when the signal is back | tests for the rules (`lib/elite/tick-outbox.ts`); phone, in airplane mode, for the rest |
+| 20 | Clubs: the one-time sheet before a first "I'm in", before starting a club and before planning is the phone's own box, comes up dark, and "Not now" leaves everything as it was; "Invite a teammate" opens the share sheet with the club's code AND its link; a code typed in lower case, or a whole link pasted, is taken | tests for the words and the code rule; the simulator's flow (`sim/flows/09-clubs.yaml`) for the sheet and the code; phone for the share sheet |
+| 21 | A tapped notification about a club's session or game opens that club's page, not Friends; with the app closed it does the same after sign-in is read | test for the address (`src/navigation.ts` pushRoute); phone, with a real push, for the rest (needs migration 087 applied) |
+| 22 | Two crests on one screen (a game, the matchup, Clubs near you) each keep their own colours | the simulator pictures |
 
 ## What Coach Yinka checks on each new build
 
@@ -48,6 +51,16 @@ Report and Block on a friend's post, Send my link. Week, Courses (every
 course locked), You, Settings (Delete my account works for a free account).
 Then, once Stripe is switched on: Start Strive Pro from the offer with a
 test card, close the sheet, and the app should carry on to "You're in".
+
+Clubs, with two free accounts on two phones: on the first, Clubs, Start a
+club (the organizer sheet, a name, a county), then Invite a teammate and
+send the code. On the second, Clubs, "Have a club code?", type the code,
+"Ask to join". Back on the first, the club's page, Manage, Let in. Then the
+captain plans a session (Manage, Plan a session), the second phone taps
+"I'm in" (the player sheet, once), and both post a training photo and see
+it under This week's photos. "How it works" on the matchup card opens the
+six lines. The matchup card itself only fills once migration 083 is
+applied and a Monday has passed.
 
 ## Seeing the phone from here
 

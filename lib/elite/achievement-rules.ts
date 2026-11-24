@@ -72,6 +72,30 @@ export const ACHIEVEMENT_RULES: AchievementRule[] = [
     mark: "10",
     earned: (_hw, s) => s.sessions_completed >= 10,
   },
+  // The sessions ladder (Nov 24 2026): 25, 50 and 100, the marks the
+  // leading training apps hand out. Earned only by sessions finished, so
+  // a break never costs one.
+  {
+    title: "25 Sessions",
+    detail: "Twenty-five full sessions done",
+    icon: "Flame",
+    mark: "25",
+    earned: (_hw, s) => s.sessions_completed >= 25,
+  },
+  {
+    title: "50 Sessions",
+    detail: "Fifty full sessions done",
+    icon: "Flame",
+    mark: "50",
+    earned: (_hw, s) => s.sessions_completed >= 50,
+  },
+  {
+    title: "100 Sessions",
+    detail: "One hundred full sessions done",
+    icon: "Trophy",
+    mark: "100",
+    earned: (_hw, s) => s.sessions_completed >= 100,
+  },
   {
     title: "500 Minutes",
     detail: "500 minutes of focused training",

@@ -73,8 +73,9 @@ export function areaHome(area: Area): string {
 // screens too: changing the photo or the username from Settings).
 const APP_ROUTES = new Set(["(tabs)", "session", "course", "drop", "extra", "checkin", "settings", "change-password", "delete-account", "profile-setup"]);
 // The same for the free app: posting, the offer (opened from the one card
-// on Week, or a locked course), the week's set-up, and the profile screens.
-const FREE_ROUTES = new Set(["(free)", "post", "offer", "week-plan", "settings", "change-password", "delete-account", "profile-setup"]);
+// on Week, or a locked course), the week's set-up, a club and everything
+// one tap from it, and the profile screens.
+const FREE_ROUTES = new Set(["(free)", "post", "offer", "week-plan", "club", "settings", "change-password", "delete-account", "profile-setup"]);
 // After the quiz and before the free app: the offer, then the week's set-up.
 const FREE_OFFER_ROUTES = new Set(["offer", "week-plan"]);
 // Signed out: the sign-in screen, and joining free one question a screen.
@@ -96,4 +97,16 @@ export function inArea(area: Area, segments: readonly string[]): boolean {
   if (area === "free-offer") return FREE_OFFER_ROUTES.has(seg);
   if (area === "onboarding" || area === "free-quiz") return seg === "onboarding";
   return seg === AREA_ROOT[area];
+}
+
+// Where a tapped notification opens. A club's session or game (the one
+// notification about clubs) carries that club's page on the website; in
+// the free app it opens the same club here. Everything else opens where
+// the person lives: Home for a member, Friends for a free account.
+const CLUB_PAGE = /^\/log\/club\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$/i;
+
+export function pushRoute(area: Area | null, url: unknown): string {
+  if (!area) return "/";
+  const club = area === "free" && typeof url === "string" ? CLUB_PAGE.exec(url)?.[1] : null;
+  return club ? `/club/${club}` : areaHome(area);
 }

@@ -9,8 +9,11 @@ import {
   PLACE_MAX,
   PLAN_MINUTES,
   PLAN_MINUTES_DEFAULT,
+  PLAN_TIMES,
+  PLAN_TIME_DEFAULT,
   PLAN_TITLE_MAX,
   organizedBy,
+  timeLabel,
 } from "@/lib/elite/club-teams";
 import { fmtDuration } from "@/lib/elite/time-trained";
 import { Crest } from "./FreeAvatar";
@@ -21,13 +24,7 @@ import { PlayTermsSheet } from "./PlayTermsSheet";
 type Kind = "training" | "game";
 
 // Every half hour from 6 AM to 9:30 PM, New York time.
-const TIMES = Array.from({ length: 32 }, (_, i) => {
-  const h = 6 + Math.floor(i / 2);
-  const m = i % 2 ? "30" : "00";
-  const value = `${String(h).padStart(2, "0")}:${m}`;
-  const label = `${h > 12 ? h - 12 : h}:${m} ${h >= 12 ? "PM" : "AM"}`;
-  return { value, label };
-});
+const TIMES = PLAN_TIMES.map((value) => ({ value, label: timeLabel(value) }));
 
 // Plan (the mock, screen 17): club training or a game against a club. The
 // club organizes it, never Strive, and the place is a public field or park.
@@ -46,7 +43,7 @@ export function PlanForm({
   const [kind, setKind] = useState<Kind>(initialVs ? "game" : "training");
   const [vs, setVs] = useState<string | null>(initialVs);
   const [day, setDay] = useState(days[1]?.value ?? days[0].value);
-  const [time, setTime] = useState("18:00");
+  const [time, setTime] = useState<string>(PLAN_TIME_DEFAULT);
   const [minutes, setMinutes] = useState<number>(PLAN_MINUTES_DEFAULT);
   const [place, setPlace] = useState("");
   const [title, setTitle] = useState("");

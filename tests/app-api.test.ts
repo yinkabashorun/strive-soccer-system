@@ -33,6 +33,10 @@ const s = {
   toggle: { ok: true } as { ok: true } | { ok: false; again: boolean },
   readFails: false,
   courses: [] as Record<string, unknown>[],
+  // clubs: is the club one of the caller's, and are the two one-time sheets accepted
+  clubFound: true,
+  organizerOk: true,
+  playerOk: true,
 };
 
 function player(over: Record<string, unknown> = {}) {
@@ -81,6 +85,14 @@ function call(fn: string) {
     if (fn === "confirmUpgrade") return { active: false };
     if (fn === "toggleProps") return { ok: true, propped: true };
     if (fn === "logTraining") return { ok: true, id: "l1" };
+    if (fn === "appClubsFor") return { clubs: [], canStart: true };
+    if (fn === "appClubPageFor" || fn === "appClubNearFor") return s.clubFound ? { id: args[1] } : null;
+    if (fn === "startClubInApp") return s.organizerOk ? { ok: true, id: "c1", code: "ABCD2345" } : { ok: false, error: "needs_organizer_ok", needs: "organizer" };
+    if (fn === "askToJoinByCode") return { ok: true, line: "Request sent. You are in Renegados FC once the captain lets you in." };
+    if (fn === "newClubLink") return { ok: true, code: "NEWC2345" };
+    if (fn === "planTraining" || fn === "planGame") return s.organizerOk ? { ok: true, id: "plan1" } : { ok: false, error: "needs_organizer_ok" };
+    if (fn === "setImIn") return s.playerOk ? { ok: true } : { ok: false, error: "needs_player_ok" };
+    if (fn === "enterScore") return { ok: false, error: "Only a captain of either club enters the score, once the game has started." };
     return { ok: true };
   };
 }
@@ -226,6 +238,33 @@ vi.mock("@/lib/elite/tracker-actions", () => ({
   reportPost: call("reportPost"),
   blockPlayer: call("blockPlayer"),
   answerFriendRequest: call("answerFriendRequest"),
+  // clubs, for a member and for the captain
+  leaveClub: call("leaveClub"),
+  reportClub: call("reportClub"),
+  renameMyClub: call("renameMyClub"),
+  removeClubMember: call("removeClubMember"),
+  newClubLink: call("newClubLink"),
+  endMyClub: call("endMyClub"),
+  answerClubRequest: call("answerClubRequest"),
+}));
+vi.mock("@/lib/elite/club-app-server", () => ({
+  appClubsFor: call("appClubsFor"),
+  appClubPageFor: call("appClubPageFor"),
+  appClubNearFor: call("appClubNearFor"),
+  startClubInApp: call("startClubInApp"),
+  askToJoinByCode: call("askToJoinByCode"),
+}));
+vi.mock("@/lib/elite/club-teams-actions", () => ({
+  setClubCounty: call("setClubCounty"),
+  acceptPlayTerms: call("acceptPlayTerms"),
+  planTraining: call("planTraining"),
+  planGame: call("planGame"),
+  answerGame: call("answerGame"),
+  cancelPlan: call("cancelPlan"),
+  setImIn: call("setImIn"),
+  enterScore: call("enterScore"),
+  answerScore: call("answerScore"),
+  reportPlan: call("reportPlan"),
 }));
 vi.mock("@/app/api/elite/auth/join/route", () => ({
   POST: async () => (s.calls.push({ fn: "join", args: [] }), new Response(JSON.stringify({ ok: true, signedIn: true }), { status: 200 })),
@@ -333,6 +372,14 @@ const ROUTES = {
   freeYou: () => import("@/app/api/app/free/you/route"),
   courses: () => import("@/app/api/app/courses/route"),
   course: () => import("@/app/api/app/courses/[slug]/route"),
+  // clubs, in the free app
+  freeClubs: () => import("@/app/api/app/free/clubs/route"),
+  freeClubJoin: () => import("@/app/api/app/free/clubs/join/route"),
+  freeClub: () => import("@/app/api/app/free/clubs/[id]/route"),
+  freeClubNear: () => import("@/app/api/app/free/clubs/[id]/near/route"),
+  freeClubPlans: () => import("@/app/api/app/free/plans/route"),
+  freeClubPlan: () => import("@/app/api/app/free/plans/[id]/route"),
+  freePlayTerms: () => import("@/app/api/app/free/play-terms/route"),
 };
 // The two routes nobody is signed in for yet.
 const PUBLIC = {
@@ -381,6 +428,16 @@ const TABLE: { route: keyof typeof ROUTES; method: "GET" | "POST" | "DELETE"; ac
   { route: "freeYou", method: "GET", access: "free_app" },
   { route: "courses", method: "GET", access: "account" },
   { route: "course", method: "GET", access: "member" },
+  // clubs: only ever an account in the free app
+  { route: "freeClubs", method: "GET", access: "free_app" },
+  { route: "freeClubs", method: "POST", access: "free_app" },
+  { route: "freeClubJoin", method: "POST", access: "free_app" },
+  { route: "freeClub", method: "GET", access: "free_app" },
+  { route: "freeClub", method: "POST", access: "free_app" },
+  { route: "freeClubNear", method: "GET", access: "free_app" },
+  { route: "freeClubPlans", method: "POST", access: "free_app" },
+  { route: "freeClubPlan", method: "POST", access: "free_app" },
+  { route: "freePlayTerms", method: "POST", access: "free_app" },
 ];
 const FOR_FREE = new Set<Access>(["free", "free_app"]);
 
@@ -429,6 +486,9 @@ beforeEach(() => {
   s.toggle = { ok: true };
   s.readFails = false;
   s.courses = library();
+  s.clubFound = true;
+  s.organizerOk = true;
+  s.playerOk = true;
 });
 
 describe("the bearer token", () => {
@@ -825,6 +885,177 @@ describe("the free app's bodies are checked first", () => {
     expect(input.weaknesses[0]).toBe("Weak foot");
     expect(input.age).toBe(15);
     expect(input.goals).toEqual(["Make a higher team"]);
+  });
+});
+
+describe("clubs: bodies are checked first, and every write is the website's own action", () => {
+  const CLUB = "22222222-2222-4222-8222-222222222222";
+  const OTHER = "33333333-3333-4333-8333-333333333333";
+  const PLAYER = "44444444-4444-4444-8444-444444444444";
+  const PLAN = "55555555-5555-4555-8555-555555555555";
+  const go = async (route: keyof typeof ROUTES, method: string, body: unknown, id?: string) =>
+    (await handler(route, method))(req(method, { body }), id === undefined ? undefined : { params: { id } });
+  const fns = () => s.calls.map((c) => c.fn);
+
+  it("the tab: my clubs, read for the caller the token names", async () => {
+    freeAccount();
+    const res = await go("freeClubs", "GET", undefined);
+    expect(await res.json()).toEqual({ clubs: [], canStart: true });
+    expect((s.calls[0].args[0] as { profile: { id: string } }).profile.id).toBe("u1");
+  });
+
+  it("starting a club: a real name, a county from the list or none, the organizer sheet first", async () => {
+    freeAccount();
+    expect((await go("freeClubs", "POST", { name: "" })).status).toBe(400);
+    expect((await go("freeClubs", "POST", { name: "www.join-us.com" })).status).toBe(400);
+    expect((await go("freeClubs", "POST", { name: "Renegados FC", county: "Gainesville" })).status).toBe(400);
+    expect(s.calls).toEqual([]);
+    // the sheet has not been accepted: a step to take, not an error
+    s.organizerOk = false;
+    const needs = await go("freeClubs", "POST", { name: "Renegados FC" });
+    expect(needs.status).toBe(200);
+    expect(await needs.json()).toEqual({ ok: false, needs: "organizer" });
+    s.organizerOk = true;
+    const ok = await go("freeClubs", "POST", { name: "  Renegados   FC ", county: "va-prince-william", captain: "someone-else" });
+    expect(await ok.json()).toEqual({ ok: true, id: "c1", code: "ABCD2345" });
+    const last = s.calls[s.calls.length - 1];
+    expect(last.args.slice(1)).toEqual(["Renegados FC", "va-prince-william"]);
+    expect((last.args[0] as { profile: { id: string } }).profile.id).toBe("u1");
+  });
+
+  it("joining by code: the code alone or a whole pasted link, nothing else", async () => {
+    freeAccount();
+    expect((await go("freeClubJoin", "POST", { code: "nope" })).status).toBe(400);
+    expect((await go("freeClubJoin", "POST", {})).status).toBe(400);
+    expect(s.calls).toEqual([]);
+    const typed = await go("freeClubJoin", "POST", { code: "abcd2345" });
+    expect((await typed.json()).line).toContain("once the captain lets you in");
+    await go("freeClubJoin", "POST", { code: "https://thestriveapp.com/join?club=ABCD2345" });
+    expect(s.calls.map((c) => c.args[1])).toEqual(["ABCD2345", "ABCD2345"]);
+  });
+
+  it("a club's page and its clubs near you: a well-formed id, and 404 for a club that is not the caller's", async () => {
+    freeAccount();
+    for (const route of ["freeClub", "freeClubNear"] as const) {
+      expect((await go(route, "GET", undefined, "../week")).status).toBe(404);
+      expect((await go(route, "GET", undefined)).status).toBe(404);
+    }
+    expect(s.calls).toEqual([]); // an id that is not one never reaches a read
+    expect(await (await go("freeClub", "GET", undefined, CLUB)).json()).toEqual({ club: { id: CLUB } });
+    expect(await (await go("freeClubNear", "GET", undefined, CLUB)).json()).toEqual({ near: { id: CLUB } });
+    s.clubFound = false;
+    for (const route of ["freeClub", "freeClubNear"] as const) {
+      const res = await go(route, "GET", undefined, CLUB);
+      expect(res.status).toBe(404);
+      expect(await res.json()).toEqual({ error: "not_found" });
+    }
+  });
+
+  it("what a member or the captain does to a club goes through the website's action for it", async () => {
+    freeAccount();
+    const post = async (body: unknown, id: string | undefined = CLUB) => (await go("freeClub", "POST", body, id)).status;
+    expect(await post({ do: "leave" }, "nope")).toBe(400);
+    expect(await post({ do: "delete-everything" })).toBe(400);
+    expect(await post({})).toBe(400);
+    expect(await post({ do: "rename" })).toBe(400);
+    expect(await post({ do: "remove", member: "the captain" })).toBe(400);
+    expect(await post({ do: "county", county: 7, open: true })).toBe(400);
+    expect(await post({ do: "county", county: "va-loudoun", open: "yes" })).toBe(400);
+    expect(await post({ do: "request", player: PLAYER, accept: "yes" })).toBe(400);
+    expect(await post({ do: "request", player: "x", accept: true })).toBe(400);
+    expect(s.calls).toEqual([]);
+
+    expect(await post({ do: "leave" })).toBe(200);
+    expect(await post({ do: "report" })).toBe(200);
+    expect(await post({ do: "rename", name: "Renegados" })).toBe(200);
+    expect(await post({ do: "remove", member: PLAYER })).toBe(200);
+    expect(await (await go("freeClub", "POST", { do: "link" }, CLUB)).json()).toEqual({ ok: true, code: "NEWC2345" });
+    expect(await post({ do: "county", county: "va-loudoun", open: true })).toBe(200);
+    expect(await post({ do: "county", county: null, open: false })).toBe(200);
+    expect(await post({ do: "end" })).toBe(200);
+    expect(await post({ do: "request", player: PLAYER, accept: true })).toBe(200);
+    expect(fns()).toEqual(["leaveClub", "reportClub", "renameMyClub", "removeClubMember", "newClubLink", "setClubCounty", "setClubCounty", "endMyClub", "answerClubRequest"]);
+    // every action is handed the club from the address, never one from the body
+    for (const c of s.calls) expect(c.args[0]).toBe(CLUB);
+    expect(s.calls[3].args).toEqual([CLUB, PLAYER]);
+    expect(s.calls[5].args).toEqual([CLUB, "va-loudoun", true]);
+    expect(s.calls[8].args).toEqual([CLUB, PLAYER, true]);
+  });
+
+  it("planning: a club, a kind, an opponent for a game; the plan itself is checked by the website's action", async () => {
+    freeAccount();
+    const input = { day: "2026-12-05", time: "18:00", minutes: 60, place: "Braemar Park, Bristow", title: "Finishing night" };
+    expect((await go("freeClubPlans", "POST", { ...input, kind: "training" })).status).toBe(400);
+    expect((await go("freeClubPlans", "POST", { ...input, club: CLUB, kind: "party" })).status).toBe(400);
+    expect((await go("freeClubPlans", "POST", { ...input, club: CLUB, kind: "game" })).status).toBe(400);
+    expect((await go("freeClubPlans", "POST", { ...input, club: CLUB, kind: "game", opponent: "them" })).status).toBe(400);
+    expect(s.calls).toEqual([]);
+    expect(await (await go("freeClubPlans", "POST", { ...input, club: CLUB, kind: "training" })).json()).toEqual({ ok: true, id: "plan1" });
+    expect(await (await go("freeClubPlans", "POST", { ...input, club: CLUB, kind: "game", opponent: OTHER })).json()).toEqual({ ok: true, id: "plan1" });
+    expect(s.calls.map((c) => [c.fn, ...c.args.slice(0, -1)])).toEqual([
+      ["planTraining", CLUB],
+      ["planGame", CLUB, OTHER],
+    ]);
+    expect(s.calls[0].args[1]).toEqual(input);
+    // a captain who has not accepted the organizer sheet is told so, as a step
+    s.organizerOk = false;
+    const needs = await go("freeClubPlans", "POST", { ...input, club: CLUB, kind: "training" });
+    expect(needs.status).toBe(200);
+    expect(await needs.json()).toEqual({ ok: false, needs: "organizer" });
+  });
+
+  it("a session or a game: I'm in, the captains' answers, the score, a report", async () => {
+    freeAccount();
+    const post = async (body: unknown, id: string | undefined = PLAN) => go("freeClubPlan", "POST", body, id);
+    expect((await post({ do: "in" }, "nope")).status).toBe(400);
+    expect((await post({ do: "win" })).status).toBe(400);
+    expect((await post({ do: "score", club: "3", opponent: 1 })).status).toBe(400);
+    expect((await post({ do: "report", reason: "because" })).status).toBe(400);
+    expect(s.calls).toEqual([]);
+
+    for (const what of ["in", "out", "accept", "pass", "cancel", "confirm", "dispute"]) expect((await post({ do: what })).status, what).toBe(200);
+    expect((await post({ do: "report", reason: "place" })).status).toBe(200);
+    expect(s.calls.map((c) => [c.fn, ...c.args])).toEqual([
+      ["setImIn", PLAN, true],
+      ["setImIn", PLAN, false],
+      ["answerGame", PLAN, true],
+      ["answerGame", PLAN, false],
+      ["cancelPlan", PLAN],
+      ["answerScore", PLAN, true],
+      ["answerScore", PLAN, false],
+      ["reportPlan", PLAN, "place"],
+    ]);
+    // the action's own refusal is passed on as it words it
+    const refused = await post({ do: "score", club: 3, opponent: 1 });
+    expect(refused.status).toBe(400);
+    expect((await refused.json()).error).toContain("once the game has started");
+    // a first "I'm in" before the player sheet: a step, not an error
+    s.playerOk = false;
+    const needs = await post({ do: "in" });
+    expect(needs.status).toBe(200);
+    expect(await needs.json()).toEqual({ ok: false, needs: "player" });
+  });
+
+  it("the two one-time sheets are recorded by the website's own action", async () => {
+    freeAccount();
+    expect((await go("freePlayTerms", "POST", { kind: "coach" })).status).toBe(400);
+    expect((await go("freePlayTerms", "POST", {})).status).toBe(400);
+    expect((await go("freePlayTerms", "POST", { kind: "organizer" })).status).toBe(200);
+    expect((await go("freePlayTerms", "POST", { kind: "player" })).status).toBe(200);
+    expect(s.calls.map((c) => [c.fn, ...c.args])).toEqual([
+      ["acceptPlayTerms", "organizer"],
+      ["acceptPlayTerms", "player"],
+    ]);
+  });
+
+  it("starting a club is rate limited hard", async () => {
+    freeAccount();
+    const h = await handler("freeClubs", "POST");
+    const start = () =>
+      h(new Request("https://x/api", { method: "POST", headers: { authorization: `Bearer ${TOKEN}`, "x-forwarded-for": "13.13.13.13" }, body: JSON.stringify({ name: "Renegados FC" }) }));
+    const codes: number[] = [];
+    for (let i = 0; i < 12; i++) codes.push((await start()).status);
+    expect(codes.slice(10)).toEqual([429, 429]);
   });
 });
 

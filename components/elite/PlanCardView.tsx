@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { setImIn } from "@/lib/elite/club-teams-actions";
-import { NEEDS_PLAYER_OK, inCountLine, organizedBy } from "@/lib/elite/club-teams";
+import { NEEDS_PLAYER_OK, inCountLine, organizedBy, planLabel, planScore, planSides } from "@/lib/elite/club-teams";
 import type { PlanCard } from "@/lib/elite/club-teams-server";
 import { fmtDuration } from "@/lib/elite/time-trained";
 import { Crest } from "./FreeAvatar";
@@ -19,8 +19,8 @@ export function PlanCardView({ card, perspective }: { card: PlanCard; perspectiv
   const [sheet, setSheet] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, start] = useTransition();
-  const ours = card.opponent && card.opponent.id === perspective ? card.opponent : card.organizer;
-  const theirs = card.opponent ? (ours.id === card.organizer.id ? card.opponent : card.organizer) : null;
+  const { ours, theirs } = planSides(card, perspective);
+  const score = planScore(card, perspective);
 
   function toggle(next: boolean) {
     setError(null);
@@ -31,14 +31,7 @@ export function PlanCardView({ card, perspective }: { card: PlanCard; perspectiv
     });
   }
 
-  const label =
-    card.kind === "training"
-      ? "Club training · Members only"
-      : card.status === "pending"
-        ? "Game · Waiting on their captain"
-        : card.result?.state === "confirmed"
-          ? "Game · Final"
-          : "Game · Club vs club";
+  const label = planLabel(card);
 
   return (
     <div className="mx-[18px] rounded-[22px] bg-[#141414] px-[18px] pb-4 pt-[15px]">
@@ -53,11 +46,11 @@ export function PlanCardView({ card, perspective }: { card: PlanCard; perspectiv
           <span className="mt-2.5 flex items-center gap-2.5">
             <Crest club={ours} size={36} />
             <span className="min-w-0 truncate text-[15.5px] font-bold">{ours.name}</span>
-            {card.result?.score ? (
+            {score ? (
               <b className="shrink-0 font-display text-[22px] font-black text-accent">
-                {ours.id === card.organizer.id ? card.result.score[0] : card.result.score[1]}
+                {score[0]}
                 {" - "}
-                {ours.id === card.organizer.id ? card.result.score[1] : card.result.score[0]}
+                {score[1]}
               </b>
             ) : (
               <span className="shrink-0 font-display text-[15px] font-black text-white/50">VS</span>

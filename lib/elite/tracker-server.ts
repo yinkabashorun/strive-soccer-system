@@ -597,7 +597,7 @@ export async function namesOf(admin: Admin, ids: string[]): Promise<Map<string, 
 }
 
 // Every entry these accounts logged between two days, photo or not.
-async function entriesOf(admin: Admin, ids: string[], since: string, until: string): Promise<PostRow[]> {
+export async function entriesOf(admin: Admin, ids: string[], since: string, until: string): Promise<PostRow[]> {
   const out: PostRow[] = [];
   for (let i = 0; i < ids.length; i += 200) {
     const some = ids.slice(i, i + 200);
@@ -619,14 +619,14 @@ async function entriesOf(admin: Admin, ids: string[], since: string, until: stri
 }
 
 // The ids of the posts this viewer reported: gone from their feed.
-async function reportedBy(admin: Admin, profileId: string): Promise<Set<string>> {
+export async function reportedBy(admin: Admin, profileId: string): Promise<Set<string>> {
   const { data } = await admin.from("elite_post_reports").select("log_id").eq("reporter_id", profileId);
   return new Set(((data as { log_id: string }[] | null) ?? []).map((r) => r.log_id));
 }
 
 // Signed addresses for stored photos, good for a few minutes. Asked for
 // open cards only; a path that could not be signed is simply left out.
-async function signPhotos(admin: Admin, paths: string[]): Promise<Map<string, string>> {
+export async function signPhotos(admin: Admin, paths: string[]): Promise<Map<string, string>> {
   const out = new Map<string, string>();
   if (paths.length === 0) return out;
   const { data } = await admin.storage.from(POST_BUCKET).createSignedUrls(paths, POST_URL_SECONDS);
@@ -913,7 +913,7 @@ export type ClubRow = {
 const CLUB_COLUMNS = "id, name, join_code, kind, captain_id, archived_at";
 type MemberRow = { club_id: string; profile_id: string; joined_at: string };
 
-async function clubByCode(admin: Admin, code: string): Promise<ClubRow | null> {
+export async function clubByCode(admin: Admin, code: string): Promise<ClubRow | null> {
   const { data } = await admin.from("elite_tracker_clubs").select(CLUB_COLUMNS).eq("join_code", code).maybeSingle();
   return (data as ClubRow | null) ?? null;
 }
@@ -921,6 +921,12 @@ async function clubByCode(admin: Admin, code: string): Promise<ClubRow | null> {
 export async function clubById(admin: Admin, id: string): Promise<ClubRow | null> {
   const { data } = await admin.from("elite_tracker_clubs").select(CLUB_COLUMNS).eq("id", id).maybeSingle();
   return (data as ClubRow | null) ?? null;
+}
+
+// When a club was started (its weeks are read from then).
+export async function clubStartedAt(admin: Admin, id: string): Promise<string | null> {
+  const { data } = await admin.from("elite_tracker_clubs").select("created_at").eq("id", id).maybeSingle();
+  return (data as { created_at: string } | null)?.created_at ?? null;
 }
 
 // The clubs a player is on.

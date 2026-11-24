@@ -17,7 +17,8 @@
 //   - film-room-actions.ts notifyMembers: the pushTitle and pushBody of
 //     filmRoomAnnouncement and checkinAnnouncement (film-room.ts)
 //   - free-notices-server.ts (sendPushToProfile, the free app): friendPostPush
-//     and propsPush, each claimed first in elite_free_notices (078)
+//     and propsPush, each claimed first in elite_free_notices (078), and
+//     clubPlanPush, claimed first in elite_plan_notices (087)
 //   - reminders-server.ts sendTrainingReminders, the hourly cron at the
 //     member's usual time: trainingReminderPush (at most one a day,
 //     claimed first in elite_training_reminders, 078)
@@ -94,6 +95,16 @@ export function squadPassPush(): PushText {
 
 export function propsPush(first: string): PushText {
   return { title: `${first} gave you props`, body: "On your training post.", url: "/log" };
+}
+
+// The free app's third, and the only one about clubs: a club's training
+// session is planned, or a game between two clubs is on. Once per plan for
+// each member (free-notices.ts decides who). `what` is "Club training" (or
+// the session's own title) or "Game against <the other club>"; `when` is
+// "Tue, Nov 24 at 6:00 PM", New York time. The place is never on a lock
+// screen: it is shown to the clubs involved, inside the app.
+export function clubPlanPush(input: { club: string; clubId: string; what: string; when: string }): PushText {
+  return { title: input.club, body: `${input.what} ${input.when}.`, url: `/log/club/${input.clubId}` };
 }
 
 // The rule itself, as a check a test (or anything else) can run on a

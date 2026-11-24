@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { Play } from "lucide-react";
 import { dropDue, dropSeenKey, parseSeenWeek } from "@/lib/elite/experience";
 import { feel } from "@/lib/elite/native";
+import { askToStartSession } from "./start-signal";
 import { cn } from "@/lib/utils";
 
 export type DropCard = { n: number; label: string; line: string; image: string | null };
@@ -20,6 +21,8 @@ export function WeekDrop({
   week,
   range,
   line,
+  lastLine = null,
+  startLabel,
   cards,
   anyDone,
   replay = false,
@@ -28,6 +31,8 @@ export function WeekDrop({
   week: number;
   range: string | null; // "Nov 23 to Nov 29"
   line: string; // "Four sessions. Built from your answers."
+  lastLine?: string | null; // "Last week you finished 3 sessions and trained 58m."
+  startLabel: string; // "Start session 1"
   cards: DropCard[];
   anyDone: boolean;
   replay?: boolean; // the example player's tour only: show it again
@@ -47,6 +52,12 @@ export function WeekDrop({
       feel("drill");
     }
   }, [playerId, week, cards.length, anyDone, replay]);
+
+  // The one button: the drop goes away and the week's first session opens.
+  function startNow() {
+    close();
+    setTimeout(askToStartSession, 280);
+  }
 
   function close() {
     try {
@@ -80,6 +91,9 @@ export function WeekDrop({
           is here.
         </h1>
         <p className="mt-3 text-[16px] leading-snug text-white/65 animate-rise [animation-delay:160ms]">{line}</p>
+        {lastLine && (
+          <p className="mt-2 text-[14px] leading-snug text-gold animate-rise [animation-delay:220ms]">{lastLine}</p>
+        )}
 
         <ol className="mt-6 space-y-2.5 pb-6">
           {cards.map((c, i) => (
@@ -112,11 +126,19 @@ export function WeekDrop({
       </div>
       <div className="px-5 pt-2 pb-safe">
         <button
-          onClick={close}
-          className="m-button mb-4 opacity-0 animate-rise"
+          onClick={startNow}
+          className="m-button opacity-0 animate-rise"
           style={{ animationDelay: `${420 + cards.length * 110}ms` }}
         >
-          Let&apos;s go
+          <Play className="h-5 w-5" fill="currentColor" />
+          {startLabel}
+        </button>
+        <button
+          onClick={close}
+          className="mb-2 mt-1 min-h-[44px] w-full text-[14px] font-semibold text-white/60 opacity-0 animate-rise"
+          style={{ animationDelay: `${480 + cards.length * 110}ms` }}
+        >
+          Not now
         </button>
       </div>
     </div>,

@@ -7,7 +7,7 @@
 // as time trained (a drill with no minutes counts 15), so the "+38 min"
 // a player sees when a session ends is exactly what lands on their total.
 import type { Homework } from "./types";
-import { DEFAULT_DRILL_MIN, cappedSeconds, creditedMinutes } from "./time-trained";
+import { DEFAULT_DRILL_MIN, cappedSeconds, creditedMinutes, fmtDuration } from "./time-trained";
 
 export type DrillKind = "warmup" | "finisher" | "skill";
 
@@ -160,6 +160,32 @@ export const ONE_MORE_LINE = "One more session completes your week.";
 export function oneMoreLine(sessionsLeft: number): string | null {
   return sessionsLeft === 1 ? ONE_MORE_LINE : null;
 }
+
+// What the drop says about the week before, when there is something to
+// say: the sessions finished (extras count, they were trained) and the time
+// trained. A week with nothing trained says nothing at all; nothing here
+// ever counts what was left undone.
+export function lastWeekLine(rows: Homework[], week: number): string | null {
+  if (week <= 1) return null;
+  const last = rows.filter((h) => h.week === week - 1);
+  const minutes = last.reduce((s, h) => s + creditedMinutes(h), 0);
+  const finished = groupSessions(last).filter((g) => g.list.every((h) => h.completed)).length;
+  if (finished > 0 && minutes > 0) {
+    return `Last week you finished ${finished} ${finished === 1 ? "session" : "sessions"} and trained ${fmtDuration(minutes)}.`;
+  }
+  if (finished > 0) return `Last week you finished ${finished} ${finished === 1 ? "session" : "sessions"}.`;
+  if (minutes > 0) return `Last week you trained ${fmtDuration(minutes)}.`;
+  return null;
+}
+
+// The drop's one button: the first session of the week, by its own name.
+export function dropStartLabel(first: Pick<SessionGroup, "n" | "extra"> | null): string {
+  return first ? `Start ${sessionName(first).toLowerCase()}` : "Let's go";
+}
+
+// After a full week (the leaders' finding: players who train more than one
+// kind of thing stay longer): the two ways to keep going, said once.
+export const AFTER_WEEK_MORE = "Still want to train this week? Add extra work, or open a course.";
 
 // What the finish screen says comes next. Never a nag, never a count of
 // what is left undone beyond the plain fact.

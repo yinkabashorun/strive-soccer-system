@@ -1,4 +1,4 @@
-import { BELL_READ, collapseNotes } from "./bell";
+import { BELL_READ, INBOX_SHOWN, collapseNotes } from "./bell";
 import { isSundayEveNY, liveWeekFor, nyToday } from "./time";
 import { resolveWeekTarget } from "./week-target";
 import { cleanFocuses, cleanQuiz, cleanThreads, programWeekFor, type Program, type ProgramWeek } from "./program";
@@ -855,8 +855,10 @@ export const getNotifications = perRequest(async function getNotifications(
     .order("created_at", { ascending: false })
     .limit(BELL_READ);
   if (error) return []; // table not created yet
-  // each note once: repeats of the same note are not shown (lib/elite/bell.ts)
-  return collapseNotes((data as EliteNotification[] | null) ?? []);
+  // each note once: repeats of the same note are not shown (lib/elite/bell.ts).
+  // BELL_READ rows are read so a pile of repeats cannot push the other notes
+  // out; the newest INBOX_SHOWN notes are what any screen needs.
+  return collapseNotes((data as EliteNotification[] | null) ?? []).slice(0, INBOX_SHOWN);
 });
 
 export async function getCoachRoster(): Promise<RosterRow[]> {

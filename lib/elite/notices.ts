@@ -69,11 +69,16 @@ export const KIND_TOPIC: Record<NoticeKind, NoticeTopic> = {
 // Which channels a kind uses. The bell row is the record; the push is the
 // tap on the shoulder. A reminder is a tap on the shoulder and nothing
 // else. A free account has no bell, so its four are push only.
+//
+// A film breakdown stays bell only (with the email it always had): it never
+// pushed before, and a new push is more volume, which needs Coach Yinka's
+// word first (docs/product-principles.md, "Protect the channel"). Turning
+// it on is this one line.
 const CHANNELS: Record<NoticeKind, { push: boolean; bell: boolean }> = {
   new_week: { push: true, bell: true },
   coach_message: { push: true, bell: true },
   checkin_feedback: { push: true, bell: true },
-  film_feedback: { push: true, bell: true },
+  film_feedback: { push: false, bell: true },
   film_room: { push: true, bell: true },
   checkin_days: { push: true, bell: true },
   coach_attending: { push: false, bell: true },

@@ -62,6 +62,43 @@ it under This week's photos. "How it works" on the matchup card opens the
 six lines. The matchup card itself only fills once migration 083 is
 applied and a Monday has passed.
 
+## Notifications, on a phone only (rebuilt Nov 24 2026)
+
+None of this can be seen in a simulator or a browser; each line is one check
+on his iPhone, with notifications turned on and migration 088 applied.
+
+1. **A tap opens the thing it is about.** A new week: Home. A medal (from
+   the Inbox): You. A message from the coach: the Inbox, with the row "Reply
+   on thestriveapp.com" under it. In the free app: a friend's post opens
+   Friends, a club's session opens that club.
+2. **From a closed app too.** Swipe the app away, tap a notification on the
+   lock screen: the app opens on that screen, not on Home.
+3. **Never past a gate.** Signed out (or with the agreement due), a tapped
+   notification opens sign-in (or the agreement), and the screen it was
+   about only after that.
+4. **No number on the icon.** If an older build left one, opening the app
+   clears it.
+5. **Grouped.** Two notices about the week stack as one group on the lock
+   screen, the coach's as another.
+6. **Replaced, not piled.** Tomorrow's reminder takes the place of today's
+   on the lock screen; a new week takes the place of last week's.
+7. **Quiet at night.** A notice sent between 9:30 PM and 7:00 AM New York
+   (the Monday week at 6:00 AM) is in the list in the morning and did not
+   light the screen or make a sound.
+8. **The website page in the sheet.** "Reply on thestriveapp.com" opens the
+   messages page in the sheet over the app. The sheet has its own sign-in
+   (it does not share the app's), so the first time it may ask for the
+   password.
+9. **The one question.** After the first finished session, say yes to
+   notifications: "When do you usually train?" shows once, one tap answers
+   it, and Settings, Notifications, Reminder time shows the answer.
+10. **The switches.** Settings, Notifications, "Your week" off: no new-week
+    push and no reminder on any phone of that account; the note is still in
+    the Inbox.
+
+The simulator run pictures the Inbox (18b) and taps through the bell, a
+note and the choices (`mobile/sim/flows/11-inbox.yaml`) with example data.
+
 ## Seeing the phone from here
 
 `.github/workflows/ios-simulator-screens.yml` (built Nov 23 2026 on his

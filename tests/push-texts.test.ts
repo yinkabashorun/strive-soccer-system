@@ -265,7 +265,7 @@ describe("which channel each kind uses, and the topic it belongs to", () => {
       new_week: "bell+push",
       coach_message: "bell+push",
       checkin_feedback: "bell+push",
-      film_feedback: "bell+push",
+      film_feedback: "bell",
       film_room: "bell+push",
       checkin_days: "bell+push",
       coach_attending: "bell",

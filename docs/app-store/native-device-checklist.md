@@ -26,6 +26,10 @@ how it is checked: a test that fails the build, or Coach Yinka's phone.
 | 12 | The status bar reads on every screen and the phone's own boxes are dark: the app is dark whatever the phone is set to | test; the simulator pictures |
 | 13 | The first screen is the right one: nothing of Home shows before a member who belongs elsewhere is sent there, and the launch screen never stays up more than a few seconds | test; the simulator's launch videos |
 | 14 | A screen that builds itself in ends up complete: watch it move, not only where it stopped | the simulator's launch videos (`film` in `sim/shots.sh`) |
+| 15 | A page opened in a sheet over the app that the app waits on (the card checkout from the offer): the sheet opens, Done closes it, and the app then asks the server what happened and moves on by itself, paid or not | test for the order of the calls; phone, with a real Stripe test card, for the rest |
+| 16 | The iPhone's own sheets opened from a post or a button: the action sheet (Report this post, Block, Delete my post), the confirm box, and the share sheet (Send my link) all come up dark, and Cancel leaves everything as it was | phone |
+| 17 | A photo from the library that is not a JPEG (the iPhone's own HEIC) is posted: the image tool turns it into a JPEG before it is sent, and the server takes it | phone; the simulator's flow picks a sample photo but the example build sends nothing |
+| 18 | Two tab groups (a member's and the free app's): the tab bar shown is the right one for the account, and a tab with the same name in both (Courses) opens the one in the group being used | test for who sees which tabs; the simulator pictures for the rest |
 
 ## What Coach Yinka checks on each new build
 
@@ -33,6 +37,16 @@ Sign in, the username and photo screen (camera and photos), Home, start a
 session through to the finish ring, Week, Courses (open a course of drills,
 tap a clip; open a course of pages and read down it), You, Settings. A screenshot or
 screen recording of anything off is the fastest fix.
+
+With a second email, the free side: Join free from the sign-in screen
+(only there while free sign-up is switched on at /coach/free), the quiz,
+the username and photo, the offer (the card shows the photo; "Not now,
+start free"), the week's target and days, then Friends: post a photo from
+the camera and one from the library, accept a friend request, give props,
+Report and Block on a friend's post, Send my link. Week, Courses (every
+course locked), You, Settings (Delete my account works for a free account).
+Then, once Stripe is switched on: Start Strive Pro from the offer with a
+test card, close the sheet, and the app should carry on to "You're in".
 
 ## Seeing the phone from here
 

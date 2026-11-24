@@ -74,6 +74,22 @@ const SHOTS = [
   ["19-delete-account", "/delete-account"],
   ["20-gate", "/gate?state=membership"],
   ["21-courses-locked", "/courses?state=locked"],
+  // joining free, the quiz, the offer and the free app's tabs
+  ["22-join-age", "/join/age?state=signedout"],
+  ["23-join-name", "/join/name?state=signedout"],
+  ["24-join-agree", "/join/agree?state=signedout"],
+  ["25-free-start", "/onboarding?state=free_quiz", 1500],
+  ["26-free-quiz-grade", "/onboarding/grade?state=free_quiz"],
+  ["27-free-quiz-on-ball", "/onboarding/onBall?state=free_quiz"],
+  ["28-free-quiz-aim", "/onboarding/aim?state=free_quiz"],
+  ["29-offer", "/offer?state=free_offer", 3200],
+  ["30-week-plan", "/week-plan?state=free_offer", 1200],
+  ["31-friends", "/friends?state=locked", 1800],
+  ["32-free-week", "/my-week?state=locked", 2200],
+  ["33-free-you", "/me?state=locked", 1800],
+  ["34-post", "/post?state=locked"],
+  ["35-offer-again", "/offer?state=locked", 1800],
+  ["36-free-settings", "/settings?state=locked"],
 ];
 
 const pwPath = process.env.PLAYWRIGHT ?? "playwright";
@@ -82,7 +98,10 @@ await mkdir(out, { recursive: true });
 server.listen(PORT);
 const browser = await chromium.launch({ executablePath: process.env.CHROME || undefined });
 const fresh = () => browser.newContext({ viewport: { width: 393, height: 852 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
+// ONLY=22,29 takes just the screens whose names start with one of those.
+const only = (process.env.ONLY ?? "").split(",").filter(Boolean);
 for (const [name, url, wait = 900, act] of SHOTS) {
+  if (only.length && !only.some((o) => name.startsWith(o))) continue;
   const ctx = await fresh(); // nothing cached from the screen before
   const page = await ctx.newPage();
   page.on("pageerror", (e) => console.error(name, "page error:", e.message));

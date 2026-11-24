@@ -25,6 +25,9 @@ SplashScreen.preventAutoHideAsync().catch(() => undefined);
 // membership was switched off): read who this is again and follow it.
 setGateListener(() => queryClient.invalidateQueries({ queryKey: keys.me }));
 
+// The longest the launch screen may stay up waiting for the first screen.
+const LAUNCH_SCREEN_MAX_MS = 4000;
+
 // Sends each person to where they belong (src/navigation.ts) and keeps
 // them there: the same order as the website's member shell.
 function Gatekeeper() {
@@ -46,6 +49,18 @@ function Gatekeeper() {
   useEffect(() => {
     if (area === "app") void keepTokenFresh();
   }, [area]);
+
+  // The launch screen stays up until the first screen is the right one:
+  // the person is where they belong, or it is known that this cannot be
+  // read (the holding screen says so). A few seconds at most, whatever
+  // happens: the launch screen must never be where the app gets stuck.
+  const unreadable = ready && signedIn && !me.data && (me.isError || me.isPaused);
+  const settled = unreadable || (area !== null && inArea(area, segments));
+  useEffect(() => {
+    if (settled) return void SplashScreen.hideAsync().catch(() => undefined);
+    const id = setTimeout(() => void SplashScreen.hideAsync().catch(() => undefined), LAUNCH_SCREEN_MAX_MS);
+    return () => clearTimeout(id);
+  }, [settled]);
 
   // The example-data build only (review screenshots on GitHub's Mac): open
   // the screen the run asked for, once, after the gate above has settled.
@@ -70,7 +85,7 @@ function Gatekeeper() {
 }
 
 export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontsFailed] = useFonts({
     "Oswald-Bold": require("../assets/fonts/Oswald-Bold.ttf"),
     "Inter-Medium": require("../assets/fonts/Inter-Medium.ttf"),
     "Inter-SemiBold": require("../assets/fonts/Inter-SemiBold.ttf"),
@@ -79,11 +94,9 @@ export default function RootLayout() {
   useEffect(() => {
     void loadPrefs();
   }, []);
-  useEffect(() => {
-    if (fontsLoaded) SplashScreen.hideAsync().catch(() => undefined);
-  }, [fontsLoaded]);
-
-  if (!fontsLoaded) return <View style={{ flex: 1, backgroundColor: color.black }} />;
+  // A font that will not load must not hold the app on its launch screen:
+  // the app opens in the phone's own type instead.
+  if (!fontsLoaded && !fontsFailed) return <View style={{ flex: 1, backgroundColor: color.black }} />;
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: color.black }}>

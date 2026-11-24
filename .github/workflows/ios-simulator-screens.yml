@@ -156,7 +156,7 @@ jobs:
           # Not the simulator's device log: one run's was 48 MB.
           if [ -d "$HOME/.maestro/tests" ]; then
             mkdir -p taps
-            find "$HOME/.maestro/tests" -type f \( -name "*.png" -o -name "maestro.log" \) -size -6M -newer "$RUNNER_TEMP/devices.json" -exec cp {} taps/ \; || true
+            find "$HOME/.maestro/tests" -type f \( -name "*.png" -o -name "*.mp4" -o -name "maestro.log" \) -size -12M -newer "$RUNNER_TEMP/devices.json" -exec cp {} taps/ \; || true
           fi
           for f in *.png taps/*.png; do
             [ -e "$f" ] || continue
@@ -174,7 +174,7 @@ jobs:
             echo "- taps and typing (sim/flows): ${{ steps.flows.outcome }}"
             echo
             echo "## Pictures"
-            ls -1 *.jpg taps/*.jpg *.mp4 2>/dev/null | sed 's/^/- /'
+            ls -1 *.jpg taps/*.jpg *.mp4 taps/*.mp4 2>/dev/null | sed 's/^/- /'
           } > README.md
           # a branch of pictures is not a site: Vercel leaves it alone
           printf '{ "git": { "deploymentEnabled": false } }\n' > vercel.json

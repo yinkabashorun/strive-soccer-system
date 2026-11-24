@@ -1,6 +1,9 @@
 # The first screens of the quiz by taps, from the door.
 appId: com.strivesoccer.elite
 ---
+# filmed from before the app opens, to set beside sim/shots.sh's own film
+# of the same screen (the two ways of opening it did not agree)
+- startRecording: door-tapped
 - launchApp:
     clearState: true
     arguments:
@@ -17,6 +20,7 @@ appId: com.strivesoccer.elite
     timeout: 6000
     optional: true
 - takeScreenshot: t14c-door-ten-seconds
+- stopRecording
 - tapOn: "Build my week"
 - extendedWaitUntil:
     visible: "Boy"

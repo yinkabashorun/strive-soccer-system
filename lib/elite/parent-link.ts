@@ -44,6 +44,14 @@ export function parentShareText(link: string): string {
 export function parentHeadline(first: string): string {
   return `${first} asked for ${PRO_PRODUCT_NAME}.`;
 }
+// The proof a parent can check: the training their player has already
+// logged on their own this week (gym time is not training time and is
+// left out, the free app's own rule). Nothing logged says nothing.
+export function parentProofLine(first: string, minutes: number, duration: string): string | null {
+  if (!Number.isFinite(minutes) || minutes <= 0) return null;
+  return `${first} has already logged ${duration} of training on their own this week.`;
+}
+
 export const PARENT_WHAT = [
   "A new week of training every Monday, built around your player.",
   "One drill at a time, each with a video of how to do it.",

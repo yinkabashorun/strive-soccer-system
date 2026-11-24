@@ -107,3 +107,12 @@ describe("where the player finds it", () => {
     expect(read("lib/elite/app-data.ts")).toContain('player.subscription_status !== "trialing"');
   });
 });
+
+describe("the proof on the parent's page", () => {
+  it("says the training the player already logged this week, and nothing when there is none", async () => {
+    const { parentProofLine } = await import("../lib/elite/parent-link");
+    expect(parentProofLine("Marcus", 130, "2h 10m")).toBe("Marcus has already logged 2h 10m of training on their own this week.");
+    expect(parentProofLine("Marcus", 0, "0m")).toBeNull();
+    expect(parentProofLine("Marcus", Number.NaN, "")).toBeNull();
+  });
+});

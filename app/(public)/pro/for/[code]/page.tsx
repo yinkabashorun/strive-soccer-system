@@ -27,6 +27,7 @@ export default async function ParentPage({ params }: { params: { code: string } 
               ? `${page.first} took our quiz. Their first week goes after ${page.areas.replace(/^your /, "their ")}.`
               : `${page.first} wants a training week built around them.`}
           </p>
+          {page.proof && <p className="mt-3 text-[16px] font-semibold leading-relaxed text-bone">{page.proof}</p>}
           <ul className="mt-6 space-y-3">
             {PARENT_WHAT.map((line) => (
               <li key={line} className="flex gap-3 text-[15px] leading-relaxed text-white/80">

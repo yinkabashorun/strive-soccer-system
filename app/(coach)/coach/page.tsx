@@ -17,6 +17,8 @@ import { PlanBuilderStatus } from "@/components/elite/PlanBuilderStatus";
 import { AppErrorsCard } from "@/components/elite/AppErrorsCard";
 import { PushStatusCard } from "@/components/elite/PushStatusCard";
 import { getPushStatus } from "@/lib/elite/push";
+import { SquadNumbersCard } from "@/components/elite/SquadNumbersCard";
+import { getSquadNumbers } from "@/lib/elite/squad-numbers-server";
 import { liveWeekNumber, nyDayNumber, nyToday } from "@/lib/elite/time";
 import { Avatar } from "@/components/Avatar";
 import { StatTile } from "@/components/elite/StatTile";
@@ -33,7 +35,7 @@ export default async function CoachDashboard() {
   const viewer = await getViewer();
 
   // One-call rollup: every player + their loop metrics + what needs a reply.
-  const [roster, inviteCodes, inbox, coverage, players, builderRun, breaks, appErrors, pushStatus] = await Promise.all([
+  const [roster, inviteCodes, inbox, coverage, players, builderRun, breaks, appErrors, pushStatus, numbers] = await Promise.all([
     getCoachRoster(),
     listInviteCodes(),
     getCoachInbox(),
@@ -43,6 +45,7 @@ export default async function CoachDashboard() {
     getUpcomingBreaks(),
     getRecentAppErrors(),
     getPushStatus(),
+    getSquadNumbers(),
   ]);
   // Who is on a break today (034): badged on the card, never counted as
   // behind - nothing is built for them on purpose.
@@ -129,6 +132,9 @@ export default async function CoachDashboard() {
           accent={toAnswer > 0}
         />
       </section>
+
+      {/* The seven numbers the app is built to move, and who they point at. */}
+      {!viewer?.demo && numbers && <SquadNumbersCard numbers={numbers} />}
 
       {!viewer?.demo && <PlanBuilderStatus run={builderRun} behind={behind} />}
 

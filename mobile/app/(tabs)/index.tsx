@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -12,7 +12,7 @@ import { queryClient } from "@/api/queryClient";
 import { seenWeek } from "@/prefs";
 import { PAGE_TOP, Screen } from "@/Screen";
 import { useMyPhoto } from "@/usePhoto";
-import { HERO_SHADE, Shade } from "@/Shade";
+import { HERO_SHADE, Shade, wordsShade } from "@/Shade";
 import { Body, Button, Card, Disc, Eyebrow, Head, Icon, Label, Press, Ring, Skeleton } from "@/ui";
 import { color, radius } from "@/theme";
 import { tick } from "@/feel";
@@ -172,18 +172,23 @@ function initials(name: string): string {
   return ((p[0]?.[0] ?? "") + (p.length > 1 ? p[p.length - 1][0] : "")).toUpperCase();
 }
 
+// the photo card is this tall; the shade is worked out against it
+const HERO_HEIGHT = 452;
+
 function Hero({ week, session, onStart }: { week: AppWeek; session: AppSession; onStart: () => void }) {
   const plan = week.sessions.filter((s) => !s.extra);
   const index = plan.findIndex((s) => s.n === session.n);
   const eyebrow = session.extra ? "Today · Extra session" : `Today · Session ${index + 1} of ${plan.length}`;
   const ladder = week.ladder.filter((r) => r.key !== "week");
+  // where the words start on the card, so the photo is already dark there
+  const [wordsTop, setWordsTop] = useState<number | null>(null);
   return (
     <View style={styles.hero}>
       {session.image ? <Image source={{ uri: session.image }} style={StyleSheet.absoluteFill} contentFit="cover" transition={250} /> : null}
-      <Shade id="hero" stops={HERO_SHADE} />
-      <View style={styles.heroIn}>
+      <Shade id="hero" stops={wordsTop == null ? HERO_SHADE : wordsShade(wordsTop)} />
+      <View style={styles.heroIn} onLayout={(e) => setWordsTop(e.nativeEvent.layout.y / HERO_HEIGHT)}>
         <Eyebrow>{eyebrow}</Eyebrow>
-        <Head size={36} style={{ marginTop: 8 }} numberOfLines={2}>
+        <Head size={36} style={{ marginTop: 10 }} numberOfLines={2}>
           {session.headline ?? "Today's session"}
         </Head>
         {ladder.length ? (
@@ -252,7 +257,7 @@ function WeekComplete({ week, onCheckin }: { week: AppWeek; onCheckin: () => voi
 const styles = StyleSheet.create({
   top: { flexDirection: "row", alignItems: "flex-end", paddingHorizontal: 20, paddingTop: PAGE_TOP },
   initials: { width: 44, height: 44, borderRadius: 22, backgroundColor: "#1c1c1c", alignItems: "center", justifyContent: "center", overflow: "hidden" },
-  hero: { marginHorizontal: 14, marginTop: 18, height: 452, borderRadius: radius.card, overflow: "hidden", backgroundColor: color.fill },
+  hero: { marginHorizontal: 14, marginTop: 18, height: HERO_HEIGHT, borderRadius: radius.card, overflow: "hidden", backgroundColor: color.fill },
   heroIn: { position: "absolute", left: 0, right: 0, bottom: 0, padding: 20 },
   chips: { flexDirection: "row", gap: 8, marginTop: 12 },
   chip: { height: 28, paddingHorizontal: 12, borderRadius: 14, backgroundColor: "rgba(255,255,255,0.12)", justifyContent: "center" },

@@ -9,6 +9,7 @@ import { openSite } from "@/links";
 import { usePrefs } from "@/prefs";
 import { turnOffNotifications, turnOnNotifications } from "@/push";
 import { Body, Card, Hairline, Head, Icon, Label, Press, SettingRow } from "@/ui";
+import { useBelowClock } from "@/Screen";
 import { color } from "@/theme";
 
 // Settings: what this phone does (notifications, vibration, the timer's
@@ -18,6 +19,7 @@ import { color } from "@/theme";
 export default function Settings() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const belowClock = useBelowClock();
   const me = useMe();
   const [p, set] = usePrefs();
   const name = me.data?.viewer.name ?? "";
@@ -26,7 +28,7 @@ export default function Settings() {
   const free = me.data?.state.kind === "free";
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: color.black }} contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: insets.bottom + 40, paddingHorizontal: 20 }}>
+    <ScrollView style={[{ flex: 1, backgroundColor: color.black }, belowClock]} contentContainerStyle={{ paddingTop: 8, paddingBottom: insets.bottom + 40, paddingHorizontal: 20 }}>
       <Press onPress={() => router.back()} style={{ width: 44, height: 44, justifyContent: "center" }} accessibilityLabel="Back">
         <Icon name="back" />
       </Press>

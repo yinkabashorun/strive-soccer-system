@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { StyleSheet, TextInput, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCheckin, useMe } from "@/api/queries";
 import { ApiError } from "@/api/client";
 import { feel, tick } from "@/feel";
 import { FormScreen } from "@/FormScreen";
+import { LabeledField } from "@/LabeledField";
 import { Body, Button, Head, Label, Press } from "@/ui";
 import { color, font } from "@/theme";
 
@@ -89,12 +90,7 @@ function Scale({ label, value, onChange }: { label: string; value: number; onCha
 }
 
 function Field({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
-  return (
-    <View style={{ marginTop: 18 }}>
-      <Label dim size={14}>{label}</Label>
-      <TextInput style={styles.input} value={value} onChangeText={onChange} multiline placeholderTextColor={color.faint} accessibilityLabel={label} />
-    </View>
-  );
+  return <LabeledField style={{ marginTop: 18 }} label={label} labelSize={14} gap={0} inputStyle={styles.input} value={value} onChangeText={onChange} multiline />;
 }
 
 const styles = StyleSheet.create({

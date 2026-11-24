@@ -90,7 +90,7 @@ export default function Plan() {
 
   if (sent && other) {
     return (
-      <FormScreen contentStyle={{ paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }}>
+      <FormScreen safeTop contentStyle={{ paddingTop: 8, paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }}>
         {back}
         <Eyebrow style={{ marginTop: 14 }}>Sent</Eyebrow>
         <Head size={36} style={{ marginTop: 10 }}>{`Your game is with ${other.name}'s captain`}</Head>
@@ -103,7 +103,7 @@ export default function Plan() {
   }
 
   return (
-    <FormScreen contentStyle={{ paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }}>
+    <FormScreen safeTop contentStyle={{ paddingTop: 8, paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }}>
       {back}
       <Eyebrow style={{ marginTop: 14 }}>{game ? "Plan a game" : "Plan a session"}</Eyebrow>
       <Head size={36} style={{ marginTop: 10 }}>

@@ -31,12 +31,25 @@ export default function CourseScreen() {
   const insets = useSafeAreaInsets();
   const found = useCourse(typeof slug === "string" ? slug : undefined);
   const back = () => (router.canGoBack() ? router.back() : router.replace("/courses"));
+  // Past the course's picture and name, the top of the page is a solid bar
+  // with the course's name: the words that scroll up go under it, never
+  // under the back button and the clock (simulator, Nov 24 2026: the back
+  // arrow sat on top of a drill's name).
+  const [barred, setBarred] = useState(false);
 
   if (found.data) {
     return (
       <View style={styles.fill}>
-        <Course course={found.data} />
-        <TopShade height={insets.top + 64} />
+        <Course course={found.data} barHeight={insets.top + BAR} onPastTop={setBarred} />
+        {barred ? (
+          <View style={[styles.bar, { height: insets.top + BAR, paddingTop: insets.top }]} pointerEvents="none">
+            <Label size={15} numberOfLines={1} style={styles.barName}>
+              {found.data.name}
+            </Label>
+          </View>
+        ) : (
+          <TopShade height={insets.top + 64} />
+        )}
         <BackButton top={insets.top + 6} onPress={back} />
       </View>
     );
@@ -92,8 +105,11 @@ function TopShade({ height }: { height: number }) {
 
 type Level = AppCourseLevel & { data: AppCourseStep[] };
 
-function Course({ course }: { course: AppCourse }) {
+function Course({ course, barHeight, onPastTop }: { course: AppCourse; barHeight: number; onPastTop: (past: boolean) => void }) {
   const insets = useSafeAreaInsets();
+  // where the picture (or, with no picture, the name) has gone under the bar
+  const pastAt = pastTopAt(Boolean(course.cover), barHeight);
+  const past = useRef(false);
   const [prefs] = usePrefs();
   const [refreshing, setRefreshing] = useState(false);
   const sections = useMemo<Level[]>(() => course.levels.map((l) => ({ ...l, data: l.steps })), [course]);
@@ -127,6 +143,14 @@ function Course({ course }: { course: AppCourse }) {
       showsVerticalScrollIndicator={false}
       contentInsetAdjustmentBehavior="never"
       contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
+      scrollEventThrottle={32}
+      onScroll={(e) => {
+        const now = e.nativeEvent.contentOffset.y > pastAt;
+        if (now !== past.current) {
+          past.current = now;
+          onPastTop(now);
+        }
+      }}
       initialNumToRender={4}
       windowSize={9}
       onViewableItemsChanged={onViewable}
@@ -263,6 +287,15 @@ function Step({ step, live, onClip }: { step: AppCourseStep; live: boolean; onCl
   );
 }
 
+// The bar under the status bar once the page is scrolled past its top.
+const BAR = 56;
+const COVER_HEIGHT = 340;
+// With a picture: when the picture's words reach the bar. Without one: when
+// the name, which starts just under the back button, has gone under it.
+function pastTopAt(cover: boolean, barHeight: number): number {
+  return cover ? COVER_HEIGHT - barHeight : 70;
+}
+
 const TOP_SHADE: [number, number][] = [
   [0, 0.85],
   [0.5, 0.6],
@@ -278,7 +311,9 @@ const styles = StyleSheet.create({
   fill: { flex: 1, backgroundColor: color.black },
   topShade: { position: "absolute", left: 0, right: 0, top: 0 },
   back: { position: "absolute", left: 14, width: 44, height: 44, borderRadius: 22, backgroundColor: "rgba(0,0,0,0.45)", alignItems: "center", justifyContent: "center" },
-  cover: { height: 340, backgroundColor: color.fill },
+  bar: { position: "absolute", left: 0, right: 0, top: 0, backgroundColor: color.black, alignItems: "center", justifyContent: "center", borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: "rgba(255,255,255,0.1)" },
+  barName: { maxWidth: "62%", textAlign: "center" },
+  cover: { height: COVER_HEIGHT, backgroundColor: color.fill },
   coverWords: { position: "absolute", left: 20, right: 20, bottom: 6 },
   intro: { marginHorizontal: 20, marginTop: 18, gap: 8 },
   level: { paddingHorizontal: 20, marginTop: 34, marginBottom: 14 },

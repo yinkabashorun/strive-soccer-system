@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { KeyboardAvoidingView, Platform, ScrollView, type StyleProp, type ViewStyle } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { color } from "./theme";
 
 // Every screen with something to type sits in this, so the keyboard behaves
@@ -21,6 +22,12 @@ import { color } from "./theme";
 // run of Nov 24 2026 showed a player typing into a box they could not see.
 // The lift is kept only where a footer has to ride on the keyboard.
 //
+// `safeTop`: the room for the status bar. It is left on the black frame
+// AROUND what scrolls, never inside it, so a page scrolled up is cut off
+// under the clock and never runs through it (the same rule as Screen.tsx;
+// the simulator showed a club page scrolled into the time, Nov 24 2026). A
+// screen with its own fixed `header` leaves that room in the header instead.
+//
 // The first TestFlight build had a sign-in screen with none of this (no way
 // to put the keyboard away, the button behind it) and three screens where a
 // button needed two taps. tests/app-device.test.ts holds every screen with
@@ -30,15 +37,18 @@ export function FormScreen({
   header,
   footer,
   contentStyle,
+  safeTop,
 }: {
   children: ReactNode;
+  safeTop?: boolean;
   header?: ReactNode;
   footer?: ReactNode;
   contentStyle?: StyleProp<ViewStyle>;
 }) {
+  const insets = useSafeAreaInsets();
   const page = (
     <ScrollView
-      style={{ flex: 1, backgroundColor: color.black }}
+      style={{ flex: 1, backgroundColor: color.black, marginTop: safeTop && !header ? insets.top : 0 }}
       contentContainerStyle={[{ flexGrow: 1 }, contentStyle]}
       keyboardShouldPersistTaps="handled"
       keyboardDismissMode={Platform.OS === "ios" ? "interactive" : "on-drag"}

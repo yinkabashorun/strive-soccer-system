@@ -5,6 +5,7 @@ import { ApiError, OFFLINE_MESSAGE } from "@/api/client";
 import { useClubNear } from "@/api/clubs";
 import { Crest } from "@/Crest";
 import { Body, Button, Card, Hairline, Head, Icon, Label, Press, Skeleton } from "@/ui";
+import { useBelowClock } from "@/Screen";
 import { color } from "@/theme";
 
 // Clubs near you, the captain only (the server sends it to nobody else):
@@ -15,14 +16,15 @@ import { color } from "@/theme";
 export default function Near() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const belowClock = useBelowClock();
   const { id } = useLocalSearchParams<{ id: string }>();
   const near = useClubNear(id);
   const n = near.data;
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: color.black }}
-      contentContainerStyle={{ paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }}
+      style={[{ flex: 1, backgroundColor: color.black }, belowClock]}
+      contentContainerStyle={{ paddingTop: 8, paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }}
       contentInsetAdjustmentBehavior="never"
       showsVerticalScrollIndicator={false}
     >

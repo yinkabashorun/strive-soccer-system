@@ -57,7 +57,7 @@ export default function StartClub() {
 
   if (made) {
     return (
-      <FormScreen contentStyle={{ paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }}>
+      <FormScreen safeTop contentStyle={{ paddingTop: 8, paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }}>
         {back}
         <Eyebrow style={{ marginTop: 14 }}>Your club is ready</Eyebrow>
         <Head size={36} style={{ marginTop: 10 }}>
@@ -85,7 +85,7 @@ export default function StartClub() {
   }
 
   return (
-    <FormScreen contentStyle={{ paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }}>
+    <FormScreen safeTop contentStyle={{ paddingTop: 8, paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }}>
       {back}
       <Head size={40} style={{ marginTop: 8 }}>
         Start a club

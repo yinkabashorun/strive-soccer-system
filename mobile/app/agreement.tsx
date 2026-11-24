@@ -36,7 +36,7 @@ export default function Agreement() {
   }
 
   return (
-    <FormScreen contentStyle={{ paddingTop: insets.top + 60, paddingBottom: insets.bottom + 30, paddingHorizontal: 24 }}>
+    <FormScreen safeTop contentStyle={{ paddingTop: 60, paddingBottom: insets.bottom + 30, paddingHorizontal: 24 }}>
         <Head size={40}>Before you train</Head>
         <View style={{ marginTop: 18, gap: 12 }}>
           {(c?.points ?? []).map((p) => (

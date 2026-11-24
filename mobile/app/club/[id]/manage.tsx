@@ -75,7 +75,7 @@ export default function Manage() {
 
   if (!c || !c.captain) {
     return (
-      <FormScreen contentStyle={{ paddingTop: insets.top + 8, paddingHorizontal: 20 }}>
+      <FormScreen safeTop contentStyle={{ paddingTop: 8, paddingHorizontal: 20 }}>
         <Back onPress={() => router.back()} />
         {club.isError || club.isPaused ? (
           <View style={{ marginTop: 20 }}>
@@ -132,7 +132,7 @@ export default function Manage() {
     ]);
 
   return (
-    <FormScreen contentStyle={{ paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: insets.bottom + 48 }}>
+    <FormScreen safeTop contentStyle={{ paddingTop: 8, paddingHorizontal: 20, paddingBottom: insets.bottom + 48 }}>
       <Back onPress={() => router.back()} />
       <Head size={40} style={{ marginTop: 8 }}>
         Manage

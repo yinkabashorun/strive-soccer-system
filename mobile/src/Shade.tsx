@@ -30,3 +30,5 @@ export const CARD_SHADE: [number, number][] = [
   [0, 0.45],
   [1, 0.65],
 ];
+
+export { WORDS_DARK, wordsShade } from "@/shade-stops";

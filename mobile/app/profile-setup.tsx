@@ -44,7 +44,7 @@ export default function ProfileSetup() {
   }
 
   return (
-    <FormScreen contentStyle={{ paddingTop: insets.top + 8, paddingHorizontal: 24, paddingBottom: insets.bottom + 40 }}>
+    <FormScreen safeTop contentStyle={{ paddingTop: 8, paddingHorizontal: 24, paddingBottom: insets.bottom + 40 }}>
         {editing ? (
           <Press onPress={() => router.back()} style={{ width: 44, height: 44, justifyContent: "center" }} accessibilityLabel="Back">
             <Icon name="back" />

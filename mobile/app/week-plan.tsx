@@ -10,6 +10,7 @@ import { freeKeys, refreshFree, rereadMe, savePlan, usePlan } from "@/api/free";
 import { queryClient } from "@/api/queryClient";
 import { tick } from "@/feel";
 import { Body, Button, Eyebrow, Head, Icon, Label, Press, Skeleton } from "@/ui";
+import { useBelowClock } from "@/Screen";
 import { color } from "@/theme";
 
 // Your week: how much training on your own to aim for, and the days you
@@ -23,6 +24,7 @@ import { color } from "@/theme";
 export default function WeekPlan() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const belowClock = useBelowClock();
   const me = useMe();
   const plan = usePlan();
   const first = me.data?.state.kind === "free" && me.data.state.stage === "offer";
@@ -67,8 +69,8 @@ export default function WeekPlan() {
   return (
     <View style={{ flex: 1, backgroundColor: color.black }}>
       <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{ paddingTop: insets.top + 8, paddingHorizontal: 24, paddingBottom: 24 }}
+        style={[{ flex: 1 }, belowClock]}
+        contentContainerStyle={{ paddingTop: 8, paddingHorizontal: 24, paddingBottom: 24 }}
         contentInsetAdjustmentBehavior="never"
         showsVerticalScrollIndicator={false}
       >

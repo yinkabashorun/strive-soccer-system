@@ -49,7 +49,7 @@ export default function JoinClub() {
 
   if (done) {
     return (
-      <FormScreen contentStyle={{ paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }}>
+      <FormScreen safeTop contentStyle={{ paddingTop: 8, paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }}>
         {back}
         <Eyebrow style={{ marginTop: 14 }}>{done.id ? "Your club" : "Asked"}</Eyebrow>
         <Head size={32} style={{ marginTop: 10 }}>
@@ -66,7 +66,7 @@ export default function JoinClub() {
   }
 
   return (
-    <FormScreen contentStyle={{ paddingTop: insets.top + 8, paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }}>
+    <FormScreen safeTop contentStyle={{ paddingTop: 8, paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }}>
       {back}
       <Head size={40} style={{ marginTop: 8 }}>
         Join a club

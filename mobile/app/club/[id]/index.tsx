@@ -14,6 +14,7 @@ import { MatchupCard } from "@/MatchupCard";
 import { PlanCardView } from "@/PlanCards";
 import { choose } from "@/sheet";
 import { Body, Button, Card, Eyebrow, Hairline, Head, Icon, Label, Press, SettingRow, Skeleton } from "@/ui";
+import { useBelowClock } from "@/Screen";
 import { color } from "@/theme";
 
 // One club, top to bottom:
@@ -35,6 +36,7 @@ import { color } from "@/theme";
 export default function Club() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const belowClock = useBelowClock();
   const { id } = useLocalSearchParams<{ id: string }>();
   const club = useClub(id);
   const c = club.data;
@@ -122,8 +124,8 @@ export default function Club() {
 
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: color.black }}
-      contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: insets.bottom + 48 }}
+      style={[{ flex: 1, backgroundColor: color.black }, belowClock]}
+      contentContainerStyle={{ paddingTop: 8, paddingBottom: insets.bottom + 48 }}
       contentInsetAdjustmentBehavior="never"
       showsVerticalScrollIndicator={false}
       refreshControl={

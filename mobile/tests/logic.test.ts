@@ -15,6 +15,7 @@ import { USERNAME_MESSAGES, normalizeUsername, usernameProblem } from "@shared/u
 import type { AppDrill, AppSession, AppWeek } from "@shared/app-contract";
 import { NEXT_STILLS, nextCard, nextStills, rowLine, weekMinutesDone, weekRows, weekSummary } from "@/week-view";
 import { QUIZ_STEPS } from "@shared/quiz";
+import { WORDS_DARK, wordsShade } from "@/shade-stops";
 
 function memoryKV(): KV & { map: Map<string, string> } {
   const map = new Map<string, string>();
@@ -614,6 +615,31 @@ describe("a drill ticked on the phone", () => {
     for (const line of [UNSENT_LINE, REFUSED_LINE]) {
       expect(line).not.toMatch(/\u2014|sync|queue|outbox|error|server|retry/i);
       expect(line.endsWith(".")).toBe(true);
+    }
+  });
+});
+
+// Home's photo card (simulator, Nov 24 2026): a two-line headline with the
+// goal under it pushed the small gold line up onto the clear part of the
+// photo. The shade is worked out from where the words start.
+describe("the shade under words on a photo", () => {
+  it("is already dark where the words start, wherever that is", () => {
+    for (const top of [0, 0.1, 0.22, 0.4, 0.55, 0.78, 0.95]) {
+      const stops = wordsShade(top);
+      const at = stops.find(([, alpha]) => alpha >= WORDS_DARK)!;
+      // the dark part begins at or above the first word (never lower than 78% down)
+      expect(at[0], String(top)).toBeLessThanOrEqual(Math.max(0.1, Math.min(0.78, top)) + 1e-9);
+    }
+  });
+  it("only ever gets darker going down, and ends black", () => {
+    for (const top of [0, 0.05, 0.3, 0.6, 0.9, 1]) {
+      const stops = wordsShade(top);
+      for (let i = 1; i < stops.length; i++) {
+        expect(stops[i][0], String(top)).toBeGreaterThan(stops[i - 1][0]);
+        expect(stops[i][1], String(top)).toBeGreaterThanOrEqual(stops[i - 1][1]);
+      }
+      expect(stops[0][1]).toBe(0);
+      expect(stops[stops.length - 1][1]).toBe(1);
     }
   });
 });

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Keyboard, StyleSheet, TextInput, View } from "react-native";
+import { Keyboard, StyleSheet, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -24,6 +24,7 @@ import { keys } from "@/api/queries";
 import { queryClient } from "@/api/queryClient";
 import { signInAfterJoin } from "@/auth/session";
 import { FormScreen } from "@/FormScreen";
+import { LabeledField } from "@/LabeledField";
 import { tick } from "@/feel";
 import { JOIN_STEPS, clearJoin, isJoinStep, setJoin, useJoin, type JoinStepId } from "@/join-draft";
 import { openSite } from "@/links";
@@ -154,6 +155,14 @@ export default function Join() {
               For players 13 and older
             </Body>
           ) : null}
+          {id === "agree" ? (
+            // the two boxes stay in reach with the button: the points above
+            // them scroll, the boxes never sit below the fold
+            <View style={{ gap: 8, marginBottom: 12 }}>
+              <Box label={FREE_AGE_STATEMENT} on={d.agreedAge} onPress={() => setJoin({ agreedAge: !d.agreedAge })} />
+              <Box label={TERMS_STATEMENT} on={d.agreedTerms} onPress={() => setJoin({ agreedTerms: !d.agreedTerms })} />
+            </View>
+          ) : null}
           <Button label={id === "agree" ? "Create my account" : "Next"} busy={busy} onPress={next} />
         </View>
       }
@@ -221,10 +230,6 @@ export default function Join() {
                   </Body>
                 </View>
               ))}
-            </View>
-            <View style={{ marginTop: 16, gap: 10 }}>
-              <Box label={FREE_AGE_STATEMENT} on={d.agreedAge} onPress={() => setJoin({ agreedAge: !d.agreedAge })} />
-              <Box label={TERMS_STATEMENT} on={d.agreedTerms} onPress={() => setJoin({ agreedTerms: !d.agreedTerms })} />
             </View>
             <View style={styles.links}>
               <Press onPress={() => void openSite("/terms")} style={styles.link} accessibilityRole="link">
@@ -313,23 +318,17 @@ function Field({
   secure?: boolean;
 }) {
   return (
-    <View>
-      <Label dim size={13} style={{ marginBottom: 8 }}>
-        {label}
-      </Label>
-      <TextInput
-        style={styles.input}
-        value={value}
-        onChangeText={onChange}
-        placeholderTextColor={color.faint}
-        keyboardType={keyboard}
-        autoCapitalize={capitalize}
-        autoCorrect={false}
-        textContentType={content}
-        secureTextEntry={secure}
-        accessibilityLabel={label}
-      />
-    </View>
+    <LabeledField
+      label={label}
+      inputStyle={styles.input}
+      value={value}
+      onChangeText={onChange}
+      keyboardType={keyboard}
+      autoCapitalize={capitalize}
+      autoCorrect={false}
+      textContentType={content}
+      secureTextEntry={secure}
+    />
   );
 }
 

@@ -40,7 +40,7 @@ export default function SignIn() {
   }
 
   return (
-    <FormScreen contentStyle={{ paddingHorizontal: 24, paddingTop: insets.top + 44, paddingBottom: insets.bottom + 24 }}>
+    <FormScreen safeTop contentStyle={{ paddingHorizontal: 24, paddingTop: 44, paddingBottom: insets.bottom + 24 }}>
       <Image source={require("../assets/splash.png")} style={styles.mark} contentFit="contain" accessibilityLabel="Strive" />
       <Head size={40} style={{ marginTop: 22 }}>
         Strive <Text style={{ color: color.gold }}>Elite</Text>

@@ -213,8 +213,95 @@ describe("the box being typed in", () => {
     expect(form).toContain("if (!header && !footer) return page;");
   });
   it("is labelled, so it can be found by name (screen readers, and the tapped pass)", () => {
-    const checkin = code(path.join(root, "app/checkin.tsx"));
-    expect(checkin).toMatch(/<TextInput[^>]*accessibilityLabel=\{label\}/);
+    const field = code(path.join(root, "src/LabeledField.tsx"));
+    expect(field).toMatch(/<TextInput[^>]*accessibilityLabel=\{label\}/);
+    expect(code(path.join(root, "app/checkin.tsx"))).toMatch(/<LabeledField\b/);
+  });
+});
+
+// Build 7 on his phone: a tab scrolled up and ran through the clock. The
+// tabs were fixed in Screen.tsx; the simulator (Nov 24 2026) then showed
+// the same thing on a pushed page, a club scrolled into the time. The rule
+// is one rule: the status bar's room is never inside anything that scrolls.
+describe("the room for the status bar", () => {
+  it("is never part of what scrolls, on any screen", () => {
+    for (const f of sources) {
+      expect(code(f), rel(f)).not.toMatch(/content(Container)?Style=\{[^=]*?insets\.top/);
+    }
+  });
+  it("is left on the black frame around the scroll view, by the two shared pieces", () => {
+    const screen = code(path.join(root, "src/Screen.tsx"));
+    expect(screen).toContain("export function useBelowClock()");
+    expect(screen).toContain("return { marginTop: insets.top };");
+    const form = code(path.join(root, "src/FormScreen.tsx"));
+    expect(form).toContain("marginTop: safeTop && !header ? insets.top : 0");
+    // the pushed pages that scroll on their own
+    for (const f of ["app/club/[id]/index.tsx", "app/club/[id]/near.tsx", "app/settings.tsx", "app/week-plan.tsx", "app/offer.tsx"]) {
+      expect(code(path.join(root, f)), f).toMatch(/<ScrollView\s+style=\{\[[^\]]*belowClock\]\}/);
+    }
+    // a form with no fixed header of its own asks for the room
+    for (const f of sources.filter((x) => /<FormScreen\b/.test(code(x)) && !x.endsWith("FormScreen.tsx"))) {
+      for (const tag of code(f).match(/<FormScreen\b[^>]*>/g) ?? []) {
+        // a sheet (the check-in, the post) and a form with a header do not sit under the clock
+        if (/header=|^<FormScreen>$/.test(tag) || /app\/(checkin|post)\.tsx$/.test(f)) continue;
+        expect(tag, rel(f)).toMatch(/\bsafeTop\b/);
+      }
+    }
+  });
+});
+
+// A course scrolled past its picture (simulator, Nov 24 2026): the floating
+// back arrow sat on top of a drill's name and the photo ran under the clock.
+describe("a course scrolled past its top", () => {
+  const course = code(path.join(root, "app/course/[slug].tsx"));
+  it("gets a solid bar with the course's name, and the back button sits on it", () => {
+    expect(course).toContain("onPastTop={setBarred}");
+    expect(course).toMatch(/\{barred \? \(\s*<View style=\{\[styles\.bar, \{ height: insets\.top \+ BAR, paddingTop: insets\.top \}\]\}/);
+    expect(course).toContain("{found.data.name}");
+    expect(course).toMatch(/bar: \{[^}]*backgroundColor: color\.black/);
+    // told only when it changes, not on every frame of a scroll
+    expect(course).toContain("if (now !== past.current) {");
+  });
+});
+
+// Join free, the last screen (simulator, Nov 24 2026): eight points to read,
+// and the second tick box sat below the fold, so "Create my account" was in
+// reach while a box it needs was not on the screen.
+describe("the two boxes on the last Join free screen", () => {
+  it("stay with the button: the points scroll, the boxes never leave the screen", () => {
+    const join = code(path.join(root, "app/join/[step].tsx"));
+    const footer = join.slice(join.indexOf("footer={"), join.indexOf("<Animated.View"));
+    expect(footer).toContain("label={FREE_AGE_STATEMENT}");
+    expect(footer).toContain("label={TERMS_STATEMENT}");
+    expect(footer.indexOf("label={TERMS_STATEMENT}")).toBeLessThan(footer.indexOf('"Create my account"'));
+    // and they are written once, not also in the page
+    expect(join.match(/label=\{TERMS_STATEMENT\}/g)?.length).toBe(1);
+  });
+});
+
+// A name written above a box. The simulator's tapping pass (Nov 24 2026)
+// tapped the words "First name" on the Join free screen, nothing happened,
+// and the name was never typed: a player who aims at the words gets a dead
+// tap. One shared piece holds the two rules, and every screen that writes a
+// name above a box uses it.
+describe("a name above a text box", () => {
+  const field = code(path.join(root, "src/LabeledField.tsx"));
+  it("a tap on the name puts the cursor in the box", () => {
+    expect(field).toContain("onPress={() => box.current?.focus()}");
+    expect(field).toMatch(/<TextInput ref=\{box\}/);
+  });
+  it("the name and the box are one thing to a screen reader", () => {
+    expect(field).toContain("accessible={false}");
+    expect(field).toContain("accessibilityElementsHidden");
+    expect(field).toContain('importantForAccessibility="no-hide-descendants"');
+  });
+  it("no screen keeps its own copy: a box named by a label above it is the shared piece", () => {
+    const screens = files(path.join(root, "app")).concat(files(path.join(root, "src"))).filter((f) => /\.tsx$/.test(f) && !f.endsWith("LabeledField.tsx"));
+    for (const f of screens) {
+      // a box that takes its name from a `label` prop is a labelled box
+      expect(code(f), rel(f)).not.toMatch(/<TextInput[^>]*accessibilityLabel=\{label\}/);
+    }
+    expect(code(path.join(root, "app/join/[step].tsx"))).toMatch(/<LabeledField\b/);
   });
 });
 

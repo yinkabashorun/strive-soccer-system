@@ -18,6 +18,17 @@ import { color } from "./theme";
 // 7 on his phone, Nov 24 2026: "WEEK 10" scrolled into the time).
 export const PAGE_TOP = 6;
 
+// The same rule for a page that is pushed on top of the tabs and scrolls on
+// its own (a club, settings, the offer): this goes on the scroll view's own
+// `style`, never in its content. The frame behind every screen is black
+// (app/_layout.tsx), so the room above the scroll view is the black the
+// clock sits on. tests/app-device.test.ts refuses the status bar's room
+// inside anything that scrolls.
+export function useBelowClock(): ViewStyle {
+  const insets = useSafeAreaInsets();
+  return { marginTop: insets.top };
+}
+
 export function Screen({
   children,
   onRefresh,

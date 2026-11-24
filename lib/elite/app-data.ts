@@ -30,6 +30,8 @@ import { memberAnswersFor } from "./free-upgrade-server";
 import { squadFor } from "./squad-pass-server";
 import { runningLine } from "./squad-pass";
 import { parentLinkFor } from "./parent-link-server";
+import { inboxRows, unreadCount } from "./bell";
+import type { AppInbox } from "./app-contract";
 import { PARENT_SEND, parentShareText } from "./parent-link";
 
 export async function loadWeek(player: Player): Promise<AppWeek> {
@@ -117,7 +119,7 @@ export async function loadBootstrap(
   const carried = state.kind === "onboarding" ? await memberAnswersFor(viewer.profile.id).catch(() => null) : null;
   const unread =
     state.kind === "ok" && player
-      ? (await getNotifications(player.id).catch(() => [])).filter((n) => !n.read).length
+      ? unreadCount(await getNotifications(player.id).catch(() => []))
       : 0;
   return {
     viewer: {
@@ -169,4 +171,10 @@ async function profileSetupFor(viewer: Viewer): Promise<AppBootstrap["profileSet
     steps,
     ideas,
   };
+}
+
+// The Inbox: the member's notes as the website's bell reads them (each
+// note once, lib/elite/bell.ts), with where each opens.
+export async function loadInbox(player: Player): Promise<AppInbox> {
+  return { notices: inboxRows(await getNotifications(player.id).catch(() => [])) };
 }

@@ -11,7 +11,7 @@
 //
 // WHEN. The hour is the player's own choice first (asked once, on the
 // first finish screen, after they said yes to notifications; changed in
-// Account): elite_players.reminder_hour (087). Else the hour they usually
+// Account): elite_players.reminder_hour (088). Else the hour they usually
 // train, learned from their last ten finished drills once there are three.
 // Else, for a member with nothing to learn from yet, a plain default:
 // after school on weekdays, mid-morning on Saturday, starting the day
@@ -35,7 +35,7 @@ const NY = "America/New_York";
 export const NO_HISTORY_HOUR_WEEKDAY = 16;
 export const NO_HISTORY_HOUR_SATURDAY = 10;
 
-// The hours a player may choose (087 checks the same range).
+// The hours a player may choose (088 checks the same range).
 export const REMINDER_HOUR_MIN = 5;
 export const REMINDER_HOUR_MAX = 21;
 
@@ -170,8 +170,8 @@ export function remindersSinceTick(claimedDays: string[], lastTickDay: string | 
 }
 
 // What today's send is. `pausedAt` is elite_players.reminders_paused_at
-// (087), the lasting memory of the pause: the ledger of claimed days is
-// cleaned after 60 days, the pause must outlive it. Before 087 the count
+// (088), the lasting memory of the pause: the ledger of claimed days is
+// cleaned after 60 days, the pause must outlive it. Before 088 the count
 // alone decides.
 export type ReminderStage = "remind" | "pause_notice" | "silent";
 

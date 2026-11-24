@@ -5,10 +5,10 @@
 // Best effort everywhere: a notice that cannot go never fails a post or
 // props.
 import { createServiceClient } from "./supabase/server";
-import { sendPushToProfile } from "./push";
+import { notifyProfile } from "./notify";
 import { isPushConfigured } from "./push";
 import { isNativePushConfigured } from "./apns";
-import { clubPlanPush, friendPostPush, propsPush } from "./push-texts";
+import { clubPlanNotice, friendPostNotice, propsNotice } from "./notices";
 import { claimOutcome, maySend } from "./announce";
 import { blocksWith, friendIdsOf, namesOf, type Admin } from "./tracker-server";
 import { planById, teamRowsOf } from "./club-teams-server";
@@ -88,8 +88,8 @@ export async function noticeFriendPost(posterId: string, today: string): Promise
   let sent = 0;
   for (const id of receivers) {
     if (!maySend(await claim(admin, id, "friend_post", noticeKey("friend_post", { today }), today))) continue;
-    const res = await sendPushToProfile(id, friendPostPush(first));
-    if (res.sent > 0) sent++;
+    const res = await notifyProfile(id, friendPostNotice({ first, nyDate: today }));
+    if (res.pushed > 0) sent++;
   }
   return sent;
 }
@@ -117,8 +117,8 @@ export async function noticeProps(input: {
     .eq("sent_on", input.today);
   if (!propsWithinDay(count ?? Number.POSITIVE_INFINITY)) return false;
   const first = noticeName((await namesOf(admin, [input.giverId])).get(input.giverId) ?? "");
-  const res = await sendPushToProfile(input.ownerId, propsPush(first));
-  return res.sent > 0;
+  const res = await notifyProfile(input.ownerId, propsNotice({ first, postId: input.postId }));
+  return res.pushed > 0;
 }
 
 // A club's training session was planned, or a game between two clubs is
@@ -148,14 +148,15 @@ export async function noticeClubPlan(input: { planId: string; byId: string }): P
   for (const r of receivers) {
     if (!maySend(await claimPlan(admin, plan.id, r.profileId))) continue;
     const other = clubIds.find((id) => id !== r.clubId) ?? null;
-    const text = clubPlanPush({
+    const notice = clubPlanNotice({
+      planId: plan.id,
       club: clubs.get(r.clubId) ?? "Your club",
       clubId: r.clubId,
       what: planWhat(plan, other ? clubs.get(other) ?? null : null),
       when,
     });
-    const res = await sendPushToProfile(r.profileId, text);
-    if (res.sent > 0) sent++;
+    const res = await notifyProfile(r.profileId, notice);
+    if (res.pushed > 0) sent++;
   }
   return sent;
 }

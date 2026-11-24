@@ -41,10 +41,11 @@ export const NOTICE_KINDS = [
   "friend_post",
   "props",
   "squad_pass",
+  "club_plan",
 ] as const;
 export type NoticeKind = (typeof NOTICE_KINDS)[number];
-// Room for the kinds another build adds (the clubs): a kind is a string in
-// the database, and one this build does not know is shown as it was sent.
+// A kind is a string in the database, and one this build does not know (a
+// row written by a newer build) is shown as it was sent.
 export type NoticeKindAll = NoticeKind | (string & {});
 
 export const KIND_TOPIC: Record<NoticeKind, NoticeTopic> = {
@@ -62,11 +63,12 @@ export const KIND_TOPIC: Record<NoticeKind, NoticeTopic> = {
   friend_post: "friends",
   props: "friends",
   squad_pass: "friends",
+  club_plan: "clubs",
 };
 
 // Which channels a kind uses. The bell row is the record; the push is the
 // tap on the shoulder. A reminder is a tap on the shoulder and nothing
-// else. A free account has no bell, so its three are push only.
+// else. A free account has no bell, so its four are push only.
 const CHANNELS: Record<NoticeKind, { push: boolean; bell: boolean }> = {
   new_week: { push: true, bell: true },
   coach_message: { push: true, bell: true },
@@ -82,6 +84,7 @@ const CHANNELS: Record<NoticeKind, { push: boolean; bell: boolean }> = {
   friend_post: { push: true, bell: false },
   props: { push: true, bell: false },
   squad_pass: { push: true, bell: false },
+  club_plan: { push: true, bell: false },
 };
 
 // The kinds that always arrive quietly (in the list, no sound, no screen
@@ -120,7 +123,7 @@ export function topicOfKind(kind: string | null | undefined): NoticeTopic | null
 
 // A path on our own site and nothing else: one leading slash, no "//", no
 // scheme, no backslash, nothing a browser could read as another address.
-// The same shape the database checks (migration 087, elite_notifications.url).
+// The same shape the database checks (migration 088, elite_notifications.url).
 export const NOTICE_PATH = /^\/(?!\/)[A-Za-z0-9\-._~/?#=&%+@]*$/;
 export const FRONT_DOOR = "/";
 
@@ -346,6 +349,22 @@ export function squadPassNotice(input: { number: number }): Notice {
   });
 }
 
+// The only notice about clubs: a club's training session is planned, or a
+// game between two clubs is on. Once per plan for each member
+// (free-notices.ts decides who; claimed in elite_plan_notices, 087). `what`
+// is "Club training" (or the session's own title) or "Game against <the
+// other club>"; `when` is "Tue, Nov 24 at 6:00 PM", New York time. The
+// place is never on a lock screen: it is shown inside the app.
+export function clubPlanNotice(input: { planId: string; club: string; clubId: string; what: string; when: string }): Notice {
+  return make("club_plan", {
+    title: input.club,
+    body: `${input.what} ${input.when}.`,
+    path: `/log/club/${input.clubId}`,
+    key: `club_plan:${input.planId}`,
+    collapse: `club_plan:${input.planId}`,
+  });
+}
+
 // ---------------------------------------------------------------------
 // The choices (Account, Notifications)
 // ---------------------------------------------------------------------
@@ -361,7 +380,7 @@ export const TOPIC_CHOICE: Record<NoticeTopic, { label: string; detail: string }
 // the coach when the membership includes the coach's time (Strive Elite
 // and Complete). A free account: friends, and clubs. A topic no notice
 // uses yet is not offered: a switch for something that never arrives is
-// noise. (The clubs topic shows the day a club notice joins KIND_TOPIC.)
+// noise.
 export function topicsFor(who: { member: boolean; free: boolean; coachTime: boolean }): NoticeTopic[] {
   const used = new Set<NoticeTopic>(Object.values(KIND_TOPIC));
   const mine: NoticeTopic[] = [];

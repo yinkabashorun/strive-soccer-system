@@ -13,6 +13,8 @@ import type { ClubFace, ClubMemberRow, ClubWeek } from "./club-app";
 import type { PlanCard } from "./club-teams";
 import type { MatchupView } from "./club-matchups";
 import type { Squad } from "./squad-pass";
+import type { InboxRow } from "./bell";
+import type { NoticePrefs } from "./notice-prefs";
 
 export type { AppDrill, AppSession, AppWeek, AppYou, LadderRung, AreaMinutes };
 // The Courses library (lib/elite/app-courses.ts): the shelf, and one course.
@@ -75,6 +77,14 @@ export type AppBootstrap = {
   };
 };
 
+// The Inbox (lib/elite/bell.ts inboxRows): the member's notes, each once,
+// newest first, with where each opens.
+export type AppNotice = InboxRow;
+export type AppInbox = { notices: AppNotice[] };
+// The notification choices (lib/elite/notice-prefs.ts).
+export type AppNoticePrefs = NoticePrefs;
+export type AppNoticePrefsSaved = { ok: true; prefs: NoticePrefs } | { ok: false; error: string };
+
 export type AppPickRow = { id: string; title: string; minutes: number; poster: string | null; doneBefore: boolean };
 export type AppExtra = {
   shelves: { key: string; label: string; blurb: string }[];
@@ -106,6 +116,8 @@ export const APP_API = {
   username: "/api/app/profile/username",
   photo: "/api/app/profile/photo",
   courses: "/api/app/courses",
+  notices: "/api/app/notices",
+  noticePrefs: "/api/app/notices/prefs",
   // the free app
   freeOpen: "/api/app/free/open",
   freeJoin: "/api/app/free/join",

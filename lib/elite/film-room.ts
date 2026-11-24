@@ -5,6 +5,7 @@
 // the announcement texts. The server actions and the pages only call
 // these, so the rules live once and are unit-tested.
 import { shiftDay } from "./time";
+import { checkinDaysNotice, filmRoomNotice, type Notice } from "./notices";
 
 const NY = "America/New_York";
 
@@ -133,15 +134,13 @@ function parentFirst(parentName: string | null | undefined, playerName: string):
   return ((parentName || playerName || "").trim().split(" ")[0]) || "there";
 }
 
-// One announcement, four channels: the text to the parent (parent_phone),
-// the text to the player's own phone, the push and the in-app note.
+// One announcement: the text to the parent (parent_phone), the text to the
+// player's own phone, and the notice (lib/elite/notices.ts) that is the
+// bell row, the push and the email subject, in the same words.
 export type Announcement = {
   sms: string;
   playerSms: string;
-  pushTitle: string;
-  pushBody: string;
-  inAppTitle: string;
-  inAppBody: string;
+  notice: Notice;
 };
 
 // The Film Room announcement, in Coach Yinka's voice (stamped Sept 26):
@@ -149,6 +148,7 @@ export type Announcement = {
 // exclamation point, no em dash. The Zoom link is not in the text; it sits
 // on the Film page in the app.
 export function filmRoomAnnouncement(input: {
+  roomId: string;
   parentName?: string | null;
   playerName: string;
   scheduledAt: string;
@@ -162,14 +162,12 @@ export function filmRoomAnnouncement(input: {
   return {
     sms: `Hey ${parent}, this week's Film Room is ${when} on Zoom with Coach Yinka and Coach Gary. Please upload ${FILM_CLIPS_MIN} to ${FILM_CLIPS_MAX} clips of ${first} from games or training by ${due}. Open the app, tap Film, and add them there: ${input.appUrl}/film Let's make it a good one.`,
     playerSms: `Hey ${first}, this week's Film Room is ${when} on Zoom with Coach Yinka and Coach Gary. Please upload ${FILM_CLIPS_MIN} to ${FILM_CLIPS_MAX} clips from your games or training by ${due}. Open the app, tap Film, and add them there: ${input.appUrl}/film Let's make it a good one.`,
-    pushTitle: "This week's Film Room",
-    pushBody: `${when}. Upload ${FILM_CLIPS_MIN} to ${FILM_CLIPS_MAX} clips by ${due} in the Film tab.`,
-    inAppTitle: "This week's Film Room",
-    inAppBody: `${when} on Zoom. Upload ${FILM_CLIPS_MIN} to ${FILM_CLIPS_MAX} clips by ${due} in the Film tab.`,
+    notice: filmRoomNotice({ roomId: input.roomId, when, due }),
   };
 }
 
 export function checkinAnnouncement(input: {
+  dayId: string;
   parentName?: string | null;
   playerName: string;
   startsAt: string;
@@ -183,9 +181,6 @@ export function checkinAnnouncement(input: {
   return {
     sms: `Hey ${parent}, monthly check-in calls with Coach Yinka and Coach Gary are open on ${window}. Each call is ${input.minutes} minutes. Open the app and pick a time for ${first}: ${input.appUrl}/dashboard Let's get ${first} on the calendar.`,
     playerSms: `Hey ${first}, monthly check-in calls with Coach Yinka and Coach Gary are open on ${window}. Each call is ${input.minutes} minutes. Open the app and pick your time: ${input.appUrl}/dashboard Let's get you on the calendar.`,
-    pushTitle: "Monthly check-in calls are open",
-    pushBody: `${window}. Pick your ${input.minutes}-minute time on your dashboard.`,
-    inAppTitle: "Monthly check-in calls are open",
-    inAppBody: `${window}. Pick your ${input.minutes}-minute time on your dashboard.`,
+    notice: checkinDaysNotice({ dayId: input.dayId, window }),
   };
 }

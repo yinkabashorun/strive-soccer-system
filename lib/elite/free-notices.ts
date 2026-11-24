@@ -12,7 +12,7 @@
 // Nothing between 9:30 PM and 7:00 AM New York time: a notice that would
 // land then is dropped, not held. Each send is claimed first in
 // elite_free_notices (078), keyed (profile, kind, NY date, ref), the same
-// claim-first lock as lib/elite/announce.ts. The words are in push-texts.ts.
+// claim-first lock as lib/elite/announce.ts. The words are in notices.ts.
 
 export type NoticeKind = "friend_post" | "props";
 

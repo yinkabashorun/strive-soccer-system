@@ -150,7 +150,11 @@ describe("a tab's page", () => {
     expect(layout).toMatch(/<NativeTabs\.Trigger[^>]*disableAutomaticContentInsets/);
     const screen = code(path.join(root, "src/Screen.tsx"));
     expect(screen).toContain('contentInsetAdjustmentBehavior="never"');
-    expect(screen).toMatch(/paddingTop: insets\.top \+ \d+/);
+    // The room for the clock is on the frame AROUND the scroll view, so a
+    // page scrolled up is cut off under the clock and never runs through
+    // it (build 7 on his phone, Nov 24 2026: "WEEK 10" over the time).
+    expect(screen).toMatch(/<View style=\{\{[^}]*paddingTop: insets\.top \}\}>\s*<ScrollView/);
+    expect(screen).not.toMatch(/contentContainerStyle=\{\[\{ paddingTop: insets\.top/);
     expect(screen).toMatch(/paddingBottom: insets\.bottom \+ bottom/);
     expect(tabs.length).toBeGreaterThanOrEqual(3);
     for (const f of tabs) {
@@ -166,6 +170,33 @@ describe("a tab's page", () => {
     }
     const top = Number(read(path.join(root, "src/Screen.tsx")).match(/PAGE_TOP = (\d+)/)?.[1]);
     expect(top).toBeLessThanOrEqual(12);
+  });
+});
+
+// Build 7 on his phone (Nov 24 2026): a badge was a grey tile with its line
+// cut short ("doesn't look like an achievement"), and the Week tab was five
+// equal cards ("I don't think that screen is super addicting").
+describe("what was earned, and the week's path", () => {
+  const you = code(path.join(root, "app/(tabs)/you.tsx"));
+  const week = code(path.join(root, "app/(tabs)/week.tsx"));
+  it("a badge is a gold medal with its whole line, never cut short", () => {
+    const badges = you.slice(you.indexOf("y.achievements.map"), you.indexOf("</>", you.indexOf("y.achievements.map")));
+    expect(badges).toContain("<Medal");
+    expect(badges).toContain("achievementMark(a.title)");
+    expect(badges).not.toContain("numberOfLines");
+    expect(badges).not.toContain("<Card");
+  });
+  it("the week has ONE big card, the session it is waiting on, worked out in one place", () => {
+    expect(week).toContain("weekRows(w)");
+    expect(week.match(/<NextCard\b/g)?.length).toBe(1);
+    expect(week).toContain('state === "next"');
+    // the rules are not re-derived on the screen
+    expect(week).not.toMatch(/s\.n === w\.current/);
+  });
+  it("Start is a bone button with black words: gold is never a button", () => {
+    const start = week.slice(week.indexOf("  start: {"), week.indexOf("}", week.indexOf("  start: {")));
+    expect(start).toContain("backgroundColor: color.bone");
+    expect(start).not.toMatch(/gold/);
   });
 });
 

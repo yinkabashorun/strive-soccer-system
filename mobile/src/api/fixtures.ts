@@ -273,8 +273,10 @@ export const FIXTURE_YOU: AppYou = {
   ],
   next: { hours: 5, minutesAway: 38 },
   achievements: [
-    { id: "a1", title: "10 Sessions", detail: "Ten sessions done" },
-    { id: "a2", title: "First Week", detail: "Every session of a week" },
+    // the badges' own titles and lines (lib/elite/achievement-rules.ts)
+    { id: "a1", title: "10 Sessions", detail: "Ten full sessions in the bank" },
+    { id: "a2", title: "Week Conquered", detail: "Every drill in a week, done" },
+    { id: "a3", title: "First Session", detail: "Your first full session, done" },
   ],
 };
 

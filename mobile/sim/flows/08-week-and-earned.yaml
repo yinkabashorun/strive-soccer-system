@@ -1,0 +1,45 @@
+# The Week tab and what was earned, by taps and scrolling: the week's path
+# with its one big card, the page scrolled up (nothing may run under the
+# clock), Start from the big card, then the You tab scrolled down to the
+# gold medals, each with its whole line.
+appId: com.strivesoccer.elite
+---
+- launchApp:
+    clearState: true
+    arguments:
+      fixtureState: ok
+- extendedWaitUntil:
+    visible: "Start session"
+    timeout: 30000
+- tapOn: "Week"
+- extendedWaitUntil:
+    visible: "Up next.*"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: t40-week-path
+- scrollUntilVisible:
+    element: "Your coach is building week 8.*"
+    direction: DOWN
+    timeout: 20000
+- takeScreenshot: t41-week-scrolled
+- tapOn: "You"
+- scrollUntilVisible:
+    element: ".*Week Conquered.*"
+    direction: DOWN
+    timeout: 30000
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: t42-you-earned
+- scroll
+- takeScreenshot: t43-you-bottom
+- tapOn: "Week"
+- scrollUntilVisible:
+    element: "Up next.*"
+    direction: UP
+    timeout: 20000
+- tapOn: "Up next.*"
+- extendedWaitUntil:
+    visible: "Done"
+    timeout: 20000
+- takeScreenshot: t44-week-start

@@ -21,7 +21,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
-import Svg, { Circle, Defs, LinearGradient, Path, Stop } from "react-native-svg";
+import Svg, { Circle, Defs, LinearGradient, Path, RadialGradient, Stop } from "react-native-svg";
 import { color, font, metal, MIN_TAP, motion, radius } from "./theme";
 
 // The handful of pieces every screen is built from, in the approved look.
@@ -231,6 +231,42 @@ export function Disc({ size, earned, children }: { size: number; earned: boolean
         <Circle cx={size / 2} cy={size / 2} r={size / 2} fill={earned ? "url(#disc)" : color.fill2} />
       </Svg>
       <View style={[StyleSheet.absoluteFill, { alignItems: "center", justifyContent: "center" }]}>{children}</View>
+    </View>
+  );
+}
+
+// A badge that was earned: the gold disc with its engraving, a fine gold
+// ring around it and a soft gold light behind (drawn, not a shadow). With
+// no engraving it carries a tick.
+export function Medal({ size, mark }: { size: number; mark: string | null }) {
+  const box = Math.round(size * 1.5);
+  const c = box / 2;
+  const text = mark ? (mark.length <= 2 ? 0.36 : mark.length === 3 ? 0.3 : 0.25) : 0;
+  return (
+    <View style={{ width: box, height: box, alignItems: "center", justifyContent: "center" }}>
+      <Svg width={box} height={box} style={StyleSheet.absoluteFill}>
+        <Defs>
+          <RadialGradient id="medalLight" cx="50%" cy="50%" r="50%">
+            <Stop offset="0.55" stopColor={metal.mid} stopOpacity={0.26} />
+            <Stop offset="1" stopColor={metal.mid} stopOpacity={0} />
+          </RadialGradient>
+        </Defs>
+        <Circle cx={c} cy={c} r={c} fill="url(#medalLight)" />
+        <Circle cx={c} cy={c} r={size / 2 + 4} fill="none" stroke={metal.mid} strokeOpacity={0.55} strokeWidth={1.5} />
+      </Svg>
+      <Disc size={size} earned>
+        {mark ? (
+          <Text
+            maxFontSizeMultiplier={1}
+            numberOfLines={1}
+            style={{ fontFamily: font.head, fontSize: Math.round(size * text), color: "#1a1408", letterSpacing: 0.4 }}
+          >
+            {mark}
+          </Text>
+        ) : (
+          <Icon name="check" size={Math.round(size * 0.4)} stroke="#1a1408" />
+        )}
+      </Disc>
     </View>
   );
 }

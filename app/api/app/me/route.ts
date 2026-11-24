@@ -6,6 +6,6 @@ import { loadBootstrap } from "@/lib/elite/app-data";
 // the tabs and the unread count.
 export const dynamic = "force-dynamic";
 
-export const GET = appRoute({ name: "me", access: "account" }, ({ viewer, state, player }) =>
-  loadBootstrap(viewer, state, player)
+export const GET = appRoute({ name: "me", access: "account" }, ({ viewer, state, player, tracker }) =>
+  loadBootstrap(viewer, state, player, tracker)
 );

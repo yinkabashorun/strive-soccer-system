@@ -1519,6 +1519,16 @@ export function cleanJoin(input: JoinInput): JoinFields | null {
   };
 }
 
+// The free app's set-up is finished: a weekly target is set and at least
+// one training day is picked (the answers behind them are stored with it).
+export function setUpDone(t: {
+  quiz_done_at?: string | null;
+  target_minutes?: number | null;
+  plan_days?: readonly number[] | null;
+}): boolean {
+  return Boolean(t.quiz_done_at && t.target_minutes && (t.plan_days ?? []).length > 0);
+}
+
 // ---- Where a signed-in person belongs ---------------------------------
 
 // One rule for the front door, the member shell and the Account page.

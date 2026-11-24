@@ -15,7 +15,7 @@ import { photoAddress, profileSetupDue, setupSteps } from "@/lib/elite/account-p
 import { suggestUsernames } from "@/lib/elite/account-profile-server";
 import { consentDue } from "@/lib/elite/legal-server";
 import { NO_PROFILE_GATE, type GateCopy } from "@/lib/elite/gates";
-import { memberState } from "@/lib/elite/member-gate";
+import { mayBeFree, memberState } from "@/lib/elite/member-gate";
 import { memberTabs } from "@/lib/elite/experience";
 import { groupSessions } from "@/lib/elite/session-flow";
 import { liveWeekFor } from "@/lib/elite/time";
@@ -75,10 +75,14 @@ export default async function PlayerLayout({
   //   - a redeemed player who has not finished intake takes the quiz
   //     (demo players are pre-onboarded)
   //   - any other membership not switched on sees the coach screen
+  // A free account that started Strive Pro and has not paid (or whose
+  // Strive Pro ended) still lives in the free training log: the free
+  // account is read only for such a row (mayBeFree).
+  const freeAccount = !viewer.demo && mayBeFree(player) ? await getTracker(viewer.profile.id) : null;
   const state = memberState({
     role: viewer.role,
     playerId: viewer.playerId,
-    isFree: Boolean(tracker),
+    isFree: Boolean(freeAccount),
     consentDue: consent,
     player: viewer.demo && player ? { ...player, onboarded_at: player.onboarded_at ?? "demo" } : player,
   });
@@ -89,6 +93,7 @@ export default async function PlayerLayout({
       </div>
     );
   }
+  if (state.kind === "free" && freeAccount) redirect(freeLanding(quizDone(freeAccount)));
   if (state.kind === "pro_checkout" || state.kind === "membership" || state.kind === "no_profile") {
     return <GateScreen gate={state.gate} />;
   }

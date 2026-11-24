@@ -121,14 +121,24 @@ function validRating(v: unknown): v is number {
 // A player who rated nothing under 4 gets their single lowest, so the plan
 // still has a place to start.
 export const MAX_WEAKNESSES = 3;
+type Rated = { label: (typeof ATTRIBUTES)[number]["label"]; v: number; i: number };
+function ratedLowestFirst(attrs: Partial<Record<string, number>>): Rated[] {
+  const rated = ATTRIBUTES.map((x, i) => ({ label: x.label, v: attrs[x.id], i })).filter((r): r is Rated => validRating(r.v));
+  return rated.sort((a, b) => a.v - b.v || a.i - b.i);
+}
 export function lowestAttributes(attrs: Partial<Record<string, number>>): string[] {
-  const rated = ATTRIBUTES.map((x, i) => ({ label: x.label, v: attrs[x.id], i })).filter(
-    (r): r is { label: (typeof ATTRIBUTES)[number]["label"]; v: number; i: number } => validRating(r.v)
-  );
-  if (!rated.length) return [];
-  const sorted = [...rated].sort((a, b) => a.v - b.v || a.i - b.i);
+  const sorted = ratedLowestFirst(attrs);
+  if (!sorted.length) return [];
   const low = sorted.filter((r) => r.v <= 3).slice(0, MAX_WEAKNESSES);
   return (low.length ? low : sorted.slice(0, 1)).map((r) => r.label);
+}
+
+// Every attribute the player rated, weakest first, by the same order
+// lowestAttributes uses (ties in the order of the list). The offer shown
+// to a free account reads down this list for the areas the filmed drill
+// bank can train (lib/elite/bank-conform.ts weekPreview).
+export function attributesWeakestFirst(attrs: Partial<Record<string, number>>): string[] {
+  return ratedLowestFirst(attrs).map((r) => r.label);
 }
 
 // What the server stores from the quiz's ratings: only known attributes,

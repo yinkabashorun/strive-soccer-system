@@ -9,11 +9,11 @@ import { checkUsername, myUsernameIdeas, saveUsername } from "@/lib/elite/profil
 //   POST { username }        take it
 export const dynamic = "force-dynamic";
 
-export const GET = appRoute({ name: "username-ideas", access: "player" }, async () => ({
+export const GET = appRoute({ name: "username-ideas", access: "person" }, async () => ({
   ideas: await myUsernameIdeas(),
 }));
 
-export const POST = appRoute({ name: "username", access: "player" }, async ({ req }) => {
+export const POST = appRoute({ name: "username", access: "person" }, async ({ req }) => {
   const body = await readJson(req);
   if (typeof body?.username !== "string") return appJson({ ok: false, error: "Pick a username." }, 400);
   const name = body.username.slice(0, 64);

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/elite/supabase/server";
 import { establishSession } from "@/lib/elite/session-start";
 import { emailHasFreeAccount } from "@/lib/elite/tracker-server";
-import { normalizePhone } from "@/lib/elite/sms";
+import { createProMember } from "@/lib/elite/pro-server";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
 import { AGREEMENT_REQUIRED_MESSAGE, agreementComplete } from "@/lib/elite/legal";
 import { recordConsent } from "@/lib/elite/legal-server";
@@ -122,28 +122,16 @@ export async function POST(req: Request) {
     email: fields.email,
   });
 
-  // 3) the member row. Who it is attributed to: the head coach, the same
-  // profile the plan builder attributes every week to.
-  const { data: coach } = await admin
-    .from("elite_profiles")
-    .select("id")
-    .in("role", ["coach", "admin"])
-    .order("role")
-    .limit(1)
-    .maybeSingle();
-  const { error: playerErr } = await admin.from("elite_players").insert({
-    profile_id: userId,
-    coach_id: (coach?.id as string | undefined) ?? null,
-    full_name: fullName,
+  // 3) the member row (lib/elite/pro-server.ts createProMember: tier pro,
+  // attributed to the head coach, never switched on here).
+  const made = await createProMember(admin, {
+    profileId: userId,
+    fullName,
     age: ageFromBirth(birth, today),
-    parent_email: fields.email,
-    parent_phone: normalizePhone(fields.phone) ?? fields.phone,
-    tier: "pro",
-    // Never "active" here: the paid checkout switches it on (webhook).
-    subscription_status: "none",
-    current_week: 1,
-    today_focus: "Welcome to Strive Pro. Answer the quiz and your first week is built around you.",
+    email: fields.email,
+    phone: fields.phone,
   });
+  const playerErr = !made;
   if (playerErr) {
     // A login with no member row behind it would be stuck for good.
     await admin.auth.admin.deleteUser(userId).catch(() => undefined);

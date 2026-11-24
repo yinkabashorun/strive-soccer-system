@@ -23,3 +23,9 @@ appId: com.strivesoccer.elite
 - waitForAnimationToEnd:
     timeout: 6000
 - takeScreenshot: t06-photo-picker
+# the phone's own picker can take a moment to draw the first time
+- extendedWaitUntil:
+    visible: "Cancel"
+    timeout: 12000
+    optional: true
+- takeScreenshot: t06b-photo-picker-later

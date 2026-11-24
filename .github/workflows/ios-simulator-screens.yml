@@ -151,16 +151,17 @@ jobs:
         run: |
           mkdir -p "$SCREENS"
           cd "$SCREENS"
-          for f in *.png; do
+          # The pictures the tapping pass took, its own failure pictures and
+          # its log. Maestro keeps them in its own folder, not where it ran.
+          # Not the simulator's device log: one run's was 48 MB.
+          if [ -d "$HOME/.maestro/tests" ]; then
+            mkdir -p taps
+            find "$HOME/.maestro/tests" -type f \( -name "*.png" -o -name "maestro.log" \) -size -6M -newer "$RUNNER_TEMP/devices.json" -exec cp {} taps/ \; || true
+          fi
+          for f in *.png taps/*.png; do
             [ -e "$f" ] || continue
             sips -s format jpeg -s formatOptions 72 -Z 1500 "$f" --out "${f%.png}.jpg" >/dev/null && rm "$f"
           done
-          # Maestro's own failure pictures and its log, when a flow failed.
-          # Not the simulator's device log: one run's was 48 MB.
-          if [ -d "$HOME/.maestro/tests" ]; then
-            mkdir -p maestro-debug
-            find "$HOME/.maestro/tests" -type f \( -name "*.png" -o -name "maestro.log" \) -size -4M -newer "$RUNNER_TEMP/devices.json" -exec cp {} maestro-debug/ \; || true
-          fi
           {
             echo "# iPhone simulator screens"
             echo
@@ -173,7 +174,7 @@ jobs:
             echo "- taps and typing (sim/flows): ${{ steps.flows.outcome }}"
             echo
             echo "## Pictures"
-            ls -1 *.jpg 2>/dev/null | sed 's/^/- /'
+            ls -1 *.jpg taps/*.jpg *.mp4 2>/dev/null | sed 's/^/- /'
           } > README.md
           # a branch of pictures is not a site: Vercel leaves it alone
           printf '{ "git": { "deploymentEnabled": false } }\n' > vercel.json

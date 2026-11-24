@@ -9,7 +9,10 @@ appId: com.strivesoccer.elite
 - extendedWaitUntil:
     visible: "Send"
     timeout: 30000
-- tapOn: "Anything else"
+# the words are on the label and on the box under it: the box is the second
+- tapOn:
+    text: "Anything else"
+    index: 1
 - inputText: "Legs felt heavy on Thursday."
 - waitForAnimationToEnd:
     timeout: 3000

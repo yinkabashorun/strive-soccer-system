@@ -9,6 +9,14 @@ appId: com.strivesoccer.elite
     visible: "Build my week"
     timeout: 30000
 - takeScreenshot: t14-door
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: t14b-door-settled
+- extendedWaitUntil:
+    visible: "This text is never on the door"
+    timeout: 6000
+    optional: true
+- takeScreenshot: t14c-door-ten-seconds
 - tapOn: "Build my week"
 - extendedWaitUntil:
     visible: "Boy"

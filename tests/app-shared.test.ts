@@ -222,7 +222,7 @@ describe("the phone's build", () => {
     const fixtures = readFileSync(path.join(root, "mobile/src/api/fixtures.ts"), "utf8");
     const shape = new RegExp(fixtures.match(/FIXTURE_ROUTE = \/(.+)\/;/)?.[1] ?? "never^");
     const asked = new Set<string>();
-    for (const m of shots.matchAll(/^[\w-]+\|[a-z_]+\|([^|\n]+)\|\d+$/gm)) if (m[1] !== "-") asked.add(m[1]);
+    for (const m of shots.matchAll(/^[\w-]+\|[a-z_]+\|([^|\n]+)\|\d+(\|film)?$/gm)) if (m[1] !== "-") asked.add(m[1]);
     for (const f of flows) for (const m of f.matchAll(/fixtureRoute: (\S+)/g)) asked.add(m[1]);
     expect(asked.size).toBeGreaterThan(8);
     const appDir = path.join(root, "mobile/app");

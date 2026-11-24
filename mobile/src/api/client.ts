@@ -13,10 +13,14 @@ import type { Multipart } from "@shared/upload-body";
 export class ApiError extends Error {
   status: number;
   code: string | null;
-  constructor(status: number, code: string | null, message: string) {
+  // what the server sent with a refusal (which sign-up screen a typed
+  // detail belongs to, for one)
+  data: Record<string, unknown> | null;
+  constructor(status: number, code: string | null, message: string, data: Record<string, unknown> | null = null) {
     super(message);
     this.status = status;
     this.code = code;
+    this.data = data;
   }
 }
 
@@ -25,7 +29,10 @@ export const OFFLINE_MESSAGE = "We could not reach Strive. Check your connection
 // `upload` is a file as bytes (lib/elite/upload-body.ts). Never a FormData: this
 // Expo version's fetch refuses a React Native file part, and the request
 // never leaves the phone.
-type Options = { method?: "GET" | "POST" | "DELETE"; body?: unknown; upload?: Multipart; timeoutMs?: number };
+// `open` is a call made before anyone is signed in (is free sign-up open,
+// and the sign-up itself): it carries no token, and a refusal never signs
+// this phone out.
+type Options = { method?: "GET" | "POST" | "DELETE"; body?: unknown; upload?: Multipart; timeoutMs?: number; open?: boolean };
 
 // The bearer header, for an image our own API serves (the profile photo).
 export async function authHeaders(): Promise<Record<string, string>> {
@@ -40,10 +47,10 @@ export function setGateListener(fn: () => void) {
 
 export async function api<T>(path: string, opts: Options = {}): Promise<T> {
   const method = opts.method ?? "GET";
-  if (FIXTURES) return fixtureResponse(path, method) as T;
+  if (FIXTURES) return fixtureResponse(path, method, opts.body) as T;
 
-  const token = await accessToken();
-  if (!token) throw new ApiError(401, "signed_out", "Sign in again.");
+  const token = opts.open ? null : await accessToken();
+  if (!opts.open && !token) throw new ApiError(401, "signed_out", "Sign in again.");
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), opts.timeoutMs ?? 20_000);
@@ -52,7 +59,7 @@ export async function api<T>(path: string, opts: Options = {}): Promise<T> {
     res = await fetch(API_BASE + path, {
       method,
       headers: {
-        Authorization: `Bearer ${token}`,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
         Accept: "application/json",
         ...(opts.upload ? { "Content-Type": opts.upload.contentType } : opts.body !== undefined ? { "Content-Type": "application/json" } : {}),
       },
@@ -70,13 +77,13 @@ export async function api<T>(path: string, opts: Options = {}): Promise<T> {
   if (res.ok) return data as T;
 
   const code = typeof data?.error === "string" ? data.error : null;
-  if (res.status === 401) {
+  if (res.status === 401 && !opts.open) {
     await signOutHere();
     throw new ApiError(401, code, "Sign in again.");
   }
   if (res.status === 403 && code === "gate") onGateMoved?.();
-  if (res.status === 429) throw new ApiError(429, code, "Too many tries in a row. Wait a minute, then try again.");
+  if (res.status === 429) throw new ApiError(429, code, "Too many tries in a row. Wait a minute, then try again.", data);
   // A server line meant for the member (a sentence, not a code) is shown as is.
   const message = code && /\s/.test(code) ? code : "Something went wrong. Try again in a minute.";
-  throw new ApiError(res.status, code, message);
+  throw new ApiError(res.status, code, message, data);
 }

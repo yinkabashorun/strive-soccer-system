@@ -11,8 +11,11 @@ import { color } from "@/theme";
 
 // The screens a member sees instead of the app (lib/elite/gates.ts, the
 // website's own words): one says what is happening and what comes next,
-// and never leaves them with nothing to do. Coaches and the free training
-// log are on the website in this version of the app.
+// and never leaves them with nothing to do. Coaches are on the website in
+// this version of the app. A free account lives in the app (app/(free));
+// it only lands here while the server cannot store its quiz yet (the stage
+// "web": the database is a step behind the app), when its training log is
+// still the website's.
 export default function Gate() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -24,7 +27,7 @@ export default function Gate() {
       : state?.kind === "coach"
         ? { title: "The coach side is on the website", body: "Rosters, plans and calls live at thestriveapp.com. This app is for players.", emailCoach: false }
         : state?.kind === "free"
-          ? { title: "Your training log is on the website", body: "The free training log opens in the next version of this app. Until then it is at thestriveapp.com.", emailCoach: false }
+          ? { title: "Your training log is on the website", body: "Your training log opens in this app soon. Until then it is at thestriveapp.com.", emailCoach: false }
           : { title: "Almost there", body: "", emailCoach: false };
 
   return (

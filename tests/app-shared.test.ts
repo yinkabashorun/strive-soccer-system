@@ -230,7 +230,7 @@ describe("the phone's build", () => {
     for (const route of asked) {
       expect(route, route).toMatch(shape);
       const first = route.split(/[/?]/)[0];
-      expect(has(appDir, first) || has(path.join(appDir, "(tabs)"), first), route).toBe(true);
+      expect(has(appDir, first) || has(path.join(appDir, "(tabs)"), first) || has(path.join(appDir, "(free)"), first), route).toBe(true);
     }
     // the screen is read from the launch argument only inside the example
     // file, and opened only where the example data is on

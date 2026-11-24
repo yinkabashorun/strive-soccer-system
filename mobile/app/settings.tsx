@@ -21,6 +21,9 @@ export default function Settings() {
   const me = useMe();
   const [p, set] = usePrefs();
   const name = me.data?.viewer.name ?? "";
+  // A free account has no sessions: no set timer and no drill demos to
+  // switch, and its notifications are about its friends.
+  const free = me.data?.state.kind === "free";
 
   return (
     <ScrollView style={{ flex: 1, backgroundColor: color.black }} contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: insets.bottom + 40, paddingHorizontal: 20 }}>
@@ -39,16 +42,20 @@ export default function Settings() {
       <Section title="This phone">
         <SettingRow
           label="Notifications"
-          detail="Your new week, your coach, a Film Room. Nothing else."
+          detail={free ? "A friend posts, or gives you props. Nothing else." : "Your new week, your coach, a Film Room. Nothing else."}
           value={p.pushOn}
           onValue={(v) => void (v ? turnOnNotifications() : turnOffNotifications())}
         />
         <Hairline />
         <SettingRow label="Vibration" value={p.vibration} onValue={(v) => set("vibration", v)} />
-        <Hairline />
-        <SettingRow label="Timer sound" value={p.sound} onValue={(v) => set("sound", v)} />
-        <Hairline />
-        <SettingRow label="Play drill demos automatically" value={p.autoplay} onValue={(v) => set("autoplay", v)} />
+        {free ? null : (
+          <>
+            <Hairline />
+            <SettingRow label="Timer sound" value={p.sound} onValue={(v) => set("sound", v)} />
+            <Hairline />
+            <SettingRow label="Play drill demos automatically" value={p.autoplay} onValue={(v) => set("autoplay", v)} />
+          </>
+        )}
       </Section>
 
       <Section title="Account">

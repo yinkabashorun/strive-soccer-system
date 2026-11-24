@@ -17,55 +17,77 @@ import {
   SPACES,
   TEAM_TRAINING,
   attributesIn,
-  firstUnanswered,
   lowestAttributes,
   stepReady,
-  type QuizAnswers,
   type QuizStepId,
 } from "@shared/quiz";
-import type { SetupStep } from "@shared/account-profile";
+import { FREE_QUESTIONS, FREE_STEPS, freeStepReady, type FreeAnswers, type FreeStepId } from "@shared/free-intake";
+import { GOALS, GRADES } from "@shared/tracker";
 import { weakSpotPhrase } from "@shared/experience";
 import { sessionsFor, sessionsWord } from "@shared/training";
 import { useMe, useSubmitQuiz } from "@/api/queries";
+import { rereadMe, saveIntake } from "@/api/free";
 import { ApiError } from "@/api/client";
 import { FormScreen } from "@/FormScreen";
 import { MEDIA_BASE } from "@/config";
 import { tick } from "@/feel";
 import { useDraft } from "@/quiz-draft";
-import { isStep, nextStepId, stepPosition, type StepId } from "@/quiz-steps";
-import { PhotoStep, UsernameStep } from "@/ProfileSteps";
+import { isStep, nextStepId, quizStepIds, stepPosition } from "@/quiz-steps";
 import { Body, Button, Eyebrow, Head, Icon, Label, Press } from "@/ui";
 import { color, font } from "@/theme";
 
 // One question a screen (experience.md, moment 2). A question with one
 // answer moves on by itself the moment it is tapped; a question with
 // several (the ratings, what is near, the typed ones) has one Next button.
+//
+// The same screens serve a member and a free account (src/quiz-steps.ts
+// says which ones each is shown). A member's answers go to the intake and
+// their week is built; a free account's are stored whole, and the offer
+// that follows is named from them. The photo and the @username are their
+// own screen (app/profile-setup.tsx), never part of this.
 export default function QuizStep() {
   const { step } = useLocalSearchParams<{ step: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const me = useMe();
-  // While 081 is live the quiz ends on the @username and the photo (the
-  // website's order). Kept fixed for the whole quiz: a screen already done
-  // shows what was saved rather than disappearing under the player.
-  const setup = me.data?.profileSetup;
-  const withProfile: SetupStep[] = setup ? ["username", "photo"] : [];
+  const free = me.data?.state.kind === "free";
+  // Fixed for the whole quiz: the list does not change under the player.
+  const [order] = useState<string[]>(() => quizStepIds(me.data));
   const { answers: a, set, clear } = useDraft();
   const submit = useSubmitQuiz();
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  if (!isStep(step, withProfile)) return null;
-  const id: StepId = step;
-  const quiz = QUIZ_STEPS.find((s) => s.id === id);
-  const { index, total } = stepPosition(id, withProfile);
+  if (!isStep(step, order)) return null;
+  const id = step;
+  const quiz = free ? FREE_STEPS.find((s) => s.id === id) : QUIZ_STEPS.find((s) => s.id === id);
+  if (!quiz) return null;
+  const question = free ? FREE_QUESTIONS[quiz.id as FreeStepId] : QUIZ_QUESTIONS[quiz.id as QuizStepId];
+  const { index, total } = stepPosition(id, order);
+  const readyAt = (s: string) => (free ? freeStepReady(s as FreeStepId, a) : stepReady(s as QuizStepId, a));
 
   async function finish() {
-    const missing = firstUnanswered(a);
-    if (missing !== -1) {
-      router.push(`/onboarding/${QUIZ_STEPS[missing].id}`);
+    // a screen skipped on the way is asked for, never saved blank
+    const missing = order.find((s) => !readyAt(s));
+    if (missing) {
+      router.push(`/onboarding/${missing}`);
       return;
     }
     setError(null);
+    if (free) {
+      // Stored, then this account is read again: the gatekeeper takes it
+      // on (the photo and @username if they are owed, then the offer).
+      setSaving(true);
+      try {
+        await saveIntake(a);
+        await clear();
+        await rereadMe();
+      } catch (e) {
+        setSaving(false);
+        setError(e instanceof ApiError ? e.message : "That did not save. Check your connection and try again.");
+      }
+      return;
+    }
     try {
       await submit.mutateAsync(a);
       await clear();
@@ -80,22 +102,23 @@ export default function QuizStep() {
     }
   }
 
-  function next(patch?: Partial<QuizAnswers>) {
+  function next(patch?: Partial<FreeAnswers>) {
     if (patch) set(patch);
-    const n = nextStepId(id, withProfile);
+    const n = nextStepId(id, order);
     if (n) router.push(`/onboarding/${n}`);
     else void finish();
   }
 
   // A tap is the answer: a light tick and the next question comes up.
-  function pick(patch: Partial<QuizAnswers>) {
+  // On the last screen the tap only answers; Finish saves it.
+  function pick(patch: Partial<FreeAnswers>) {
     tick();
     set(patch);
-    setTimeout(() => next(), 180);
+    if (!last) setTimeout(() => next(), 180);
   }
 
-  const ready = quiz ? stepReady(quiz.id, a) : true;
-  const last = nextStepId(id, withProfile) === null;
+  const ready = readyAt(id);
+  const last = nextStepId(id, order) === null;
 
   return (
     <FormScreen
@@ -111,42 +134,28 @@ export default function QuizStep() {
           </View>
       }
       footer={
-          quiz && !quiz.autoAdvance ? (
+          // a question a tap answers has no button, unless it is the last one
+          !quiz.autoAdvance || last ? (
             <View style={[styles.cta, { paddingBottom: insets.bottom + 16 }]}>
-              <NextButton ready={ready || id === "nearby"} last={last} busy={submit.isPending} onNext={() => next(id === "nearby" ? { nearbyAnswered: true } : undefined)} />
+              <NextButton ready={ready || id === "nearby"} last={last} busy={submit.isPending || saving} onNext={() => next(id === "nearby" ? { nearbyAnswered: true } : undefined)} />
             </View>
           ) : null
       }
     >
-        {quiz ? (
-          <>
-            <Animated.View entering={FadeInDown.duration(320)}>
-              <Eyebrow style={{ marginTop: 18 }}>{quiz.section}</Eyebrow>
-              <Head size={36} style={{ marginTop: 10 }}>
-                {QUIZ_QUESTIONS[quiz.id].title}
-              </Head>
-              {QUIZ_QUESTIONS[quiz.id].sub ? (
-                <Body dim style={{ marginTop: 10 }}>
-                  {QUIZ_QUESTIONS[quiz.id].sub}
-                </Body>
-              ) : null}
-            </Animated.View>
-            <View style={{ marginTop: 24 }}>
-              <Answers id={quiz.id} a={a} pick={pick} set={set} />
-            </View>
-          </>
-        ) : (
-          <Animated.View entering={FadeInDown.duration(320)} style={{ marginTop: 18 }}>
-            <Eyebrow>Your profile</Eyebrow>
-            <View style={{ marginTop: 10 }}>
-              {id === "username" ? (
-                <UsernameStep ideas={setup?.ideas ?? []} initial={setup?.username} onDone={() => next()} />
-              ) : (
-                <PhotoStep seenBy="your coaches" initialUri={null} onDone={() => next()} />
-              )}
-            </View>
-          </Animated.View>
-        )}
+        <Animated.View entering={FadeInDown.duration(320)}>
+          <Eyebrow style={{ marginTop: 18 }}>{quiz.section}</Eyebrow>
+          <Head size={36} style={{ marginTop: 10 }}>
+            {question.title}
+          </Head>
+          {question.sub ? (
+            <Body dim style={{ marginTop: 10 }}>
+              {question.sub}
+            </Body>
+          ) : null}
+        </Animated.View>
+        <View style={{ marginTop: 24 }}>
+          <Answers id={quiz.id} a={a} pick={pick} set={set} />
+        </View>
         {error ? (
           <Body size={14} style={{ color: color.danger, marginTop: 14 }}>
             {error}
@@ -181,8 +190,25 @@ function Choice({ label, line, on, onPress, image }: { label: string; line?: str
   );
 }
 
-function Answers({ id, a, pick, set }: { id: QuizStepId; a: QuizAnswers; pick: (p: Partial<QuizAnswers>) => void; set: (p: Partial<QuizAnswers>) => void }) {
+function Answers({ id, a, pick, set }: { id: QuizStepId | FreeStepId; a: FreeAnswers; pick: (p: Partial<FreeAnswers>) => void; set: (p: Partial<FreeAnswers>) => void }) {
   switch (id) {
+    // the free quiz's own two questions (lib/elite/free-intake.ts)
+    case "grade":
+      return (
+        <View style={{ gap: 10 }}>
+          {GRADES.map((g) => (
+            <Choice key={g.id} label={g.label} on={a.grade === g.id} onPress={() => pick({ grade: g.id })} />
+          ))}
+        </View>
+      );
+    case "aim":
+      return (
+        <View style={{ gap: 10 }}>
+          {GOALS.map((g) => (
+            <Choice key={g.id} label={g.label} on={a.aim === g.id} onPress={() => pick({ aim: g.id })} />
+          ))}
+        </View>
+      );
     case "gender":
       return (
         <View style={{ gap: 10 }}>

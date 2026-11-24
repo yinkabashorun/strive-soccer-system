@@ -44,14 +44,59 @@ export type Multipart = { body: Uint8Array; contentType: string };
 // One file under one field name. The field, file name and type are ours
 // (plain ASCII), never typed by anyone.
 export function oneFileForm(field: string, fileName: string, type: string, bytes: Uint8Array, boundary = makeBoundary()): Multipart {
-  const head = ascii(
-    `--${boundary}\r\nContent-Disposition: form-data; name="${field}"; filename="${fileName}"\r\nContent-Type: ${type}\r\n\r\n`,
+  return fileForm({}, { field, fileName, type, bytes }, boundary);
+}
+
+// Text as UTF-8 bytes. Its own encoder, so nothing depends on the phone
+// having TextEncoder. A lone surrogate becomes the replacement character.
+export function utf8Bytes(text: string): Uint8Array {
+  const out: number[] = [];
+  for (let i = 0; i < text.length; i++) {
+    let c = text.charCodeAt(i);
+    if (c >= 0xd800 && c <= 0xdbff && i + 1 < text.length) {
+      const d = text.charCodeAt(i + 1);
+      if (d >= 0xdc00 && d <= 0xdfff) {
+        c = 0x10000 + ((c - 0xd800) << 10) + (d - 0xdc00);
+        i++;
+      }
+    }
+    if (c >= 0xd800 && c <= 0xdfff) c = 0xfffd;
+    if (c < 0x80) out.push(c);
+    else if (c < 0x800) out.push(0xc0 | (c >> 6), 0x80 | (c & 63));
+    else if (c < 0x10000) out.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));
+    else out.push(0xf0 | (c >> 18), 0x80 | ((c >> 12) & 63), 0x80 | ((c >> 6) & 63), 0x80 | (c & 63));
+  }
+  return Uint8Array.from(out);
+}
+
+// A file with a few short text fields beside it (a post: the photo, how
+// long, training or gym, the one-line note). The field names are ours; a
+// value is what the person typed, sent as UTF-8 on one line (a line break
+// in a value could end the part early, so there is never one).
+export function fileForm(
+  fields: Record<string, string>,
+  file: { field: string; fileName: string; type: string; bytes: Uint8Array },
+  boundary = makeBoundary(),
+): Multipart {
+  const parts: Uint8Array[] = [];
+  for (const [name, value] of Object.entries(fields)) {
+    parts.push(ascii(`--${boundary}\r\nContent-Disposition: form-data; name="${name}"\r\n\r\n`));
+    parts.push(utf8Bytes(value.replace(/[\r\n]+/g, " ")));
+    parts.push(ascii("\r\n"));
+  }
+  parts.push(
+    ascii(
+      `--${boundary}\r\nContent-Disposition: form-data; name="${file.field}"; filename="${file.fileName}"\r\nContent-Type: ${file.type}\r\n\r\n`,
+    ),
   );
-  const tail = ascii(`\r\n--${boundary}--\r\n`);
-  const body = new Uint8Array(head.length + bytes.length + tail.length);
-  body.set(head, 0);
-  body.set(bytes, head.length);
-  body.set(tail, head.length + bytes.length);
+  parts.push(file.bytes);
+  parts.push(ascii(`\r\n--${boundary}--\r\n`));
+  const body = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
+  let at = 0;
+  for (const p of parts) {
+    body.set(p, at);
+    at += p.length;
+  }
   return { body, contentType: `multipart/form-data; boundary=${boundary}` };
 }
 

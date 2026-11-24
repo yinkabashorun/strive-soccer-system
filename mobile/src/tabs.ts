@@ -12,3 +12,13 @@ export const APP_TABS = [
 ] as const;
 
 export type TabKey = (typeof APP_TABS)[number]["key"];
+
+// The free app's tabs (app/(free)): Friends (today and the feed), Week,
+// the Courses shelf (every course locked: a state, not a prompt) and You.
+// A free account always has all four.
+export const FREE_TABS = [
+  { route: "friends", label: "Friends", sf: "person.2", sfSelected: "person.2.fill" },
+  { route: "my-week", label: "Week", sf: "calendar", sfSelected: "calendar" },
+  { route: "courses", label: "Courses", sf: "book", sfSelected: "book.fill" },
+  { route: "me", label: "You", sf: "person", sfSelected: "person.fill" },
+] as const;

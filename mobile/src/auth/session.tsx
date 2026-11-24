@@ -2,7 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState, type ReactNode
 import { AppState } from "react-native";
 import { SIGN_IN_MESSAGES, signInProblem } from "@shared/sign-in";
 import { FIXTURES } from "@/config";
-import { fixtureSignedIn } from "@/api/fixtures";
+import { fixtureJoin, fixtureSignIn, fixtureSignedIn, onFixtureChange } from "@/api/fixtures";
 import { supabase } from "./supabase";
 
 // Who is signed in on this phone. The session itself lives in the Keychain
@@ -18,7 +18,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    if (FIXTURES) return;
+    // The example build: whoever the example is, followed as it moves
+    // (a run that joins free signs itself in).
+    if (FIXTURES) return onFixtureChange(() => setAuth({ ready: true, signedIn: fixtureSignedIn(), email: "marcus@example.com" }));
     let alive = true;
     supabase.auth.getSession().then(({ data }) => {
       if (alive) setAuth({ ready: true, signedIn: Boolean(data.session), email: data.session?.user.email ?? null });
@@ -56,9 +58,22 @@ export async function accessToken(): Promise<string | null> {
 // The website's own words for every way a sign-in can fail.
 export async function signInWithPassword(email: string, password: string): Promise<string | null> {
   if (!email.trim() || !password) return SIGN_IN_MESSAGES.missing;
-  if (FIXTURES) return null;
+  if (FIXTURES) {
+    fixtureSignIn();
+    return null;
+  }
   const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
   return error ? SIGN_IN_MESSAGES[signInProblem(error)] : null;
+}
+
+// Right after a free account is made (app/join): signed in with the email
+// and password just chosen, the same way as any sign-in.
+export async function signInAfterJoin(email: string, password: string): Promise<string | null> {
+  if (FIXTURES) {
+    fixtureJoin();
+    return null;
+  }
+  return signInWithPassword(email, password);
 }
 
 export async function signOutHere(): Promise<void> {

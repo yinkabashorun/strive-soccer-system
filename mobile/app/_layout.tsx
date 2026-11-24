@@ -14,7 +14,7 @@ import { PERSIST_MAX_AGE, persister, queryClient } from "@/api/queryClient";
 import { setGateListener } from "@/api/client";
 import { fixtureRoute } from "@/api/fixtures";
 import { FIXTURES } from "@/config";
-import { areaFor, AREA_ROOT, inArea } from "@/navigation";
+import { areaFor, areaHome, inArea } from "@/navigation";
 import { keepTokenFresh } from "@/push";
 import { loadPrefs } from "@/prefs";
 import { color } from "@/theme";
@@ -39,15 +39,13 @@ function Gatekeeper() {
 
   useEffect(() => {
     if (!area) return;
-    if (!inArea(area, segments)) {
-      if (area === "app") router.replace("/");
-      else if (area === "onboarding") router.replace("/onboarding");
-      else router.replace(`/${AREA_ROOT[area]}`);
-    }
+    if (!inArea(area, segments)) router.replace(areaHome(area) as Href);
   }, [area, segments, router]);
 
+  // A phone that already said yes stays on file, for a member and for a
+  // free account alike (the server keeps each under its own kind).
   useEffect(() => {
-    if (area === "app") void keepTokenFresh();
+    if (area === "app" || area === "free") void keepTokenFresh();
   }, [area]);
 
   // The launch screen stays up until the first screen is the right one:
@@ -72,11 +70,14 @@ function Gatekeeper() {
     if (route) router.push(route as Href);
   }, [area, segments, router]);
 
-  // A tapped notification opens the app on Home (every notification the
-  // site sends is about the week or the coach).
+  // A tapped notification opens the app where this person lives: Home for
+  // a member (the week, the coach), Friends for a free account (a friend
+  // posted, props).
+  const home = useRef("/");
+  home.current = area ? areaHome(area) : "/";
   useEffect(() => {
     const sub = Notifications.addNotificationResponseReceivedListener(() => {
-      router.navigate("/");
+      router.navigate(home.current as Href);
     });
     return () => sub.remove();
   }, [router]);
@@ -115,7 +116,12 @@ export default function RootLayout() {
               }}
             >
               <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="(free)" options={{ animation: "fade" }} />
               <Stack.Screen name="sign-in" options={{ animation: "fade" }} />
+              <Stack.Screen name="join/[step]" />
+              <Stack.Screen name="offer" options={{ animation: "fade" }} />
+              <Stack.Screen name="week-plan" />
+              <Stack.Screen name="post" options={{ presentation: "fullScreenModal" }} />
               <Stack.Screen name="agreement" options={{ animation: "fade", gestureEnabled: false }} />
               <Stack.Screen name="gate" options={{ animation: "fade", gestureEnabled: false }} />
               <Stack.Screen name="onboarding" options={{ animation: "fade", gestureEnabled: false }} />

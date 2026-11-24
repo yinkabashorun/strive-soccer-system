@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, Play } from "lucide-react";
@@ -22,6 +22,7 @@ import { drillPoster } from "@/lib/elite/drill-poster";
 import { sessionsWord } from "@/lib/elite/training";
 import { fmtDuration } from "@/lib/elite/time-trained";
 import { SessionPlayer, type Origin } from "./SessionPlayer";
+import { onAskToStartSession } from "./start-signal";
 import { liveMinutes, useDrillState } from "./SessionRows";
 import { goalLadder } from "@/lib/elite/home";
 import { cn } from "@/lib/utils";
@@ -61,6 +62,9 @@ export function TodaySession({
   const { done, toggle, trained } = useDrillState();
   const [open, setOpen] = useState<{ group: SessionGroup; index: number; origin: Origin | null } | null>(null);
   const cardRef = useRef<HTMLElement>(null);
+  // The drop's button asks this card to start (start-signal.ts).
+  const startRef = useRef<(() => void) | null>(null);
+  useEffect(() => onAskToStartSession(() => startRef.current?.()), []);
 
   const sessions = useMemo(() => groupSessions(rows), [rows]);
   const current = sessions.find((s) => s.list.some((h) => !isDone(h, done)));
@@ -147,6 +151,7 @@ export function TodaySession({
       origin: r ? { top: r.top, left: r.left, width: r.width, height: r.height } : null,
     });
   }
+  startRef.current = () => start(Math.max(0, progress.nextIndex));
 
   return (
     <>

@@ -29,7 +29,7 @@ import { liveWeekFor, nextMondayNY, nyToday } from "@/lib/elite/time";
 import { nextWeekLine as nextWeekLineFor } from "@/lib/elite/app-payload";
 import { timeAgo } from "@/lib/utils";
 import { WeekDrop, type DropCard } from "@/components/elite/WeekDrop";
-import { groupSessions, sessionProgress } from "@/lib/elite/session-flow";
+import { dropStartLabel, groupSessions, lastWeekLine, sessionProgress } from "@/lib/elite/session-flow";
 import { mondayOfProgramWeek, sessionImage, shortDate, todayName, weekRange } from "@/lib/elite/experience";
 import { sessionsWord } from "@/lib/elite/training";
 import { getNextFilmRoom } from "@/lib/elite/film-room-data";
@@ -187,6 +187,8 @@ export default async function DashboardPage({
           week={contentWeek}
           range={weekRange(mondayOfProgramWeek(player.week1_monday, contentWeek))}
           line={dropLine}
+          lastLine={lastWeekLine(homework, contentWeek)}
+          startLabel={dropStartLabel(regular[0] ?? null)}
           cards={dropCards}
           anyDone={thisWeek.some((h) => h.completed)}
           replay={viewer.demo && searchParams?.drop === "1"}

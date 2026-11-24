@@ -17,6 +17,7 @@ import {
   oneMoreLine,
   planSessionCount,
   planSessionsLeft,
+  lastWeekLine,
   sessionName,
   sessionProgress,
   type DrillKind,
@@ -102,6 +103,8 @@ export type AppWeek = {
   oneMore: string | null;
   nextWeekLine: string;
   dropLine: string;
+  // the week before, in one line, or null when there is nothing to say
+  lastWeekLine: string | null;
   ladder: LadderRung[];
   totalMinutes: number;
   onBreak: { until: string; line: string } | null;
@@ -200,6 +203,7 @@ export function weekPayload(i: {
     dropLine: `${count.charAt(0).toUpperCase()}${count.slice(1)} sessions. ${
       plan?.focus?.trim() || "Built from your answers and how your training goes."
     }`,
+    lastWeekLine: lastWeekLine(unlocked, week),
     ladder: goalLadder({
       programGoal: i.programGoal,
       onboardingGoal: i.onboardingGoal,

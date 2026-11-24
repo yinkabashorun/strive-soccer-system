@@ -153,3 +153,21 @@ describe("the engraving on a badge", () => {
     expect(achievementMark("Something else")).toBeNull();
   });
 });
+
+describe("the sessions ladder: 25, 50, 100", () => {
+  it("is earned by sessions finished and nothing else", () => {
+    const titles = (n: number) => newlyEarned([], summary({ sessions_completed: n }), []).map((r) => r.title);
+    expect(titles(24)).not.toContain("25 Sessions");
+    expect(titles(25)).toContain("25 Sessions");
+    expect(titles(50)).toEqual(expect.arrayContaining(["25 Sessions", "50 Sessions"]));
+    expect(titles(99)).not.toContain("100 Sessions");
+    expect(titles(100)).toContain("100 Sessions");
+  });
+
+  it("every badge has an engraving that fits the medal and words with no streak in them", () => {
+    for (const r of ACHIEVEMENT_RULES) {
+      expect(r.mark.length, r.title).toBeLessThanOrEqual(MARK_MAX);
+      expect(`${r.title} ${r.detail}`).not.toMatch(/streak|in a row|straight|%/i);
+    }
+  });
+});

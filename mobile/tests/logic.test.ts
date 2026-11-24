@@ -96,6 +96,7 @@ function week(): AppWeek {
     oneMore: null,
     nextWeekLine: "",
     dropLine: "",
+    lastWeekLine: null,
     ladder: [{ key: "week", label: "This week", value: "1 of 3" }],
     totalMinutes: 15,
     onBreak: null,
@@ -509,7 +510,7 @@ describe("a drill ticked on the phone", () => {
     };
     return {
       week: 3, range: null, focus: null, sessions: [session(1, s1), session(2, s2)], current: 2, planCount: 2, sessionsLeft: 1, weekDone: false,
-      oneMore: null, nextWeekLine: "", dropLine: "", ladder: [], totalMinutes: 100, onBreak: null, hasWall: true,
+      oneMore: null, nextWeekLine: "", dropLine: "", lastWeekLine: null, ladder: [], totalMinutes: 100, onBreak: null, hasWall: true,
     };
   };
 

@@ -53,6 +53,27 @@ where that happens: a personal progression system, not a catalog.
   (training done), never screen time. No feeds built to be scrolled for
   their own sake, no notifications to win an open.
 
+## Protect the channel (Nov 24 2026)
+
+A notification is the one way the app reaches a player who is not looking
+at it, and a player who turns it off never turns it back on. So:
+
+- **Wording and timing may be improved at any time. Volume may not.** A new
+  kind of notification, or more of an existing one, needs Coach Yinka's
+  word first.
+- **One event, one notice.** The database enforces it, so a bug cannot
+  repeat one.
+- **It informs.** It never tells the player to do a task, never sells,
+  never counts what was missed. Every notice is one entry in one list
+  (the catalogue in lib/elite) and a test reads every word of it.
+- **It opens the thing it is about**, on the website and in the iPhone app.
+- **It goes quiet at night**, and the daily reminder pauses itself when a
+  player has stopped answering it, with one plain last line.
+- **The player chooses.** Topics can be switched off one by one in Account.
+
+What the leaders do for each number, and what we took from them, is in
+docs/growth/leaders-2026-11-24.md.
+
 ## The loop to protect
 
 Open, train, see what you did, see that you are improving, feel capable,

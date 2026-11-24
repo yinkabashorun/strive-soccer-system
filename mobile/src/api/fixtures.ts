@@ -235,6 +235,7 @@ export const FIXTURE_WEEK: AppWeek = {
   oneMore: null,
   nextWeekLine: "Your coach is building week 8. It drops Monday.",
   dropLine: "Four sessions. This week goes after your weak foot.",
+  lastWeekLine: "Last week you finished 3 sessions and trained 1h 4m.",
   ladder: [
     { key: "goal", label: "Goal", value: "Start for my club team" },
     { key: "week", label: "This week", value: "2 of 4" },

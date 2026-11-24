@@ -4,23 +4,23 @@ import { FIVE_V_FIVE, dayOf, ghlFormId, lastDayBefore, money, phaseAt, priceAt, 
 const at = (iso: string) => Date.parse(iso);
 
 describe("5v5 pricing", () => {
-  it("early bird is $450 up to the last second of Nov 25 ET", () => {
+  it("early bird is $450 up to the last second of Dec 1 ET", () => {
     expect(priceAt(at("2026-11-19T15:00:00Z"))).toBe(450);
-    expect(priceAt(at("2026-11-26T04:59:59Z"))).toBe(450); // 11:59:59pm EST Nov 25
+    expect(priceAt(at("2026-12-02T04:59:59Z"))).toBe(450); // 11:59:59pm EST Dec 1
   });
-  it("$550 from midnight Nov 26 ET", () => {
-    expect(FIVE_V_FIVE.earlyBirdEndsIso).toBe("2026-11-26T05:00:00.000Z");
-    expect(priceAt(at("2026-11-26T05:00:00Z"))).toBe(550);
+  it("$550 from midnight Dec 2 ET", () => {
+    expect(FIVE_V_FIVE.earlyBirdEndsIso).toBe("2026-12-02T05:00:00.000Z");
+    expect(priceAt(at("2026-12-02T05:00:00Z"))).toBe(550);
     expect(priceAt(at("2026-12-06T04:59:59Z"))).toBe(550); // last second of Dec 5
   });
   it("closes when Dec 6 starts in New York", () => {
     expect(phaseAt(at("2026-12-06T05:00:00Z"))).toBe("closed");
-    expect(priceAt(at("2026-12-19T15:00:00Z"))).toBeNull();
+    expect(priceAt(at("2026-12-21T15:00:00Z"))).toBeNull();
     expect(registerTarget(at("2026-12-06T05:00:00Z"))).toBeNull();
   });
   it("labels the deadlines in New York days", () => {
-    expect(lastDayBefore(FIVE_V_FIVE.earlyBirdEndsIso)).toBe("Wednesday, Nov 25");
-    expect(dayOf(FIVE_V_FIVE.earlyBirdEndsIso)).toBe("Nov 26");
+    expect(lastDayBefore(FIVE_V_FIVE.earlyBirdEndsIso)).toBe("Tuesday, Dec 1");
+    expect(dayOf(FIVE_V_FIVE.earlyBirdEndsIso)).toBe("Dec 2");
     expect(lastDayBefore(FIVE_V_FIVE.registrationClosesIso)).toBe("Saturday, Dec 5");
   });
   it("sends teams to the Google Form, the DM until it is set, nothing when closed", () => {

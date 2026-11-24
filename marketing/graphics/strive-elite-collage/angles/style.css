@@ -1,0 +1,30 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Inter:wght@400;500;600;700&display=block');
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1080px;height:1350px;overflow:hidden;background:#050505}
+.stage{position:relative;width:1080px;height:1350px;overflow:hidden;
+  background:radial-gradient(ellipse 70% 55% at 50% 50%,#2a2010 0%,#120d07 45%,#050505 80%)}
+.bg{position:absolute;inset:0;width:1080px;height:1350px;object-fit:cover;opacity:.55}
+.vig{position:absolute;inset:0;background:radial-gradient(ellipse 80% 70% at 50% 45%,transparent 30%,rgba(5,5,5,.85) 100%)}
+.grain{position:absolute;inset:0;opacity:.10;mix-blend-mode:overlay;pointer-events:none;z-index:50;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>")}
+.eyebrow{position:absolute;left:0;right:0;top:54px;text-align:center;font-family:'Inter',sans-serif;font-weight:600;
+  font-size:22px;letter-spacing:12px;padding-left:12px;color:#e9d9ad;z-index:20}
+.eyebrow i,.meta i{font-style:normal;color:#c8a858;margin:0 16px}
+.big{position:absolute;left:0;right:0;text-align:center;font-family:'Oswald',sans-serif;font-weight:700;
+  text-transform:uppercase;line-height:.9;z-index:20}
+.white{background:linear-gradient(180deg,#fff 0%,#f5ecd2 60%,#cbbb92 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 6px 18px rgba(0,0,0,.85))}
+.gold{background:linear-gradient(180deg,#fff6d8 0%,#efd287 40%,#c39a3c 80%,#8a6420 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 0 22px rgba(232,190,90,.35)) drop-shadow(0 6px 14px rgba(0,0,0,.8))}
+.line{position:absolute;left:0;right:0;text-align:center;font-family:'Inter',sans-serif;font-weight:500;color:#f1e9d6;z-index:20;
+  text-shadow:0 2px 12px rgba(0,0,0,.9)}
+.rule{position:absolute;left:390px;width:300px;height:2px;background:linear-gradient(90deg,transparent,#c8a858,transparent);z-index:20}
+.p{position:absolute;filter:drop-shadow(0 18px 24px rgba(0,0,0,.75)) contrast(1.08) saturate(1.05)}
+.fade{position:absolute;left:0;right:0;bottom:0;height:420px;z-index:15;
+  background:linear-gradient(to bottom,rgba(5,5,5,0) 0%,rgba(5,5,5,.88) 45%,#050505 70%)}
+.foot{position:absolute;left:0;right:0;bottom:0;height:150px;z-index:30;text-align:center}
+.foot .prize{font-family:'Oswald',sans-serif;font-weight:700;font-size:44px;letter-spacing:6px;padding-left:6px;color:#f4ecd8}
+.foot .prize b{background:linear-gradient(180deg,#fff6d8,#efd287 45%,#c39a3c);-webkit-background-clip:text;background-clip:text;color:transparent}
+.meta{font-family:'Inter',sans-serif;font-weight:600;font-size:18px;letter-spacing:5px;padding-left:5px;color:#cfc2a0;margin-top:10px}
+.url{font-family:'Inter',sans-serif;font-weight:700;font-size:20px;letter-spacing:6px;padding-left:6px;color:#c8a858;margin-top:12px}
+.logo{position:absolute;right:40px;bottom:40px;width:44px;filter:invert(1);mix-blend-mode:screen;opacity:.95;z-index:31}

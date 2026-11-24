@@ -1,4 +1,4 @@
-// Strive Elite 5v5, Sat Dec 19 2026 at SoFive Columbia (Coach Yinka,
+// Strive Elite 5v5, Mon Dec 21 2026 at SoFive Columbia (Coach Yinka,
 // Nov 13 and Nov 19 2026). The page at /5v5 reads every fact and the
 // price from here, so the poster, the caption and the page cannot drift.
 //
@@ -12,8 +12,8 @@ import { nyLocalToIso } from "@/lib/elite/film-room";
 
 export const FIVE_V_FIVE = {
   name: "Strive Elite 5v5",
-  dateLabel: "Saturday, December 19",
-  shortDate: "Sat, Dec 19",
+  dateLabel: "Monday, December 21",
+  shortDate: "Mon, Dec 21",
   venue: "SoFive Columbia",
   prize: 3000,
   teams: 32, // Coach Yinka, Nov 19 (was 16)
@@ -21,8 +21,9 @@ export const FIVE_V_FIVE = {
   coverage: "@yslofficial", // the event is picked up by YSL Official
   earlyBird: 450,
   standard: 550,
-  // Early bird ends the instant Nov 26 starts in New York.
-  earlyBirdEndsIso: nyLocalToIso("2026-11-26", "00:00"),
+  // Early bird ends the instant Dec 2 starts in New York (moved from
+  // Nov 26 on Coach Yinka's word Nov 23: "put early bird december 1st").
+  earlyBirdEndsIso: nyLocalToIso("2026-12-02", "00:00"),
   // Final deadline: the whole of Dec 5 counts, so it closes as Dec 6 starts.
   registrationClosesIso: nyLocalToIso("2026-12-06", "00:00"),
   dmWord: "5V5",

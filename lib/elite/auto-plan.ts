@@ -36,9 +36,13 @@ import { FIRST_WEEK_HELD, claimFirstWeek, releaseFirstWeek } from "./first-week-
 import { fmtBreakDate, settleBreaks } from "./breaks";
 import { nyToday } from "./time";
 import type { Player, TrainingBreak } from "./types";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { backupIssue, backupReasonIn, backupSummary, writerReason, type BackupBuilt } from "./plan-writer";
 
 type Result =
-  | { playerId: string; name: string; ok: true; skipped?: string; week?: number }
+  // `backup`: the week was built, by the backup, and this is why the plan
+  // writer did not write it (plan-writer.ts)
+  | { playerId: string; name: string; ok: true; skipped?: string; week?: number; backup?: string }
   | { playerId: string; name: string; ok: false; error: string };
 
 export type PlanBuilderOutcome = {
@@ -216,7 +220,10 @@ export async function runAutoWeeklyPlans(
       // The 3-month program (065): the focus and threads of the week
       // this run is building, or null for a player with no program.
       const program = await loadProgramWeek(player.id, target, admin);
-      const { plan } = await generatePlanFromNotes(notes, player, player.coach_memory, bank, tpl, program);
+      const written = await generatePlanFromNotes(notes, player, player.coach_memory, bank, tpl, program);
+      const { plan } = written;
+      // The backup wrote this week: never quietly (plan-writer.ts).
+      const backup = written.source === "fallback" ? writerReason(written.reasonKind, written.reason) : undefined;
       const applied = await applyGeneratedPlanCore(player.id, notes, plan, coach.id, admin);
       if (applied.announced === false) {
         // The week is live but the announcement ledger could not be
@@ -229,7 +236,7 @@ export async function runAutoWeeklyPlans(
           error: `week ${applied.week} is live but the family was not told (the announcement could not be recorded)`,
         });
       } else {
-        results.push({ playerId: player.id, name: player.full_name, ok: true, week: applied.week });
+        results.push({ playerId: player.id, name: player.full_name, ok: true, week: applied.week, ...(backup ? { backup } : {}) });
       }
     } catch (err) {
       results.push({
@@ -269,14 +276,20 @@ export async function buildFirstWeekFor(playerId: string): Promise<PlanBuilderOu
   } catch (err) {
     outcome = { ...outcome, errors: [{ name: "run", error: err instanceof Error ? err.message : "unknown crash" }] };
   }
+  // A first week the backup wrote is said on the run row and to the coach.
+  const firstBackups = backupsIn(outcome);
+  const firstIssues = firstBackups.length ? [backupIssue([...new Set(firstBackups.map((b) => b.reason))].join("; "))] : [];
   await updateCronRun(runId, {
     built: outcome.built,
     skipped: outcome.skipped,
     errors: outcome.errors,
-    issues: [],
+    issues: firstIssues,
     summary: summarize(outcome),
     finished: true,
   }).catch(() => undefined);
+  if (firstIssues.length > 0) {
+    await alertCoach(`Strive plan builder needs you. A new member's first week: ${firstIssues[0].issue}.`);
+  }
   if (outcome.errors.length > 0) {
     await alertCoach(
       `A new member's first week did not build when they finished the quiz: ${outcome.errors
@@ -308,8 +321,37 @@ function summarize(o: PlanBuilderOutcome): string {
     o.errors.length
       ? `errors: ${o.errors.map((e) => `${e.name.split(" ")[0]} (${e.error})`).join("; ")}`
       : "",
+    backupSummary(backupsIn(o)),
   ].filter(Boolean);
   return parts.join(" · ") || "nothing to do";
+}
+
+// The weeks of a run that the backup wrote.
+function backupsIn(o: PlanBuilderOutcome): BackupBuilt[] {
+  return o.results.flatMap((r) => (r.ok && r.week != null && r.backup ? [{ name: r.name, week: r.week, reason: r.backup }] : []));
+}
+
+// Whether the backup is still writing the weeks: this run's builds say so,
+// or, on a run that built nothing, the last run that did. It stands until
+// a week is written by the plan writer again.
+async function standingBackupIssue(o: PlanBuilderOutcome, admin: SupabaseClient | null): Promise<HealthIssue | null> {
+  const now = backupsIn(o);
+  if (now.length > 0) return backupIssue([...new Set(now.map((b) => b.reason))].join("; "));
+  if (o.built > 0 || !admin) return null; // weeks were built, and the plan writer wrote them
+  try {
+    const { data } = await admin
+      .from("elite_cron_runs")
+      .select("summary")
+      .in("job", [PLAN_BUILDER_JOB, FIRST_WEEK_JOB])
+      .gt("built", 0)
+      .order("ran_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const reason = backupReasonIn((data as { summary?: string } | null)?.summary);
+    return reason ? backupIssue(reason) : null;
+  } catch {
+    return null;
+  }
 }
 
 function tally(results: Result[]) {
@@ -344,6 +386,8 @@ export async function runPlanBuilder(opts: PlanBuilderInput): Promise<PlanBuilde
         { name: "audit", issue: e instanceof Error ? e.message : "audit failed" },
       ]);
     }
+    const backup = await standingBackupIssue(outcome, admin);
+    if (backup) issues = [...issues, backup];
   } catch (err) {
     crashed = err instanceof Error ? err.message : "unknown crash";
     outcome = { ...outcome, errors: [...outcome.errors, { name: "run", error: crashed }] };

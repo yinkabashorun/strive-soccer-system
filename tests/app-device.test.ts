@@ -264,6 +264,33 @@ describe("a course scrolled past its top", () => {
   });
 });
 
+// Join free, "How do we reach you?" (simulator, Nov 24 2026): with the
+// keyboard up for the email, the phone box sat behind the Next button that
+// rides on the keyboard, and a tap aimed at it pressed Next.
+describe("a box behind the button that rides on the keyboard", () => {
+  const form = code(path.join(root, "src/FormScreen.tsx"));
+  it("the box being typed in is scrolled to the top of a page with a footer", () => {
+    expect(form).toContain("TextInput.State.currentlyFocusedInput()");
+    expect(form).toContain('Keyboard.addListener("keyboardDidShow", reveal)');
+    expect(form).toMatch(/view\.scrollTo\(\{ y: Math\.max\(0, y\), animated: true \}\)/);
+    expect(form).toContain("<RevealContext.Provider value={onBoxFocus}>");
+    // only where a footer rides on the keyboard
+    expect(form).toContain("if (!hasFooter) return;");
+  });
+  it("every named box tells the page when it takes the cursor", () => {
+    const field = code(path.join(root, "src/LabeledField.tsx"));
+    expect(field).toContain("const reveal = useRevealOnFocus();");
+    expect(field).toMatch(/onFocus=\{\(e\) => \{\s*reveal\(\);/);
+    expect(code(path.join(root, "app/onboarding/[step].tsx"))).toContain("onFocus={reveal}");
+  });
+  it("the keyboard's Next key moves to the next box on Join free", () => {
+    const join = code(path.join(root, "app/join/[step].tsx"));
+    expect(join.match(/onNext=\{\(\) => second\.current\?\.focus\(\)\}/g)?.length).toBe(2);
+    expect(join.match(/inputRef=\{second\}/g)?.length).toBe(2);
+    expect(join).toContain('returnKeyType={onNext ? "next" : undefined}');
+  });
+});
+
 // Join free, the last screen (simulator, Nov 24 2026): eight points to read,
 // and the second tick box sat below the fold, so "Create my account" was in
 // reach while a box it needs was not on the screen.
@@ -288,7 +315,7 @@ describe("a name above a text box", () => {
   const field = code(path.join(root, "src/LabeledField.tsx"));
   it("a tap on the name puts the cursor in the box", () => {
     expect(field).toContain("onPress={() => box.current?.focus()}");
-    expect(field).toMatch(/<TextInput ref=\{box\}/);
+    expect(field).toMatch(/<TextInput\s+ref=\{box\}/);
   });
   it("the name and the box are one thing to a screen reader", () => {
     expect(field).toContain("accessible={false}");

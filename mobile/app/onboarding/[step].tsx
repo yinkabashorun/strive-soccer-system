@@ -28,7 +28,7 @@ import { sessionsFor, sessionsWord } from "@shared/training";
 import { useMe, useSubmitQuiz } from "@/api/queries";
 import { rereadMe, saveIntake } from "@/api/free";
 import { ApiError } from "@/api/client";
-import { FormScreen } from "@/FormScreen";
+import { FormScreen, useRevealOnFocus } from "@/FormScreen";
 import { MEDIA_BASE } from "@/config";
 import { tick } from "@/feel";
 import { useDraft } from "@/quiz-draft";
@@ -343,11 +343,14 @@ function Field({
   multiline?: boolean;
   keyboard?: "email-address" | "phone-pad";
 }) {
+  // the box that takes the cursor is scrolled into reach (FormScreen)
+  const reveal = useRevealOnFocus();
   return (
     <TextInput
       style={[styles.input, multiline ? { minHeight: 120, textAlignVertical: "top", paddingTop: 16 } : null]}
       value={value}
       onChangeText={onChange}
+      onFocus={reveal}
       placeholder={placeholder}
       placeholderTextColor={color.faint}
       multiline={multiline}

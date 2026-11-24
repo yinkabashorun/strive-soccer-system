@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Keyboard, StyleSheet, View } from "react-native";
+import { useRef, useState, type ComponentRef, type RefObject } from "react";
+import { Keyboard, StyleSheet, View, type TextInput } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -48,6 +48,8 @@ export default function Join() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [allYears, setAllYears] = useState(false);
+  // the second box on a screen with two: the keyboard's Next key moves to it
+  const second = useRef<ComponentRef<typeof TextInput>>(null);
 
   if (!isJoinStep(step)) return null;
   const id: JoinStepId = step;
@@ -199,23 +201,23 @@ export default function Join() {
           <>
             <Question title="What's your name?" line="Your friends see your first name and last initial." />
             <View style={styles.fields}>
-              <Field label="First name" value={d.firstName} onChange={(firstName) => setJoin({ firstName })} content="givenName" capitalize="words" />
-              <Field label="Last name" value={d.lastName} onChange={(lastName) => setJoin({ lastName })} content="familyName" capitalize="words" />
+              <Field label="First name" value={d.firstName} onChange={(firstName) => setJoin({ firstName })} content="givenName" capitalize="words" onNext={() => second.current?.focus()} />
+              <Field label="Last name" value={d.lastName} onChange={(lastName) => setJoin({ lastName })} content="familyName" capitalize="words" inputRef={second} onNext={next} />
             </View>
           </>
         ) : id === "contact" ? (
           <>
             <Question title="How do we reach you?" line="Your email signs you in. Your friends never see either." />
             <View style={styles.fields}>
-              <Field label="Email" value={d.email} onChange={(email) => setJoin({ email })} content="username" keyboard="email-address" />
-              <Field label="Phone, so a coach can reach you" value={d.phone} onChange={(phone) => setJoin({ phone })} content="telephoneNumber" keyboard="phone-pad" />
+              <Field label="Email" value={d.email} onChange={(email) => setJoin({ email })} content="username" keyboard="email-address" onNext={() => second.current?.focus()} />
+              <Field label="Phone, so a coach can reach you" value={d.phone} onChange={(phone) => setJoin({ phone })} content="telephoneNumber" keyboard="phone-pad" inputRef={second} />
             </View>
           </>
         ) : id === "password" ? (
           <>
             <Question title="Make a password" line="At least 8 characters." />
             <View style={styles.fields}>
-              <Field label="Password" value={d.password} onChange={(password) => setJoin({ password })} content="newPassword" secure />
+              <Field label="Password" value={d.password} onChange={(password) => setJoin({ password })} content="newPassword" secure onNext={next} />
             </View>
           </>
         ) : (
@@ -308,7 +310,12 @@ function Field({
   keyboard,
   capitalize = "none",
   secure,
+  inputRef,
+  onNext,
 }: {
+  // the screen's handle on this box, and what the keyboard's Next key does
+  inputRef?: RefObject<ComponentRef<typeof TextInput> | null>;
+  onNext?: () => void;
   label: string;
   value: string;
   onChange: (v: string) => void;
@@ -328,6 +335,10 @@ function Field({
       autoCorrect={false}
       textContentType={content}
       secureTextEntry={secure}
+      inputRef={inputRef}
+      returnKeyType={onNext ? "next" : undefined}
+      submitBehavior={onNext ? "submit" : undefined}
+      onSubmitEditing={onNext}
     />
   );
 }

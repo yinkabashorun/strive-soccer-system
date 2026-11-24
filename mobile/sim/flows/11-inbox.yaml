@@ -15,16 +15,17 @@ appId: com.strivesoccer.elite
 - waitForAnimationToEnd:
     timeout: 4000
 - takeScreenshot: t70-home-bell-dot
+# a note is one thing to a screen reader: "New. <title>. <body>"
 - tapOn: "Inbox, something new"
 - extendedWaitUntil:
-    visible: "Week 7 is here, Marcus"
+    visible: ".*Week 7 is here, Marcus.*"
     timeout: 15000
 - waitForAnimationToEnd:
     timeout: 3000
 - takeScreenshot: t71-inbox
 - tapOn: "10 Sessions.*"
 - extendedWaitUntil:
-    notVisible: "Week 7 is here, Marcus"
+    notVisible: ".*Week 7 is here, Marcus.*"
     timeout: 15000
 - waitForAnimationToEnd:
     timeout: 3000

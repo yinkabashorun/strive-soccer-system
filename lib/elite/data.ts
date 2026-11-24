@@ -1,3 +1,4 @@
+import { BELL_READ, INBOX_SHOWN, collapseNotes } from "./bell";
 import { isSundayEveNY, liveWeekFor, nyToday } from "./time";
 import { resolveWeekTarget } from "./week-target";
 import { cleanFocuses, cleanQuiz, cleanThreads, programWeekFor, type Program, type ProgramWeek } from "./program";
@@ -50,6 +51,7 @@ import type {
   WeeklyPlan, CronRun, AppError,
   TrainingBreak,
 } from "./types";
+import { creditedMinutes } from "./time-trained";
 
 // Server-side data access for Strive Elite. Reads from Supabase when
 // configured, otherwise returns the demo dataset. The UI is identical in
@@ -741,7 +743,6 @@ export async function getProgressHistory(
 // Player-loop metrics
 // ---------------------------------------------------------------------------
 
-const DEFAULT_DRILL_MIN = 15;
 
 function nyDay(iso: string): string {
   // America/New_York local calendar date, YYYY-MM-DD.
@@ -788,10 +789,7 @@ export function computeSummary(hw: Homework[]): PlayerSummary {
 
   const total = hw.length;
   const done = completed.length;
-  const minutes = completed.reduce(
-    (s, h) => s + (h.duration_min ?? DEFAULT_DRILL_MIN),
-    0
-  );
+  const minutes = completed.reduce((s, h) => s + creditedMinutes(h), 0);
   const lastActive = completed.reduce<string | null>(
     (m, h) => (!m || (h.completed_at as string) > m ? (h.completed_at as string) : m),
     null
@@ -842,10 +840,11 @@ export const getNotifications = perRequest(async function getNotifications(
         id: "demo-notif-1",
         player_id: playerId,
         kind: "new_week",
-        title: "Week 7 is ready",
+        title: "Week 7 is here",
         body: "Own your 1v1. Sell the fake, explode past.",
         read: false,
         created_at: new Date().toISOString(),
+        url: "/dashboard",
       },
     ];
   }
@@ -854,9 +853,12 @@ export const getNotifications = perRequest(async function getNotifications(
     .select("*")
     .eq("player_id", playerId)
     .order("created_at", { ascending: false })
-    .limit(30);
+    .limit(BELL_READ);
   if (error) return []; // table not created yet
-  return (data as EliteNotification[] | null) ?? [];
+  // each note once: repeats of the same note are not shown (lib/elite/bell.ts).
+  // BELL_READ rows are read so a pile of repeats cannot push the other notes
+  // out; the newest INBOX_SHOWN notes are what any screen needs.
+  return collapseNotes((data as EliteNotification[] | null) ?? []).slice(0, INBOX_SHOWN);
 });
 
 export async function getCoachRoster(): Promise<RosterRow[]> {

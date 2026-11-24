@@ -206,6 +206,7 @@ export type Homework = {
   exercise: string;
   reps: string;
   duration_min?: number; // minutes for this drill (009_player_loop adds the column)
+  actual_seconds?: number | null; // (085) the time the drill really took, measured by the session player; null before the app measured it
   video_url: string | null;
   drill_id?: string | null; // (028) stable link to elite_drills - video updates flow through this, not title text
   pillar?: string | null; // (034) the linked drill's pillar, filled by the database from drill_id - powers minutes-by-pillar for the player
@@ -267,6 +268,11 @@ export type EliteNotification = {
   body: string;
   read: boolean;
   created_at: string;
+  // Where the note opens: a path on our own site (088). Null on a row from
+  // before it, which stays plain text.
+  url?: string | null;
+  // The notice's key (088): one row per player per key.
+  dedupe_key?: string | null;
 };
 
 // One roster row for the coach (elite_coach_roster RPC / TS fallback).

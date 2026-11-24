@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, ChevronDown, Play } from "lucide-react";
 import { sessionHeadline, sessionImage } from "@/lib/elite/experience";
-import { fmtDuration } from "@/lib/elite/time-trained";
+import { creditedMinutes, fmtDuration } from "@/lib/elite/time-trained";
 import type { Homework } from "@/lib/elite/types";
 import {
   groupSessions,
@@ -53,7 +53,7 @@ export function WeekList({
   startSession?: number | null;
 }) {
   const router = useRouter();
-  const { done, toggle } = useDrillState();
+  const { done, toggle, trained } = useDrillState();
   const [open, setOpen] = useState<{ group: SessionGroup; index: number; origin: Origin | null } | null>(null);
 
   const weeks = useMemo(() => {
@@ -95,7 +95,7 @@ export function WeekList({
   const nextUp = sessions.find((s) => s.list.some((h) => !isDone(h, done)));
   const sessionsDone = sessions.filter((s) => s.list.every((h) => isDone(h, done))).length;
   const allDone = sessionsDone === sessions.length;
-  const allTime = liveMinutes(totalMinutes, topWeek.list, done);
+  const allTime = liveMinutes(totalMinutes, topWeek.list, done, trained);
 
   const regular = sessions.filter((s) => !s.extra);
   const position = (g: SessionGroup) => regular.findIndex((s) => s.n === g.n) + 1;
@@ -207,7 +207,8 @@ export function WeekList({
           origin={open.origin}
           weekLabel={`Week ${topWeek.week}`}
           firstName={firstName}
-          minutesBefore={allTime - sessionProgress(open.group.list, done).minutesDone}
+          trained={trained}
+          minutesBefore={allTime - sessionProgress(open.group.list, done, trained).minutesDone}
           sessionsLeftAfter={planSessionsLeft(sessions, done, open.group.n)}
           sessionsTotal={planSessionCount(sessions)}
           playerId={playerId}
@@ -222,7 +223,7 @@ export function WeekList({
 
 function PastWeek({ week, list }: { week: number; list: Homework[] }) {
   const [open, setOpen] = useState(false);
-  const minutes = list.filter((h) => h.completed).reduce((m, h) => m + (h.duration_min ?? 15), 0);
+  const minutes = list.reduce((m, h) => m + creditedMinutes(h), 0);
   const ordered = [...list].sort(
     (a, b) => (a.session ?? 1) - (b.session ?? 1) || a.sort - b.sort
   );

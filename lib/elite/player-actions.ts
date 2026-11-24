@@ -1,5 +1,6 @@
 "use server";
 
+import { settleSessionLogForDrill } from "./session-log";
 import { revalidatePath } from "next/cache";
 import { SETUP_REFUSED, profileSetupDue } from "./account-profile";
 import { createClient, createServiceClient } from "./supabase/server";
@@ -19,6 +20,7 @@ import { NOT_IN_PLAN_MESSAGE } from "./tiers";
 import { memberHasFeature } from "./pro-server";
 
 import type { OnboardingInput } from "./onboarding-input";
+import { MINUTES_MAX, cappedSeconds } from "./time-trained";
 export type { OnboardingInput } from "./onboarding-input";
 
 // Complete a player's intake. Players cannot UPDATE their own elite_players
@@ -89,26 +91,54 @@ export async function completeOnboarding(input: OnboardingInput) {
 
 // Toggle a homework item's completion. Persists to Supabase in real mode;
 // a safe no-op in demo mode (the UI keeps optimistic state).
-export async function toggleHomework(id: string, completed: boolean) {
+// `seconds`: the time the drill really took, measured by the session player
+// (Nov 24 2026: minutes trained are the ACTUAL minutes). Kept on the row as
+// actual_seconds; the database holds the cap (migration 085). A drill
+// unticked loses its measured time with its tick.
+export async function toggleHomework(id: string, completed: boolean, seconds?: number) {
   const supabase = createClient();
+  // the signed-out example tour ticks drills on its own screen and saves nothing
+  if (supabase && (await getViewer())?.demo) return { ok: true as const };
   if (supabase) {
-    await supabase
+    // Only a row that is changing is written (the row is the member's own,
+    // under RLS). A tick sent twice (the phone sends until it is answered)
+    // must not move the time the drill was done: that time is what "trained
+    // today" and the usual training hour are read from.
+    const { data: changed, error } = await supabase
       .from("elite_homework")
       .update({
         completed,
         completed_at: completed ? new Date().toISOString() : null,
+        actual_seconds: completed ? cappedSeconds(seconds, MINUTES_MAX) : null,
       })
-      .eq("id", id);
-    if (completed) {
-      const viewer = await getViewer();
-      if (viewer?.playerId) {
-        await maybeAwardAchievements(viewer.playerId).catch(() => undefined);
-      }
+      .eq("id", id)
+      .neq("completed", completed)
+      .select("id");
+    // `again`: asking again could work (the database was busy), as against
+    // a row the database will never take (a guard or a constraint said no).
+    if (error) return { ok: false as const, again: !/^(P0|22|23|42)/.test(String(error.code ?? "")) };
+    if (!changed?.length) {
+      // Nothing changed. Either the row already read that way (the same
+      // tick sent twice: fine), or it is not this member's row to change,
+      // which must never be answered as saved.
+      const { data: row, error: readError } = await supabase.from("elite_homework").select("completed").eq("id", id).maybeSingle();
+      if (readError) return { ok: false as const, again: true };
+      if (!row || Boolean(row.completed) !== completed) return { ok: false as const, again: false };
+    }
+    const viewer = await getViewer();
+    if (completed && viewer?.playerId) {
+      await maybeAwardAchievements(viewer.playerId).catch(() => undefined);
+    }
+    // A member with friends and clubs in the app: a finished session goes
+    // on their week once, and an unfinished one comes back off
+    // (lib/elite/session-log.ts). Never throws, never refuses the tick.
+    if (viewer?.playerId) {
+      await settleSessionLogForDrill({ playerId: viewer.playerId, profileId: viewer.profile.id, homeworkId: id });
     }
     revalidatePath("/homework");
     revalidatePath("/dashboard");
   }
-  return { ok: true };
+  return { ok: true as const };
 }
 
 // Player submits their monthly film LINK (Veo/Hudl/YouTube/etc.) for the

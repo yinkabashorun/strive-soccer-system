@@ -7,6 +7,8 @@
 import { createServiceClient } from "./supabase/server";
 import { computeSummary, isDemo } from "./data";
 import { newlyEarned } from "./achievement-rules";
+import { notifyPlayer } from "./notify";
+import { earnedNotice } from "./notices";
 import type { Homework } from "./types";
 
 // Evaluate every rule for the player and award anything newly earned.
@@ -42,12 +44,7 @@ export async function maybeAwardAchievements(playerId: string): Promise<void> {
       icon: r.icon,
     }))
   );
-  await admin.from("elite_notifications").insert(
-    fresh.map((r) => ({
-      player_id: playerId,
-      kind: "achievement",
-      title: `Achievement unlocked: ${r.title}`,
-      body: r.detail,
-    }))
-  );
+  // The bell keeps the record, in the badge's own name and line; no push
+  // (the finish screen already celebrates it). One note per badge, ever.
+  for (const r of fresh) await notifyPlayer(playerId, earnedNotice({ title: r.title, detail: r.detail }));
 }

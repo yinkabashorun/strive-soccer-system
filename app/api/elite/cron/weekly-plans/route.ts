@@ -3,6 +3,8 @@ import { runPlanBuilder } from "@/lib/elite/auto-plan";
 import { createServiceClient } from "@/lib/elite/supabase/server";
 import { unlockDueWeeks } from "@/lib/elite/unlock";
 import { sendTrainingReminders } from "@/lib/elite/reminders-server";
+import { runClubMatchups } from "@/lib/elite/club-matchups-server";
+import { endDuePasses } from "@/lib/elite/squad-pass-server";
 import { isSundayEveNY, nyHour } from "@/lib/elite/time";
 
 export const runtime = "nodejs";
@@ -33,12 +35,20 @@ export const fetchCache = "force-no-store";
 //                           push a day at most, only at their hour, never
 //                           on a break, once the week is done or if they
 //                           trained today (lib/elite/reminders.ts, 078).
-//   Every hour            - unlock Monday-held weeks that are due (so the
-//                           Monday 6am ET unlock + texts no longer depend
-//                           on someone opening the app); then heal any
+//   Every hour            - open the weeks that are due (early Monday,
+//                           New York) and, from 4:00 PM, announce them
+//                           (lib/elite/unlock.ts; nobody is texted about a
+//                           new week); then heal any
 //                           homework whose drill got its video later and
 //                           AUDIT every live week (lib/elite/health.ts),
 //                           texting the coach about anything new.
+//   Every hour, LAST      - the weekly club matchup (083): decide the
+//                           matchups of weeks that have ended, and on
+//                           Monday match the clubs for the new week. Its
+//                           own step, after everything else, inside its own
+//                           catch: it can never stop or slow the plan
+//                           builder, and running it twice changes nothing
+//                           (lib/elite/club-matchups-server.ts).
 //
 // Hourly + an NY-hour check makes this DST-proof: no twice-a-year
 // schedule flip, the 3pm Sunday slot is 3pm in Virginia year-round.
@@ -55,10 +65,17 @@ export async function GET(req: Request) {
 
   // The reminder at each member's usual time (claimed per player per day,
   // so a second run this hour sends nothing). Never on a Sunday.
-  const reminders = await sendTrainingReminders().catch(() => ({ checked: 0, sent: 0 }));
+  const reminders = await sendTrainingReminders().catch(() => ({ checked: 0, sent: 0, paused: 0 }));
+
+  // Earned months of Strive Pro whose time is up are closed (086): the
+  // account is a free account again, nothing of its own is lost.
+  await endDuePasses().catch(() => ({ ended: 0 }));
+
+  // The weekly club matchup: its own step, run last, never throwing.
+  const clubMatchups = () => runClubMatchups({ authed }).catch(() => ({ status: "failed" as const }));
 
   if (isSundayEveNY() && nyHour() < 15) {
-    return NextResponse.json({ ok: true, skipped: "sunday before 3pm ET", reminders });
+    return NextResponse.json({ ok: true, skipped: "sunday before 3pm ET", reminders, matchups: await clubMatchups() });
   }
 
   const outcome = await runPlanBuilder({ trigger: "cron", authed });
@@ -86,5 +103,5 @@ export async function GET(req: Request) {
     /* next run tries again */
   }
 
-  return NextResponse.json({ ok: true, ...outcome, reminders });
+  return NextResponse.json({ ok: true, ...outcome, reminders, matchups: await clubMatchups() });
 }

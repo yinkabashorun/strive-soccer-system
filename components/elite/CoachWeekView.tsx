@@ -1,6 +1,8 @@
 import { Check, Clock } from "lucide-react";
 import type { Homework } from "@/lib/elite/types";
 import { cn } from "@/lib/utils";
+import { creditedMinutes } from "@/lib/elite/time-trained";
+import { drillMinutes } from "@/lib/elite/session-flow";
 
 function isPlyo(title: string): boolean {
   return /plyo|warm-?up/i.test(title);
@@ -126,7 +128,8 @@ export function CoachWeekView({
                   </span>
                   <span className="ml-auto flex items-center gap-1 text-xs text-white/35">
                     <Clock className="h-3 w-3" />
-                    {h.duration_min ?? 15}m
+                    {/* the time it really took once done and measured, beside the plan's */}
+                    {h.completed && typeof h.actual_seconds === "number" ? `${creditedMinutes(h)}m of ${drillMinutes(h)}m` : `${drillMinutes(h)}m`}
                   </span>
                 </li>
               ))}

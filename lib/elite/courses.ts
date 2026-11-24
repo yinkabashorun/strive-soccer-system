@@ -220,6 +220,15 @@ export function courseForApp(course: Course, native: boolean): Course | null {
   if (!native || course.kind !== "link") return course;
   const href = externalHref(course);
   if (href && isInternalHref(href)) return course;
+  return linkCourseAsPages(course);
+}
+
+// A link course as its own pages in the app, or null when it has none:
+// without its address and without its intro (that site's password). Also
+// what the native iPhone app shows for EVERY link course, a path on our
+// own domain included: it has no web page to open one in
+// (lib/elite/app-courses.ts).
+export function linkCourseAsPages(course: Course): Course | null {
   const steps = course.steps.filter(stepIsUsable);
   if (steps.length === 0) return null;
   return {

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { View } from "react-native";
+import { AppState, View } from "react-native";
 import { Stack, useRouter, useSegments, type Href } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -14,8 +14,9 @@ import { PERSIST_MAX_AGE, persister, queryClient } from "@/api/queryClient";
 import { setGateListener } from "@/api/client";
 import { fixtureRoute } from "@/api/fixtures";
 import { FIXTURES } from "@/config";
-import { areaFor, AREA_ROOT, inArea } from "@/navigation";
-import { keepTokenFresh } from "@/push";
+import { areaFor, areaHome, inArea, pushRoute, tappedNotice, type Area, type TappedNotice, hasTrain } from "@/navigation";
+import { clearBadge, keepTokenFresh } from "@/push";
+import { loadOutbox } from "@/outbox";
 import { loadPrefs } from "@/prefs";
 import { color } from "@/theme";
 
@@ -36,26 +37,32 @@ function Gatekeeper() {
   const segments = useSegments();
   const router = useRouter();
   const area = ready ? areaFor(signedIn, me.data?.state, me.data?.profileSetup) : null;
+  // Strive Pro is on for someone who lives in the free tabs (one-app.ts)
+  const train = hasTrain(me.data?.state);
 
   useEffect(() => {
     if (!area) return;
-    if (!inArea(area, segments)) {
-      if (area === "app") router.replace("/");
-      else if (area === "onboarding") router.replace("/onboarding");
-      else router.replace(`/${AREA_ROOT[area]}`);
-    }
-  }, [area, segments, router]);
+    if (!inArea(area, segments, train)) router.replace(areaHome(area, train) as Href);
+  }, [area, segments, router, train]);
 
+  // A phone that already said yes stays on file, for a member and for a
+  // free account alike (the server keeps each under its own kind).
   useEffect(() => {
-    if (area === "app") void keepTokenFresh();
+    if (area === "app" || area === "free") void keepTokenFresh();
   }, [area]);
+
+  // Drills ticked with no signal the last time the app was open are read
+  // back from the phone and sent (src/outbox.ts).
+  useEffect(() => {
+    if (area === "app" || (area === "free" && train)) void loadOutbox();
+  }, [area, train]);
 
   // The launch screen stays up until the first screen is the right one:
   // the person is where they belong, or it is known that this cannot be
   // read (the holding screen says so). A few seconds at most, whatever
   // happens: the launch screen must never be where the app gets stuck.
   const unreadable = ready && signedIn && !me.data && (me.isError || me.isPaused);
-  const settled = unreadable || (area !== null && inArea(area, segments));
+  const settled = unreadable || (area !== null && inArea(area, segments, train));
   useEffect(() => {
     if (settled) return void SplashScreen.hideAsync().catch(() => undefined);
     const id = setTimeout(() => void SplashScreen.hideAsync().catch(() => undefined), LAUNCH_SCREEN_MAX_MS);
@@ -66,20 +73,71 @@ function Gatekeeper() {
   // the screen the run asked for, once, after the gate above has settled.
   const fixtureOpened = useRef(false);
   useEffect(() => {
-    if (!FIXTURES || fixtureOpened.current || !area || !inArea(area, segments)) return;
+    if (!FIXTURES || fixtureOpened.current || !area || !inArea(area, segments, train)) return;
     fixtureOpened.current = true;
     const route = fixtureRoute();
     if (route) router.push(route as Href);
-  }, [area, segments, router]);
+  }, [area, segments, router, train]);
 
-  // A tapped notification opens the app on Home (every notification the
-  // site sends is about the week or the coach).
+  // A tapped notification opens the screen it is about (ONE map from the
+  // address the notice carries to a screen here: src/navigation.ts
+  // pushRoute, lib/elite/notice-routes.ts). A new week opens Home, a medal
+  // opens You, the coach opens the Inbox, a friend's post opens Friends, a
+  // club's session or game opens that club.
+  //
+  // A tap that arrives before the app knows who this is waits: the
+  // notification that STARTED the app (read once, below), or one tapped
+  // while the agreement or a gate is up. It is opened the moment the person
+  // is in the app or the free app, and never before: a notice does not
+  // jump a gate.
+  const where = useRef<Area | null>(null);
+  where.current = area;
+  const waiting = useRef<TappedNotice | null>(null);
+  const lastTap = useRef<string | null>(null);
+  const inside = (area === "app" || area === "free") && inArea(area, segments, train);
+  const withTrain = useRef(false);
+  withTrain.current = train;
+  const settledIn = useRef(false);
+  settledIn.current = inside;
+
   useEffect(() => {
-    const sub = Notifications.addNotificationResponseReceivedListener(() => {
-      router.navigate("/");
-    });
+    const take = (res: Notifications.NotificationResponse | null) => {
+      if (!res || res.actionIdentifier !== Notifications.DEFAULT_ACTION_IDENTIFIER) return;
+      // the same tap can be handed over twice (as the one that started the
+      // app, and again to the listener): it is opened once
+      const id = `${res.notification.request.identifier}:${res.notification.date}`;
+      if (lastTap.current === id) return;
+      lastTap.current = id;
+      const notice = tappedNotice(res);
+      if (settledIn.current) router.navigate(pushRoute(where.current, notice.url, notice.topic, withTrain.current) as Href);
+      else waiting.current = notice;
+    };
+    try {
+      take(Notifications.getLastNotificationResponse());
+      Notifications.clearLastNotificationResponse();
+    } catch {
+      // no notification started the app
+    }
+    const sub = Notifications.addNotificationResponseReceivedListener(take);
     return () => sub.remove();
   }, [router]);
+
+  useEffect(() => {
+    if (!inside || !waiting.current) return;
+    const notice = waiting.current;
+    waiting.current = null;
+    router.navigate(pushRoute(where.current, notice.url, notice.topic, withTrain.current) as Href);
+  }, [inside, router]);
+
+  // No number sits on the app's icon: whatever is there is cleared each
+  // time the app comes to the front (src/push.ts).
+  useEffect(() => {
+    clearBadge();
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state === "active") clearBadge();
+    });
+    return () => sub.remove();
+  }, []);
 
   return null;
 }
@@ -101,7 +159,10 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: color.black }}>
       <SafeAreaProvider>
-        <PersistQueryClientProvider client={queryClient} persistOptions={{ persister, maxAge: PERSIST_MAX_AGE, buster: "1" }}>
+        {/* buster: raised when what is kept on the phone changes shape (2: a
+            free account's stage, and what a member still owes of the quiz),
+            so a screen saved by the version before is read fresh once. */}
+        <PersistQueryClientProvider client={queryClient} persistOptions={{ persister, maxAge: PERSIST_MAX_AGE, buster: "2" }}>
           <AuthProvider>
             <StatusBar style="light" />
             <Gatekeeper />
@@ -115,14 +176,28 @@ export default function RootLayout() {
               }}
             >
               <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="(free)" options={{ animation: "fade" }} />
               <Stack.Screen name="sign-in" options={{ animation: "fade" }} />
+              <Stack.Screen name="join/[step]" />
+              <Stack.Screen name="offer" options={{ animation: "fade" }} />
+              <Stack.Screen name="week-plan" />
+              <Stack.Screen name="post" options={{ presentation: "fullScreenModal" }} />
+              <Stack.Screen name="club/[id]/index" />
+              <Stack.Screen name="club/[id]/manage" />
+              <Stack.Screen name="club/[id]/plan" />
+              <Stack.Screen name="club/[id]/near" />
+              <Stack.Screen name="club/start" />
+              <Stack.Screen name="club/join" />
+              <Stack.Screen name="club/how" options={{ presentation: "modal" }} />
               <Stack.Screen name="agreement" options={{ animation: "fade", gestureEnabled: false }} />
               <Stack.Screen name="gate" options={{ animation: "fade", gestureEnabled: false }} />
               <Stack.Screen name="onboarding" options={{ animation: "fade", gestureEnabled: false }} />
               <Stack.Screen name="session/[n]" options={{ presentation: "fullScreenModal", animation: "fade", gestureEnabled: false }} />
               <Stack.Screen name="drop" options={{ presentation: "fullScreenModal", animation: "fade" }} />
+              <Stack.Screen name="course/[slug]" />
               <Stack.Screen name="extra" options={{ presentation: "modal" }} />
               <Stack.Screen name="checkin" options={{ presentation: "modal" }} />
+              <Stack.Screen name="inbox" />
               <Stack.Screen name="settings" />
               <Stack.Screen name="change-password" />
               <Stack.Screen name="delete-account" />

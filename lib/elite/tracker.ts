@@ -438,14 +438,14 @@ export const BOARD_CAP = 10;
 export const BOARD_TITLE = "This week with your friends";
 export const BOARD_EMPTY_LINE = "Send your link to a teammate and see who trains more this week.";
 
-export function friendsBoard(entries: BoardEntry[], meId: string): BoardRow[] {
+export function friendsBoard(entries: BoardEntry[], meId: string, cap: number = BOARD_CAP): BoardRow[] {
   const sorted = [...entries].sort(
     (x, y) => y.minutes - x.minutes || x.name.localeCompare(y.name) || x.id.localeCompare(y.id)
   );
   // One place each: a tie is broken by name, so two players never show
   // the same number (Coach Yinka saw two 5s on the same board).
   const rows = sorted.map((e, i) => ({ ...e, place: i + 1, time: fmtDuration(e.minutes), me: e.id === meId }));
-  const top = rows.slice(0, BOARD_CAP);
+  const top = rows.slice(0, cap);
   const mine = rows.find((r) => r.me);
   return mine && !top.includes(mine) ? [...top, mine] : top;
 }
@@ -1517,6 +1517,16 @@ export function cleanJoin(input: JoinInput): JoinFields | null {
     phone: joinText(input.phone),
     password: input.password as string,
   };
+}
+
+// The free app's set-up is finished: a weekly target is set and at least
+// one training day is picked (the answers behind them are stored with it).
+export function setUpDone(t: {
+  quiz_done_at?: string | null;
+  target_minutes?: number | null;
+  plan_days?: readonly number[] | null;
+}): boolean {
+  return Boolean(t.quiz_done_at && t.target_minutes && (t.plan_days ?? []).length > 0);
 }
 
 // ---- Where a signed-in person belongs ---------------------------------

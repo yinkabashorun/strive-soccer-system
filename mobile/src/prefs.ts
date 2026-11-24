@@ -5,9 +5,9 @@ import { dropSeenKey, parseSeenWeek } from "@shared/experience";
 // This phone's own settings (a per-device convenience, never a record):
 // vibration, the timer's tones, drill demos playing on their own, and the
 // two one-time moments (the notifications ask, the Monday drop).
-export type Prefs = { vibration: boolean; sound: boolean; autoplay: boolean; pushAsked: boolean; pushOn: boolean };
+export type Prefs = { vibration: boolean; sound: boolean; autoplay: boolean; pushAsked: boolean; pushOn: boolean; firstDaysHidden: boolean; proEndedSeen: boolean };
 
-export const DEFAULT_PREFS: Prefs = { vibration: true, sound: true, autoplay: true, pushAsked: false, pushOn: false };
+export const DEFAULT_PREFS: Prefs = { vibration: true, sound: true, autoplay: true, pushAsked: false, pushOn: false, firstDaysHidden: false, proEndedSeen: false };
 const KEY = "strive.prefs.v1";
 
 let cache: Prefs | null = null;

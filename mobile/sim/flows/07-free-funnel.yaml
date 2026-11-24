@@ -1,0 +1,307 @@
+# The free funnel by taps, start to finish: Join free from the sign-in
+# screen, the join screens, the quiz, the @username and photo, the offer,
+# "Not now, start free", the week's target and days, Friends (locked), a
+# post with a photo picked from the library, the feed unlocked, and Week.
+#
+# Example data only: nothing is sent anywhere, and the account made here
+# lives in the app's memory until it is closed. The two photos are picked
+# from the simulator's own sample library by where they sit on the screen
+# (the phone's picker is not ours to label).
+appId: com.strivesoccer.elite
+---
+- launchApp:
+    clearState: true
+    arguments:
+      fixtureState: signedout
+- extendedWaitUntil:
+    visible: "Join free"
+    timeout: 30000
+- takeScreenshot: t22-sign-in-join-free
+- tapOn: "Join free"
+
+# Joining, one question a screen. The birthday first.
+- extendedWaitUntil:
+    visible: "March"
+    timeout: 15000
+- tapOn: "March"
+- tapOn: "2010"
+- takeScreenshot: t23-join-birthday
+- tapOn: "Next"
+- extendedWaitUntil:
+    visible: "First name"
+    timeout: 15000
+- tapOn: "First name"
+- inputText: "Marcus"
+- tapOn: "Last name"
+- inputText: "Bryant"
+- takeScreenshot: t24-join-name-typing
+- tapOn: "Next"
+- extendedWaitUntil:
+    visible: "Email"
+    timeout: 15000
+- tapOn: "Email"
+- inputText: "marcus@example.com"
+- tapOn: "Phone, so a coach can reach you"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: t24b-join-phone-focused
+- inputText: "7035550100"
+# The number pad: on this simulator typed text has not always reached it
+# (run of Nov 24 2026 left the box empty). When it has not, the pad's own
+# keys are tapped, the way a player's thumb does it.
+- runFlow:
+    when:
+      notVisible: "7035550100"
+    commands:
+      - tapOn: "7"
+      - tapOn: "0"
+      - tapOn: "3"
+      - tapOn: "5"
+      - tapOn: "5"
+      - tapOn: "5"
+      - tapOn: "0"
+      - tapOn: "1"
+      - tapOn: "0"
+      - tapOn: "0"
+- takeScreenshot: t24c-join-phone-typed
+- tapOn: "Next"
+- extendedWaitUntil:
+    visible: "Password"
+    timeout: 15000
+- tapOn: "Password"
+- inputText: "striveelite1"
+- tapOn: "Next"
+- extendedWaitUntil:
+    visible: "Create my account"
+    timeout: 15000
+- tapOn: "I am 13 or older."
+- tapOn: "I agree to the Terms of Service and the Privacy Policy."
+- takeScreenshot: t25-join-agree
+- tapOn: "Create my account"
+
+# The quiz: the same screens a member takes, minus the three only a member
+# is asked.
+- extendedWaitUntil:
+    visible: "Start"
+    timeout: 20000
+- takeScreenshot: t26-free-start
+- tapOn: "Start"
+- extendedWaitUntil:
+    visible: "Boy"
+    timeout: 15000
+- tapOn: "Boy"
+- extendedWaitUntil:
+    visible: "High school"
+    timeout: 10000
+- takeScreenshot: t27-free-quiz-grade
+- tapOn: "High school"
+- extendedWaitUntil:
+    visible: "Attacking midfield"
+    timeout: 10000
+- tapOn: "Attacking midfield"
+- extendedWaitUntil:
+    visible: "Right"
+    timeout: 10000
+- tapOn: "Right"
+- extendedWaitUntil:
+    visible: "Competitive"
+    timeout: 10000
+- tapOn: "Competitive"
+- extendedWaitUntil:
+    visible: "Next"
+    timeout: 10000
+- tapOn: "Club and age group"
+- inputText: "Example FC 2010"
+- tapOn: "Next"
+# On the ball: every row is rated before Next works.
+- extendedWaitUntil:
+    visible: "First touch 2 of 5"
+    timeout: 10000
+- tapOn: "First touch 2 of 5"
+- tapOn: "Close control 3 of 5"
+- scrollUntilVisible:
+    element: "Weak foot 1 of 5"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Weak foot 1 of 5"
+- scrollUntilVisible:
+    element: "Dribbling and 1v1 3 of 5"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Dribbling and 1v1 3 of 5"
+- scrollUntilVisible:
+    element: "Short passing 4 of 5"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Short passing 4 of 5"
+- scrollUntilVisible:
+    element: "Long passing 3 of 5"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Long passing 3 of 5"
+- scrollUntilVisible:
+    element: "Shooting 3 of 5"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Shooting 3 of 5"
+- takeScreenshot: t28-free-quiz-on-ball
+- tapOn: "Next"
+# Off the ball.
+- extendedWaitUntil:
+    visible: "Speed 3 of 5"
+    timeout: 10000
+- tapOn: "Speed 3 of 5"
+- tapOn: "Agility 3 of 5"
+- scrollUntilVisible:
+    element: "Strength 3 of 5"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Strength 3 of 5"
+- scrollUntilVisible:
+    element: "Fitness 4 of 5"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Fitness 4 of 5"
+- scrollUntilVisible:
+    element: "Scanning 3 of 5"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Scanning 3 of 5"
+- scrollUntilVisible:
+    element: "Decision making 3 of 5"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Decision making 3 of 5"
+- scrollUntilVisible:
+    element: "Movement 3 of 5"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Movement 3 of 5"
+- scrollUntilVisible:
+    element: "Defending 3 of 5"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Defending 3 of 5"
+- tapOn: "Next"
+- extendedWaitUntil:
+    visible: "Make a higher team"
+    timeout: 10000
+- takeScreenshot: t29-free-quiz-aim
+- tapOn: "Make a higher team"
+- extendedWaitUntil:
+    visible: "Three or four times"
+    timeout: 10000
+- tapOn: "Three or four times"
+- extendedWaitUntil:
+    visible: "Room to run"
+    timeout: 10000
+- tapOn: "Room to run"
+- extendedWaitUntil:
+    visible: "A wall"
+    timeout: 10000
+- tapOn: "A wall"
+- takeScreenshot: t30-free-quiz-last
+- tapOn: "Finish"
+
+# The @username and the photo, before the offer that shows their card.
+- extendedWaitUntil:
+    visible: "Username"
+    timeout: 20000
+- tapOn: "Username"
+- inputText: "marcus.b"
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn: "Next"
+- extendedWaitUntil:
+    visible: "Choose from photos"
+    timeout: 15000
+- tapOn: "Choose from photos"
+- extendedWaitUntil:
+    visible: "Cancel"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 5000
+# the first photo in the phone's own picker, then its Choose (the crop)
+- tapOn:
+    point: "17%,32%"
+- waitForAnimationToEnd:
+    timeout: 5000
+- tapOn:
+    text: "Choose"
+    optional: true
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: t31-free-photo-picked
+- tapOn: "Next"
+
+# The offer, once, with their own card.
+- startRecording: offer-after-quiz
+- extendedWaitUntil:
+    visible: "Not now, start free"
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 5000
+- takeScreenshot: t32-offer
+- stopRecording
+- tapOn: "Not now, start free"
+
+# The week: the target we recommend and the days they train.
+- extendedWaitUntil:
+    visible: "Start my week"
+    timeout: 15000
+- tapOn: "Monday"
+- tapOn: "Tuesday"
+- tapOn: "Thursday"
+- tapOn: "Saturday"
+- takeScreenshot: t33-week-plan
+- tapOn: "Start my week"
+
+# Friends: today's posts are locked until a photo is posted today.
+- extendedWaitUntil:
+    visible: "Post my training"
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: t34-friends-locked
+- tapOn: "Post my training"
+- extendedWaitUntil:
+    visible: "Choose from photos"
+    timeout: 15000
+- takeScreenshot: t35-post-start
+- tapOn: "Choose from photos"
+- extendedWaitUntil:
+    visible: "Cancel"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 5000
+- tapOn:
+    point: "17%,32%"
+- extendedWaitUntil:
+    visible: "Post to my friends"
+    timeout: 20000
+- tapOn: "45m"
+- tapOn: "One line about your training"
+- inputText: "Weak foot only."
+- takeScreenshot: t36-post-typing
+- tapOn: "Post to my friends"
+# asked once, after the first post, with the reason
+- extendedWaitUntil:
+    visible: "Not now"
+    timeout: 20000
+- takeScreenshot: t37-post-notifications-ask
+- tapOn: "Not now"
+
+# The feed is open now, with their own post first.
+- extendedWaitUntil:
+    visible: "Weak foot only."
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: t38-friends-unlocked
+- tapOn: "Week"
+- extendedWaitUntil:
+    visible: "Change"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: t39-free-week

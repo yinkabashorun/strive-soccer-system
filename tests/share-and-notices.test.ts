@@ -11,7 +11,7 @@ import {
   nyClock,
   propsWithinDay,
 } from "../lib/elite/free-notices";
-import { friendPostPush, propsPush, pushTextProblems } from "../lib/elite/push-texts";
+import { friendPostNotice, noticeProblems, propsNotice } from "../lib/elite/notices";
 
 const root = join(__dirname, "..");
 const read = (p: string) => readFileSync(join(root, p), "utf8");
@@ -146,7 +146,7 @@ describe("a friend just posted", () => {
     const src = code("lib/elite/free-notices-server.ts");
     expect(src).toContain("friendIdsOf(admin, posterId)");
     expect(src).toContain("blocksWith(admin, posterId, friends)");
-    expect(src.indexOf("claim(admin, id, \"friend_post\"")).toBeLessThan(src.indexOf("sendPushToProfile(id, friendPostPush(first))"));
+    expect(src.indexOf("claim(admin, id, \"friend_post\"")).toBeLessThan(src.indexOf("notifyProfile(id, friendPostNotice({ first, nyDate: today }))"));
     expect(code("app/api/elite/tracker/post/route.ts")).toContain("noticeFriendPost(viewer.profile.id, today)");
   });
 });
@@ -170,7 +170,7 @@ describe("props", () => {
     const claimAt = src.indexOf('claim(admin, input.ownerId, "props"');
     expect(claimAt).toBeGreaterThan(-1);
     expect(src.indexOf("propsWithinDay(")).toBeGreaterThan(claimAt);
-    expect(src.indexOf("sendPushToProfile(input.ownerId, propsPush(first))")).toBeGreaterThan(claimAt);
+    expect(src.indexOf("notifyProfile(input.ownerId, propsNotice({ first, postId: input.postId }))")).toBeGreaterThan(claimAt);
     expect(code("lib/elite/tracker-actions.ts")).toMatch(/if \(!had\) \{\s*await noticeProps\(/);
   });
   it("uses the friend's first name", () => {
@@ -181,15 +181,36 @@ describe("props", () => {
 
 describe("the words", () => {
   it("say what happened, no emoji, no exclamation mark", () => {
-    expect(friendPostPush("Diego")).toEqual({ title: "Diego just posted", body: "Post yours to see it.", url: "/log" });
-    expect(propsPush("Diego")).toEqual({ title: "Diego gave you props", body: "On your training post.", url: "/log" });
-    for (const t of [friendPostPush("Diego"), propsPush("Diego")]) expect(pushTextProblems(t)).toEqual([]);
+    const posted = friendPostNotice({ first: "Diego", nyDate: "2026-11-24" });
+    const props = propsNotice({ first: "Diego", postId: "post-1" });
+    // "Post yours to see it." was an instruction; it says what happens instead
+    expect({ title: posted.title, body: posted.body, path: posted.path }).toEqual({
+      title: "Diego just posted",
+      body: "Their post opens when you post yours today.",
+      path: "/log",
+    });
+    expect({ title: props.title, body: props.body, path: props.path }).toEqual({
+      title: "Diego gave you props",
+      body: "On your training post.",
+      path: "/log",
+    });
+    for (const n of [posted, props]) {
+      expect(noticeProblems(n)).toEqual([]);
+      // a free account has no bell: the phone is the only place it shows
+      expect([n.push, n.bell]).toEqual([true, false]);
+      expect(n.topic).toBe("friends");
+    }
   });
   it("every profile push takes its words from the list", () => {
     const src = code("lib/elite/free-notices-server.ts");
-    expect((src.match(/sendPushToProfile\(/g) ?? []).length).toBe(2);
-    expect(src).toContain("friendPostPush(first)");
-    expect(src).toContain("propsPush(first)");
+    // through the one sender (lib/elite/notify.ts), never the push layer itself
+    expect(src).not.toMatch(/sendPushToProfile\(/);
+    expect((src.match(/notifyProfile\(/g) ?? []).length).toBe(3);
+    expect(src).toContain("friendPostNotice({ first, nyDate: today })");
+    expect(src).toContain("propsNotice({ first, postId: input.postId })");
+    // the one about clubs (087): its words are the list's too
+    expect(src).toContain("const notice = clubPlanNotice({");
+    expect(src).toContain("notifyProfile(r.profileId, notice)");
   });
 });
 

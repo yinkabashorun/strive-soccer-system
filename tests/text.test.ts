@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ensureSentence } from "@/lib/elite/text";
+import { FOCUS_MAX, ensureSentence, playerFocus, weekFocusLine } from "@/lib/elite/text";
 
 // The Sept 30 2026 SMS recurrence. Every new_week template is a colon
 // construction ("This week: X Let's have..."), which only reads cleanly
@@ -16,5 +16,36 @@ describe("ensureSentence", () => {
     const sms = template("Lock in the first touch and force the right foot to earn its keep.");
     expect(sms).not.toMatch(/\.\./);
     expect(sms).toMatch(/keep\. Let's/);
+  });
+});
+
+// The line a player reads when their week arrives (Coach Yinka, Nov 24
+// 2026: copy people actually want to see, easy to read). Production was
+// showing "Back to the pillars: ball mastery, scanning, passing, confidence."
+describe("the week's focus line", () => {
+  it("names what the week goes after, in the player's words, two areas at most", () => {
+    expect(weekFocusLine(["Weak foot"])).toBe("This week goes after your weak foot.");
+    expect(weekFocusLine(["Weak foot", "First touch"])).toBe("This week goes after your weak foot and first touch.");
+    expect(weekFocusLine(["Ball mastery", "Passing", "1v1 moves", "Speed"])).toBe("This week goes after your ball mastery and passing.");
+    expect(weekFocusLine(["Passing", "passing", " Passing "])).toBe("This week goes after your passing.");
+    expect(weekFocusLine([])).toBe("This week is built around your game.");
+  });
+
+  it("is one short sentence whatever wrote it: no list after a colon, no second sentence, never long", () => {
+    expect(playerFocus("Back to the pillars: ball mastery, scanning, passing, confidence")).toBe("Back to the pillars.");
+    expect(playerFocus("This week goes after your weak foot. Keep stacking clean reps every day.")).toBe("This week goes after your weak foot.");
+    expect(playerFocus("  This week is first touch and quick feet  ")).toBe("This week is first touch and quick feet.");
+    const long = playerFocus("Reset the week with ruthless consistency on close control and the first touch under pressure from every single angle you can find");
+    expect(long.length).toBeLessThanOrEqual(FOCUS_MAX + 1);
+    expect(long.endsWith(".")).toBe(true);
+    expect(long).not.toMatch(/\s\.$/);
+    expect(playerFocus("")).toBe("This week is built around your game.");
+    expect(playerFocus("   ")).toBe("This week is built around your game.");
+  });
+
+  it("carries no long dash and no shouting", () => {
+    for (const line of [weekFocusLine(["Weak foot"]), weekFocusLine([]), playerFocus("Lock in the first touch \u2014 every day")]) {
+      expect(line).not.toMatch(/[\u2014\u2013!]/);
+    }
   });
 });

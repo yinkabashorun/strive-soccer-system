@@ -10,16 +10,27 @@ import { setPref } from "./prefs";
 // so the app hands the server its raw APNs token, never a relay's.
 //
 // Asked once, on the first finish screen (punch list A8), never at launch.
-// While the app is open a notification is quiet: it goes to the list and
-// the badge, no banner over the screen being used (research B, Nov 18).
+// While the app is open a notification is quiet: it goes to the list, no
+// banner over the screen being used (research B, Nov 18).
+//
+// NO NUMBER ON THE ICON, ever (Nov 24 2026): the site sends no badge count
+// (lib/elite/apns.ts), this handler sets none, and whatever number an
+// earlier build left there is cleared each time the app comes to the
+// front (clearBadge, called from app/_layout.tsx). A red number is a debt
+// the player did not ask for; what is new is the Inbox's quiet gold dot.
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowBanner: false,
     shouldShowList: true,
     shouldPlaySound: false,
-    shouldSetBadge: true,
+    shouldSetBadge: false,
   }),
 });
+
+export function clearBadge(): void {
+  if (Platform.OS !== "ios") return;
+  void Notifications.setBadgeCountAsync(0).catch(() => undefined);
+}
 
 async function saveToken(): Promise<boolean> {
   const token = await Notifications.getDevicePushTokenAsync();

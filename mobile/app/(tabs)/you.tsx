@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { Share, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { fmtDuration } from "@shared/time-trained";
 import { keys, useMe, useYou } from "@/api/queries";
@@ -6,7 +6,8 @@ import { queryClient } from "@/api/queryClient";
 import { MemberCard } from "@/MemberCard";
 import { useMyPhoto } from "@/usePhoto";
 import { PAGE_TOP, Screen } from "@/Screen";
-import { Body, Card, Disc, Hairline, Head, Label, Ring, SettingRow, Skeleton } from "@/ui";
+import { Body, Button, Card, Head, Label, Ring, SettingRow, Skeleton } from "@/ui";
+import { YouEarned } from "@/YouEarned";
 import { color } from "@/theme";
 
 // You (approved mock v4): the member card, this week's time in the gold
@@ -38,6 +39,20 @@ export default function You() {
         )}
       </View>
 
+      {y?.earned ? (
+        <Card style={{ marginHorizontal: 20, marginTop: 16 }}>
+          <Body size={14}>{y.earned.line}</Body>
+          {y.earned.parent ? (
+            <Button
+              quiet
+              style={{ marginTop: 12 }}
+              label={y.earned.parent.label}
+              onPress={() => void Share.share({ message: y.earned!.parent!.text }).catch(() => undefined)}
+            />
+          ) : null}
+        </Card>
+      ) : null}
+
       {!y ? (
         <View style={{ margin: 20, gap: 14 }}>
           <Skeleton height={132} />
@@ -46,7 +61,7 @@ export default function You() {
       ) : (
         <>
           <View style={styles.ringRow}>
-            <Ring size={132} stroke={10} value={y.weekMinutesPlanned > 0 ? y.weekMinutesDone / y.weekMinutesPlanned : 0}>
+            <Ring size={132} stroke={10} value={y.weekMinutesPlanned > 0 ? Math.min(1, y.weekMinutesDone / y.weekMinutesPlanned) : 0}>
               <Head size={28}>{fmtDuration(y.weekMinutesDone)}</Head>
               <Body dim size={11.5}>this week</Body>
             </Ring>
@@ -72,62 +87,7 @@ export default function You() {
             })}
           </View>
 
-          {y.areas.length ? (
-            <View style={{ marginHorizontal: 20, marginTop: 26 }}>
-              <Label size={17}>Time by area</Label>
-              <Card style={{ marginTop: 10, padding: 0 }}>
-                {y.areas.map((a, i) => (
-                  <View key={a.area}>
-                    {i > 0 ? <Hairline /> : null}
-                    <View style={styles.area}>
-                      <Label style={{ flex: 1 }}>{a.area}</Label>
-                      {a.thisWeek > 0 ? (
-                        <Label size={13} style={{ color: color.gold, marginRight: 10 }}>
-                          +{fmtDuration(a.thisWeek)} this week
-                        </Label>
-                      ) : null}
-                      <Label dim>{fmtDuration(a.minutes)}</Label>
-                    </View>
-                  </View>
-                ))}
-              </Card>
-            </View>
-          ) : null}
-
-          <View style={{ marginHorizontal: 20, marginTop: 26 }}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "baseline" }}>
-              <Label size={17}>Earned</Label>
-              {y.next ? (
-                <Body dim size={13}>
-                  {`${y.next.hours} hours in ${fmtDuration(y.next.minutesAway)}`}
-                </Body>
-              ) : null}
-            </View>
-            <View style={styles.medals}>
-              {y.medals.map((m) => (
-                <View key={m.hours} style={{ alignItems: "center", flex: 1 }}>
-                  <Disc size={72} earned={m.earned}>
-                    <Head size={20} style={{ color: m.earned ? "#1a1408" : color.faint }}>{`${m.hours}H`}</Head>
-                  </Disc>
-                  <Body dim size={12} style={{ marginTop: 9 }}>
-                    {m.hours === 1 ? "1 hour" : `${m.hours} hours`}
-                  </Body>
-                </View>
-              ))}
-            </View>
-            {y.achievements.length ? (
-              <View style={styles.badges}>
-                {y.achievements.map((a) => (
-                  <Card key={a.id} style={styles.badge}>
-                    <Label numberOfLines={1}>{a.title}</Label>
-                    <Body dim size={12} numberOfLines={1}>
-                      {a.detail}
-                    </Body>
-                  </Card>
-                ))}
-              </View>
-            ) : null}
-          </View>
+          <YouEarned y={y} />
         </>
       )}
 
@@ -143,8 +103,4 @@ const styles = StyleSheet.create({
   chart: { flexDirection: "row", alignItems: "flex-end", gap: 9, height: 150, marginHorizontal: 20, marginTop: 22 },
   col: { flex: 1, height: "100%", justifyContent: "flex-end", alignItems: "center", gap: 6 },
   bar: { width: "100%", borderTopLeftRadius: 8, borderTopRightRadius: 8, borderBottomLeftRadius: 4, borderBottomRightRadius: 4, backgroundColor: color.fill2 },
-  area: { minHeight: 52, flexDirection: "row", alignItems: "center", paddingHorizontal: 16 },
-  medals: { flexDirection: "row", marginTop: 14 },
-  badges: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 16 },
-  badge: { width: "48%", padding: 14 },
 });

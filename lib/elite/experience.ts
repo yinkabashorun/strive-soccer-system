@@ -8,7 +8,7 @@
 // rule, docs/product-principles.md).
 import type { Homework, MembershipTier } from "./types";
 import { drillKind } from "./session-flow";
-import { DEFAULT_DRILL_MIN } from "./time-trained";
+import { creditedMinutes } from "./time-trained";
 import { MILESTONE_HOURS } from "./session-flow";
 import { tabOn, tierOf } from "./tiers";
 import { drillPoster } from "./drill-poster";
@@ -21,7 +21,7 @@ const NY = "America/New_York";
 // on Home and a link on the Coach screen, never a tab of its own. The
 // routes are the ones that already exist: Week is /homework.
 // ---------------------------------------------------------------------
-export type MemberTab = { href: string; label: string; icon: "home" | "week" | "courses" | "coach" | "you" };
+export type MemberTab = { href: string; label: string; icon: "home" | "week" | "courses" | "coach" | "you" | "friends" };
 
 export const HOME_TAB: MemberTab = { href: "/dashboard", label: "Home", icon: "home" };
 export const WEEK_TAB: MemberTab = { href: "/homework", label: "Week", icon: "week" };
@@ -29,8 +29,15 @@ export const COURSES_TAB: MemberTab = { href: "/courses", label: "Courses", icon
 export const COACH_TAB: MemberTab = { href: "/messages", label: "Coach", icon: "coach" };
 export const YOU_TAB: MemberTab = { href: "/you", label: "You", icon: "you" };
 
-export function memberTabs(tier: MembershipTier | string | null | undefined): MemberTab[] {
-  const tabs = [HOME_TAB, WEEK_TAB, COURSES_TAB];
+// ONE APP on the website (lib/elite/one-app.ts): a member who came through
+// the free app keeps it. Their member pages carry a Friends tab that opens
+// the free pages (Friends, My week, their clubs), and those pages carry a
+// Train tab back (components/elite/FreeShell.tsx). Strive Pro adds; it
+// never takes the free pages away.
+export const FRIENDS_TAB: MemberTab = { href: "/log", label: "Friends", icon: "friends" };
+
+export function memberTabs(tier: MembershipTier | string | null | undefined, social = false): MemberTab[] {
+  const tabs = social ? [HOME_TAB, FRIENDS_TAB, WEEK_TAB, COURSES_TAB] : [HOME_TAB, WEEK_TAB, COURSES_TAB];
   if (tabOn(tier, COACH_TAB.href)) tabs.push(COACH_TAB);
   tabs.push(YOU_TAB);
   return tabs;
@@ -117,8 +124,8 @@ export function firstWeekStatus(i: { active: boolean; built: boolean; week1Monda
 }
 
 export const FIRST_WEEK_LINE: Record<Exclude<FirstWeekStatus, "live">, { title: string; body: string }> = {
-  monday: { title: "Your first week starts Monday.", body: "It is built and waiting. It opens Monday morning, and we'll text you when it does." },
-  waiting: { title: "Your week lands within the hour.", body: "We'll text you the moment it is ready." },
+  monday: { title: "Your first week starts Monday.", body: "It is built and waiting. It opens right here Monday morning." },
+  waiting: { title: "Your week lands within the hour.", body: "It shows up right here the moment it is ready." },
   off: { title: "Your answers are in.", body: "Your coach switches your membership on, then your first week lands within the hour." },
 };
 
@@ -231,14 +238,14 @@ export function hoursMedals(minutes: number, upTo = 4): { hours: number; earned:
 // live week last. A week with nothing done is a short grey bar, never a
 // mark against them.
 // ---------------------------------------------------------------------
-export function weeklyMinutes(rows: Pick<Homework, "week" | "completed" | "duration_min">[], throughWeek: number, count = 7): { week: number; minutes: number }[] {
+export function weeklyMinutes(rows: Pick<Homework, "week" | "completed" | "duration_min" | "actual_seconds">[], throughWeek: number, count = 7): { week: number; minutes: number }[] {
   const last = Math.max(1, throughWeek);
   const first = Math.max(1, last - count + 1);
   const out: { week: number; minutes: number }[] = [];
   for (let w = first; w <= last; w++) {
     const minutes = rows
       .filter((h) => h.week === w && h.completed)
-      .reduce((s, h) => s + (h.duration_min ?? DEFAULT_DRILL_MIN), 0);
+      .reduce((s, h) => s + creditedMinutes(h), 0);
     out.push({ week: w, minutes });
   }
   return out;

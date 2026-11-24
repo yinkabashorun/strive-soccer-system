@@ -59,7 +59,7 @@ describe("the screens a member sees instead of the app", () => {
 
 describe("empty states say what happens next", () => {
   it("no week built yet", () => {
-    expect(read("app/(player)/dashboard/page.tsx")).toMatch(/It shows up here the\s+moment it is ready/);
+    expect(read("app/(player)/dashboard/page.tsx")).toMatch(/It shows up right here the\s+moment it is\s+ready/);
     expect(read("components/elite/WeekList.tsx")).toContain("It lands here the moment it is ready");
   });
 
@@ -74,7 +74,11 @@ describe("empty states say what happens next", () => {
   it("the week is finished", () => {
     const card = read("components/elite/TodaySession.tsx");
     expect(card).toContain("{nextWeekLine}");
-    expect(card).toContain("Tap Extra work below to add a session");
+    // what to do with a finished week: extra work, or a course (one line,
+    // lib/elite/session-flow.ts AFTER_WEEK_MORE), and the way to Courses
+    expect(card).toContain("{AFTER_WEEK_MORE}");
+    expect(card).toContain('href="/courses"');
+    expect(read("lib/elite/session-flow.ts")).toContain("Add extra work, or open a course.");
   });
 
   it("offline, inside the App Store app", () => {

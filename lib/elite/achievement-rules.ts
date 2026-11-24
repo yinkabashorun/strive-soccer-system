@@ -16,6 +16,9 @@ export type AchievementRule = {
   title: string;
   detail: string;
   icon: string; // lucide name known to the ICONS map on the Progress page
+  // What is engraved on the gold medal in the iPhone app, the way the
+  // hours medals read "1H" and "3H": four characters at most.
+  mark: string;
   // Titles this badge was stored under before a rule or wording change.
   formerly?: string[];
   earned: (hw: Homework[], s: PlayerSummary) => boolean;
@@ -41,12 +44,14 @@ export const ACHIEVEMENT_RULES: AchievementRule[] = [
     title: "First Session",
     detail: "Your first full session, done",
     icon: "Sparkles",
+    mark: "1ST",
     earned: (_hw, s) => s.sessions_completed >= 1,
   },
   {
     title: "Week Conquered",
     detail: "Every drill in a week, done",
     icon: "CheckCircle2",
+    mark: "1 WK",
     earned: (hw) => fullWeeks(hw).length >= 1,
   },
   {
@@ -56,6 +61,7 @@ export const ACHIEVEMENT_RULES: AchievementRule[] = [
     title: "3 Full Weeks",
     detail: "Three weeks with every drill done",
     icon: "Trophy",
+    mark: "3 WK",
     formerly: ["3 Perfect Weeks"],
     earned: (hw) => fullWeeks(hw).length >= 3,
   },
@@ -63,18 +69,45 @@ export const ACHIEVEMENT_RULES: AchievementRule[] = [
     title: "10 Sessions",
     detail: "Ten full sessions in the bank",
     icon: "Flame",
+    mark: "10",
     earned: (_hw, s) => s.sessions_completed >= 10,
+  },
+  // The sessions ladder (Nov 24 2026): 25, 50 and 100, the marks the
+  // leading training apps hand out. Earned only by sessions finished, so
+  // a break never costs one.
+  {
+    title: "25 Sessions",
+    detail: "Twenty-five full sessions done",
+    icon: "Flame",
+    mark: "25",
+    earned: (_hw, s) => s.sessions_completed >= 25,
+  },
+  {
+    title: "50 Sessions",
+    detail: "Fifty full sessions done",
+    icon: "Flame",
+    mark: "50",
+    earned: (_hw, s) => s.sessions_completed >= 50,
+  },
+  {
+    title: "100 Sessions",
+    detail: "One hundred full sessions done",
+    icon: "Trophy",
+    mark: "100",
+    earned: (_hw, s) => s.sessions_completed >= 100,
   },
   {
     title: "500 Minutes",
     detail: "500 minutes of focused training",
     icon: "Zap",
+    mark: "500",
     earned: (_hw, s) => s.training_minutes >= 500,
   },
   {
     title: "1,000 Minutes",
     detail: "A thousand minutes in the bank",
     icon: "Target",
+    mark: "1K",
     earned: (_hw, s) => s.training_minutes >= 1000,
   },
 ];
@@ -97,12 +130,23 @@ export function newlyEarned(
 
 // Badges stored before a wording change, shown in today's words. The row
 // in the database is left as it is; only what the member reads changes.
-const RETIRED_WORDING: Record<string, { title: string; detail: string }> = {
+const RETIRED_WORDING: Record<string, { title: string; detail: string; mark?: string }> = {
   "3 Perfect Weeks": { title: "3 Full Weeks", detail: "Three weeks with every drill done" },
   // Retired as a rule on Oct 12 2026 (it punished a gap). Members who
   // earned it keep it, named for the work rather than the run.
-  "7-Day Streak": { title: "7 Days Trained", detail: "Seven days of training, earned" },
+  "7-Day Streak": { title: "7 Days Trained", detail: "Seven days of training, earned", mark: "7D" },
 };
+
+// The engraving for a badge, by the title the member reads (today's or the
+// one it was stored under). null for a title no rule knows: the medal then
+// carries a tick, never a made-up mark.
+export const MARK_MAX = 4;
+export function achievementMark(title: string): string | null {
+  const rule = ACHIEVEMENT_RULES.find((r) => r.title === title || (r.formerly ?? []).includes(title));
+  if (rule) return rule.mark;
+  const retired = Object.entries(RETIRED_WORDING).find(([was, now]) => was === title || now.title === title);
+  return retired?.[1].mark ?? null;
+}
 
 export function presentAchievement<T extends Pick<Achievement, "title" | "detail">>(a: T): T {
   const now = RETIRED_WORDING[a.title];

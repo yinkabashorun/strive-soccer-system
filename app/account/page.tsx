@@ -3,12 +3,15 @@ import { redirect } from "next/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Avatar } from "@/components/Avatar";
 import { DeviceSettings } from "@/components/elite/DeviceSettings";
+import { NoticeChoices } from "@/components/elite/NoticeChoices";
+import { loadNoticePrefs } from "@/lib/elite/notice-prefs-server";
+import { NO_NOTICE_PREFS } from "@/lib/elite/notice-prefs";
 import { getViewer } from "@/lib/elite/session";
 import { signOut } from "@/lib/elite/auth-actions";
 import { deleteGate } from "@/lib/elite/account";
 import { SUPPORT_EMAIL, concernMailto } from "@/lib/elite/support";
 import { consentDue } from "@/lib/elite/legal-server";
-import { trackerFor } from "@/lib/elite/tracker-server";
+import { freeAccountFor } from "@/lib/elite/tracker-server";
 import { profileSetupDue } from "@/lib/elite/account-profile";
 import { FREE_SETTINGS, FREE_WEEK } from "@/lib/elite/tracker";
 import { hasRunningSubscription, memberTier } from "@/lib/elite/pro-server";
@@ -30,7 +33,7 @@ export default async function AccountPage() {
   // A free account (069) has its own Settings inside the free app. It
   // lands here only while new terms wait for its yes (the free app shows
   // the agreement until then), so it can still sign out or delete.
-  const tracker = viewer.demo ? null : await trackerFor(viewer);
+  const tracker = viewer.demo ? null : await freeAccountFor(viewer);
   // ...or while it still owes its profile photo and username (081): the
   // one-time screen links here so Sign out and Delete stay reachable.
   if (tracker && !profileSetupDue(viewer.setup) && !(await consentDue(viewer.profile.id))) redirect(FREE_SETTINGS);
@@ -41,6 +44,10 @@ export default async function AccountPage() {
   // cancelled here too.
   const pro = isMember && !viewer.demo && viewer.playerId ? isPro(await memberTier(viewer.playerId)) : false;
   const canCancelPro = pro && (await hasRunningSubscription(viewer.profile.id));
+  // What we may tell this member about, and when the one reminder comes
+  // (088). Nothing to show before the migration is applied.
+  const notices = isMember && !viewer.demo ? await loadNoticePrefs(viewer).catch(() => NO_NOTICE_PREFS) : NO_NOTICE_PREFS;
+  const hasNoticeChoices = notices.topics.length > 0 || notices.reminder !== null;
 
   return (
     <div className="min-h-[100svh] bg-black text-bone">
@@ -89,6 +96,12 @@ export default async function AccountPage() {
         <Group title="This phone">
           <DeviceSettings showNotifications={isMember && !viewer.demo} />
         </Group>
+
+        {hasNoticeChoices && (
+          <Group title="Notifications">
+            <NoticeChoices prefs={notices} />
+          </Group>
+        )}
 
         <Group title="Help">
           <Row href="/support" label="Support" detail={SUPPORT_EMAIL} />

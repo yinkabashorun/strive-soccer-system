@@ -1,3 +1,6 @@
+import { whatNotifications } from "@shared/notices";
+import { featureOn } from "@shared/tiers";
+import { hasTrain } from "@/navigation";
 import { Linking, ScrollView, View } from "react-native";
 import { useRouter } from "expo-router";
 import Constants from "expo-constants";
@@ -8,22 +11,30 @@ import { signOutEverywhere } from "@/account";
 import { openSite } from "@/links";
 import { usePrefs } from "@/prefs";
 import { turnOffNotifications, turnOnNotifications } from "@/push";
+import { NoticeChoices } from "@/NoticeChoices";
 import { Body, Card, Hairline, Head, Icon, Label, Press, SettingRow } from "@/ui";
+import { useBelowClock } from "@/Screen";
 import { color } from "@/theme";
 
 // Settings: what this phone does (notifications, vibration, the timer's
-// tones, drill demos), the account (password, sign out, delete), and help.
+// tones, drill demos), what the account is told about (one switch per kind
+// of notification, and a member's reminder time: src/NoticeChoices.tsx),
+// the account (password, sign out, delete), and help.
 // Reachable from every screen of the app, the gate and the agreement
 // included, so deleting the account is never behind anything.
 export default function Settings() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const belowClock = useBelowClock();
   const me = useMe();
   const [p, set] = usePrefs();
   const name = me.data?.viewer.name ?? "";
+  // A free account has no sessions: no set timer and no drill demos to
+  // switch, and its notifications are about its friends.
+  const free = me.data?.state.kind === "free";
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: color.black }} contentContainerStyle={{ paddingTop: insets.top + 8, paddingBottom: insets.bottom + 40, paddingHorizontal: 20 }}>
+    <ScrollView style={[{ flex: 1, backgroundColor: color.black }, belowClock]} contentContainerStyle={{ paddingTop: 8, paddingBottom: insets.bottom + 40, paddingHorizontal: 20 }}>
       <Press onPress={() => router.back()} style={{ width: 44, height: 44, justifyContent: "center" }} accessibilityLabel="Back">
         <Icon name="back" />
       </Press>
@@ -39,17 +50,27 @@ export default function Settings() {
       <Section title="This phone">
         <SettingRow
           label="Notifications"
-          detail="Your new week, your coach, a Film Room. Nothing else."
+          detail={
+            free
+              ? "A friend posts or gives you props, or your club plans a session or a game. Nothing else."
+              : whatNotifications({ coachTime: featureOn(me.data?.player?.tier, "coachChat"), friends: hasTrain(me.data?.state) })
+          }
           value={p.pushOn}
           onValue={(v) => void (v ? turnOnNotifications() : turnOffNotifications())}
         />
         <Hairline />
         <SettingRow label="Vibration" value={p.vibration} onValue={(v) => set("vibration", v)} />
-        <Hairline />
-        <SettingRow label="Timer sound" value={p.sound} onValue={(v) => set("sound", v)} />
-        <Hairline />
-        <SettingRow label="Play drill demos automatically" value={p.autoplay} onValue={(v) => set("autoplay", v)} />
+        {free ? null : (
+          <>
+            <Hairline />
+            <SettingRow label="Timer sound" value={p.sound} onValue={(v) => set("sound", v)} />
+            <Hairline />
+            <SettingRow label="Play drill demos automatically" value={p.autoplay} onValue={(v) => set("autoplay", v)} />
+          </>
+        )}
       </Section>
+
+      <NoticeChoices>{(rows) => <Section title="Notifications">{rows}</Section>}</NoticeChoices>
 
       <Section title="Account">
         {me.data?.profileSetup ? (

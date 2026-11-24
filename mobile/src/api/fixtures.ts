@@ -1,6 +1,34 @@
 import { Platform, Settings } from "react-native";
-import type { AppBootstrap, AppDrill, AppExtra, AppMemberState, AppWeek, AppYou } from "@shared/app-contract";
+import type {
+  AppBootstrap,
+  AppCourse,
+  AppCourseList,
+  AppCourseStep,
+  AppDrill,
+  AppExtra,
+  AppFeedCard,
+  AppFreeFeed,
+  AppFreePlan,
+  AppFreeWeek,
+  AppFreeYou,
+  AppMemberState,
+  AppOffer,
+  AppWeek,
+  AppYou,
+} from "@shared/app-contract";
+import { lessonBlocks } from "@shared/app-courses";
+import type { FreeStage } from "@shared/free-intake";
+import { auraLabel, friendsBoard, type Face } from "@shared/tracker";
 import { MEDIA_BASE } from "@/config";
+import { fixtureClubs } from "./fixtures-clubs";
+import { buildSquad } from "@shared/squad-pass";
+import { firstDays } from "@shared/first-days";
+import type { AppInbox } from "@shared/app-contract";
+import type { NoticePrefs } from "@shared/notice-prefs";
+import { buildNoticePrefs, withTopic } from "@shared/notice-prefs";
+import { earnedNotice, newWeekNotice, welcomeNotice, type NoticeTopic } from "@shared/notices";
+import { reminderChoice } from "@shared/reminders";
+import { oneAppTabs } from "@shared/one-app";
 
 // The example player the screens are drawn with for review screenshots
 // (EXPO_PUBLIC_FIXTURES=1): the browser build (scripts/screenshots.mjs) and
@@ -10,16 +38,28 @@ import { MEDIA_BASE } from "@/config";
 // stills are the real bank's.
 //
 // Which member the example is, chosen per run:
-//   browser    ?state=ok|consent|onboarding|membership|pro_checkout|setup|signedout
+//   browser    ?state=ok|consent|onboarding|membership|pro_checkout|setup|locked|free_quiz|free_offer|social|ended|signedout
 //   simulator  the launch argument -fixtureState <the same words>, which
 //              iOS hands the app as a setting (sim/shots.sh, sim/flows)
+//
+// "locked" is a FREE account in the free app (Friends, Week, Clubs, You):
+// friends, posts, a week under way and two clubs (fixtures-clubs.ts).
+// "social" is that same account with Strive Pro on (lib/elite/one-app.ts):
+// the same four tabs, the same friends and clubs, and Train added in
+// front. "ended" is the free account again after Strive Pro ended, with
+// the one calm line on Week. "free_quiz"
+// is a free account that has not taken the quiz, "free_offer" one that has
+// and is at the offer. A run that starts "signedout" and taps Join free
+// becomes a new free account and moves on as it goes (the quiz, the
+// @username and photo, the offer, the week's set-up, a post), all of it
+// kept in memory only.
 //
 // Which screen it opens on, simulator only: the launch argument
 // -fixtureRoute <screen> (week, session/3, profile-setup?edit=photo). The
 // simulator's "open this link" command cannot be used for that: iOS answers
 // it with an "Open in Strive Elite?" box that stays on screen and covers
 // every picture after it (the first simulator run, Nov 23 2026).
-export const FIXTURE_STATES = ["ok", "consent", "onboarding", "membership", "pro_checkout", "setup", "signedout"] as const;
+export const FIXTURE_STATES = ["ok", "consent", "onboarding", "membership", "pro_checkout", "setup", "locked", "free_quiz", "free_offer", "social", "ended", "signedout"] as const;
 
 function chosenState(): string {
   let raw: unknown = null;
@@ -43,11 +83,80 @@ export function fixtureRoute(): string | null {
   } catch {
     raw = null;
   }
-  return typeof raw === "string" && FIXTURE_ROUTE.test(raw) ? `/${raw}` : null;
+  if (typeof raw !== "string" || !FIXTURE_ROUTE.test(raw)) return null;
+  // A free tab is named with its group: the member tabs have a Courses
+  // screen at the same address, and the run must open the free one.
+  const first = raw.split(/[/?]/)[0];
+  return (now().free || now().train) && FREE_TABS.has(first) ? `/(free)/${raw}` : `/${raw}`;
+}
+const FREE_TABS = new Set(["train", "friends", "my-week", "clubs", "me"]);
+
+// Where the example account is. It starts as the run asked and, for a free
+// account, moves on as the screens are used. Memory only.
+type Live = {
+  signedIn: boolean;
+  free: boolean;
+  // Strive Pro is on for an account with the free app: the free tabs + Train
+  train: boolean;
+  // Strive Pro was on for this free account and has ended
+  ended: boolean;
+  stage: FreeStage;
+  owed: ("username" | "photo")[];
+  username: string | null;
+  posted: boolean;
+};
+let live: Live | null = null;
+const watchers = new Set<() => void>();
+
+function now(): Live {
+  if (!live) {
+    const s = chosenState();
+    const free = s === "locked" || s === "ended" || s === "free_quiz" || s === "free_offer";
+    live = {
+      signedIn: s !== "signedout",
+      free,
+      train: s === "social",
+      ended: s === "ended",
+      stage: s === "free_quiz" ? "quiz" : s === "free_offer" ? "offer" : "ready",
+      owed: s === "setup" ? ["username", "photo"] : [],
+      username: s === "setup" ? null : "marcus.b",
+      posted: false,
+    };
+  }
+  return live;
+}
+
+function moved() {
+  watchers.forEach((w) => w());
+}
+
+export function onFixtureChange(fn: () => void): () => void {
+  watchers.add(fn);
+  return () => void watchers.delete(fn);
 }
 
 export function fixtureSignedIn(): boolean {
-  return chosenState() !== "signedout";
+  return now().signedIn;
+}
+
+// "Create my account" on the join screens: a new free account, at the quiz,
+// that still owes its @username and its photo.
+export function fixtureJoin(): void {
+  live = { signedIn: true, free: true, train: false, ended: false, stage: "quiz", owed: ["username", "photo"], username: null, posted: false };
+  moved();
+}
+
+// The example sign-in: the member the run asked for.
+export function fixtureSignIn(): void {
+  now().signedIn = true;
+  moved();
+}
+
+// A profile step saved on the example account.
+export function fixtureProfileSaved(step: "username" | "photo", username?: string): void {
+  const l = now();
+  l.owed = l.owed.filter((s) => s !== step);
+  if (step === "username" && username) l.username = username;
 }
 
 const m = (p: string) => `${MEDIA_BASE}${p}`;
@@ -63,6 +172,7 @@ function drill(id: string, title: string, name: string, kind: AppDrill["kind"], 
     how: "",
     notes: null,
     minutes,
+    trained: completed ? minutes : 0,
     video: m(`/drills/${file}.mp4`),
     poster: m(`/drills/posters/${file}.jpg`),
     completed,
@@ -142,6 +252,7 @@ export const FIXTURE_WEEK: AppWeek = {
   oneMore: null,
   nextWeekLine: "Your coach is building week 8. It drops Monday.",
   dropLine: "Four sessions. This week goes after your weak foot.",
+  lastWeekLine: "Last week you finished 3 sessions and trained 1h 4m.",
   ladder: [
     { key: "goal", label: "Goal", value: "Start for my club team" },
     { key: "week", label: "This week", value: "2 of 4" },
@@ -182,8 +293,10 @@ export const FIXTURE_YOU: AppYou = {
   ],
   next: { hours: 5, minutesAway: 38 },
   achievements: [
-    { id: "a1", title: "10 Sessions", detail: "Ten sessions done" },
-    { id: "a2", title: "First Week", detail: "Every session of a week" },
+    // the badges' own titles and lines (lib/elite/achievement-rules.ts)
+    { id: "a1", title: "10 Sessions", detail: "Ten full sessions in the bank" },
+    { id: "a2", title: "Week Conquered", detail: "Every drill in a week, done" },
+    { id: "a3", title: "First Session", detail: "Your first full session, done" },
   ],
 };
 
@@ -216,6 +329,188 @@ export const FIXTURE_EXTRA: AppExtra = {
   error: null,
 };
 
+// The Courses library: four of the real courses, cut short. The drills,
+// their clips and stills are the real bank's and the words are the
+// courses' own (supabase/migrations 041, 043, 044, 048 to 053, 057).
+function courseDrill(id: string, title: string, file: string, more: Partial<AppCourseStep> = {}): AppCourseStep {
+  return {
+    id,
+    kind: "drill",
+    title,
+    tag: null,
+    cue: null,
+    passMark: null,
+    blocks: [],
+    video: m(`/drills/${file}.mp4`),
+    poster: m(`/drills/posters/${file}.jpg`),
+    download: null,
+    ...more,
+  };
+}
+
+function coursePage(id: string, title: string, body: string): AppCourseStep {
+  return { id, kind: "lesson", title, tag: null, cue: null, passMark: null, blocks: lessonBlocks(body), video: null, poster: null, download: null };
+}
+
+export const FIXTURE_COURSES: AppCourse[] = [
+  {
+    slug: "keep-it-up",
+    name: "Keep It Up",
+    subtitle: "The Juggling Ladder",
+    kind: "drill",
+    intro: [
+      "Start at Level 1, even if you can already juggle.",
+      "Pass the catch version, then work the keep it up version, then move up.",
+      "A pass mark is in a row. A drop ends the attempt.",
+      "Film the day you pass a level.",
+    ],
+    cover: m("/drills/posters/juggling-one-touch-catch.jpg"),
+    levels: [
+      {
+        no: 1,
+        label: "Level 1",
+        name: "One touch",
+        steps: [
+          courseDrill("k11", "One touch, catch", "juggling-one-touch-catch", {
+            tag: "beginner",
+            cue: "Toe up, ankle locked, hit the middle of the ball.",
+            passMark: "10 in a row",
+          }),
+          courseDrill("k12", "One touch, keep it up", "juggling-one-touch-keep-it-up", { tag: "advanced", cue: "Small touches, both feet." }),
+        ],
+      },
+      {
+        no: 2,
+        label: "Level 2",
+        name: "Two touches each foot",
+        steps: [
+          courseDrill("k21", "Two touches each foot, catch", "juggling-two-touches-each-foot-catch", {
+            tag: "beginner",
+            cue: "The first touch is small, the second one sends it to your chest for the catch.",
+            passMark: "10 in a row",
+          }),
+          courseDrill("k22", "Two touches each foot, keep it up", "juggling-two-touches-each-foot-keep-it-up", {
+            tag: "advanced",
+            cue: "Small touches, stay on the balls of your feet.",
+          }),
+        ],
+      },
+    ],
+  },
+  {
+    slug: "weak-foot",
+    name: "Weak Foot",
+    subtitle: "Both feet, no excuses.",
+    kind: "drill",
+    intro: [],
+    cover: m("/drills/posters/weak-foot-tap-pull-push.jpg"),
+    levels: [
+      {
+        no: 1,
+        label: "Level 1",
+        name: "Touches",
+        steps: [
+          courseDrill("w11", "Weak foot tap, pull, push", "weak-foot-tap-pull-push", { tag: "beginner" }),
+          courseDrill("w12", "Weak foot outside pull, inside pull", "weak-foot-outside-pull-inside-pull", { tag: "advanced" }),
+        ],
+      },
+      {
+        no: 2,
+        label: "Level 2",
+        name: "Off the ground",
+        steps: [
+          courseDrill("w21", "Weak foot pop and settle", "weak-foot-pop-and-settle", { tag: "beginner" }),
+          courseDrill("w22", "Weak foot pop and juggle", "weak-foot-pop-and-juggle", { tag: "advanced" }),
+        ],
+      },
+    ],
+  },
+  {
+    slug: "speed",
+    name: "Speed",
+    subtitle: "Explosive first steps and quick feet.",
+    kind: "drill",
+    intro: ["Warm up first, every time.", "Work one level at a time. Full rest between reps; speed is never tired work.", "Land soft, leave fast."],
+    cover: m("/drills/posters/plyo-pogo-jumps.jpg"),
+    levels: [
+      {
+        no: 1,
+        label: "Level 1",
+        name: "Warm-up",
+        steps: [
+          courseDrill("s11", "Pogo jumps", "plyo-pogo-jumps"),
+          courseDrill("s12", "Lateral hops over object", "plyo-lateral-hops"),
+          courseDrill("s13", "Broad jumps", "plyo-broad-jumps"),
+        ],
+      },
+      {
+        no: 2,
+        label: "Level 2",
+        name: "Technique",
+        steps: [
+          courseDrill("s21", "Stop and go", "speed-stop-and-go"),
+          courseDrill("s22", "50%, 100%, 25%", "speed-50-100-25"),
+          courseDrill("s23", "Sprint around the cones", "speed-sprint-around-the-cones"),
+        ],
+      },
+    ],
+  },
+  {
+    slug: "general-nutrition-guide",
+    name: "General Nutrition Guide",
+    subtitle: "Fuel for a training day, a match day, and the hours between.",
+    kind: "lesson",
+    intro: [
+      "A guide, not a plan. General food guidance for a young player, nothing more.",
+      "No calorie counts, no supplements, no weight targets. Allergies, a medical condition or anything about weight is a conversation with your doctor, not a page in an app.",
+      "Ask us anything here. We will tell you what we know and when to ask someone else.",
+    ],
+    cover: m("/courses/general-nutrition-guide.jpg"),
+    levels: [
+      {
+        no: 1,
+        label: "Part 1",
+        name: "Start here",
+        steps: [
+          coursePage(
+            "n11",
+            "Three rules",
+            "Everything in this guide comes back to three things.\n\nEAT ENOUGH\nA player who trains four times a week and plays on the weekend needs more food than a kid who does not. Hungry is normal. Eat.\n\nEAT ON TIME\nThe same food at the wrong time is a heavy stomach at kickoff or an empty tank at the hour mark. The pages here are mostly about when.\n\nDRINK BEFORE YOU ARE THIRSTY\nBy the time you feel thirsty you are already behind. Water through the day, a bottle at every session.\n\nRULES OF THUMB\n\nThis is general guidance for healthy young players. It is not medical advice. Allergies, a condition, or any question about weight go to your doctor first.\n\nNothing here needs a supplement, a powder or a special product. Food from the grocery store does the job."
+          ),
+          coursePage(
+            "n12",
+            "The plate",
+            "The simplest picture of a good meal, and it works for breakfast, lunch and dinner.\n\nHALF THE PLATE\nFruit and vegetables. Any kind, any color, cooked or raw. More color, more good.\n\nA QUARTER\nCarbs. Rice, pasta, potatoes, bread, oats, tortillas. This is the fuel for the session; players who cut carbs run out of gas.\n\nA QUARTER\nProtein. Chicken, fish, eggs, beef, beans, yogurt, tofu. This is what repairs the legs after the work.\n\nRULES OF THUMB\n\nOn a training day or a match day, the carb quarter grows. That is the only change.\n\nPortions: roughly your own fist for carbs, your own palm for protein. Hands grow with the player, so the portion does too.\n\nWater with the meal. Milk is fine. Soda and energy drinks are not food."
+          ),
+        ],
+      },
+      {
+        no: 2,
+        label: "Part 2",
+        name: "A training day",
+        steps: [
+          coursePage(
+            "n21",
+            "Before training",
+            "Train on a full tank, never a full stomach.\n\nTWO TO THREE HOURS BEFORE\nA normal meal from the plate. Lunch before an after-school session; dinner early before an evening one.\n\nTHIRTY TO SIXTY MINUTES BEFORE\nSomething small and mostly carbs. A banana. Toast with peanut butter or jam. A granola bar. Pretzels. A small bowl of cereal.\n\nRULES OF THUMB\n\nIf practice is straight after school, the snack in the bag matters more than anything else on this page. Pack it in the morning.\n\nNothing new and nothing heavy close to a session. Fried food, a big burger or a milkshake an hour before is a stomach ache, not fuel.\n\nWater with the snack, and the bottle goes to the session full."
+          ),
+        ],
+      },
+    ],
+  },
+];
+
+// The shelf, as the server would cut it from those courses.
+export function fixtureShelf(): AppCourseList {
+  const locked = now().free;
+  return {
+    locked,
+    courses: FIXTURE_COURSES.map((c) => ({ slug: c.slug, name: c.name, subtitle: c.subtitle, cover: c.cover, locked })),
+  };
+}
+
+const COURSE_PATH = "/api/app/courses/";
+
 function stateFor(kind: string): AppMemberState {
   switch (kind) {
     case "consent":
@@ -241,8 +536,167 @@ function stateFor(kind: string): AppMemberState {
   }
 }
 
+// ---- The free app's example: Marcus and three friends -------------------
+// Every picture is a still of one of our own drill clips, standing in for a
+// profile photo or a training photo. Nobody here is a real person.
+const ME_PHOTO = m("/drills/posters/juggling-one-touch-keep-it-up.jpg");
+const FRIENDS = [
+  { id: "f-diego", name: "Diego R.", first: "Diego", initials: "DR", photo: m("/drills/posters/weak-foot-pop-and-juggle.jpg"), minutes: 195, today: 75 },
+  { id: "f-nico", name: "Nico A.", first: "Nico", initials: "NA", photo: m("/drills/posters/two-touch-ball-mastery-v1.jpg"), minutes: 150, today: 45 },
+  { id: "f-jalen", name: "Jalen T.", first: "Jalen", initials: "JT", photo: m("/drills/posters/speed-kneel-and-drive.jpg"), minutes: 90, today: 0 },
+] as const;
+const MY_WEEK_MINUTES = 120;
+const POST_MINUTES = 45;
+const TARGET = 240;
+
+export const FIXTURE_OFFER: Omit<AppOffer, "later"> = {
+  card: { name: "Marcus B.", tier: "Pro" },
+  headline: "Marcus, your first week goes after your weak foot and first touch.",
+  parent: { label: "Send to a parent", text: "Can you look at this for me? It is the soccer training I want to do. https://thestriveapp.com/pro/for/exampleexampleexampleexamp" },
+  drillsLabel: "Inside your first week",
+  drills: [
+    { poster: m("/drills/posters/weak-foot-tap-pull-push.jpg") },
+    { poster: m("/drills/posters/two-touch-ball-mastery-v1.jpg") },
+    { poster: m("/drills/posters/weak-foot-outside-pull-inside-pull.jpg") },
+    { poster: m("/drills/posters/l-turn-roll-touch.jpg") },
+  ],
+  drillLocked: "A drill from your first week. It opens when you start.",
+  gets: ["A new week every Monday, built around what you told us.", "One drill at a time, with the video.", "Every course is included."],
+  price: "$29 a month. Cancel anytime.",
+  start: "Start Strive Pro",
+  terms: "Strive Pro is $29 a month, charged every month until you cancel. By starting you agree to the Terms of Service and the Privacy Policy.",
+};
+
+function fixtureFeed(): AppFreeFeed {
+  const l = now();
+  const open = (id: string, f: (typeof FRIENDS)[number], day: string, ago: string, minutes: number, file: string, caption: string | null, props: number): AppFeedCard => ({
+    state: "open",
+    id,
+    ownerId: f.id,
+    mine: false,
+    name: f.name,
+    first: f.first,
+    initials: f.initials,
+    kind: "training",
+    minutes,
+    caption,
+    day,
+    photoUrl: m(`/drills/posters/${file}.jpg`),
+    ago,
+    props,
+    propped: false,
+    together: null,
+    starred: false,
+    photo: f.photo,
+  });
+  const today: AppFeedCard[] = l.posted
+    ? [
+        {
+          state: "open", id: "p-me", ownerId: "me", mine: true, name: "You", first: "You", initials: "MB", kind: "training", minutes: POST_MINUTES,
+          caption: "Weak foot only.", day: "2026-11-24", photoUrl: m("/drills/posters/weak-foot-tap-pull-push.jpg"), ago: "Just now", props: 0, propped: false, together: null, starred: false, photo: ME_PHOTO,
+        },
+        open("p-diego", FRIENDS[0], "2026-11-24", "42 min ago", 75, "wall-pass-touch-stepover", "Wall work before school.", 2),
+        open("p-nico", FRIENDS[1], "2026-11-24", "2h ago", 45, "l-turn-roll-touch", null, 1),
+      ]
+    : [
+        { state: "locked", id: "p-diego", ownerId: FRIENDS[0].id, photo: FRIENDS[0].photo, first: "Diego", initials: "DR", kind: "training", minutes: 75 },
+        { state: "locked", id: "p-nico", ownerId: FRIENDS[1].id, photo: FRIENDS[1].photo, first: "Nico", initials: "NA", kind: "training", minutes: 45 },
+      ];
+  const faces: Face[] = [
+    { id: "me", first: "You", initials: "MB", you: true, active: l.posted, starred: false, photo: ME_PHOTO },
+    ...FRIENDS.map((f) => ({ id: f.id, first: f.first, initials: f.initials, you: false, active: f.today > 0, starred: false, photo: f.photo })),
+  ];
+  const minutes = MY_WEEK_MINUTES + (l.posted ? POST_MINUTES : 0);
+  return {
+    date: "Tuesday, Nov 24",
+    unlocked: l.posted,
+    faces,
+    friendCount: FRIENDS.length,
+    friendsToday: 2,
+    cards: [
+      ...today,
+      open("p-jalen-y", FRIENDS[2], "2026-11-23", "Yesterday", 60, "speed-zigzag-sprint", "Sprints at the park.", 3),
+      open("p-diego-y", FRIENDS[0], "2026-11-23", "Yesterday", 60, "juggling-thighs-high", null, 1),
+    ],
+    requests: l.posted ? [] : [{ id: "r-kai", name: "Kai M.", initials: "KM" }],
+    week: { minutes, target: TARGET, percent: Math.round((minutes / TARGET) * 100) },
+    invite: "https://thestriveapp.com/join?ref=EXAMPLE2",
+    // the first-days list: posted and on a club, friends and props still open
+    firstDays: firstDays({ joinedAt: new Date(Date.now() - 2 * 86_400_000).toISOString(), posted: true, friends: 1, clubs: 1, gaveProps: false }, Date.now()),
+    // bring your squad: one teammate trained, one joined and has not posted
+    squad: buildSquad({
+      trained: [{ id: "t1", name: "Diego R." }],
+      joined: [{ id: "t2", name: "Kai M." }],
+      passes: [],
+      runningUntil: null,
+    }),
+  };
+}
+
+function fixtureFreeWeek(): AppFreeWeek {
+  const l = now();
+  const minutes = MY_WEEK_MINUTES + (l.posted ? POST_MINUTES : 0);
+  const days = ["2026-11-23", "2026-11-24", "2026-11-25", "2026-11-26", "2026-11-27", "2026-11-28", "2026-11-29"];
+  const letters = ["M", "T", "W", "T", "F", "S", "S"];
+  const plan = [0, 1, 3, 5];
+  return {
+    today: "2026-11-24",
+    label: "Nov 23 to Nov 29",
+    minutes,
+    gymMinutes: 30,
+    target: TARGET,
+    percent: Math.round((minutes / TARGET) * 100),
+    planDays: plan,
+    strip: days.map((day, index) => ({
+      day,
+      index,
+      letter: letters[index],
+      planned: plan.includes(index),
+      trained: index === 0 || (index === 1 && l.posted),
+      today: index === 1,
+      minutes: index === 0 ? MY_WEEK_MINUTES : index === 1 && l.posted ? POST_MINUTES : 0,
+    })),
+    todayLine: l.posted ? { strong: "Trained today.", rest: "Next up: Thursday, about 1h." } : { strong: "Today is a training day.", rest: "About 1h." },
+    splitLine: "4 days. About 1h a day.",
+    gymLine: "Gym this week: 30m",
+    entries: [
+      ...(l.posted ? [{ id: "e-today", day: "2026-11-24", label: "Tue, Nov 24", minutes: POST_MINUTES, kind: "training" as const, photo: true }] : []),
+      { id: "e-mon", day: "2026-11-23", label: "Mon, Nov 23", minutes: MY_WEEK_MINUTES, kind: "training" as const, photo: true },
+      { id: "e-gym", day: "2026-11-23", label: "Mon, Nov 23", minutes: 30, kind: "gym" as const, photo: false },
+    ],
+    board: friendsBoard(
+      [{ id: "me", name: "Marcus B.", minutes, photo: ME_PHOTO }, ...FRIENDS.map((f) => ({ id: f.id, name: f.name, minutes: f.minutes, photo: f.photo }))],
+      "me"
+    ),
+    invite: "https://thestriveapp.com/join?ref=EXAMPLE2",
+    upgrade: { area: "Weak foot", sessions: 4 },
+  };
+}
+
+function fixtureFreeYou(): AppFreeYou {
+  const minutes = MY_WEEK_MINUTES + (now().posted ? POST_MINUTES : 0);
+  return {
+    name: "Marcus B.",
+    aura: { level: 3, label: auraLabel(3), progress: 0.4, next: "3h of training to Level 4" },
+    weekMinutes: minutes,
+    allMinutes: 420 + (now().posted ? POST_MINUTES : 0),
+    gymLine: "Gym this week: 30m",
+    starred: false,
+    invite: "https://thestriveapp.com/join?ref=EXAMPLE2",
+  };
+}
+
+const FIXTURE_PLAN: AppFreePlan = {
+  recommended: TARGET,
+  line: "We recommend 4 hours a week on your own, outside team training.",
+  target: TARGET,
+  days: [],
+};
+
 export function fixtureBootstrap(): AppBootstrap {
-  const state = stateFor(chosenState());
+  const l = now();
+  const state: AppMemberState = l.free ? { kind: "free", stage: l.stage } : l.train ? { kind: "ok", social: true } : stateFor(chosenState());
+  const photo = l.owed.includes("photo") ? null : ME_PHOTO;
   return {
     viewer: { name: "Marcus Bryant", firstName: "Marcus", email: "marcus@example.com" },
     state,
@@ -259,36 +713,149 @@ export function fixtureBootstrap(): AppBootstrap {
             terms: "I agree to the Terms of Service and the Privacy Policy.",
           }
         : null,
-    player: {
-      id: "p-example",
-      tier: "pro",
-      card: FIXTURE_YOU.card,
-      position: "Attacking midfield",
-      knownParentPhone: "",
+    player: l.free
+      ? null
+      : {
+          id: "p-example",
+          tier: "pro",
+          card: FIXTURE_YOU.card,
+          position: "Attacking midfield",
+          knownParentPhone: "",
+        },
+    free: l.free || l.train ? { name: "Marcus B.", gym: true, ...(l.ended ? { proEnded: true } : {}) } : null,
+    quizOwed: null,
+    tabs:
+      l.free || l.train
+        ? oneAppTabs(l.train)
+        : [
+            { key: "home", label: "Home" },
+            { key: "week", label: "Week" },
+            { key: "courses", label: "Courses" },
+            { key: "you", label: "You" },
+          ],
+    // one note the example member has not read: Home's bell shows its dot
+    unread: l.free || inboxRead ? 0 : 1,
+    // ?state=setup: a member from before 081 who still owes both screens,
+    // and a new free account until it has picked them. Everyone else has a
+    // photo (a drill still standing in for one), so every card and every
+    // face is drawn with it.
+    profileSetup: {
+      username: l.username,
+      hasPhoto: photo !== null,
+      photoUrl: photo,
+      steps: [...l.owed],
+      ideas: l.owed.includes("username") ? ["marcus.b", "marcusbryant", "marcus_b"] : [],
     },
-    tabs: [
-      { key: "home", label: "Home" },
-      { key: "week", label: "Week" },
-      { key: "courses", label: "Courses" },
-      { key: "you", label: "You" },
-    ],
-    unread: 0,
-    // ?state=setup: a member from before 081 who still owes both screens
-    profileSetup:
-      chosenState() === "setup"
-        ? { username: null, hasPhoto: false, photoUrl: null, steps: ["username", "photo"], ideas: ["marcus.b", "marcusbryant", "marcus_b"] }
-        : { username: "marcus.b", hasPhoto: false, photoUrl: null, steps: [], ideas: [] },
   };
 }
 
+// The free app's calls, answered from the example and moved on by it.
+function fixtureFree(path: string, method: string, body?: unknown): unknown {
+  const l = now();
+  const at = path.slice("/api/app/free/".length);
+  // clubs, their sessions and games, and the two one-time sheets
+  if (/^(clubs|plans|play-terms)(\/|$)/.test(at)) return fixtureClubs(at, method, body, { mePhoto: ME_PHOTO, posted: l.posted });
+  if (at === "open") return { open: true };
+  if (at === "join") return { ok: true, signedIn: false };
+  if (at === "intake") {
+    l.stage = "offer";
+    return { ok: true };
+  }
+  if (at === "offer") return { ...FIXTURE_OFFER, later: l.stage === "ready" ? "Not now" : "Not now, start free" } satisfies AppOffer;
+  if (at === "plan") {
+    if (method === "GET") return l.stage === "ready" ? { ...FIXTURE_PLAN, days: [0, 1, 3, 5] } : FIXTURE_PLAN;
+    l.stage = "ready";
+    return { ok: true };
+  }
+  if (at === "upgrade") return { ok: false, error: "Payments are not switched on yet, so Strive Pro cannot be started today. Check back soon." };
+  if (at === "upgrade/confirm") return { active: false };
+  if (at === "feed") return fixtureFeed();
+  if (at === "post" || (at === "log" && method === "POST")) {
+    if (at === "post") l.posted = true;
+    return { ok: true, id: "e-today" };
+  }
+  if (at === "week") return fixtureFreeWeek();
+  if (at === "you") return fixtureFreeYou();
+  if (at === "props") return { ok: true, propped: true };
+  return { ok: true };
+}
+
 // What each call answers with in the example build.
-export function fixtureResponse(path: string, method: string): unknown {
+// The example server's own count of what was ticked, so its answer to a
+// saved drill adds up the way the real one does (the all-time minutes with
+// that drill in or out), not a fixed figure.
+const fixtureDone = new Map<string, boolean>();
+// The Inbox of the example member: the words are the catalogue's own
+// (lib/elite/notices.ts), so a picture of this screen is a picture of what
+// a member is really sent. The first is new until the Inbox is opened.
+let inboxRead = false;
+const HOUR = 3_600_000;
+function fixtureInbox(): AppInbox {
+  const week = newWeekNotice({ first: "Marcus", week: FIXTURE_WEEK.week, firstWeek: false, focus: FIXTURE_WEEK.focus });
+  const medal = earnedNotice({ title: "10 Sessions", detail: "Ten full sessions in the bank" });
+  const first = earnedNotice({ title: "First Session", detail: "Your first full session, done" });
+  const welcome = welcomeNotice();
+  const at = (hoursAgo: number) => new Date(Date.now() - hoursAgo * HOUR).toISOString();
+  return {
+    notices: [
+      { id: "n1", kind: week.kind, topic: week.topic, title: week.title, body: week.body, at: at(3), fresh: !inboxRead, path: week.path },
+      { id: "n2", kind: medal.kind, topic: medal.topic, title: medal.title, body: medal.body, at: at(52), fresh: false, path: medal.path },
+      { id: "n3", kind: first.kind, topic: first.topic, title: first.title, body: first.body, at: at(24 * 40), fresh: false, path: first.path },
+      { id: "n4", kind: welcome.kind, topic: welcome.topic, title: welcome.title, body: welcome.body, at: at(24 * 44), fresh: false, path: welcome.path },
+    ],
+  };
+}
+
+// The notification choices of the example account, kept in memory: a
+// member's ("Your week", and the reminder time) or a free account's
+// ("Friends", "Clubs").
+let noticeOff: NoticeTopic[] = [];
+let reminderHour: number | null = null;
+function fixtureNoticePrefs(): NoticePrefs {
+  const free = now().free;
+  return buildNoticePrefs({ member: !free, free, coachTime: false, off: noticeOff, reminderHour: free ? undefined : reminderHour });
+}
+function fixtureSavePrefs(body: unknown): unknown {
+  const b = (body ?? {}) as { topic?: unknown; on?: unknown; reminder?: unknown };
+  if (typeof b.topic === "string" && typeof b.on === "boolean") noticeOff = withTopic(noticeOff, b.topic as NoticeTopic, b.on);
+  const choice = reminderChoice(b.reminder);
+  if (choice) reminderHour = choice.hour;
+  return { ok: true, prefs: fixtureNoticePrefs() };
+}
+
+function fixtureTotalAfter(body: unknown): number {
+  const b = body as { id?: string; completed?: boolean } | undefined;
+  if (b?.id && typeof b.completed === "boolean") fixtureDone.set(b.id, b.completed);
+  let total = FIXTURE_WEEK.totalMinutes;
+  for (const s of FIXTURE_WEEK.sessions)
+    for (const d of s.drills) {
+      const now = fixtureDone.get(d.id);
+      if (now !== undefined && now !== d.completed) total += now ? d.minutes : -d.minutes;
+    }
+  return total;
+}
+
+export function fixtureResponse(path: string, method: string, body?: unknown): unknown {
+  if (path.startsWith("/api/app/free/")) return fixtureFree(path, method, body);
   if (path.startsWith("/api/app/me")) return fixtureBootstrap();
+  if (path.startsWith("/api/app/notices/prefs")) return method === "GET" ? { prefs: fixtureNoticePrefs() } : fixtureSavePrefs(body);
+  if (path.startsWith("/api/app/notices")) {
+    if (method === "GET") return fixtureInbox();
+    inboxRead = true;
+    return { ok: true };
+  }
   if (path.startsWith("/api/app/week")) return { week: FIXTURE_WEEK };
   if (path.startsWith("/api/app/you")) return { you: FIXTURE_YOU };
   if (path.startsWith("/api/app/extra")) return method === "GET" ? FIXTURE_EXTRA : { ok: true, session: 5 };
-  if (path.startsWith("/api/app/drill")) return { ok: true, totalMinutes: FIXTURE_WEEK.totalMinutes };
+  if (path.startsWith("/api/app/drill")) return { ok: true, totalMinutes: fixtureTotalAfter(body) };
   if (path.startsWith("/api/app/first-week")) return { status: "live", line: null };
   if (path.startsWith("/api/app/profile/username")) return { ok: true, name: "marcus.b" };
+  if (path.startsWith(COURSE_PATH)) {
+    const course = FIXTURE_COURSES.find((c) => c.slug === decodeURIComponent(path.slice(COURSE_PATH.length)));
+    // as the server: a course that is not on the shelf is not found
+    if (!course) throw Object.assign(new Error("not_found"), { status: 404 });
+    return { course };
+  }
+  if (path.startsWith("/api/app/courses")) return fixtureShelf();
   return { ok: true };
 }

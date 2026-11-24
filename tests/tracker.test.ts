@@ -494,10 +494,17 @@ describe("where a signed-in person belongs", () => {
     expect(code("app/page.tsx")).toContain("homePathFor(viewer)");
     const free = code("app/(free)/layout.tsx");
     expect(free).toContain('if (viewer.role !== "player") redirect("/coach")');
-    expect(free).toContain('if (!tracker) redirect("/dashboard")');
+    expect(free).toContain('if (!side) redirect("/dashboard")');
     expect(free).toMatch(/!viewer\.demo && \(await consentDue/);
-    // a member has a player record, so trackerFor answers null for them
-    expect(code("lib/elite/tracker-server.ts")).toContain("if (viewer.playerId) return null;");
+    // an invite family or a member who joined Strive Pro directly has no
+    // free account, so trackerFor answers null for them. A free account
+    // keeps its free app before, during and after Strive Pro
+    // (lib/elite/one-app.ts keepsFreeApp); freeAccountFor is the one that
+    // is not switched on (lib/elite/member-gate.ts livesInFreeApp).
+    const server = code("lib/elite/tracker-server.ts");
+    expect(server).toContain("if (!viewer.playerId) return { tracker, lives: true };");
+    expect(server).toContain("if (!keepsFreeApp({ hasTracker: true, hasPlayer: true, tier: player?.tier })) return null;");
+    expect(server).toContain("return { tracker, lives: livesInFreeApp({ hasTracker: true, hasPlayer: true, player }) };");
   });
 
   it("signing in takes a free account to its screen in one redirect after /dashboard", () => {
@@ -673,6 +680,10 @@ describe("free accounts are invisible to everything a member query reads", () =>
     "lib/elite/tracker-actions.ts",
     "app/api/elite/auth/join/route.ts",
     "lib/elite/tracker-ranking.ts", // the club ranking: club names and averages only
+    // bring your squad (086): who a player brought, and their first names
+    "lib/elite/squad-pass-server.ts",
+    // send to a parent (086): the player's own code for the page a parent pays from
+    "lib/elite/parent-link-server.ts",
     // clubs as teams (077): sessions, games, events and trained together
     "lib/elite/club-teams-server.ts",
     "lib/elite/club-teams-actions.ts",
@@ -689,6 +700,16 @@ describe("free accounts are invisible to everything a member query reads", () =>
     // tracker-posts bucket, and before 081 a free account's pointer is
     // still read from elite_trackers
     "lib/elite/account-profile-server.ts",
+    // the quiz a free account takes in the iPhone app (082) and the week's
+    // set-up after it: the account's own row, after the app API's gate
+    "lib/elite/free-intake-server.ts",
+    // the weekly club matchup (083): which clubs can be matched, and the
+    // training of a matchup's stored players; what leaves it is a club's
+    // name and its time per player, never a player
+    "lib/elite/club-matchups-server.ts",
+    // a member's finished session, put on their own free-app week once
+    // (one-app.ts): the signed-in member's own row, from the tick's action
+    "lib/elite/session-log.ts",
   ]);
   // (the post route stores nothing itself: it hands a checked photo to
   // savePost in tracker-server.ts)
@@ -829,7 +850,8 @@ describe("planning the week", () => {
     const actions = code("lib/elite/tracker-actions.ts");
     expect(actions).toContain("export async function setPlanDays(");
     // the set-up is not finished without at least one day
-    expect(code("lib/elite/tracker-server.ts")).toContain("tracker.plan_days.length > 0");
+    expect(code("lib/elite/tracker-server.ts")).toContain("return setUpDone(tracker);");
+    expect(code("lib/elite/tracker.ts")).toContain("(t.plan_days ?? []).length > 0");
   });
 
   it("logging stays today only", () => {

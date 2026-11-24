@@ -1,0 +1,38 @@
+# The Courses tab by taps: the tab bar, the shelf, a course of drills with
+# a clip tapped (it plays, or pauses if it was the one already playing),
+# and back to the shelf. A course of pages is opened by sim/shots.sh.
+appId: com.strivesoccer.elite
+---
+- launchApp:
+    clearState: true
+    arguments:
+      fixtureState: ok
+- extendedWaitUntil:
+    visible: "Start session"
+    timeout: 30000
+- tapOn: "Courses"
+- extendedWaitUntil:
+    visible: "All courses"
+    timeout: 15000
+- takeScreenshot: t17-courses-tab
+- tapOn: "Keep It Up. The Juggling Ladder"
+- extendedWaitUntil:
+    visible: "Back to Courses"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: t18-course-drills
+- scrollUntilVisible:
+    element: ".* One touch, keep it up"
+    direction: DOWN
+    timeout: 20000
+- takeScreenshot: t19-course-second-drill
+- tapOn: ".* One touch, keep it up"
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: t20-course-clip-tapped
+- tapOn: "Back to Courses"
+- extendedWaitUntil:
+    visible: "All courses"
+    timeout: 15000
+- takeScreenshot: t21-courses-back

@@ -35,6 +35,10 @@ import { SendClip } from "./SendClip";
 import { SetTimer } from "./SetTimer";
 import { PushOptIn, useNotificationsAsk } from "./PushOptIn";
 import { cn } from "@/lib/utils";
+import { REFUSED_LINE, UNSENT_LINE_WEB } from "@/lib/elite/tick-outbox";
+import { newClock, resetDrill, secondsOn, showDrill } from "@/lib/elite/drill-clock";
+import type { TrainedMap } from "@/lib/elite/session-flow";
+import { useWebRefused, useWebTicks } from "./web-ticks";
 
 // Where the session grows from: the Home card's box on screen.
 export type Origin = { top: number; left: number; width: number; height: number };
@@ -60,6 +64,7 @@ export function SessionPlayer({
   drills,
   done,
   onToggle,
+  trained,
   startIndex,
   title,
   headline,
@@ -78,7 +83,9 @@ export function SessionPlayer({
 }: {
   drills: Homework[];
   done: DoneMap;
-  onToggle: (id: string, next: boolean) => void;
+  onToggle: (id: string, next: boolean, seconds?: number) => void;
+  // seconds measured for the drills ticked in this browser (the clock below)
+  trained?: TrainedMap;
   startIndex: number;
   title: string; // "Session 3" or "Extra session"
   headline?: string | null; // "Weak foot and ball mastery" (experience.ts sessionHeadline)
@@ -111,13 +118,21 @@ export function SessionPlayer({
     countInWanted(drills, done, startIndex) ? "intro" : null
   );
   const advance = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const clock = useRef(newClock());
   const sheet = useRef<HTMLDivElement | null>(null);
   // Notifications are asked for once, on its own screen after the finish
   // screen of a member's own session (A8). Never the example player.
   const { ask, shown } = useNotificationsAsk(Boolean(playerId) && !example);
   const [asking, setAsking] = useState(false);
 
-  const progress = useMemo(() => sessionProgress(drills, done), [drills, done]);
+  const progress = useMemo(() => sessionProgress(drills, done, trained), [drills, done, trained]);
+
+  // The clock runs for the drill that is on screen and for nothing else:
+  // not the count-in, not the finish, not the notifications ask.
+  const onScreen = !finished && !asking && countIn === null ? drills[index]?.id ?? null : null;
+  useEffect(() => {
+    clock.current = showDrill(clock.current, onScreen, Date.now());
+  }, [onScreen]);
 
   useEffect(() => {
     setMounted(true);
@@ -204,7 +219,11 @@ export function SessionPlayer({
       return;
     }
     const after: DoneMap = { ...done, [drill.id]: true };
-    onToggle(drill.id, true);
+    // the time this drill really took, from the moment it came on screen
+    const now = Date.now();
+    const seconds = secondsOn(clock.current, drill.id, now);
+    clock.current = resetDrill(clock.current, drill.id, now);
+    onToggle(drill.id, true, seconds);
     setJustTicked(true);
     const n = nextStep(drills, after, index);
     if (n === -1) {
@@ -222,6 +241,7 @@ export function SessionPlayer({
   }
 
   function undo() {
+    clock.current = resetDrill(clock.current, drill.id, Date.now());
     onToggle(drill.id, false);
     setJustTicked(false);
   }
@@ -244,14 +264,15 @@ export function SessionPlayer({
   );
 
   const body = asking && ask ? (
-    <PushOptIn ask={ask} onDone={onClose} />
+    // an offer without Send a clip is Strive Pro: no coach chat, no Film Room
+    <PushOptIn ask={ask} onDone={onClose} coachTime={sendClips !== false} />
   ) : finished ? (
     <Finish
       title={title}
       weekLabel={weekLabel}
       firstName={firstName}
       sessionsTotal={sessionsTotal}
-      minutes={progress.minutesTotal}
+      minutes={progress.minutesDone}
       minutesBefore={minutesBefore}
       sessionsLeftAfter={sessionsLeftAfter}
       weekDoneLine={weekDoneLine}
@@ -701,6 +722,9 @@ function Finish({
   weekDoneLine?: string;
   onClose: () => void;
 }) {
+  // the truth about saving: ticks still on their way, or one the server refused
+  const unsent = useWebTicks().length > 0;
+  const notSaved = useWebRefused().length > 0;
   const weekDone = sessionsLeftAfter <= 0;
   const added = useCountUp(minutes);
   const total = minutesBefore + added;
@@ -764,6 +788,11 @@ function Finish({
           <p className="mt-2 max-w-xs text-[15px] leading-relaxed text-white/65 animate-rise [animation-delay:340ms]">
             {weekDone ? weekDoneLine ?? "Every session of the week, done." : afterSessionLine(sessionsLeftAfter)}
           </p>
+          {notSaved || unsent ? (
+            <p className={cn("mt-2 max-w-xs text-[13px] leading-relaxed", notSaved ? "text-white" : "text-white/60")}>
+              {notSaved ? REFUSED_LINE : UNSENT_LINE_WEB}
+            </p>
+          ) : null}
           <span className="sr-only">{title}</span>
 
           <div className="mt-6 flex w-full max-w-sm gap-2.5 text-left animate-rise [animation-delay:440ms]">

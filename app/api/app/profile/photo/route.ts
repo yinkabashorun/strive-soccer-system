@@ -10,5 +10,5 @@ import { GET as readPhoto, POST as storePhoto } from "@/app/api/elite/profile/ph
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export const GET = appRoute({ name: "photo-read", access: "player", limit: 240 }, ({ req }) => readPhoto(req));
-export const POST = appRoute({ name: "photo", access: "player", limit: 10 }, ({ req }) => storePhoto(req));
+export const GET = appRoute({ name: "photo-read", access: "person", limit: 240 }, ({ req }) => readPhoto(req));
+export const POST = appRoute({ name: "photo", access: "person", limit: 10 }, ({ req }) => storePhoto(req));

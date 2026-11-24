@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getViewer } from "@/lib/elite/session";
 import { createClient, createServiceClient } from "@/lib/elite/supabase/server";
-import { trackerFor } from "@/lib/elite/tracker-server";
+import { freeAccountFor } from "@/lib/elite/tracker-server";
 
 // Stores a player's Web Push subscription (one row per device) so
 // lib/elite/push.ts can actually reach them later. Called by
@@ -10,9 +10,11 @@ import { trackerFor } from "@/lib/elite/tracker-server";
 export async function POST(req: Request) {
   const viewer = await getViewer();
   if (!viewer || viewer.demo) return NextResponse.json({ ok: false }, { status: 401 });
-  // A free account (078) has no player row: its devices are on file by
-  // profile, written with the service client after this check.
-  const free = !viewer.playerId && (await trackerFor(viewer)) !== null;
+  // A free account (078) is on file by profile, written with the service
+  // client after this check. An account that lives in the free app is a
+  // free account here, whether or not it has a member row that is not
+  // switched on (freeAccountFor).
+  const free = (await freeAccountFor(viewer)) !== null;
   if (!viewer.playerId && !free) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
@@ -55,8 +57,9 @@ export async function DELETE(req: Request) {
   const body = await req.json().catch(() => null);
   const endpoint = body?.endpoint as string | undefined;
   if (!endpoint) return NextResponse.json({ ok: false }, { status: 400 });
-  if (!viewer.playerId) {
-    if (!(await trackerFor(viewer))) return NextResponse.json({ ok: false }, { status: 401 });
+  const free = (await freeAccountFor(viewer)) !== null;
+  if (!viewer.playerId && !free) return NextResponse.json({ ok: false }, { status: 401 });
+  if (free) {
     const admin = createServiceClient();
     if (!admin) return NextResponse.json({ ok: false }, { status: 500 });
     await admin

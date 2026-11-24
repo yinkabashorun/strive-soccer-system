@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { FREE_HOME, FREE_WEEK } from "@/lib/elite/tracker";
 import { PostComposer } from "./PostComposer";
+import { Play } from "lucide-react";
 import { IconClock, IconFriends, IconPlus } from "./FreeIcons";
 
 // The free app's frame: the two tabs and the plus between them (the
@@ -32,9 +33,13 @@ export const usePostLauncher = () => useContext(LauncherContext);
 
 export function FreeShell({
   gym,
+  train = false,
   children,
 }: {
   gym: boolean;
+  // Strive Pro is on (lib/elite/one-app.ts): one tab is ADDED, Train, which
+  // opens the member's week. Friends, the plus and My week stay as they are.
+  train?: boolean;
   children: ReactNode;
 }) {
   const pathname = usePathname();
@@ -81,7 +86,12 @@ export function FreeShell({
           aria-label="Free app"
           className="fixed inset-x-0 bottom-0 z-40 bg-gradient-to-b from-transparent via-black to-black pb-[env(safe-area-inset-bottom)]"
         >
-          <div className="mx-auto flex h-[88px] max-w-md items-center justify-between px-11 pb-[18px] pt-3">
+          <div className={"mx-auto flex h-[88px] max-w-md items-center justify-between pb-[18px] pt-3 " + (train ? "px-5" : "px-11")}>
+            {train ? (
+              <Tab href="/dashboard" label="Train" on={false}>
+                <IconTrain />
+              </Tab>
+            ) : null}
             <Tab href={FREE_HOME} label="Friends" on={onFriends}>
               <IconFriends />
             </Tab>
@@ -112,6 +122,8 @@ export function FreeShell({
     </LauncherContext.Provider>
   );
 }
+
+const IconTrain = () => <Play className="h-[22px] w-[22px]" strokeWidth={2} aria-hidden />;
 
 function Tab({ href, label, on, children }: { href: string; label: string; on: boolean; children: ReactNode }) {
   return (

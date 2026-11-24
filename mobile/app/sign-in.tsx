@@ -3,9 +3,11 @@ import { Keyboard, StyleSheet, Text, TextInput, View } from "react-native";
 import { Image } from "expo-image";
 import * as WebBrowser from "expo-web-browser";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { signInWithPassword } from "@/auth/session";
 import { queryClient } from "@/api/queryClient";
 import { keys } from "@/api/queries";
+import { useJoinOpen } from "@/api/free";
 import { API_BASE } from "@/config";
 import { FormScreen } from "@/FormScreen";
 import { Body, Button, Head, Label, Press } from "@/ui";
@@ -13,10 +15,14 @@ import { color, font } from "@/theme";
 
 // Sign in: the same email and password as the website. Forgot your
 // password opens the website's own reset in a sheet inside the app (the
-// emailed link is the website's too). There is no sign-up here: accounts
-// are made by the coach's invite or on the website.
+// emailed link is the website's too). A member's account is made by the
+// coach's invite or on the website. A FREE account can be made here: the
+// quiet "Join free" link shows only while the server says free sign-up is
+// open (the coaches' switch, the same one the website's /join reads).
 export default function SignIn() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
+  const joinOpen = useJoinOpen().data?.open === true;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -34,7 +40,7 @@ export default function SignIn() {
   }
 
   return (
-    <FormScreen contentStyle={{ paddingHorizontal: 24, paddingTop: insets.top + 44, paddingBottom: insets.bottom + 24 }}>
+    <FormScreen safeTop contentStyle={{ paddingHorizontal: 24, paddingTop: 44, paddingBottom: insets.bottom + 24 }}>
       <Image source={require("../assets/splash.png")} style={styles.mark} contentFit="contain" accessibilityLabel="Strive" />
       <Head size={40} style={{ marginTop: 22 }}>
         Strive <Text style={{ color: color.gold }}>Elite</Text>
@@ -88,6 +94,12 @@ export default function SignIn() {
       >
         <Label dim>Forgot your password?</Label>
       </Press>
+      {joinOpen ? (
+        <Press style={styles.join} accessibilityRole="link" accessibilityLabel="Join free" onPress={() => router.push("/join/age")}>
+          <Label dim>New here?</Label>
+          <Label>Join free</Label>
+        </Press>
+      ) : null}
     </FormScreen>
   );
 }
@@ -107,4 +119,5 @@ const styles = StyleSheet.create({
   },
   error: { marginTop: 14, padding: 14, borderRadius: 14, backgroundColor: "rgba(255,107,94,0.12)", borderWidth: 1, borderColor: "rgba(255,107,94,0.35)" },
   link: { alignSelf: "center", minHeight: 44, justifyContent: "center", paddingHorizontal: 12, marginTop: 10 },
+  join: { alignSelf: "center", minHeight: 44, flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 12, marginTop: 4 },
 });

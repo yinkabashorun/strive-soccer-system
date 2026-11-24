@@ -64,12 +64,59 @@ const SHOTS = [
     await p.waitForTimeout(1600);
   }],
   ["14-week", "/week"],
+  ["14b-courses", "/courses"],
+  ["14c-course-drills", "/course/keep-it-up", 1800],
+  ["14d-course-lessons", "/course/general-nutrition-guide", 1200],
   ["15-you", "/you", 1500],
   ["16-extra", "/extra"],
   ["17-checkin", "/checkin"],
   ["18-settings", "/settings"],
   ["19-delete-account", "/delete-account"],
   ["20-gate", "/gate?state=membership"],
+  ["21-courses-locked", "/courses?state=locked"],
+  // joining free, the quiz, the offer and the free app's tabs
+  ["22-join-age", "/join/age?state=signedout"],
+  ["23-join-name", "/join/name?state=signedout"],
+  ["24-join-agree", "/join/agree?state=signedout"],
+  ["25-free-start", "/onboarding?state=free_quiz", 1500],
+  ["26-free-quiz-grade", "/onboarding/grade?state=free_quiz"],
+  ["27-free-quiz-on-ball", "/onboarding/onBall?state=free_quiz"],
+  ["28-free-quiz-aim", "/onboarding/aim?state=free_quiz"],
+  ["29-offer", "/offer?state=free_offer", 3200],
+  ["30-week-plan", "/week-plan?state=free_offer", 1200],
+  ["31-friends", "/friends?state=locked", 1800],
+  ["32-free-week", "/my-week?state=locked", 2200],
+  ["33-free-you", "/me?state=locked", 1800],
+  ["34-post", "/post?state=locked"],
+  ["35-offer-again", "/offer?state=locked", 1800],
+  ["36-free-settings", "/settings?state=locked"],
+  // clubs: the tab, a club as a member, as its captain, and the screens off it
+  ["37-clubs", "/clubs?state=locked", 1800],
+  ["38-club", "/club/c-renegados?state=locked", 1800],
+  ["38b-club-lower", "/club/c-renegados?state=locked", 1800, async (p) => {
+    await p.mouse.wheel(0, 900);
+    await p.waitForTimeout(700);
+  }],
+  ["38c-club-photos", "/club/c-renegados?state=locked", 1800, async (p) => {
+    await p.mouse.wheel(0, 1800);
+    await p.waitForTimeout(700);
+  }],
+  ["39-club-captain", "/club/c-pickup?state=locked", 1800],
+  ["39b-club-captain-lower", "/club/c-pickup?state=locked", 1800, async (p) => {
+    await p.mouse.wheel(0, 1100);
+    await p.waitForTimeout(700);
+  }],
+  ["40-club-manage", "/club/c-pickup/manage?state=locked", 1500],
+  ["40b-club-manage-lower", "/club/c-pickup/manage?state=locked", 1500, async (p) => {
+    await p.mouse.wheel(0, 900);
+    await p.waitForTimeout(700);
+  }],
+  ["41-clubs-near", "/club/c-pickup/near?state=locked", 1500],
+  ["42-club-plan", "/club/c-pickup/plan?state=locked", 1500],
+  ["43-club-join", "/club/join?state=locked"],
+  ["44-matchup-how", "/club/how?state=locked"],
+  ["45-club-week-decided", "/club/c-gainesville?state=locked", 1800],
+  ["46-club-start", "/club/start?state=locked"],
 ];
 
 const pwPath = process.env.PLAYWRIGHT ?? "playwright";
@@ -78,7 +125,10 @@ await mkdir(out, { recursive: true });
 server.listen(PORT);
 const browser = await chromium.launch({ executablePath: process.env.CHROME || undefined });
 const fresh = () => browser.newContext({ viewport: { width: 393, height: 852 }, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
+// ONLY=22,29 takes just the screens whose names start with one of those.
+const only = (process.env.ONLY ?? "").split(",").filter(Boolean);
 for (const [name, url, wait = 900, act] of SHOTS) {
+  if (only.length && !only.some((o) => name.startsWith(o))) continue;
   const ctx = await fresh(); // nothing cached from the screen before
   const page = await ctx.newPage();
   page.on("pageerror", (e) => console.error(name, "page error:", e.message));

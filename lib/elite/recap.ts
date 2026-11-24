@@ -11,6 +11,7 @@
 
 import type { Homework, Player } from "./types";
 import { liveWeekNumber } from "./time";
+import { creditedMinutes } from "./time-trained";
 
 export type WeekRecap = {
   week: number; // the week being recapped (the one that just ended)
@@ -61,7 +62,7 @@ export function buildWeekRecap(
         drills.find((d) => !/warm.?up|plyo/i.test(d.title)) ?? drills[0];
       missedTitles.push(lead.title);
     }
-    for (const d of drills) if (d.completed) minutes += d.duration_min ?? 0;
+    for (const d of drills) minutes += creditedMinutes(d);
   }
 
   const first = player.full_name.split(" ")[0];

@@ -5,13 +5,16 @@
 // Best effort everywhere: a notice that cannot go never fails a post or
 // props.
 import { createServiceClient } from "./supabase/server";
-import { sendPushToProfile } from "./push";
+import { notifyProfile } from "./notify";
 import { isPushConfigured } from "./push";
 import { isNativePushConfigured } from "./apns";
-import { friendPostPush, propsPush } from "./push-texts";
+import { clubPlanNotice, friendPostNotice, propsNotice } from "./notices";
 import { claimOutcome, maySend } from "./announce";
 import { blocksWith, friendIdsOf, namesOf, type Admin } from "./tracker-server";
+import { planById, teamRowsOf } from "./club-teams-server";
+import { planDayAt, planWhat } from "./club-teams";
 import {
+  clubPlanReceivers,
   friendPostReceivers,
   isQuietTime,
   noticeKey,
@@ -85,8 +88,8 @@ export async function noticeFriendPost(posterId: string, today: string): Promise
   let sent = 0;
   for (const id of receivers) {
     if (!maySend(await claim(admin, id, "friend_post", noticeKey("friend_post", { today }), today))) continue;
-    const res = await sendPushToProfile(id, friendPostPush(first));
-    if (res.sent > 0) sent++;
+    const res = await notifyProfile(id, friendPostNotice({ first, nyDate: today }));
+    if (res.pushed > 0) sent++;
   }
   return sent;
 }
@@ -114,6 +117,55 @@ export async function noticeProps(input: {
     .eq("sent_on", input.today);
   if (!propsWithinDay(count ?? Number.POSITIVE_INFINITY)) return false;
   const first = noticeName((await namesOf(admin, [input.giverId])).get(input.giverId) ?? "");
-  const res = await sendPushToProfile(input.ownerId, propsPush(first));
-  return res.sent > 0;
+  const res = await notifyProfile(input.ownerId, propsNotice({ first, postId: input.postId }));
+  return res.pushed > 0;
+}
+
+// A club's training session was planned, or a game between two clubs is
+// on (the other captain accepted): the members of the club(s) hear once.
+// Each send is claimed first in elite_plan_notices (087), keyed (plan,
+// player): a retry, or the same plan announced again, sends nothing, and
+// so does a ledger that cannot be written (087 not applied). Never to the
+// player who planned or accepted it, never at night, and only to a phone
+// whose player left notifications on.
+export async function noticeClubPlan(input: { planId: string; byId: string }): Promise<number> {
+  const admin = ready();
+  if (!admin) return 0;
+  const plan = await planById(admin, input.planId);
+  if (!plan || plan.status !== "on" || Date.parse(plan.starts_at) <= Date.now()) return 0;
+  const clubIds = [plan.club_id, ...(plan.opponent_id ? [plan.opponent_id] : [])];
+  const clubs = new Map((await teamRowsOf(admin, clubIds)).map((c) => [c.id, c.name]));
+  const { data } = await admin.from("elite_tracker_club_members").select("club_id, profile_id").in("club_id", clubIds);
+  const members = (data as { club_id: string; profile_id: string }[] | null) ?? [];
+  const receivers = clubPlanReceivers({
+    clubIds,
+    members,
+    byId: input.byId,
+    withDevice: await withDevices(admin, [...new Set(members.map((m) => m.profile_id))]),
+  });
+  const when = planDayAt(plan.starts_at);
+  let sent = 0;
+  for (const r of receivers) {
+    if (!maySend(await claimPlan(admin, plan.id, r.profileId))) continue;
+    const other = clubIds.find((id) => id !== r.clubId) ?? null;
+    const notice = clubPlanNotice({
+      planId: plan.id,
+      club: clubs.get(r.clubId) ?? "Your club",
+      clubId: r.clubId,
+      what: planWhat(plan, other ? clubs.get(other) ?? null : null),
+      when,
+    });
+    const res = await notifyProfile(r.profileId, notice);
+    if (res.pushed > 0) sent++;
+  }
+  return sent;
+}
+
+async function claimPlan(admin: Admin, planId: string, profileId: string) {
+  try {
+    const { error } = await admin.from("elite_plan_notices").insert({ plan_id: planId, profile_id: profileId });
+    return claimOutcome(error);
+  } catch {
+    return "failed" as const;
+  }
 }

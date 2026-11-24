@@ -104,6 +104,7 @@ describe("one call a month, give it back with notice", () => {
 
 describe("the announcements", () => {
   const film = filmRoomAnnouncement({
+    roomId: "room-1",
     parentName: "Tatsiana Kovalev",
     playerName: "Tim Kovalev",
     scheduledAt: nyLocalToIso("2026-11-08", "19:00"),
@@ -125,15 +126,23 @@ describe("the announcements", () => {
     expect(film.playerSms).toContain("https://thestriveapp.com/film");
   });
   it("keeps to the house voice and fits one text", () => {
-    for (const s of [film.sms, film.playerSms, film.pushBody, film.inAppBody]) {
+    for (const s of [film.sms, film.playerSms, film.notice.title, film.notice.body]) {
       expect(s).not.toMatch(/—|!/);
       expect(s).not.toMatch(/\b(AI|automated|algorithm|generated)\b/);
     }
     expect(film.sms.length).toBeLessThanOrEqual(480);
     expect(film.playerSms.length).toBeLessThanOrEqual(480);
   });
+  it("the note and the push say when it is and until when clips are open, with no instruction", () => {
+    expect(film.notice.title).toBe("Film Room is Sunday, Nov 8 at 7:00 PM ET");
+    expect(film.notice.body).toBe("Clips are open until Saturday, Nov 7 at 9:00 PM ET.");
+    expect(film.notice.path).toBe("/film");
+    // one per room per member, however many times it is announced
+    expect(film.notice.key).toBe("film_room:room-1");
+  });
   it("falls back to the player's first name when there is no parent name", () => {
     const m = filmRoomAnnouncement({
+      roomId: "room-1",
       playerName: "Tim Kovalev",
       scheduledAt: nyLocalToIso("2026-11-08", "19:00"),
       clipsDueAt: clipsDueIso("2026-11-08"),
@@ -143,6 +152,7 @@ describe("the announcements", () => {
   });
   it("announces check-in days with the window and the length", () => {
     const m = checkinAnnouncement({
+      dayId: "day-1",
       parentName: "Tatsiana",
       playerName: "Tim Kovalev",
       startsAt: nyLocalToIso("2026-11-15", "09:00"),
@@ -151,6 +161,9 @@ describe("the announcements", () => {
       appUrl: "https://thestriveapp.com",
     });
     expect(m.sms).toContain("Sunday, Nov 15, 9 AM to 12 PM ET");
+    expect(m.notice.title).toBe("Check-in calls are open");
+    expect(m.notice.body).toBe("Sunday, Nov 15, 9 AM to 12 PM ET. Times are on your Home screen.");
+    expect(m.notice.key).toBe("checkin_days:day-1");
     expect(m.sms).toContain("30 minutes");
     expect(m.sms).not.toMatch(/—|!/);
     expect(m.sms.length).toBeLessThanOrEqual(480);

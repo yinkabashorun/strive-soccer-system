@@ -4,7 +4,7 @@ import { ChevronLeft } from "lucide-react";
 import { DeleteAccountForm } from "@/components/elite/DeleteAccountForm";
 import { getViewer } from "@/lib/elite/session";
 import { DELETE_BLOCKED_MESSAGE, deleteGate } from "@/lib/elite/account";
-import { trackerFor } from "@/lib/elite/tracker-server";
+import { freeAccountFor } from "@/lib/elite/tracker-server";
 
 export const metadata = { title: "Delete my account · Strive Elite" };
 
@@ -17,7 +17,7 @@ export default async function DeleteAccountPage() {
   const gate = deleteGate(viewer);
   // A free training log account (069) has no plan, clips or billing, so
   // its list says what it actually holds.
-  const free = !viewer.demo && (await trackerFor(viewer)) !== null;
+  const free = !viewer.demo && (await freeAccountFor(viewer)) !== null;
   const isPlayer = viewer.role === "player" && !free;
 
   return (

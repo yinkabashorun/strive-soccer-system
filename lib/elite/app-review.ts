@@ -92,6 +92,15 @@ export const SCREENS: readonly Screen[] = [
   // review notes must describe it before that build is submitted.
   { path: "/pro", since: IN_FIRST_BUILD },
   { path: "/pro/join", since: IN_FIRST_BUILD },
+  // Where a Strive Pro checkout opened from the native iPhone app comes
+  // back to, in the sheet over the app (Nov 24 2026): one line saying what
+  // happened and to close the sheet. Nothing is sold on it.
+  { path: "/pro/done", since: IN_FIRST_BUILD },
+  // Send to a parent (Nov 24 2026, lib/elite/parent-link.ts): the page a
+  // parent opens in their own browser from the link their player texted
+  // them, and pays from. It is never opened inside the iPhone app: the app
+  // only shares the link through the phone's share sheet.
+  { path: "/pro/for/[code]", since: WEBSITE_ONLY },
 
   // The free app (photo posts between players, clubs, rankings). In the
   // first build on Coach Yinka's word (Nov 20 2026, "App store asap"):

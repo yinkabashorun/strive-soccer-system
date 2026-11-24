@@ -4,6 +4,7 @@ import { normalizeUsername } from "@shared/username";
 import { AVATAR_MAX_BYTES, AVATAR_MESSAGE } from "@shared/tracker";
 import { api, ApiError } from "./api/client";
 import { FIXTURES } from "./config";
+import { fixtureProfileSaved } from "./api/fixtures";
 import { base64ToBytes, oneFileForm } from "@shared/upload-body";
 
 // The required profile photo and @username (migration 081): the website's
@@ -16,7 +17,10 @@ export async function checkUsername(input: string): Promise<AppUsernameAnswer> {
 }
 
 export async function saveUsername(input: string): Promise<AppUsernameAnswer> {
-  if (FIXTURES) return { ok: true, name: normalizeUsername(input) };
+  if (FIXTURES) {
+    fixtureProfileSaved("username", normalizeUsername(input));
+    return { ok: true, name: normalizeUsername(input) };
+  }
   return api<AppUsernameAnswer>(APP_API.username, { method: "POST", body: { username: normalizeUsername(input) } });
 }
 
@@ -32,7 +36,7 @@ const SHRINK: { side: number; compress: number }[] = [
 ];
 
 export async function savePhoto(uri: string): Promise<void> {
-  if (FIXTURES) return;
+  if (FIXTURES) return fixtureProfileSaved("photo");
   let bytes: Uint8Array | null = null;
   for (const step of SHRINK) {
     const out = await ImageManipulator.manipulateAsync(uri, [{ resize: { width: step.side, height: step.side } }], {

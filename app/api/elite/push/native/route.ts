@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getViewer } from "@/lib/elite/session";
 import { createServiceClient } from "@/lib/elite/supabase/server";
 import { cleanDeviceToken } from "@/lib/elite/apns";
-import { trackerFor } from "@/lib/elite/tracker-server";
+import { freeAccountFor } from "@/lib/elite/tracker-server";
 
 // Stores the device token the App Store app hands the site once a member
 // allows notifications (migration 067), so lib/elite/push.ts can reach the
@@ -13,8 +13,10 @@ import { trackerFor } from "@/lib/elite/tracker-server";
 export async function POST(req: Request) {
   const viewer = await getViewer();
   if (!viewer || viewer.demo) return NextResponse.json({ ok: false }, { status: 401 });
-  // A free account (078) is on file by profile; a member by player.
-  const free = !viewer.playerId && (await trackerFor(viewer)) !== null;
+  // A free account (078) is on file by profile; a member by player. An
+  // account that lives in the free app is a free account here, whether or
+  // not it has a member row that is not switched on (freeAccountFor).
+  const free = (await freeAccountFor(viewer)) !== null;
   if (!viewer.playerId && !free) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }
@@ -43,7 +45,7 @@ export async function POST(req: Request) {
 export async function DELETE(req: Request) {
   const viewer = await getViewer();
   if (!viewer || viewer.demo) return NextResponse.json({ ok: false }, { status: 401 });
-  const free = !viewer.playerId && (await trackerFor(viewer)) !== null;
+  const free = (await freeAccountFor(viewer)) !== null;
   if (!viewer.playerId && !free) {
     return NextResponse.json({ ok: false }, { status: 401 });
   }

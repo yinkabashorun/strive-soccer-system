@@ -8,19 +8,24 @@ import { removeTrackerFiles } from "./tracker-server";
 import { clearProfilePhoto } from "./account-profile-server";
 import { getViewer } from "./session";
 import { sendPlayerEmail } from "./email";
-import { sendPushToPlayer } from "./push";
-import { coachMessagePush, newWeekPush } from "./push-texts";
+import { notifyPlayer } from "./notify";
+import {
+  checkinFeedbackNotice,
+  coachAttendingNotice,
+  coachMessageNotice,
+  filmFeedbackNotice,
+} from "./notices";
 import { normalizePhone, sendPlayerSMS } from "./sms";
 import { isSundayEveNY, liveWeekFor, mondayOfWeekNY, nextMondayNY, unlockInstant } from "./time";
 import { getDrillBank, loadProgramWeek, loadTemplateContext, normalizeTitle } from "./data";
 import { conformSessionsToBank, offeredBank, strengthRequired } from "./bank-conform";
 import { sessionsWord, TRAINING_LOADS } from "./training";
 import { resolveWeekTarget } from "./week-target";
-import { buildParentRecap } from "./parent-recap";
 import type { FilmReview, GeneratedPlan, TrainingLoad, TrainingSpace } from "./types";
 
-import { APP_URL } from "./app-url";
-import { claimWeekAnnouncement, maySend, mustRefuseRebuild, weekWasAnnounced } from "./announce";
+import { mustRefuseRebuild, weekIsLiveUnannounced, weekWasAnnounced } from "./announce";
+import { unlockDueWeeks } from "./unlock";
+import { realMinutes } from "./time-trained";
 
 async function requireCoach() {
   const viewer = await getViewer();
@@ -338,19 +343,16 @@ export async function sendCoachMessage(playerId: string, body: string) {
       from_name: viewer.profile.full_name,
       body,
     });
-    // In-app notification + email for the player (best-effort).
-    await supabase.from("elite_notifications").insert({
-      player_id: playerId,
-      kind: "coach_message",
-      title: "Message from your coach",
-      body: body.slice(0, 140),
-    });
+    // The bell and the push are one notice (lib/elite/notices.ts), sent
+    // by the one sender; the email carries the same title. Best-effort.
+    const notice = coachMessageNotice({ coach: viewer.profile.full_name, message: body });
+    await notifyPlayer(playerId, notice, { db: supabase });
     await sendPlayerEmail(playerId, {
       event: "coach_message",
-      subject: "Your coach sent you a message",
+      // the notice's title is the coach's name: a whole sentence for an inbox
+      subject: `${notice.title} sent you a message`,
       body: `${viewer.profile.full_name}: "${body}"`,
     }).catch(() => undefined);
-    await sendPushToPlayer(playerId, coachMessagePush(body)).catch(() => undefined);
     await sendPlayerSMS(playerId, {
       event: "coach_message",
       message: `${viewer.profile.full_name}: "${body}"`,
@@ -366,7 +368,8 @@ export async function addCheckinFeedback(
   playerId: string,
   feedback: string
 ) {
-  if (!(await requireCoach())) return { ok: false };
+  const viewer = await requireCoach();
+  if (!viewer) return { ok: false };
   const supabase = createClient();
   if (supabase) {
     await supabase
@@ -376,15 +379,11 @@ export async function addCheckinFeedback(
         coach_feedback_at: new Date().toISOString(),
       })
       .eq("id", checkinId);
-    await supabase.from("elite_notifications").insert({
-      player_id: playerId,
-      kind: "checkin_feedback",
-      title: "Coach replied to your check-in",
-      body: feedback.slice(0, 140),
-    });
+    const notice = checkinFeedbackNotice({ coach: viewer.profile.full_name, feedback });
+    await notifyPlayer(playerId, notice, { db: supabase });
     await sendPlayerEmail(playerId, {
       event: "checkin_feedback",
-      subject: "Your coach replied to your check-in",
+      subject: notice.title,
       body: feedback,
     }).catch(() => undefined);
     revalidatePath(`/coach/players/${playerId}`);
@@ -457,15 +456,12 @@ export async function setGameAttendance(
       .update({ coach_attending: attending })
       .eq("id", gameId);
     if (attending) {
-      await supabase.from("elite_notifications").insert({
-        player_id: playerId,
-        kind: "coach_attending",
-        title: "Coach is coming to your game",
-        body: gameDate ? `See you out there on ${gameDate}. Play brave.` : "See you out there. Play brave.",
-      });
+      // one note per game, however often attendance is switched (the key)
+      const notice = coachAttendingNotice({ gameId, gameDate });
+      await notifyPlayer(playerId, notice, { db: supabase });
       await sendPlayerEmail(playerId, {
         event: "coach_attending",
-        subject: "Coach is coming to the game",
+        subject: notice.title,
         body: `Coach marked himself as attending${gameDate ? ` the game on ${gameDate}` : " the upcoming game"}. See you out there.`,
       }).catch(() => undefined);
     }
@@ -546,15 +542,11 @@ export async function sendFilmReview(
         .update({ coach_notes: flattenReview(review), status: "Reviewed" })
         .eq("id", filmId);
     }
-    await supabase.from("elite_notifications").insert({
-      player_id: playerId,
-      kind: "film_feedback",
-      title: "Your film breakdown is in",
-      body: review.summary.slice(0, 140),
-    });
+    const notice = filmFeedbackNotice({ filmId, summary: review.summary });
+    await notifyPlayer(playerId, notice, { db: supabase });
     await sendPlayerEmail(playerId, {
       event: "film_feedback",
-      subject: "Coach broke down your film",
+      subject: notice.title,
       body: `Your monthly film breakdown is in:\n\n${flattenReview(review)}\n\nOpen the app to see it with your film.`,
     }).catch(() => undefined);
     revalidatePath(`/coach/players/${playerId}`);
@@ -655,7 +647,7 @@ export async function applyGeneratedPlanCore(
   // exactly that, every hour. Checked here against the announcement
   // ledger, before a single row is touched; the builder logs the throw
   // and the coach is texted.
-  if (goesLiveNow && (await weekWasAnnounced(supabase, playerId, week))) {
+  if (goesLiveNow && ((await weekWasAnnounced(supabase, playerId, week)) || (await weekIsLiveUnannounced(supabase, playerId, week)))) {
     const { count } = await supabase
       .from("elite_homework")
       .select("id", { count: "exact", head: true })
@@ -694,7 +686,7 @@ export async function applyGeneratedPlanCore(
   // player gets a week of drills with no videos. Now it throws, the cron
   // logs it as an error, and the coach gets a text, before any row is
   // written. (The database refuses such rows too - migration 031.)
-  const byTitle = new Map<string, { id: string; video_url: string | null }>();
+  const byTitle = new Map<string, { id: string; video_url: string | null; minutes: number | null }>();
   const { drills: wholeBank } = await getDrillBank({ onlyWithVideo: true, client: supabase });
   if (wholeBank.length === 0) {
     throw new Error("Refusing to publish: the drill bank has no filmed drills reachable");
@@ -741,12 +733,20 @@ export async function applyGeneratedPlanCore(
   const sessionsSaid = sessionsWord(sessionCount);
   const SessionsSaid = sessionsSaid[0].toUpperCase() + sessionsSaid.slice(1);
   for (const b of bank) {
-    byTitle.set(normalizeTitle(b.title), { id: b.id, video_url: b.video_url || null });
+    byTitle.set(normalizeTitle(b.title), { id: b.id, video_url: b.video_url || null, minutes: realMinutes(b.minutes) });
   }
 
   const rows = sessionsToPublish.flatMap((s, si) =>
     s.drills.map((d, di) => {
       const match = byTitle.get(normalizeTitle(d.title));
+      // The minutes a player is credited for a drill are the plan's own, or
+      // the ones the coach gave the drill in the bank. Never a made-up
+      // figure: a drill with neither stops the publish before a row is
+      // written (it used to be written as 15).
+      const minutes = realMinutes(d.minutes) ?? match?.minutes ?? null;
+      if (minutes === null) {
+        throw new Error(`Refusing to publish: "${d.title}" has no minutes in the plan or in the drill bank`);
+      }
       return {
         player_id: playerId,
         week,
@@ -754,7 +754,7 @@ export async function applyGeneratedPlanCore(
         title: d.title,
         exercise: d.exercise,
         reps: d.reps,
-        duration_min: d.minutes ?? 15,
+        duration_min: minutes,
         notes: d.notes ?? null,
         video_url: match?.video_url ?? null,
         drill_id: match?.id ?? null,
@@ -830,7 +830,9 @@ export async function applyGeneratedPlanCore(
     objectives: plan.next_week_objectives,
     homework: plan.sessions,
     unlocks_at: unlocksAt,
-    notified: goesLiveNow, // live-now weeks are notified inline below
+    // Every week waits for its announcement (unlock.ts): a week that is
+    // live at once is open now and announced from 4:00 PM New York.
+    notified: false,
   });
   if (planErr) {
     // pre-014 database - fall back to the legacy shape
@@ -858,16 +860,15 @@ export async function applyGeneratedPlanCore(
     .update({ last_session_at: new Date().toISOString() })
     .eq("id", playerId);
 
-  // Whether this publish told the family. Stays true for a held week
-  // (Monday's unlock does the telling).
+  // False only when the week is live and its announcement could not be
+  // recorded (the builder logs that loudly). True otherwise: told now, or
+  // waiting for 4:00 PM.
   let announced = true;
   if (goesLiveNow) {
     // Live immediately: a player's first week (anchor the program clock
     // to this NY week's Monday - next Monday if today is Sunday, so week
     // 1 is never a one-day week) or a catch-up publish for the live week
     // (never re-anchor - the calendar keeps counting).
-    const first = player?.full_name?.split(" ")[0] ?? "";
-    const parentFirst = (player?.parent_name || first || "").trim().split(" ")[0];
     await supabase
       .from("elite_players")
       .update({
@@ -876,71 +877,16 @@ export async function applyGeneratedPlanCore(
         ...(firstWeek ? { week1_monday: mondayOfWeekNY(target.anchorOffsetWeeks) } : {}),
       })
       .eq("id", playerId);
-    // One announcement per player per week, enforced by the database
-    // (announce.ts, migration 066). Everything below this line - the note,
-    // the email, the push, the text, the parent report - goes out only if
-    // this claim is the first for this week.
-    const claim = await claimWeekAnnouncement(supabase, playerId, week);
-    announced = claim !== "failed";
-    if (!maySend(claim)) {
-      revalidatePath(`/coach/players/${playerId}`);
-      return { ok: true, week, goesLiveNow, unlocksAt, announced };
-    }
-    await supabase.from("elite_notifications").insert({
-      player_id: playerId,
-      kind: "new_week",
-      title: first ? `Week ${week} is ready, ${first}` : `Week ${week} is ready`,
-      body: plan.weekly_focus || "Your coach set your focus for the week.",
-    });
-    await sendPlayerEmail(playerId, {
-      event: "new_week",
-      subject: firstWeek
-        ? first
-          ? `${first}, your first week is live`
-          : "Your first week is live"
-        : first
-          ? `${first}, week ${week} just dropped`
-          : `Week ${week} just dropped`,
-      body: firstWeek
-        ? `Your Strive Elite training starts now.\n\nThis week's focus: ${plan.weekly_focus}\n\n${SessionsSaid} sessions, each opening with your plyometric warm-up. Open the app and start Session 1.`
-        : `Your new training week is live.\n\nThis week's focus: ${plan.weekly_focus}\n\n${SessionsSaid} sessions, plyo warm-up first. Open the app and start Session 1.`,
-    }).catch(() => undefined);
-    await sendPushToPlayer(
-      playerId,
-      newWeekPush({ first, week, firstWeek, focus: plan.weekly_focus })
-    ).catch(() => undefined);
-    const greeting = parentFirst ? `Hey ${parentFirst}, ` : "";
-    await sendPlayerSMS(playerId, {
-      event: "new_week",
-      message: firstWeek
-        ? `${greeting}${first || "Your player"}'s first Strive Elite training week is officially live. This week: ${plan.weekly_focus} Let's have ${first || "them"} open the app and get after Session 1: ${APP_URL}/dashboard`
-        : `${greeting}${first || "Your player"}'s week ${week} just went live. This week: ${plan.weekly_focus} Let's have ${first || "them"} open the app and get started on Session 1: ${APP_URL}/dashboard`,
-    }).catch(() => undefined);
-
-    // Parent weekly report for the week that just ended. This path
-    // (goesLiveNow) writes notified:true up front, so unlockDueWeeks() in
-    // unlock.ts, which sends the same report for Monday-held weeks, never
-    // sees these plans as "due" - the report has to go out from here.
-    // Best-effort; a recap failure never blocks the week from publishing.
-    try {
-      const recap = await buildParentRecap(playerId, week - 1);
-      if (recap) {
-        await sendPlayerEmail(playerId, {
-          event: "parent_weekly_report",
-          subject: `${recap.playerFirst}'s week ${recap.week} report`,
-          body: recap.text,
-        });
-        await sendPlayerSMS(playerId, {
-          event: "parent_weekly_report",
-          message: recap.text,
-        });
-      }
-    } catch {
-      /* recap is a bonus - the week already published successfully */
-    }
+    // The announcement (the bell note, the notification, the email, the
+    // parent report) has ONE sender, unlock.ts: it goes out now when it is
+    // between 4:00 PM and 9:00 PM New York, otherwise the hourly job sends
+    // it at 4:00 PM. Once per player per week, held by the database
+    // (announce.ts, migration 066). Nobody is texted about a new week.
+    const told = await unlockDueWeeks({ force: true }).catch(() => null);
+    if (told?.unrecorded.some((u) => u.playerId === playerId && u.week === week)) announced = false;
   }
-  // Scheduled weeks stay silent until Monday morning - unlockDueWeeks()
-  // flips them live and notifies then.
+  // A held week opens Monday morning and is announced Monday from 4:00 PM
+  // (unlock.ts).
 
   revalidatePath(`/coach/players/${playerId}`);
   return { ok: true, week, goesLiveNow, unlocksAt, announced };

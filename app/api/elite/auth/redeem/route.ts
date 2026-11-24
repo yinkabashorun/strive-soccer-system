@@ -3,6 +3,8 @@ import { createServiceClient } from "@/lib/elite/supabase/server";
 import { establishSession } from "@/lib/elite/session-start";
 import { emailHasFreeAccount } from "@/lib/elite/tracker-server";
 import { FREE_ACCOUNT_EXISTS_MESSAGE } from "@/lib/elite/tracker";
+import { notifyPlayer } from "@/lib/elite/notify";
+import { welcomeNotice } from "@/lib/elite/notices";
 import { sendPlayerEmail } from "@/lib/elite/email";
 import { normalizePhone } from "@/lib/elite/sms";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
@@ -198,18 +200,7 @@ export async function POST(req: Request) {
   // 6) welcome the new member - in-app notification + GHL welcome
   //    email/SMS. Both best-effort; signup never fails because of them.
   if (playerRow?.id) {
-    await admin
-      .from("elite_notifications")
-      .insert({
-        player_id: playerRow.id,
-        kind: "welcome",
-        title: "Welcome to Strive Elite",
-        body: "You're in. Complete your profile so your coach can build your first training week around you.",
-      })
-      .then(
-        () => undefined,
-        () => undefined
-      );
+    await notifyPlayer(playerRow.id, welcomeNotice());
     await sendPlayerEmail(playerRow.id, {
       event: "player_signed_up",
       subject: "Welcome to Strive Elite",

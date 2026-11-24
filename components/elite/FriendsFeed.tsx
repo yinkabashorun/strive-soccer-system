@@ -20,6 +20,10 @@ import { TeamRequests } from "./TeamRequests";
 import type { TeamAsks } from "@/lib/elite/club-teams-server";
 import { sendLink } from "./send-link";
 import { StarMark } from "./StarMark";
+import type { Squad } from "@/lib/elite/squad-pass";
+import type { FirstDays } from "@/lib/elite/first-days";
+import { FirstDaysCard } from "./FirstDaysCard";
+import { SquadCard } from "./SquadCard";
 
 // The Friends tab, as the approved mock draws it: TODAY and the date, the
 // week ring in the corner, the row of faces (lit when that friend trained
@@ -37,6 +41,8 @@ export function FriendsFeed({
   clubRequests = [],
   teamAsks,
   inviteLink,
+  squad,
+  firstDays = null,
 }: {
   date: string; // "Wednesday, Nov 18"
   feed: FeedView;
@@ -48,6 +54,8 @@ export function FriendsFeed({
   clubRequests?: ClubRequestView[];
   teamAsks?: TeamAsks;
   inviteLink: string;
+  squad?: Squad | null;
+  firstDays?: FirstDays | null;
 }) {
   const { post, profile } = usePostLauncher();
   const [hidden, setHidden] = useState<Set<string>>(new Set());
@@ -96,16 +104,18 @@ export function FriendsFeed({
         </ul>
       )}
 
+      {firstDays ? <FirstDaysCard list={firstDays} inviteLink={inviteLink} onPost={post} /> : null}
+
       {feed.friendCount === 0 ? (
         <Empty
           title="Your friends' training lands here"
-          line="Send your link to a teammate. When they join, accept their friend request and you see each other's training every day."
-          inviteLink={inviteLink}
+          line="Send your link to a teammate. Accept their request, and you see each other's training every day."
+          inviteLink={squad ? undefined : inviteLink}
         />
       ) : cards.length === 0 ? (
         <Empty
-          title="Nobody has posted yet this week"
-          line="Post a photo of your training and be the first your friends see."
+          title="Nobody has posted this week"
+          line="Be the first. Post a photo of your training."
         />
       ) : (
         <ul className="mt-3.5 space-y-3.5">
@@ -122,6 +132,13 @@ export function FriendsFeed({
           )}
         </ul>
       )}
+
+      {/* Bring your squad: one card, where the invite has always been. */}
+      {squad ? (
+        <div className="mx-[18px]">
+          <SquadCard squad={squad} inviteLink={inviteLink} />
+        </div>
+      ) : null}
 
       {!feed.unlocked && locked.length > 0 && (
         <div className="fixed inset-x-0 bottom-[calc(96px+env(safe-area-inset-bottom))] z-30 mx-auto max-w-md px-[18px]">
@@ -192,7 +209,7 @@ function Empty({ title, line, inviteLink }: { title: string; line: string; invit
     <div className="mx-[18px] mt-6 rounded-[26px] border border-white/[0.09] bg-[#101010] px-6 py-8 text-center">
       <h2 className="font-display text-[30px] font-black uppercase leading-[0.95]">{title}</h2>
       <p className="mx-auto mt-3 max-w-[300px] text-[15px] leading-snug text-white/70">{line}</p>
-      {inviteLink && (
+      {inviteLink ? (
         <button
           type="button"
           onClick={async () => {
@@ -205,7 +222,7 @@ function Empty({ title, line, inviteLink }: { title: string; line: string; invit
         >
           {copied ? "Link copied" : "Send my link"}
         </button>
-      )}
+      ) : null}
     </div>
   );
 }

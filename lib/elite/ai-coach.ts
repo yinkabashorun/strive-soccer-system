@@ -7,7 +7,8 @@
 // otherwise a deterministic fallback keeps it fully functional.
 
 import Anthropic from "@anthropic-ai/sdk";
-import { ensureSentence } from "./text";
+import { playerFocus, weekFocusLine } from "./text";
+import { areaName } from "./time-trained";
 import {
   PLYO_PILLAR,
   PROGRESS_METRICS,
@@ -82,7 +83,7 @@ Ball Mastery, Weak Foot, Passing, Scanning, Decision Making, Confidence, Speed.
 
 Return ONLY valid JSON, no prose, matching this shape:
 {
-  "weekly_focus": "one sentence, the single theme for the week",
+  "weekly_focus": "ONE short line written TO THE PLAYER, 10 words at most, in words a 13 year old would say, naming what this week goes after. Like 'This week goes after your weak foot.' or 'This week is first touch and quick feet.'",
   "sessions": [
     { "title": "Session 1: short label",
       "drills": [ { "title": "...", "exercise": "Setup first, one short sentence (what to lay out, e.g. 'Line of 5 cones a yard apart.'). Then the execution: exactly what to do, concrete and stepwise.", "reps": "real sets and reps like '3 x 20 each foot' or '4 x 45 sec', NEVER a bare duration", "minutes": 10, "notes": "2-3 key cues, short and punchy, like 'Sell the fake, drop the shoulder, explode out'" } ] }
@@ -107,6 +108,11 @@ Rules:
 - Every drill's exercise reads setup then execution, and every drill has
   notes with 2-3 key cues. A player should be able to run the drill from
   the card alone: what to set up, what to do, what to feel.
+- weekly_focus is the first line the player reads when the week arrives,
+  on their phone. One short sentence to them ("your"), 10 words at most.
+  No colon, no list, no coach words ("pillars", "non-negotiable",
+  "ruthless", "reset", "reps", "consistency"). Say the thing itself: their
+  weak foot, their first touch, their 1v1 moves, their passing, their speed.
 - progress_updates: only pillars the notes actually touched, value 0-100.
 - next_week_objectives: 2-4 items, plain coach language only. NEVER a
   percentage, a distance, a measurement, or any performance-metric jargon
@@ -148,9 +154,13 @@ function extractJSON<T>(raw: string): T | null {
   }
 }
 
-function clampMin(v: unknown): number {
+// The plan's own minutes for a drill, kept within reason. With none given
+// there is NO made-up figure: the drill keeps the minutes its bank row
+// carries (bank-conform.ts keepTailoring, then the publish gate).
+function clampMin(v: unknown): number | undefined {
+  if (v === null || v === undefined || v === "") return undefined;
   const n = Math.round(Number(v));
-  if (!Number.isFinite(n)) return 10;
+  if (!Number.isFinite(n)) return undefined;
   return Math.max(5, Math.min(15, n));
 }
 
@@ -257,9 +267,9 @@ function sanitize(
   program?: ProgramWeek | null
 ): GeneratedPlan {
   const validMetrics = new Set(PROGRESS_METRICS as readonly string[]);
-  const weekly_focus = ensureSentence(
-    plan.weekly_focus?.trim() || "Sharpen this week's technical focus"
-  );
+  // One short line the player reads (text.ts playerFocus): whatever wrote
+  // it, it is one sentence, with no list, at most FOCUS_MAX characters.
+  const weekly_focus = playerFocus(plan.weekly_focus ?? "");
   // Build, then CONFORM: after this line every drill in the plan is a bank
   // drill by exact title, or has been replaced by one, and every session
   // is filled to three skill drills from the bank.
@@ -384,9 +394,8 @@ function fallbackPlan(
   const names = pillars.map((p) => p.toLowerCase());
   // A program week names its focus (065); the sessions are rebuilt around
   // it by conformSessionsToBank either way.
-  const focus = program
-    ? `This week's focus is ${program.focusName.toLowerCase()}, two drills of it in every session`
-    : `Back to the pillars: ${names.join(", ")}`;
+  // The line the player reads, in their words for each area (text.ts).
+  const focus = program ? weekFocusLine([program.focusName]) : weekFocusLine(pillars.map((p) => areaName(p)));
 
   return sanitize(
     {

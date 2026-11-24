@@ -21,6 +21,8 @@ import type { Viewer } from "./session";
 import { shiftDay } from "./time";
 import { clubRankingFor } from "./tracker-ranking";
 import { withLine } from "./club-teams";
+import { livesInFreeApp } from "./member-gate";
+import { keepsFreeApp } from "./one-app";
 import {
   CLUB_CAP,
   CLUB_REFUSED,
@@ -79,6 +81,7 @@ import {
   type TargetRow,
   type TrainingLog,
   limitHit,
+  setUpDone,
   CLUB_REQUESTS_PENDING_MAX,
 } from "./tracker";
 import {
@@ -143,6 +146,22 @@ export async function hasTracker(profileId: string): Promise<boolean> {
   return (await getTracker(profileId)) !== null;
 }
 
+// The facts behind the first-days list (lib/elite/first-days.ts): has this
+// player ever posted a training photo, how many clubs are they on, have
+// they ever given props. Three counts, never the rows. A read that fails
+// says "nothing yet", which only leaves a step open.
+export async function firstDaysFacts(profileId: string): Promise<{ posted: boolean; clubs: number; gaveProps: boolean }> {
+  const admin = createServiceClient();
+  if (!admin) return { posted: false, clubs: 0, gaveProps: false };
+  const count = { count: "exact" as const, head: true };
+  const [posts, clubs, props] = await Promise.all([
+    admin.from("elite_training_logs").select("id", count).eq("profile_id", profileId).not("photo_path", "is", null),
+    admin.from("elite_tracker_club_members").select("club_id", count).eq("profile_id", profileId),
+    admin.from("elite_log_props").select("log_id", count).eq("profile_id", profileId),
+  ]);
+  return { posted: (posts.count ?? 0) > 0, clubs: clubs.count ?? 0, gaveProps: (props.count ?? 0) > 0 };
+}
+
 // This week's entries (Monday to Sunday, New York), newest first. The
 // player's screens only ever show the week.
 export async function getWeekLogs(profileId: string, today: string): Promise<TrainingLog[]> {
@@ -193,7 +212,7 @@ export async function isFreeSignupOpen(): Promise<boolean> {
 export function quizDone(
   tracker: Pick<Tracker, "quiz_done_at" | "target_minutes" | "plan_days">
 ): boolean {
-  return Boolean(tracker.quiz_done_at && tracker.target_minutes && tracker.plan_days.length > 0);
+  return setUpDone(tracker);
 }
 
 // Where this signed-in person belongs (lib/elite/tracker.ts homeFor).
@@ -210,11 +229,49 @@ export async function homePathFor(viewer: Viewer): Promise<string> {
 
 // The free account behind this viewer, or null when they do not have one.
 // The example player stands in only when there is no database at all.
+//
+// ONE APP (lib/elite/one-app.ts, Nov 24 2026): a free account KEEPS its
+// free app when it starts Strive Pro. Friends, posts, clubs and the week
+// are the same account's before, during and after a membership; Strive Pro
+// only adds the Train tab. So this answers for a free account AND for a
+// Strive Pro member who has one behind them (keepsFreeApp). An invite
+// family or a member who joined Strive Pro directly has no free account
+// and gets null.
 export async function trackerFor(viewer: Viewer): Promise<Tracker | null> {
+  return (await freeSideOf(viewer))?.tracker ?? null;
+}
+
+// Only an account that LIVES in the free app right now: a free account
+// with no membership on (never started, never paid, or Strive Pro ended).
+// For the few places that must tell a free account from a member: the
+// Account page (a member's has Cancel Strive Pro), what a deleted account
+// held, and which key a phone is kept on file under.
+export async function freeAccountFor(viewer: Viewer): Promise<Tracker | null> {
+  const side = await freeSideOf(viewer);
+  return side && side.lives ? side.tracker : null;
+}
+
+// Both answers in one read: the free account, and whether the person
+// lives in it (`lives`) or has Strive Pro on top of it (not `lives`).
+export async function freeSideOf(viewer: Viewer): Promise<{ tracker: Tracker; lives: boolean } | null> {
   if (viewer.role !== "player") return null;
-  if (viewer.demo) return isSupabaseConfigured() ? null : demoTracker(viewer.profile.id);
-  if (viewer.playerId) return null;
-  return getTracker(viewer.profile.id);
+  if (viewer.demo) {
+    const demo = isSupabaseConfigured() ? null : demoTracker(viewer.profile.id);
+    return demo ? { tracker: demo, lives: true } : null;
+  }
+  const tracker = await getTracker(viewer.profile.id);
+  if (!tracker) return null;
+  if (!viewer.playerId) return { tracker, lives: true };
+  const admin = createServiceClient();
+  if (!admin) return null;
+  const { data } = await admin
+    .from("elite_players")
+    .select("tier, subscription_status")
+    .eq("id", viewer.playerId)
+    .maybeSingle();
+  const player = (data as { tier: string | null; subscription_status: string | null } | null) ?? null;
+  if (!keepsFreeApp({ hasTracker: true, hasPlayer: true, tier: player?.tier })) return null;
+  return { tracker, lives: livesInFreeApp({ hasTracker: true, hasPlayer: true, player }) };
 }
 
 export async function weekLogsFor(
@@ -579,7 +636,7 @@ export async function namesOf(admin: Admin, ids: string[]): Promise<Map<string, 
 }
 
 // Every entry these accounts logged between two days, photo or not.
-async function entriesOf(admin: Admin, ids: string[], since: string, until: string): Promise<PostRow[]> {
+export async function entriesOf(admin: Admin, ids: string[], since: string, until: string): Promise<PostRow[]> {
   const out: PostRow[] = [];
   for (let i = 0; i < ids.length; i += 200) {
     const some = ids.slice(i, i + 200);
@@ -601,14 +658,14 @@ async function entriesOf(admin: Admin, ids: string[], since: string, until: stri
 }
 
 // The ids of the posts this viewer reported: gone from their feed.
-async function reportedBy(admin: Admin, profileId: string): Promise<Set<string>> {
+export async function reportedBy(admin: Admin, profileId: string): Promise<Set<string>> {
   const { data } = await admin.from("elite_post_reports").select("log_id").eq("reporter_id", profileId);
   return new Set(((data as { log_id: string }[] | null) ?? []).map((r) => r.log_id));
 }
 
 // Signed addresses for stored photos, good for a few minutes. Asked for
 // open cards only; a path that could not be signed is simply left out.
-async function signPhotos(admin: Admin, paths: string[]): Promise<Map<string, string>> {
+export async function signPhotos(admin: Admin, paths: string[]): Promise<Map<string, string>> {
   const out = new Map<string, string>();
   if (paths.length === 0) return out;
   const { data } = await admin.storage.from(POST_BUCKET).createSignedUrls(paths, POST_URL_SECONDS);
@@ -861,6 +918,46 @@ export async function savePost(input: {
   return { ok: true, id };
 }
 
+// "Post it to your friends" from a finished session (lib/elite/one-app.ts):
+// the photo goes onto the session's OWN entry (lib/elite/session-log.ts),
+// so the time is on the week once. The photo first, then the entry that
+// points at it; an entry that already has a photo is left alone. NOT a
+// server action: called only by the post route, with the signed-in
+// account's id, an entry id worked out on the server and a checked photo.
+export async function attachSessionPhoto(input: {
+  profileId: string;
+  logId: string;
+  caption: string | null;
+  photo: Uint8Array;
+}): Promise<"ok" | "missing" | "posted" | "error"> {
+  const admin = createServiceClient();
+  const path = postPath(input.profileId, input.logId);
+  if (!admin || !path) return "error";
+  const { data: row, error: readError } = await admin
+    .from("elite_training_logs")
+    .select("id, photo_path")
+    .eq("id", input.logId)
+    .eq("profile_id", input.profileId)
+    .maybeSingle();
+  if (readError) return "error";
+  if (!row) return "missing";
+  if ((row as { photo_path: string | null }).photo_path) return "posted";
+  const up = await admin.storage.from(POST_BUCKET).upload(path, input.photo, { contentType: "image/jpeg", upsert: true });
+  if (up.error) return "error";
+  const { data: changed, error } = await admin
+    .from("elite_training_logs")
+    .update({ photo_path: path, caption: input.caption })
+    .eq("id", input.logId)
+    .eq("profile_id", input.profileId)
+    .is("photo_path", null)
+    .select("id");
+  if (error || !changed?.length) {
+    await admin.storage.from(POST_BUCKET).remove([path]).catch(() => undefined);
+    return error ? "error" : "posted";
+  }
+  return "ok";
+}
+
 // Every photo an account ever posted, removed from storage. Called just
 // before the account itself is deleted (its rows leave by cascade; files
 // do not). Best effort: a storage hiccup never blocks the deletion.
@@ -895,7 +992,7 @@ export type ClubRow = {
 const CLUB_COLUMNS = "id, name, join_code, kind, captain_id, archived_at";
 type MemberRow = { club_id: string; profile_id: string; joined_at: string };
 
-async function clubByCode(admin: Admin, code: string): Promise<ClubRow | null> {
+export async function clubByCode(admin: Admin, code: string): Promise<ClubRow | null> {
   const { data } = await admin.from("elite_tracker_clubs").select(CLUB_COLUMNS).eq("join_code", code).maybeSingle();
   return (data as ClubRow | null) ?? null;
 }
@@ -903,6 +1000,12 @@ async function clubByCode(admin: Admin, code: string): Promise<ClubRow | null> {
 export async function clubById(admin: Admin, id: string): Promise<ClubRow | null> {
   const { data } = await admin.from("elite_tracker_clubs").select(CLUB_COLUMNS).eq("id", id).maybeSingle();
   return (data as ClubRow | null) ?? null;
+}
+
+// When a club was started (its weeks are read from then).
+export async function clubStartedAt(admin: Admin, id: string): Promise<string | null> {
+  const { data } = await admin.from("elite_tracker_clubs").select("created_at").eq("id", id).maybeSingle();
+  return (data as { created_at: string } | null)?.created_at ?? null;
 }
 
 // The clubs a player is on.

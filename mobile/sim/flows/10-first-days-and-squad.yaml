@@ -1,0 +1,46 @@
+# The free app's two cards on Friends, by taps: "Your first days" (four
+# things a new player does once; lib/elite/first-days.ts) near the top, and
+# "Bring 3 teammates" (lib/elite/squad-pass.ts) at the bottom of the feed.
+# A step that is still open goes where it is done: "Join a club or start
+# one" is already done in the example, so "Add 3 friends" is the one tapped
+# (it opens the phone's share sheet, which is closed again).
+#
+# Example data only: every name is made up and nothing is sent anywhere.
+appId: com.strivesoccer.elite
+---
+- launchApp:
+    clearState: true
+    arguments:
+      fixtureState: locked
+- extendedWaitUntil:
+    visible: "Post my training"
+    timeout: 30000
+- scrollUntilVisible:
+    element: "Hide this list"
+    direction: DOWN
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: t60-first-days
+- assertVisible: "Post your first training, done"
+- assertVisible: "Add 3 friends, 1 of 3"
+
+# The squad card, at the bottom of the feed.
+- scrollUntilVisible:
+    element: "Send my link"
+    direction: DOWN
+    timeout: 40000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: t61-squad-card
+
+# Putting the list away: it is gone, on this phone, for good.
+- scrollUntilVisible:
+    element: "Hide this list"
+    direction: UP
+    timeout: 40000
+- tapOn: "Hide this list"
+- waitForAnimationToEnd:
+    timeout: 4000
+- assertNotVisible: "Hide this list"
+- takeScreenshot: t62-first-days-hidden

@@ -7,7 +7,7 @@
 // as time trained (a drill with no minutes counts 15), so the "+38 min"
 // a player sees when a session ends is exactly what lands on their total.
 import type { Homework } from "./types";
-import { DEFAULT_DRILL_MIN } from "./time-trained";
+import { DEFAULT_DRILL_MIN, cappedSeconds, creditedMinutes, fmtDuration } from "./time-trained";
 
 export type DrillKind = "warmup" | "finisher" | "skill";
 
@@ -41,11 +41,31 @@ export function canSendClip(title: string): boolean {
   return drillKind(title) === "skill";
 }
 
+// The minutes the PLAN gives a drill (what a session card promises).
 export function drillMinutes(h: Pick<Homework, "duration_min">): number {
   return h.duration_min ?? DEFAULT_DRILL_MIN;
 }
 
 export type DoneMap = Record<string, boolean | undefined>;
+
+// Seconds measured on this device for drills ticked on it (the session
+// player's own clock), by drill id.
+export type TrainedMap = Record<string, number | undefined>;
+
+// The ACTUAL minutes a drill adds, as the screen shows it right now: a
+// drill ticked on this device counts the time just measured (capped by the
+// same rule the server uses); one the server already holds counts what the
+// server holds (lib/elite/time-trained.ts creditedMinutes).
+export function doneMinutes(
+  h: Pick<Homework, "id" | "completed" | "duration_min" | "actual_seconds">,
+  done: DoneMap,
+  trained: TrainedMap = {}
+): number {
+  if (!isDone(h, done)) return 0;
+  const here = done[h.id] === true ? trained[h.id] : undefined;
+  if (here !== undefined) return creditedMinutes({ completed: true, actual_seconds: cappedSeconds(here, drillMinutes(h)) });
+  return creditedMinutes({ ...h, completed: true });
+}
 
 // A drill is done when the player's own tap says so; a drill the screen has
 // no tap for yet reads what the server last said.
@@ -62,7 +82,8 @@ export type SessionProgress = {
   minutesTotal: number;
 };
 
-export function sessionProgress(drills: Homework[], done: DoneMap): SessionProgress {
+// minutesTotal is the plan; minutesDone is the actual time of what is done.
+export function sessionProgress(drills: Homework[], done: DoneMap, trained: TrainedMap = {}): SessionProgress {
   let count = 0;
   let minutesDone = 0;
   let minutesTotal = 0;
@@ -72,7 +93,7 @@ export function sessionProgress(drills: Homework[], done: DoneMap): SessionProgr
     minutesTotal += m;
     if (isDone(d, done)) {
       count++;
-      minutesDone += m;
+      minutesDone += doneMinutes(d, done, trained);
     } else if (nextIndex === -1) {
       nextIndex = i;
     }
@@ -139,6 +160,32 @@ export const ONE_MORE_LINE = "One more session completes your week.";
 export function oneMoreLine(sessionsLeft: number): string | null {
   return sessionsLeft === 1 ? ONE_MORE_LINE : null;
 }
+
+// What the drop says about the week before, when there is something to
+// say: the sessions finished (extras count, they were trained) and the time
+// trained. A week with nothing trained says nothing at all; nothing here
+// ever counts what was left undone.
+export function lastWeekLine(rows: Homework[], week: number): string | null {
+  if (week <= 1) return null;
+  const last = rows.filter((h) => h.week === week - 1);
+  const minutes = last.reduce((s, h) => s + creditedMinutes(h), 0);
+  const finished = groupSessions(last).filter((g) => g.list.every((h) => h.completed)).length;
+  if (finished > 0 && minutes > 0) {
+    return `Last week you finished ${finished} ${finished === 1 ? "session" : "sessions"} and trained ${fmtDuration(minutes)}.`;
+  }
+  if (finished > 0) return `Last week you finished ${finished} ${finished === 1 ? "session" : "sessions"}.`;
+  if (minutes > 0) return `Last week you trained ${fmtDuration(minutes)}.`;
+  return null;
+}
+
+// The drop's one button: the first session of the week, by its own name.
+export function dropStartLabel(first: Pick<SessionGroup, "n" | "extra"> | null): string {
+  return first ? `Start ${sessionName(first).toLowerCase()}` : "Let's go";
+}
+
+// After a full week (the leaders' finding: players who train more than one
+// kind of thing stay longer): the two ways to keep going, said once.
+export const AFTER_WEEK_MORE = "Still want to train this week? Add extra work, or open a course.";
 
 // What the finish screen says comes next. Never a nag, never a count of
 // what is left undone beyond the plain fact.

@@ -1,0 +1,56 @@
+# The Inbox and the notification choices, by taps: the small bell on Home
+# with its gold dot, the Inbox with the new week's note, a note opening the
+# screen it is about (a medal opens You), the dot gone once the Inbox has
+# been read, then Settings with the "Your week" switch and the reminder
+# time, one tap each.
+appId: com.strivesoccer.elite
+---
+- launchApp:
+    clearState: true
+    arguments:
+      fixtureState: ok
+- extendedWaitUntil:
+    visible: "Start session"
+    timeout: 30000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: t70-home-bell-dot
+# a note is one thing to a screen reader: "New. <title>. <body>"
+- tapOn: "Inbox, something new"
+- extendedWaitUntil:
+    visible: ".*Week 7 is here, Marcus.*"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: t71-inbox
+- tapOn: "10 Sessions.*"
+- extendedWaitUntil:
+    notVisible: ".*Week 7 is here, Marcus.*"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: t72-note-opened-you
+- tapOn: "Home"
+- extendedWaitUntil:
+    visible: "Start session"
+    timeout: 15000
+- assertNotVisible: "Inbox, something new"
+- takeScreenshot: t73-home-bell-read
+- tapOn: "You"
+- scrollUntilVisible:
+    element: "Settings"
+    direction: DOWN
+    timeout: 20000
+- tapOn: "Settings"
+- scrollUntilVisible:
+    element: "Reminder time"
+    direction: DOWN
+    timeout: 20000
+- takeScreenshot: t74-settings-notifications
+- tapOn: "After school"
+- waitForAnimationToEnd:
+    timeout: 2000
+- tapOn: "Your week"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: t75-settings-choices-made

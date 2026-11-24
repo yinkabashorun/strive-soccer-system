@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, View } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter, type Href } from "expo-router";
+import { POST_SESSION_ROW } from "@shared/one-app";
+import { whyNotifications, type NoticeWho } from "@shared/notices";
+import { featureOn } from "@shared/tiers";
+import { hasTrain } from "@/navigation";
 import { useKeepAwake } from "expo-keep-awake";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, {
@@ -16,7 +20,11 @@ import { afterSessionLine, milestoneCrossed, milestoneLabel, nextStep } from "@s
 import { parseReps } from "@shared/set-timer";
 import { fmtDuration } from "@shared/time-trained";
 import type { AppSession, AppWeek } from "@shared/app-contract";
-import { useMe, useToggleDrill, useWeek } from "@/api/queries";
+import { newClock, resetDrill, secondsOn, showDrill } from "@shared/drill-clock";
+import { cappedSeconds, creditedMinutes } from "@shared/time-trained";
+import { useMe, useNoticePrefs, useSaveNoticePrefs, useToggleDrill, useWeek } from "@/api/queries";
+import { useRefused, useTicks } from "@/outbox";
+import { REFUSED_LINE, UNSENT_LINE } from "@/outbox-core";
 import { DrillVideo } from "@/DrillVideo";
 import { SetTimer } from "@/SetTimer";
 import { Shade } from "@/Shade";
@@ -24,6 +32,7 @@ import { drillEyebrow, repsTiles } from "@/drill-view";
 import { cue, feel, tick } from "@/feel";
 import { usePrefs } from "@/prefs";
 import { turnOnNotifications } from "@/push";
+import { ReminderChips } from "@/NoticeChoices";
 import { Body, Button, Disc, Eyebrow, Head, Icon, Label, Press, Ring } from "@/ui";
 import { color } from "@/theme";
 
@@ -70,10 +79,12 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
   );
   const [count, setCount] = useState<CountInState>("intro");
   const [timerOpen, setTimerOpen] = useState(false);
-  const before = useRef(week.totalMinutes);
-  // The minutes this sitting adds: the drills ticked since the session opened.
-  const doneHere = useRef(new Set<string>());
-  const [finish, setFinish] = useState<{ added: number; total: number; weekDone: boolean; left: number } | null>(null);
+  // The ACTUAL minutes this sitting adds: for each drill ticked since the
+  // session opened, the time it really took (the clock below), counted by
+  // the server's own rule.
+  const doneHere = useRef(new Map<string, number>());
+  const clock = useRef(newClock());
+  const [finish, setFinish] = useState<{ added: number; weekDone: boolean; left: number } | null>(null);
 
   // The count-in: the session's name, then 3, 2, 1 with a tap felt on each.
   useEffect(() => {
@@ -91,6 +102,11 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
   }, [phase, count]);
 
   const drill = drills[index];
+  // the clock runs for the drill that is on screen, and for nothing else
+  const onScreen = phase === "drill" && drill ? drill.id : null;
+  useEffect(() => {
+    clock.current = showDrill(clock.current, onScreen, Date.now());
+  }, [onScreen]);
   const skills = drills.filter((d) => d.kind === "skill");
   const plan = useMemo(() => (drill ? parseReps(drill.reps) : null), [drill]);
 
@@ -98,18 +114,21 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
     if (!drill) return;
     if (!drill.completed) {
       feel("drill");
-      doneHere.current.add(drill.id);
-      toggle.mutate({ id: drill.id, completed: true });
+      const now = Date.now();
+      const seconds = secondsOn(clock.current, drill.id, now);
+      clock.current = resetDrill(clock.current, drill.id, now);
+      doneHere.current.set(drill.id, creditedMinutes({ completed: true, actual_seconds: cappedSeconds(seconds, drill.minutes) }));
+      toggle.mutate({ id: drill.id, completed: true, seconds });
     }
     const doneMap = Object.fromEntries(drills.map((d) => [d.id, d.id === drill.id ? true : d.completed]));
     // nextStep reads only each row's id and completed (lib/elite/session-flow.ts)
     const next = nextStep(drills as unknown as Parameters<typeof nextStep>[0], doneMap, index);
     if (next === -1) {
-      const added = drills.filter((d) => doneHere.current.has(d.id)).reduce((sum, d) => sum + d.minutes, 0);
+      const added = [...doneHere.current.values()].reduce((sum, m) => sum + m, 0);
       const plan = week.sessions.filter((s) => !s.extra);
       const left = plan.filter((s) => !s.complete && s.n !== session.n).length;
       const weekDone = !session.extra && left === 0;
-      setFinish({ added, total: before.current + added, weekDone, left });
+      setFinish({ added, weekDone, left });
       setPhase("finish");
       setTimeout(() => feel(weekDone ? "week" : "session"), 450);
     } else {
@@ -144,9 +163,19 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
       <Finish
         name={me.data?.viewer.firstName ?? ""}
         week={week}
+        drillIds={drills.map((d) => d.id)}
         finish={finish}
         askPush={!prefs.pushAsked}
+        // only what this player will really be told about
+        who={{ coachTime: featureOn(me.data?.player?.tier, "coachChat"), friends: hasTrain(me.data?.state) }}
         onHome={() => router.back()}
+        // a member with friends in the app (one-app.ts): one quiet row. A
+        // session that added no time has nothing to post.
+        onPost={
+          hasTrain(me.data?.state) && finish.added >= 1
+            ? () => router.replace(`/post?session=${week.week}-${session.n}` as Href)
+            : undefined
+        }
       />
     );
   }
@@ -222,7 +251,11 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
       </View>
       {drill?.completed ? (
         <Pressable
-          onPress={() => toggle.mutate({ id: drill.id, completed: false })}
+          onPress={() => {
+            doneHere.current.delete(drill.id);
+            clock.current = resetDrill(clock.current, drill.id, Date.now());
+            toggle.mutate({ id: drill.id, completed: false });
+          }}
           style={[styles.undo, { bottom: insets.bottom + 88 }]}
           accessibilityRole="button"
         >
@@ -240,20 +273,33 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
 function Finish({
   name,
   week,
+  drillIds,
   finish,
   askPush,
   onHome,
+  onPost,
+  who,
 }: {
   name: string;
   week: AppWeek;
-  finish: { added: number; total: number; weekDone: boolean; left: number };
+  drillIds: string[];
+  finish: { added: number; weekDone: boolean; left: number };
   askPush: boolean;
   onHome: () => void;
+  onPost?: () => void;
+  who: NoticeWho;
 }) {
   const insets = useSafeAreaInsets();
   const reduce = useReducedMotion();
   const [shown, setShown] = useState(reduce ? finish.added : 0);
-  const [push, setPush] = useState<"ask" | "done" | "skip">(askPush ? "ask" : "skip");
+  // "time": they just said yes, and are asked once when they usually
+  // train, so the one daily reminder comes then. One tap answers and it is
+  // gone; doing nothing skips it. Never asked at sign-up or at launch, and
+  // not asked at all while the answer cannot be stored.
+  const [push, setPush] = useState<"ask" | "time" | "done" | "skip">(askPush ? "ask" : "skip");
+  const noticePrefs = useNoticePrefs();
+  const saveNoticePrefs = useSaveNoticePrefs();
+  const reminder = noticePrefs.data?.reminder ?? null;
 
   // The minutes count up while the ring closes.
   useEffect(() => {
@@ -267,8 +313,18 @@ function Finish({
     return () => clearInterval(id);
   }, [finish.added, reduce]);
 
-  const crossed = milestoneCrossed(finish.total - finish.added, finish.total);
-  const next = nextMilestone(finish.total);
+  // All time is the week's own figure (the server's total with this phone's
+  // unsent ticks laid over it), never a sum kept on the side: once every
+  // tick is saved it IS the server's number.
+  const total = week.totalMinutes;
+  const crossed = milestoneCrossed(Math.max(0, total - finish.added), total);
+  const next = nextMilestone(total);
+  // The truth about saving: a drill the server refused, or ticks still on
+  // their way.
+  const ticks = useTicks();
+  const refused = useRefused();
+  const notSaved = drillIds.some((id) => refused.includes(id));
+  const unsent = ticks.length > 0;
   const plan = week.sessions.filter((s) => !s.extra);
   const doneCount = plan.length - finish.left;
 
@@ -299,7 +355,7 @@ function Finish({
           <Body dim size={12}>sessions this week</Body>
         </View>
         <View style={styles.stat}>
-          <Head size={26}>{fmtDuration(finish.total)}</Head>
+          <Head size={26}>{fmtDuration(total)}</Head>
           <Body dim size={12}>trained, all time</Body>
         </View>
       </Animated.View>
@@ -316,6 +372,11 @@ function Finish({
           </View>
         </Animated.View>
       ) : null}
+      {notSaved || unsent ? (
+        <Body dim={!notSaved} size={13} style={{ marginHorizontal: 24, marginTop: 14, textAlign: "center" }}>
+          {notSaved ? REFUSED_LINE : UNSENT_LINE}
+        </Body>
+      ) : null}
       {/* In the flow under the rest (never laid over the medal), at the bottom. */}
       <View style={{ flexGrow: 1 }} />
       <View style={{ marginHorizontal: 20, marginTop: 16, gap: 10 }}>
@@ -323,7 +384,7 @@ function Finish({
           <View style={styles.ask}>
             <Label>Turn on notifications?</Label>
             <Body dim size={13} style={{ marginTop: 4 }}>
-              So you know the moment your new week is live, your coach messages you, or a Film Room is announced. Nothing else.
+              {whyNotifications(who)}
             </Body>
             <View style={{ flexDirection: "row", gap: 10, marginTop: 12 }}>
               <Button style={{ flex: 1 }} quiet label="Not now" onPress={() => setPush("skip")} />
@@ -331,13 +392,38 @@ function Finish({
                 style={{ flex: 1 }}
                 label="Turn on"
                 onPress={() => {
-                  void turnOnNotifications().finally(() => setPush("done"));
+                  void turnOnNotifications()
+                    .then((on) => setPush(on && reminder ? "time" : "done"))
+                    .catch(() => setPush("done"));
                 }}
               />
             </View>
           </View>
         ) : null}
+        {push === "time" && reminder ? (
+          <View style={styles.ask}>
+            <Label>{reminder.question}</Label>
+            <Body dim size={13} style={{ marginTop: 4 }}>
+              One reminder a day, at that time, on days you have a session left.
+            </Body>
+            <ReminderChips
+              choices={reminder.choices}
+              chosen={null}
+              onPick={(key) => {
+                saveNoticePrefs.mutate({ reminder: key });
+                setPush("done");
+              }}
+            />
+          </View>
+        ) : null}
         <Button label="Back home" onPress={onHome} />
+        {onPost ? (
+          <Press onPress={onPost} style={styles.postRow} accessibilityLabel={POST_SESSION_ROW}>
+            <Label dim size={15}>
+              {POST_SESSION_ROW}
+            </Label>
+          </Press>
+        ) : null}
       </View>
     </ScrollView>
   );
@@ -368,6 +454,7 @@ function Sparks() {
 
 const styles = StyleSheet.create({
   fill: { flex: 1, backgroundColor: color.black },
+  postRow: { minHeight: 44, alignItems: "center", justifyContent: "center" },
   center: { alignItems: "center", justifyContent: "center" },
   video: { position: "absolute", left: 0, right: 0, top: 0, height: 560 },
   topBar: { position: "absolute", left: 14, right: 20, flexDirection: "row", alignItems: "center", gap: 12 },

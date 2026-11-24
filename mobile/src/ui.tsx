@@ -21,7 +21,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
-import Svg, { Circle, Defs, LinearGradient, Path, Stop } from "react-native-svg";
+import Svg, { Circle, Defs, LinearGradient, Path, RadialGradient, Stop } from "react-native-svg";
 import { color, font, metal, MIN_TAP, motion, radius } from "./theme";
 
 // The handful of pieces every screen is built from, in the approved look.
@@ -53,9 +53,10 @@ export function Eyebrow({ children, style, gold = true }: TProps & { gold?: bool
   );
 }
 
-export function Body({ children, style, dim, size = 15, numberOfLines }: TProps & { dim?: boolean; size?: number }) {
+// selectable: words a player is meant to copy out (a lesson's templates).
+export function Body({ children, style, dim, size = 15, numberOfLines, selectable }: TProps & { dim?: boolean; size?: number }) {
   return (
-    <Text numberOfLines={numberOfLines} style={[{ fontFamily: font.body, fontSize: size, lineHeight: Math.round(size * 1.4), color: dim ? color.dim : color.bone }, style]}>
+    <Text numberOfLines={numberOfLines} selectable={selectable} style={[{ fontFamily: font.body, fontSize: size, lineHeight: Math.round(size * 1.4), color: dim ? color.dim : color.bone }, style]}>
       {children}
     </Text>
   );
@@ -234,6 +235,42 @@ export function Disc({ size, earned, children }: { size: number; earned: boolean
   );
 }
 
+// A badge that was earned: the gold disc with its engraving, a fine gold
+// ring around it and a soft gold light behind (drawn, not a shadow). With
+// no engraving it carries a tick.
+export function Medal({ size, mark }: { size: number; mark: string | null }) {
+  const box = Math.round(size * 1.5);
+  const c = box / 2;
+  const text = mark ? (mark.length <= 2 ? 0.36 : mark.length === 3 ? 0.3 : 0.25) : 0;
+  return (
+    <View style={{ width: box, height: box, alignItems: "center", justifyContent: "center" }}>
+      <Svg width={box} height={box} style={StyleSheet.absoluteFill}>
+        <Defs>
+          <RadialGradient id="medalLight" cx="50%" cy="50%" r="50%">
+            <Stop offset="0.55" stopColor={metal.mid} stopOpacity={0.26} />
+            <Stop offset="1" stopColor={metal.mid} stopOpacity={0} />
+          </RadialGradient>
+        </Defs>
+        <Circle cx={c} cy={c} r={c} fill="url(#medalLight)" />
+        <Circle cx={c} cy={c} r={size / 2 + 4} fill="none" stroke={metal.mid} strokeOpacity={0.55} strokeWidth={1.5} />
+      </Svg>
+      <Disc size={size} earned>
+        {mark ? (
+          <Text
+            maxFontSizeMultiplier={1}
+            numberOfLines={1}
+            style={{ fontFamily: font.head, fontSize: Math.round(size * text), color: "#1a1408", letterSpacing: 0.4 }}
+          >
+            {mark}
+          </Text>
+        ) : (
+          <Icon name="check" size={Math.round(size * 0.4)} stroke="#1a1408" />
+        )}
+      </Disc>
+    </View>
+  );
+}
+
 export function Icon({ name, size = 22, stroke = color.bone, fill }: { name: IconName; size?: number; stroke?: string; fill?: string }) {
   const d = ICONS[name];
   const solid = name === "play";
@@ -251,7 +288,7 @@ export function Icon({ name, size = 22, stroke = color.bone, fill }: { name: Ico
   );
 }
 
-export type IconName = "play" | "check" | "close" | "timer" | "chevron" | "back" | "plus";
+export type IconName = "play" | "check" | "close" | "timer" | "chevron" | "back" | "plus" | "lock" | "download" | "bell";
 const ICONS: Record<IconName, string> = {
   play: "M7 4.5v15l13-7.5z",
   check: "m5 12.5 4.5 4.5L19 7.5",
@@ -260,6 +297,9 @@ const ICONS: Record<IconName, string> = {
   chevron: "m9 6 6 6-6 6",
   back: "m15 6-6 6 6 6",
   plus: "M12 5v14M5 12h14",
+  lock: "M7.5 11V8a4.5 4.5 0 0 1 9 0v3M6.5 11h11a1.5 1.5 0 0 1 1.5 1.5v6a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 18.5v-6A1.5 1.5 0 0 1 6.5 11z",
+  download: "M12 4v11M7.5 10.5 12 15l4.5-4.5M5 20h14",
+  bell: "M6 9.5a6 6 0 1 1 12 0c0 4.5 1.8 6 1.8 6H4.2S6 14 6 9.5zM10 19a2.1 2.1 0 0 0 4 0",
 };
 
 export function SettingRow({
@@ -282,7 +322,7 @@ export function SettingRow({
       <View style={{ flex: 1 }}>
         <Label style={danger ? { color: color.danger } : null}>{label}</Label>
         {detail ? (
-          <Body dim size={13} style={{ marginTop: 2 }} numberOfLines={2}>
+          <Body dim size={13} style={{ marginTop: 2 }} numberOfLines={3}>
             {detail}
           </Body>
         ) : null}

@@ -6,7 +6,7 @@ import { AgreementScreen } from "@/components/elite/AgreementScreen";
 import { getViewer } from "@/lib/elite/session";
 import { signOut } from "@/lib/elite/auth-actions";
 import { consentDue } from "@/lib/elite/legal-server";
-import { trackerFor } from "@/lib/elite/tracker-server";
+import { freeSideOf } from "@/lib/elite/tracker-server";
 import { FREE_HOME, tracksGym } from "@/lib/elite/tracker";
 import { ProfileSetupScreen } from "@/components/elite/ProfileSetupScreen";
 import { profileSetupDue, setupSteps } from "@/lib/elite/account-profile";
@@ -14,9 +14,11 @@ import { suggestUsernames } from "@/lib/elite/account-profile-server";
 import { initials } from "@/lib/utils";
 
 // The free app's shell (migration 069): two tabs, Friends and My week, and
-// the plus between them that posts today's training. Only a free account
-// gets in: a coach goes to the coach side, and a member (or a player still
-// waiting on a profile) goes to the member side, which knows what to show.
+// the plus between them that posts today's training. A free account gets
+// in, and so does a Strive Pro member who came through it (they also get a
+// Train tab that opens their week). A coach goes to the coach side, and a
+// member with no free account (or a player still waiting on a profile)
+// goes to the member side, which knows what to show.
 // Account (password, blocked players, sign out, delete account) is behind
 // the initials on My week.
 export default async function FreeLayout({ children }: { children: React.ReactNode }) {
@@ -24,8 +26,13 @@ export default async function FreeLayout({ children }: { children: React.ReactNo
   if (!viewer) redirect(`/login?next=${FREE_HOME}`);
   if (viewer.role !== "player") redirect("/coach");
 
-  const tracker = await trackerFor(viewer);
-  if (!tracker) redirect("/dashboard");
+  // A free account, and a Strive Pro member who came through it (ONE APP,
+  // lib/elite/one-app.ts): they keep these pages, and get a Train tab on
+  // them that opens their week.
+  const side = await freeSideOf(viewer);
+  if (!side) redirect("/dashboard");
+  const tracker = side.tracker;
+  const train = !side.lives;
 
   // The agreement gate (068), the same one members pass. A free account
   // accepts at sign-up, so this shows only when the terms change.
@@ -55,7 +62,7 @@ export default async function FreeLayout({ children }: { children: React.ReactNo
       <FreshOnReturn />
       {/* A phone that said yes to notifications is kept on file (078). */}
       {!viewer.demo && <PushKeepAlive />}
-      <FreeShell gym={tracksGym(tracker.grade)}>
+      <FreeShell gym={tracksGym(tracker.grade)} train={train}>
         <main className="mx-auto w-full max-w-md pb-[calc(120px+env(safe-area-inset-bottom))] pt-[env(safe-area-inset-top)]">
           {children}
         </main>

@@ -1,5 +1,6 @@
 "use client";
 
+import { whyNotifications } from "@/lib/elite/notices";
 import { useCallback, useEffect, useState } from "react";
 import { Bell, Share } from "lucide-react";
 import {
@@ -16,6 +17,9 @@ import {
   readNativePushStep,
   registerNativePush,
 } from "@/lib/elite/native-push-client";
+import { REMINDER_CHOICES, REMINDER_QUESTION } from "@/lib/elite/reminders";
+import { reminderTimeOpen, setReminderTime } from "@/lib/elite/notice-actions";
+import { ReminderChoices } from "./NoticeChoices";
 
 function wasAsked(): boolean {
   try {
@@ -103,9 +107,9 @@ export function useNotificationsAsk(enabled: boolean): { ask: FinishAsk; shown: 
 const COPY = {
   member: {
     title: "Turn on notifications",
-    body: "So you know the moment your new week is live, your coach messages you, or a Film Room is announced. Nothing else.",
+    body: null as string | null, // said by whyNotifications, below: only what this member really gets
     install:
-      "Tap the Share button in your browser, then tap Add to Home Screen. Open Strive Elite from your home screen and turn on notifications, so you know the moment your new week is live or your coach messages you.",
+      "Tap the Share button in your browser, then tap Add to Home Screen. Open Strive Elite from your home screen and turn on notifications, so you know the moment your new week is here.",
     where: "You can change this any time on your Account page.",
   },
   free: {
@@ -121,29 +125,90 @@ export function PushOptIn({
   ask,
   onDone,
   variant = "member",
+  coachTime = true,
 }: {
   ask: Exclude<FinishAsk, null>;
   onDone: () => void;
   variant?: keyof typeof COPY;
+  // the member's offer has the coach's own time (chat, Film Room): false
+  // for Strive Pro, who is never told about either
+  coachTime?: boolean;
 }) {
-  const copy = COPY[variant];
+  const copy = { ...COPY[variant], body: COPY[variant].body ?? whyNotifications({ coachTime, friends: false }) };
   const [busy, setBusy] = useState(false);
+  // A member who just said yes is asked one more thing, once, on this same
+  // step: when they usually train, so the one daily reminder comes then.
+  // One tap saves it and closes; "Skip" closes and nothing is stored. A
+  // free account is never asked (it has no session reminder).
+  const [askTime, setAskTime] = useState(false);
 
   async function enable() {
     setBusy(true);
+    let on = false;
     try {
       if (isNativeApp()) {
-        await enableNativePush();
+        on = (await enableNativePush()) === "resync";
       } else {
         const permission = await Notification.requestPermission();
-        if (permission === "granted") await saveSubscription();
+        if (permission === "granted") {
+          await saveSubscription();
+          on = true;
+        }
       }
     } catch {
       // best-effort: a failed subscribe just means no push, not a broken app
-    } finally {
-      setBusy(false);
-      onDone();
     }
+    const open = on && variant === "member" ? await reminderTimeOpen().catch(() => false) : false;
+    setBusy(false);
+    if (open) setAskTime(true);
+    else onDone();
+  }
+
+  function pickTime(key: string) {
+    setBusy(true);
+    // Saved behind the screen; the session closes either way.
+    void setReminderTime(key)
+      .catch(() => undefined)
+      .finally(() => onDone());
+  }
+
+  if (askTime) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col pt-safe">
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 text-center">
+          <div className="flex min-h-full flex-col items-center justify-center py-6">
+            <span className="grid h-20 w-20 place-items-center rounded-full bg-accent/10 text-accent animate-rise">
+              <Bell className="h-9 w-9" />
+            </span>
+            <h2 className="mt-6 font-display text-4xl font-black uppercase leading-[0.95] animate-rise [animation-delay:80ms]">
+              {REMINDER_QUESTION}
+            </h2>
+            <p className="mt-4 max-w-xs text-[15px] leading-relaxed text-white/75 animate-rise [animation-delay:160ms]">
+              One reminder a day, at that time, on days you have a session left.
+            </p>
+            <div className="w-full max-w-xs animate-rise [animation-delay:220ms]">
+              <ReminderChoices
+                choices={REMINDER_CHOICES.map((c) => ({ key: c.key, label: c.label }))}
+                chosen={null}
+                disabled={busy}
+                onPick={pickTime}
+              />
+            </div>
+          </div>
+        </div>
+        <div className="px-4 pt-3 pb-safe">
+          <div className="mx-auto max-w-md pb-3">
+            <button
+              onClick={onDone}
+              disabled={busy}
+              className="flex h-12 w-full items-center justify-center text-[15px] font-medium text-white/65"
+            >
+              Skip
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const install = ask === "install_ios";

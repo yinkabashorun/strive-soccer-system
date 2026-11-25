@@ -945,6 +945,19 @@ describe("the social half is built like the training loop", () => {
     expect(post.match(/lockedLine\(feed\.friendsToday\)/g)?.length).toBe(2);
   });
 
+  // The simulator's first full walk of the free quiz (Nov 25 2026) stopped on
+  // its last screen: Finish judged and saved the draft as it was BEFORE the
+  // tap, so the screen's own answer was missing and the same screen opened
+  // again. Finish is handed the answers with the last tap in them.
+  it("the quiz's Finish saves the answers including the last screen's own", () => {
+    const quiz = code(path.join(root, "app/onboarding/[step].tsx"));
+    expect(quiz).toContain("else void finish(patch ? { ...a, ...patch } : a);");
+    expect(quiz).toContain("const missing = order.find((s) => !readyOf(s, now));");
+    expect(quiz).toContain("await saveIntake(now);");
+    expect(quiz).toContain("await submit.mutateAsync(now);");
+    expect(quiz).not.toMatch(/saveIntake\(a\)|mutateAsync\(a\)/);
+  });
+
   // A screen the gatekeeper does not know is sent straight back home: a
   // friend's profile was built and its first open bounced to Friends. Every
   // screen in the app has to be named in one of the gatekeeper's lists.

@@ -16,7 +16,7 @@ appId: com.strivesoccer.elite
     timeout: 30000
 - tapOn: "Diego, trained today. Open Diego's profile."
 - extendedWaitUntil:
-    visible: "Diego R."
+    visible: "Diego R.*"
     timeout: 15000
 - waitForAnimationToEnd:
     timeout: 4000
@@ -53,10 +53,16 @@ appId: com.strivesoccer.elite
     timeout: 8000
 - takeScreenshot: t82b-photo-open
 - tapOn: "Close the photo"
-- scrollUntilVisible:
-    element: "Back"
-    direction: UP
-    timeout: 15000
+# all the way to the top, so the Back arrow is clear of the clock (it
+# scrolls with the page, and a tap aimed at one half under the clock misses)
+- swipe:
+    start: "50%,35%"
+    end: "50%,85%"
+- swipe:
+    start: "50%,35%"
+    end: "50%,85%"
+- waitForAnimationToEnd:
+    timeout: 3000
 - tapOn: "Back"
 - extendedWaitUntil:
     visible: "Post my training"
@@ -70,7 +76,7 @@ appId: com.strivesoccer.elite
     timeout: 20000
 - tapOn: ".*Nico A.*Open Nico's profile."
 - extendedWaitUntil:
-    visible: "Nico A."
+    visible: "Nico A.*"
     timeout: 15000
 - takeScreenshot: t83-player-from-board
 - tapOn: "Back"

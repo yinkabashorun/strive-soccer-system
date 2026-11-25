@@ -38,6 +38,25 @@ appId: com.strivesoccer.elite
     direction: DOWN
     timeout: 15000
 - takeScreenshot: t82-player-clubs-photos
+# a training photo opens full screen, and closes again
+- scrollUntilVisible:
+    element:
+      text: ".*training photo.*Open the photo."
+      index: 0
+    direction: DOWN
+    timeout: 15000
+- tapOn:
+    text: ".*training photo.*Open the photo."
+    index: 0
+- extendedWaitUntil:
+    visible: "Close the photo"
+    timeout: 8000
+- takeScreenshot: t82b-photo-open
+- tapOn: "Close the photo"
+- scrollUntilVisible:
+    element: "Back"
+    direction: UP
+    timeout: 15000
 - tapOn: "Back"
 - extendedWaitUntil:
     visible: "Post my training"

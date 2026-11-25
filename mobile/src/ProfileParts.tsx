@@ -1,10 +1,11 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { ScrollView, StyleSheet, View, useWindowDimensions, type StyleProp, type ViewStyle } from "react-native";
 import { Image } from "expo-image";
 import { useRouter, type Href } from "expo-router";
 import { fmtDuration } from "@shared/time-trained";
 import type { AppProfile } from "@shared/app-contract";
 import { Crest } from "@/Crest";
+import { PhotoViewer, type ViewedPhoto } from "@/PhotoViewer";
 import { Body, Eyebrow, Head, Label, Press } from "@/ui";
 import { color } from "@/theme";
 
@@ -105,12 +106,14 @@ export function ClubRow({ clubs }: { clubs: AppProfile["clubs"] }) {
   );
 }
 
-// Their training photos, newest first, three across, the time on each.
+// Their training photos, newest first, three across, the time on each. A
+// tap opens the photo full screen (src/PhotoViewer.tsx).
 // Only the photos the viewer may see are ever sent (today's stay locked
 // until the viewer has posted today), and when there is none to show the
 // grid is simply not there: nobody is ever shown as not having trained.
 export function PostGrid({ posts, first, mine }: { posts: AppProfile["posts"]; first: string; mine: boolean }) {
   const { width } = useWindowDimensions();
+  const [open, setOpen] = useState<ViewedPhoto | null>(null);
   if (posts.length === 0) return null;
   const gap = 3;
   const side = Math.floor((width - gap * 2) / 3);
@@ -122,22 +125,24 @@ export function PostGrid({ posts, first, mine }: { posts: AppProfile["posts"]; f
       <View style={[styles.grid, { gap }]}>
         {posts.map((p) => {
           const time = fmtDuration(p.minutes);
+          const said = `${mine ? "Your" : `${first}'s`} ${p.kind === "gym" ? "gym" : "training"} photo, ${time}`;
           return (
-            <View
+            <Press
               key={p.id}
               style={{ width: side, height: side, backgroundColor: color.fill2 }}
-              accessible
-              accessibilityRole="image"
-              accessibilityLabel={`${mine ? "Your" : `${first}'s`} ${p.kind === "gym" ? "gym" : "training"} photo, ${time}`}
+              onPress={() => setOpen({ uri: p.photoUrl, said, time, kind: p.kind })}
+              accessibilityRole="imagebutton"
+              accessibilityLabel={`${said}. Open the photo.`}
             >
               <Image source={{ uri: p.photoUrl }} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} cachePolicy="disk" />
               <View style={styles.time}>
                 <Label size={12}>{time}</Label>
               </View>
-            </View>
+            </Press>
           );
         })}
       </View>
+      <PhotoViewer photo={open} onClose={() => setOpen(null)} />
     </View>
   );
 }

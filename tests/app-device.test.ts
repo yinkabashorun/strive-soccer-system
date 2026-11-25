@@ -962,7 +962,15 @@ describe("the social half is built like the training loop", () => {
     const page = code(path.join(root, "app/player/[id].tsx"));
     const parts = code(path.join(root, "src/ProfileParts.tsx"));
     // no photos to show: the grid is simply not there
-    expect(parts).toMatch(/export function PostGrid[\s\S]{0,200}if \(posts\.length === 0\) return null;/);
+    expect(parts).toMatch(/export function PostGrid[\s\S]{0,400}if \(posts\.length === 0\) return null;/);
+    // a tap opens the photo full screen; the whole photo, never cropped,
+    // and nothing can be saved, shared or sent from there
+    expect(parts).toContain("<PhotoViewer photo={open} onClose={() => setOpen(null)} />");
+    const viewer = code(path.join(root, "src/PhotoViewer.tsx"));
+    expect(viewer).toContain('contentFit="contain"');
+    expect(viewer).toContain('accessibilityLabel="Close the photo"');
+    expect(viewer).toContain("onRequestClose={onClose}");
+    expect(viewer).not.toMatch(/\bShare\b|MediaLibrary|saveToLibrary|Clipboard|Linking/);
     for (const text of [page, parts]) {
       expect(text).not.toMatch(/has not (trained|posted)|hasn't|no training|missed|streak|upgrade|Strive Pro|\/offer|followers?/i);
     }

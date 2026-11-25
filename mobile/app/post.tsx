@@ -36,6 +36,10 @@ import { color, font } from "@/theme";
 // photo and the line are asked. The time is already on the week, counted
 // by the server from the session itself, so there is no length to pick and
 // it can never count twice.
+// Where the note comes to rest under the top of the page once the keyboard
+// is up: far enough down that the row of lengths above it stays on screen.
+const NOTE_REVEAL_TOP = 112;
+
 export default function Post() {
   const router = useRouter();
   const { session: sessionParam } = useLocalSearchParams<{ session?: string }>();
@@ -158,7 +162,22 @@ export default function Post() {
           </Press>
         </View>
       }
-      contentStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }}
+      contentStyle={{ paddingHorizontal: 20, paddingBottom: ready ? 16 : insets.bottom + 40 }}
+      // The note comes to rest with the lengths still in view above it: a
+      // player who types first can still tap how long they trained.
+      revealTop={NOTE_REVEAL_TOP}
+      // The button rides on the keyboard. In the page's own flow it sat
+      // BEHIND the keyboard while the note was being typed, and a tap aimed
+      // at it typed a letter (the simulator's first walk of a first post,
+      // Nov 25 2026).
+      footer={
+        ready ? (
+          <View style={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: insets.bottom + 16, backgroundColor: color.black }}>
+            {error ? <Body style={{ color: color.danger, marginBottom: 10 }}>{error}</Body> : null}
+            <Button label={photo ? "Post to my friends" : "Log my training"} busy={busy} disabled={session ? !photo : minutes === null} onPress={() => void send()} />
+          </View>
+        ) : undefined
+      }
     >
       {photo ? (
         <View style={styles.preview}>
@@ -285,8 +304,6 @@ export default function Post() {
             </>
           ) : null}
 
-          {error ? <Body style={{ color: color.danger, marginTop: 12 }}>{error}</Body> : null}
-          <Button style={{ marginTop: 16 }} label={photo ? "Post to my friends" : "Log my training"} busy={busy} disabled={session ? !photo : minutes === null} onPress={() => void send()} />
           <Press
             onPress={() => {
               setPhoto(null);
@@ -294,7 +311,7 @@ export default function Post() {
               setError(null);
             }}
             disabled={busy}
-            style={[styles.link, { alignSelf: "center", marginTop: 6 }]}
+            style={[styles.link, { alignSelf: "center", marginTop: 10 }]}
           >
             <Label dim size={14}>
               {photo ? "Use another photo" : "Add a photo instead"}

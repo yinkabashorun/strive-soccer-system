@@ -986,6 +986,23 @@ describe("the social half is built like the training loop", () => {
     }
   });
 
+  // The simulator's first walk of a first post (Nov 25 2026): with the
+  // keyboard up for the note, "Post to my friends" sat behind the keyboard
+  // and the tap aimed at it typed a letter. The button is the page's footer,
+  // which rides on the keyboard, and the note rests with the lengths in view.
+  it("the post button rides on the keyboard while the note is typed", () => {
+    const post = code(path.join(root, "app/post.tsx"));
+    const footer = post.slice(post.indexOf("footer={"), post.indexOf("    >", post.indexOf("footer={")));
+    expect(footer).toContain('label={photo ? "Post to my friends" : "Log my training"}');
+    expect(footer).toContain("{error ?");
+    // one button, in the footer only
+    expect(post.match(/"Post to my friends"/g)?.length).toBe(1);
+    expect(post).toContain("revealTop={NOTE_REVEAL_TOP}");
+    const form = code(path.join(root, "src/FormScreen.tsx"));
+    expect(form).toContain("revealTop = REVEAL_TOP");
+    expect(form).toContain("- revealTop;");
+  });
+
   // A screen the gatekeeper does not know is sent straight back home: a
   // friend's profile was built and its first open bounced to Friends. Every
   // screen in the app has to be named in one of the gatekeeper's lists.

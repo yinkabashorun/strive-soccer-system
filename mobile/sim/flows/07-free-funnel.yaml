@@ -296,19 +296,25 @@ appId: com.strivesoccer.elite
 - takeScreenshot: t33-week-plan
 - tapOn: "Start my week"
 
-# Friends: today's posts are locked until a photo is posted today.
+# Friends: today's posts are locked until training is posted today.
 - extendedWaitUntil:
-    visible: "Post my training"
+    visible: "Start training"
     timeout: 20000
 - waitForAnimationToEnd:
     timeout: 4000
 - takeScreenshot: t34-friends-locked
-- tapOn: "Post my training"
+
+# THE TRAINING CLOCK: a photo starts it, a photo stops it, and the time
+# between the two is the training. On a phone both photos come from the
+# camera only; the simulator has no camera, so in this example build (and
+# only in it) the phone's photos stand in. The example clock opens 45
+# minutes in, so the pictures show a real session.
+- tapOn: "Start training"
 - extendedWaitUntil:
-    visible: "Choose from photos"
+    visible: "Take my start photo"
     timeout: 15000
-- takeScreenshot: t35-post-start
-- tapOn: "Choose from photos"
+- takeScreenshot: t35-clock-start
+- tapOn: "Take my start photo"
 - extendedWaitUntil:
     visible: "Cancel"
     timeout: 15000
@@ -317,12 +323,58 @@ appId: com.strivesoccer.elite
 - tapOn:
     point: "17%,32%"
 - extendedWaitUntil:
+    visible: "Take my finish photo"
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: t35b-clock-running
+
+# The clock is never out of sight: close the screen and it sits at the top
+# of Friends and of Week, one tap from the finish photo.
+- tapOn: "Close"
+- extendedWaitUntil:
+    visible: "Finish my training"
+    timeout: 15000
+- takeScreenshot: t35c-clock-row-friends
+- tapOn: "Week"
+- extendedWaitUntil:
+    visible: "Change"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: t35d-clock-row-week
+# the row is one thing to a screen reader: "Training. 45:20. Take my finish photo"
+# ONE TAP TO THE CAMERA: the row opens the clock and the camera comes up by
+# itself (here, the phone's photos)
+- tapOn: "Training\\..*Take my finish photo"
+- extendedWaitUntil:
+    visible: "Cancel"
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 5000
+- tapOn:
+    point: "50%,32%"
+- extendedWaitUntil:
     visible: "Post to my friends"
     timeout: 20000
-- tapOn: "45m"
+- waitForAnimationToEnd:
+    timeout: 3000
+# nobody picks a length: it is the time between the two photos
+- assertVisible: "Ready to post\\. 45m\\..*"
+# Forgot to stop the clock: time comes off, five minutes a tap, and back
+- tapOn: "Finished before you took this photo?"
+- tapOn: "5 min less"
+- tapOn: "5 min less"
+- assertVisible: "Ready to post\\. 35m\\..*"
+- takeScreenshot: t36a-clock-time-off
+- tapOn: "5 min more"
+- tapOn: "5 min more"
+- assertVisible: "Ready to post\\. 45m\\..*"
+- takeScreenshot: t36-clock-ready
 - tapOn: "One line about your training"
 - inputText: "Weak foot only."
-- takeScreenshot: t36-post-typing
+# the post button rides on the keyboard
+- takeScreenshot: t36b-post-typing
 - tapOn: "Post to my friends"
 # asked once, after the first post, with the reason
 - extendedWaitUntil:
@@ -330,14 +382,23 @@ appId: com.strivesoccer.elite
     timeout: 20000
 - takeScreenshot: t37-post-notifications-ask
 - tapOn: "Not now"
+# the clock was opened from Week, so that is where posting returns to
+- tapOn: "Friends"
 
-# The feed is open now, with their own post first.
+# The feed is open now, with their own post first. Its one line sits under
+# the photo, so it is scrolled to (the run on 3108e77 looked for it without
+# scrolling and stopped here, with the post right there on screen).
 - extendedWaitUntil:
-    visible: "Weak foot only."
+    visible: "Just now"
     timeout: 20000
 - waitForAnimationToEnd:
     timeout: 4000
 - takeScreenshot: t38-friends-unlocked
+- scrollUntilVisible:
+    element: "Weak foot only."
+    direction: DOWN
+    timeout: 15000
+- takeScreenshot: t38b-own-post-line
 - tapOn: "Week"
 - extendedWaitUntil:
     visible: "Change"

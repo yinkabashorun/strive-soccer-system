@@ -20,10 +20,12 @@ import {
   facesRow,
   friendsBoard,
   initialsOf,
+  onBoards,
   weekOf,
   type Kind,
   type MyClub,
 } from "./tracker";
+import type { Proof } from "./training-clock";
 import type { PlanCard } from "./club-teams";
 
 // ---- Joining by code -------------------------------------------------------
@@ -114,7 +116,7 @@ export function clubBoard(members: MyClub["members"], today: string): ClubMember
 
 // ---- This week and the best week --------------------------------------------
 
-export type ClubLog = { profile_id: string; trained_on: string; minutes: number; kind: Kind };
+export type ClubLog = { profile_id: string; trained_on: string; minutes: number; kind: Kind; proof?: Proof | null };
 
 // The club's training time by week (Monday to Sunday), from its members'
 // logs: training only, gym never counts. A member's training counts from
@@ -130,7 +132,7 @@ export function clubWeeks(input: {
   const thisMonday = weekOf(input.today).monday;
   const byWeek = new Map<string, number>();
   for (const l of input.logs) {
-    if (l.kind !== "training") continue;
+    if (!onBoards(l)) continue; // training only, and never time that was simply typed in
     const since = from.get(l.profile_id);
     const monday = weekOf(l.trained_on).monday;
     if (!since || monday < since || monday > thisMonday) continue;

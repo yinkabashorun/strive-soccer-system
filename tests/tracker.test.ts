@@ -710,6 +710,9 @@ describe("free accounts are invisible to everything a member query reads", () =>
     // a member's finished session, put on their own free-app week once
     // (one-app.ts): the signed-in member's own row, from the tick's action
     "lib/elite/session-log.ts",
+    // the training clock (089): the signed-in account's own timed entry,
+    // its two photos into its own folder, and its own running clock
+    "lib/elite/training-clock-server.ts",
   ]);
   // (the post route stores nothing itself: it hands a checked photo to
   // savePost in tracker-server.ts)

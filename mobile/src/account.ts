@@ -1,5 +1,6 @@
 import { signOutHere } from "./auth/session";
 import { clearCache } from "./api/queryClient";
+import { clearClockStore } from "./clock";
 import { clearOutbox, sendOutbox } from "./outbox";
 import { turnOffNotifications } from "./push";
 import { setPref } from "./prefs";
@@ -16,6 +17,7 @@ export async function signOutEverywhere(): Promise<void> {
   await signOutHere();
   await clearCache();
   await clearOutbox();
+  await clearClockStore();
 }
 
 // After the account was deleted on the server there is nothing to take the
@@ -26,4 +28,5 @@ export async function leaveDeletedAccount(): Promise<void> {
   await signOutHere();
   await clearCache();
   await clearOutbox();
+  await clearClockStore();
 }

@@ -126,7 +126,7 @@ these are what only a phone shows.
 
 1. **Start my week opens the app.** Join free with a new email, take the
    quiz, add the photo, tap "Not now, start free", pick the days, tap
-   "Start my week". The app opens on Friends with "Post my training". It
+   "Start my week". The app opens on Friends with "Start training". It
    must not stay on "Your week" with a Save button (builds 8 and 9 did).
 2. **Nothing behind it.** On Friends, swipe from the left edge: nothing
    happens. The offer and the week's set-up are not behind the app.
@@ -182,6 +182,68 @@ to a file and opens the share sheet. None of that has run on a phone.
    be made. If the words should ride with the picture, set
    `SHARE_WEEK_WORDS_WITH_PICTURE` in `mobile/src/share-week.ts` to true
    on a test build and check that Instagram is still in the sheet.
+
+## The training clock, on a phone only (Nov 25 2026)
+
+Training in the free app is timed between two photos (his "a pic when they
+arrive then when they dip"). The simulator has no camera, so in its
+pictures the phone's own photos stand in; ONLY A PHONE PROVES the camera,
+the locked phone and a field with no signal. Needs a build made after the
+clock is on main, and migration 089 applied.
+
+1. **The camera, and only the camera.** Friends, "Start training", "Take
+   my start photo": the camera opens (after the one-time permission
+   question). There is no way to pick a photo from the library, for the
+   start or the finish.
+2. **Camera turned off.** With the camera switched off for Strive Elite in
+   the phone's Settings, the button says so in one line with "Open
+   Settings", and nothing else happens.
+3. **The clock runs with the phone locked.** Take the start photo, lock
+   the phone for five minutes, unlock: the clock shows five minutes more,
+   at once, not a clock that starts catching up.
+4. **The clock survives the app being closed.** Start a clock, swipe the
+   app away, open it again: Friends and Week both show the clock row at
+   the top, still counting; one tap opens it.
+5. **The finish.** "Take my finish photo", then the screen shows the
+   finish photo with the start photo in its corner, "Ready to post" and
+   the time between the two. There is nothing to pick a length with.
+   Type a note: the Post button stays above the keyboard.
+6. **Under a minute.** Start a clock and tap the finish straight away: one
+   line says the clock has been running for under a minute, and the
+   camera does not open.
+7. **NO SIGNAL (the one that matters at a field).** Turn on airplane mode.
+   Start a clock, wait two minutes, take the finish photo, tap "Post to my
+   friends". It says "Your training is saved on this phone. Post it when
+   you are back online." Close the app. Turn airplane mode off, open the
+   app: the row on Friends says "Ready to post"; tap it, post. The time on
+   the post is the two minutes between the photos, not the time it waited.
+8. **Posting twice does nothing twice.** On weak signal tap Post, and tap
+   it again if it seems stuck: one post, one entry on the week.
+9. **Stop without posting.** Start a clock, "Stop without posting", confirm:
+   the row is gone and nothing is on the week.
+10. **Friends see both photos.** A friend's phone shows the post with the
+    start photo small in the corner of the finish photo.
+11. **Without the clock.** "Trained without the clock?", pick 45m, "Add it
+    to my week": it is on the Week tab's list marked "Not timed", the ring
+    moves, and the friends board and the club's time do not.
+13. **One tap to the camera.** After the first clock ever, "Start
+    training" on Friends opens the camera at once (the screen behind it
+    is the start screen). With a clock running, "Finish my training" and
+    the clock's row open the camera at once too. Closing the camera
+    leaves the clock's screen, nothing lost. IF THE CAMERA DOES NOT COME
+    UP BY ITSELF, tell me: the button on the screen still works, and the
+    wait before it opens is one number (CAMERA_AFTER_MS in app/post.tsx).
+14. **The post sends itself.** Repeat check 7, but after tapping Post in
+    airplane mode do NOT open the clock again: turn airplane mode off and
+    just open the app. Within a few seconds the row is gone and the post
+    is on Friends.
+15. **Forgot to stop the clock.** On "Ready to post" tap "Finished before
+    you took this photo?", then "5 min less" twice: the time drops ten
+    minutes; "5 min more" brings it back and never goes above the
+    measured time. The post shows the lower time.
+12. **A clock nobody finished.** Not worth waiting three hours for on a
+    phone: the simulator's pictures and the tests hold it. If it ever
+    shows ("This one was not timed"), both buttons clear it.
 
 ## Seeing the phone from here
 

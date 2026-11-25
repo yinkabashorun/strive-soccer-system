@@ -32,7 +32,10 @@ export const dynamic = "force-dynamic";
 const no = (error: string, status: number) => NextResponse.json({ ok: false, error }, { status });
 
 // Post today's training: a photo, how long, training or gym, and one
-// optional line. The photo arrives already shrunk by the phone; the
+// optional line. The length here is TYPED by the player, so the entry is
+// written with proof 'typed' (savePost): friends see the post, marked not
+// timed, and it counts on the player's own week only. Timed training is
+// the clock's (app/api/app/free/clock, lib/elite/training-clock.ts). The photo arrives already shrunk by the phone; the
 // server checks who is signed in, that the file is a JPEG of a size it
 // will take, and only then stores it under the signed-in account's own
 // folder in the private bucket (lib/elite/tracker-server.ts savePost).
@@ -126,9 +129,9 @@ export async function POST(req: Request) {
   // Friends who have not posted today hear about it (078): one a day at
   // most, accepted friends only, never across a block, never at night.
   await noticeFriendPost(viewer.profile.id, today).catch(() => 0);
-  // Bring your squad (086): a player a teammate brought counts for that
-  // teammate on their first training post, once.
-  await countTeammate(viewer.profile.id).catch(() => undefined);
+  // Bring your squad (086) counts a teammate on their first TIMED training
+  // only (the clock, or a finished session above): a photo with a typed
+  // length proves nothing, so it counts nobody (training-clock.ts).
   revalidatePath(FREE_HOME);
   revalidatePath(FREE_WEEK);
   return NextResponse.json({ ok: true, id: saved.id });

@@ -17,6 +17,8 @@ import type { AppDrill, AppSession, AppWeek } from "@shared/app-contract";
 import { NEXT_STILLS, nextCard, nextStills, rowLine, weekMinutesDone, weekRows, weekSummary } from "@/week-view";
 import { QUIZ_STEPS } from "@shared/quiz";
 import { WORDS_DARK, wordsShade } from "@/shade-stops";
+import { START_TELL_AT_MS, cameraFirst, clockButton, clockFields, clockView, lessStep, parseClock, readyMinutes, refusalIsFinal, resendDelayMs, shotUri, startWorthTelling, type Clock } from "@/clock-core";
+import { CLOCK_CAP_MINUTES, CLOCK_LIVE_SECONDS, CLOCK_MIN_SECONDS, CLOCK_WORDS } from "@shared/training-clock";
 
 function memoryKV(): KV & { map: Map<string, string> } {
   const map = new Map<string, string>();
@@ -793,5 +795,116 @@ describe("the version line in Settings", () => {
     expect(versionLine("1.0.0", "9")).toBe("Strive Elite 1.0.0 (9)");
     expect(versionLine("1.0.0", null)).toBe("Strive Elite 1.0.0");
     expect(versionLine(undefined, " ")).toBe("Strive Elite");
+  });
+});
+
+// The training clock as the phone keeps it (src/clock-core.ts; the rules
+// are lib/elite/training-clock.ts). It has to survive the app being closed
+// and a field with no signal, and it never sends a length.
+describe("the training clock on the phone", () => {
+  const T = 1_800_000_000_000;
+  const MIN = 60_000;
+  const running: Clock = { owner: "m@example.com", start: { atMs: T, b64: "AAAA", uri: null }, finish: null, heard: false, post: null };
+  const ready: Clock = { ...running, finish: { atMs: T + 47 * MIN, b64: "BBBB", uri: null } };
+
+  it("comes back from storage whole, or not at all", () => {
+    expect(parseClock(JSON.stringify(running))).toEqual(running);
+    expect(parseClock(JSON.stringify(ready))).toEqual(ready);
+    // the example build keeps where the picked photo is, not its bytes
+    expect(parseClock(JSON.stringify({ ...running, start: { atMs: T, b64: null, uri: "file:///x.jpg" } }))?.start.uri).toBe("file:///x.jpg");
+    for (const bad of [null, "", "nope", "{}", JSON.stringify({ ...running, owner: "" }), JSON.stringify({ ...running, start: { atMs: T } }), JSON.stringify({ ...running, start: { atMs: "soon", b64: "AAAA" } })]) {
+      expect(parseClock(bad), String(bad)).toBeNull();
+    }
+    // a finish before its start is not a clock
+    expect(parseClock(JSON.stringify({ ...running, finish: { atMs: T - 1, b64: "BBBB" } }))).toBeNull();
+    expect(shotUri(running.start)).toBe("data:image/jpeg;base64,AAAA");
+  });
+
+  it("says where it stands: none, running, capped, expired, ready", () => {
+    expect(clockView(null, T)).toEqual({ at: "none" });
+    expect(clockView(running, T + 42 * MIN + 10_000)).toEqual({ at: "running", seconds: 42 * 60 + 10 });
+    expect(clockView(running, T + 160 * MIN)).toEqual({ at: "capped", seconds: CLOCK_CAP_MINUTES * 60 });
+    expect(clockView(running, T + 181 * MIN)).toEqual({ at: "expired" });
+    // once both photos are taken the clock no longer moves, whatever time it is
+    expect(clockView(ready, T + 500 * MIN)).toEqual({ at: "ready", minutes: 47, waiting: false });
+  });
+
+  it("a finished clock shows the time between the photos, never past the cap", () => {
+    expect(readyMinutes(ready)).toBe(47);
+    expect(readyMinutes({ ...ready, finish: { atMs: T + 170 * MIN, b64: "B", uri: null } })).toBe(CLOCK_CAP_MINUTES);
+    expect(readyMinutes({ ...ready, finish: { atMs: T + 70_000, b64: "B", uri: null } })).toBe(1);
+    expect(readyMinutes(running)).toBe(0);
+  });
+
+  it("the one button says where the clock stands", () => {
+    expect(clockButton({ at: "none" })).toBe(CLOCK_WORDS.start);
+    expect(clockButton({ at: "running", seconds: 5 })).toBe(CLOCK_WORDS.finishShort);
+    expect(clockButton({ at: "capped", seconds: 9000 })).toBe(CLOCK_WORDS.finishShort);
+    expect(clockButton({ at: "expired" })).toBe(CLOCK_WORDS.finishShort);
+    expect(clockButton({ at: "ready", minutes: 47, waiting: false })).toBe(CLOCK_WORDS.postShort);
+    expect([CLOCK_WORDS.start, CLOCK_WORDS.finishShort, CLOCK_WORDS.postShort]).toEqual(["Start training", "Finish my training", "Post my training"]);
+  });
+
+  it("tells the server the clock started only while that word can still arrive live", () => {
+    expect(startWorthTelling(running, T + 5_000)).toBe(true);
+    expect(startWorthTelling(running, T + CLOCK_LIVE_SECONDS * 1000)).toBe(true);
+    expect(startWorthTelling(running, T + CLOCK_LIVE_SECONDS * 1000 + 1)).toBe(false);
+    expect(startWorthTelling({ ...running, heard: true }, T + 5_000)).toBe(false);
+    expect(startWorthTelling(ready, T + 5_000)).toBe(false);
+    expect(startWorthTelling(null, T)).toBe(false);
+    // every try lands inside the live window, the first at once
+    expect(START_TELL_AT_MS[0]).toBe(0);
+    expect(Math.max(...START_TELL_AT_MS)).toBeLessThan(CLOCK_LIVE_SECONDS * 1000);
+  });
+
+  it("sends the two times, when it was sent, and what the player chose: never a length", () => {
+    expect(clockFields(ready, T + 48 * MIN, { kind: "training", caption: "  Weak foot only.  ", less: 10 })).toEqual({
+      started: String(T),
+      ended: String(T + 47 * MIN),
+      sent: String(T + 48 * MIN),
+      kind: "training",
+      caption: "Weak foot only.",
+      less: "10",
+    });
+    expect(clockFields(running, T, { kind: "training", caption: "", less: 0 })).toBeNull();
+  });
+
+  it("a post that could not be sent stays with the clock, through the app being closed", () => {
+    const waiting: Clock = { ...ready, post: { kind: "gym", caption: "Legs.", less: 5 } };
+    expect(parseClock(JSON.stringify(waiting))).toEqual(waiting);
+    // it shows as waiting, at the time it will count
+    expect(clockView(waiting, T + 500 * MIN)).toEqual({ at: "ready", minutes: 42, waiting: true });
+    // a post is only ever waiting on a finished clock, and only a whole one is kept
+    expect(parseClock(JSON.stringify({ ...running, post: waiting.post }))?.post).toBeNull();
+    expect(parseClock(JSON.stringify({ ...ready, post: { kind: "nap", caption: "", less: 0 } }))?.post).toBeNull();
+    // tried again soon, then every minute while the app is open
+    expect([0, 1, 2, 3, 40].map(resendDelayMs)).toEqual([10_000, 30_000, 60_000, 60_000, 60_000]);
+  });
+
+  it("time can only come off a finished clock, five minutes a tap, never down to nothing", () => {
+    expect(lessStep(47, 0, -1)).toBe(5);
+    expect(lessStep(47, 5, -1)).toBe(10);
+    expect(lessStep(47, 45, -1)).toBe(45); // 2 minutes left: no further
+    expect(lessStep(47, 5, 1)).toBe(0);
+    expect(lessStep(47, 0, 1)).toBe(0); // never adds time
+    expect(lessStep(4, 0, -1)).toBe(0); // too short to take anything off
+  });
+
+  it("one tap goes to the camera only where a photo is the one thing to do next", () => {
+    // the first clock ever shows how it works first
+    expect(cameraFirst({ at: "none" }, false, CLOCK_MIN_SECONDS)).toBeNull();
+    expect(cameraFirst({ at: "none" }, true, CLOCK_MIN_SECONDS)).toBe("start");
+    // under a minute there is nothing to finish yet
+    expect(cameraFirst({ at: "running", seconds: 30 }, true, CLOCK_MIN_SECONDS)).toBeNull();
+    expect(cameraFirst({ at: "running", seconds: 60 }, true, CLOCK_MIN_SECONDS)).toBe("finish");
+    expect(cameraFirst({ at: "capped", seconds: 9000 }, false, CLOCK_MIN_SECONDS)).toBe("finish");
+    // nothing to photograph once both photos are taken, or it can no longer be timed
+    expect(cameraFirst({ at: "ready", minutes: 47, waiting: false }, true, CLOCK_MIN_SECONDS)).toBeNull();
+    expect(cameraFirst({ at: "expired" }, true, CLOCK_MIN_SECONDS)).toBeNull();
+  });
+
+  it("keeps a clock the server could not be reached for, and lets go of one it will never take", () => {
+    for (const reason of ["short", "expired", "bad", "overlap", "day_cap"]) expect(refusalIsFinal(reason), reason).toBe(true);
+    for (const reason of [null, undefined, "", "server", "offline", 7]) expect(refusalIsFinal(reason), String(reason)).toBe(false);
   });
 });

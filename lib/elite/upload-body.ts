@@ -75,22 +75,33 @@ export function utf8Bytes(text: string): Uint8Array {
 // in a value could end the part early, so there is never one).
 export function fileForm(
   fields: Record<string, string>,
-  file: { field: string; fileName: string; type: string; bytes: Uint8Array },
+  file: UploadFile,
   boundary = makeBoundary(),
 ): Multipart {
+  return filesForm(fields, [file], boundary);
+}
+
+export type UploadFile = { field: string; fileName: string; type: string; bytes: Uint8Array };
+
+// The same, with more than one file (a finished training clock sends its
+// start photo and its finish photo together: lib/elite/training-clock.ts).
+export function filesForm(fields: Record<string, string>, files: UploadFile[], boundary = makeBoundary()): Multipart {
   const parts: Uint8Array[] = [];
   for (const [name, value] of Object.entries(fields)) {
     parts.push(ascii(`--${boundary}\r\nContent-Disposition: form-data; name="${name}"\r\n\r\n`));
     parts.push(utf8Bytes(value.replace(/[\r\n]+/g, " ")));
     parts.push(ascii("\r\n"));
   }
-  parts.push(
-    ascii(
-      `--${boundary}\r\nContent-Disposition: form-data; name="${file.field}"; filename="${file.fileName}"\r\nContent-Type: ${file.type}\r\n\r\n`,
-    ),
-  );
-  parts.push(file.bytes);
-  parts.push(ascii(`\r\n--${boundary}--\r\n`));
+  for (const file of files) {
+    parts.push(
+      ascii(
+        `--${boundary}\r\nContent-Disposition: form-data; name="${file.field}"; filename="${file.fileName}"\r\nContent-Type: ${file.type}\r\n\r\n`,
+      ),
+    );
+    parts.push(file.bytes);
+    parts.push(ascii("\r\n"));
+  }
+  parts.push(ascii(`--${boundary}--\r\n`));
   const body = new Uint8Array(parts.reduce((n, p) => n + p.length, 0));
   let at = 0;
   for (const p of parts) {

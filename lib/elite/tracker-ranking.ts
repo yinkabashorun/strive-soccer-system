@@ -8,6 +8,7 @@ import { createServiceClient } from "./supabase/server";
 import { everyRow } from "./supabase/every-row";
 import type { Viewer } from "./session";
 import { clubRanking, rankedClubCount, weekOf, type ClubRankingView } from "./tracker";
+import { TYPED } from "./training-clock";
 
 export async function clubRankingFor(viewer: Viewer, today: string): Promise<ClubRankingView> {
   if (viewer.demo) return demoRanking();
@@ -32,6 +33,7 @@ export async function clubRankingFor(viewer: Viewer, today: string): Promise<Clu
         .from("elite_training_logs")
         .select("profile_id, minutes")
         .eq("kind", "training")
+        .neq("proof", TYPED) // typed time counts on the player's own week only
         .gte("trained_on", monday)
         .lte("trained_on", sunday)
         .order("id")

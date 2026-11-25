@@ -169,7 +169,9 @@ describe("a finished session counts once on the week", () => {
     expect(fn).toMatch(/\.is\("photo_path", null\)/);
     // the phone's session post carries no length
     const phone = src("mobile/src/post-api.ts");
-    expect(phone).toMatch(/: \{ session: input\.session, caption: input\.caption\.trim\(\) \}/);
+    expect(phone).toMatch(/= \{ session: input\.session, caption: input\.caption\.trim\(\) \}/);
+    // and the phone has no way left to send a typed length with a photo
+    expect(phone).not.toMatch(/minutes/);
   });
 });
 

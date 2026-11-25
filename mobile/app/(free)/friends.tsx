@@ -9,6 +9,7 @@ import { PlayerLink } from "@/ProfileParts";
 import type { LockedCard } from "@shared/tracker";
 import { LockedPost, OpenPost } from "@/FeedCards";
 import { TodayHero } from "@/TodayHero";
+import { ClockRow, OPEN_CLOCK, useClockButton } from "@/ClockRow";
 import { PAGE_TOP, Screen } from "@/Screen";
 import { Body, Button, Card, Eyebrow, Hairline, Head, Label, Press, Ring, Skeleton } from "@/ui";
 import { color } from "@/theme";
@@ -21,11 +22,17 @@ import { FirstDaysCard } from "@/FirstDaysCard";
 // a locked post but whose it is and how long, so posting yours is the only
 // way to see theirs. Earlier days are always open.
 //
+// Training is timed between two photos (app/post.tsx): the one button here
+// opens the clock, and says where the clock stands ("Start training",
+// "Finish my training", "Post my training"). While a clock is running its
+// row sits at the top of the page.
+//
 // There is no upgrade wording on this screen.
 export default function Friends() {
   const router = useRouter();
   const feed = useFeed();
   const f = feed.data;
+  const clockLabel = useClockButton();
   // posts taken off the feed here (reported, blocked, deleted) and requests
   // answered, until the next read says the same
   const [gone, setGone] = useState<ReadonlySet<string>>(new Set());
@@ -46,7 +53,7 @@ export default function Friends() {
     }
   }
 
-  const post = () => router.push("/post");
+  const post = () => router.push(OPEN_CLOCK);
   const invite = () => f && void Share.share({ url: f.invite }).catch(() => undefined);
 
   if (!f) {
@@ -118,17 +125,21 @@ export default function Friends() {
         </ScrollView>
       ) : null}
 
+      {/* a clock that is running or ready to post, always in sight */}
+      <ClockRow />
+
       {/* Before today's post: one card, one button, the way Train opens
           (src/TodayHero.tsx). After it: a quiet button, and the feed. */}
       {f.unlocked ? (
         <View style={{ marginHorizontal: 14, marginTop: 16 }}>
-          <Button quiet label="Post my training" onPress={post} />
+          <Button quiet label={clockLabel} onPress={post} />
         </View>
       ) : (
         <TodayHero
           locked={heroCard}
           faces={f.faces.filter((x) => !x.you && x.active)}
           friendsToday={f.friendsToday}
+          label={clockLabel}
           onPost={post}
         />
       )}
@@ -189,7 +200,7 @@ export default function Friends() {
             Nobody has posted this week
           </Head>
           <Body dim style={{ textAlign: "center", marginTop: 10 }}>
-            Be the first. Post a photo of your training.
+            Be the first. Start the clock and train.
           </Body>
         </Card>
       ) : (

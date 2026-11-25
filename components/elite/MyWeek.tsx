@@ -1,5 +1,6 @@
 "use client";
 
+import { NOT_TIMED } from "@/lib/elite/training-clock";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -220,6 +221,8 @@ export function MyWeek({
                   <span className="flex-1 text-[15px] text-white/70">
                     {l.kind === "gym" ? "Gym" : "Training"}
                     {l.photo ? ", with a photo" : ""}
+                    {/* said without the clock: on the week, on no board (training-clock.ts) */}
+                    {l.timed === false ? `, ${NOT_TIMED.toLowerCase()}` : ""}
                   </span>
                   <span className="font-display text-xl font-bold tabular-nums text-bone">{fmtDuration(l.minutes)}</span>
                   <button

@@ -910,3 +910,24 @@ describe("the social half is built like the training loop", () => {
     expect(me).not.toMatch(/<Button[^>]*gold/);
   });
 });
+
+// A control that is switched off has to look switched off. The dim sat in a
+// plain style beside an animated one, and the animated one is applied last,
+// so a disabled button showed at full brightness (the simulator, Nov 24
+// 2026: Next on a rating page with a row missed).
+describe("a switched-off control looks switched off", () => {
+  const ui = read(path.resolve(root, "src/ui.tsx"));
+  it("the dim is inside the one animated style", () => {
+    const press = ui.slice(ui.indexOf("export function Press("), ui.indexOf("export function Button("));
+    const styled = press.slice(press.indexOf("useAnimatedStyle("), press.indexOf("[off, reduce]"));
+    expect(styled).toContain("opacity: (off ? DISABLED_OPACITY : 1)");
+    expect(press).toMatch(/\[off, reduce\]/);
+    // no plain opacity beside the animated style, where it would be dropped
+    expect(press).not.toMatch(/disabled \? \{ opacity/);
+    expect(press).toContain("style={[style, a]}");
+  });
+  it("the main button passes its off state down", () => {
+    const button = ui.slice(ui.indexOf("export function Button("), ui.indexOf("export function Card("));
+    expect(button).toContain("disabled={disabled || busy}");
+  });
+});

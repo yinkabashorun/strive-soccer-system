@@ -116,6 +116,18 @@ function validRating(v: unknown): v is number {
   return typeof v === "number" && Number.isInteger(v) && v >= RATING_MIN && v <= RATING_MAX;
 }
 
+// What a rating page still needs, in one line a player can read above the
+// Next button. Nothing is said before the first rating (the page has only
+// just opened) or once every row is rated. The simulator, Nov 24 2026: one
+// row was missed on a page of seven and Next did nothing, with no word.
+export function stillToRate(group: AttributeGroup, attrs: Partial<Record<string, number>>): string | null {
+  const rows = attributesIn(group);
+  const open = rows.filter((x) => !validRating(attrs[x.id]));
+  if (!open.length || open.length === rows.length) return null;
+  const more = open.length - 1;
+  return more ? `Still to rate: ${open[0].label}, and ${more} more.` : `Still to rate: ${open[0].label}.`;
+}
+
 // The attributes the player rated lowest: every one at 3 or under, lowest
 // first, ties in the order of the list (on the ball first), at most three.
 // A player who rated nothing under 4 gets their single lowest, so the plan

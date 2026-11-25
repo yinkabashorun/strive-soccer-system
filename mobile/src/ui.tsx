@@ -70,12 +70,23 @@ export function Label({ children, style, dim, size = 15, numberOfLines }: TProps
   );
 }
 
+// How far a control that is switched off is dimmed.
+export const DISABLED_OPACITY = 0.45;
+
 // A control that answers the moment it is touched: it sinks a little and
 // comes back (motion.tap), or just dims when the phone asks for less motion.
 export function Press({ children, style, disabled, ...rest }: PressableProps & { style?: StyleProp<ViewStyle>; children: ReactNode }) {
   const reduce = useReducedMotion();
   const s = useSharedValue(1);
-  const a = useAnimatedStyle(() => ({ transform: [{ scale: s.value }], opacity: reduce ? (s.value < 1 ? 0.7 : 1) : 1 }));
+  // The dim of a control that is switched off lives in this one style. An
+  // animated style is applied after the plain ones, so a plain opacity
+  // beside it was thrown away and a switched-off button looked switched on
+  // (the simulator, Nov 24 2026: Next on a rating page with a row missed).
+  const off = Boolean(disabled);
+  const a = useAnimatedStyle(
+    () => ({ transform: [{ scale: s.value }], opacity: (off ? DISABLED_OPACITY : 1) * (reduce && s.value < 1 ? 0.7 : 1) }),
+    [off, reduce]
+  );
   // The style sits on the pressable itself, so a control laid out with
   // flex (a segment, a rating box) takes its place in the row.
   return (
@@ -91,7 +102,7 @@ export function Press({ children, style, disabled, ...rest }: PressableProps & {
         s.value = withTiming(1, { duration: motion.tap * 1.5, easing: Easing.out(Easing.quad) });
         rest.onPressOut?.(e);
       }}
-      style={[style, a, disabled ? { opacity: 0.45 } : null]}
+      style={[style, a]}
     >
       {children}
     </AnimatedPressable>

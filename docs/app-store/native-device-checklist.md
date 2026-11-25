@@ -122,6 +122,17 @@ these are what only a phone shows.
    four free tabs again, Week says so once ("Got it" puts it away), and
    every friend, post and club is still there.
 
+## The last step of joining free, on a phone only (Nov 25 2026)
+
+1. **Start my week opens the app.** Join free with a new email, take the
+   quiz, add the photo, tap "Not now, start free", pick the days, tap
+   "Start my week". The app opens on Friends with "Post my training". It
+   must not stay on "Your week" with a Save button (builds 8 and 9 did).
+2. **Nothing behind it.** On Friends, swipe from the left edge: nothing
+   happens. The offer and the week's set-up are not behind the app.
+3. **Changing it later still closes.** Week tab, Change, move a day, Save:
+   back on Week with the new days.
+
 ## Build 9 and later, on a phone only (Nov 25 2026)
 
 1. **A face opens a profile.** On Friends, tap a friend's face in the row,

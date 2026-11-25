@@ -49,9 +49,12 @@ export function PhotoViewer({ photo, onClose }: { photo: ViewedPhoto | null; onC
   );
 }
 
+// The Close button keeps its own edge: a tall photo leaves black bars above
+// and below it, and a dark circle with no edge is cut in half by the bar
+// (the simulator's picture, Nov 25 2026).
 const styles = StyleSheet.create({
   back: { flex: 1, backgroundColor: color.black },
   top: { position: "absolute", top: 0, left: 0, right: 0, paddingHorizontal: 14 },
-  close: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.55)" },
+  close: { width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(20,20,20,0.72)", borderWidth: StyleSheet.hairlineWidth, borderColor: "rgba(255,255,255,0.28)" },
   bottom: { position: "absolute", left: 20, right: 20, bottom: 0 },
 });

@@ -4,10 +4,14 @@ import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import Animated, { FadeInDown } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useMe } from "@/api/queries";
+import type { AppBootstrap } from "@shared/app-contract";
+import { keys, useMe } from "@/api/queries";
+import { queryClient } from "@/api/queryClient";
 import { ApiError, OFFLINE_MESSAGE } from "@/api/client";
 import { confirmUpgrade, rereadMe, startUpgrade, useOffer } from "@/api/free";
+import { openHome } from "@/go-home";
 import { MemberCard } from "@/MemberCard";
+import { hasTrain } from "@/navigation";
 import { openLink, openSite } from "@/links";
 import { Shade } from "@/Shade";
 import { useMyPhoto } from "@/usePhoto";
@@ -54,6 +58,10 @@ export default function Offer() {
       await openLink(res.url);
       await confirmUpgrade().catch(() => null);
       await rereadMe();
+      // Paid, and Strive Pro is on at once: the offer is done, open Train
+      // (src/go-home.ts). An account that still owes a step is outside this
+      // area and the gatekeeper carries it there; an unpaid one stays here.
+      if (hasTrain(queryClient.getQueryData<AppBootstrap>(keys.me)?.state)) openHome(router);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : OFFLINE_MESSAGE);
     } finally {

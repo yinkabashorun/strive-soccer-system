@@ -958,6 +958,34 @@ describe("the social half is built like the training loop", () => {
     expect(quiz).not.toMatch(/saveIntake\(a\)|mutateAsync\(a\)/);
   });
 
+  // The simulator's first walk past the quiz (Nov 25 2026) stopped on "Your
+  // week": Start my week saved, the button turned into Save, and the player
+  // was left on the same screen. The gatekeeper only moves someone who is
+  // OUTSIDE their area, and the week's set-up and the offer are inside the
+  // free app's area too, so a screen that finishes a step there has to
+  // leave by itself (src/go-home.ts).
+  it("a finished step opens the app's first screen, it does not wait on the gatekeeper", () => {
+    const home = code(path.join(root, "src/go-home.ts"));
+    expect(home).toContain("if (router.canDismiss()) router.dismissAll();");
+    expect(home).toContain("router.replace(homeOf(state) as Href);");
+    const plan = code(path.join(root, "app/week-plan.tsx"));
+    // read before the save: after it, this account is no longer "first"
+    expect(plan).toMatch(/const opening = first;[\s\S]*await savePlan\(/);
+    expect(plan).toMatch(/if \(!opening\) return router\.back\(\);[\s\S]*await rereadMe\(\);\s*openHome\(router\);/);
+    const offer = code(path.join(root, "app/offer.tsx"));
+    expect(offer).toMatch(/await rereadMe\(\);\s*if \(hasTrain\([^\n]*\)\) openHome\(router\);/);
+    // the rule, for any screen added later: one that stays allowed in the
+    // free app and rereads who this is must leave by itself
+    const nav = code(path.join(root, "src/navigation.ts"));
+    const free = new Set([...(nav.match(/const FREE_ROUTES = new Set\(\[([^\]]+)\]/)?.[1] ?? "").matchAll(/"([()a-z-]+)"/g)].map((m) => m[1]));
+    expect(free.has("week-plan") && free.has("offer")).toBe(true);
+    for (const f of files(path.join(root, "app"))) {
+      const top = rel(f).split(path.sep)[1].replace(/\.tsx$/, "");
+      if (!free.has(top) || !code(f).includes("rereadMe()")) continue;
+      expect(code(f), `${rel(f)} rereads who this is and stays put`).toContain("openHome(router)");
+    }
+  });
+
   // A screen the gatekeeper does not know is sent straight back home: a
   // friend's profile was built and its first open bounced to Friends. Every
   // screen in the app has to be named in one of the gatekeeper's lists.

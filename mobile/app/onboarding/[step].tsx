@@ -21,6 +21,7 @@ import {
   stepReady,
   stillToRate,
   type QuizStepId,
+  canSkip,
 } from "@shared/quiz";
 import { FREE_QUESTIONS, FREE_STEPS, freeStepReady, type FreeAnswers, type FreeStepId } from "@shared/free-intake";
 import { GOALS, GRADES } from "@shared/tracker";
@@ -151,7 +152,7 @@ export default function QuizStep() {
                   {toRate}
                 </Body>
               ) : null}
-              <NextButton ready={ready || id === "nearby"} last={last} busy={submit.isPending || saving} onNext={() => next(id === "nearby" ? { nearbyAnswered: true } : undefined)} />
+              <NextButton ready={ready || id === "nearby"} last={last} skip={canSkip(id, a)} busy={submit.isPending || saving} onNext={() => next(id === "nearby" ? { nearbyAnswered: true } : undefined)} />
             </View>
           ) : null
       }
@@ -179,8 +180,10 @@ export default function QuizStep() {
   );
 }
 
-function NextButton({ ready, last, busy, onNext }: { ready: boolean; last: boolean; busy: boolean; onNext: () => void }) {
-  return <Button label={last ? "Finish" : "Next"} busy={busy} disabled={!ready} onPress={onNext} />;
+// "Skip" while a question that may be left empty is empty (lib/elite/quiz.ts
+// canSkip): a player with no team is never left wondering what to type.
+function NextButton({ ready, last, skip, busy, onNext }: { ready: boolean; last: boolean; skip: boolean; busy: boolean; onNext: () => void }) {
+  return <Button label={last ? "Finish" : skip ? "Skip" : "Next"} busy={busy} disabled={!ready} onPress={onNext} />;
 }
 
 function Choice({ label, line, on, onPress, image }: { label: string; line?: string; on: boolean; onPress: () => void; image?: string }) {

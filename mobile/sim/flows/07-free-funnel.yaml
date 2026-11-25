@@ -107,9 +107,11 @@ appId: com.strivesoccer.elite
     visible: "Competitive"
     timeout: 10000
 - tapOn: "Competitive"
+# the team may be left empty: the button says Skip until something is typed
 - extendedWaitUntil:
-    visible: "Next"
+    visible: "Skip"
     timeout: 10000
+- takeScreenshot: t27b-free-quiz-team-empty
 - tapOn: "Club and age group"
 - inputText: "Example FC 2010"
 - tapOn: "Next"

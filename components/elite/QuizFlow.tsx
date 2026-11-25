@@ -25,6 +25,7 @@ import {
   stillToRate,
   QUIZ_QUESTIONS,
   type QuizAnswers,
+  canSkip,
 } from "@/lib/elite/quiz";
 import {
   FIRST_WEEK_LINE,
@@ -394,7 +395,7 @@ export function QuizFlow({
               "Saving your answers"
             ) : current.id === "parent" && setup.steps.length === 0 ? (
               "Build my week"
-            ) : (current.id === "club" && !a.club.trim()) || (current.id === "goals" && !a.goals.trim()) ? (
+            ) : canSkip(current.id, a) ? (
               "Skip"
             ) : (
               "Next"

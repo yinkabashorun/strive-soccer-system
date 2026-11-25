@@ -14,6 +14,7 @@
 import { isOffensive } from "./text-filter";
 import { fmtDuration } from "./time-trained";
 import { shiftDay } from "./time";
+import { countsOnBoards, type Proof } from "./training-clock";
 import type { Role } from "./types";
 
 // ---- The four quiz answers --------------------------------------------
@@ -217,6 +218,7 @@ export type TrainingLog = {
   kind: Kind;
   created_at?: string;
   photo?: boolean; // this entry is a post: it carries a photo friends can see
+  timed?: boolean; // false: the player typed how long (training-clock.ts), so it counts on their own week only
 };
 
 export function validateMinutes(raw: unknown): number | null {
@@ -240,6 +242,12 @@ export function weekOf(today: string): { monday: string; sunday: string } {
 export function logsThisWeek(logs: TrainingLog[], today: string): TrainingLog[] {
   const { monday, sunday } = weekOf(today);
   return logs.filter((l) => l.trained_on >= monday && l.trained_on <= sunday);
+}
+
+// A player's own row on a board: their training this week that counts
+// beyond their own week (training-clock.ts). Their ring counts all of it.
+export function boardMinutes(logs: TrainingLog[]): number {
+  return logs.reduce((s, l) => (l.kind === "training" && l.timed !== false ? s + l.minutes : s), 0);
 }
 
 const sumOf = (logs: { minutes: number; kind: Kind }[], kind: Kind) =>
@@ -1000,6 +1008,18 @@ export function postPath(profileId: string, logId: string): string | null {
   return UUID.test(profileId) && UUID.test(logId) ? `${profileId}/${logId}.jpg` : null;
 }
 
+// A clock entry's start photo sits beside its finish photo (the post's own
+// photo): <profile id>/start-<entry id>.jpg.
+export function startPhotoPath(profileId: string, logId: string): string | null {
+  return UUID.test(profileId) && UUID.test(logId) ? `${profileId}/start-${logId}.jpg` : null;
+}
+
+export function ownsStartPath(path: string, profileId: string): boolean {
+  const [folder, file, ...more] = path.split("/");
+  const m = /^start-([0-9a-f-]{36})\.jpg$/.exec(file ?? "");
+  return more.length === 0 && folder === profileId && UUID.test(folder) && Boolean(m) && UUID.test(m?.[1] ?? "");
+}
+
 // Is this stored path this account's own photo? Anything that does not
 // match the convention is nobody's.
 export function ownsPostPath(path: string, profileId: string): boolean {
@@ -1108,7 +1128,16 @@ export type PostRow = {
   photo_path: string | null;
   caption: string | null;
   removed_at: string | null; // a coach took the post down
+  proof?: Proof | null; // how the time is known (training-clock.ts); absent reads as counted
+  start_photo_path?: string | null; // a clock entry's start photo
 };
+
+// TRAINING THAT COUNTS BEYOND THE PLAYER'S OWN WEEK: training (never gym)
+// whose time was not simply typed in (training-clock.ts). Every sum for a
+// board, a club or a matchup asks this.
+export function onBoards(l: { kind: Kind; proof?: Proof | null }): boolean {
+  return l.kind === "training" && countsOnBoards(l.proof);
+}
 
 const hasPhoto = (p: PostRow) => Boolean(p.photo_path) && !p.removed_at;
 
@@ -1173,10 +1202,12 @@ export type OpenCard = {
   initials: string;
   kind: Kind;
   minutes: number;
+  timed: boolean; // false: the time was typed, not timed between two photos
   caption: string | null;
   day: string;
   createdAt: string;
   photoPath: string;
+  startPhotoPath?: string | null; // the photo that started the clock
   starred?: boolean;
   photo?: string | null; // the poster's profile photo
 };
@@ -1191,6 +1222,7 @@ export type LockedCard = {
   initials: string;
   kind: Kind;
   minutes: number;
+  timed: boolean;
 };
 export type FeedCard = OpenCard | LockedCard;
 
@@ -1222,6 +1254,7 @@ export function buildFeed(input: {
           initials: initialsOf(name),
           kind: r.kind,
           minutes: r.minutes,
+          timed: countsOnBoards(r.proof),
         };
       }
       return {
@@ -1234,10 +1267,12 @@ export function buildFeed(input: {
         initials: initialsOf(name),
         kind: r.kind,
         minutes: r.minutes,
+        timed: countsOnBoards(r.proof),
         caption: r.caption,
         day: r.trained_on,
         createdAt: r.created_at,
         photoPath: r.photo_path as string,
+        startPhotoPath: r.start_photo_path ?? null,
       };
     });
 }

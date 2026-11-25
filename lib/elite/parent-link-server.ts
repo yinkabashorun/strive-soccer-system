@@ -12,6 +12,7 @@ import { readIntake, setUpgradeCheckout } from "./free-intake-server";
 import { attributesWeakestFirst } from "./quiz";
 import { areasPhrase } from "./free-intake";
 import { getTracker, getWeekLogs } from "./tracker-server";
+import { boardMinutes } from "./tracker";
 import { fmtDuration } from "./time-trained";
 import { nyToday } from "./time";
 import { isPro } from "./tiers";
@@ -71,7 +72,8 @@ export async function parentPageFor(rawCode: unknown): Promise<ParentPage | null
     getWeekLogs(owner.profileId, nyToday()).catch(() => []),
   ]);
   const first = owner.fullName.trim().split(/\s+/)[0] || "Your player";
-  const trained = logs.filter((l) => l.kind !== "gym").reduce((sum, l) => sum + l.minutes, 0);
+  // what a parent is shown is timed training only (training-clock.ts)
+  const trained = boardMinutes(logs);
   const status = (row?.data as { subscription_status: string | null } | null)?.subscription_status ?? "none";
   const weakest = intake?.answers ? attributesWeakestFirst(intake.answers.attrs).slice(0, 2) : [];
   return {

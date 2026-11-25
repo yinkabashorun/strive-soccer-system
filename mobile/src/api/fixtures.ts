@@ -590,19 +590,23 @@ function fixtureFeed(): AppFreeFeed {
     together: null,
     starred: false,
     photo: f.photo,
+    // timed by the clock: the start photo sits in the corner of the finish photo
+    timed: true,
+    startPhotoUrl: m("/drills/posters/two-touch-ball-mastery-v1.jpg"),
   });
   const today: AppFeedCard[] = l.posted
     ? [
         {
           state: "open", id: "p-me", ownerId: "me", mine: true, name: "You", first: "You", initials: "MB", kind: "training", minutes: POST_MINUTES,
           caption: "Weak foot only.", day: "2026-11-24", photoUrl: m("/drills/posters/weak-foot-tap-pull-push.jpg"), ago: "Just now", props: 0, propped: false, together: null, starred: false, photo: ME_PHOTO,
+          timed: true, startPhotoUrl: m("/drills/posters/weak-foot-outside-pull-inside-pull.jpg"),
         },
         open("p-diego", FRIENDS[0], "2026-11-24", "42 min ago", 75, "wall-pass-touch-stepover", "Wall work before school.", 2),
         open("p-nico", FRIENDS[1], "2026-11-24", "2h ago", 45, "l-turn-roll-touch", null, 1),
       ]
     : [
-        { state: "locked", id: "p-diego", ownerId: FRIENDS[0].id, photo: FRIENDS[0].photo, first: "Diego", initials: "DR", kind: "training", minutes: 75 },
-        { state: "locked", id: "p-nico", ownerId: FRIENDS[1].id, photo: FRIENDS[1].photo, first: "Nico", initials: "NA", kind: "training", minutes: 45 },
+        { state: "locked", id: "p-diego", ownerId: FRIENDS[0].id, photo: FRIENDS[0].photo, first: "Diego", initials: "DR", kind: "training", minutes: 75, timed: true },
+        { state: "locked", id: "p-nico", ownerId: FRIENDS[1].id, photo: FRIENDS[1].photo, first: "Nico", initials: "NA", kind: "training", minutes: 45, timed: true },
       ];
   const faces: Face[] = [
     { id: "me", first: "You", initials: "MB", you: true, active: l.posted, starred: false, photo: ME_PHOTO },
@@ -664,7 +668,8 @@ function fixtureFreeWeek(): AppFreeWeek {
     entries: [
       ...(l.posted ? [{ id: "e-today", day: "2026-11-24", label: "Tue, Nov 24", minutes: POST_MINUTES, kind: "training" as const, photo: true }] : []),
       { id: "e-mon", day: "2026-11-23", label: "Mon, Nov 23", minutes: MY_WEEK_MINUTES, kind: "training" as const, photo: true },
-      { id: "e-gym", day: "2026-11-23", label: "Mon, Nov 23", minutes: 30, kind: "gym" as const, photo: false },
+      // said without the clock: on the week, marked, on no board
+      { id: "e-gym", day: "2026-11-23", label: "Mon, Nov 23", minutes: 30, kind: "gym" as const, photo: false, timed: false },
     ],
     board: friendsBoard(
       [{ id: "me", name: "Marcus B.", minutes, photo: ME_PHOTO }, ...FRIENDS.map((f) => ({ id: f.id, name: f.name, minutes: f.minutes, photo: f.photo }))],
@@ -841,6 +846,12 @@ function fixtureFree(path: string, method: string, body?: unknown): unknown {
   if (at === "upgrade") return { ok: false, error: "Payments are not switched on yet, so Strive Pro cannot be started today. Check back soon." };
   if (at === "upgrade/confirm") return { active: false };
   if (at === "feed") return fixtureFeed();
+  // the training clock: the start is heard, the finish posts today's training
+  if (at === "clock") return { ok: true };
+  if (at === "clock/finish") {
+    l.posted = true;
+    return { ok: true, id: "e-today", minutes: POST_MINUTES };
+  }
   if (at === "post" || (at === "log" && method === "POST")) {
     if (at === "post") l.posted = true;
     return { ok: true, id: "e-today" };

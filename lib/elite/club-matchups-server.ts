@@ -13,6 +13,7 @@ import { everyRow } from "./supabase/every-row";
 import { nyToday, shiftDay } from "./time";
 import { startCronRun, updateCronRun } from "./cron-log";
 import type { Admin } from "./tracker-server";
+import { TYPED } from "./training-clock";
 import {
   MATCHUP_MIN_PLAYERS,
   decide,
@@ -49,6 +50,7 @@ async function trainingOf(admin: Admin, ids: string[], since: string, until: str
           .select("profile_id, trained_on, minutes, kind")
           .in("profile_id", some)
           .eq("kind", "training")
+          .neq("proof", TYPED) // typed time counts on the player's own week only
           .gte("trained_on", since)
           .lte("trained_on", until)
           .order("id")

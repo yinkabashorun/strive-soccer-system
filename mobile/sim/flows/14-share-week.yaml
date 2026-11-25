@@ -14,7 +14,7 @@ appId: com.strivesoccer.elite
     arguments:
       fixtureState: locked
 - extendedWaitUntil:
-    visible: "Post my training"
+    visible: "Start training"
     timeout: 30000
 - tapOn: "Week"
 - waitForAnimationToEnd:

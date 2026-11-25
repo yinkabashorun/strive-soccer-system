@@ -41,6 +41,8 @@ const s = {
   playerOk: true,
   // Share my week: has the player trained this week (there is a card to make)
   weekTrained: true,
+  // the training clock: what storing a finished clock answers
+  clockSaved: { ok: true, id: "c1", minutes: 45, fresh: true } as Record<string, unknown>,
 };
 
 function player(over: Record<string, unknown> = {}) {
@@ -298,6 +300,21 @@ vi.mock("@/lib/elite/club-teams-actions", () => ({
   answerScore: call("answerScore"),
   reportPlan: call("reportPlan"),
 }));
+// a route that refreshes the website's pages does so inside Next; here it is a no-op
+vi.mock("next/cache", async (actual) => ({ ...(await actual<typeof import("next/cache")>()), revalidatePath: () => undefined }));
+// the training clock: its rules are real (training-clock.ts), its writes stood in for
+vi.mock("@/lib/elite/training-clock-server", () => ({
+  hearClockStart: async (...args: unknown[]) => (s.calls.push({ fn: "hearClockStart", args }), true),
+  forgetClock: async (...args: unknown[]) => void s.calls.push({ fn: "forgetClock", args }),
+  saveClockPost: async (...args: unknown[]) => (s.calls.push({ fn: "saveClockPost", args }), s.clockSaved),
+  nyDayOf: () => "2026-11-25",
+}));
+vi.mock("@/lib/elite/free-notices-server", () => ({
+  noticeFriendPost: async (...args: unknown[]) => (s.calls.push({ fn: "noticeFriendPost", args }), 1),
+}));
+vi.mock("@/lib/elite/squad-pass-server", () => ({
+  countTeammate: async (...args: unknown[]) => void s.calls.push({ fn: "countTeammate", args }),
+}));
 vi.mock("@/app/api/elite/auth/join/route", () => ({
   POST: async () => (s.calls.push({ fn: "join", args: [] }), new Response(JSON.stringify({ ok: true, signedIn: true }), { status: 200 })),
 }));
@@ -405,6 +422,8 @@ const ROUTES = {
   freeFeed: () => import("@/app/api/app/free/feed/route"),
   freePost: () => import("@/app/api/app/free/post/route"),
   freeLog: () => import("@/app/api/app/free/log/route"),
+  freeClock: () => import("@/app/api/app/free/clock/route"),
+  freeClockFinish: () => import("@/app/api/app/free/clock/finish/route"),
   freeProps: () => import("@/app/api/app/free/props/route"),
   freeReport: () => import("@/app/api/app/free/report/route"),
   freeBlock: () => import("@/app/api/app/free/block/route"),
@@ -466,6 +485,10 @@ const TABLE: { route: keyof typeof ROUTES; method: "GET" | "POST" | "DELETE"; ac
   { route: "freePost", method: "POST", access: "free_app" },
   { route: "freeLog", method: "POST", access: "free_app" },
   { route: "freeLog", method: "DELETE", access: "free_app" },
+  // the training clock
+  { route: "freeClock", method: "POST", access: "free_app" },
+  { route: "freeClock", method: "DELETE", access: "free_app" },
+  { route: "freeClockFinish", method: "POST", access: "free_app" },
   { route: "freeProps", method: "POST", access: "free_app" },
   { route: "freeReport", method: "POST", access: "free_app" },
   { route: "freeBlock", method: "POST", access: "free_app" },
@@ -990,6 +1013,81 @@ describe("the free app's bodies are checked first", () => {
     const none = await h(req("GET"));
     expect(none.status).toBe(409);
     expect(await none.json()).toEqual({ error: "nothing_yet" });
+  });
+
+  // THE TRAINING CLOCK (Nov 25 2026): the start is a few numbers and no
+  // photo; the finish is both photos and the phone's own times. A length is
+  // never sent, and whose clock it is always comes from the token.
+  it("the clock's start takes two numbers and nothing else", async () => {
+    freeAccount();
+    const post = async (body: unknown, method = "POST") => (await (await handler("freeClock", method))(req(method, { body }))).status;
+    expect(await post({ started: "1700000000000", ago: 0 })).toBe(400);
+    expect(await post({ started: 1_700_000_000_000 })).toBe(400);
+    expect(await post({ started: 1_700_000_000_000, ago: -1 })).toBe(400);
+    expect(await post({ started: 1_700_000_000_000, ago: 4 * 3600 })).toBe(400); // longer ago than any clock runs
+    expect(await post({ started: 1_700_000_000_000, ago: 3, profileId: "someone-else" })).toBe(200);
+    expect(await post(undefined, "DELETE")).toBe(200);
+    expect(s.calls).toEqual([
+      { fn: "hearClockStart", args: ["u1", 1_700_000_000_000, 3] },
+      { fn: "forgetClock", args: ["u1"] },
+    ]);
+  });
+
+  it("the clock's finish is two real photos and the phone's times: never a length", async () => {
+    freeAccount();
+    const { filesForm } = await import("@/lib/elite/upload-body");
+    const { readFileSync } = await import("node:fs");
+    const { join } = await import("node:path");
+    const jpeg = new Uint8Array(readFileSync(join(__dirname, "fixtures", "photo-exif.jpg")));
+    const h = await handler("freeClockFinish", "POST");
+    const send = async (fields: Record<string, string>, files: { field: string; bytes: Uint8Array }[]) => {
+      const form = filesForm(fields, files.map((f) => ({ ...f, fileName: `${f.field}.jpg`, type: "image/jpeg" })));
+      const r = req("POST");
+      return h(new Request(r.url, { method: "POST", headers: { ...Object.fromEntries(r.headers), "content-type": form.contentType }, body: form.body as unknown as BodyInit }));
+    };
+    const times = { started: "1700000000000", ended: "1700002700000", sent: "1700002705000" };
+    const both = [{ field: "start", bytes: jpeg }, { field: "finish", bytes: jpeg }];
+
+    // a time that is not a number, a missing photo, a file that is not a photo
+    expect((await send({ ...times, started: "soon", kind: "training" }, both)).status).toBe(400);
+    expect((await send({ ...times, kind: "training" }, [both[0]])).status).toBe(400);
+    expect((await send({ ...times, kind: "training" }, [both[0], { field: "finish", bytes: new Uint8Array([1, 2, 3]) }])).status).toBe(400);
+    expect(s.calls).toEqual([]);
+
+    // stored: the account from the token, the times as sent, both photos
+    // cleaned (where and when they were taken removed), and no length anywhere
+    const ok = await send({ ...times, kind: "training", caption: "  Weak foot only.  ", minutes: "150", profileId: "someone-else" }, both);
+    expect(ok.status).toBe(200);
+    expect(await ok.json()).toEqual({ ok: true, id: "c1", minutes: 45 });
+    const saved = s.calls[0].args[0] as Record<string, unknown>;
+    expect(s.calls[0].fn).toBe("saveClockPost");
+    expect(Object.keys(saved).sort()).toEqual(["caption", "finishPhoto", "kind", "profileId", "startPhoto", "times", "weekTarget"]);
+    expect(saved).toMatchObject({ profileId: "u1", kind: "training", caption: "Weak foot only.", weekTarget: 240, times: { started: 1_700_000_000_000, ended: 1_700_002_700_000, sent: 1_700_002_705_000 } });
+    expect(Buffer.from(saved.startPhoto as Uint8Array).includes(Buffer.from("Exif"))).toBe(false);
+    // friends hear of it and a teammate counts: once, for the write that made the entry
+    expect(s.calls.slice(1).map((c) => c.fn)).toEqual(["noticeFriendPost", "countTeammate"]);
+
+    // the same finish sent again (a retry on weak signal) says nothing twice
+    s.calls.length = 0;
+    s.clockSaved = { ok: true, id: "c1", minutes: 45, fresh: false };
+    expect((await send({ ...times, kind: "training" }, both)).status).toBe(200);
+    expect(s.calls.map((c) => c.fn)).toEqual(["saveClockPost"]);
+
+    // a refusal names its reason, so the phone knows whether sending again can help
+    for (const [reason, status] of [["short", 400], ["expired", 400], ["overlap", 409], ["day_cap", 400], ["error", 502]] as const) {
+      s.clockSaved = { ok: false, reason };
+      const res = await send({ ...times, kind: "training" }, both);
+      expect(res.status, reason).toBe(status);
+      const body = (await res.json()) as { ok: boolean; error: string; reason?: string };
+      expect(body.ok).toBe(false);
+      expect(body.error).toMatch(/\s/); // a sentence for the player, never a code
+      expect(body.reason).toBe(reason === "error" ? undefined : reason);
+    }
+    s.clockSaved = { ok: true, id: "c1", minutes: 45, fresh: true };
+
+    // gym is for high school and older, here as everywhere
+    freeAccount({ grade: "middle_school" });
+    expect((await send({ ...times, kind: "gym" }, both)).status).toBe(403);
   });
 
   it("a post is stored by the website's own route", async () => {

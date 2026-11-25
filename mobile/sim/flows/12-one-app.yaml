@@ -15,7 +15,7 @@ appId: com.strivesoccer.elite
 - takeScreenshot: t60-train
 - tapOn: "Friends"
 - extendedWaitUntil:
-    visible: "Post my training"
+    visible: "Start training"
     timeout: 15000
 - takeScreenshot: t61-train-friends
 - tapOn: "Clubs"

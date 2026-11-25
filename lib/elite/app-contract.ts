@@ -138,6 +138,9 @@ export const APP_API = {
   freeFeed: "/api/app/free/feed",
   freePost: "/api/app/free/post",
   freeLog: "/api/app/free/log",
+  // the training clock (training-clock.ts): the start, heard by the server, and the finish with both photos
+  freeClock: "/api/app/free/clock",
+  freeClockFinish: "/api/app/free/clock/finish",
   freeProps: "/api/app/free/props",
   freeReport: "/api/app/free/report",
   freeBlock: "/api/app/free/block",
@@ -215,8 +218,9 @@ export type AppFreePlan = {
   days: number[];
 };
 
-export type AppOpenCard = Omit<OpenCard, "photoPath" | "createdAt"> & {
+export type AppOpenCard = Omit<OpenCard, "photoPath" | "createdAt" | "startPhotoPath"> & {
   photoUrl: string;
+  startPhotoUrl?: string | null; // the photo that started the clock (training-clock.ts)
   ago: string;
   props: number;
   propped: boolean;
@@ -252,7 +256,8 @@ export type AppFreeWeek = {
   todayLine: TodayLine | null;
   splitLine: string | null;
   gymLine: string | null;
-  entries: { id: string; day: string; label: string; minutes: number; kind: Kind; photo: boolean }[];
+  // timed false: the player typed how long, so it counts on their own week only
+  entries: { id: string; day: string; label: string; minutes: number; kind: Kind; photo: boolean; timed?: boolean }[];
   board: BoardRow[];
   invite: string;
   // What the one upgrade card on this screen is built from

@@ -62,6 +62,7 @@ import {
   tracksGym,
   weekLabel,
   weekProgress,
+  boardMinutes,
   weekStrip,
   type Season,
 } from "./tracker";
@@ -168,7 +169,8 @@ export async function freeWeekFor(
   const me = {
     id: viewer.profile.id,
     name: shortName(viewer.profile.full_name),
-    minutes: week.minutes,
+    // the board counts timed training; the ring above it counts all of it
+    minutes: boardMinutes(logs),
     starred: Boolean(tracker.starred_at),
     photo: myPhoto,
   };
@@ -186,7 +188,7 @@ export async function freeWeekFor(
     gymLine: gym ? gymThisWeekLine(week.gymMinutes) : null,
     entries: logs
       .filter((l) => l.kind === "training" || gym)
-      .map((l) => ({ id: l.id, day: l.trained_on, label: dayLabel(l.trained_on), minutes: l.minutes, kind: l.kind, photo: Boolean(l.photo) })),
+      .map((l) => ({ id: l.id, day: l.trained_on, label: dayLabel(l.trained_on), minutes: l.minutes, kind: l.kind, photo: Boolean(l.photo), timed: l.timed !== false })),
     board: friendsBoard([me, ...friends], viewer.profile.id),
     invite: joinLink(APP_URL, tracker.referral_code),
     upgrade: { area: preview?.areas[0] ?? null, sessions: answers ? sessionsFrom(answers) : 0 },

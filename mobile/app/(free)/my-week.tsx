@@ -4,6 +4,8 @@ import { useRouter } from "expo-router";
 import { fmtDuration } from "@shared/time-trained";
 import { BOARD_EMPTY_LINE, BOARD_TITLE, STAR_LABEL, firstNameOf, initialsOf, stripDayLabel } from "@shared/tracker";
 import { PRO_ENDED_DISMISS, PRO_ENDED_LINE } from "@shared/one-app";
+import { NOT_TIMED } from "@shared/training-clock";
+import { ClockRow } from "@/ClockRow";
 import { OFFLINE_MESSAGE } from "@/api/client";
 import { useMe } from "@/api/queries";
 import { hasTrain } from "@/navigation";
@@ -23,6 +25,10 @@ import { color } from "@/theme";
 // the player set, the seven days, today's line, what was logged, and the
 // board of friends. A day with nothing on it is just a day: nothing here
 // counts what was not done, and there is no streak.
+//
+// Training the player said the length of, with no clock, is marked "Not
+// timed" in the list: it is on their week and on no board
+// (lib/elite/training-clock.ts).
 //
 // The ONE upgrade prompt of the free app sits on this screen, under the
 // week (src/UpgradeCard.tsx; lib/elite/upgrade-card.ts decides whether it
@@ -106,6 +112,9 @@ export default function MyWeek() {
           </Press>
         </Card>
       ) : null}
+
+      {/* a clock that is running or ready to post, always in sight */}
+      <ClockRow />
 
       <View style={styles.ringRow}>
         <Ring size={132} stroke={10} value={w.target > 0 ? w.minutes / w.target : 0}>
@@ -208,7 +217,7 @@ export default function MyWeek() {
                   <View style={{ flex: 1 }}>
                     <Label>{e.label}</Label>
                     <Body dim size={12.5}>
-                      {[e.kind === "gym" ? "Gym" : "Training", e.photo ? "posted" : null].filter(Boolean).join(", ")}
+                      {[e.kind === "gym" ? "Gym" : "Training", e.photo ? "posted" : null, e.timed === false ? NOT_TIMED : null].filter(Boolean).join(", ")}
                     </Body>
                   </View>
                   <Label>{fmtDuration(e.minutes)}</Label>

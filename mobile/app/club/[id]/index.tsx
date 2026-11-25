@@ -19,6 +19,7 @@ import { PlanCardView } from "@/PlanCards";
 import { choose } from "@/sheet";
 import { Body, Button, Card, Eyebrow, Hairline, Head, Icon, Label, Press, SettingRow, Skeleton } from "@/ui";
 import { useBelowClock } from "@/Screen";
+import { useClockButton } from "@/ClockRow";
 import { color, radius } from "@/theme";
 
 // One club, top to bottom:
@@ -39,6 +40,7 @@ import { color, radius } from "@/theme";
 // There is no selling on this screen.
 export default function Club() {
   const router = useRouter();
+  const clockLabel = useClockButton();
   const insets = useSafeAreaInsets();
   const belowClock = useBelowClock();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -271,16 +273,16 @@ export default function Club() {
             </View>
           ) : (
             <Body dim style={{ marginHorizontal: 20, marginTop: 8 }}>
-              Post a photo of your training and your club sees it here.
+              Post your training and your club sees it here.
             </Body>
           )}
           {c.photos.some((t) => t.state === "locked") ? (
             <Body dim size={13.5} style={{ marginHorizontal: 20, marginTop: 10 }}>
-              Post a photo of your training today to see today&apos;s photos from your club.
+              Post your training today to see today&apos;s photos from your club.
             </Body>
           ) : null}
           <View style={{ marginHorizontal: 14, marginTop: 14 }}>
-            <Button quiet label="Post my training" onPress={() => router.push("/post")} />
+            <Button quiet label={clockLabel} onPress={() => router.push("/post")} />
           </View>
 
           {c.share || c.captain ? (

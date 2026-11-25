@@ -1,5 +1,6 @@
 "use client";
 
+import { WEB_TYPED_LINE } from "@/lib/elite/training-clock";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, X } from "lucide-react";
@@ -449,7 +450,11 @@ export function PostComposer({
             </button>
           ) : preview ? (
             <>
-              <p className="mt-3 text-[12px] leading-snug text-white/60">{POST_RULES_LINE}</p>
+              {/* The website has no clock: a length picked here is typed, so
+                  it is on the player's own week and on no board. Said before
+                  they post, never found out after (training-clock.ts). */}
+              <p className="mt-3 text-[13px] leading-snug text-white/75">{WEB_TYPED_LINE}</p>
+              <p className="mt-2 text-[12px] leading-snug text-white/60">{POST_RULES_LINE}</p>
               <button
                 type="button"
                 disabled={minutes === null || busy !== null}

@@ -27,6 +27,7 @@ import {
   trackerFor,
 } from "./tracker-server";
 import { DEMO_ASK, DEMO_CLUB_ASK, demoClubs, readDemoState, writeDemoState } from "./tracker-demo";
+import { TYPED } from "./training-clock";
 import {
   BIRTH_REQUIRED_MESSAGE,
   BLOCKED_LINK_MESSAGE,
@@ -59,6 +60,7 @@ import {
   mayViewPhoto,
   oldEnough,
   ownsPostPath,
+  ownsStartPath,
   reportText,
   shortName,
   validateMinutes,
@@ -251,7 +253,7 @@ export async function deleteLog(id: string): Promise<{ ok: true } | Fail> {
   }
   const { data: row } = await o.admin
     .from("elite_training_logs")
-    .select("photo_path")
+    .select("photo_path, start_photo_path")
     .eq("id", id)
     .eq("profile_id", o.profileId)
     .maybeSingle();
@@ -261,12 +263,21 @@ export async function deleteLog(id: string): Promise<{ ok: true } | Fail> {
     .eq("id", id)
     .eq("profile_id", o.profileId);
   if (error) return fail(OFFLINE);
-  const path = (row?.photo_path as string | null) ?? null;
-  if (path && ownsPostPath(path, o.profileId)) {
-    await o.admin.storage.from(POST_BUCKET).remove([path]).catch(() => undefined);
-  }
+  // a timed session has two photos: the finish (the post's own) and the start
+  const files = entryFiles(row as EntryFiles | null, o.profileId);
+  if (files.length) await o.admin.storage.from(POST_BUCKET).remove(files).catch(() => undefined);
   touch();
   return { ok: true };
+}
+
+type EntryFiles = { photo_path: string | null; start_photo_path: string | null };
+
+// The stored photos of one entry that really are that account's own.
+function entryFiles(row: EntryFiles | null, profileId: string): string[] {
+  const out: string[] = [];
+  if (row?.photo_path && ownsPostPath(row.photo_path, profileId)) out.push(row.photo_path);
+  if (row?.start_photo_path && ownsStartPath(row.start_photo_path, profileId)) out.push(row.start_photo_path);
+  return out;
 }
 
 // ---- Friends ----------------------------------------------------------
@@ -826,9 +837,11 @@ async function closeReports(c: { admin: Admin; profileId: string }, logId: strin
 }
 
 // "Remove the post": the post is marked taken down (when, and by which
-// coach), its photo is deleted from storage, and its reports are closed.
-// The minutes stay in the player's week. After this the post is shown to
-// nobody.
+// coach), its photos are deleted from storage, and its reports are closed.
+// The minutes stay in the player's own week and stop counting anywhere
+// else: a post a coach took down is no longer proof of anything, so its
+// time comes off the boards (training-clock.ts). After this the post is
+// shown to nobody.
 export async function removePost(logId: string): Promise<{ ok: true } | Fail> {
   if (typeof logId !== "string" || !logId) return fail(NOT_THERE);
   const c = await coach();
@@ -836,19 +849,17 @@ export async function removePost(logId: string): Promise<{ ok: true } | Fail> {
   if (c.kind === "demo") return { ok: true };
   const { data: row } = await c.admin
     .from("elite_training_logs")
-    .select("id, profile_id, photo_path")
+    .select("id, profile_id, photo_path, start_photo_path")
     .eq("id", logId)
     .maybeSingle();
   if (!row) return fail(NOT_THERE);
   const { error } = await c.admin
     .from("elite_training_logs")
-    .update({ removed_at: new Date().toISOString(), removed_by: c.profileId })
+    .update({ removed_at: new Date().toISOString(), removed_by: c.profileId, proof: TYPED })
     .eq("id", logId);
   if (error) return fail(OFFLINE);
-  const path = (row.photo_path as string | null) ?? null;
-  if (path && ownsPostPath(path, row.profile_id as string)) {
-    await c.admin.storage.from(POST_BUCKET).remove([path]).catch(() => undefined);
-  }
+  const files = entryFiles(row as unknown as EntryFiles, row.profile_id as string);
+  if (files.length) await c.admin.storage.from(POST_BUCKET).remove(files).catch(() => undefined);
   await closeReports(c, logId, "removed");
   revalidatePath("/coach/free");
   touch();

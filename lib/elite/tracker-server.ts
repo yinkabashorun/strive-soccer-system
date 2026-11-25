@@ -81,9 +81,11 @@ import {
   type TargetRow,
   type TrainingLog,
   limitHit,
+  onBoards,
   setUpDone,
   CLUB_REQUESTS_PENDING_MAX,
 } from "./tracker";
+import { TYPED, countsOnBoards, type Proof } from "./training-clock";
 import {
   demoBlocked,
   DEMO_CLUB_ASK,
@@ -170,16 +172,17 @@ export async function getWeekLogs(profileId: string, today: string): Promise<Tra
   const { monday, sunday } = weekOf(today);
   const { data } = await admin
     .from("elite_training_logs")
-    .select("id, trained_on, minutes, kind, created_at, photo_path, removed_at")
+    .select("id, trained_on, minutes, kind, created_at, photo_path, removed_at, proof")
     .eq("profile_id", profileId)
     .gte("trained_on", monday)
     .lte("trained_on", sunday)
     .order("trained_on", { ascending: false })
     .order("created_at", { ascending: false });
-  type Row = TrainingLog & { photo_path: string | null; removed_at: string | null };
-  return ((data as Row[] | null) ?? []).map(({ photo_path, removed_at, ...l }) => ({
+  type Row = TrainingLog & { photo_path: string | null; removed_at: string | null; proof: Proof | null };
+  return ((data as Row[] | null) ?? []).map(({ photo_path, removed_at, proof, ...l }) => ({
     ...l,
     photo: Boolean(photo_path) && !removed_at,
+    timed: countsOnBoards(proof),
   }));
 }
 
@@ -344,6 +347,7 @@ export async function friendsWeekFor(viewer: Viewer, today: string): Promise<Boa
         .select("profile_id, minutes")
         .in("profile_id", some)
         .eq("kind", "training")
+        .neq("proof", TYPED) // typed time counts on the player's own week only
         .gte("trained_on", monday)
         .lte("trained_on", sunday)
         .order("id")
@@ -623,7 +627,7 @@ export async function blocksWith(admin: Admin, profileId: string, ids: string[])
 
 // ---- Posts and the feed -----------------------------------------------
 
-const POST_COLUMNS = "id, profile_id, trained_on, minutes, kind, created_at, photo_path, caption, removed_at";
+const POST_COLUMNS = "id, profile_id, trained_on, minutes, kind, created_at, photo_path, caption, removed_at, proof, start_photo_path";
 
 // First name and last initial for a list of accounts.
 export async function namesOf(admin: Admin, ids: string[]): Promise<Map<string, string>> {
@@ -675,8 +679,9 @@ export async function signPhotos(admin: Admin, paths: string[]): Promise<Map<str
 
 // One card as the screen gets it. An open card carries the photo's
 // address; a locked card carries a name and a time and nothing else.
-export type OpenCardView = Omit<OpenCard, "photoPath" | "createdAt"> & {
+export type OpenCardView = Omit<OpenCard, "photoPath" | "createdAt" | "startPhotoPath"> & {
   photoUrl: string;
+  startPhotoUrl?: string | null; // the photo that started the clock, when there is one
   ago: string;
   props: number;
   propped: boolean;
@@ -754,7 +759,7 @@ export async function feedFor(viewer: Viewer, today: string): Promise<FeedView> 
 
   const open = cards.filter((c): c is OpenCard => c.state === "open");
   const [urls, props, together] = await Promise.all([
-    sign(open.map((c) => c.photoPath)),
+    sign(open.flatMap((c) => (c.startPhotoPath ? [c.photoPath, c.startPhotoPath] : [c.photoPath]))),
     propsOf(open.map((c) => c.id)),
     admin ? togetherOf(admin, open.map((c) => c.id)) : Promise.resolve(new Map<string, string[]>()),
   ]);
@@ -784,12 +789,13 @@ export async function feedFor(viewer: Viewer, today: string): Promise<FeedView> 
       if (c.state === "locked") return [{ ...c, photo: photos.get(c.ownerId) ?? null }];
       const photoUrl = urls.get(c.photoPath);
       if (!photoUrl) return []; // the photo could not be reached: no card
-      const { photoPath: _path, createdAt, ...rest } = c;
+      const { photoPath: _path, createdAt, startPhotoPath: start, ...rest } = c;
       void _path;
       return [
         {
           ...rest,
           photoUrl,
+          startPhotoUrl: start ? urls.get(start) ?? null : null,
           ago: timeSince({ day: c.day, createdAt }, nowMs, today),
           props: props.get(c.id)?.count ?? 0,
           propped: props.get(c.id)?.mine ?? false,
@@ -871,6 +877,7 @@ export async function insertLog(
       trained_on: input.day,
       minutes: input.minutes,
       kind: input.kind,
+      proof: TYPED, // the player said how long: their own week only
       week_target: input.weekTarget || null,
     })
     .select("id")
@@ -909,6 +916,7 @@ export async function savePost(input: {
     kind: input.kind,
     photo_path: path,
     caption: input.caption,
+    proof: TYPED, // a photo with a typed length: friends see it, no board counts it
     week_target: input.weekTarget || null,
   });
   if (error) {
@@ -1290,7 +1298,7 @@ export async function myClubsFor(viewer: Viewer, today: string): Promise<MyClub[
     const minutes = new Map<string, number>();
     const lastDay = new Map<string, string>();
     for (const r of recent) {
-      if (r.kind === "training" && r.trained_on >= monday) minutes.set(r.profile_id, (minutes.get(r.profile_id) ?? 0) + r.minutes);
+      if (onBoards(r) && r.trained_on >= monday) minutes.set(r.profile_id, (minutes.get(r.profile_id) ?? 0) + r.minutes);
       if ((lastDay.get(r.profile_id) ?? "") < r.trained_on) lastDay.set(r.profile_id, r.trained_on);
     }
     out.push({
@@ -1589,6 +1597,7 @@ export async function auraLogsOf(admin: Admin, profileId: string): Promise<AuraL
       .from("elite_training_logs")
       .select("id, trained_on, minutes, kind, photo_path, removed_at, week_target, created_at")
       .eq("profile_id", profileId)
+      .neq("proof", TYPED) // the level is earned by timed training only
       .order("id")
       .range(from, from + 999);
     const rows =

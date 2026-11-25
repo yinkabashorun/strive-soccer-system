@@ -1,5 +1,5 @@
 import * as ImageManipulator from "expo-image-manipulator";
-import { POST_JPEG_QUALITY, POST_MAX_BYTES, POST_MAX_EDGE, POST_REFUSED_PHOTO, fitWithin, type Kind } from "@shared/tracker";
+import { POST_JPEG_QUALITY, POST_MAX_BYTES, POST_MAX_EDGE, POST_REFUSED_PHOTO, fitWithin } from "@shared/tracker";
 import { base64ToBytes, fileForm } from "@shared/upload-body";
 import { ApiError } from "./api/client";
 import { sendPost } from "./api/free";
@@ -22,14 +22,11 @@ export type PickedPhoto = { uri: string; width: number; height: number };
 
 // `session` ("<week>-<n>"): a member posting a session they just finished.
 // The photo goes onto that session's own entry; its time is already on the
-// week, written by the server from the session itself, so no length is sent.
-export async function postTraining(
-  input: { photo: PickedPhoto; caption: string } & ({ minutes: number; kind: Kind; session?: undefined } | { session: string })
-): Promise<void> {
-  const fields: Record<string, string> =
-    "minutes" in input
-      ? { minutes: String(input.minutes), kind: input.kind, caption: input.caption.trim() }
-      : { session: input.session, caption: input.caption.trim() };
+// week, written by the server from the session itself, so no length is
+// ever sent from the phone. (Training outside a session is timed by the
+// clock, src/clock.ts, which sends its own two photos.)
+export async function postTraining(input: { photo: PickedPhoto; caption: string; session: string }): Promise<void> {
+  const fields: Record<string, string> = { session: input.session, caption: input.caption.trim() };
   let bytes: Uint8Array | null = null;
   // The example build sends nothing anywhere: the picked photo is not read.
   if (FIXTURES) bytes = new Uint8Array(0);

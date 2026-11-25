@@ -218,6 +218,9 @@ describe("the feed", () => {
       initials: "GG",
       kind: "training",
       minutes: 45,
+      // whether the time counts on boards (training-clock.ts); a row from
+      // before the clock still does
+      timed: true,
     });
     expect(JSON.stringify(card)).not.toContain(".jpg");
     expect(JSON.stringify(card)).not.toContain("Secret");
@@ -236,11 +239,12 @@ describe("the feed", () => {
     const server = code("lib/elite/tracker-server.ts");
     const fn = server.slice(server.indexOf("export async function feedFor("), server.indexOf("export async function postForViewer("));
     expect(fn).toContain('const open = cards.filter((c): c is OpenCard => c.state === "open");');
-    expect(fn).toContain("sign(open.map((c) => c.photoPath))");
+    // the photo, and the start photo of a post the clock timed: open cards only
+    expect(fn).toContain("sign(open.flatMap((c) => (c.startPhotoPath ? [c.photoPath, c.startPhotoPath] : [c.photoPath])))");
     // a locked card gets the friend's profile photo (friends may see it), never the post's
     expect(fn).toContain('if (c.state === "locked") return [{ ...c, photo: photos.get(c.ownerId) ?? null }];');
     // the stored path never reaches the screen, only the short-lived address
-    expect(fn).toContain("const { photoPath: _path, createdAt, ...rest } = c;");
+    expect(fn).toContain("const { photoPath: _path, createdAt, startPhotoPath: start, ...rest } = c;");
     expect((server.match(/createSignedUrls\(/g) ?? []).length).toBe(1);
     expect(server).not.toMatch(/getPublicUrl/);
     for (const f of ["lib/elite/tracker-actions.ts", "lib/elite/tracker-coach.ts", "app/api/elite/tracker/post/route.ts"]) {
@@ -365,8 +369,13 @@ describe("a post's photo and its one line", () => {
   it("deleting an entry or an account deletes the photo", () => {
     const acts = code("lib/elite/tracker-actions.ts");
     const del = acts.slice(acts.indexOf("export async function deleteLog("), acts.indexOf("export async function confirmFriend("));
-    expect(del).toContain("ownsPostPath(path, o.profileId)");
-    expect(del).toContain(".storage.from(POST_BUCKET).remove([path])");
+    // both photos of a timed post (the finish and the start), each only
+    // when it really is that account's own
+    expect(del).toContain("entryFiles(row as EntryFiles | null, o.profileId)");
+    expect(del).toContain(".storage.from(POST_BUCKET).remove(files)");
+    const files = acts.slice(acts.indexOf("function entryFiles("), acts.indexOf("// ---- Friends"));
+    expect(files).toContain("ownsPostPath(row.photo_path, profileId)");
+    expect(files).toContain("ownsStartPath(row.start_photo_path, profileId)");
     const account = code("lib/elite/account-delete.ts");
     expect(account.indexOf("await removeTrackerFiles(user.id)")).toBeGreaterThan(-1);
     expect(account.indexOf("await removeTrackerFiles(user.id)")).toBeLessThan(account.indexOf("admin.auth.admin.deleteUser(user.id)"));
@@ -400,14 +409,15 @@ describe("reporting a post", () => {
     );
   });
 
-  it("a coach removes the post or says no action; a removed post keeps its minutes", () => {
+  it("a coach removes the post or says no action; a removed post stays on the player's own week and comes off every board", () => {
     const acts = code("lib/elite/tracker-actions.ts");
     const remove = acts.slice(acts.indexOf("export async function removePost("), acts.indexOf("export async function dismissReports("));
     expect(remove).toContain('if (c.kind === "no") return fail("Only a coach can remove a post.");');
-    expect(remove).toContain(".update({ removed_at: new Date().toISOString(), removed_by: c.profileId })");
-    expect(remove).toContain(".storage.from(POST_BUCKET).remove([path])");
+    // proof typed: its time no longer counts on a board, a club or a matchup
+    expect(remove).toContain(".update({ removed_at: new Date().toISOString(), removed_by: c.profileId, proof: TYPED })");
+    expect(remove).toContain(".storage.from(POST_BUCKET).remove(files)");
     expect(remove).toContain('closeReports(c, logId, "removed")');
-    expect(remove).not.toMatch(/\.delete\(\)/); // the entry stays: the minutes count
+    expect(remove).not.toMatch(/\.delete\(\)/); // the entry stays on the player's own week
     expect(acts).toContain('closeReports(c, logId, "none")');
     // a player cannot reach either
     const coachFn = acts.slice(acts.indexOf("async function coach()"), acts.indexOf("export async function setFreeSignupOpen("));

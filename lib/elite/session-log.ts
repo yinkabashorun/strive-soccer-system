@@ -95,6 +95,7 @@ export async function settleSessionLog(i: { playerId: string; profileId: string;
       trained_on: nyToday(),
       minutes,
       kind: "training",
+      proof: "session", // timed drill by drill by the session player: it counts everywhere
       week_target: (tracker as { target_minutes: number | null }).target_minutes || null,
     });
     // 23505: this session is already on the week. That is the point.

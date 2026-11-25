@@ -576,7 +576,11 @@ describe("the free app", () => {
 
   it("asks for notifications once, after a post, with the reason", () => {
     const post = code(path.join(root, "app/post.tsx"));
-    expect(post).toContain("if (photo && !prefs.pushAsked)");
+    // after a post that went up (the clock's, or a session's photo): never
+    // after training added without the clock, which posts nothing
+    expect(post.match(/if \(!prefs\.pushAsked\) \{/g)?.length).toBe(2);
+    const typedAdd = post.slice(post.indexOf("async function addTyped()"), post.indexOf("if (asking)"));
+    expect(typedAdd).not.toContain("pushAsked");
     expect(post).toContain("Know the moment your friends post?");
     expect(post).toContain("turnOnNotifications()");
     // and never from the tabs themselves
@@ -868,7 +872,10 @@ describe("the social half is built like the training loop", () => {
   const hero = code(path.join(root, "src/TodayHero.tsx"));
 
   it("Friends opens on one card with one button until today's post is up", () => {
-    expect(friends).toMatch(/\{f\.unlocked \? \([\s\S]{0,260}<Button quiet label="Post my training"[\s\S]{0,120}\) : \(\s*<TodayHero/);
+    // the one button opens the training clock and says where it stands
+    expect(friends).toMatch(/\{f\.unlocked \? \([\s\S]{0,260}<Button quiet label=\{clockLabel\}[\s\S]{0,120}\) : \(\s*<TodayHero/);
+    expect(friends).toContain("const clockLabel = useClockButton();");
+    expect(hero).toContain("<Button label={label} onPress={onPost} />");
     // the card IS the feed's first locked post, so it is not said twice
     expect(friends).toContain("cards.filter((c) => c.id !== heroCard.id)");
     expect(hero.match(/<Button\b/g)?.length).toBe(1);
@@ -940,8 +947,11 @@ describe("the social half is built like the training loop", () => {
     const post = code(path.join(root, "app/post.tsx"));
     // only friends who trained today, never you, and only while locked
     expect(post).toContain("feed && !feed.unlocked && feed.friendsToday > 0 ? feed.faces.filter((f) => !f.you && f.active) : []");
-    // the words are the feed's own line, said once; not shown on a session's photo
-    expect(post).toContain("{waiting.length && feed && !session ? (");
+    // the words are the feed's own line, said once, on the clock's start
+    // screen; a session's photo has its own screen and never shows them
+    expect(post).toContain("{waiting.length && feed ? (");
+    const sessionPost = post.slice(post.indexOf("function SessionPost("));
+    expect(sessionPost).not.toContain("lockedLine");
     expect(post.match(/lockedLine\(feed\.friendsToday\)/g)?.length).toBe(2);
   });
 
@@ -992,12 +1002,19 @@ describe("the social half is built like the training loop", () => {
   // which rides on the keyboard, and the note rests with the lengths in view.
   it("the post button rides on the keyboard while the note is typed", () => {
     const post = code(path.join(root, "app/post.tsx"));
-    const footer = post.slice(post.indexOf("footer={"), post.indexOf("    >", post.indexOf("footer={")));
-    expect(footer).toContain('label={photo ? "Post to my friends" : "Log my training"}');
-    expect(footer).toContain("{error ?");
-    // one button, in the footer only
-    expect(post.match(/"Post to my friends"/g)?.length).toBe(1);
-    expect(post).toContain("revealTop={NOTE_REVEAL_TOP}");
+    // every screen with the note has its post button in the footer
+    const footers = post.match(/footer=\{\s*<Footer error=\{error\}>\s*<Button label=\{CLOCK_WORDS\.(post|typedButton)\}/g) ?? [];
+    expect(footers.length).toBe(3);
+    // the post button is never laid out in the page itself
+    expect(post.match(/label=\{CLOCK_WORDS\.post\}/g)?.length).toBe(2);
+    for (const m of post.matchAll(/<Note value=/g)) {
+      const before = post.slice(0, m.index);
+      const screen = before.slice(before.lastIndexOf("<FormScreen"));
+      expect(screen).toContain("footer={");
+      expect(screen).toContain("revealTop={NOTE_REVEAL_TOP}");
+    }
+    // the footer says what went wrong above the button
+    expect(post).toMatch(/function Footer\([\s\S]{0,400}\{error \?/);
     const form = code(path.join(root, "src/FormScreen.tsx"));
     expect(form).toContain("revealTop = REVEAL_TOP");
     expect(form).toContain("- revealTop;");

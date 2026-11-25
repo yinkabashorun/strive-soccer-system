@@ -16,6 +16,9 @@ import { color, radius } from "@/theme";
 // room of a hero and the Post button, so the faces, the reason and the
 // action are one thing instead of three stacked lists.
 //
+// The button opens the training clock (app/post.tsx) and says where the
+// clock stands: "Start training", "Finish my training", "Post my training".
+//
 // What is behind the words is the friend's PROFILE photo, blurred: a photo
 // the player already sees on every row. The server still sends nothing of
 // the locked post itself, so there is nothing here to peek at.
@@ -28,6 +31,7 @@ export function TodayHero({
   locked,
   faces,
   friendsToday,
+  label,
   onPost,
 }: {
   // the first of today's locked posts, when a friend has trained
@@ -35,10 +39,12 @@ export function TodayHero({
   // the friends who trained today, to show their faces together
   faces: HeroFace[];
   friendsToday: number;
+  // what the one button says (src/ClockRow.tsx useClockButton)
+  label: string;
   onPost: () => void;
 }) {
   const lines = locked ? lockedHeadlineLines(locked.first, locked.minutes, locked.kind) : null;
-  const label = locked
+  const said = locked
     ? `${lockedHeadline(locked.first, locked.minutes, locked.kind)}. ${lockedLine(friendsToday)}`
     : TODAY_OPEN_HEAD;
   return (
@@ -47,7 +53,7 @@ export function TodayHero({
         <Image source={{ uri: locked.photo }} style={[StyleSheet.absoluteFill, { opacity: 0.55 }]} contentFit="cover" blurRadius={28} transition={250} cachePolicy="disk" />
       ) : null}
       <Shade id="today-hero" stops={HERO_SHADE} />
-      <View style={styles.in} accessible accessibilityLabel={label}>
+      <View style={styles.in} accessible accessibilityLabel={said}>
         {faces.length ? (
           <View style={styles.faces}>
             {faces.slice(0, 4).map((f, i) => (
@@ -75,7 +81,7 @@ export function TodayHero({
         <Body style={{ marginTop: 8, color: "rgba(242,239,232,0.8)" }}>{locked ? TODAY_LOCKED_LINE : TODAY_OPEN_LINE}</Body>
       </View>
       <View style={styles.cta}>
-        <Button label="Post my training" onPress={onPost} />
+        <Button label={label} onPress={onPost} />
       </View>
     </Animated.View>
   );
@@ -88,7 +94,7 @@ export function todayEyebrow(friendsToday: number): string {
 
 export const TODAY_LOCKED_LINE = "Post yours to see theirs.";
 export const TODAY_OPEN_HEAD = "Be the first to post today";
-export const TODAY_OPEN_LINE = "A photo of your training. Your friends see it the moment it is up.";
+export const TODAY_OPEN_LINE = "Start the clock with a photo. Your friends see your training when you finish.";
 
 const styles = StyleSheet.create({
   hero: {

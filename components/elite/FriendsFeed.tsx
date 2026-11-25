@@ -12,6 +12,7 @@ import { feel } from "@/lib/elite/native";
 import { REPORT_REASONS, lockedHeadline, lockedHeadlineLines, lockedLine } from "@/lib/elite/tracker";
 import type { ClubRequestView, FeedView, FriendRequestView, OpenCardView } from "@/lib/elite/tracker-server";
 import type { LockedCard } from "@/lib/elite/tracker";
+import { NOT_TIMED } from "@/lib/elite/training-clock";
 import { usePostLauncher } from "./FreeShell";
 import { FriendAsk } from "./FriendAsk";
 import { FriendRequests } from "./FriendRequests";
@@ -318,6 +319,8 @@ function OpenPost({ card, onGone }: { card: OpenCardView; onGone: () => void }) 
         <div className="min-w-0">
           <div className="mb-2 text-[11px] font-bold uppercase tracking-[2.6px] text-accent">
             {card.kind === "gym" ? "Gym" : "Training"}
+            {/* the length was typed, not timed by the clock (training-clock.ts) */}
+            {card.timed === false ? ` · ${NOT_TIMED}` : ""}
           </div>
           <div className="font-display text-[66px] font-black uppercase leading-[0.82] tracking-[-1px]">
             {fmtDuration(card.minutes)}

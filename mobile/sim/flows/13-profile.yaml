@@ -12,7 +12,7 @@ appId: com.strivesoccer.elite
     arguments:
       fixtureState: locked
 - extendedWaitUntil:
-    visible: "Post my training"
+    visible: "Start training"
     timeout: 30000
 - tapOn: "Diego, trained today. Open Diego's profile."
 - extendedWaitUntil:
@@ -65,7 +65,7 @@ appId: com.strivesoccer.elite
     timeout: 3000
 - tapOn: "Back"
 - extendedWaitUntil:
-    visible: "Post my training"
+    visible: "Start training"
     timeout: 10000
 
 # The friends board on Week opens the same profile.

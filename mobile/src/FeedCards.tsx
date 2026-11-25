@@ -4,6 +4,7 @@ import { Image } from "expo-image";
 import { fmtDuration } from "@shared/time-trained";
 import { REPORT_REASONS, STAR_LABEL, lockedHeadline, lockedHeadlineLines, lockedLine, type LockedCard } from "@shared/tracker";
 import type { AppOpenCard } from "@shared/app-contract";
+import { NOT_TIMED } from "@shared/training-clock";
 import { ApiError, OFFLINE_MESSAGE } from "./api/client";
 import { blockPlayer, deleteEntry, reportPost, toggleProps } from "./api/free";
 import { Avatar, MyAvatar, Star } from "./Avatar";
@@ -25,6 +26,10 @@ import { color, radius } from "./theme";
 // note, and one tap of props. The three dots open the iPhone's own sheet:
 // Report this post and Block on anyone else's post, Delete on your own.
 // A report or a block takes the post off this feed at once.
+//
+// A post timed by the clock shows its START photo small in the corner of
+// the finish photo: the two photos the time was measured between. A post
+// whose length was typed says "Not timed" beside the time.
 
 export function LockedPost({ card, first, friendsToday }: { card: LockedCard; first: boolean; friendsToday: number }) {
   const [a, b] = lockedHeadlineLines(card.first, card.minutes, card.kind);
@@ -158,9 +163,14 @@ export function OpenPost({ card, onGone }: { card: AppOpenCard; onGone: () => vo
           accessibilityLabel={`${card.mine ? "Your" : `${card.first}'s`} ${card.kind === "gym" ? "gym" : "training"} photo`}
         />
         <Shade id={`post-${card.id}`} stops={POST_SHADE} />
+        {card.startPhotoUrl ? (
+          <View style={styles.startInset}>
+            <Image source={{ uri: card.startPhotoUrl }} style={StyleSheet.absoluteFill} contentFit="cover" transition={200} accessibilityLabel="The start photo" />
+          </View>
+        ) : null}
         <View style={styles.onPhoto}>
           <Label size={12} dim style={{ letterSpacing: 1.6, textTransform: "uppercase" }}>
-            {card.kind === "gym" ? "Gym" : "Training"}
+            {[card.kind === "gym" ? "Gym" : "Training", card.timed === false ? NOT_TIMED : null].filter(Boolean).join(" · ")}
           </Label>
           <Head size={34}>{time}</Head>
         </View>
@@ -215,6 +225,8 @@ const styles = StyleSheet.create({
   dot: { width: 4, height: 4, borderRadius: 2, backgroundColor: color.dim },
   photo: { width: "100%", aspectRatio: 4 / 5, backgroundColor: color.fill2 },
   onPhoto: { position: "absolute", left: 16, bottom: 14 },
+  // the start photo, small, in the corner of the finish photo
+  startInset: { position: "absolute", left: 12, top: 12, width: "26%", aspectRatio: 4 / 5, borderRadius: 12, overflow: "hidden", borderWidth: 2, borderColor: color.black, backgroundColor: color.fill2 },
   under: { flexDirection: "row", alignItems: "center", gap: 12, paddingHorizontal: 16, paddingVertical: 10, minHeight: 64 },
   props: { minHeight: 44, paddingHorizontal: 18, borderRadius: 22, borderWidth: 1, borderColor: "rgba(242,239,232,0.3)", alignItems: "center", justifyContent: "center" },
   propsOn: { backgroundColor: color.bone, borderColor: color.bone },

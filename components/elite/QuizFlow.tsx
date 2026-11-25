@@ -22,6 +22,7 @@ import {
   firstUnanswered,
   quizInput,
   stepReady,
+  stillToRate,
   QUIZ_QUESTIONS,
   type QuizAnswers,
 } from "@/lib/elite/quiz";
@@ -376,6 +377,11 @@ export function QuizFlow({
         {!current.autoAdvance && (
           // pinned to the bottom, riding above the keyboard when it is up
           <div className="sticky z-10 -mx-5 mt-5 bg-black px-5 pb-1 pt-3" style={{ bottom: kb }}>
+          {(current.id === "onBall" || current.id === "offBall") && stillToRate(current.id === "onBall" ? "on" : "off", a.attrs) ? (
+            <p className="mb-2 text-center text-[13px] text-white/60" role="status">
+              {stillToRate(current.id === "onBall" ? "on" : "off", a.attrs)}
+            </p>
+          ) : null}
           <button
             onClick={current.id === "parent" ? finish : next}
             disabled={saving || (current.id === "nearby" ? false : !ready)}

@@ -14,6 +14,7 @@ import {
   selfScale,
   quizInput,
   stepReady,
+  stillToRate,
   type QuizAnswers,
 } from "@/lib/elite/quiz";
 
@@ -190,6 +191,31 @@ describe("a screen moves on only when it is answered", () => {
     expect(QUIZ_STEPS[firstUnanswered(full({ parentName: " " }))].id).toBe("parent");
     expect(QUIZ_STEPS[firstUnanswered(full({ position: undefined }))].id).toBe("position");
     expect(QUIZ_STEPS[firstUnanswered(full({ attrs: { ...allFour, defending: undefined } }))].id).toBe("offBall");
+  });
+
+  // The simulator, Nov 24 2026: one row of seven was missed and Next did
+  // nothing, with no word of why. A rating page names the row above Next.
+  it("a rating page says which row is still to rate", () => {
+    const on = ATTRIBUTES.filter((x) => x.group === "on");
+    const all = Object.fromEntries(on.map((x) => [x.id, 3]));
+    // nothing rated yet: the page has only just opened, nothing is said
+    expect(stillToRate("on", {})).toBeNull();
+    // every row rated: nothing left to say
+    expect(stillToRate("on", all)).toBeNull();
+    expect(stillToRate("on", { ...all, dribbling: undefined })).toBe("Still to rate: Dribbling and 1v1.");
+    expect(stillToRate("on", { first_touch: 2, close_control: 3 })).toBe("Still to rate: Weak foot, and 4 more.");
+    // a rating that is not on the scale is still open
+    expect(stillToRate("on", { ...all, shooting: 0 })).toBe("Still to rate: Shooting.");
+    // the other page's ratings do not count for this one
+    expect(stillToRate("off", all)).toBeNull();
+    expect(stillToRate("off", { ...all, speed: 4 })).toBe("Still to rate: Agility, and 6 more.");
+    // it agrees with the rule that lets Next through
+    const a = full({ attrs: { ...allFour, dribbling: undefined } });
+    expect(stepReady("onBall", a)).toBe(false);
+    expect(stillToRate("on", a.attrs)).not.toBeNull();
+    // both quiz screens show the line
+    expect(read("components/elite/QuizFlow.tsx")).toContain("stillToRate(");
+    expect(read("mobile/app/onboarding/[step].tsx")).toContain("stillToRate(");
   });
 
   it("the quiz screen saves through the same action as before", () => {

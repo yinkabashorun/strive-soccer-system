@@ -122,26 +122,31 @@ appId: com.strivesoccer.elite
 - scrollUntilVisible:
     element: "Weak foot 1 of 5"
     direction: DOWN
+    centerElement: true
     timeout: 15000
 - tapOn: "Weak foot 1 of 5"
 - scrollUntilVisible:
     element: "Dribbling and 1v1 3 of 5"
     direction: DOWN
+    centerElement: true
     timeout: 15000
 - tapOn: "Dribbling and 1v1 3 of 5"
 - scrollUntilVisible:
     element: "Short passing 4 of 5"
     direction: DOWN
+    centerElement: true
     timeout: 15000
 - tapOn: "Short passing 4 of 5"
 - scrollUntilVisible:
     element: "Long passing 3 of 5"
     direction: DOWN
+    centerElement: true
     timeout: 15000
 - tapOn: "Long passing 3 of 5"
 - scrollUntilVisible:
     element: "Shooting 3 of 5"
     direction: DOWN
+    centerElement: true
     timeout: 15000
 - tapOn: "Shooting 3 of 5"
 - takeScreenshot: t28-free-quiz-on-ball
@@ -155,31 +160,37 @@ appId: com.strivesoccer.elite
 - scrollUntilVisible:
     element: "Strength 3 of 5"
     direction: DOWN
+    centerElement: true
     timeout: 15000
 - tapOn: "Strength 3 of 5"
 - scrollUntilVisible:
     element: "Fitness 4 of 5"
     direction: DOWN
+    centerElement: true
     timeout: 15000
 - tapOn: "Fitness 4 of 5"
 - scrollUntilVisible:
     element: "Scanning 3 of 5"
     direction: DOWN
+    centerElement: true
     timeout: 15000
 - tapOn: "Scanning 3 of 5"
 - scrollUntilVisible:
     element: "Decision making 3 of 5"
     direction: DOWN
+    centerElement: true
     timeout: 15000
 - tapOn: "Decision making 3 of 5"
 - scrollUntilVisible:
     element: "Movement 3 of 5"
     direction: DOWN
+    centerElement: true
     timeout: 15000
 - tapOn: "Movement 3 of 5"
 - scrollUntilVisible:
     element: "Defending 3 of 5"
     direction: DOWN
+    centerElement: true
     timeout: 15000
 - tapOn: "Defending 3 of 5"
 - tapOn: "Next"

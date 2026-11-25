@@ -22,10 +22,14 @@ appId: com.strivesoccer.elite
 - waitForAnimationToEnd:
     timeout: 4000
 - takeScreenshot: t18-course-drills
+# A clip is nearly a screen tall, so it counts as in view at two thirds, and
+# a slow machine gets the time to scroll to it (Nov 24 2026: the clip was on
+# screen when the 20 seconds ran out).
 - scrollUntilVisible:
     element: ".* One touch, keep it up"
     direction: DOWN
-    timeout: 20000
+    visibilityPercentage: 66
+    timeout: 45000
 - takeScreenshot: t19-course-second-drill
 - tapOn: ".* One touch, keep it up"
 - waitForAnimationToEnd:

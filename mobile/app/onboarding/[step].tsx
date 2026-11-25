@@ -19,6 +19,7 @@ import {
   attributesIn,
   lowestAttributes,
   stepReady,
+  stillToRate,
   type QuizStepId,
 } from "@shared/quiz";
 import { FREE_QUESTIONS, FREE_STEPS, freeStepReady, type FreeAnswers, type FreeStepId } from "@shared/free-intake";
@@ -118,6 +119,8 @@ export default function QuizStep() {
   }
 
   const ready = readyAt(id);
+  // A rating page says which row is still open, right above Next.
+  const toRate = id === "onBall" || id === "offBall" ? stillToRate(id === "onBall" ? "on" : "off", a.attrs) : null;
   const last = nextStepId(id, order) === null;
 
   return (
@@ -137,6 +140,11 @@ export default function QuizStep() {
           // a question a tap answers has no button, unless it is the last one
           !quiz.autoAdvance || last ? (
             <View style={[styles.cta, { paddingBottom: insets.bottom + 16 }]}>
+              {toRate ? (
+                <Body dim size={13} style={styles.toRate}>
+                  {toRate}
+                </Body>
+              ) : null}
               <NextButton ready={ready || id === "nearby"} last={last} busy={submit.isPending || saving} onNext={() => next(id === "nearby" ? { nearbyAnswered: true } : undefined)} />
             </View>
           ) : null
@@ -383,4 +391,5 @@ const styles = StyleSheet.create({
   // it (the simulator, Nov 24 2026: "What team do you play for?" with the
   // keyboard up and no Next to tap). In the flow it rides on the keyboard.
   cta: { paddingHorizontal: 20, paddingTop: 12, backgroundColor: color.black },
+  toRate: { textAlign: "center", marginBottom: 10 },
 });

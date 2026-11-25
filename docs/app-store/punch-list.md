@@ -106,7 +106,8 @@ left on it. What only a phone can show is `native-device-checklist.md`.
 | N13 | Video posts and My Drills (film a take, Then and now) | TODO, the largest piece left from the website's free app |
 | N14 | Strive events and trained-together tags | TODO |
 | N15 | Links that open the app (a texted link opens the right screen) | TODO, after N6 is proven on a phone |
-| N16 | Review notes, age rating and privacy answers rewritten for the native app in `listing.md` | TODO before submitting (C5) |
+| N16 | Review notes, age rating and privacy answers rewritten for the native app in `listing.md` | DONE Nov 25 (the training clock added the same day). His to approve (D8), then entered in App Store Connect (C5) |
+| N18 | The training clock: training timed between a start photo and a finish photo, both from the app's camera; only timed training counts on the boards | DONE Nov 25, on main for the next build (migration 089 applied). Not proven: the camera, a locked phone, airplane mode (`native-device-checklist.md`, "The training clock") |
 | N17 | The upgrade inside the app opens a web checkout: allowed on the US storefront only (from memory, to verify); Apple's in-app purchase is the fallback | HIS (D14), before review |
 
 ## B. Research to settle before the first build

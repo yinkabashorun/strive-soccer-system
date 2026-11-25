@@ -344,14 +344,12 @@ appId: com.strivesoccer.elite
     timeout: 3000
 - takeScreenshot: t35d-clock-row-week
 # the row is one thing to a screen reader: "Training. 45:20. Take my finish photo"
+# ONE TAP TO THE CAMERA: the row opens the clock and the camera comes up by
+# itself (here, the phone's photos)
 - tapOn: "Training\\..*Take my finish photo"
 - extendedWaitUntil:
-    visible: "Stop without posting"
-    timeout: 15000
-- tapOn: "Take my finish photo"
-- extendedWaitUntil:
     visible: "Cancel"
-    timeout: 15000
+    timeout: 20000
 - waitForAnimationToEnd:
     timeout: 5000
 - tapOn:
@@ -362,6 +360,15 @@ appId: com.strivesoccer.elite
 - waitForAnimationToEnd:
     timeout: 3000
 # nobody picks a length: it is the time between the two photos
+- assertVisible: "Ready to post\\. 45m\\..*"
+# Forgot to stop the clock: time comes off, five minutes a tap, and back
+- tapOn: "Finished before you took this photo?"
+- tapOn: "5 min less"
+- tapOn: "5 min less"
+- assertVisible: "Ready to post\\. 35m\\..*"
+- takeScreenshot: t36a-clock-time-off
+- tapOn: "5 min more"
+- tapOn: "5 min more"
 - assertVisible: "Ready to post\\. 45m\\..*"
 - takeScreenshot: t36-clock-ready
 - tapOn: "One line about your training"

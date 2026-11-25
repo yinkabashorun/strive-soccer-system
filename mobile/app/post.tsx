@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Alert, Linking, StyleSheet, TextInput, View } from "react-native";
 import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
@@ -6,18 +6,18 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CAPTION_MAX, KINDS, LOG_CHIPS, POST_RULES_LINE, chipLabel, lockedLine, type Kind } from "@shared/tracker";
 import { POST_SESSION_DETAIL, POST_SESSION_ROW } from "@shared/one-app";
-import { CLOCK_MIN_SECONDS, CLOCK_WORDS, TYPED_LINE, clockFace, clockLength } from "@shared/training-clock";
+import { CLOCK_MIN_SECONDS, CLOCK_WORDS, TYPED_LINE, clockFace, clockLength, lessApplied, lessMax } from "@shared/training-clock";
 import { useMe } from "@/api/queries";
 import { ApiError, OFFLINE_MESSAGE } from "@/api/client";
 import { logTraining, refreshFree, useFeed } from "@/api/free";
 import { Avatar } from "@/Avatar";
-import { finishClock, retakeFinish, sendClock, startClock, stopClock, useClockView } from "@/clock";
-import { shotUri } from "@/clock-core";
+import { finishClock, retakeFinish, sendClock, startClock, stopClock, storedClock, takeClockNote, useClockView } from "@/clock";
+import { cameraFirst, clockView, lessStep, readyMinutes, shotUri } from "@/clock-core";
 import { FIXTURES } from "@/config";
 import { feel, tick } from "@/feel";
 import { FormScreen } from "@/FormScreen";
 import { postTraining, type PickedPhoto } from "@/post-api";
-import { setPref, usePrefs } from "@/prefs";
+import { loadPrefs, setPref, usePrefs } from "@/prefs";
 import { turnOnNotifications } from "@/push";
 import { Body, Button, Eyebrow, Head, Icon, Label, Press } from "@/ui";
 import { color, font } from "@/theme";
@@ -48,6 +48,16 @@ import { color, font } from "@/theme";
 //
 // A clock that ran past three hours with no finish photo can no longer be
 // timed; the player may add that training the typed way.
+//
+// MADE PRACTICAL (his word, Nov 25 2026):
+//   - ONE TAP TO THE CAMERA. A button that says "Start training" or
+//     "Finish my training" opens this screen with `go`: the camera opens
+//     at once (src/clock-core.ts cameraFirst). The first clock ever shows
+//     how it works first. Closing the camera leaves the screen as it is.
+//   - A POST SENDS ITSELF. With no signal the post is kept on the phone
+//     and the app sends it when it is back online (src/clock.ts).
+//   - FORGOT TO STOP THE CLOCK. "Finished before you took this photo?"
+//     takes time OFF, five minutes a tap. It can never add time.
 //
 // Opened from a finished session's "Post it to your friends" (a member
 // with the free app: lib/elite/one-app.ts) it carries `session`: only a
@@ -81,10 +91,14 @@ async function takePhoto(): Promise<Shoot> {
 }
 
 export default function Post() {
-  const { session: sessionParam } = useLocalSearchParams<{ session?: string }>();
+  const { session: sessionParam, go } = useLocalSearchParams<{ session?: string; go?: string }>();
   const session = typeof sessionParam === "string" && /^\d{1,3}-\d{1,2}$/.test(sessionParam) ? sessionParam : null;
-  return session ? <SessionPost session={session} /> : <ClockPost />;
+  return session ? <SessionPost session={session} /> : <ClockPost go={go === "1"} />;
 }
+
+// How long the screen is given to finish opening before the camera is put
+// on top of it: iOS refuses to show one screen while another is arriving.
+const CAMERA_AFTER_MS = 600;
 
 // ---- the pieces every state shares ---------------------------------------
 
@@ -156,11 +170,13 @@ function Note({ value, onChange }: { value: string; onChange: (v: string) => voi
 // The button rides on the keyboard. In the page's own flow it sat BEHIND
 // the keyboard while the note was being typed, and a tap aimed at it typed
 // a letter (the simulator's first walk of a first post, Nov 25 2026).
-function Footer({ error, children }: { error: string | null; children: ReactNode }) {
+// `calm`: the line is not a fault (a post kept safe on the phone), so it
+// is not said in red.
+function Footer({ error, calm, children }: { error: string | null; calm?: boolean; children: ReactNode }) {
   const insets = useSafeAreaInsets();
   return (
     <View style={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: insets.bottom + 16, backgroundColor: color.black }}>
-      {error ? <Body style={{ color: color.danger, marginBottom: 10 }}>{error}</Body> : null}
+      {error ? <Body style={{ color: calm ? color.bone : color.danger, marginBottom: 10 }}>{error}</Body> : null}
       {children}
     </View>
   );
@@ -213,7 +229,7 @@ function useLeave() {
 
 // ---- the clock -------------------------------------------------------------
 
-function ClockPost() {
+function ClockPost({ go }: { go: boolean }) {
   const insets = useSafeAreaInsets();
   const leave = useLeave();
   const me = useMe();
@@ -230,8 +246,12 @@ function ClockPost() {
 
   const [typed, setTyped] = useState(false);
   const [minutes, setMinutes] = useState<number | null>(null);
-  const [kind, setKind] = useState<Kind>("training");
-  const [caption, setCaption] = useState("");
+  // a post that is waiting to be sent opens with what was chosen for it
+  const [kind, setKind] = useState<Kind>(clock?.post?.kind ?? "training");
+  const [caption, setCaption] = useState(clock?.post?.caption ?? "");
+  // minutes taken off, when the clock ran on after training ended
+  const [less, setLess] = useState(clock?.post?.less ?? 0);
+  const [lessOpen, setLessOpen] = useState((clock?.post?.less ?? 0) > 0);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cameraOff, setCameraOff] = useState(false);
@@ -263,6 +283,50 @@ function ClockPost() {
     void shoot(finishClock);
   }
 
+  // ONE TAP TO THE CAMERA: opened by a button that already said what it
+  // does, the camera comes up by itself, once. Read from the stored clock
+  // and settings, not from this render, so a clock still being read from
+  // the phone is never mistaken for no clock.
+  const went = useRef(false);
+  useEffect(() => {
+    if (!go || !owner || went.current) return;
+    went.current = true;
+    let live = true;
+    const t = setTimeout(() => {
+      void Promise.all([storedClock(), loadPrefs()]).then(([c, p]) => {
+        if (!live) return;
+        const mine = c && c.owner === owner.toLowerCase() ? c : null;
+        const to = cameraFirst(clockView(mine, Date.now()), p.clockKnown, CLOCK_MIN_SECONDS);
+        if (to === "start") void shoot((photo) => startClock(owner, photo));
+        if (to === "finish") void shoot(finishClock);
+      });
+    }, CAMERA_AFTER_MS);
+    return () => {
+      live = false;
+      clearTimeout(t);
+    };
+    // once, when the account is known
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [go, owner]);
+
+  // a post that is waiting to be sent shows what was chosen for it
+  const waitingFor = clock?.post ? clock.start.atMs : null;
+  useEffect(() => {
+    const p = clock?.post;
+    if (!p) return;
+    setKind(p.kind);
+    setCaption(p.caption);
+    setLess(p.less);
+    setLessOpen(p.less > 0);
+    // only when a waiting post appears, not on every keystroke
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [waitingFor]);
+
+  // why a waiting post was let go of, said once
+  useEffect(() => {
+    void takeClockNote().then((note) => note && setError(note));
+  }, []);
+
   function stop() {
     Alert.alert(CLOCK_WORDS.cancel, CLOCK_WORDS.cancelAsk, [
       { text: "Keep training", style: "cancel" },
@@ -273,10 +337,12 @@ function ClockPost() {
   async function post() {
     setError(null);
     setBusy(true);
-    const res = await sendClock(kind, caption);
+    const res = await sendClock(kind, caption, less);
     setBusy(false);
-    // a refusal that is final cleared the clock: the start screen says why
-    if (!res.ok) return setError(res.message);
+    // A refusal that is final cleared the clock: the start screen says why.
+    // A post kept for later says so calmly, under "Ready to post" (the
+    // footer reads it off the clock itself).
+    if (!res.ok) return setError(!res.final && res.message === CLOCK_WORDS.kept ? null : res.message);
     feel("drill");
     // asked once, after the first post that went up
     if (!prefs.pushAsked) {
@@ -365,6 +431,9 @@ function ClockPost() {
   if (clock && clock.finish && view.at === "ready") {
     const startUri = shotUri(clock.start);
     const finishUri = shotUri(clock.finish);
+    // the time between the photos, and what it counts with time taken off
+    const measured = readyMinutes(clock);
+    const counted = lessApplied(measured, less);
     return (
       <FormScreen
         header={<CloseBar />}
@@ -372,7 +441,7 @@ function ClockPost() {
         // the note comes to rest with the time still in view above it
         revealTop={NOTE_REVEAL_TOP}
         footer={
-          <Footer error={error}>
+          <Footer error={error ?? (view.waiting ? `${CLOCK_WORDS.kept} ${CLOCK_WORDS.waiting}` : null)} calm={!error || error === CLOCK_WORDS.kept}>
             <Button label={CLOCK_WORDS.post} busy={busy} onPress={() => void post()} />
           </Footer>
         }
@@ -385,20 +454,55 @@ function ClockPost() {
             </View>
           ) : null}
         </View>
-        <View accessible accessibilityLabel={`${CLOCK_WORDS.ready}. ${clockLength(view.minutes)}. ${CLOCK_WORDS.between}`}>
+        <View accessible accessibilityLabel={`${CLOCK_WORDS.ready}. ${clockLength(counted)}. ${CLOCK_WORDS.between}`}>
           <Eyebrow style={{ marginTop: 18 }}>{CLOCK_WORDS.ready}</Eyebrow>
           <Head size={54} style={{ marginTop: 4, textTransform: "none" }}>
-            {clockLength(view.minutes)}
+            {clockLength(counted)}
           </Head>
           <Body dim size={13.5} style={{ marginTop: 2 }}>
-            {CLOCK_WORDS.between}
+            {less > 0 ? CLOCK_WORDS.lessBody : CLOCK_WORDS.between}
           </Body>
         </View>
+        {/* Forgot to stop the clock: time comes OFF, five minutes a tap. */}
+        {lessOpen ? (
+          <View style={styles.less}>
+            <Press
+              onPress={() => {
+                tick();
+                setLess(lessStep(measured, less, -1));
+              }}
+              disabled={busy || less >= lessMax(measured)}
+              style={styles.lessButton}
+              accessibilityLabel={CLOCK_WORDS.lessMinus}
+            >
+              <Label size={14}>{CLOCK_WORDS.lessMinus}</Label>
+            </Press>
+            <Press
+              onPress={() => {
+                tick();
+                setLess(lessStep(measured, less, 1));
+              }}
+              disabled={busy || less === 0}
+              style={styles.lessButton}
+              accessibilityLabel={CLOCK_WORDS.lessPlus}
+            >
+              <Label size={14}>{CLOCK_WORDS.lessPlus}</Label>
+            </Press>
+          </View>
+        ) : lessMax(measured) > 0 ? (
+          <Press onPress={() => setLessOpen(true)} disabled={busy} style={styles.link} accessibilityLabel={CLOCK_WORDS.lessLink}>
+            <Label dim size={14}>
+              {CLOCK_WORDS.lessLink}
+            </Label>
+          </Press>
+        ) : null}
         {gym ? <Kinds kind={kind} onPick={setKind} /> : null}
         <Note value={caption} onChange={setCaption} />
         <Press
           onPress={() => {
             setError(null);
+            setLess(0);
+            setLessOpen(false);
             void retakeFinish();
           }}
           disabled={busy}
@@ -631,6 +735,8 @@ const styles = StyleSheet.create({
   // every digit the same width, so the clock does not shake as it counts
   face: { marginTop: 4, fontVariant: ["tabular-nums"], textTransform: "none" },
   link: { minHeight: 44, justifyContent: "center", alignSelf: "flex-start" },
+  less: { flexDirection: "row", gap: 10, marginTop: 10 },
+  lessButton: { flex: 1, minHeight: 48, borderRadius: 16, backgroundColor: color.fill2, borderWidth: 1, borderColor: color.line, alignItems: "center", justifyContent: "center" },
   kinds: { flexDirection: "row", marginTop: 18, padding: 4, borderRadius: 16, backgroundColor: color.fill2, borderWidth: 1, borderColor: color.line },
   kind: { flex: 1, minHeight: 44, borderRadius: 12, alignItems: "center", justifyContent: "center" },
   kindOn: { backgroundColor: "#2b2b2b" },

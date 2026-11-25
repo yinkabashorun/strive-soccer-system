@@ -1003,7 +1003,7 @@ describe("the social half is built like the training loop", () => {
   it("the post button rides on the keyboard while the note is typed", () => {
     const post = code(path.join(root, "app/post.tsx"));
     // every screen with the note has its post button in the footer
-    const footers = post.match(/footer=\{\s*<Footer error=\{error\}>\s*<Button label=\{CLOCK_WORDS\.(post|typedButton)\}/g) ?? [];
+    const footers = post.match(/footer=\{\s*<Footer error=\{[^>]*>\s*<Button label=\{CLOCK_WORDS\.(post|typedButton)\}/g) ?? [];
     expect(footers.length).toBe(3);
     // the post button is never laid out in the page itself
     expect(post.match(/label=\{CLOCK_WORDS\.post\}/g)?.length).toBe(2);

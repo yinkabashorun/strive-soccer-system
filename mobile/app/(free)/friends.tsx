@@ -9,7 +9,7 @@ import { PlayerLink } from "@/ProfileParts";
 import type { LockedCard } from "@shared/tracker";
 import { LockedPost, OpenPost } from "@/FeedCards";
 import { TodayHero } from "@/TodayHero";
-import { ClockRow, useClockButton } from "@/ClockRow";
+import { ClockRow, OPEN_CLOCK, useClockButton } from "@/ClockRow";
 import { PAGE_TOP, Screen } from "@/Screen";
 import { Body, Button, Card, Eyebrow, Hairline, Head, Label, Press, Ring, Skeleton } from "@/ui";
 import { color } from "@/theme";
@@ -53,7 +53,7 @@ export default function Friends() {
     }
   }
 
-  const post = () => router.push("/post");
+  const post = () => router.push(OPEN_CLOCK);
   const invite = () => f && void Share.share({ url: f.invite }).catch(() => undefined);
 
   if (!f) {

@@ -14,14 +14,14 @@ import {
   cleanKind,
   mayLog,
 } from "@/lib/elite/tracker";
-import { CLOCK_PHOTO_MAX_BYTES, CLOCK_WORDS, cleanClockTimes } from "@/lib/elite/training-clock";
+import { CLOCK_PHOTO_MAX_BYTES, CLOCK_WORDS, cleanClockTimes, cleanLess } from "@/lib/elite/training-clock";
 import { nyDayOf, saveClockPost } from "@/lib/elite/training-clock-server";
 
 // A training clock finished (training-clock.ts): the start photo, the
 // finish photo, and the phone's own times for both. The server works out
 // how long it counts; no length is ever sent. The account, the day and
 // both paths come from the server, never from the form.
-//   POST multipart { start, finish, started, ended, sent, kind, caption? }
+//   POST multipart { start, finish, started, ended, sent, kind, caption?, less? }
 //     -> { ok, id, minutes } | { ok: false, error, reason? }
 // Both photos are checked the way a post's photo is: a whole JPEG of a real
 // size, with where and when it was taken removed.
@@ -47,7 +47,9 @@ export const POST = appRoute({ name: "free-clock-finish", access: "free_app", li
   }
   const times = cleanClockTimes({ started: form.get("started"), ended: form.get("ended"), sent: form.get("sent") });
   const kind = cleanKind(form.get("kind"));
-  if (!times || kind === null) return no("That clock could not be read.", 400);
+  // minutes the player took off, because the clock ran on after training
+  const less = cleanLess(form.get("less"));
+  if (!times || kind === null || less === null) return no("That clock could not be read.", 400);
   if (!mayLog(kind, tracker.grade)) return no(GYM_REFUSED_MESSAGE, 403);
   if (isOffensive(form.get("caption"))) return no(OFFENSIVE_MESSAGE, 400);
   const caption = cleanCaption(form.get("caption"));
@@ -63,6 +65,7 @@ export const POST = appRoute({ name: "free-clock-finish", access: "free_app", li
     startPhoto,
     finishPhoto,
     times,
+    less,
     weekTarget: tracker.target_minutes,
   });
   if (!saved.ok) {

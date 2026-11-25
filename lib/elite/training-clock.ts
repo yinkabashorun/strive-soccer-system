@@ -136,6 +136,13 @@ export const CLOCK_WORDS = {
   typedButton: "Add it to my week",
   backToClock: "Start the clock instead",
   cameraOff: "The camera is turned off for Strive Elite. Turn it on in Settings to start the clock.",
+  // a finished clock that could not be sent yet: it sends itself
+  waiting: "It posts by itself when you are back online.",
+  // the clock was left running after training ended
+  lessLink: "Finished before you took this photo?",
+  lessBody: "Take off the time after you stopped training.",
+  lessMinus: "5 min less",
+  lessPlus: "5 min more",
   cancel: "Stop without posting",
   cancelAsk: "Stop this clock? Nothing is added to your week.",
   typedLink: "Trained without the clock?",
@@ -193,6 +200,29 @@ export function settleClock(i: {
   if (seconds < CLOCK_MIN_SECONDS) return { ok: false, reason: "short" };
   const minutes = Math.max(1, Math.round(seconds / 60));
   return { ok: true, minutes, startedAtMs: endedAtMs - Math.round(seconds * 1000), endedAtMs, startSeen: live };
+}
+
+// "Finished before you took this photo?": a player who forgot to stop the
+// clock takes time OFF it, in steps of five minutes. It can only ever make
+// the session shorter, so it is never a way to add time.
+export const CLOCK_LESS_STEP = 5;
+
+// The minutes a player took off, as sent: none, or a whole number of steps.
+export function cleanLess(raw: unknown): number | null {
+  if (raw === null || raw === undefined || raw === "") return 0;
+  const n = typeof raw === "number" ? raw : typeof raw === "string" && /^\d{1,3}$/.test(raw.trim()) ? Number(raw) : NaN;
+  if (!Number.isInteger(n) || n < 0 || n >= CLOCK_CAP_MINUTES || n % CLOCK_LESS_STEP !== 0) return null;
+  return n;
+}
+
+// What a session counts once that time is off: never under a minute.
+export function lessApplied(minutes: number, less: number): number {
+  return Math.max(1, minutes - Math.max(0, less));
+}
+
+// How much can still be taken off a session of this length.
+export function lessMax(minutes: number): number {
+  return Math.max(0, Math.floor((minutes - 1) / CLOCK_LESS_STEP) * CLOCK_LESS_STEP);
 }
 
 // What the phone sends with its two photos. Whole numbers of milliseconds

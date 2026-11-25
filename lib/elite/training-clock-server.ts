@@ -16,7 +16,7 @@
 import { createHash } from "node:crypto";
 import { createServiceClient } from "./supabase/server";
 import { POST_BUCKET, limitHit, postPath, startPhotoPath, type Kind } from "./tracker";
-import { settleClock, type ClockRefusal } from "./training-clock";
+import { lessApplied, settleClock, type ClockRefusal } from "./training-clock";
 
 type Admin = NonNullable<ReturnType<typeof createServiceClient>>;
 
@@ -83,6 +83,8 @@ export async function saveClockPost(input: {
   startPhoto: Uint8Array;
   finishPhoto: Uint8Array;
   times: { started: number; ended: number; sent: number }; // the phone's own clock, in ms
+  // minutes the player took OFF ("finished before I took this photo")
+  less?: number;
   weekTarget: number | null;
   nowMs?: number;
 }): Promise<ClockSaved> {
@@ -106,6 +108,8 @@ export async function saveClockPost(input: {
     seen,
   });
   if (!settled.ok) return { ok: false, reason: settled.reason };
+  // the server's own count, less what the player took off: never more
+  const minutes = lessApplied(settled.minutes, input.less ?? 0);
   const startedAt = new Date(settled.startedAtMs).toISOString();
   const endedAt = new Date(settled.endedAtMs).toISOString();
 
@@ -133,7 +137,7 @@ export async function saveClockPost(input: {
     id,
     profile_id: input.profileId,
     trained_on: nyDayOf(settled.endedAtMs),
-    minutes: settled.minutes,
+    minutes,
     kind: input.kind,
     photo_path: finishPath,
     start_photo_path: startPath,
@@ -145,10 +149,10 @@ export async function saveClockPost(input: {
   });
   if (error) {
     // 23505: the same finish landed twice at once. The other one wrote it.
-    if (String(error.code ?? "") === "23505") return { ok: true, id, minutes: settled.minutes, fresh: false };
+    if (String(error.code ?? "") === "23505") return { ok: true, id, minutes, fresh: false };
     await takeBack();
     return { ok: false, reason: limitHit(error) === "day_cap" ? "day_cap" : "error" };
   }
   await forgetClock(input.profileId);
-  return { ok: true, id, minutes: settled.minutes, fresh: true };
+  return { ok: true, id, minutes, fresh: true };
 }

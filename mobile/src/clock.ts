@@ -10,7 +10,9 @@ import { ApiError, api } from "./api/client";
 import { useMe } from "./api/queries";
 import { FIXTURES } from "./config";
 import type { PickedPhoto } from "./post-api";
-import { START_TELL_AT_MS, clockFields, clockView, parseClock, refusalIsFinal, startWorthTelling, type Clock, type ClockView, type Shot } from "./clock-core";
+import { queryClient } from "./api/queryClient";
+import { setPref } from "./prefs";
+import { START_TELL_AT_MS, clockFields, clockView, parseClock, refusalIsFinal, resendDelayMs, startWorthTelling, type Clock, type ClockView, type Pending, type Shot } from "./clock-core";
 
 // THE TRAINING CLOCK, kept on this phone (clock-core.ts says what a clock
 // is; lib/elite/training-clock.ts has the rules).
@@ -22,9 +24,17 @@ import { START_TELL_AT_MS, clockFields, clockView, parseClock, refusalIsFinal, s
 // photo (tellStart): when it lands, the server can time the session with
 // its own clock. When it cannot land, the clock still counts.
 //
+// A POST THAT COULD NOT BE SENT SENDS ITSELF. What the player chose when
+// they tapped Post is kept with the clock; the app tries again the moment
+// it opens or comes back to the front, and on a timer while it is open.
+// The player does nothing a second time. If the server will never take it
+// (it overlaps training already timed, the day is full), the reason is
+// kept and said once on the clock's next open (takeClockNote).
+//
 // It is cleared when it is posted, stopped, or the account signs out
 // (src/account.ts).
 export const CLOCK_KEY = "strive.clock.v1";
+const NOTE_KEY = "strive.clock.note.v1";
 
 // The example build (screenshots, the simulator) opens its clock already
 // 45 minutes in, so the pictures show a real session (the example post in
@@ -64,13 +74,35 @@ export async function loadClock(): Promise<void> {
     emit();
   }
   planTelling();
+  void resendClock();
+}
+
+// The clock as stored, once it has been read from the phone.
+export async function storedClock(): Promise<Clock | null> {
+  await loadClock();
+  return clock;
 }
 
 // Signing out leaves nothing of the account on this phone.
 export async function clearClockStore(): Promise<void> {
   for (const t of timers) clearTimeout(t);
   timers.clear();
+  if (resendTimer) clearTimeout(resendTimer);
+  resendTimer = null;
+  tries = 0;
   await keep(null);
+}
+
+// Why a waiting post was let go of, said once the next time the clock is
+// opened. Null when there is nothing to say.
+export async function takeClockNote(): Promise<string | null> {
+  try {
+    const note = await AsyncStorage.getItem(NOTE_KEY);
+    if (note) await AsyncStorage.removeItem(NOTE_KEY);
+    return note || null;
+  } catch {
+    return null;
+  }
 }
 
 // ---- reading it ----------------------------------------------------------
@@ -130,7 +162,9 @@ async function shrink(photo: PickedPhoto): Promise<Pick<Shot, "b64" | "uri">> {
 export async function startClock(owner: string, photo: PickedPhoto): Promise<void> {
   const atMs = Date.now() - (FIXTURES ? EXAMPLE_HEAD_START_MS : 0);
   const made = await shrink(photo);
-  await keep({ owner: owner.toLowerCase(), start: { atMs, ...made }, finish: null, heard: false });
+  await keep({ owner: owner.toLowerCase(), start: { atMs, ...made }, finish: null, heard: false, post: null });
+  // from now on "Start training" opens the camera at once (clock-core.ts cameraFirst)
+  void setPref("clockKnown", true);
   planTelling();
 }
 
@@ -147,7 +181,7 @@ export async function finishClock(photo: PickedPhoto): Promise<void> {
 
 // "Take my finish photo again": the clock goes on from where it was.
 export async function retakeFinish(): Promise<void> {
-  if (clock?.finish) await keep({ ...clock, finish: null });
+  if (clock?.finish) await keep({ ...clock, finish: null, post: null });
 }
 
 // Stopped without posting. Nothing is added anywhere.
@@ -162,13 +196,14 @@ export type ClockSent =
   // `final`: sending again will never change the answer, so the clock is gone
   | { ok: false; final: boolean; reason: string | null; message: string };
 
-// Post it: both photos and the phone's times in one request. The server
-// works out how long it counts. With no signal the clock stays exactly as
-// it is, and the same button sends it later.
-export async function sendClock(kind: Kind, caption: string): Promise<ClockSent> {
-  const c = clock;
-  const fields = c ? clockFields(c, Date.now(), kind, caption) : null;
-  if (!c || !c.finish || !fields) return { ok: false, final: true, reason: null, message: "There is no training to post." };
+let sending = false;
+let tries = 0;
+let resendTimer: ReturnType<typeof setTimeout> | null = null;
+
+// One try at sending the finished clock with what the player chose.
+async function attempt(c: Clock, p: Pending): Promise<ClockSent> {
+  const fields = clockFields(c, Date.now(), p);
+  if (!c.finish || !fields) return { ok: false, final: true, reason: null, message: "There is no training to post." };
   const bytes = (s: Shot) => (s.b64 ? base64ToBytes(s.b64) : new Uint8Array(0));
   const upload = filesForm(fields, [
     { field: "start", fileName: "start.jpg", type: "image/jpeg", bytes: bytes(c.start) },
@@ -176,23 +211,75 @@ export async function sendClock(kind: Kind, caption: string): Promise<ClockSent>
   ]);
   try {
     const res = await api<{ ok: boolean; minutes?: number; error?: string; reason?: string }>(APP_API.freeClockFinish, { method: "POST", upload, timeoutMs: 120_000 });
-    if (!res.ok) {
-      const final = refusalIsFinal(res.reason);
-      if (final) await clearClockStore();
-      return { ok: false, final, reason: res.reason ?? null, message: res.error ?? "Your training was not saved. Try again." };
-    }
-    await clearClockStore();
-    return { ok: true, minutes: res.minutes ?? 0 };
+    if (res.ok) return { ok: true, minutes: res.minutes ?? 0 };
+    return { ok: false, final: refusalIsFinal(res.reason), reason: res.reason ?? null, message: res.error ?? "Your training was not saved. Try again." };
   } catch (e) {
     if (e instanceof ApiError) {
       const reason = typeof e.data?.reason === "string" ? e.data.reason : null;
-      const final = refusalIsFinal(reason);
-      if (final) await clearClockStore();
       // no signal: say that it is safe on the phone, not just that it failed
-      return { ok: false, final, reason, message: e.status === 0 && e.code === "offline" ? CLOCK_WORDS.kept : e.message };
+      return { ok: false, final: refusalIsFinal(reason), reason, message: e.status === 0 && e.code === "offline" ? CLOCK_WORDS.kept : e.message };
     }
     return { ok: false, final: false, reason: null, message: CLOCK_WORDS.kept };
   }
+}
+
+// Posted, or let go of: either way the clock is done with.
+async function settleSent(startedMs: number, out: ClockSent): Promise<void> {
+  if (!clock || clock.start.atMs !== startedMs) return;
+  if (out.ok || out.final) await clearClockStore();
+  else planResend();
+}
+
+// Post it: both photos and the phone's times in one request. The server
+// works out how long it counts. What the player chose is stored FIRST, so
+// with no signal the post is kept exactly as it is and sends itself later.
+export async function sendClock(kind: Kind, caption: string, less: number): Promise<ClockSent> {
+  if (!clock || !clock.finish) return { ok: false, final: true, reason: null, message: "There is no training to post." };
+  if (sending) return { ok: false, final: false, reason: null, message: CLOCK_WORDS.kept };
+  const post: Pending = { kind, caption: caption.trim(), less };
+  await keep({ ...clock, post });
+  const c = clock;
+  sending = true;
+  try {
+    const out = await attempt(c, post);
+    await settleSent(c.start.atMs, out);
+    return out;
+  } finally {
+    sending = false;
+  }
+}
+
+// The post that is waiting, tried again without the player. Quiet: a try
+// that cannot reach the server changes nothing on screen.
+export async function resendClock(): Promise<void> {
+  const c = clock;
+  if (sending || !c || !c.finish || !c.post) return;
+  sending = true;
+  try {
+    const out = await attempt(c, c.post);
+    if (out.ok) {
+      await settleSent(c.start.atMs, out);
+      // the feed, the week and the board now have it
+      void queryClient.invalidateQueries();
+    } else if (out.final) {
+      await AsyncStorage.setItem(NOTE_KEY, out.message).catch(() => undefined);
+      await settleSent(c.start.atMs, out);
+    } else {
+      planResend();
+    }
+  } finally {
+    sending = false;
+  }
+}
+
+function planResend() {
+  if (resendTimer) clearTimeout(resendTimer);
+  resendTimer = null;
+  if (!clock?.finish || !clock.post) return;
+  resendTimer = setTimeout(() => {
+    resendTimer = null;
+    void resendClock();
+  }, resendDelayMs(tries++));
 }
 
 // ---- telling the server the clock started ---------------------------------
@@ -230,7 +317,11 @@ function planTelling() {
   }
 }
 
-// the app came back to the front inside the live window: try at once
+// The app came back to the front: the start is told if it can still arrive
+// live, and a post that was waiting is tried at once.
 AppState.addEventListener("change", (s) => {
-  if (s === "active") void tellStart();
+  if (s !== "active") return;
+  void tellStart();
+  tries = 0;
+  void resendClock();
 });

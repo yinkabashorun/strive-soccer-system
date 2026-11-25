@@ -17,8 +17,8 @@ import type { AppDrill, AppSession, AppWeek } from "@shared/app-contract";
 import { NEXT_STILLS, nextCard, nextStills, rowLine, weekMinutesDone, weekRows, weekSummary } from "@/week-view";
 import { QUIZ_STEPS } from "@shared/quiz";
 import { WORDS_DARK, wordsShade } from "@/shade-stops";
-import { START_TELL_AT_MS, clockButton, clockFields, clockView, parseClock, readyMinutes, refusalIsFinal, shotUri, startWorthTelling, type Clock } from "@/clock-core";
-import { CLOCK_CAP_MINUTES, CLOCK_LIVE_SECONDS, CLOCK_WORDS } from "@shared/training-clock";
+import { START_TELL_AT_MS, cameraFirst, clockButton, clockFields, clockView, lessStep, parseClock, readyMinutes, refusalIsFinal, resendDelayMs, shotUri, startWorthTelling, type Clock } from "@/clock-core";
+import { CLOCK_CAP_MINUTES, CLOCK_LIVE_SECONDS, CLOCK_MIN_SECONDS, CLOCK_WORDS } from "@shared/training-clock";
 
 function memoryKV(): KV & { map: Map<string, string> } {
   const map = new Map<string, string>();
@@ -804,7 +804,7 @@ describe("the version line in Settings", () => {
 describe("the training clock on the phone", () => {
   const T = 1_800_000_000_000;
   const MIN = 60_000;
-  const running: Clock = { owner: "m@example.com", start: { atMs: T, b64: "AAAA", uri: null }, finish: null, heard: false };
+  const running: Clock = { owner: "m@example.com", start: { atMs: T, b64: "AAAA", uri: null }, finish: null, heard: false, post: null };
   const ready: Clock = { ...running, finish: { atMs: T + 47 * MIN, b64: "BBBB", uri: null } };
 
   it("comes back from storage whole, or not at all", () => {
@@ -826,7 +826,7 @@ describe("the training clock on the phone", () => {
     expect(clockView(running, T + 160 * MIN)).toEqual({ at: "capped", seconds: CLOCK_CAP_MINUTES * 60 });
     expect(clockView(running, T + 181 * MIN)).toEqual({ at: "expired" });
     // once both photos are taken the clock no longer moves, whatever time it is
-    expect(clockView(ready, T + 500 * MIN)).toEqual({ at: "ready", minutes: 47 });
+    expect(clockView(ready, T + 500 * MIN)).toEqual({ at: "ready", minutes: 47, waiting: false });
   });
 
   it("a finished clock shows the time between the photos, never past the cap", () => {
@@ -841,7 +841,7 @@ describe("the training clock on the phone", () => {
     expect(clockButton({ at: "running", seconds: 5 })).toBe(CLOCK_WORDS.finishShort);
     expect(clockButton({ at: "capped", seconds: 9000 })).toBe(CLOCK_WORDS.finishShort);
     expect(clockButton({ at: "expired" })).toBe(CLOCK_WORDS.finishShort);
-    expect(clockButton({ at: "ready", minutes: 47 })).toBe(CLOCK_WORDS.postShort);
+    expect(clockButton({ at: "ready", minutes: 47, waiting: false })).toBe(CLOCK_WORDS.postShort);
     expect([CLOCK_WORDS.start, CLOCK_WORDS.finishShort, CLOCK_WORDS.postShort]).toEqual(["Start training", "Finish my training", "Post my training"]);
   });
 
@@ -857,15 +857,50 @@ describe("the training clock on the phone", () => {
     expect(Math.max(...START_TELL_AT_MS)).toBeLessThan(CLOCK_LIVE_SECONDS * 1000);
   });
 
-  it("sends the two times, when it was sent, the kind and the note: never a length", () => {
-    expect(clockFields(ready, T + 48 * MIN, "training", "  Weak foot only.  ")).toEqual({
+  it("sends the two times, when it was sent, and what the player chose: never a length", () => {
+    expect(clockFields(ready, T + 48 * MIN, { kind: "training", caption: "  Weak foot only.  ", less: 10 })).toEqual({
       started: String(T),
       ended: String(T + 47 * MIN),
       sent: String(T + 48 * MIN),
       kind: "training",
       caption: "Weak foot only.",
+      less: "10",
     });
-    expect(clockFields(running, T, "training", "")).toBeNull();
+    expect(clockFields(running, T, { kind: "training", caption: "", less: 0 })).toBeNull();
+  });
+
+  it("a post that could not be sent stays with the clock, through the app being closed", () => {
+    const waiting: Clock = { ...ready, post: { kind: "gym", caption: "Legs.", less: 5 } };
+    expect(parseClock(JSON.stringify(waiting))).toEqual(waiting);
+    // it shows as waiting, at the time it will count
+    expect(clockView(waiting, T + 500 * MIN)).toEqual({ at: "ready", minutes: 42, waiting: true });
+    // a post is only ever waiting on a finished clock, and only a whole one is kept
+    expect(parseClock(JSON.stringify({ ...running, post: waiting.post }))?.post).toBeNull();
+    expect(parseClock(JSON.stringify({ ...ready, post: { kind: "nap", caption: "", less: 0 } }))?.post).toBeNull();
+    // tried again soon, then every minute while the app is open
+    expect([0, 1, 2, 3, 40].map(resendDelayMs)).toEqual([10_000, 30_000, 60_000, 60_000, 60_000]);
+  });
+
+  it("time can only come off a finished clock, five minutes a tap, never down to nothing", () => {
+    expect(lessStep(47, 0, -1)).toBe(5);
+    expect(lessStep(47, 5, -1)).toBe(10);
+    expect(lessStep(47, 45, -1)).toBe(45); // 2 minutes left: no further
+    expect(lessStep(47, 5, 1)).toBe(0);
+    expect(lessStep(47, 0, 1)).toBe(0); // never adds time
+    expect(lessStep(4, 0, -1)).toBe(0); // too short to take anything off
+  });
+
+  it("one tap goes to the camera only where a photo is the one thing to do next", () => {
+    // the first clock ever shows how it works first
+    expect(cameraFirst({ at: "none" }, false, CLOCK_MIN_SECONDS)).toBeNull();
+    expect(cameraFirst({ at: "none" }, true, CLOCK_MIN_SECONDS)).toBe("start");
+    // under a minute there is nothing to finish yet
+    expect(cameraFirst({ at: "running", seconds: 30 }, true, CLOCK_MIN_SECONDS)).toBeNull();
+    expect(cameraFirst({ at: "running", seconds: 60 }, true, CLOCK_MIN_SECONDS)).toBe("finish");
+    expect(cameraFirst({ at: "capped", seconds: 9000 }, false, CLOCK_MIN_SECONDS)).toBe("finish");
+    // nothing to photograph once both photos are taken, or it can no longer be timed
+    expect(cameraFirst({ at: "ready", minutes: 47, waiting: false }, true, CLOCK_MIN_SECONDS)).toBeNull();
+    expect(cameraFirst({ at: "expired" }, true, CLOCK_MIN_SECONDS)).toBeNull();
   });
 
   it("keeps a clock the server could not be reached for, and lets go of one it will never take", () => {

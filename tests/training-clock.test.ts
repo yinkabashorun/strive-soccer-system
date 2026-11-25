@@ -16,6 +16,9 @@ import {
   TYPED_LINE,
   WEB_TYPED_LINE,
   cleanClockTimes,
+  cleanLess,
+  lessApplied,
+  lessMax,
   clockFace,
   clockLength,
   clockState,
@@ -202,6 +205,8 @@ describe("the clock on the screen", () => {
       expect(line, line).not.toMatch(/\b(AI|automated|algorithm|streak|missed|behind|proof|verified|cheat|lie)\b/i);
       // every sentence short enough to read at a glance
       for (const sentence of line.split(/(?<=[.?!])\s+/)) expect(sentence.split(/\s+/).length, sentence).toBeLessThanOrEqual(18);
+      // the player's own words: no order barked, nothing shouted
+      expect(line, line).not.toMatch(/!/);
     }
     expect(CLOCK_WORDS.startBody).toBe("Take a photo to start the clock. Take one more when you finish. The time between your two photos is your training.");
     expect(CLOCK_WORDS.cap).toBe("The clock counts up to 2 hours 30 minutes.");
@@ -259,7 +264,10 @@ describe("the rule is held everywhere time is added up or written", () => {
     const clock = writers.find((w) => w.file === "lib/elite/training-clock-server.ts")!.body;
     expect(clock).toContain('proof: "clock"');
     // its minutes are the server's own count, never the phone's
-    expect(clock).toContain("minutes: settled.minutes");
+    const server = code("lib/elite/training-clock-server.ts");
+    expect(server).toContain("const minutes = lessApplied(settled.minutes, input.less ?? 0);");
+    expect(clock).toMatch(/\bminutes,/);
+    expect(clock).not.toMatch(/minutes: input\./);
   });
 
   it("the friends board, a club's time, the club ranking, the matchup and the level leave typed time out", () => {
@@ -353,7 +361,9 @@ describe("the iPhone app", () => {
     const addTyped = post.slice(post.indexOf("async function addTyped()"), post.indexOf("if (asking)"));
     expect(addTyped).toContain("logTraining(minutes, kind)");
     // and the clock's post sends no length at all
-    expect(code("mobile/src/clock-core.ts")).toMatch(/return \{\s*started: String\(c\.start\.atMs\),\s*ended: String\(c\.finish\.atMs\),\s*sent: String\(sentMs\),\s*kind,\s*caption: caption\.trim\(\),\s*\};/);
+    expect(code("mobile/src/clock-core.ts")).toMatch(
+      /return \{\s*started: String\(c\.start\.atMs\),\s*ended: String\(c\.finish\.atMs\),\s*sent: String\(sentMs\),\s*kind: p\.kind,\s*caption: p\.caption\.trim\(\),\s*less: String\(p\.less\),\s*\};/
+    );
   });
 
   it("the clock is written to the phone at each photo, before anything is sent", () => {
@@ -366,13 +376,49 @@ describe("the iPhone app", () => {
     expect(finish.indexOf("const atMs = Date.now()")).toBeLessThan(finish.indexOf("await shrink(photo)"));
   });
 
-  it("with no signal the finished clock stays on the phone and says so", () => {
-    const send = store.slice(store.indexOf("export async function sendClock("), store.indexOf("let telling = false;"));
-    // cleared only when it was stored, or when sending again can never help
-    expect(send.match(/await clearClockStore\(\)/g)?.length).toBe(3);
-    expect(send).toContain("if (final) await clearClockStore();");
-    expect(send).toContain('e.status === 0 && e.code === "offline" ? CLOCK_WORDS.kept : e.message');
+  it("with no signal the finished clock stays on the phone, says so, and sends itself later", () => {
+    const sent = store.slice(store.indexOf("async function attempt("), store.indexOf("let telling = false;"));
+    // cleared in ONE place: when it was stored, or when sending again can never help
+    expect(sent.match(/await clearClockStore\(\)/g)?.length).toBe(1);
+    expect(sent).toContain("if (out.ok || out.final) await clearClockStore();");
+    expect(sent).toContain('e.status === 0 && e.code === "offline" ? CLOCK_WORDS.kept : e.message');
     expect(CLOCK_WORDS.kept).toBe("Your training is saved on this phone. Post it when you are back online.");
+    // what the player chose is stored BEFORE the first try
+    const send = store.slice(store.indexOf("export async function sendClock("), store.indexOf("export async function resendClock("));
+    expect(send.indexOf("await keep({ ...clock, post });")).toBeGreaterThan(-1);
+    expect(send.indexOf("await keep({ ...clock, post });")).toBeLessThan(send.indexOf("await attempt(c, post)"));
+    // and it is tried again when the app opens, comes back to the front, and on a timer
+    expect(store).toMatch(/export async function loadClock\(\)[\s\S]{0,500}void resendClock\(\);/);
+    expect(store).toMatch(/AppState\.addEventListener\("change", \(s\) => \{[\s\S]{0,200}void resendClock\(\);/);
+    expect(store).toContain("}, resendDelayMs(tries++));");
+    expect(code("mobile/app/_layout.tsx")).toContain('if (area === "free") void loadClock();');
+    // one send at a time, so a tap and a timer never post it twice at once
+    expect(store.match(/if \(sending/g)?.length).toBe(2);
+    // a post the server will never take is not dropped silently
+    expect(store).toContain("await AsyncStorage.setItem(NOTE_KEY, out.message)");
+    expect(post).toContain("void takeClockNote().then((note) => note && setError(note));");
+  });
+
+  it("one tap goes to the camera, after the first clock, and never during the screen's own arrival", () => {
+    for (const f of ["mobile/app/(free)/friends.tsx", "mobile/app/club/[id]/index.tsx", "mobile/src/ClockRow.tsx"]) {
+      expect(code(f), f).toContain("router.push(OPEN_CLOCK)");
+      expect(code(f), f).not.toContain('router.push("/post")');
+    }
+    expect(code("mobile/src/ClockRow.tsx")).toContain('export const OPEN_CLOCK = "/post?go=1" as Href;');
+    expect(post).toContain("cameraFirst(clockView(mine, Date.now()), p.clockKnown, CLOCK_MIN_SECONDS)");
+    expect(post).toContain("}, CAMERA_AFTER_MS);");
+    // the first clock a player starts is what turns it on
+    expect(store).toContain('void setPref("clockKnown", true);');
+  });
+
+  it("time taken off can only make a session shorter", () => {
+    expect([cleanLess(null), cleanLess(""), cleanLess("0"), cleanLess("15"), cleanLess(30)]).toEqual([0, 0, 0, 15, 30]);
+    for (const bad of ["-5", "7", "5.5", "150", "9999", "five", {}, 12]) expect(cleanLess(bad), String(bad)).toBeNull();
+    expect([lessApplied(47, 0), lessApplied(47, 15), lessApplied(47, 45), lessApplied(47, 500), lessApplied(47, -30)]).toEqual([47, 32, 2, 1, 47]);
+    expect([lessMax(47), lessMax(5), lessMax(6), lessMax(150), lessMax(1)]).toEqual([45, 0, 5, 145, 0]);
+    // the phone shows it, the server applies it to its own count
+    expect(post).toContain("const counted = lessApplied(measured, less);");
+    expect(code("app/api/app/free/clock/finish/route.ts")).toContain('const less = cleanLess(form.get("less"));');
   });
 
   it("the example build's head start is never in a real build", () => {

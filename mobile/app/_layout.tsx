@@ -17,6 +17,7 @@ import { FIXTURES } from "@/config";
 import { areaFor, areaHome, inArea, pushRoute, tappedNotice, type Area, type TappedNotice, hasTrain } from "@/navigation";
 import { clearBadge, keepTokenFresh } from "@/push";
 import { loadOutbox } from "@/outbox";
+import { loadClock } from "@/clock";
 import { loadPrefs } from "@/prefs";
 import { color } from "@/theme";
 
@@ -55,6 +56,9 @@ function Gatekeeper() {
   // back from the phone and sent (src/outbox.ts).
   useEffect(() => {
     if (area === "app" || (area === "free" && train)) void loadOutbox();
+    // a training clock kept on this phone, and a post still waiting to be
+    // sent: read back, and the post tried, the moment the free app opens
+    if (area === "free") void loadClock();
   }, [area, train]);
 
   // The launch screen stays up until the first screen is the right one:

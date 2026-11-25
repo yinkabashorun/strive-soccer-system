@@ -1,6 +1,6 @@
 import { StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
-import { useRouter } from "expo-router";
+import { useRouter, type Href } from "expo-router";
 import { CLOCK_WORDS, clockFace, clockLength } from "@shared/training-clock";
 import { useClockView } from "./clock";
 import { clockButton, shotUri, type ClockView } from "./clock-core";
@@ -14,6 +14,10 @@ import { color } from "./theme";
 //
 // Nothing is shown when there is no clock.
 
+// Where every button that opens the clock goes: with `go`, the camera
+// comes up at once when a photo is the one thing to do next (app/post.tsx).
+export const OPEN_CLOCK = "/post?go=1" as Href;
+
 // What the button that opens the clock says right now ("Start training",
 // "Finish my training", "Post my training").
 export function useClockButton(): string {
@@ -23,7 +27,7 @@ export function useClockButton(): string {
 function lines(view: ClockView): { eyebrow: string; big: string; small: string } | null {
   if (view.at === "running") return { eyebrow: CLOCK_WORDS.running, big: clockFace(view.seconds), small: CLOCK_WORDS.finish };
   if (view.at === "capped") return { eyebrow: CLOCK_WORDS.running, big: clockFace(view.seconds), small: CLOCK_WORDS.finish };
-  if (view.at === "ready") return { eyebrow: CLOCK_WORDS.ready, big: clockLength(view.minutes), small: CLOCK_WORDS.postShort };
+  if (view.at === "ready") return { eyebrow: CLOCK_WORDS.ready, big: clockLength(view.minutes), small: view.waiting ? CLOCK_WORDS.waiting : CLOCK_WORDS.postShort };
   if (view.at === "expired") return { eyebrow: CLOCK_WORDS.running, big: CLOCK_WORDS.expiredHead, small: CLOCK_WORDS.typedButton };
   return null;
 }
@@ -35,7 +39,7 @@ export function ClockRow() {
   if (!clock || !said) return null;
   const uri = shotUri(clock.finish ?? clock.start);
   return (
-    <Press onPress={() => router.push("/post")} style={styles.row} accessibilityRole="button" accessibilityLabel={`${said.eyebrow}. ${said.big}. ${said.small}`}>
+    <Press onPress={() => router.push(OPEN_CLOCK)} style={styles.row} accessibilityRole="button" accessibilityLabel={`${said.eyebrow}. ${said.big}. ${said.small}`}>
       {uri ? (
         <View style={styles.thumb}>
           <Image source={{ uri }} style={StyleSheet.absoluteFill} contentFit="cover" />

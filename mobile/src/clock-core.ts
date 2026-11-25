@@ -1,4 +1,4 @@
-import { CLOCK_CAP_MINUTES, CLOCK_LIVE_SECONDS, CLOCK_WORDS, clockState } from "@shared/training-clock";
+import { CLOCK_CAP_MINUTES, CLOCK_LESS_STEP, CLOCK_LIVE_SECONDS, CLOCK_WORDS, clockState, lessApplied, lessMax } from "@shared/training-clock";
 
 // The training clock as this phone keeps it (the rules are in
 // lib/elite/training-clock.ts; the store is src/clock.ts). Pure, so the
@@ -16,12 +16,26 @@ export type Shot = {
   uri: string | null; // where the picked photo is (the example build only)
 };
 
+// What the player chose when they tapped Post. Kept with the clock, so a
+// post that could not be sent (no signal) is sent later BY THE APP, with
+// nothing for the player to do again.
+export type Pending = { kind: "training" | "gym"; caption: string; less: number };
+
 export type Clock = {
   owner: string; // whose clock it is: a phone follows whoever is signed in
   start: Shot;
   finish: Shot | null;
   heard: boolean; // the server answered "a clock started"
+  post: Pending | null; // Post was tapped: the app keeps sending it until it lands
 };
+
+function pending(raw: unknown): Pending | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  if (r.kind !== "training" && r.kind !== "gym") return null;
+  const less = typeof r.less === "number" && Number.isInteger(r.less) && r.less >= 0 ? r.less : 0;
+  return { kind: r.kind, caption: typeof r.caption === "string" ? r.caption : "", less };
+}
 
 function shot(raw: unknown): Shot | null {
   if (!raw || typeof raw !== "object") return null;
@@ -41,7 +55,8 @@ export function parseClock(raw: string | null | undefined): Clock | null {
     if (!start || typeof r.owner !== "string" || !r.owner) return null;
     const finish = r.finish == null ? null : shot(r.finish);
     if (r.finish != null && (!finish || finish.atMs <= start.atMs)) return null;
-    return { owner: r.owner, start, finish, heard: r.heard === true };
+    // a post is only ever waiting on a finished clock
+    return { owner: r.owner, start, finish, heard: r.heard === true, post: finish ? pending(r.post) : null };
   } catch {
     return null;
   }
@@ -70,16 +85,17 @@ export const START_TELL_AT_MS = [0, 4_000, 12_000, 30_000, 70_000, 105_000] as c
 //   running  counting
 //   capped   past the cap: stopped counting, the finish photo is still taken
 //   expired  it can no longer be timed
-//   ready    both photos taken: waiting to be posted
+//   ready    both photos taken: waiting to be posted. `waiting`: Post was
+//            tapped and it has not reached the server yet (it sends itself)
 export type ClockView =
   | { at: "none" }
   | { at: "running" | "capped"; seconds: number }
   | { at: "expired" }
-  | { at: "ready"; minutes: number };
+  | { at: "ready"; minutes: number; waiting: boolean };
 
 export function clockView(c: Clock | null, nowMs: number): ClockView {
   if (!c) return { at: "none" };
-  if (c.finish) return { at: "ready", minutes: readyMinutes(c) };
+  if (c.finish) return { at: "ready", minutes: lessApplied(readyMinutes(c), c.post?.less ?? 0), waiting: c.post !== null };
   const s = clockState(c.start.atMs, nowMs);
   if (s.state === "expired") return { at: "expired" };
   return { at: s.state, seconds: s.countedSeconds };
@@ -101,16 +117,44 @@ export function clockButton(view: ClockView): string {
   return CLOCK_WORDS.finishShort;
 }
 
-// The text fields that travel with the two photos.
-export function clockFields(c: Clock, sentMs: number, kind: string, caption: string): Record<string, string> | null {
+// "Finished before you took this photo?": the next amount taken off, one
+// step at a time, never past what leaves a minute and never below none.
+export function lessStep(minutes: number, less: number, direction: -1 | 1): number {
+  const next = less + (direction === -1 ? CLOCK_LESS_STEP : -CLOCK_LESS_STEP);
+  return Math.max(0, Math.min(lessMax(minutes), next));
+}
+
+// The text fields that travel with the two photos: the two times, when it
+// was sent, and what the player chose. Never a length (`less` can only take
+// time off what the server itself counts).
+export function clockFields(c: Clock, sentMs: number, p: Pending): Record<string, string> | null {
   if (!c.finish) return null;
   return {
     started: String(c.start.atMs),
     ended: String(c.finish.atMs),
     sent: String(sentMs),
-    kind,
-    caption: caption.trim(),
+    kind: p.kind,
+    caption: p.caption.trim(),
+    less: String(p.less),
   };
+}
+
+// When a waiting post is tried again while the app is open, in ms after
+// the last try. The app also tries the moment it opens or comes back to
+// the front.
+export function resendDelayMs(tries: number): number {
+  return [10_000, 30_000, 60_000][Math.min(Math.max(0, tries), 2)];
+}
+
+// Does opening the clock go straight to the camera? Only on a tap that
+// asked for it, and only where the camera is the one thing to do next:
+// the start for a player who has used the clock before (the first time
+// they read how it works), and the finish once a minute has run.
+export function cameraFirst(view: ClockView, knowsTheClock: boolean, minSeconds: number): "start" | "finish" | null {
+  if (view.at === "none") return knowsTheClock ? "start" : null;
+  if (view.at === "capped") return "finish";
+  if (view.at === "running") return view.seconds >= minSeconds ? "finish" : null;
+  return null;
 }
 
 // A refusal that sending again will never change: the clock is done with.

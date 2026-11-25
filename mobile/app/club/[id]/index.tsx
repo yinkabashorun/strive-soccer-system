@@ -19,7 +19,7 @@ import { PlanCardView } from "@/PlanCards";
 import { choose } from "@/sheet";
 import { Body, Button, Card, Eyebrow, Hairline, Head, Icon, Label, Press, SettingRow, Skeleton } from "@/ui";
 import { useBelowClock } from "@/Screen";
-import { useClockButton } from "@/ClockRow";
+import { OPEN_CLOCK, useClockButton } from "@/ClockRow";
 import { color, radius } from "@/theme";
 
 // One club, top to bottom:
@@ -268,7 +268,7 @@ export default function Club() {
           {c.photos.length ? (
             <View style={styles.grid}>
               {c.photos.map((t) => (
-                <Tile key={t.id} tile={t} onLocked={() => router.push("/post")} />
+                <Tile key={t.id} tile={t} onLocked={() => router.push(OPEN_CLOCK)} />
               ))}
             </View>
           ) : (
@@ -282,7 +282,7 @@ export default function Club() {
             </Body>
           ) : null}
           <View style={{ marginHorizontal: 14, marginTop: 14 }}>
-            <Button quiet label={clockLabel} onPress={() => router.push("/post")} />
+            <Button quiet label={clockLabel} onPress={() => router.push(OPEN_CLOCK)} />
           </View>
 
           {c.share || c.captain ? (

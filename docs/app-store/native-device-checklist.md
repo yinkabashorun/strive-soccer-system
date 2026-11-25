@@ -226,6 +226,21 @@ clock is on main, and migration 089 applied.
 11. **Without the clock.** "Trained without the clock?", pick 45m, "Add it
     to my week": it is on the Week tab's list marked "Not timed", the ring
     moves, and the friends board and the club's time do not.
+13. **One tap to the camera.** After the first clock ever, "Start
+    training" on Friends opens the camera at once (the screen behind it
+    is the start screen). With a clock running, "Finish my training" and
+    the clock's row open the camera at once too. Closing the camera
+    leaves the clock's screen, nothing lost. IF THE CAMERA DOES NOT COME
+    UP BY ITSELF, tell me: the button on the screen still works, and the
+    wait before it opens is one number (CAMERA_AFTER_MS in app/post.tsx).
+14. **The post sends itself.** Repeat check 7, but after tapping Post in
+    airplane mode do NOT open the clock again: turn airplane mode off and
+    just open the app. Within a few seconds the row is gone and the post
+    is on Friends.
+15. **Forgot to stop the clock.** On "Ready to post" tap "Finished before
+    you took this photo?", then "5 min less" twice: the time drops ten
+    minutes; "5 min more" brings it back and never goes above the
+    measured time. The post shows the lower time.
 12. **A clock nobody finished.** Not worth waiting three hours for on a
     phone: the simulator's pictures and the tests hold it. If it ever
     shows ("This one was not timed"), both buttons clear it.

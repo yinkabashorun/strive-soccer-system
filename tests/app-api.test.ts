@@ -1061,11 +1061,18 @@ describe("the free app's bodies are checked first", () => {
     expect(await ok.json()).toEqual({ ok: true, id: "c1", minutes: 45 });
     const saved = s.calls[0].args[0] as Record<string, unknown>;
     expect(s.calls[0].fn).toBe("saveClockPost");
-    expect(Object.keys(saved).sort()).toEqual(["caption", "finishPhoto", "kind", "profileId", "startPhoto", "times", "weekTarget"]);
+    expect(Object.keys(saved).sort()).toEqual(["caption", "finishPhoto", "kind", "less", "profileId", "startPhoto", "times", "weekTarget"]);
+    expect(saved.less).toBe(0);
     expect(saved).toMatchObject({ profileId: "u1", kind: "training", caption: "Weak foot only.", weekTarget: 240, times: { started: 1_700_000_000_000, ended: 1_700_002_700_000, sent: 1_700_002_705_000 } });
     expect(Buffer.from(saved.startPhoto as Uint8Array).includes(Buffer.from("Exif"))).toBe(false);
     // friends hear of it and a teammate counts: once, for the write that made the entry
     expect(s.calls.slice(1).map((c) => c.fn)).toEqual(["noticeFriendPost", "countTeammate"]);
+
+    // "finished before I took this photo": time comes off in whole steps, or not at all
+    s.calls.length = 0;
+    expect((await send({ ...times, kind: "training", less: "15" }, both)).status).toBe(200);
+    expect((s.calls[0].args[0] as { less: number }).less).toBe(15);
+    for (const bad of ["7", "-5", "150", "lots"]) expect((await send({ ...times, kind: "training", less: bad }, both)).status, bad).toBe(400);
 
     // the same finish sent again (a retry on weak signal) says nothing twice
     s.calls.length = 0;

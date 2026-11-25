@@ -786,3 +786,12 @@ describe("the social half's small rules", () => {
     expect(recordShort(null)).toBeNull();
   });
 });
+
+describe("the version line in Settings", () => {
+  it("names the version and the build, and leaves out what it does not know", async () => {
+    const { versionLine } = await import("@/version");
+    expect(versionLine("1.0.0", "9")).toBe("Strive Elite 1.0.0 (9)");
+    expect(versionLine("1.0.0", null)).toBe("Strive Elite 1.0.0");
+    expect(versionLine(undefined, " ")).toBe("Strive Elite");
+  });
+});

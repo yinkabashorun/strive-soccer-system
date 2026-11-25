@@ -51,6 +51,8 @@ export const SCREENS: readonly Screen[] = [
   { path: "/privacy", since: IN_FIRST_BUILD },
   { path: "/terms", since: IN_FIRST_BUILD },
   { path: "/support", since: IN_FIRST_BUILD },
+  // read by the iPhone itself (saved passwords), never opened as a screen
+  { path: "/.well-known/apple-app-site-association", since: IN_FIRST_BUILD },
   { path: APP_UNAVAILABLE_PATH, since: IN_FIRST_BUILD },
 
   // The member side, as the review notes describe it.

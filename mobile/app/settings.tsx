@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SUPPORT_EMAIL, concernMailto } from "@shared/support";
 import { useMe } from "@/api/queries";
 import { hasFreeApp } from "@/navigation";
+import { versionLine } from "@/version";
 import { signOutEverywhere } from "@/account";
 import { openSite } from "@/links";
 import { usePrefs } from "@/prefs";
@@ -113,7 +114,7 @@ export default function Settings() {
       </Section>
 
       <Body dim size={12} style={{ textAlign: "center", marginTop: 24 }}>
-        {`Strive Elite ${Constants.expoConfig?.version ?? ""}`}
+        {versionLine(Constants.expoConfig?.version, Constants.expoConfig?.ios?.buildNumber)}
       </Body>
     </ScrollView>
   );

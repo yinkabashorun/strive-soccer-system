@@ -936,6 +936,15 @@ describe("the social half is built like the training loop", () => {
     expect(parts).toMatch(/c\.mine \? \(\s*<Press[\s\S]{0,120}router\.push\(`\/club\/\$\{c\.id\}`/);
   });
 
+  it("the post screen shows whose training opens when you post, only while today is locked", () => {
+    const post = code(path.join(root, "app/post.tsx"));
+    // only friends who trained today, never you, and only while locked
+    expect(post).toContain("feed && !feed.unlocked && feed.friendsToday > 0 ? feed.faces.filter((f) => !f.you && f.active) : []");
+    // the words are the feed's own line, said once; not shown on a session's photo
+    expect(post).toContain("{waiting.length && feed && !session ? (");
+    expect(post.match(/lockedLine\(feed\.friendsToday\)/g)?.length).toBe(2);
+  });
+
   // A screen the gatekeeper does not know is sent straight back home: a
   // friend's profile was built and its first open bounced to Friends. Every
   // screen in the app has to be named in one of the gatekeeper's lists.

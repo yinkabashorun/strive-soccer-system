@@ -122,6 +122,32 @@ these are what only a phone shows.
    four free tabs again, Week says so once ("Got it" puts it away), and
    every friend, post and club is still there.
 
+## Build 9 and later, on a phone only (Nov 25 2026)
+
+1. **A face opens a profile.** On Friends, tap a friend's face in the row,
+   then the face on a post, then a row of the friends board on Week, then a
+   member in a club. Each opens that player's profile (their card, clubs,
+   training photos) and Back returns to where you were. Your own face does
+   nothing.
+2. **The profile's menu.** The three dots open the iPhone's own sheet:
+   report the photo, remove from my friends, block. Cancel closes it.
+   After Block, the player is gone from Friends, and Settings, Blocked
+   players lists them with Unblock.
+3. **You shows your clubs and photos.** Under your card: your clubs, then
+   your own training photos, the time on each.
+4. **Saved passwords.** Sign out. On the sign-in screen, tap the email
+   box: the keyboard offers the saved login for thestriveapp.com (it has to
+   be saved in the phone's Passwords, e.g. from Safari). After signing in
+   with a typed password, the phone offers to save it. If neither happens,
+   say so: it means the phone has not linked the app and the site yet (it
+   can take a day after the first install of a build that has it).
+5. **The icon.** On the home screen the Strive logo is sharp and whole
+   inside the white coin.
+6. **The build number.** Settings ends with "Strive Elite 1.0.0 (9)": the
+   number in brackets is the build that is installed.
+7. **The post screen names who is waiting.** Before you post today, with a
+   friend who trained: their faces and "Post yours to see theirs."
+
 ## Seeing the phone from here
 
 `.github/workflows/ios-simulator-screens.yml` (built Nov 23 2026 on his

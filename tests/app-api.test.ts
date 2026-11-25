@@ -39,6 +39,8 @@ const s = {
   clubFound: true,
   organizerOk: true,
   playerOk: true,
+  // Share my week: has the player trained this week (there is a card to make)
+  weekTrained: true,
 };
 
 function player(over: Record<string, unknown> = {}) {
@@ -68,6 +70,20 @@ function viewer(over: Partial<Viewer> = {}): Viewer {
     ...over,
   };
 }
+// Share my week: what the server's own loader hands the route (the real
+// loader and its rules are held in tests/week-card.test.ts).
+const WEEK_CARD = {
+  card: {
+    name: "Marcus B.",
+    week: "Nov 23 to Nov 29",
+    time: "2h 40m",
+    of: "of 4h",
+    share: 2 / 3,
+    days: ["M", "T", "W", "T", "F", "S", "S"].map((letter, i) => ({ letter, trained: i < 2 })),
+    gym: null,
+  },
+  text: "My week of training on Strive. Train with me: https://thestriveapp.com/join?ref=ABCDEFGH&src=share",
+};
 function call(fn: string) {
   return async (...args: unknown[]) => {
     s.calls.push({ fn, args });
@@ -92,6 +108,7 @@ function call(fn: string) {
     if (fn === "confirmUpgrade") return { active: false };
     if (fn === "toggleProps") return { ok: true, propped: true };
     if (fn === "logTraining") return { ok: true, id: "l1" };
+    if (fn === "freeWeekCardFor") return s.weekTrained ? WEEK_CARD : null;
     if (fn === "appClubsFor") return { clubs: [], canStart: true };
     if (fn === "appClubPageFor" || fn === "appClubNearFor") return s.clubFound ? { id: args[1] } : null;
     if (fn === "startClubInApp") return s.organizerOk ? { ok: true, id: "c1", code: "ABCD2345" } : { ok: false, error: "needs_organizer_ok", needs: "organizer" };
@@ -231,6 +248,7 @@ vi.mock("@/lib/elite/free-app-server", () => ({
   planFor: call("planFor"),
   freeFeedFor: call("freeFeedFor"),
   freeWeekFor: call("freeWeekFor"),
+  freeWeekCardFor: call("freeWeekCardFor"),
   freeYouFor: call("freeYouFor"),
 }));
 vi.mock("@/lib/elite/free-upgrade-server", () => ({
@@ -385,6 +403,7 @@ const ROUTES = {
   freeBlock: () => import("@/app/api/app/free/block/route"),
   freeFriend: () => import("@/app/api/app/free/friend/route"),
   freeWeek: () => import("@/app/api/app/free/week/route"),
+  freeWeekCard: () => import("@/app/api/app/free/week/card/route"),
   freeYou: () => import("@/app/api/app/free/you/route"),
   courses: () => import("@/app/api/app/courses/route"),
   course: () => import("@/app/api/app/courses/[slug]/route"),
@@ -443,6 +462,7 @@ const TABLE: { route: keyof typeof ROUTES; method: "GET" | "POST" | "DELETE"; ac
   { route: "freeBlock", method: "POST", access: "free_app" },
   { route: "freeFriend", method: "POST", access: "free_app" },
   { route: "freeWeek", method: "GET", access: "free_app" },
+  { route: "freeWeekCard", method: "GET", access: "free_app" },
   { route: "freeYou", method: "GET", access: "free_app" },
   { route: "courses", method: "GET", access: "account" },
   { route: "course", method: "GET", access: "member" },
@@ -513,6 +533,7 @@ beforeEach(() => {
   s.clubFound = true;
   s.organizerOk = true;
   s.playerOk = true;
+  s.weekTrained = true;
 });
 
 describe("the bearer token", () => {
@@ -932,6 +953,30 @@ describe("the free app's bodies are checked first", () => {
     expect(await post("freeFriend", { id, accept: "yes" })).toBe(400);
     expect(await post("freeFriend", { id, accept: true })).toBe(200);
     expect(s.calls.map((c) => c.fn)).toEqual(["logTraining", "deleteLog", "toggleProps", "reportPost", "blockPlayer", "answerFriendRequest"]);
+  });
+
+  it("Share my week: the player's own card comes back as a picture with its words, and takes nothing from the request", async () => {
+    freeAccount();
+    const h = await handler("freeWeekCard", "GET");
+    const res = await h(req("GET"));
+    expect(res.status).toBe(200);
+    expect(res.headers.get("cache-control")).toContain("no-store");
+    const out = (await res.json()) as { image: string; text: string };
+    // a 1080 x 1920 PNG, as a data URI the phone's image tool reads
+    expect(out.image.startsWith("data:image/png;base64,")).toBe(true);
+    const png = Buffer.from(out.image.slice("data:image/png;base64,".length), "base64");
+    expect(png.subarray(0, 8).toString("hex")).toBe("89504e470d0a1a0a");
+    expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual([1080, 1920]);
+    expect(out.text).toBe(WEEK_CARD.text);
+    // whose card it is comes from the token: the viewer and their own free account
+    expect(s.calls.map((c) => c.fn)).toEqual(["freeWeekCardFor"]);
+    expect((s.calls[0].args[0] as { profile: { id: string } }).profile.id).toBe("u1");
+    expect((s.calls[0].args[1] as { profile_id: string }).profile_id).toBe("u1");
+    // before any training this week there is no card to make
+    s.weekTrained = false;
+    const none = await h(req("GET"));
+    expect(none.status).toBe(409);
+    expect(await none.json()).toEqual({ error: "nothing_yet" });
   });
 
   it("a post is stored by the website's own route", async () => {

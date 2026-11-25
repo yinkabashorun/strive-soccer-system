@@ -13,6 +13,8 @@ import { deleteEntry, refreshFree, useFreeWeek } from "@/api/free";
 import { Avatar, MyAvatar, Star } from "@/Avatar";
 import { PAGE_TOP, Screen } from "@/Screen";
 import { UpgradeCard } from "@/UpgradeCard";
+import { ShareWeekRow } from "@/ShareWeekRow";
+import { shareWeekShown } from "@/share-week";
 import { Body, Button, Card, Hairline, Head, Label, Press, Ring, Skeleton } from "@/ui";
 import { color } from "@/theme";
 
@@ -189,6 +191,10 @@ export default function MyWeek() {
           </>
         ) : null}
       </View>
+
+      {/* Share my week: one quiet row, under the board so the board keeps
+          the first screen. There once the player has trained this week. */}
+      {shareWeekShown(w.minutes) ? <ShareWeekRow /> : null}
 
       {entries.length ? (
         <View style={{ marginHorizontal: 20, marginTop: 26 }}>

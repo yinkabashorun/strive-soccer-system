@@ -378,13 +378,20 @@ appId: com.strivesoccer.elite
 # the clock was opened from Week, so that is where posting returns to
 - tapOn: "Friends"
 
-# The feed is open now, with their own post first.
+# The feed is open now, with their own post first. Its one line sits under
+# the photo, so it is scrolled to (the run on 3108e77 looked for it without
+# scrolling and stopped here, with the post right there on screen).
 - extendedWaitUntil:
-    visible: "Weak foot only."
+    visible: "Just now"
     timeout: 20000
 - waitForAnimationToEnd:
     timeout: 4000
 - takeScreenshot: t38-friends-unlocked
+- scrollUntilVisible:
+    element: "Weak foot only."
+    direction: DOWN
+    timeout: 15000
+- takeScreenshot: t38b-own-post-line
 - tapOn: "Week"
 - extendedWaitUntil:
     visible: "Change"

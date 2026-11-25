@@ -100,7 +100,7 @@ left on it. What only a phone can show is `native-device-checklist.md`.
 | N7 | App icon crisp, the whole logo inside the coin | DONE Nov 25 (`scripts/make-app-icon.py`). A vector logo from Coach Yinka would still be better (D6) |
 | N8 | The build number shown in Settings | DONE Nov 25 |
 | N9 | App Store size screenshots from the simulator (1320 x 2868, example data) | DONE Nov 25: the simulator run saves eight under `store/` on the `app-screens` branch. Replaces A17. His to approve (D8) |
-| N10 | Share my week, as a story-size picture from the Week tab | DOING Nov 25 |
+| N10 | Share my week, as a story-size picture from the Week tab | DONE Nov 25, for the next build. Not proven: the share sheet and Instagram on a phone |
 | N11 | A free account has no Inbox (push only) | TODO |
 | N12 | Tap a training photo to see it full screen | TODO |
 | N13 | Video posts and My Drills (film a take, Then and now) | TODO, the largest piece left from the website's free app |

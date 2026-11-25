@@ -16,6 +16,7 @@ import {
 import type { FreeAnswers } from "@shared/free-intake";
 import type { Kind } from "@shared/tracker";
 import type { Multipart } from "@shared/upload-body";
+import type { AppWeekCard } from "@shared/app-contract";
 import { ApiError, api } from "./client";
 import { keys, useMe } from "./queries";
 import { queryClient } from "./queryClient";
@@ -119,6 +120,9 @@ export const removeFriend = (id: string) => api<Ok>(appProfilePath(id), { method
 export const reportProfile = (id: string, what: "photo" | "line") => api<Ok>(appProfilePath(id), { method: "POST", body: { do: what === "photo" ? "report_photo" : "report_line" } });
 export const unblockPlayer = (id: string) => api<Ok>(APP_API.freeBlocked, { method: "POST", body: { id } });
 export const answerFriend = (id: string, accept: boolean) => api<Ok>(APP_API.freeFriend, { method: "POST", body: { id, accept } });
+// Share my week: the player's own week as a story-size picture, drawn on
+// the server, with the words that go with it (src/ShareWeekRow.tsx).
+export const getWeekCard = () => api<AppWeekCard>(APP_API.freeWeekCard, { timeoutMs: 30_000 });
 
 // After anything that can change where this account belongs (the quiz, the
 // week's set-up, a checkout): read who this is again and let the

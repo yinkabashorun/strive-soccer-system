@@ -30,6 +30,7 @@ import { buildNoticePrefs, withTopic } from "@shared/notice-prefs";
 import { earnedNotice, newWeekNotice, welcomeNotice, type NoticeTopic } from "@shared/notices";
 import { reminderChoice } from "@shared/reminders";
 import { oneAppTabs } from "@shared/one-app";
+import { shareText } from "@shared/share-link";
 
 // The example player the screens are drawn with for review screenshots
 // (EXPO_PUBLIC_FIXTURES=1): the browser build (scripts/screenshots.mjs) and
@@ -845,6 +846,11 @@ function fixtureFree(path: string, method: string, body?: unknown): unknown {
     return { ok: true, id: "e-today" };
   }
   if (at === "week") return fixtureFreeWeek();
+  // Share my week: the example build is handed the words and no picture,
+  // so it makes no file and its share sheet carries the words alone
+  if (at === "week/card") {
+    return { image: "", text: shareText("week", "https://thestriveapp.com/join?ref=EXAMPLE2&src=share") } satisfies import("@shared/app-contract").AppWeekCard;
+  }
   if (at === "you") return fixtureFreeYou();
   if (at.startsWith("profile/")) return method === "GET" ? { profile: fixtureProfile(decodeURIComponent(at.slice("profile/".length))) } : { ok: true };
   if (at === "blocked") {

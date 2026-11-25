@@ -66,6 +66,9 @@ import {
   type Season,
 } from "./tracker";
 import type { AppBlocked, AppFeedCard, AppFreeFeed, AppFreePlan, AppFreeWeek, AppFreeYou, AppOffer, AppProfile } from "./app-contract";
+import { hasWeekToShare, weekCard, type WeekCard } from "./week-card";
+import { shareText } from "./share-link";
+import { shareLinkFor } from "./share-link-server";
 import type { Viewer } from "./session";
 import { squadFor } from "./squad-pass-server";
 import { firstDays } from "./first-days";
@@ -187,6 +190,31 @@ export async function freeWeekFor(
     board: friendsBoard([me, ...friends], viewer.profile.id),
     invite: joinLink(APP_URL, tracker.referral_code),
     upgrade: { area: preview?.areas[0] ?? null, sessions: answers ? sessionsFrom(answers) : 0 },
+  };
+}
+
+// Share my week (lib/elite/week-card.ts): what is on the player's own
+// card, and the words that go with it on the share sheet. Every share is
+// an invite, so the words end with their own join link
+// (lib/elite/share-link.ts decides which code it carries). Null until the
+// player has trained this week.
+export async function freeWeekCardFor(
+  viewer: Viewer,
+  tracker: Tracker,
+  today: string
+): Promise<{ card: WeekCard; text: string } | null> {
+  const [logs, link] = await Promise.all([getWeekLogs(viewer.profile.id, today), shareLinkFor(tracker, false)]);
+  // nothing trained yet this week: there is no card (week-card.ts)
+  if (!hasWeekToShare(weekProgress(logs, 0, today).minutes)) return null;
+  return {
+    card: weekCard({
+      fullName: viewer.profile.full_name,
+      logs,
+      target: tracker.target_minutes ?? 0,
+      today,
+      gym: tracksGym(tracker.grade),
+    }),
+    text: shareText("week", link),
   };
 }
 

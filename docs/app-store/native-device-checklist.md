@@ -148,6 +148,30 @@ these are what only a phone shows.
 7. **The post screen names who is waiting.** Before you post today, with a
    friend who trained: their faces and "Post yours to see theirs."
 
+## Share my week, on a phone only (Nov 25 2026)
+
+One row under the friends board on Week, once the player has trained this
+week (`mobile/src/ShareWeekRow.tsx`). The server draws the picture
+(`lib/elite/week-card-image.ts`, tested and looked at); the phone writes it
+to a file and opens the share sheet. None of that has run on a phone.
+
+1. **The sheet opens with the picture.** Tap "Share my week". After a
+   moment the phone's share sheet opens with a tall black card as its
+   preview: the name, the gold ring with the time, the seven days.
+2. **Instagram takes it as a story.** Instagram is in the sheet; pick it,
+   then Story. The card fills the story, nothing important under
+   Instagram's own bars at the top and bottom.
+3. **Save Image works** and the saved picture is sharp (1080 x 1920).
+4. **With no connection** the row says "We could not reach Strive. Check
+   your connection and try again." and nothing opens.
+5. **The words.** The sheet is handed the picture alone, on purpose: a
+   story takes a picture, not a picture with a line of text, and a sheet
+   only offers apps that take everything it is given. The player's own
+   link ("Train with me: ...") goes out only when the picture could not
+   be made. If the words should ride with the picture, set
+   `SHARE_WEEK_WORDS_WITH_PICTURE` in `mobile/src/share-week.ts` to true
+   on a test build and check that Instagram is still in the sheet.
+
 ## Seeing the phone from here
 
 `.github/workflows/ios-simulator-screens.yml` (built Nov 23 2026 on his

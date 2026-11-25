@@ -28,6 +28,8 @@ const nextConfig = {
     },
     outputFileTracingIncludes: {
       "/api/elite/tracker/card": ["./lib/elite/fonts/*.ttf"],
+      // the iPhone app's Share my week card (lib/elite/week-card-image.ts)
+      "/api/app/free/week/card": ["./lib/elite/fonts/*.ttf"],
     },
   },
   // The old $97 dribbling course sales page was retired Nov 18 2026. Any

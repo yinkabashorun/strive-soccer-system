@@ -143,6 +143,7 @@ export const APP_API = {
   freeBlock: "/api/app/free/block",
   freeFriend: "/api/app/free/friend",
   freeWeek: "/api/app/free/week",
+  freeWeekCard: "/api/app/free/week/card",
   freeYou: "/api/app/free/you",
   freeProfile: "/api/app/free/profile",
   freeBlocked: "/api/app/free/blocked",
@@ -259,6 +260,12 @@ export type AppFreeWeek = {
   // and the sessions a week the player's own answers give.
   upgrade: { area: string | null; sessions: number };
 };
+
+// Share my week (lib/elite/week-card.ts): the player's own week as a
+// story-size picture, 1080 x 1920, sent as a PNG data URI, and the words
+// that go with it on the share sheet (they end with the player's own join
+// link). The picture is drawn on the server; the phone only hands it on.
+export type AppWeekCard = { image: string; text: string };
 
 export type AppFreeYou = {
   name: string;

@@ -114,85 +114,112 @@ appId: com.strivesoccer.elite
 - inputText: "Example FC 2010"
 - tapOn: "Next"
 # On the ball: every row is rated before Next works.
+# A row is tapped only where a finger could reach it. The first three rows
+# sit clear of the top bar and of Next as the page opens. For each row after
+# that the page is dragged up by one row, slowly, so the next row comes to
+# rest where the last one was. (scrollUntilVisible is not used here: it once
+# stopped with the row half under Next, and with centerElement it carried a
+# row up under the top bar, where the tap landed on Back.)
 - extendedWaitUntil:
     visible: "First touch 2 of 5"
     timeout: 10000
 - tapOn: "First touch 2 of 5"
+- extendedWaitUntil:
+    visible: "Close control 3 of 5"
+    timeout: 10000
 - tapOn: "Close control 3 of 5"
-- scrollUntilVisible:
-    element: "Weak foot 1 of 5"
-    direction: DOWN
-    centerElement: true
-    timeout: 15000
+- extendedWaitUntil:
+    visible: "Weak foot 1 of 5"
+    timeout: 10000
 - tapOn: "Weak foot 1 of 5"
-- scrollUntilVisible:
-    element: "Dribbling and 1v1 3 of 5"
-    direction: DOWN
-    centerElement: true
-    timeout: 15000
+- swipe:
+    start: "50%,62%"
+    end: "50%,45%"
+    duration: 1500
+- extendedWaitUntil:
+    visible: "Dribbling and 1v1 3 of 5"
+    timeout: 10000
 - tapOn: "Dribbling and 1v1 3 of 5"
-- scrollUntilVisible:
-    element: "Short passing 4 of 5"
-    direction: DOWN
-    centerElement: true
-    timeout: 15000
+- swipe:
+    start: "50%,62%"
+    end: "50%,45%"
+    duration: 1500
+- extendedWaitUntil:
+    visible: "Short passing 4 of 5"
+    timeout: 10000
 - tapOn: "Short passing 4 of 5"
-- scrollUntilVisible:
-    element: "Long passing 3 of 5"
-    direction: DOWN
-    centerElement: true
-    timeout: 15000
+- swipe:
+    start: "50%,62%"
+    end: "50%,45%"
+    duration: 1500
+- extendedWaitUntil:
+    visible: "Long passing 3 of 5"
+    timeout: 10000
 - tapOn: "Long passing 3 of 5"
-- scrollUntilVisible:
-    element: "Shooting 3 of 5"
-    direction: DOWN
-    centerElement: true
-    timeout: 15000
+- swipe:
+    start: "50%,62%"
+    end: "50%,45%"
+    duration: 1500
+- extendedWaitUntil:
+    visible: "Shooting 3 of 5"
+    timeout: 10000
 - tapOn: "Shooting 3 of 5"
 - takeScreenshot: t28-free-quiz-on-ball
 - tapOn: "Next"
-# Off the ball.
+# Off the ball: the same way.
 - extendedWaitUntil:
     visible: "Speed 3 of 5"
     timeout: 10000
 - tapOn: "Speed 3 of 5"
+- extendedWaitUntil:
+    visible: "Agility 3 of 5"
+    timeout: 10000
 - tapOn: "Agility 3 of 5"
-- scrollUntilVisible:
-    element: "Strength 3 of 5"
-    direction: DOWN
-    centerElement: true
-    timeout: 15000
+- extendedWaitUntil:
+    visible: "Strength 3 of 5"
+    timeout: 10000
 - tapOn: "Strength 3 of 5"
-- scrollUntilVisible:
-    element: "Fitness 4 of 5"
-    direction: DOWN
-    centerElement: true
-    timeout: 15000
+- swipe:
+    start: "50%,62%"
+    end: "50%,45%"
+    duration: 1500
+- extendedWaitUntil:
+    visible: "Fitness 4 of 5"
+    timeout: 10000
 - tapOn: "Fitness 4 of 5"
-- scrollUntilVisible:
-    element: "Scanning 3 of 5"
-    direction: DOWN
-    centerElement: true
-    timeout: 15000
+- swipe:
+    start: "50%,62%"
+    end: "50%,45%"
+    duration: 1500
+- extendedWaitUntil:
+    visible: "Scanning 3 of 5"
+    timeout: 10000
 - tapOn: "Scanning 3 of 5"
-- scrollUntilVisible:
-    element: "Decision making 3 of 5"
-    direction: DOWN
-    centerElement: true
-    timeout: 15000
+- swipe:
+    start: "50%,62%"
+    end: "50%,45%"
+    duration: 1500
+- extendedWaitUntil:
+    visible: "Decision making 3 of 5"
+    timeout: 10000
 - tapOn: "Decision making 3 of 5"
-- scrollUntilVisible:
-    element: "Movement 3 of 5"
-    direction: DOWN
-    centerElement: true
-    timeout: 15000
+- swipe:
+    start: "50%,62%"
+    end: "50%,45%"
+    duration: 1500
+- extendedWaitUntil:
+    visible: "Movement 3 of 5"
+    timeout: 10000
 - tapOn: "Movement 3 of 5"
-- scrollUntilVisible:
-    element: "Defending 3 of 5"
-    direction: DOWN
-    centerElement: true
-    timeout: 15000
+- swipe:
+    start: "50%,62%"
+    end: "50%,45%"
+    duration: 1500
+- extendedWaitUntil:
+    visible: "Defending 3 of 5"
+    timeout: 10000
 - tapOn: "Defending 3 of 5"
+- takeScreenshot: t28b-free-quiz-off-ball
 - tapOn: "Next"
 - extendedWaitUntil:
     visible: "Make a higher team"

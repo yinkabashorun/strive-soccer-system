@@ -83,6 +83,32 @@ poster image on any drill video, so a slow connection shows a black box.
 | A29 | Every push text re-read against Apple's rules: it informs, never orders, never sells; one per event. | DONE Nov 18 as an audit. REBUILT Nov 24: every notice (bell, push, email subject) is one entry in `lib/elite/notices.ts`, sent only through `lib/elite/notify.ts`, word for word in `tests/push-texts.test.ts`; `lib/elite/push-texts.ts` is gone. The Film Room and check-in pushes no longer end on an instruction, a new week reads the same from both senders, a coach message is titled with the coach's name |
 | A30 | Stop nudging a member who has ignored several nudges in a row. | TODO, needs his word on the number |
 
+## N. The native iPhone app (mobile/), from Nov 23 2026
+
+Sections A to C were written for the first shell (the website inside an
+app). The App Store app is now the native one in `mobile/`; this is what is
+left on it. What only a phone can show is `native-device-checklist.md`.
+
+| ID | Item | Status |
+|---|---|---|
+| N1 | Member core loop: sign in, the agreement, the quiz, "You're in", Home, the session player, Week, You, Settings, delete my account | DONE, builds 5 to 8 |
+| N2 | Join free, the quiz and offer, the free app (Friends, Week, Clubs, You), Courses, the Inbox, one app where Strive Pro adds Train | DONE, build 8 |
+| N3 | The social half polished to the training loop | DONE, build 9 |
+| N4 | A switched-off button looks switched off; a rating page names the row still to rate | DONE, build 9 |
+| N5 | A friend's profile from their face; your clubs and photos on You; the blocked list in Settings | DONE Nov 25, for the next build |
+| N6 | Saved passwords on sign-in (the app and the site name each other) | DONE Nov 25, for the next build. Not proven: the first archive with the new entitlement, and the phone offering the password |
+| N7 | App icon crisp, the whole logo inside the coin | DONE Nov 25 (`scripts/make-app-icon.py`). A vector logo from Coach Yinka would still be better (D6) |
+| N8 | The build number shown in Settings | DONE Nov 25 |
+| N9 | App Store size screenshots from the simulator (1320 x 2868, example data) | DONE Nov 25: the simulator run saves eight under `store/` on the `app-screens` branch. Replaces A17. His to approve (D8) |
+| N10 | Share my week, as a story-size picture from the Week tab | DOING Nov 25 |
+| N11 | A free account has no Inbox (push only) | TODO |
+| N12 | Tap a training photo to see it full screen | TODO |
+| N13 | Video posts and My Drills (film a take, Then and now) | TODO, the largest piece left from the website's free app |
+| N14 | Strive events and trained-together tags | TODO |
+| N15 | Links that open the app (a texted link opens the right screen) | TODO, after N6 is proven on a phone |
+| N16 | Review notes, age rating and privacy answers rewritten for the native app in `listing.md` | TODO before submitting (C5) |
+| N17 | The upgrade inside the app opens a web checkout: allowed on the US storefront only (from memory, to verify); Apple's in-app purchase is the fallback | HIS (D14), before review |
+
 ## B. Research to settle before the first build
 
 ALL TEN ANSWERED Nov 18 2026, with sources, in `research-2026-11-18.md`
@@ -184,3 +210,7 @@ the thing in the way.
   (lib/elite/text-filter.ts), and Terms with zero tolerance and a 24-hour
   promise on reports. Listing, review notes and age rating answers updated
   in listing.md (expect 12+ or 13+). 688 tests.
+- Nov 25 2026: section N added: the App Store app is the native one in
+  `mobile/`. N5 to N9 done for the next build (profiles, saved passwords,
+  the icon, the build number, App Store size screenshots from the
+  simulator).

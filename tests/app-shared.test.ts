@@ -114,6 +114,25 @@ describe("the phone's build", () => {
   const capacitorPlist = readFileSync(path.join(root, "native/ios/App/App/Info.plist"), "utf8");
   const plistString = (key: string) => capacitorPlist.match(new RegExp(`<key>${key}</key>\\s*<string>([^<]*)</string>`))?.[1];
 
+  // Saved passwords on the sign-in screen: the iPhone offers them only when
+  // the app names the site and the site names the app. The two halves are
+  // held to the same app here.
+  it("the app and the site name each other, for saved passwords only", async () => {
+    const { APP_DOMAIN, IOS_APP_ID, IOS_BUNDLE_ID } = await import("@/lib/elite/app-identity");
+    expect(IOS_BUNDLE_ID).toBe(app.ios.bundleIdentifier);
+    expect(app.ios.associatedDomains).toEqual([`webcredentials:${APP_DOMAIN}`]);
+    const { GET } = await import("@/app/.well-known/apple-app-site-association/route");
+    const res = GET();
+    expect(res.headers.get("content-type")).toBe("application/json");
+    // passwords only: no link is handed to the app from the site
+    expect(await res.json()).toEqual({ webcredentials: { apps: [IOS_APP_ID] } });
+    // the sign-in fields say what they are, so the phone knows where a
+    // saved password goes
+    const signIn = readFileSync(path.join(root, "mobile/app/sign-in.tsx"), "utf8");
+    expect(signIn).toContain('textContentType="username"');
+    expect(signIn).toContain('textContentType="password"');
+  });
+
   it("is the same App Store app, iPhone only, portrait, dark", () => {
     expect(app.ios.bundleIdentifier).toBe("com.strivesoccer.elite");
     expect(app.name).toBe("Strive Elite");

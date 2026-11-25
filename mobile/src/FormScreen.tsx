@@ -59,9 +59,14 @@ export function FormScreen({
   footer,
   contentStyle,
   safeTop,
+  revealTop = REVEAL_TOP,
 }: {
   children: ReactNode;
   safeTop?: boolean;
+  // How far under the top of the page the box with the cursor comes to rest
+  // (a page with a footer only). A page whose box has something the player
+  // still needs right above it (the post screen's lengths) asks for more.
+  revealTop?: number;
   header?: ReactNode;
   footer?: ReactNode;
   contentStyle?: StyleProp<ViewStyle>;
@@ -81,11 +86,11 @@ export function FormScreen({
     if (!input || !view) return;
     view.measureInWindow((_vx, viewTop) => {
       input.measureInWindow((_ix, inputTop) => {
-        const y = scrolled.current + (inputTop - viewTop) - REVEAL_TOP;
+        const y = scrolled.current + (inputTop - viewTop) - revealTop;
         view.scrollTo({ y: Math.max(0, y), animated: true });
       });
     });
-  }, [hasFooter]);
+  }, [hasFooter, revealTop]);
   // a box that takes the cursor: after this frame, when it is the focused one
   const onBoxFocus = useCallback(() => {
     requestAnimationFrame(reveal);

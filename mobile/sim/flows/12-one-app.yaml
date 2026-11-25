@@ -39,10 +39,17 @@ appId: com.strivesoccer.elite
     direction: DOWN
     timeout: 20000
 - takeScreenshot: t65-train-courses
-- scrollUntilVisible:
-    element: "Start session"
-    direction: UP
-    timeout: 20000
+# Back to the very top before the tap. Scrolling "until visible" stops the
+# moment the button's lower edge shows under the clock, and a tap aimed at
+# its middle then lands on the status bar (the run on 51b08f9).
+- swipe: { start: "50%,35%", end: "50%,85%", duration: 400 }
+- swipe: { start: "50%,35%", end: "50%,85%", duration: 400 }
+- swipe: { start: "50%,35%", end: "50%,85%", duration: 400 }
+- extendedWaitUntil:
+    visible: "Start session"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 3000
 - tapOn: "Start session"
 - extendedWaitUntil:
     visible: "Done"

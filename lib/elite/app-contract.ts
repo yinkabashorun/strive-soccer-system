@@ -143,13 +143,23 @@ export const APP_API = {
   freeBlock: "/api/app/free/block",
   freeFriend: "/api/app/free/friend",
   freeWeek: "/api/app/free/week",
+  freeWeekCard: "/api/app/free/week/card",
   freeYou: "/api/app/free/you",
+  freeProfile: "/api/app/free/profile",
+  freeBlocked: "/api/app/free/blocked",
   // clubs, in the free app
   freeClubs: "/api/app/free/clubs",
   freeClubJoin: "/api/app/free/clubs/join",
   freePlans: "/api/app/free/plans",
   freePlayTerms: "/api/app/free/play-terms",
 } as const;
+
+// One player's profile: GET it ("me" is the caller's own), POST something
+// the caller does about that player (take them off, report their photo or
+// their Playing for line).
+export function appProfilePath(id: string): string {
+  return `${APP_API.freeProfile}/${encodeURIComponent(id)}`;
+}
 
 // One club: GET its page, POST something a member or its captain does.
 export function appClubPath(id: string): string {
@@ -251,6 +261,12 @@ export type AppFreeWeek = {
   upgrade: { area: string | null; sessions: number };
 };
 
+// Share my week (lib/elite/week-card.ts): the player's own week as a
+// story-size picture, 1080 x 1920, sent as a PNG data URI, and the words
+// that go with it on the share sheet (they end with the player's own join
+// link). The picture is drawn on the server; the phone only hands it on.
+export type AppWeekCard = { image: string; text: string };
+
 export type AppFreeYou = {
   name: string;
   aura: { level: number; label: string; progress: number; next: string | null };
@@ -260,6 +276,36 @@ export type AppFreeYou = {
   starred: boolean;
   invite: string;
 };
+
+// A player's profile in the free app (lib/elite/tracker.ts Profile): only
+// the player, their friends and the coaches are ever sent one. The same
+// card the You tab shows, their clubs, and the training photos the caller
+// may see. No bio, no follower count, no age or grade.
+export type AppProfile = {
+  id: string;
+  name: string; // "Diego R."
+  first: string;
+  initials: string;
+  photo: string | null;
+  username: string | null;
+  starred: boolean;
+  you: boolean;
+  friend: boolean;
+  // the level they play at, in its own words, and their own Playing for line
+  level: string | null;
+  playingFor: string | null;
+  // next is said only to the player themselves
+  aura: { level: number; label: string; progress: number; next: string | null };
+  weekMinutes: number;
+  allMinutes: number;
+  // mine: the caller is in that club too, so its page opens for them
+  clubs: { id: string; name: string; mine: boolean }[];
+  posts: { id: string; day: string; minutes: number; kind: Kind; photoUrl: string }[];
+  // their latest post the caller may give props on
+  propsPost: { id: string; propped: boolean } | null;
+};
+
+export type AppBlocked = { blocked: { id: string; name: string }[] };
 
 export type AppUsernameAnswer = { ok: true; name: string } | { ok: false; name: string; error: string; taken?: boolean };
 

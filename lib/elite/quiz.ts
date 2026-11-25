@@ -250,7 +250,7 @@ export const QUIZ_QUESTIONS: Record<QuizStepId, { title: string; sub?: string }>
   level: { title: "What level do you play at?" },
   space: { title: "Where will you train most days?", sub: "Every drill will fit the space you have." },
   nearby: { title: "What is near where you train?", sub: "Tick any you have. Your drills only use what is there." },
-  club: { title: "What team do you play for?", sub: "Club and age group, if you have one." },
+  club: { title: "What team do you play for?", sub: "Club and age group. No team right now? Skip this one." },
   goals: { title: "What are you chasing?", sub: "One goal a line. This one is optional." },
   onBall: { title: "On the ball.", sub: "Rate yourself on each one, 1 to 5. Be honest: the lowest ones are where your training starts." },
   offBall: { title: "Off the ball.", sub: "Your speed, your body and how you read the game. Same scale, 1 to 5." },
@@ -259,6 +259,13 @@ export const QUIZ_QUESTIONS: Record<QuizStepId, { title: string; sub?: string }>
 
 // Whether a screen has what it needs to move on. A typed screen that is
 // optional (the club, the goals) is always ready.
+// The two typed questions a player may leave empty: the team they play for
+// (a player with no team right now) and their goals. While the box is
+// empty the button says Skip, not Next, so nobody thinks an answer is owed.
+export function canSkip(id: string, a: Pick<QuizAnswers, "club" | "goals">): boolean {
+  return (id === "club" && !a.club.trim()) || (id === "goals" && !a.goals.trim());
+}
+
 export function stepReady(id: QuizStepId, a: QuizAnswers): boolean {
   switch (id) {
     case "gender":

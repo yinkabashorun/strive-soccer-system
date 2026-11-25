@@ -2,18 +2,22 @@ import { hasFreeApp } from "@/navigation";
 import { useQuery } from "@tanstack/react-query";
 import {
   APP_API,
+  appProfilePath,
+  type AppBlocked,
   type AppFreeFeed,
   type AppFreePlan,
   type AppFreeWeek,
   type AppFreeYou,
   type AppJoinOpen,
   type AppOffer,
+  type AppProfile,
   type AppUpgradeStart,
 } from "@shared/app-contract";
 import type { FreeAnswers } from "@shared/free-intake";
 import type { Kind } from "@shared/tracker";
 import type { Multipart } from "@shared/upload-body";
-import { api } from "./client";
+import type { AppWeekCard } from "@shared/app-contract";
+import { ApiError, api } from "./client";
 import { keys, useMe } from "./queries";
 import { queryClient } from "./queryClient";
 
@@ -27,6 +31,9 @@ export const freeKeys = {
   feed: ["free", "feed"] as const,
   week: ["free", "week"] as const,
   you: ["free", "you"] as const,
+  profiles: ["free", "profile"] as const,
+  profile: (id: string) => ["free", "profile", id] as const,
+  blocked: ["free", "blocked"] as const,
 };
 
 // Is free sign-up open? Asked from the sign-in screen, signed out.
@@ -68,12 +75,32 @@ export function useFreeYou() {
   return useQuery({ queryKey: freeKeys.you, queryFn: () => api<AppFreeYou>(APP_API.freeYou), enabled: free });
 }
 
+// One player's profile ("me" is your own): only you, your friends and the
+// coaches are ever sent one, so anyone else is a 404 and the screen says so.
+export function useProfile(id: string | undefined) {
+  const free = useIsFree("ready");
+  return useQuery({
+    queryKey: freeKeys.profile(id ?? ""),
+    queryFn: async () => (await api<{ profile: AppProfile }>(appProfilePath(id as string))).profile,
+    enabled: free && Boolean(id),
+    retry: (count, error) => !(error instanceof ApiError && error.status === 404) && count < 2,
+  });
+}
+
+// The players you blocked, so a block can be taken back (Settings).
+export function useBlocked() {
+  const free = useIsFree("ready");
+  return useQuery({ queryKey: freeKeys.blocked, queryFn: () => api<AppBlocked>(APP_API.freeBlocked), enabled: free });
+}
+
 // Everything the free tabs show changes when something is logged.
 export function refreshFree(): Promise<unknown> {
   return Promise.all([
     queryClient.invalidateQueries({ queryKey: freeKeys.feed }),
     queryClient.invalidateQueries({ queryKey: freeKeys.week }),
     queryClient.invalidateQueries({ queryKey: freeKeys.you }),
+    queryClient.invalidateQueries({ queryKey: freeKeys.profiles }),
+    queryClient.invalidateQueries({ queryKey: freeKeys.blocked }),
   ]);
 }
 
@@ -89,7 +116,13 @@ export const deleteEntry = (id: string) => api<Ok>(APP_API.freeLog, { method: "D
 export const toggleProps = (id: string) => api<Ok & { propped?: boolean }>(APP_API.freeProps, { method: "POST", body: { id } });
 export const reportPost = (id: string, reason: string) => api<Ok>(APP_API.freeReport, { method: "POST", body: { id, reason } });
 export const blockPlayer = (id: string) => api<Ok>(APP_API.freeBlock, { method: "POST", body: { id } });
+export const removeFriend = (id: string) => api<Ok>(appProfilePath(id), { method: "POST", body: { do: "remove" } });
+export const reportProfile = (id: string, what: "photo" | "line") => api<Ok>(appProfilePath(id), { method: "POST", body: { do: what === "photo" ? "report_photo" : "report_line" } });
+export const unblockPlayer = (id: string) => api<Ok>(APP_API.freeBlocked, { method: "POST", body: { id } });
 export const answerFriend = (id: string, accept: boolean) => api<Ok>(APP_API.freeFriend, { method: "POST", body: { id, accept } });
+// Share my week: the player's own week as a story-size picture, drawn on
+// the server, with the words that go with it (src/ShareWeekRow.tsx).
+export const getWeekCard = () => api<AppWeekCard>(APP_API.freeWeekCard, { timeoutMs: 30_000 });
 
 // After anything that can change where this account belongs (the quiz, the
 // week's set-up, a checkout): read who this is again and let the

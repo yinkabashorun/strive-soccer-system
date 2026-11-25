@@ -4,11 +4,12 @@ import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { CAPTION_MAX, KINDS, LOG_CHIPS, NO_PHOTO_LINK, POST_RULES_LINE, chipLabel, type Kind } from "@shared/tracker";
+import { CAPTION_MAX, KINDS, LOG_CHIPS, NO_PHOTO_LINK, POST_RULES_LINE, chipLabel, lockedLine, type Kind } from "@shared/tracker";
 import { POST_SESSION_DETAIL, POST_SESSION_ROW } from "@shared/one-app";
 import { useMe } from "@/api/queries";
 import { ApiError, OFFLINE_MESSAGE } from "@/api/client";
-import { logTraining, refreshFree } from "@/api/free";
+import { logTraining, refreshFree, useFeed } from "@/api/free";
+import { Avatar } from "@/Avatar";
 import { feel, tick } from "@/feel";
 import { FormScreen } from "@/FormScreen";
 import { postTraining, type PickedPhoto } from "@/post-api";
@@ -35,6 +36,10 @@ import { color, font } from "@/theme";
 // photo and the line are asked. The time is already on the week, counted
 // by the server from the session itself, so there is no length to pick and
 // it can never count twice.
+// Where the note comes to rest under the top of the page once the keyboard
+// is up: far enough down that the row of lengths above it stays on screen.
+const NOTE_REVEAL_TOP = 112;
+
 export default function Post() {
   const router = useRouter();
   const { session: sessionParam } = useLocalSearchParams<{ session?: string }>();
@@ -43,6 +48,12 @@ export default function Post() {
   const me = useMe();
   const [prefs] = usePrefs();
   const gym = me.data?.free?.gym === true;
+  // The friends whose training today opens the moment this is posted:
+  // their faces, and the one line the feed's own locked card says. Shown
+  // only while today is still locked and a friend has trained; nobody is
+  // ever named as not having trained.
+  const feed = useFeed().data;
+  const waiting = feed && !feed.unlocked && feed.friendsToday > 0 ? feed.faces.filter((f) => !f.you && f.active) : [];
   const [photo, setPhoto] = useState<PickedPhoto | null>(null);
   const [plain, setPlain] = useState(false);
   const [minutes, setMinutes] = useState<number | null>(null);
@@ -151,7 +162,22 @@ export default function Post() {
           </Press>
         </View>
       }
-      contentStyle={{ paddingHorizontal: 20, paddingBottom: insets.bottom + 40 }}
+      contentStyle={{ paddingHorizontal: 20, paddingBottom: ready ? 16 : insets.bottom + 40 }}
+      // The note comes to rest with the lengths still in view above it: a
+      // player who types first can still tap how long they trained.
+      revealTop={NOTE_REVEAL_TOP}
+      // The button rides on the keyboard. In the page's own flow it sat
+      // BEHIND the keyboard while the note was being typed, and a tap aimed
+      // at it typed a letter (the simulator's first walk of a first post,
+      // Nov 25 2026).
+      footer={
+        ready ? (
+          <View style={{ paddingHorizontal: 20, paddingTop: 10, paddingBottom: insets.bottom + 16, backgroundColor: color.black }}>
+            {error ? <Body style={{ color: color.danger, marginBottom: 10 }}>{error}</Body> : null}
+            <Button label={photo ? "Post to my friends" : "Log my training"} busy={busy} disabled={session ? !photo : minutes === null} onPress={() => void send()} />
+          </View>
+        ) : undefined
+      }
     >
       {photo ? (
         <View style={styles.preview}>
@@ -167,6 +193,20 @@ export default function Post() {
           <Body dim style={{ marginTop: 10 }}>
             {session ? POST_SESSION_DETAIL : POST_RULES_LINE}
           </Body>
+          {waiting.length && feed && !session ? (
+            <View style={styles.waiting} accessible accessibilityLabel={lockedLine(feed.friendsToday)}>
+              <View style={{ flexDirection: "row" }}>
+                {waiting.slice(0, 4).map((f, i) => (
+                  <View key={f.id} style={{ marginLeft: i === 0 ? 0 : -12 }}>
+                    <Avatar uri={f.photo} initials={f.initials} size={40} ring />
+                  </View>
+                ))}
+              </View>
+              <Body size={13.5} style={{ flex: 1 }}>
+                {lockedLine(feed.friendsToday)}
+              </Body>
+            </View>
+          ) : null}
           <View style={{ gap: 10, marginTop: 24 }}>
             <Button label="Take a photo" onPress={() => void choose(true)} />
             <Button quiet label="Choose from photos" onPress={() => void choose(false)} />
@@ -264,8 +304,6 @@ export default function Post() {
             </>
           ) : null}
 
-          {error ? <Body style={{ color: color.danger, marginTop: 12 }}>{error}</Body> : null}
-          <Button style={{ marginTop: 16 }} label={photo ? "Post to my friends" : "Log my training"} busy={busy} disabled={session ? !photo : minutes === null} onPress={() => void send()} />
           <Press
             onPress={() => {
               setPhoto(null);
@@ -273,7 +311,7 @@ export default function Post() {
               setError(null);
             }}
             disabled={busy}
-            style={[styles.link, { alignSelf: "center", marginTop: 6 }]}
+            style={[styles.link, { alignSelf: "center", marginTop: 10 }]}
           >
             <Label dim size={14}>
               {photo ? "Use another photo" : "Add a photo instead"}
@@ -286,6 +324,7 @@ export default function Post() {
 }
 
 const styles = StyleSheet.create({
+  waiting: { flexDirection: "row", alignItems: "center", gap: 14, marginTop: 22, padding: 14, borderRadius: 18, backgroundColor: color.fill2 },
   fill: { flex: 1, backgroundColor: color.black },
   preview: { width: "62%", alignSelf: "center", aspectRatio: 4 / 5, borderRadius: 24, overflow: "hidden", backgroundColor: color.fill2, marginTop: 6 },
   link: { minHeight: 44, justifyContent: "center", alignSelf: "flex-start" },

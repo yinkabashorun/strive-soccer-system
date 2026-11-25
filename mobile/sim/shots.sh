@@ -104,6 +104,8 @@ SHOTS='
 49-train-week|social|my-week|12
 50-train-you|social|me|12
 51-pro-ended|ended|my-week|12
+52-player|locked|player/f-diego|13
+53-blocked|locked|blocked|10
 '
 
 last=""

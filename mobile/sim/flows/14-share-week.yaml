@@ -1,0 +1,32 @@
+# Share my week, by taps: the one quiet row under the friends board on the
+# free Week tab (src/ShareWeekRow.tsx). It is there because the example
+# player has trained this week. A tap opens the phone's own share sheet.
+#
+# Example data only: the example build is handed the words and no picture
+# (src/api/fixtures.ts), so the sheet here carries the words alone and
+# nothing is read from or sent to the site. The picture itself, and
+# Instagram taking it, are a real phone's to show
+# (docs/app-store/native-device-checklist.md).
+appId: com.strivesoccer.elite
+---
+- launchApp:
+    clearState: true
+    arguments:
+      fixtureState: locked
+- extendedWaitUntil:
+    visible: "Post my training"
+    timeout: 30000
+- tapOn: "Week"
+- waitForAnimationToEnd:
+    timeout: 4000
+- scrollUntilVisible:
+    element: "Share my week"
+    direction: DOWN
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: t70-share-week-row
+- tapOn: "Share my week"
+- waitForAnimationToEnd:
+    timeout: 6000
+- takeScreenshot: t71-share-week-sheet

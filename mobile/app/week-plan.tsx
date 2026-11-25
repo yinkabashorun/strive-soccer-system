@@ -9,6 +9,7 @@ import { ApiError, OFFLINE_MESSAGE } from "@/api/client";
 import { freeKeys, refreshFree, rereadMe, savePlan, usePlan } from "@/api/free";
 import { queryClient } from "@/api/queryClient";
 import { tick } from "@/feel";
+import { openHome } from "@/go-home";
 import { Body, Button, Eyebrow, Head, Icon, Label, Press, Skeleton } from "@/ui";
 import { useBelowClock } from "@/Screen";
 import { color } from "@/theme";
@@ -50,13 +51,18 @@ export default function WeekPlan() {
     if (target === null) return;
     setError(null);
     setBusy(true);
+    // Read before the save: once this account is read again it is in the
+    // free app, and `first` is no longer true.
+    const opening = first;
     try {
       const res = await savePlan(target, days);
       if (!res.ok) return setError(res.error ?? "That did not save. Try again.");
       await queryClient.invalidateQueries({ queryKey: freeKeys.plan });
       await refreshFree();
-      if (first) await rereadMe();
-      else router.back();
+      if (!opening) return router.back();
+      // The first save is what opens the free app: go there (src/go-home.ts).
+      await rereadMe();
+      openHome(router);
     } catch (e) {
       setError(e instanceof ApiError ? e.message : OFFLINE_MESSAGE);
     } finally {

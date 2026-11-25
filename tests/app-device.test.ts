@@ -904,10 +904,153 @@ describe("the social half is built like the training loop", () => {
 
   it("You is one card: who they are, the level their training earned, their two numbers", () => {
     const me = code(path.join(root, "app/(free)/me.tsx"));
-    expect(me).toContain("<Eyebrow>{y.aura.label}</Eyebrow>");
-    expect(me).toMatch(/fill: \{[^}]*backgroundColor: color\.gold/);
+    const parts = code(path.join(root, "src/ProfileParts.tsx"));
+    // the level and the two numbers are the profile's own pieces, shared
+    // with a friend's profile so the two can never drift
+    expect(me).toContain("<LevelBar aura={y.aura} />");
+    expect(me).toContain("<TwoNumbers weekMinutes={y.weekMinutes} allMinutes={y.allMinutes} mine />");
+    expect(parts).toContain("<Eyebrow>{aura.label}</Eyebrow>");
+    expect(parts).toMatch(/fill: \{[^}]*backgroundColor: color\.gold/);
     // gold stays on what was earned, never on a button
     expect(me).not.toMatch(/<Button[^>]*gold/);
+    // under the card: your clubs and your own training photos, the same
+    // reader a friend's view of you comes from
+    expect(me).toContain('useProfile("me")');
+    expect(me).toContain("<ClubRow clubs={mine.data.clubs} />");
+    expect(me).toContain("<PostGrid posts={mine.data.posts} first={mine.data.first} mine />");
+  });
+
+  // A social app where a face does nothing feels dead: every place a friend
+  // is shown opens their profile, and the profile holds to the house rules.
+  it("a friend's face opens their profile, from every place a friend is shown", () => {
+    for (const f of ["app/(free)/friends.tsx", "app/(free)/my-week.tsx", "app/club/[id]/index.tsx", "src/FeedCards.tsx"]) {
+      expect(code(path.join(root, f)), f).toMatch(/<PlayerLink\b/);
+    }
+    const parts = code(path.join(root, "src/ProfileParts.tsx"));
+    // your own face is never a link (your profile is the You tab), and a
+    // link says what the tap does
+    expect(parts).toMatch(/if \(you \|\| !id\) \{\s*return \(\s*<View style=\{style\} accessible accessibilityLabel=\{said\}>/);
+    expect(parts).toContain("router.push(`/player/${id}` as Href)");
+    expect(parts).toContain("Open ${first}'s profile.");
+    // a club the viewer is not in is only named: its page is its members'
+    expect(parts).toMatch(/c\.mine \? \(\s*<Press[\s\S]{0,120}router\.push\(`\/club\/\$\{c\.id\}`/);
+  });
+
+  it("the post screen shows whose training opens when you post, only while today is locked", () => {
+    const post = code(path.join(root, "app/post.tsx"));
+    // only friends who trained today, never you, and only while locked
+    expect(post).toContain("feed && !feed.unlocked && feed.friendsToday > 0 ? feed.faces.filter((f) => !f.you && f.active) : []");
+    // the words are the feed's own line, said once; not shown on a session's photo
+    expect(post).toContain("{waiting.length && feed && !session ? (");
+    expect(post.match(/lockedLine\(feed\.friendsToday\)/g)?.length).toBe(2);
+  });
+
+  // The simulator's first full walk of the free quiz (Nov 25 2026) stopped on
+  // its last screen: Finish judged and saved the draft as it was BEFORE the
+  // tap, so the screen's own answer was missing and the same screen opened
+  // again. Finish is handed the answers with the last tap in them.
+  it("the quiz's Finish saves the answers including the last screen's own", () => {
+    const quiz = code(path.join(root, "app/onboarding/[step].tsx"));
+    expect(quiz).toContain("else void finish(patch ? { ...a, ...patch } : a);");
+    expect(quiz).toContain("const missing = order.find((s) => !readyOf(s, now));");
+    expect(quiz).toContain("await saveIntake(now);");
+    expect(quiz).toContain("await submit.mutateAsync(now);");
+    expect(quiz).not.toMatch(/saveIntake\(a\)|mutateAsync\(a\)/);
+  });
+
+  // The simulator's first walk past the quiz (Nov 25 2026) stopped on "Your
+  // week": Start my week saved, the button turned into Save, and the player
+  // was left on the same screen. The gatekeeper only moves someone who is
+  // OUTSIDE their area, and the week's set-up and the offer are inside the
+  // free app's area too, so a screen that finishes a step there has to
+  // leave by itself (src/go-home.ts).
+  it("a finished step opens the app's first screen, it does not wait on the gatekeeper", () => {
+    const home = code(path.join(root, "src/go-home.ts"));
+    expect(home).toContain("if (router.canDismiss()) router.dismissAll();");
+    expect(home).toContain("router.replace(homeOf(state) as Href);");
+    const plan = code(path.join(root, "app/week-plan.tsx"));
+    // read before the save: after it, this account is no longer "first"
+    expect(plan).toMatch(/const opening = first;[\s\S]*await savePlan\(/);
+    expect(plan).toMatch(/if \(!opening\) return router\.back\(\);[\s\S]*await rereadMe\(\);\s*openHome\(router\);/);
+    const offer = code(path.join(root, "app/offer.tsx"));
+    expect(offer).toMatch(/await rereadMe\(\);\s*if \(hasTrain\([^\n]*\)\) openHome\(router\);/);
+    // the rule, for any screen added later: one that stays allowed in the
+    // free app and rereads who this is must leave by itself
+    const nav = code(path.join(root, "src/navigation.ts"));
+    const free = new Set([...(nav.match(/const FREE_ROUTES = new Set\(\[([^\]]+)\]/)?.[1] ?? "").matchAll(/"([()a-z-]+)"/g)].map((m) => m[1]));
+    expect(free.has("week-plan") && free.has("offer")).toBe(true);
+    for (const f of files(path.join(root, "app"))) {
+      const top = rel(f).split(path.sep)[1].replace(/\.tsx$/, "");
+      if (!free.has(top) || !code(f).includes("rereadMe()")) continue;
+      expect(code(f), `${rel(f)} rereads who this is and stays put`).toContain("openHome(router)");
+    }
+  });
+
+  // The simulator's first walk of a first post (Nov 25 2026): with the
+  // keyboard up for the note, "Post to my friends" sat behind the keyboard
+  // and the tap aimed at it typed a letter. The button is the page's footer,
+  // which rides on the keyboard, and the note rests with the lengths in view.
+  it("the post button rides on the keyboard while the note is typed", () => {
+    const post = code(path.join(root, "app/post.tsx"));
+    const footer = post.slice(post.indexOf("footer={"), post.indexOf("    >", post.indexOf("footer={")));
+    expect(footer).toContain('label={photo ? "Post to my friends" : "Log my training"}');
+    expect(footer).toContain("{error ?");
+    // one button, in the footer only
+    expect(post.match(/"Post to my friends"/g)?.length).toBe(1);
+    expect(post).toContain("revealTop={NOTE_REVEAL_TOP}");
+    const form = code(path.join(root, "src/FormScreen.tsx"));
+    expect(form).toContain("revealTop = REVEAL_TOP");
+    expect(form).toContain("- revealTop;");
+  });
+
+  // A screen the gatekeeper does not know is sent straight back home: a
+  // friend's profile was built and its first open bounced to Friends. Every
+  // screen in the app has to be named in one of the gatekeeper's lists.
+  it("every screen is one the gatekeeper knows", () => {
+    const nav = code(path.join(root, "src/navigation.ts"));
+    const known = new Set([...nav.matchAll(/"([()a-z-]+)"/g)].map((m) => m[1]));
+    const screens = readdirSync(path.join(root, "app"))
+      .filter((n) => !n.startsWith("_") && !n.startsWith("+"))
+      .map((n) => n.replace(/\.tsx$/, ""));
+    expect(screens.length).toBeGreaterThan(15);
+    for (const name of screens) expect(known.has(name), `mobile/app/${name} is not in src/navigation.ts`).toBe(true);
+  });
+
+  it("a profile never says a player has not trained, sells nothing, and keeps report, remove and block behind one menu", () => {
+    const page = code(path.join(root, "app/player/[id].tsx"));
+    const parts = code(path.join(root, "src/ProfileParts.tsx"));
+    // no photos to show: the grid is simply not there
+    expect(parts).toMatch(/export function PostGrid[\s\S]{0,400}if \(posts\.length === 0\) return null;/);
+    // a tap opens the photo full screen; the whole photo, never cropped,
+    // and nothing can be saved, shared or sent from there
+    expect(parts).toContain("<PhotoViewer photo={open} onClose={() => setOpen(null)} />");
+    const viewer = code(path.join(root, "src/PhotoViewer.tsx"));
+    expect(viewer).toContain('contentFit="contain"');
+    expect(viewer).toContain('accessibilityLabel="Close the photo"');
+    expect(viewer).toContain("onRequestClose={onClose}");
+    expect(viewer).not.toMatch(/\bShare\b|MediaLibrary|saveToLibrary|Clipboard|Linking/);
+    for (const text of [page, parts]) {
+      expect(text).not.toMatch(/has not (trained|posted)|hasn't|no training|missed|streak|upgrade|Strive Pro|\/offer|followers?/i);
+    }
+    // what the next level takes is said only to the player themselves: the
+    // words are the server's, and it sends them to nobody else
+    expect(parts).toContain("{aura.next ? (");
+    expect(page).toContain("<LevelBar aura={p.aura} />");
+    expect(page).toContain("<TwoNumbers weekMinutes={p.weekMinutes} allMinutes={p.allMinutes} mine={p.you} />");
+    // one menu, the iPhone's own sheet; the player is never told
+    expect(page).toContain("is not told if you report, remove or block them.");
+    for (const label of ['"Report the profile photo"', '"Report the Playing for line"', '"Remove from my friends"', "`Block ${first}`"]) {
+      expect(page, label).toContain(label);
+    }
+    // a profile the server will not send is said plainly, never a blank page
+    expect(page).toContain("error.status === 404");
+    expect(page).toContain("You see a player&apos;s profile once you are friends.");
+    // the room for the clock is outside the scroll, like every pushed page
+    expect(page).toContain("useBelowClock()");
+    // a block can be taken back: Settings, for an account with friends
+    const settings = code(path.join(root, "app/settings.tsx"));
+    expect(settings).toMatch(/\{social \? \([\s\S]{0,120}label="Blocked players"/);
+    expect(code(path.join(root, "app/blocked.tsx"))).toContain("Unblocking does not make you friends again.");
   });
 });
 

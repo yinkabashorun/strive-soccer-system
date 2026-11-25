@@ -5,6 +5,7 @@ import { fmtDuration } from "@shared/time-trained";
 import { ApiError, OFFLINE_MESSAGE } from "@/api/client";
 import { answerFriend, refreshFree, useFeed } from "@/api/free";
 import { Avatar, MyAvatar, Star } from "@/Avatar";
+import { PlayerLink } from "@/ProfileParts";
 import type { LockedCard } from "@shared/tracker";
 import { LockedPost, OpenPost } from "@/FeedCards";
 import { TodayHero } from "@/TodayHero";
@@ -104,7 +105,7 @@ export default function Friends() {
       {f.faces.length > 1 ? (
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.faces} accessibilityLabel="Who trained today">
           {f.faces.map((x) => (
-            <View key={x.id} style={styles.face} accessible accessibilityLabel={`${x.first}${x.active ? ", trained today" : ""}`}>
+            <PlayerLink key={x.id} id={x.id} you={x.you} first={x.first} said={`${x.first}${x.active ? ", trained today" : ""}`} style={styles.face}>
               {x.you ? <MyAvatar uri={x.photo} initials={x.initials} size={56} /> : <Avatar uri={x.photo} initials={x.initials} size={56} lit={x.active} />}
               <View style={{ flexDirection: "row", alignItems: "center", gap: 3, marginTop: 6 }}>
                 <Label size={12} dim={!x.active} numberOfLines={1}>
@@ -112,7 +113,7 @@ export default function Friends() {
                 </Label>
                 {x.starred ? <Star size={10} /> : null}
               </View>
-            </View>
+            </PlayerLink>
           ))}
         </ScrollView>
       ) : null}

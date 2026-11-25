@@ -122,6 +122,67 @@ these are what only a phone shows.
    four free tabs again, Week says so once ("Got it" puts it away), and
    every friend, post and club is still there.
 
+## The last step of joining free, on a phone only (Nov 25 2026)
+
+1. **Start my week opens the app.** Join free with a new email, take the
+   quiz, add the photo, tap "Not now, start free", pick the days, tap
+   "Start my week". The app opens on Friends with "Post my training". It
+   must not stay on "Your week" with a Save button (builds 8 and 9 did).
+2. **Nothing behind it.** On Friends, swipe from the left edge: nothing
+   happens. The offer and the week's set-up are not behind the app.
+3. **Changing it later still closes.** Week tab, Change, move a day, Save:
+   back on Week with the new days.
+
+## Build 9 and later, on a phone only (Nov 25 2026)
+
+1. **A face opens a profile.** On Friends, tap a friend's face in the row,
+   then the face on a post, then a row of the friends board on Week, then a
+   member in a club. Each opens that player's profile (their card, clubs,
+   training photos) and Back returns to where you were. Your own face does
+   nothing.
+2. **The profile's menu.** The three dots open the iPhone's own sheet:
+   report the photo, remove from my friends, block. Cancel closes it.
+   After Block, the player is gone from Friends, and Settings, Blocked
+   players lists them with Unblock.
+3. **You shows your clubs and photos.** Under your card: your clubs, then
+   your own training photos, the time on each.
+4. **Saved passwords.** Sign out. On the sign-in screen, tap the email
+   box: the keyboard offers the saved login for thestriveapp.com (it has to
+   be saved in the phone's Passwords, e.g. from Safari). After signing in
+   with a typed password, the phone offers to save it. If neither happens,
+   say so: it means the phone has not linked the app and the site yet (it
+   can take a day after the first install of a build that has it).
+5. **The icon.** On the home screen the Strive logo is sharp and whole
+   inside the white coin.
+6. **The build number.** Settings ends with "Strive Elite 1.0.0 (9)": the
+   number in brackets is the build that is installed.
+7. **The post screen names who is waiting.** Before you post today, with a
+   friend who trained: their faces and "Post yours to see theirs."
+
+## Share my week, on a phone only (Nov 25 2026)
+
+One row under the friends board on Week, once the player has trained this
+week (`mobile/src/ShareWeekRow.tsx`). The server draws the picture
+(`lib/elite/week-card-image.ts`, tested and looked at); the phone writes it
+to a file and opens the share sheet. None of that has run on a phone.
+
+1. **The sheet opens with the picture.** Tap "Share my week". After a
+   moment the phone's share sheet opens with a tall black card as its
+   preview: the name, the gold ring with the time, the seven days.
+2. **Instagram takes it as a story.** Instagram is in the sheet; pick it,
+   then Story. The card fills the story, nothing important under
+   Instagram's own bars at the top and bottom.
+3. **Save Image works** and the saved picture is sharp (1080 x 1920).
+4. **With no connection** the row says "We could not reach Strive. Check
+   your connection and try again." and nothing opens.
+5. **The words.** The sheet is handed the picture alone, on purpose: a
+   story takes a picture, not a picture with a line of text, and a sheet
+   only offers apps that take everything it is given. The player's own
+   link ("Train with me: ...") goes out only when the picture could not
+   be made. If the words should ride with the picture, set
+   `SHARE_WEEK_WORDS_WITH_PICTURE` in `mobile/src/share-week.ts` to true
+   on a test build and check that Instagram is still in the sheet.
+
 ## Seeing the phone from here
 
 `.github/workflows/ios-simulator-screens.yml` (built Nov 23 2026 on his

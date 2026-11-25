@@ -68,6 +68,16 @@ appId: com.strivesoccer.elite
     element: "Back"
     direction: UP
     timeout: 20000
+# all the way to the top, so the Back arrow is clear of the clock (it
+# scrolls with the page, and a tap aimed at one half under the clock misses)
+- swipe:
+    start: "50%,35%"
+    end: "50%,85%"
+- swipe:
+    start: "50%,35%"
+    end: "50%,85%"
+- waitForAnimationToEnd:
+    timeout: 3000
 - tapOn: "Back"
 - extendedWaitUntil:
     visible: "Have a club code?"

@@ -224,3 +224,28 @@ describe("a screen moves on only when it is answered", () => {
     expect(flow).not.toMatch(/—|\bAI\b|automated|algorithm|streak|missed/i);
   });
 });
+
+// "What if they don't have a club?" (Coach Yinka, Nov 25 2026): the team
+// question may be left empty, and while it is empty the button says so.
+describe("a question that may be left empty says Skip", () => {
+  it("the team and the goals may be skipped while empty, and nothing else", async () => {
+    const { canSkip, stepReady, QUIZ_QUESTIONS } = await import("@/lib/elite/quiz");
+    expect(canSkip("club", { club: "", goals: "" })).toBe(true);
+    expect(canSkip("club", { club: "   ", goals: "" })).toBe(true);
+    expect(canSkip("club", { club: "Renegados FC 2010", goals: "" })).toBe(false);
+    expect(canSkip("goals", { club: "", goals: "" })).toBe(true);
+    for (const id of ["gender", "position", "onBall", "nearby", "parent"]) expect(canSkip(id, { club: "", goals: "" })).toBe(false);
+    // an empty team never holds the quiz up
+    expect(stepReady("club", { club: "" } as never)).toBe(true);
+    // the words under the question say what to do with no team
+    expect(QUIZ_QUESTIONS.club.sub).toBe("Club and age group. No team right now? Skip this one.");
+  });
+
+  it("both quiz screens use the one rule", () => {
+    const fs = require("node:fs") as typeof import("node:fs");
+    const app = fs.readFileSync("mobile/app/onboarding/[step].tsx", "utf8");
+    expect(app).toContain("skip={canSkip(id, a)}");
+    expect(app).toContain('label={last ? "Finish" : skip ? "Skip" : "Next"}');
+    expect(fs.readFileSync("components/elite/QuizFlow.tsx", "utf8")).toContain("canSkip(current.id, a) ? (");
+  });
+});

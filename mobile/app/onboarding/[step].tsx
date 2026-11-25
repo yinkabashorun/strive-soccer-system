@@ -21,6 +21,7 @@ import {
   stepReady,
   stillToRate,
   type QuizStepId,
+  canSkip,
 } from "@shared/quiz";
 import { FREE_QUESTIONS, FREE_STEPS, freeStepReady, type FreeAnswers, type FreeStepId } from "@shared/free-intake";
 import { GOALS, GRADES } from "@shared/tracker";
@@ -65,11 +66,17 @@ export default function QuizStep() {
   if (!quiz) return null;
   const question = free ? FREE_QUESTIONS[quiz.id as FreeStepId] : QUIZ_QUESTIONS[quiz.id as QuizStepId];
   const { index, total } = stepPosition(id, order);
-  const readyAt = (s: string) => (free ? freeStepReady(s as FreeStepId, a) : stepReady(s as QuizStepId, a));
+  const readyOf = (s: string, of: FreeAnswers) => (free ? freeStepReady(s as FreeStepId, of) : stepReady(s as QuizStepId, of));
+  const readyAt = (s: string) => readyOf(s, a);
 
-  async function finish() {
+  // `now` is the answers INCLUDING what the last tap just answered. The
+  // draft is saved a moment after a tap, so reading it here would miss the
+  // last screen's own answer: on the free quiz, whose last screen is "What
+  // is near where you train?", the first tap on Finish found that screen
+  // still unanswered and opened it again, and only a second tap went on.
+  async function finish(now: FreeAnswers) {
     // a screen skipped on the way is asked for, never saved blank
-    const missing = order.find((s) => !readyAt(s));
+    const missing = order.find((s) => !readyOf(s, now));
     if (missing) {
       router.push(`/onboarding/${missing}`);
       return;
@@ -80,7 +87,7 @@ export default function QuizStep() {
       // on (the photo and @username if they are owed, then the offer).
       setSaving(true);
       try {
-        await saveIntake(a);
+        await saveIntake(now);
         await clear();
         await rereadMe();
       } catch (e) {
@@ -90,13 +97,13 @@ export default function QuizStep() {
       return;
     }
     try {
-      await submit.mutateAsync(a);
+      await submit.mutateAsync(now);
       await clear();
       // The building screen names their own weak spot and their week.
-      const load = TEAM_TRAINING.find((t) => t.id === a.team)?.load;
+      const load = TEAM_TRAINING.find((t) => t.id === now.team)?.load;
       router.replace({
         pathname: "/onboarding/building",
-        params: { spot: weakSpotPhrase(lowestAttributes(a.attrs)) ?? "you", sessions: sessionsWord(sessionsFor(load)) },
+        params: { spot: weakSpotPhrase(lowestAttributes(now.attrs)) ?? "you", sessions: sessionsWord(sessionsFor(load)) },
       });
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "That did not save. Check your connection and try again.");
@@ -107,7 +114,7 @@ export default function QuizStep() {
     if (patch) set(patch);
     const n = nextStepId(id, order);
     if (n) router.push(`/onboarding/${n}`);
-    else void finish();
+    else void finish(patch ? { ...a, ...patch } : a);
   }
 
   // A tap is the answer: a light tick and the next question comes up.
@@ -145,7 +152,7 @@ export default function QuizStep() {
                   {toRate}
                 </Body>
               ) : null}
-              <NextButton ready={ready || id === "nearby"} last={last} busy={submit.isPending || saving} onNext={() => next(id === "nearby" ? { nearbyAnswered: true } : undefined)} />
+              <NextButton ready={ready || id === "nearby"} last={last} skip={canSkip(id, a)} busy={submit.isPending || saving} onNext={() => next(id === "nearby" ? { nearbyAnswered: true } : undefined)} />
             </View>
           ) : null
       }
@@ -173,8 +180,10 @@ export default function QuizStep() {
   );
 }
 
-function NextButton({ ready, last, busy, onNext }: { ready: boolean; last: boolean; busy: boolean; onNext: () => void }) {
-  return <Button label={last ? "Finish" : "Next"} busy={busy} disabled={!ready} onPress={onNext} />;
+// "Skip" while a question that may be left empty is empty (lib/elite/quiz.ts
+// canSkip): a player with no team is never left wondering what to type.
+function NextButton({ ready, last, skip, busy, onNext }: { ready: boolean; last: boolean; skip: boolean; busy: boolean; onNext: () => void }) {
+  return <Button label={last ? "Finish" : skip ? "Skip" : "Next"} busy={busy} disabled={!ready} onPress={onNext} />;
 }
 
 function Choice({ label, line, on, onPress, image }: { label: string; line?: string; on: boolean; onPress: () => void; image?: string }) {

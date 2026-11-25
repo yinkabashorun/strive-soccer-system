@@ -1,0 +1,103 @@
+# A friend's profile, by taps: a face on Friends opens that player's
+# profile (who they are, the level their training earned, this week and all
+# time, their clubs, the training photos you may see). Props are given from
+# it; the one menu holds report, remove and block. Then the same from the
+# friends board on Week, and the blocked list in Settings.
+#
+# Example data only: every name is made up and nothing is sent anywhere.
+appId: com.strivesoccer.elite
+---
+- launchApp:
+    clearState: true
+    arguments:
+      fixtureState: locked
+- extendedWaitUntil:
+    visible: "Post my training"
+    timeout: 30000
+- tapOn: "Diego, trained today. Open Diego's profile."
+- extendedWaitUntil:
+    visible: "Diego R.*"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: t80-player
+- assertVisible: "Training photos"
+- tapOn: "Give Diego props on their latest training"
+- extendedWaitUntil:
+    visible: "Take your props back"
+    timeout: 8000
+# the one menu: the iPhone's own sheet, closed again without choosing
+- tapOn: "More for Diego"
+- extendedWaitUntil:
+    visible: "Block Diego"
+    timeout: 8000
+- takeScreenshot: t81-player-menu
+- tapOn: "Cancel"
+- scrollUntilVisible:
+    element: "Renegados FC. Open the club."
+    direction: DOWN
+    timeout: 15000
+- takeScreenshot: t82-player-clubs-photos
+# a training photo opens full screen, and closes again
+- scrollUntilVisible:
+    element:
+      text: ".*training photo.*Open the photo."
+      index: 0
+    direction: DOWN
+    timeout: 15000
+- tapOn:
+    text: ".*training photo.*Open the photo."
+    index: 0
+- extendedWaitUntil:
+    visible: "Close the photo"
+    timeout: 8000
+- takeScreenshot: t82b-photo-open
+- tapOn: "Close the photo"
+# all the way to the top, so the Back arrow is clear of the clock (it
+# scrolls with the page, and a tap aimed at one half under the clock misses)
+- swipe:
+    start: "50%,35%"
+    end: "50%,85%"
+- swipe:
+    start: "50%,35%"
+    end: "50%,85%"
+- waitForAnimationToEnd:
+    timeout: 3000
+- tapOn: "Back"
+- extendedWaitUntil:
+    visible: "Post my training"
+    timeout: 10000
+
+# The friends board on Week opens the same profile.
+- tapOn: "Week"
+- scrollUntilVisible:
+    element: ".*Nico A.*Open Nico's profile."
+    direction: DOWN
+    timeout: 20000
+- tapOn: ".*Nico A.*Open Nico's profile."
+- extendedWaitUntil:
+    visible: "Nico A.*"
+    timeout: 15000
+- takeScreenshot: t83-player-from-board
+- tapOn: "Back"
+
+# A block can be taken back in Settings.
+- tapOn: "You"
+- scrollUntilVisible:
+    element: "Settings.*"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Settings.*"
+- scrollUntilVisible:
+    element: "Blocked players.*"
+    direction: DOWN
+    timeout: 15000
+- tapOn: "Blocked players.*"
+- extendedWaitUntil:
+    visible: "Andre S."
+    timeout: 10000
+- takeScreenshot: t84-blocked
+- tapOn: "Unblock"
+- extendedWaitUntil:
+    visible: "You have not blocked anyone."
+    timeout: 10000

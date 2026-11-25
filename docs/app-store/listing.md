@@ -1,9 +1,18 @@
 # App Store listing: draft for Coach Yinka
 
 Everything App Store Connect asks for when the app record is created, ready
-to paste. DRAFT: nothing here is submitted until he approves it. No prices
-anywhere (Apple does not allow them in the name, subtitle or screenshots,
-and the app sells nothing inside it).
+to paste. DRAFT: nothing here is submitted until he approves it.
+
+REWRITTEN Nov 25 2026 for the native iPhone app (`mobile/`), which is the
+app that goes to review. The first draft described the earlier shell (the
+website inside an app) and said three things that are no longer true of
+the app a reviewer opens: that it has a coach side, that it has an example
+tour on the sign-in screen, and that nothing in it has a price. The native
+app is for players only, has no example tour, and offers Strive Pro after
+the free quiz (the price is on that one screen, and Start Strive Pro opens
+a web checkout). THAT LAST ONE IS THE DECISION THAT DECIDES REVIEW, and it
+is his: see "The payment decision" below. No price goes in the name, the
+subtitle or the screenshots either way.
 
 ## The fields
 
@@ -18,101 +27,136 @@ and the app sells nothing inside it).
 | Privacy Policy URL | | https://thestriveapp.com/privacy |
 | Marketing URL | optional | leave empty |
 | Copyright | | 2026, then the legal name on the Apple account (HIS) |
-| Price | | Free (nothing is bought in the app: members join after a call with a coach, and the free training log is free) |
+| Price | | Free to download. Strive Pro is a subscription started on the website (see "The payment decision") |
 | Availability | | United States only to start (HIS call) |
 
 Promotional text (170):
 
-> A new week of training every Monday, built around your player by Coach Yinka and Coach Gary. Every drill on video. One session at a time.
+> Train on your own, with your friends watching. Post your training, see theirs, and get a week built around your game. Every drill on video.
 
 Description:
 
-> Strive Elite is the training app for members of Strive Soccer's remote coaching program. Sign in with the account you created with your coach.
+> Strive Elite is where soccer players train on their own, together.
 >
-> YOUR WEEK, BUILT FOR ONE PLAYER
-> Every Monday a new week of sessions is ready, built by Coach Yinka and Coach Gary around what your player needs to work on. Open the app, tap Start session, and train.
+> POST YOUR TRAINING
+> Snap a photo of the work you put in. Your friends' training opens when you post yours. Give props. Friends are added by request only.
 >
-> ONE DRILL AT A TIME
-> Each drill fills the screen: the demo on video, how to do it, and the sets. A built-in timer counts your sets and your rest. Tap Done and the next drill is up.
+> YOUR WEEK, YOUR TARGET
+> Set how much you want to train each week and watch the ring close. See how your week stacks up against your friends.
 >
-> SEE THE WORK ADD UP
-> Every session adds to your time trained. Take a break when you need one and pick up where you left off. Nothing is lost.
+> CLUBS
+> Start a club with your team or your pickup crew. Every week your club is matched with another club: the club that trains more per player wins the week. Plan a session or a game with your club.
 >
-> YOUR COACHES, IN THE APP
-> Message your coach, send a clip of a drill and get it checked, join the weekly Film Room and book your monthly 1:1 call.
+> STRIVE PRO: A WEEK BUILT AROUND YOU
+> Take the quiz and get a new week of sessions every Monday, built around what you need to work on. One drill at a time, each with its video, and a timer that counts your sets and your rest.
 >
 > COURSES
-> A library of drills and guides to work through after your sessions: juggling, dribbling, weak foot, strength, speed and more.
+> A library of drills and guides to work through after your sessions: first touch, dribbling, weak foot, strength, speed and more.
 >
-> TRAIN WITH YOUR FRIENDS, FREE
-> Not a member? Join free (13 and older). Post a photo of the training you do on your own, set a weekly target, and see the friends you added do the same. Friends are added by request only. Start a club with your team and see how your club's week stacks up.
+> SEE THE WORK ADD UP
+> Every session adds to your time trained and earns medals. Share your week to your story.
 >
-> Members get everything above. You can also look around the members' app with the example player on the sign-in screen.
+> For players 13 and older. Members of Strive Soccer's coaching program sign in with the account they made with their coach.
 
-Every line above is something the app does today (the free part only
-while a coach has free sign-up switched on at /coach/free, which it must
-be for review). Not in it on purpose:
-prices, the guarantee, results claims, alumni names, courses that are not
-in the app yet (Passing, Scoring Goals).
+Every line above is something the native app does today. Not in it on
+purpose: prices, the guarantee, results claims, alumni names, courses that
+are not in the app (Passing, Scoring Goals), and the things that are on the
+website only (the coach chat, Film Room, the monthly call, My Drills).
+Free sign-up must be switched on at /coach/free for review.
 
 ## Screenshots (6.9-inch iPhone, 1320 x 2868)
 
-In `docs/app-store/screenshots/`, taken from the example player (not a real
-member): 1 home, 2 a drill full screen, 3 the set timer, 4 session
-complete, 5 the week. HIS to check: who appears in the two drill clips
-shown, and whether he wants a headline over each one (plain screenshots
-are allowed).
+Made by the simulator run from the real app with example data (one made-up
+player, "Marcus B."; every picture in them is a still of our own drill
+clips): the `store/` folder on the `app-screens` branch, eight PNGs at
+1320 x 2868. Suggested order: Train (home), a drill in the session, Week,
+Friends, a club, a player's profile, the friends board, Courses. HIS to
+check: who appears in the drill stills, and whether he wants a headline
+over each one (plain screenshots are allowed). The five older pictures in
+`docs/app-store/screenshots/` are of the website and are not used.
 
 ## Age rating questionnaire
 
 Answer None to violence, gambling, mature themes and the rest. Say Yes to
-user-generated content: members send private clips and messages to their
-coaches, AND free players share photos of their training with the friends
-they accepted. Describe it as: friends by accepted request only, no
+user-generated content: players share photos of their training, a one-line
+note, a club name and a Playing for line with the friends they accepted
+and their club mates. Describe it as: friends by accepted request only, no
 public feed and no search, a word filter on every typed line, report on
-every post, profile photo and club, block on any friend or club mate, a
-coach queue that is texted on every report and acts within 24 hours, and
-Terms with zero tolerance for objectionable content (Nov 20 2026). The
-free app is 13 and older, so expect 12+ or 13+, not 4+.
-Say YES to "Messaging and Chat": a member messages their coach. Apps have
-been rejected under guideline 2.3.6 for answering No to this (see
-`research-2026-11-18.md`, B8). Unrestricted web access: No. Expect 4+ or
-9+. Never choose the Kids Category.
+every post, profile photo, Playing for line and club, block on any friend
+or club mate, a coach queue that is texted on every report and acts within
+24 hours, and Terms with zero tolerance for objectionable content. The app
+is 13 and older, so expect 12+ or 13+, not 4+.
+
+"Messaging and Chat": the native app has no messages between people (no
+direct messages, no chat between clubs; the coach chat is on the website
+only). Answer No, and change it to Yes in the same update that ever adds
+the coach chat or any message between players: apps have been rejected
+under guideline 2.3.6 for a wrong answer here (`research-2026-11-18.md`,
+B8). Unrestricted web access: No. Never choose the Kids Category.
 
 ## App privacy answers
 
 Data linked to the user, none used for tracking: name, email address,
-phone number; photos or videos; customer support (messages); other user
-content; user ID; device ID; product interaction; crash data. The free
+phone number; photos or videos; other user content; user ID; device ID
+(the push token); product interaction; purchases (whether Strive Pro is
+on). Crash data only if a crash reporter is ever added (none is today). The free
 app adds nothing new to the list: its posts are photos and other user
 content, its birth month and year sit under other user content (used only
 for the 13-and-older check). Tracking: No.
 
+## The payment decision (HIS, before submitting)
+
+After the free quiz the app shows one offer screen for Strive Pro with its
+monthly price, and "Start Strive Pro" opens a web checkout (Stripe) in a
+sheet inside the app. From memory of Apple's rules, to verify against the
+current guideline 3.1.1 before submitting: a subscription to digital
+content normally has to be sold through Apple's in-app purchase; since
+2025 an app on the UNITED STATES storefront may link out to a web
+purchase. Three ways to go:
+
+1. Keep it as built and list the app on the US storefront only. Fastest.
+   The checkout should then open in Safari rather than a sheet inside the
+   app (one line), which is the form Apple's US rule describes.
+2. Take the offer and the price out of the iPhone app (a free player sees
+   no way to pay in the app; they start Strive Pro on the website and the
+   app picks it up). Safest for review, costs sign-ups.
+3. Sell Strive Pro through Apple's in-app purchase. Apple keeps a share
+   (15% for a small business, from memory); a few days of work.
+
+My suggestion: 1, with the checkout opening in Safari, and 2 as the
+fallback if review objects. Book Apple's "Meet with App Review" (D12) and
+ask before submitting.
+
 ## Notes for the reviewer (paste into App Review Information)
 
-> Strive Elite is the member app for Strive Soccer's remote coaching. A family joins after a call with a coach; the coach then creates their invitation. There is no purchase or price anywhere in the app.
+Written for option 1 above. If he picks another, the second paragraph
+changes.
+
+> Strive Elite is a training app for soccer players 13 and older.
 >
-> The app also has a free part for players 13 and older: Join free on the sign-in screen. A free player posts a photo of their own training for the friends they accepted, logs training time against a weekly target, and can start or join a club. There is no public feed and no search: friends are added only by sending a request that the other player accepts. Every post, profile photo and club can be reported; any friend or club mate can be blocked; typed text passes a word filter; every report texts our coaches, who review it within 24 hours from a queue at /coach/free and remove the content and the account where needed. The Terms state zero tolerance for objectionable content.
+> Anyone can join free on the sign-in screen (Join free). A free player takes a short quiz about their game, then is shown Strive Pro once: a weekly training plan built from their answers, as a monthly subscription. "Start Strive Pro" opens our website's checkout. The app is offered on the United States storefront only. "Not now, start free" continues into the free app, which stays free.
 >
-> A club's captain can plan a club training session (seen only by that club's members) or a game against another club in the same county that chose to be open to games (seen only by the two clubs). Every session and game shows which club organized it; Strive does not run or supervise them, a captain accepts that before planning and a player before saying they're in. A place is the name of a public field or park: the app refuses street addresses, links and phone numbers. There is no messaging between clubs and no direct messages. Sessions and games can be reported into the same coach queue, and a coach can cancel any of them. Strive's own events are a separate list: a captain enters the club with a roster, each player accepts the event's waiver, and payment for a physical event happens outside the app.
+> The free app: a player posts a photo of their own training for the friends they accepted, logs training time against a weekly target they set, and can start or join a club. There is no public feed and no search: friends are added only by a request the other player accepts, and a club is joined by a code and its captain's approval. Every post, profile photo, Playing for line and club can be reported; any friend or club mate can be blocked (and unblocked under Settings > Blocked players); typed text passes a word filter; every report texts our coaches, who review it within 24 hours and remove the content and the account where needed. Our Terms have zero tolerance for objectionable content.
 >
-> My drills (free part, optional): a free player names a drill of their own and films short takes of it (up to 20 seconds) whenever they want, then watches two takes side by side or every take in a row. Takes are private: only the player sees them (our coaches can too); they are never in the friends feed or on a profile. A Share button makes one video of the takes on the phone itself and hands it to the phone's share sheet; the app never posts anything for the player.
+> Clubs: a captain can plan a club training session (seen only by that club's members) or a game against another club in the same county that chose to be open to games (seen only by the two clubs). Every session and game shows which club organized it; Strive does not run or supervise them, a captain accepts that before planning and a player before saying they are in. A place is the name of a public field or park: the app refuses street addresses, links and phone numbers. There is no messaging between clubs and no direct messages between players.
 >
-> What the member gets is personal coaching: each week is built for one player by a coach, the coach answers the player's messages and clips, and the family has a 1:1 call with the coach each month.
+> Strive Pro: a new week of sessions every Monday, one drill at a time with its video and a set timer, a library of courses, and medals for time trained. Members of our coaching program (families who joined with a coach) sign in with the account they made on our website and see the same training screens.
 >
-> Sign in with the player account below to see the member side, and the coach account to see the coach side (the coach side is where a coach builds and reviews each player's week).
->
-> Player: [email] / [password]
-> Coach: [email] / [password]
+> Logins for review:
+> Strive Pro player: [email] / [password]
 > Free player: [email] / [password] (or tap Join free and make one)
 >
-> Every account has a profile photo and a username, asked for once at the end of sign-up (members) or right after it (free players). The photo is seen only by the player's coaches and, in the free part, the friends they accepted; it can be reported, and a coach can remove it. The username follows the word filter and can be changed under You > Edit profile (members) or Settings > Edit profile (free).
+> Every account has a profile photo and a username, asked for once after sign-up. The photo is seen only by the friends the player accepted and our coaches; it can be reported, and a coach can remove it.
 >
-> Account deletion: Account (tap the photo, top right) > Delete my account.
-> Notifications: optional, on or off under Account.
-> The app loads its screens from our server, with native push notifications, haptics, camera upload for training clips and an offline screen.
+> Account deletion: You > Settings > Delete my account.
+> Notifications: optional, asked once, each kind on or off under Settings.
+> Camera and photos: used only when the player chooses a photo for their profile or a training post.
 
-The two logins are made once the first build is on TestFlight. Each reviewer login (player, coach is exempt, free player) needs a profile photo and a username set before it is handed over (081): an account without them opens on the one-time photo and username screen, which a reviewer may read as a wall.
+The two logins are made on the day of submission. Each needs a profile
+photo and a username already set, so the reviewer does not open on the
+one-time photo and username screen. The Strive Pro login needs a live week
+in it. A coach login is not given: a coach account opens on one screen
+that says the coach side is on the website.
 
 ## The text to current families before the agreement screen appears
 

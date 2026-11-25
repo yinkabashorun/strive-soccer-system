@@ -21,6 +21,7 @@
         "UISupportedInterfaceOrientations": ["UIInterfaceOrientationPortrait"],
         "NSPhotoLibraryAddUsageDescription": "Strive Elite saves your progress videos to your photo library when you choose Save Video."
       },
+      "associatedDomains": ["webcredentials:thestriveapp.com"],
       "entitlements": { "aps-environment": "production" },
       "privacyManifests": {
         "NSPrivacyTracking": false,

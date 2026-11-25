@@ -11,6 +11,7 @@ import type {
   AppFreePlan,
   AppFreeWeek,
   AppFreeYou,
+  AppProfile,
   AppMemberState,
   AppOffer,
   AppWeek,
@@ -686,6 +687,75 @@ function fixtureFreeYou(): AppFreeYou {
   };
 }
 
+// A player's profile in the example: Marcus himself ("me") or one of his
+// three friends. The photos are the same stills the feed uses; the clubs
+// are the example clubs (fixtures-clubs.ts).
+const PROFILE_CLUBS = [
+  { id: "c-renegados", name: "Renegados FC", mine: true },
+  { id: "c-pickup", name: "Sunday Pickup", mine: true },
+  { id: "c-gainesville", name: "Gainesville HS", mine: true },
+];
+const still = (file: string) => m(`/drills/posters/${file}.jpg`);
+function fixtureProfile(id: string): AppProfile {
+  const l = now();
+  if (id === "me") {
+    const y = fixtureFreeYou();
+    return {
+      id: "me",
+      name: y.name,
+      first: "Marcus",
+      initials: "MB",
+      photo: ME_PHOTO,
+      username: "marcus.b",
+      starred: false,
+      you: true,
+      friend: false,
+      level: "Competitive",
+      playingFor: "Example FC 2010",
+      aura: y.aura,
+      weekMinutes: y.weekMinutes,
+      allMinutes: y.allMinutes,
+      clubs: PROFILE_CLUBS,
+      posts: [
+        ...(l.posted ? [{ id: "e-today", day: "2026-11-24", minutes: POST_MINUTES, kind: "training" as const, photoUrl: still("two-touch-passing") }] : []),
+        { id: "e-mon", day: "2026-11-23", minutes: MY_WEEK_MINUTES, kind: "training" as const, photoUrl: still("juggling-thighs-high") },
+        { id: "e-sat", day: "2026-11-21", minutes: 45, kind: "training" as const, photoUrl: still("weak-foot-tap-pull-push") },
+      ],
+      propsPost: null,
+    };
+  }
+  const f = FRIENDS.find((x) => x.id === id) ?? FRIENDS[0];
+  const lead = f.id === FRIENDS[0].id;
+  return {
+    id: f.id,
+    name: f.name,
+    first: f.first,
+    initials: f.initials,
+    photo: f.photo,
+    username: lead ? "diego.r9" : null,
+    starred: lead,
+    you: false,
+    friend: true,
+    level: "Competitive",
+    playingFor: lead ? "Renegados FC 2010" : null,
+    aura: { level: lead ? 5 : 3, label: auraLabel(lead ? 5 : 3), progress: lead ? 0.62 : 0.3, next: null },
+    weekMinutes: f.minutes,
+    allMinutes: lead ? 1730 : 610,
+    clubs: lead ? PROFILE_CLUBS.slice(0, 2) : PROFILE_CLUBS.slice(0, 1),
+    // today's photo is theirs to see only once Marcus has posted today
+    posts: [
+      ...(l.posted && f.today > 0 ? [{ id: `p-${f.first.toLowerCase()}`, day: "2026-11-24", minutes: f.today, kind: "training" as const, photoUrl: still("wall-pass-touch-stepover") }] : []),
+      { id: `p-${f.first.toLowerCase()}-y`, day: "2026-11-23", minutes: 60, kind: "training" as const, photoUrl: still("juggling-thighs-high") },
+      { id: `p-${f.first.toLowerCase()}-s`, day: "2026-11-21", minutes: 45, kind: "training" as const, photoUrl: still("speed-zigzag-sprint") },
+      { id: `p-${f.first.toLowerCase()}-g`, day: "2026-11-20", minutes: 30, kind: "gym" as const, photoUrl: still("plyo-squat-jumps") },
+      { id: `p-${f.first.toLowerCase()}-w`, day: "2026-11-19", minutes: 60, kind: "training" as const, photoUrl: still("l-turn-roll-touch") },
+    ],
+    propsPost: { id: `p-${f.first.toLowerCase()}-y`, propped: false },
+  };
+}
+// One player Marcus blocked, until the block is taken back in Settings.
+let unblocked = false;
+
 const FIXTURE_PLAN: AppFreePlan = {
   recommended: TARGET,
   line: "We recommend 4 hours a week on your own, outside team training.",
@@ -776,6 +846,12 @@ function fixtureFree(path: string, method: string, body?: unknown): unknown {
   }
   if (at === "week") return fixtureFreeWeek();
   if (at === "you") return fixtureFreeYou();
+  if (at.startsWith("profile/")) return method === "GET" ? { profile: fixtureProfile(decodeURIComponent(at.slice("profile/".length))) } : { ok: true };
+  if (at === "blocked") {
+    if (method === "GET") return { blocked: unblocked ? [] : [{ id: "f-blocked", name: "Andre S." }] };
+    unblocked = true;
+    return { ok: true };
+  }
   if (at === "props") return { ok: true, propped: true };
   return { ok: true };
 }

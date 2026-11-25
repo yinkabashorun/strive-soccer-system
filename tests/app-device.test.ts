@@ -904,10 +904,78 @@ describe("the social half is built like the training loop", () => {
 
   it("You is one card: who they are, the level their training earned, their two numbers", () => {
     const me = code(path.join(root, "app/(free)/me.tsx"));
-    expect(me).toContain("<Eyebrow>{y.aura.label}</Eyebrow>");
-    expect(me).toMatch(/fill: \{[^}]*backgroundColor: color\.gold/);
+    const parts = code(path.join(root, "src/ProfileParts.tsx"));
+    // the level and the two numbers are the profile's own pieces, shared
+    // with a friend's profile so the two can never drift
+    expect(me).toContain("<LevelBar aura={y.aura} />");
+    expect(me).toContain("<TwoNumbers weekMinutes={y.weekMinutes} allMinutes={y.allMinutes} mine />");
+    expect(parts).toContain("<Eyebrow>{aura.label}</Eyebrow>");
+    expect(parts).toMatch(/fill: \{[^}]*backgroundColor: color\.gold/);
     // gold stays on what was earned, never on a button
     expect(me).not.toMatch(/<Button[^>]*gold/);
+    // under the card: your clubs and your own training photos, the same
+    // reader a friend's view of you comes from
+    expect(me).toContain('useProfile("me")');
+    expect(me).toContain("<ClubRow clubs={mine.data.clubs} />");
+    expect(me).toContain("<PostGrid posts={mine.data.posts} first={mine.data.first} mine />");
+  });
+
+  // A social app where a face does nothing feels dead: every place a friend
+  // is shown opens their profile, and the profile holds to the house rules.
+  it("a friend's face opens their profile, from every place a friend is shown", () => {
+    for (const f of ["app/(free)/friends.tsx", "app/(free)/my-week.tsx", "app/club/[id]/index.tsx", "src/FeedCards.tsx"]) {
+      expect(code(path.join(root, f)), f).toMatch(/<PlayerLink\b/);
+    }
+    const parts = code(path.join(root, "src/ProfileParts.tsx"));
+    // your own face is never a link (your profile is the You tab), and a
+    // link says what the tap does
+    expect(parts).toMatch(/if \(you \|\| !id\) \{\s*return \(\s*<View style=\{style\} accessible accessibilityLabel=\{said\}>/);
+    expect(parts).toContain("router.push(`/player/${id}` as Href)");
+    expect(parts).toContain("Open ${first}'s profile.");
+    // a club the viewer is not in is only named: its page is its members'
+    expect(parts).toMatch(/c\.mine \? \(\s*<Press[\s\S]{0,120}router\.push\(`\/club\/\$\{c\.id\}`/);
+  });
+
+  // A screen the gatekeeper does not know is sent straight back home: a
+  // friend's profile was built and its first open bounced to Friends. Every
+  // screen in the app has to be named in one of the gatekeeper's lists.
+  it("every screen is one the gatekeeper knows", () => {
+    const nav = code(path.join(root, "src/navigation.ts"));
+    const known = new Set([...nav.matchAll(/"([()a-z-]+)"/g)].map((m) => m[1]));
+    const screens = readdirSync(path.join(root, "app"))
+      .filter((n) => !n.startsWith("_") && !n.startsWith("+"))
+      .map((n) => n.replace(/\.tsx$/, ""));
+    expect(screens.length).toBeGreaterThan(15);
+    for (const name of screens) expect(known.has(name), `mobile/app/${name} is not in src/navigation.ts`).toBe(true);
+  });
+
+  it("a profile never says a player has not trained, sells nothing, and keeps report, remove and block behind one menu", () => {
+    const page = code(path.join(root, "app/player/[id].tsx"));
+    const parts = code(path.join(root, "src/ProfileParts.tsx"));
+    // no photos to show: the grid is simply not there
+    expect(parts).toMatch(/export function PostGrid[\s\S]{0,200}if \(posts\.length === 0\) return null;/);
+    for (const text of [page, parts]) {
+      expect(text).not.toMatch(/has not (trained|posted)|hasn't|no training|missed|streak|upgrade|Strive Pro|\/offer|followers?/i);
+    }
+    // what the next level takes is said only to the player themselves: the
+    // words are the server's, and it sends them to nobody else
+    expect(parts).toContain("{aura.next ? (");
+    expect(page).toContain("<LevelBar aura={p.aura} />");
+    expect(page).toContain("<TwoNumbers weekMinutes={p.weekMinutes} allMinutes={p.allMinutes} mine={p.you} />");
+    // one menu, the iPhone's own sheet; the player is never told
+    expect(page).toContain("is not told if you report, remove or block them.");
+    for (const label of ['"Report the profile photo"', '"Report the Playing for line"', '"Remove from my friends"', "`Block ${first}`"]) {
+      expect(page, label).toContain(label);
+    }
+    // a profile the server will not send is said plainly, never a blank page
+    expect(page).toContain("error.status === 404");
+    expect(page).toContain("You see a player&apos;s profile once you are friends.");
+    // the room for the clock is outside the scroll, like every pushed page
+    expect(page).toContain("useBelowClock()");
+    // a block can be taken back: Settings, for an account with friends
+    const settings = code(path.join(root, "app/settings.tsx"));
+    expect(settings).toMatch(/\{social \? \([\s\S]{0,120}label="Blocked players"/);
+    expect(code(path.join(root, "app/blocked.tsx"))).toContain("Unblocking does not make you friends again.");
   });
 });
 

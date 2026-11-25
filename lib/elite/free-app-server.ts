@@ -37,6 +37,9 @@ import {
   getTargetTable,
   getWeekLogs,
   myPhotoFor,
+  blockedFor,
+  clubIdsOf,
+  profileFor,
   type Tracker,
 } from "./tracker-server";
 import {
@@ -62,7 +65,7 @@ import {
   weekStrip,
   type Season,
 } from "./tracker";
-import type { AppFeedCard, AppFreeFeed, AppFreePlan, AppFreeWeek, AppFreeYou, AppOffer } from "./app-contract";
+import type { AppBlocked, AppFeedCard, AppFreeFeed, AppFreePlan, AppFreeWeek, AppFreeYou, AppOffer, AppProfile } from "./app-contract";
 import type { Viewer } from "./session";
 import { squadFor } from "./squad-pass-server";
 import { firstDays } from "./first-days";
@@ -204,4 +207,44 @@ export async function freeYouFor(viewer: Viewer, tracker: Tracker, today: string
     starred: Boolean(tracker.starred_at),
     invite: joinLink(APP_URL, tracker.referral_code),
   };
+}
+
+// One player's profile, for the phone. Who may be sent one is the
+// website's own rule (profileFor: the player, their friends, the coaches;
+// a block either way closes it), and so is which photos come with it.
+// Added here: whether each of their clubs is one the caller is in too (its
+// page opens only for its members), and the words for the level.
+export async function appProfileFor(viewer: Viewer, target: string, today: string): Promise<AppProfile | null> {
+  const id = target === "me" ? viewer.profile.id : target;
+  const admin = createServiceClient();
+  const [p, mine] = await Promise.all([
+    profileFor(viewer, id, today),
+    admin ? clubIdsOf(admin, viewer.profile.id) : Promise.resolve([] as string[]),
+  ]);
+  if (!p) return null;
+  const myClubs = new Set(mine);
+  return {
+    id: p.id,
+    name: p.name,
+    first: firstNameOf(p.name),
+    initials: p.initials,
+    photo: p.photo,
+    username: p.username ?? null,
+    starred: p.starred,
+    you: p.you,
+    friend: p.friend,
+    level: p.levelName,
+    playingFor: p.playingFor,
+    aura: { level: p.aura.level, label: auraLabel(p.aura.level), progress: p.aura.progress, next: p.you ? auraNextLine(p.aura) : null },
+    weekMinutes: p.weekMinutes,
+    allMinutes: p.allMinutes,
+    clubs: p.clubs.map((c) => ({ id: c.id, name: c.name, mine: myClubs.has(c.id) })),
+    posts: p.posts.map((g) => ({ id: g.id, day: g.day, minutes: g.minutes, kind: g.kind, photoUrl: g.photoUrl })),
+    propsPost: p.propsPost,
+  };
+}
+
+// The players the caller has blocked, so a block can be taken back.
+export async function appBlockedFor(viewer: Viewer): Promise<AppBlocked> {
+  return { blocked: await blockedFor(viewer) };
 }

@@ -7,6 +7,7 @@ import type { AppOpenCard } from "@shared/app-contract";
 import { ApiError, OFFLINE_MESSAGE } from "./api/client";
 import { blockPlayer, deleteEntry, reportPost, toggleProps } from "./api/free";
 import { Avatar, MyAvatar, Star } from "./Avatar";
+import { PlayerLink } from "./ProfileParts";
 import { feel } from "./feel";
 import { Shade } from "./Shade";
 import { sheet } from "./sheet";
@@ -123,16 +124,25 @@ export function OpenPost({ card, onGone }: { card: AppOpenCard; onGone: () => vo
   return (
     <View style={styles.open}>
       <View style={styles.who}>
-        {card.mine ? <MyAvatar uri={card.photo} initials={card.initials} size={38} /> : <Avatar uri={card.photo} initials={card.initials} size={38} />}
-        <View style={{ flex: 1 }}>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }} accessible accessibilityLabel={card.starred ? `${card.name}. ${STAR_LABEL}` : card.name}>
-            <Label numberOfLines={1}>{card.name}</Label>
-            {card.starred ? <Star /> : null}
+        {/* the face and the name open that player's profile */}
+        <PlayerLink
+          id={card.ownerId}
+          you={card.mine}
+          first={card.first}
+          said={`${card.starred ? `${card.name}. ${STAR_LABEL}` : card.name}. ${card.ago}`}
+          style={styles.whoLink}
+        >
+          {card.mine ? <MyAvatar uri={card.photo} initials={card.initials} size={38} /> : <Avatar uri={card.photo} initials={card.initials} size={38} />}
+          <View style={{ flex: 1 }}>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+              <Label numberOfLines={1}>{card.name}</Label>
+              {card.starred ? <Star /> : null}
+            </View>
+            <Body dim size={12.5}>
+              {card.ago}
+            </Body>
           </View>
-          <Body dim size={12.5}>
-            {card.ago}
-          </Body>
-        </View>
+        </PlayerLink>
         <Press onPress={more} style={styles.more} accessibilityLabel={card.mine ? "Your post: more" : `${card.first}'s post: more`}>
           <View style={styles.dot} />
           <View style={styles.dot} />
@@ -200,6 +210,7 @@ const styles = StyleSheet.create({
   locked: { marginHorizontal: 14, borderRadius: radius.card, backgroundColor: "#1c1b17", borderWidth: 1, borderColor: color.line, alignItems: "center", justifyContent: "center", paddingHorizontal: 30 },
   open: { marginHorizontal: 14, borderRadius: radius.card, backgroundColor: color.fill, borderWidth: 1, borderColor: color.line, overflow: "hidden" },
   who: { flexDirection: "row", alignItems: "center", gap: 10, paddingLeft: 14, paddingRight: 4, minHeight: 62 },
+  whoLink: { flex: 1, flexDirection: "row", alignItems: "center", gap: 10, minHeight: 44 },
   more: { width: 44, height: 44, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 3.5 },
   dot: { width: 4, height: 4, borderRadius: 2, backgroundColor: color.dim },
   photo: { width: "100%", aspectRatio: 4 / 5, backgroundColor: color.fill2 },

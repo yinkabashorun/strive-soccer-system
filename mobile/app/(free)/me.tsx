@@ -1,6 +1,5 @@
 import { Share, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
-import { fmtDuration } from "@shared/time-trained";
 import { STAR_LABEL, initialsOf } from "@shared/tracker";
 import { useMe, useYou } from "@/api/queries";
 import { MemberCard } from "@/MemberCard";
@@ -8,11 +7,11 @@ import { hasTrain } from "@/navigation";
 import { useMyPhoto } from "@/usePhoto";
 import { YouEarned } from "@/YouEarned";
 import { OFFLINE_MESSAGE } from "@/api/client";
-import { refreshFree, useFreeYou } from "@/api/free";
+import { refreshFree, useFreeYou, useProfile } from "@/api/free";
+import { ClubRow, LevelBar, PostGrid, TwoNumbers } from "@/ProfileParts";
 import { MyAvatar, Star } from "@/Avatar";
 import { PAGE_TOP, Screen } from "@/Screen";
-import { Body, Button, Card, Eyebrow, Hairline, Head, Ring, SettingRow, Skeleton } from "@/ui";
-import { color } from "@/theme";
+import { Body, Button, Card, Hairline, Head, Ring, SettingRow, Skeleton } from "@/ui";
 
 // You, in the free app: your photo and @username, your aura level (earned
 // by training and by nothing else; it only goes up), this week and all
@@ -29,6 +28,7 @@ export default function Me() {
   const me = useMe();
   const you = useFreeYou();
   const y = you.data;
+  const mine = useProfile("me");
   const name = y?.name ?? me.data?.free?.name ?? "";
   const username = me.data?.profileSetup?.username;
   // Strive Pro is on (lib/elite/one-app.ts): the SAME You tab, with the
@@ -77,32 +77,8 @@ export default function Me() {
           )
         ) : (
           <>
-            <View style={styles.level} accessible accessibilityLabel={[y.aura.label, y.aura.next].filter(Boolean).join(". ")}>
-              <Eyebrow>{y.aura.label}</Eyebrow>
-              <View style={styles.track}>
-                <View style={[styles.fill, { width: `${Math.round(Math.min(1, Math.max(0, y.aura.progress)) * 100)}%` }]} />
-              </View>
-              {y.aura.next ? (
-                <Body dim size={12.5} style={{ marginTop: 7 }}>
-                  {y.aura.next}
-                </Body>
-              ) : null}
-            </View>
-            <View style={styles.numbers}>
-              <View style={styles.number}>
-                <Head size={36}>{fmtDuration(y.weekMinutes)}</Head>
-                <Body dim size={13}>
-                  this week
-                </Body>
-              </View>
-              <View style={styles.divider} />
-              <View style={styles.number}>
-                <Head size={36}>{fmtDuration(y.allMinutes)}</Head>
-                <Body dim size={13}>
-                  all time. It only ever goes up.
-                </Body>
-              </View>
-            </View>
+            <LevelBar aura={y.aura} />
+            <TwoNumbers weekMinutes={y.weekMinutes} allMinutes={y.allMinutes} mine />
           </>
         )}
       </Card>
@@ -110,6 +86,15 @@ export default function Me() {
         <Body dim size={13.5} style={{ marginHorizontal: 20, marginTop: 10 }}>
           {y.gymLine}
         </Body>
+      ) : null}
+
+      {/* Your clubs and your own training photos: what a friend sees when
+          they open your profile (app/player/[id].tsx), from the same reader. */}
+      {mine.data ? (
+        <>
+          <ClubRow clubs={mine.data.clubs} />
+          <PostGrid posts={mine.data.posts} first={mine.data.first} mine />
+        </>
       ) : null}
 
       {train ? (
@@ -156,11 +141,4 @@ export default function Me() {
 const styles = StyleSheet.create({
   card: { marginHorizontal: 14, marginTop: 18, padding: 20, overflow: "hidden", borderColor: "rgba(200,168,88,0.28)" },
   who: { flexDirection: "row", alignItems: "center", gap: 16 },
-  level: { marginTop: 20 },
-  track: { height: 6, borderRadius: 3, backgroundColor: color.fill2, marginTop: 9, overflow: "hidden" },
-  // earned by training and by nothing else: gold
-  fill: { height: 6, borderRadius: 3, backgroundColor: color.gold },
-  numbers: { flexDirection: "row", alignItems: "stretch", marginTop: 20, paddingTop: 18, borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: color.line },
-  number: { flex: 1 },
-  divider: { width: StyleSheet.hairlineWidth, backgroundColor: color.line, marginHorizontal: 16 },
 });

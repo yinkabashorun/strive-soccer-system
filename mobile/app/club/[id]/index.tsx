@@ -4,11 +4,12 @@ import { Image } from "expo-image";
 import { useLocalSearchParams, useRouter, type Href } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { AppClubPage, AppClubTile, ClubMemberRow } from "@shared/app-contract";
-import { STAR_LABEL } from "@shared/tracker";
+import { STAR_LABEL, firstNameOf } from "@shared/tracker";
 import { ApiError, OFFLINE_MESSAGE } from "@/api/client";
 import { leaveClub, refreshClubs, reportClub, useClub } from "@/api/clubs";
 import { blockPlayer, refreshFree } from "@/api/free";
 import { Avatar, MyAvatar, Star } from "@/Avatar";
+import { PlayerLink } from "@/ProfileParts";
 import Animated, { FadeIn } from "react-native-reanimated";
 import { Crest, CrestGlow } from "@/Crest";
 import { HERO_SHADE, Shade } from "@/Shade";
@@ -340,7 +341,7 @@ function MemberRow({ m }: { m: ClubMemberRow }) {
     .filter(Boolean)
     .join(", ");
   return (
-    <View style={styles.member} accessible accessibilityLabel={said}>
+    <PlayerLink id={m.id} you={m.you} first={firstNameOf(m.name)} said={said} style={styles.member}>
       <Label dim size={14} style={styles.place}>
         {m.place ?? ""}
       </Label>
@@ -366,7 +367,7 @@ function MemberRow({ m }: { m: ClubMemberRow }) {
         ) : null}
       </View>
       {m.time ? <Head size={22}>{m.time}</Head> : null}
-    </View>
+    </PlayerLink>
   );
 }
 

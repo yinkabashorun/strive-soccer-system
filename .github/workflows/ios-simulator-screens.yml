@@ -158,6 +158,13 @@ jobs:
             mkdir -p taps
             find "$HOME/.maestro/tests" -type f \( -name "*.png" -o -name "*.mp4" -o -name "maestro.log" \) -size -12M -newer "$RUNNER_TEMP/devices.json" -exec cp {} taps/ \; || true
           fi
+          # App Store size (6.9 inch, 1320 x 2868) copies of the screens the
+          # listing shows, kept as PNG. The simulator is a plain iPhone, whose
+          # screen has the same shape to within a pixel, so this only scales.
+          mkdir -p store
+          for n in 47-train 13-session-drill 14-week 48-train-friends 38-club 52-player 49-train-week 14b-courses; do
+            [ -e "$n.png" ] && sips -z 2868 1320 "$n.png" --out "store/$n.png" >/dev/null
+          done
           for f in *.png taps/*.png; do
             [ -e "$f" ] || continue
             sips -s format jpeg -s formatOptions 72 -Z 1500 "$f" --out "${f%.png}.jpg" >/dev/null && rm "$f"
@@ -175,6 +182,9 @@ jobs:
             echo
             echo "## Pictures"
             ls -1 *.jpg taps/*.jpg *.mp4 taps/*.mp4 2>/dev/null | sed 's/^/- /'
+            echo
+            echo "## App Store size (1320 x 2868)"
+            ls -1 store/*.png 2>/dev/null | sed 's/^/- /'
           } > README.md
           # a branch of pictures is not a site: Vercel leaves it alone
           printf '{ "git": { "deploymentEnabled": false } }\n' > vercel.json

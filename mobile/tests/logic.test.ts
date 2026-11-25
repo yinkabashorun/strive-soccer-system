@@ -197,6 +197,11 @@ describe("where the app belongs", () => {
     expect(areaHome("profile")).toBe("/profile-setup");
     expect(inArea("free-quiz", ["onboarding", "grade"])).toBe(true);
     expect(inArea("free-quiz", ["offer"])).toBe(false);
+    // a friend's profile and the blocked list belong to the free app only
+    expect(inArea("free", ["player", "f-diego"])).toBe(true);
+    expect(inArea("free", ["blocked"])).toBe(true);
+    expect(inArea("app", ["player", "f-diego"])).toBe(false);
+    expect(inArea("free-quiz", ["player", "f-diego"])).toBe(false);
     expect(inArea("free-quiz", ["(free)"])).toBe(false);
     // after the quiz: the offer, then the week's set-up, and nothing else
     expect(inArea("free-offer", ["offer"])).toBe(true);

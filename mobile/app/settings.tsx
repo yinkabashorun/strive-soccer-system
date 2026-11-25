@@ -7,6 +7,7 @@ import Constants from "expo-constants";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { SUPPORT_EMAIL, concernMailto } from "@shared/support";
 import { useMe } from "@/api/queries";
+import { hasFreeApp } from "@/navigation";
 import { signOutEverywhere } from "@/account";
 import { openSite } from "@/links";
 import { usePrefs } from "@/prefs";
@@ -32,6 +33,9 @@ export default function Settings() {
   // A free account has no sessions: no set timer and no drill demos to
   // switch, and its notifications are about its friends.
   const free = me.data?.state.kind === "free";
+  // friends and clubs (a free player, or Strive Pro on top of the free
+  // app): a block made there can be taken back here
+  const social = hasFreeApp(me.data?.state);
 
   return (
     <ScrollView style={[{ flex: 1, backgroundColor: color.black }, belowClock]} contentContainerStyle={{ paddingTop: 8, paddingBottom: insets.bottom + 40, paddingHorizontal: 20 }}>
@@ -82,6 +86,12 @@ export default function Settings() {
             />
             <Hairline />
             <SettingRow label="Profile photo" onPress={() => router.push("/profile-setup?edit=photo")} />
+            <Hairline />
+          </>
+        ) : null}
+        {social ? (
+          <>
+            <SettingRow label="Blocked players" onPress={() => router.push("/blocked")} />
             <Hairline />
           </>
         ) : null}

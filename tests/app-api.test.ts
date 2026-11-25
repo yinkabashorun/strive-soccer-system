@@ -94,6 +94,8 @@ function call(fn: string) {
     if (fn === "logTraining") return { ok: true, id: "l1" };
     if (fn === "appClubsFor") return { clubs: [], canStart: true };
     if (fn === "appClubPageFor" || fn === "appClubNearFor") return s.clubFound ? { id: args[1] } : null;
+    if (fn === "appProfileFor") return s.clubFound ? { id: args[1] } : null;
+    if (fn === "appBlockedFor") return { blocked: [] };
     if (fn === "startClubInApp") return s.organizerOk ? { ok: true, id: "c1", code: "ABCD2345" } : { ok: false, error: "needs_organizer_ok", needs: "organizer" };
     if (fn === "askToJoinByCode") return { ok: true, line: "Request sent. You are in Renegados FC once the captain lets you in." };
     if (fn === "newClubLink") return { ok: true, code: "NEWC2345" };
@@ -232,6 +234,8 @@ vi.mock("@/lib/elite/free-app-server", () => ({
   freeFeedFor: call("freeFeedFor"),
   freeWeekFor: call("freeWeekFor"),
   freeYouFor: call("freeYouFor"),
+  appProfileFor: call("appProfileFor"),
+  appBlockedFor: call("appBlockedFor"),
 }));
 vi.mock("@/lib/elite/free-upgrade-server", () => ({
   startProFromFree: call("startProFromFree"),
@@ -244,6 +248,9 @@ vi.mock("@/lib/elite/tracker-actions", () => ({
   toggleProps: call("toggleProps"),
   reportPost: call("reportPost"),
   blockPlayer: call("blockPlayer"),
+  unblockPlayer: call("unblockPlayer"),
+  removeFriend: call("removeFriend"),
+  reportLine: call("reportLine"),
   answerFriendRequest: call("answerFriendRequest"),
   // clubs, for a member and for the captain
   leaveClub: call("leaveClub"),
@@ -386,6 +393,8 @@ const ROUTES = {
   freeFriend: () => import("@/app/api/app/free/friend/route"),
   freeWeek: () => import("@/app/api/app/free/week/route"),
   freeYou: () => import("@/app/api/app/free/you/route"),
+  freeProfile: () => import("@/app/api/app/free/profile/[id]/route"),
+  freeBlocked: () => import("@/app/api/app/free/blocked/route"),
   courses: () => import("@/app/api/app/courses/route"),
   course: () => import("@/app/api/app/courses/[slug]/route"),
   notices: () => import("@/app/api/app/notices/route"),
@@ -444,6 +453,10 @@ const TABLE: { route: keyof typeof ROUTES; method: "GET" | "POST" | "DELETE"; ac
   { route: "freeFriend", method: "POST", access: "free_app" },
   { route: "freeWeek", method: "GET", access: "free_app" },
   { route: "freeYou", method: "GET", access: "free_app" },
+  { route: "freeProfile", method: "GET", access: "free_app" },
+  { route: "freeProfile", method: "POST", access: "free_app" },
+  { route: "freeBlocked", method: "GET", access: "free_app" },
+  { route: "freeBlocked", method: "POST", access: "free_app" },
   { route: "courses", method: "GET", access: "account" },
   { route: "course", method: "GET", access: "member" },
   // the Inbox is a member's; the notification choices are anyone's own
@@ -1021,6 +1034,45 @@ describe("clubs: bodies are checked first, and every write is the website's own 
       expect(res.status).toBe(404);
       expect(await res.json()).toEqual({ error: "not_found" });
     }
+  });
+
+  it("a player's profile: a well-formed id or me, a 404 for anyone the caller may not see, and each action is the website's own", async () => {
+    freeAccount();
+    expect((await go("freeProfile", "GET", undefined, "../week")).status).toBe(404);
+    expect((await go("freeProfile", "GET", undefined)).status).toBe(404);
+    expect(s.calls).toEqual([]); // an id that is not one never reaches a read
+    expect(await (await go("freeProfile", "GET", undefined, CLUB)).json()).toEqual({ profile: { id: CLUB } });
+    expect(await (await go("freeProfile", "GET", undefined, "me")).json()).toEqual({ profile: { id: "me" } });
+    s.clubFound = false; // not a friend, or a block either way: the reader answers nothing
+    const hidden = await go("freeProfile", "GET", undefined, CLUB);
+    expect(hidden.status).toBe(404);
+    expect(await hidden.json()).toEqual({ error: "not_found" });
+
+    s.calls.length = 0;
+    const post = async (body: unknown, id: string | undefined = CLUB) => (await go("freeProfile", "POST", body, id)).status;
+    expect(await post({ do: "remove" }, "me")).toBe(400); // nobody acts on "me"
+    expect(await post({ do: "remove" }, "nope")).toBe(400);
+    expect(await post({ do: "delete-them" })).toBe(400);
+    expect(s.calls).toEqual([]);
+    expect(await post({ do: "remove" })).toBe(200);
+    expect(await post({ do: "report_photo" })).toBe(200);
+    expect(await post({ do: "report_line" })).toBe(200);
+    expect(s.calls.map((c) => [c.fn, ...c.args])).toEqual([
+      ["removeFriend", CLUB],
+      ["reportLine", CLUB, "photo"],
+      ["reportLine", CLUB, "line"],
+    ]);
+  });
+
+  it("the blocked list, and taking a block back", async () => {
+    freeAccount();
+    expect(await (await go("freeBlocked", "GET", undefined)).json()).toEqual({ blocked: [] });
+    s.calls.length = 0;
+    expect((await go("freeBlocked", "POST", { id: "nope" })).status).toBe(400);
+    expect((await go("freeBlocked", "POST", {})).status).toBe(400);
+    expect(s.calls).toEqual([]);
+    expect((await go("freeBlocked", "POST", { id: CLUB })).status).toBe(200);
+    expect(s.calls.map((c) => [c.fn, ...c.args])).toEqual([["unblockPlayer", CLUB]]);
   });
 
   it("what a member or the captain does to a club goes through the website's action for it", async () => {

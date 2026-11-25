@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Alert, Share, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { fmtDuration } from "@shared/time-trained";
-import { BOARD_EMPTY_LINE, BOARD_TITLE, STAR_LABEL, initialsOf, stripDayLabel } from "@shared/tracker";
+import { BOARD_EMPTY_LINE, BOARD_TITLE, STAR_LABEL, firstNameOf, initialsOf, stripDayLabel } from "@shared/tracker";
 import { PRO_ENDED_DISMISS, PRO_ENDED_LINE } from "@shared/one-app";
 import { OFFLINE_MESSAGE } from "@/api/client";
 import { useMe } from "@/api/queries";
@@ -11,6 +11,7 @@ import { barShare } from "@/social-view";
 import { setPref, usePrefs } from "@/prefs";
 import { deleteEntry, refreshFree, useFreeWeek } from "@/api/free";
 import { Avatar, MyAvatar, Star } from "@/Avatar";
+import { PlayerLink } from "@/ProfileParts";
 import { PAGE_TOP, Screen } from "@/Screen";
 import { UpgradeCard } from "@/UpgradeCard";
 import { Body, Button, Card, Hairline, Head, Label, Press, Ring, Skeleton } from "@/ui";
@@ -157,7 +158,7 @@ export default function MyWeek() {
           {w.board.map((r, i) => (
             <View key={r.id}>
               {i > 0 ? <Hairline /> : null}
-              <View style={styles.row} accessible accessibilityLabel={`${r.place}. ${r.me ? "You" : r.name}${r.starred ? `, ${STAR_LABEL}` : ""}. ${r.time}`}>
+              <PlayerLink id={r.id} you={r.me} first={firstNameOf(r.name)} said={`${r.place}. ${r.me ? "You" : r.name}${r.starred ? `, ${STAR_LABEL}` : ""}. ${r.time}`} style={styles.row}>
                 <Head size={20} style={{ width: 24, color: r.me ? color.bone : color.faint }}>
                   {String(r.place)}
                 </Head>
@@ -176,7 +177,7 @@ export default function MyWeek() {
                   </View>
                 </View>
                 <Head size={20}>{r.time}</Head>
-              </View>
+              </PlayerLink>
             </View>
           ))}
         </Card>

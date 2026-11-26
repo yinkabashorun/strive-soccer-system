@@ -70,7 +70,7 @@ describe("the Monday moment", () => {
     }
     expect(lines.length).toBeGreaterThan(10);
     for (const l of lines) {
-      expect(l).not.toMatch(/[—–]| - /);
+      expect(l).not.toMatch(/[\u2014\u2013]| - /);
       expect(l.toLowerCase()).not.toMatch(/missed|only|behind|last place|streak/);
     }
   });

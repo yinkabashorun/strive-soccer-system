@@ -31,6 +31,7 @@ import { Shade } from "@/Shade";
 import { drillEyebrow, repsTiles } from "@/drill-view";
 import { cue, feel, tick } from "@/feel";
 import { usePrefs } from "@/prefs";
+import { askForRating, setSessionOpen } from "@/rating";
 import { turnOnNotifications } from "@/push";
 import { ReminderChips } from "@/NoticeChoices";
 import { Body, Button, Disc, Eyebrow, Head, Icon, Label, Press, Ring } from "@/ui";
@@ -85,6 +86,12 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
   const doneHere = useRef(new Map<string, number>());
   const clock = useRef(newClock());
   const [finish, setFinish] = useState<{ added: number; weekDone: boolean; left: number } | null>(null);
+
+  // while this screen is open the App Store rating is never asked (src/rating.ts)
+  useEffect(() => {
+    setSessionOpen(true);
+    return () => setSessionOpen(false);
+  }, []);
 
   // The count-in: the session's name, then 3, 2, 1 with a tap felt on each.
   useEffect(() => {
@@ -168,7 +175,12 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
         askPush={!prefs.pushAsked}
         // only what this player will really be told about
         who={{ coachTime: featureOn(me.data?.player?.tier, "coachChat"), friends: hasTrain(me.data?.state) }}
-        onHome={() => router.back()}
+        onHome={() => {
+          router.back();
+          // the last session of the week, finished and closed: one of the
+          // good moments to ask for a rating, once the session has gone
+          if (finish.weekDone) setTimeout(() => void askForRating("member_week_done"), 1200);
+        }}
         // a member with friends in the app (one-app.ts): one quiet row. A
         // session that added no time has nothing to post.
         onPost={

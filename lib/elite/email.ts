@@ -106,6 +106,15 @@ async function dispatchResend(
   }
 }
 
+// One email straight to one address, through Resend only: the email
+// confirmation code (lib/elite/email-confirm-server.ts). It is never sent to
+// a GHL workflow, so the code never sits in another system. Returns false
+// when Resend is not set up or the send failed.
+export async function sendDirectEmail(to: { name: string; email: string }, mail: { subject: string; body: string }): Promise<boolean> {
+  if (!isEmailConfigured()) return false;
+  return dispatchResend([to], mail);
+}
+
 // Notify the player + their parent contact.
 export async function sendPlayerEmail(
   playerId: string,

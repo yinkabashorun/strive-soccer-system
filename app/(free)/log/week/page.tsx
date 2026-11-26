@@ -12,6 +12,7 @@ import {
   quizDone,
   trackerFor,
   weekLogsFor,
+  weekRecapFor,
 } from "@/lib/elite/tracker-server";
 import { clubRankingFor } from "@/lib/elite/tracker-ranking";
 import { shareLinkFor } from "@/lib/elite/share-link-server";
@@ -38,11 +39,12 @@ export default async function MyWeekPage() {
   if (!quizDone(tracker) || !tracker.target_minutes) redirect(FREE_QUIZ);
 
   const today = nyToday();
-  const [logs, friends, clubs, ranking] = await Promise.all([
+  const [logs, friends, clubs, ranking, recap] = await Promise.all([
     weekLogsFor(viewer, tracker, today),
     friendsWeekFor(viewer, today),
     myClubsFor(viewer, today),
     clubRankingFor(viewer, today),
+    weekRecapFor(viewer, tracker, today).catch(() => null),
   ]);
   const [photo, preview] = await Promise.all([myPhotoFor(viewer), myLatestPhotoFor(viewer, today)]);
   const name = shortName(viewer.profile.full_name);
@@ -64,6 +66,7 @@ export default async function MyWeekPage() {
       inviteLink={joinLink(APP_URL, tracker.referral_code)}
       programHref={programLink(inNativeApp())}
       shareLink={await shareLinkFor(tracker, viewer.demo)}
+      recap={recap}
     />
   );
 }

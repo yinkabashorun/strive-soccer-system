@@ -71,6 +71,7 @@ export const leaveClub = (id: string) => post(appClubPath(id), { do: "leave" });
 export const reportClub = (id: string) => post(appClubPath(id), { do: "report" });
 export const renameClub = (id: string, name: string) => post(appClubPath(id), { do: "rename", name });
 export const removeMember = (id: string, member: string) => post(appClubPath(id), { do: "remove", member });
+export const makeCaptain = (id: string, member: string) => post(appClubPath(id), { do: "captain", member });
 export const newClubLink = (id: string) => post(appClubPath(id), { do: "link" });
 export const setClubCounty = (id: string, county: string | null, open: boolean) => post(appClubPath(id), { do: "county", county, open });
 export const endClub = (id: string) => post(appClubPath(id), { do: "end" });

@@ -51,6 +51,9 @@ export const SCREENS: readonly Screen[] = [
   { path: "/privacy", since: IN_FIRST_BUILD },
   { path: "/terms", since: IN_FIRST_BUILD },
   { path: "/support", since: IN_FIRST_BUILD },
+  // For parents (Nov 26 2026): a plain page for a player's parent, public,
+  // like /support and /privacy, and allowed to open from inside the app.
+  { path: "/parents", since: IN_FIRST_BUILD },
   // read by the iPhone itself (saved passwords), never opened as a screen
   { path: "/.well-known/apple-app-site-association", since: IN_FIRST_BUILD },
   { path: APP_UNAVAILABLE_PATH, since: IN_FIRST_BUILD },
@@ -75,6 +78,10 @@ export const SCREENS: readonly Screen[] = [
   { path: "/account", since: IN_FIRST_BUILD },
   { path: "/account/delete", since: IN_FIRST_BUILD },
   { path: "/account/password", since: IN_FIRST_BUILD },
+  // Email confirmation (093, Nov 26 2026): a new account types the code
+  // from its email before anything else. Every shell sends a new account
+  // here, so it is never "not in the app yet".
+  { path: "/confirm-email", since: IN_FIRST_BUILD },
 
   // The coach side (the review notes give the reviewer a coach login).
   { path: "/coach", since: IN_FIRST_BUILD },

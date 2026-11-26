@@ -20,6 +20,9 @@
 # themselves in (the door, the gate, Home, the week arriving, the offer and
 # the free app's first screen).
 #
+# 58 is "confirm": a new free account at "Check your email" (093), the code
+# from its email still to type.
+#
 # The example members: "ok" a member, "onboarding" a new member at the door
 # (03-door: the member card with their photo), "setup" one who still owes
 # the photo and @username, "locked" a FREE account in the free app (its
@@ -46,6 +49,13 @@
 # 18b is the Inbox (the small bell on Home): the member's notes, the newest
 # with its gold dot. 18-settings carries the Notifications choices under
 # This phone; sim/flows/11-inbox.yaml opens the Inbox by the bell.
+#
+# Adding a friend in person (60 to 62), the "locked" free account
+# (lib/elite/friend-add.ts, lib/elite/friend-link.ts): 60 the "Add a
+# friend" screen (their exact @username); 61 "My code", the player's own
+# invite as a QR code; 62 the one screen an invite link opens, which asks
+# before anything is sent ("Kai invited you"). sim/flows/17-add-a-friend.yaml
+# types a username and opens the code by taps.
 #
 # The 3, 2, 1 count-in is not here (a picture timed from launch would miss
 # it); sim/flows/03-session.yaml takes it by tapping Start.
@@ -114,6 +124,11 @@ SHOTS='
 55-later-week|free_later|my-week|12
 56-later-quiz-start|free_later|onboarding|11
 57-update|update|-|9
+58-week-recap|recap|my-week|12
+59-confirm-email|confirm|-|10
+60-add-friend|locked|friend/add|10
+61-my-code|locked|friend/code|11
+62-invite-link|locked|friend/link?code=EXAMPLE2|11
 '
 
 last=""

@@ -2,6 +2,7 @@ import { cleanSource } from "@/lib/elite/waitlist";
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/elite/supabase/server";
 import { establishSession } from "@/lib/elite/session-start";
+import { sendFirstCode } from "@/lib/elite/email-confirm-server";
 import { normalizePhone } from "@/lib/elite/sms";
 import { rateLimit, clientIp, JOIN_TRIES_PER_ADDRESS, JOIN_WINDOW_MS } from "@/lib/rate-limit";
 import { AGREEMENT_REQUIRED_MESSAGE, agreementComplete } from "@/lib/elite/legal";
@@ -196,6 +197,10 @@ export async function POST(req: Request) {
   // (lib/elite/session-start.ts). If it does not take, the account still
   // exists and the form sends them to sign in. A new account has not
   // answered the four questions yet, so it opens on them.
+  // 5a) the code that confirms the email (093). Best effort: a failed send
+  // never fails the sign-up; "Send a new code" on the screen covers it.
+  await sendFirstCode(userId);
+
   const signedIn = await establishSession(fields.email, fields.password);
   return NextResponse.json({ ok: true, signedIn, next: freeLanding(false) });
 }

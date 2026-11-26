@@ -309,8 +309,9 @@ describe("the redrawn screens keep the house rules", () => {
   it("Settings is the free account's own; a member's Account page keeps no free-app setting", () => {
     const account = code("app/account/page.tsx");
     // it stays on Account only while new terms or the photo and username
-    // (081) are owed, so it can still sign out or delete
-    expect(account).toContain("if (tracker && !profileSetupDue(viewer.setup) && !(await consentDue(viewer.profile.id))) redirect(FREE_SETTINGS);");
+    // (081), or the code from its email (093), are owed, so it can still
+    // sign out or delete
+    expect(account).toContain("if (tracker && !viewer.emailDue && !profileSetupDue(viewer.setup) && !(await consentDue(viewer.profile.id))) redirect(FREE_SETTINGS);");
     expect(account).not.toMatch(/BlockedList|PlayingForField|FREE_QUIZ|FREE_DAYS/);
     const settings = code("components/elite/FreeSettings.tsx");
     for (const s of ["Weekly target", "My training days", "Send my link", "Blocked", "Support", "Privacy and terms", "Sign out", "Delete my account"]) {

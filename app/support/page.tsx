@@ -28,6 +28,17 @@ export default function SupportPage() {
           </section>
 
           <section>
+            <h2 className="font-display text-xl font-bold uppercase text-bone">For parents</h2>
+            <p className="mt-2">
+              Who sees your player&apos;s training, what is not in the app, and how paying and deleting work:{" "}
+              <Link href="/parents" className="tap text-accent hover:underline">
+                For parents
+              </Link>
+              .
+            </p>
+          </section>
+
+          <section>
             <h2 className="font-display text-xl font-bold uppercase text-bone">Trouble signing in</h2>
             <p className="mt-2">
               On the sign-in page tap <strong className="text-bone">Forgot your password</strong>{" "}

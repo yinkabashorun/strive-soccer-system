@@ -19,6 +19,7 @@ import { createServiceClient, isSupabaseConfigured } from "./supabase/server";
 import { avatarUrlsOf, clearProfilePhoto, usernamesOf } from "./account-profile-server";
 import type { Viewer } from "./session";
 import { shiftDay } from "./time";
+import { weekRecap, type WeekRecap } from "./week-recap";
 import { clubRankingFor } from "./tracker-ranking";
 import { withLine } from "./club-teams";
 import { NO_APP_VERSION, cleanAppVersion, type AppVersion } from "./app-version";
@@ -85,6 +86,7 @@ import {
   onBoards,
   setUpDone,
   CLUB_REQUESTS_PENDING_MAX,
+  nextCaptain,
 } from "./tracker";
 import { TYPED, countsOnBoards, type Proof } from "./training-clock";
 import {
@@ -409,6 +411,42 @@ export async function friendsWeekFor(viewer: Viewer, today: string): Promise<Boa
   }));
 }
 
+// The Monday moment (week-recap.ts): last week's numbers for the card at
+// the top of Week. The player's own counting training per week (the same
+// timed-training sum the board uses: auraLogsOf leaves typed time out, and
+// only training is added), their gym last week when they track gym, and
+// each friend's counting training last week (the board's own reader, for
+// last week). Reads only this player and their own friends; sends nothing.
+export async function weekRecapFor(viewer: Viewer, tracker: Tracker, today: string): Promise<WeekRecap | null> {
+  if (viewer.demo) return null;
+  const admin = createServiceClient();
+  if (!admin) return null;
+  const { monday: thisMonday } = weekOf(today);
+  const lastDay = shiftDay(thisMonday, -1); // Sunday of last week
+  const { monday: lastMonday } = weekOf(lastDay);
+  const [own, lastLogs, friends] = await Promise.all([
+    auraLogsOf(admin, viewer.profile.id),
+    getWeekLogs(viewer.profile.id, lastDay),
+    friendsWeekFor(viewer, lastDay),
+  ]);
+  const byWeek = new Map<string, number>();
+  for (const l of own) {
+    if (l.kind !== "training" || l.trained_on >= thisMonday) continue;
+    const m = weekOf(l.trained_on).monday;
+    byWeek.set(m, (byWeek.get(m) ?? 0) + l.minutes);
+  }
+  const lastWeek = byWeek.get(lastMonday) ?? 0;
+  byWeek.delete(lastMonday);
+  const gym = tracksGym(tracker.grade) ? lastLogs.reduce((s, l) => (l.kind === "gym" ? s + l.minutes : s), 0) : 0;
+  return weekRecap({
+    week: thisMonday,
+    lastWeek,
+    earlier: [...byWeek.values()],
+    gymLastWeek: gym,
+    friends: friends.map((f) => f.minutes),
+  });
+}
+
 // The owner of a link's code, when this viewer could add them: a real
 // free account, not the viewer, not a friend already. Null otherwise.
 // Gives back only what a friend would see of the name.
@@ -520,6 +558,25 @@ export async function requestFriend(requester: string, recipient: string): Promi
     .from("elite_tracker_friend_requests")
     .upsert({ requester, recipient }, { onConflict: "requester,recipient", ignoreDuplicates: true });
   return error ? "error" : "sent";
+}
+
+// What already stands between two players, read BEFORE a request is sent,
+// for the wording only (lib/elite/friend-add.ts: adding a friend by their
+// exact @username). It decides nothing and stores nothing: requestFriend
+// above is still the one place a request is made or refused.
+//   removed   the recipient once took the requester off (071): requestFriend
+//             answers "sent" and stores nothing
+//   waiting   a request from the requester is already waiting on them
+// Null when it could not be read.
+export async function friendAskFacts(requester: string, recipient: string): Promise<{ removed: boolean; waiting: boolean } | null> {
+  const admin = createServiceClient();
+  if (!admin || !friendPair(requester, recipient)) return null;
+  const [removed, waiting] = await Promise.all([
+    admin.from("elite_tracker_unfriends").select("remover").eq("remover", recipient).eq("removed", requester).maybeSingle(),
+    admin.from("elite_tracker_friend_requests").select("requester").eq("requester", requester).eq("recipient", recipient).maybeSingle(),
+  ]);
+  if (removed.error || waiting.error) return null;
+  return { removed: Boolean(removed.data), waiting: Boolean(waiting.data) };
 }
 
 // The requests waiting on this viewer, newest first: first name and last
@@ -1073,6 +1130,23 @@ export async function membersOf(admin: Admin, clubId: string): Promise<MemberRow
     .order("joined_at")
     .order("profile_id");
   return (data as MemberRow[] | null) ?? [];
+}
+
+// An account that is about to be deleted hands over every club it
+// captains, by the same rule as a captain who leaves (the member who has
+// been in the club longest; nobody left: the club ends). Without this the
+// club keeps its players and loses its captain, and nobody can let a
+// player in. Called before the login is deleted; best effort per club.
+export async function handOverClubsOf(admin: Admin, profileId: string): Promise<void> {
+  const { data } = await admin.from("elite_tracker_clubs").select("id").eq("captain_id", profileId).is("archived_at", null);
+  for (const club of (data as { id: string }[] | null) ?? []) {
+    const next = nextCaptain(await membersOf(admin, club.id), profileId);
+    await admin
+      .from("elite_tracker_clubs")
+      .update(next ? { captain_id: next } : { captain_id: null, archived_at: new Date().toISOString() })
+      .eq("id", club.id)
+      .eq("captain_id", profileId);
+  }
 }
 
 // Make a club with a fresh link code. NOT a server action: called by the

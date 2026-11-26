@@ -117,15 +117,22 @@ describe("the phone's build", () => {
   // Saved passwords on the sign-in screen: the iPhone offers them only when
   // the app names the site and the site names the app. The two halves are
   // held to the same app here.
-  it("the app and the site name each other, for saved passwords only", async () => {
+  // Since Nov 26 2026 the same file also hands the app ONE page of the
+  // site, the invite page (/join: a teammate's link, a club's link, a
+  // player's QR code), so an invite opens the app when it is installed.
+  // What the app does with it is held in tests/add-friend.test.ts.
+  it("the app and the site name each other, for saved passwords and for an invite link, and nothing else", async () => {
     const { APP_DOMAIN, IOS_APP_ID, IOS_BUNDLE_ID } = await import("@/lib/elite/app-identity");
     expect(IOS_BUNDLE_ID).toBe(app.ios.bundleIdentifier);
-    expect(app.ios.associatedDomains).toEqual([`webcredentials:${APP_DOMAIN}`]);
+    expect(app.ios.associatedDomains).toEqual([`webcredentials:${APP_DOMAIN}`, `applinks:${APP_DOMAIN}`]);
     const { GET } = await import("@/app/.well-known/apple-app-site-association/route");
     const res = GET();
     expect(res.headers.get("content-type")).toBe("application/json");
-    // passwords only: no link is handed to the app from the site
-    expect(await res.json()).toEqual({ webcredentials: { apps: [IOS_APP_ID] } });
+    // passwords, and the invite page only: no other page of the site is handed to the app
+    expect(await res.json()).toEqual({
+      applinks: { details: [{ appIDs: [IOS_APP_ID], components: [{ "/": "/join" }, { "/": "/join/*" }] }] },
+      webcredentials: { apps: [IOS_APP_ID] },
+    });
     // the sign-in fields say what they are, so the phone knows where a
     // saved password goes
     const signIn = readFileSync(path.join(root, "mobile/app/sign-in.tsx"), "utf8");

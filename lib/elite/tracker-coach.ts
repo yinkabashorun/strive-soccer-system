@@ -379,6 +379,8 @@ export async function getFreeOverview(): Promise<FreeOverview> {
     code: c.join_code,
     captain: c.captain_id ? nameOrNone(c.captain_id) : null,
     members: (membersBy.get(c.id) ?? []).map(nameOrNone),
+    roster: (membersBy.get(c.id) ?? []).map((id) => ({ id, name: nameOrNone(id) })),
+    captainId: c.captain_id,
     ended: Boolean(c.archived_at),
     waiting: requestRows.filter((r) => r.club_id === c.id).map((r) => ({ id: r.profile_id, name: nameOrNone(r.profile_id) })),
   }));

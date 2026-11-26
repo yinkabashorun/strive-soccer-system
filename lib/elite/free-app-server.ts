@@ -38,6 +38,7 @@ import {
   getWeekLogs,
   myPhotoFor,
   blockedFor,
+  weekRecapFor,
   clubIdsOf,
   profileFor,
   type Tracker,
@@ -166,11 +167,13 @@ export async function freeWeekFor(
   today: string
 ): Promise<AppFreeWeek> {
   const target = tracker.target_minutes ?? 0;
-  const [logs, friends, myPhoto, preview] = await Promise.all([
+  const [logs, friends, myPhoto, preview, recap] = await Promise.all([
     getWeekLogs(viewer.profile.id, today),
     friendsWeekFor(viewer, today),
     myPhotoFor(viewer),
     answers ? previewFor(answers).catch(() => null) : Promise.resolve(null),
+    // the Monday moment: never allowed to break the Week tab
+    weekRecapFor(viewer, tracker, today).catch(() => null),
   ]);
   const week = weekProgress(logs, target, today);
   const gym = tracksGym(tracker.grade);
@@ -203,6 +206,7 @@ export async function freeWeekFor(
     // no answers: the player came in by the door (free-door.ts), and the
     // one card on Week opens the quiz before the offer
     upgrade: { area: preview?.areas[0] ?? null, sessions: answers ? sessionsFrom(answers) : 0, ...(answers ? {} : { quiz: true }) },
+    recap,
   };
 }
 

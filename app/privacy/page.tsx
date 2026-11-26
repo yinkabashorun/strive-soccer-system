@@ -134,7 +134,10 @@ export default function PrivacyPage({
                 or store your actual password), and, if you enable push
                 notifications, the technical subscription details needed to
                 send them. If the app shows an error page, we record which
-                page it was and what went wrong so we can fix it.
+                page it was and what went wrong so we can fix it. When you
+                make an account, we email a 6 digit code to your login email
+                to confirm the address is yours; we keep only a scrambled
+                copy of the code until it is used or runs out.
               </li>
             </ul>
           </Section>

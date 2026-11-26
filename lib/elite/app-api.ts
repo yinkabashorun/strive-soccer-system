@@ -40,6 +40,12 @@ import type { Player } from "./types";
 //   free_app in the free app itself (the set-up is finished and the photo
 //            and @username are in, as the website's free shell requires):
 //            the feed, posting, the week, friends
+//
+// A NEW ACCOUNT THAT HAS NOT CONFIRMED ITS EMAIL (093, viewer.emailDue)
+// reaches only the "account" routes: sending, checking and changing the
+// code, the agreement, change password and delete the account. Everything
+// else waits until the code is typed, as everything waits on the
+// agreement.
 export type AppAccess = "account" | "player" | "member" | "person" | "free" | "free_only" | "free_app";
 
 export type AppContext = {
@@ -71,8 +77,9 @@ export function appJson(body: unknown, status = 200): Response {
 }
 
 // Whether a member state may use a route of a given access level.
-export function accessAllowed(access: AppAccess, state: MemberState, setupDue = false): boolean {
+export function accessAllowed(access: AppAccess, state: MemberState, setupDue = false, emailDue = false): boolean {
   if (access === "account") return true;
+  if (emailDue) return false;
   const player = state.kind !== "coach" && state.kind !== "free" && state.kind !== "no_profile" && state.kind !== "consent";
   const free = state.kind === "free" && state.stage !== "web";
   // a member who also has the free app keeps every free route (one-app.ts)
@@ -158,7 +165,7 @@ export function appRoute(
       const viewer = await getViewer();
       if (!viewer || viewer.demo) return appJson(SIGNED_OUT, 401);
       const { state, player, tracker, intake } = await loadMemberState(viewer);
-      if (!accessAllowed(opts.access, state, profileSetupDue(viewer.setup))) return appJson({ error: "gate", state }, 403);
+      if (!accessAllowed(opts.access, state, profileSetupDue(viewer.setup), viewer.emailDue)) return appJson({ error: "gate", state }, 403);
       try {
         const out = await handler({ req, viewer, state, player, tracker, intake });
         return out instanceof Response ? out : appJson(out);

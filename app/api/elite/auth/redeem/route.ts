@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/elite/supabase/server";
 import { establishSession } from "@/lib/elite/session-start";
+import { sendFirstCode } from "@/lib/elite/email-confirm-server";
 import { emailHasFreeAccount } from "@/lib/elite/tracker-server";
 import { FREE_ACCOUNT_EXISTS_MESSAGE } from "@/lib/elite/tracker";
 import { notifyPlayer } from "@/lib/elite/notify";
@@ -207,6 +208,10 @@ export async function POST(req: Request) {
       body: `${fullName} is officially in the Strive Elite program.\n\nNext step: open the app and complete the quick player profile. Your coach uses it to build the first training week. A new week every Monday, every session starting with an explosive plyometric warm-up. Let's get to work.`,
     }).catch(() => undefined);
   }
+
+  // 7) the code that confirms the email (093), best effort. A coach code
+  // returned earlier: coaches are never asked.
+  await sendFirstCode(userId);
 
   return NextResponse.json({ ok: true, role, signedIn: await establishSession(email, password) });
 }

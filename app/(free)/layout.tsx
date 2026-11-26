@@ -12,6 +12,7 @@ import { ProfileSetupScreen } from "@/components/elite/ProfileSetupScreen";
 import { profileSetupDue, setupSteps } from "@/lib/elite/account-profile";
 import { suggestUsernames } from "@/lib/elite/account-profile-server";
 import { initials } from "@/lib/utils";
+import { CONFIRM_EMAIL_PATH } from "@/lib/elite/email-confirm";
 
 // The free app's shell (migration 069): two tabs, Friends and My week, and
 // the plus between them that posts today's training. A free account gets
@@ -25,6 +26,10 @@ export default async function FreeLayout({ children }: { children: React.ReactNo
   const viewer = await getViewer();
   if (!viewer) redirect(`/login?next=${FREE_HOME}`);
   if (viewer.role !== "player") redirect("/coach");
+  // A new account confirms its email first (093): before the agreement,
+  // the photo and @username, and everything after. False for coaches, the
+  // example tour, and while no sender is set up (email-confirm.ts).
+  if (viewer.emailDue) redirect(CONFIRM_EMAIL_PATH);
 
   // A free account, and a Strive Pro member who came through it (ONE APP,
   // lib/elite/one-app.ts): they keep these pages, and get a Train tab on

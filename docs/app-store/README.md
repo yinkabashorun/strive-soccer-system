@@ -199,8 +199,13 @@ Known gaps to close on the first real build:
   `PrivacyInfo.xcprivacy` (no tracking) is in the app target; its
   collected-data list is filled from Xcode's own values on the first
   build so it mirrors section 5.
-- Universal links (a texted link opening the app instead of Safari) need
-  the Team ID in `/.well-known/apple-app-site-association`. NOT BUILT.
+- Universal links (a texted link opening the app instead of Safari):
+  BUILT Nov 26 2026 for the native app, for the invite page only (`/join`:
+  a teammate's link, a club's link, a player's QR code), in
+  `/.well-known/apple-app-site-association` and `mobile/app.json`
+  (`applinks:thestriveapp.com`). The app asks before anything is sent
+  (`lib/elite/friend-link.ts`). Not proven: it only works in a signed
+  build with the new entitlement, made after the site's half is live.
 - Capacitor documents `server.url` as meant for development. Shipping
   with it is common but it is the weakest point under guideline 4.2; the
   native features above are the answer to it.

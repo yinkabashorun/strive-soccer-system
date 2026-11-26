@@ -8,6 +8,9 @@ import { firstTab, type OneAppTabKey } from "@shared/one-app";
 // as screen groups:
 //   sign-in     nobody is signed in (and joining free, before an account
 //               exists)
+//   confirm-email  a new account types the 6 digit code from its email
+//               (093, lib/elite/email-confirm.ts), before anything else:
+//               the agreement, the photo, the quiz, the app
 //   agreement   "Before you train", once
 //   profile     the photo and the @username (081), whoever owes them: a
 //               new member BEFORE "You're in" (the member card there
@@ -30,15 +33,18 @@ import { firstTab, type OneAppTabKey } from "@shared/one-app";
 //               and one more, Train. Upgrading never moves them to another
 //               set of tabs and never takes their friends or clubs away.
 // Pure, tested in tests/logic.test.ts.
-export type Area = "sign-in" | "agreement" | "onboarding" | "gate" | "profile" | "app" | "free-quiz" | "free-offer" | "free";
+export type Area = "sign-in" | "confirm-email" | "agreement" | "onboarding" | "gate" | "profile" | "app" | "free-quiz" | "free-offer" | "free";
 
 export function areaFor(
   signedIn: boolean,
   state: AppMemberState | null | undefined,
-  setup?: AppBootstrap["profileSetup"]
+  setup?: AppBootstrap["profileSetup"],
+  emailConfirm?: AppBootstrap["emailConfirm"]
 ): Area | null {
   if (!signedIn) return "sign-in";
   if (!state) return null; // still reading who this is: stay where we are
+  // the code from the email comes first; a coach is never asked
+  if (emailConfirm && state.kind !== "coach") return "confirm-email";
   const owed = Boolean(setup && setup.steps.length > 0);
   switch (state.kind) {
     case "ok":
@@ -66,6 +72,7 @@ export function areaFor(
 // The first route segment of each area, as the router reports it.
 export const AREA_ROOT: Record<Area, string> = {
   "sign-in": "sign-in",
+  "confirm-email": "confirm-email",
   agreement: "agreement",
   onboarding: "onboarding",
   gate: "gate",
@@ -119,9 +126,10 @@ export function homeOf(state: AppMemberState | null | undefined): string {
 const APP_ROUTES = new Set(["(tabs)", "session", "course", "drop", "extra", "checkin", "inbox", "settings", "change-password", "delete-account", "profile-setup"]);
 // The same for the free app: posting, the offer (opened from the one card
 // on Week, or a locked course), the week's set-up, a club and everything
-// one tap from it, a friend's profile, the blocked list, and the profile
-// screens.
-const FREE_ROUTES = new Set(["(free)", "post", "offer", "week-plan", "club", "player", "blocked", "settings", "change-password", "delete-account", "profile-setup"]);
+// one tap from it, a friend's profile, the blocked list, adding a friend
+// (by @username, your own code, and the screen an invite link opens:
+// app/friend), and the profile screens.
+const FREE_ROUTES = new Set(["(free)", "post", "offer", "week-plan", "club", "player", "friend", "blocked", "settings", "change-password", "delete-account", "profile-setup"]);
 // What Strive Pro adds to the free tabs, one tap from Train: the session,
 // the Monday drop, extra work, the check-in, a course and the Inbox.
 const TRAIN_ROUTES = new Set(["session", "drop", "extra", "checkin", "course", "inbox"]);

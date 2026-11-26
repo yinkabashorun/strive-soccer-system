@@ -6,6 +6,7 @@ import type { AppDrill, AppSession, AppWeek, AppYou } from "./app-payload";
 import type { AppCourse, AppCourseCard, AppCourseLevel, AppCourseList, AppCourseStep, AppLessonBlock } from "./app-courses";
 import type { LadderRung } from "./home";
 import type { AreaMinutes } from "./time-trained";
+import type { WeekRecap } from "./week-recap";
 import type { FreeStage } from "./free-intake";
 import type { QuizStepId } from "./quiz";
 import type { BoardRow, Face, Kind, LockedCard, OpenCard, StripDay, TodayLine } from "./tracker";
@@ -84,7 +85,16 @@ export type AppBootstrap = {
     // a few usernames to offer, when the username is still owed
     ideas: string[];
   };
+  // A new account that has not typed the code from its email yet (093,
+  // lib/elite/email-confirm.ts): the phone shows the confirm-email screen
+  // before anything else. Null when nothing is owed, and always null while
+  // no email sender is set up or 093 is not applied. Optional so an older
+  // server's answer still reads as "nothing owed".
+  emailConfirm?: null | { email: string };
 };
+
+// What sending, checking and changing the code answer (email-confirm.ts).
+export type { ConfirmAnswer as AppEmailAnswer } from "./email-confirm";
 
 // The Inbox (lib/elite/bell.ts inboxRows): the member's notes, each once,
 // newest first, with where each opens.
@@ -127,6 +137,10 @@ export const APP_API = {
   courses: "/api/app/courses",
   notices: "/api/app/notices",
   noticePrefs: "/api/app/notices/prefs",
+  // email confirmation (093)
+  emailSend: "/api/app/email/send",
+  emailConfirm: "/api/app/email/confirm",
+  emailChange: "/api/app/email/change",
   // the free app
   freeOpen: "/api/app/free/open",
   freeJoin: "/api/app/free/join",
@@ -148,6 +162,8 @@ export const APP_API = {
   freeReport: "/api/app/free/report",
   freeBlock: "/api/app/free/block",
   freeFriend: "/api/app/free/friend",
+  // add a friend by their exact @username (friend-add.ts)
+  freeFriendAsk: "/api/app/free/friend/ask",
   freeWeek: "/api/app/free/week",
   freeWeekCard: "/api/app/free/week/card",
   freeYou: "/api/app/free/you",
@@ -276,6 +292,10 @@ export type AppFreeWeek = {
   // quiz: this player came in by the door and has not rated their game
   // yet, so the card opens the quiz first and the offer after it.
   upgrade: { area: string | null; sessions: number; quiz?: boolean };
+  // The Monday moment (lib/elite/week-recap.ts): last week in a few lines,
+  // shown once a week at the top of Week. Absent or null: no card (a week
+  // with nothing in it is never mentioned). Older builds ignore it.
+  recap?: WeekRecap | null;
 };
 
 // Share my week (lib/elite/week-card.ts): the player's own week as a

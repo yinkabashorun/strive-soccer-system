@@ -1,0 +1,28 @@
+# Email confirmation (093): a new free account opens on "Check your email".
+# A wrong code says so, the right one (123456 in the example build) moves
+# the account on to the @username, the next thing a new account owes.
+appId: com.strivesoccer.elite
+---
+- launchApp:
+    clearState: true
+    arguments:
+      fixtureState: confirm
+- extendedWaitUntil:
+    visible: "Code from your email"
+    timeout: 30000
+- takeScreenshot: t-confirm-email
+- tapOn: "Code from your email"
+- inputText: "111111"
+- takeScreenshot: t-confirm-email-typing
+- tapOn: "Confirm"
+- extendedWaitUntil:
+    visible: "That code does not match. Check the email and try again."
+    timeout: 10000
+- takeScreenshot: t-confirm-email-wrong
+- tapOn: "Code from your email"
+- inputText: "123456"
+- tapOn: "Confirm"
+- extendedWaitUntil:
+    visible: "Username"
+    timeout: 15000
+- takeScreenshot: t-confirm-email-done

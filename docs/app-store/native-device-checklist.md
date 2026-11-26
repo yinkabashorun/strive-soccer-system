@@ -327,6 +327,31 @@ THE CLOCK IS STILL RUNNING
     on, starting a clock raises no permission question and nothing
     arrives.
 
+## Email confirmation, on a phone only (Nov 26 2026, migration 093)
+
+Only shows once RESEND_API_KEY is set in Vercel and migration 093 is
+applied; until then nobody is asked. Make a new free account with an email
+you can open on the same phone.
+
+1. Right after "Create my account" the app opens on "Check your email" with
+   the address you typed, before the @username and the photo.
+2. The code arrives in Mail ("Your Strive Elite code"), and the box offers
+   it above the number pad (iOS fills a code from Mail). Tap it: the box
+   holds 6 digits.
+3. The number pad comes up by itself and Confirm stays above it.
+4. Type a wrong code and tap Confirm: "That code does not match. Check the
+   email and try again." and the box empties.
+5. Tap Send a new code: "Sent. Check your email." and the line under it
+   counts down to the next one. A second tap inside the minute says how long
+   to wait. The new email's code works, the old one does not.
+6. Wrong email? Change it: one email box, Send the code. The code goes to
+   the new address and the screen says it.
+7. Airplane mode: Confirm says it could not reach Strive; back online it
+   works on the next tap.
+8. The right code moves you straight on to the @username. Close the app and
+   open it again: it does not ask for the code again.
+9. Delete my account and Sign out on the screen both work.
+
 ## Seeing the phone from here
 
 `.github/workflows/ios-simulator-screens.yml` (built Nov 23 2026 on his
@@ -350,3 +375,86 @@ camera, notifications, sound or vibration: lines 4 and 10 stay his phone's.
 - [ ] With airplane mode on, the app opens as usual (the check never blocks without an answer).
 - [ ] Paste the TestFlight public link on /coach/free. On an iPhone that is signed out of the website, open an invite link from a text: the page shows the code and "Get the app"; "No iPhone? Join on the web" opens the form with the invite still on it.
 - [ ] After any crash or "That screen did not load" page, the App errors card on /coach shows a line that starts /iphone/ with the build number and the screen.
+
+## The Monday moment, on a phone (Nov 26 2026)
+
+- [ ] A free account that trained timed sessions last week opens Week on Monday: one card at the top, "Last week you trained ...". Gym shows as its own line only when gym was logged. With two or more friends who trained, a place line shows only when it is in the top half. "Your best week yet." with the small gold star only after three earlier weeks of training.
+- [ ] Tap "Got it": the card is gone. Close the app fully and reopen Week: still gone. Next Monday a new card shows once.
+- [ ] A week with no timed training (or only typed time) shows no card at all. No notification arrives for any of this.
+
+## The App Store rating ask, on a phone (Nov 26 2026)
+
+- [ ] This can only be seen in an App Store build. In TestFlight Apple never shows its rating sheet, and the example build never asks.
+- [ ] In an App Store build on a phone where the app first opened 7 or more days ago: reach the week's target on Week (free), or finish and close the last session of a member's week, or put away a Monday card that says "Your best week yet." Apple's own rating sheet may appear once (Apple decides whether it shows). There is no screen or button of ours for it.
+- [ ] It never appears during a session or while a training clock is running, and never a second time in the same version.
+
+## Adding a friend in person, on two phones only (Nov 26 2026)
+
+Add a friend by exact @username, My code (a QR code), and an invite link
+that opens the app (`lib/elite/friend-add.ts`, `lib/elite/friend-link.ts`).
+The simulator pictures the three screens with example data
+(`sim/shots.sh` 60 to 62, `sim/flows/17-add-a-friend.yaml`). What it
+cannot show is below: the QR code being read, and a link opening the app.
+
+**A link opening the app works only in a signed build with the new
+entitlement** (`applinks:thestriveapp.com` in `mobile/app.json`), made
+AFTER the site's half is live (`/.well-known/apple-app-site-association`
+on main). Never in the simulator's example build, and not in a build made
+before this. The iPhone reads the site's file when the app is installed
+(through Apple's own servers, which can lag by hours): if a link still
+opens the website right after installing, delete the app, install it again
+and try once more before calling it broken.
+
+Two phones, each signed in to its own free account (A and B), neither a
+friend of the other.
+
+1. **By @username.** On A: Friends, scroll to the bottom, "Add a friend".
+   Type B's @username with the @ and in capitals: "Request sent. You and
+   <B> are friends once <B> accepts." The button stays above the keyboard
+   the whole time. The request arrives on the other phone: B's Friends
+   shows it, Accept, and both see each other.
+2. **The refusals.** On A type a username nobody has: "We could not find
+   that @username. Check the spelling." Type A's own: "That is your own
+   @username." Type B's again once you are friends: "You are already
+   friends." Tap the button with the box empty: "Type their @username
+   first."
+3. **A block reads as not found.** On B block A. On A type B's @username:
+   the same "We could not find that @username" line as for a name nobody
+   has. Unblock afterwards.
+4. **My code.** On A: "Add a friend", "Show my code" (and You, "My code").
+   A white card with the QR code, A's name, @username and "My code:
+   XXXXXXXX" under it. Turn the phone's brightness down: the code is still
+   black on white.
+5. **Scan my QR with another iPhone's Camera.** On B open the iPhone's own
+   Camera and point it at A's code: a yellow tag appears under the code.
+   Tap it: the app opens (not Safari) on one screen, "<A's first
+   name> invited you", with A's initials and no photo, and "Send <A> a
+   friend request". Nothing has been sent yet: A's Friends shows no
+   request until B taps the button. Tap it: the request arrives on the
+   other phone (A's Friends).
+6. **Not now.** Scan again on B and tap "Not now": the screen closes to
+   where B was, and A gets nothing.
+7. **A link in Messages opens the app.** A taps "Send my link" and texts
+   it to B. On B tap the link in Messages: the app opens on the same
+   "invited you" screen. Do it once with the app already open on another
+   screen (the invite comes up on top, and the back gesture returns to that
+   screen) and once with the app fully closed (it opens on Friends, then
+   the invite comes up on top).
+8. **A club's link.** The same with a club's invite ("Invite a teammate"
+   on the club page): the screen shows the club's crest and name and "Ask
+   to join <club>"; the captain gets the request under Manage.
+9. **A new player keeps the code.** Sign B out. Tap A's link in Messages:
+   the app opens on sign-in, nothing else. Join free with a new email:
+   after the username and the photo, the code question has A's code
+   already typed. "Use my code" sends the request; "I do not have a code"
+   goes on with nothing sent.
+10. **With the app not installed** the link opens the website page:
+    delete the app from B, tap A's link: Safari opens
+    thestriveapp.com/join with A's first name and the code, as before.
+11. **Other links stay out of the way.** With the app installed, tap a
+    link to thestriveapp.com/join with no code (or with ?w=): the app
+    opens where it was, or on its first screen, and nothing is asked.
+    Links to any other page of the site (/5v5, /pro, /terms) still open
+    Safari.
+12. **Saved passwords still work** on the sign-in screen (the same
+    entitlement list carries both).

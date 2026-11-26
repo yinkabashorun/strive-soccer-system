@@ -716,6 +716,9 @@ describe("free accounts are invisible to everything a member query reads", () =>
     // the training clock (089): the signed-in account's own timed entry,
     // its two photos into its own folder, and its own running clock
     "lib/elite/training-clock-server.ts",
+    // the launch numbers (coach's free page): every free account, club and
+    // timed entry, read only; what leaves it is counts and club names
+    "lib/elite/launch-numbers-server.ts",
   ]);
   // (the post route stores nothing itself: it hands a checked photo to
   // savePost in tracker-server.ts)

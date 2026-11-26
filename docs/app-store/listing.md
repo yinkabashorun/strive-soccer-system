@@ -28,7 +28,7 @@ subtitle or the screenshots either way.
 | Marketing URL | optional | leave empty |
 | Copyright | | 2026, then the legal name on the Apple account (HIS) |
 | Price | | Free to download. Strive Pro is a subscription started on the website (see "The payment decision") |
-| Availability | | United States only to start (HIS call) |
+| Availability | | United States only (his call, Nov 25 2026) |
 
 Promotional text (170):
 
@@ -39,7 +39,7 @@ Description:
 > Strive Elite is where soccer players train on their own, together.
 >
 > POST YOUR TRAINING
-> Snap a photo of the work you put in. Your friends' training opens when you post yours. Give props. Friends are added by request only.
+> Take a photo when you start and a photo when you finish. The time between your two photos is your training. Your friends' training opens when you post yours. Give props. Friends are added by request only.
 >
 > YOUR WEEK, YOUR TARGET
 > Set how much you want to train each week and watch the ring close. See how your week stacks up against your friends.
@@ -104,7 +104,7 @@ app adds nothing new to the list: its posts are photos and other user
 content, its birth month and year sit under other user content (used only
 for the 13-and-older check). Tracking: No.
 
-## The payment decision (HIS, before submitting)
+## The payment decision (DECIDED Nov 25 2026, his "Keep it": United States only, the web checkout stays)
 
 After the free quiz the app shows one offer screen for Strive Pro with its
 monthly price, and "Start Strive Pro" opens a web checkout (Stripe) in a
@@ -136,7 +136,7 @@ changes.
 >
 > Anyone can join free on the sign-in screen (Join free). A free player takes a short quiz about their game, then is shown Strive Pro once: a weekly training plan built from their answers, as a monthly subscription. "Start Strive Pro" opens our website's checkout. The app is offered on the United States storefront only. "Not now, start free" continues into the free app, which stays free.
 >
-> The free app: a player posts a photo of their own training for the friends they accepted, logs training time against a weekly target they set, and can start or join a club. There is no public feed and no search: friends are added only by a request the other player accepts, and a club is joined by a code and its captain's approval. Every post, profile photo, Playing for line and club can be reported; any friend or club mate can be blocked (and unblocked under Settings > Blocked players); typed text passes a word filter; every report texts our coaches, who review it within 24 hours and remove the content and the account where needed. Our Terms have zero tolerance for objectionable content.
+> The free app: a player times their own training between two photos taken in the app's camera ("Start training", then "Finish my training" at least one minute later) and posts it for the friends they accepted. The time between the two photos is what counts toward their weekly target, the friends board and their club. "Trained without the clock?" adds a length by hand, which shows on the player's own week only. A player can start or join a club. There is no public feed and no search: friends are added only by a request the other player accepts, and a club is joined by a code and its captain's approval. Every post, profile photo, Playing for line and club can be reported; any friend or club mate can be blocked (and unblocked under Settings > Blocked players); typed text passes a word filter; every report texts our coaches, who review it within 24 hours and remove the content and the account where needed. Our Terms have zero tolerance for objectionable content.
 >
 > Clubs: a captain can plan a club training session (seen only by that club's members) or a game against another club in the same county that chose to be open to games (seen only by the two clubs). Every session and game shows which club organized it; Strive does not run or supervise them, a captain accepts that before planning and a player before saying they are in. A place is the name of a public field or park: the app refuses street addresses, links and phone numbers. There is no messaging between clubs and no direct messages between players.
 >
@@ -150,7 +150,7 @@ changes.
 >
 > Account deletion: You > Settings > Delete my account.
 > Notifications: optional, asked once, each kind on or off under Settings.
-> Camera and photos: used only when the player chooses a photo for their profile or a training post.
+> Camera: used only when the player takes their start photo and finish photo for a training post, or a profile photo. Photos: used only when the player chooses a profile photo. To see a friend's training from today, post your own first: Start training, take a photo, wait one minute, Finish my training, take a photo, Post to my friends.
 
 The two logins are made on the day of submission. Each needs a profile
 photo and a username already set, so the reviewer does not open on the

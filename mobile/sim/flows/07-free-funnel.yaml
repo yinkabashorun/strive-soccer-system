@@ -337,8 +337,11 @@ appId: com.strivesoccer.elite
     timeout: 15000
 - takeScreenshot: t35c-clock-row-friends
 - tapOn: "Week"
+# the link reads "Change" and is named "Change your target and days" to a
+# screen reader, which is what this tool matches (the run on 52803b1 waited
+# for "Change" alone and stopped here with the Week tab right on screen)
 - extendedWaitUntil:
-    visible: "Change"
+    visible: "Change your target and days"
     timeout: 15000
 - waitForAnimationToEnd:
     timeout: 3000
@@ -362,7 +365,7 @@ appId: com.strivesoccer.elite
 # nobody picks a length: it is the time between the two photos
 - assertVisible: "Ready to post\\. 45m\\..*"
 # Forgot to stop the clock: time comes off, five minutes a tap, and back
-- tapOn: "Finished before you took this photo?"
+- tapOn: "Finished before you took this photo\\?"
 - tapOn: "5 min less"
 - tapOn: "5 min less"
 - assertVisible: "Ready to post\\. 35m\\..*"
@@ -401,7 +404,7 @@ appId: com.strivesoccer.elite
 - takeScreenshot: t38b-own-post-line
 - tapOn: "Week"
 - extendedWaitUntil:
-    visible: "Change"
+    visible: "Change your target and days"
     timeout: 15000
 - waitForAnimationToEnd:
     timeout: 4000

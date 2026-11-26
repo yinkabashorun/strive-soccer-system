@@ -19,7 +19,7 @@
         "ITSAppUsesNonExemptEncryption": false,
         "CFBundleDisplayName": "Strive Elite",
         "UISupportedInterfaceOrientations": ["UIInterfaceOrientationPortrait"],
-        "NSPhotoLibraryAddUsageDescription": "Strive Elite saves your progress videos to your photo library when you choose Save Video."
+        "NSPhotoLibraryAddUsageDescription": "Strive Elite saves the picture of your week to your photo library when you choose Save Image."
       },
       "associatedDomains": ["webcredentials:thestriveapp.com"],
       "entitlements": { "aps-environment": "production" },
@@ -48,8 +48,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Strive Elite opens your photo library so you can pick a photo or a clip of your training or games.",
-          "cameraPermission": "Strive Elite uses the camera so you can film your drills and training, take a photo for your training post, and send clips to your coach.",
+          "photosPermission": "Strive Elite opens your photo library so you can choose your profile photo.",
+          "cameraPermission": "Strive Elite uses the camera for your start photo and your finish photo when you train, and for your profile photo.",
           "microphonePermission": "Strive Elite uses the microphone to record sound with the clips you film."
         }
       ],

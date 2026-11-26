@@ -149,12 +149,43 @@ describe("the phone's build", () => {
     expect(props[1].ios.deploymentTarget).toBe("16.4");
   });
 
-  it("says why it asks for the camera and photos in the Capacitor app's own words", () => {
+  // The sentence iOS shows in each permission box. It says what THIS app
+  // does with it, in the player's words: two photos when they train and a
+  // profile photo. Nothing about clips, filming or a coach (the first shell
+  // loaded the website, which has those; this app does not).
+  it("says why it asks for the camera and photos, and only what this app does with them", () => {
     const picker = app.plugins.find((p: unknown) => Array.isArray(p) && p[0] === "expo-image-picker")[1];
-    expect(picker.cameraPermission).toBe(plistString("NSCameraUsageDescription"));
-    expect(picker.photosPermission).toBe(plistString("NSPhotoLibraryUsageDescription"));
+    expect(picker.cameraPermission).toBe(
+      "Strive Elite uses the camera for your start photo and your finish photo when you train, and for your profile photo.",
+    );
+    expect(picker.photosPermission).toBe("Strive Elite opens your photo library so you can choose your profile photo.");
+    expect(app.ios.infoPlist.NSPhotoLibraryAddUsageDescription).toBe(
+      "Strive Elite saves the picture of your week to your photo library when you choose Save Image.",
+    );
+    for (const said of [picker.cameraPermission, picker.photosPermission, app.ios.infoPlist.NSPhotoLibraryAddUsageDescription]) {
+      expect(said).not.toMatch(/coach|clip|film|video|\u2014/i);
+    }
+    // the microphone sentence has to exist (the audio library is linked),
+    // and it is the first shell's own; this app never asks for it
     expect(picker.microphonePermission).toBe(plistString("NSMicrophoneUsageDescription"));
-    expect(app.ios.infoPlist.NSPhotoLibraryAddUsageDescription).toBe(plistString("NSPhotoLibraryAddUsageDescription"));
+  });
+
+  it("never asks for the microphone, and only ever picks a still photo", () => {
+    const files: string[] = [];
+    const walk = (dir: string) => {
+      for (const e of readdirSync(dir, { withFileTypes: true })) {
+        const f = path.join(dir, e.name);
+        if (e.isDirectory()) walk(f);
+        else if (/\.tsx?$/.test(e.name)) files.push(f);
+      }
+    };
+    walk(path.join(process.cwd(), "mobile/app"));
+    walk(path.join(process.cwd(), "mobile/src"));
+    for (const f of files) {
+      const src = readFileSync(f, "utf8");
+      expect(src, f).not.toMatch(/requestRecordingPermissions|requestMicrophonePermissions/);
+      for (const m of src.matchAll(/mediaTypes:\s*\[([^\]]*)\]/g)) expect(m[1], f).toBe('"images"');
+    }
   });
 
   it("tracks nobody and plays nothing in the background", () => {

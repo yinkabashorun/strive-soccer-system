@@ -118,6 +118,11 @@ left on it. What only a phone can show is `native-device-checklist.md`.
 | N26 | Sign-up and app calls sized for a whole event on one Wi-Fi | BUILT Nov 26, dev branch (server side) |
 | N27 | Launch numbers on /coach/free: the funnel overall and per club | BUILT Nov 26, dev branch |
 | N28 | The gap list: docs/growth/completeness-2026-11-26.md | OPEN: his calls and the proposed builds are named there |
+| N29 | A paying player's earned month is their next month free; lifetime access | LIVE Nov 26 (PR #42, migrations 091 and 092 applied). A real Stripe credit is not proven |
+| N30 | A club's captaincy can be handed over (the captain, a coach, and on account deletion) | BUILT Nov 26, dev branch |
+| N31 | Email confirmation: a 6 digit code before a new account enters the app | BUILT Nov 26, dev branch. DARK until RESEND_API_KEY is in Vercel and migration 093 is applied (both his word) |
+| N32 | Add a friend by exact @username, My code (QR), invite links open the app | BUILT Nov 26, dev branch. Universal links only in a signed build made after the site is live |
+| N33 | The Monday card (no notification), the rating ask, a page for parents | BUILT Nov 26, dev branch |
 | N17 | The upgrade inside the app opens a web checkout: allowed on the US storefront only (from memory, to verify); Apple's in-app purchase is the fallback | DECIDED Nov 25 2026, his "Keep it": United States only, the web checkout stays. Fallback if Apple objects: take the offer out of the iPhone app |
 
 ## B. Research to settle before the first build

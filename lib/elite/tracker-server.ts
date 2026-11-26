@@ -85,6 +85,7 @@ import {
   onBoards,
   setUpDone,
   CLUB_REQUESTS_PENDING_MAX,
+  nextCaptain,
 } from "./tracker";
 import { TYPED, countsOnBoards, type Proof } from "./training-clock";
 import {
@@ -1073,6 +1074,23 @@ export async function membersOf(admin: Admin, clubId: string): Promise<MemberRow
     .order("joined_at")
     .order("profile_id");
   return (data as MemberRow[] | null) ?? [];
+}
+
+// An account that is about to be deleted hands over every club it
+// captains, by the same rule as a captain who leaves (the member who has
+// been in the club longest; nobody left: the club ends). Without this the
+// club keeps its players and loses its captain, and nobody can let a
+// player in. Called before the login is deleted; best effort per club.
+export async function handOverClubsOf(admin: Admin, profileId: string): Promise<void> {
+  const { data } = await admin.from("elite_tracker_clubs").select("id").eq("captain_id", profileId).is("archived_at", null);
+  for (const club of (data as { id: string }[] | null) ?? []) {
+    const next = nextCaptain(await membersOf(admin, club.id), profileId);
+    await admin
+      .from("elite_tracker_clubs")
+      .update(next ? { captain_id: next } : { captain_id: null, archived_at: new Date().toISOString() })
+      .eq("id", club.id)
+      .eq("captain_id", profileId);
+  }
 }
 
 // Make a club with a fresh link code. NOT a server action: called by the

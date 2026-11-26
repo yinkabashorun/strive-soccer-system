@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient, createServiceClient } from "./supabase/server";
 import { removePlayerFiles } from "./account-server";
-import { removeTrackerFiles } from "./tracker-server";
+import { handOverClubsOf, removeTrackerFiles } from "./tracker-server";
 import { clearProfilePhoto } from "./account-profile-server";
 import { getViewer } from "./session";
 import { sendPlayerEmail } from "./email";
@@ -234,6 +234,8 @@ export async function deletePlayer(playerId: string) {
     // and the profile photo (081), in the account's own photo folder
     // (account-profile-server.ts)
     await removeTrackerFiles(player.profile_id);
+    // a club this account captains is handed over first (tracker-server.ts)
+    await handOverClubsOf(admin, player.profile_id).catch(() => undefined);
     const { error } = await admin.auth.admin.deleteUser(player.profile_id);
     if (error) return { ok: false as const };
   } else {

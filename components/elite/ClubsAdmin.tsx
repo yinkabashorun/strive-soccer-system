@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { answerClubRequestsAsCoach, archiveClub, createClub, dismissClubReports, renameClub } from "@/lib/elite/tracker-actions";
+import { answerClubRequestsAsCoach, archiveClub, createClub, dismissClubReports, renameClub, setClubCaptain } from "@/lib/elite/tracker-actions";
 import { CLUB_NAME_MAX, clubLink, type CoachClub, type ReportedClub } from "@/lib/elite/tracker";
 
 // The Clubs card on /coach/free: reported club names first (rename,
@@ -24,6 +24,8 @@ export function ClubsAdmin({
   const [copied, setCopied] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, start] = useTransition();
+  // the player picked to captain each club, before Make captain is tapped
+  const [picked, setPicked] = useState<Record<string, string>>({});
 
   function act(run: () => Promise<{ ok: true } | { ok: false; error: string }>, then?: () => void) {
     setError(null);
@@ -148,13 +150,43 @@ export function ClubsAdmin({
                 <div className="min-w-0">
                   <div className="truncate font-semibold text-bone">{c.name}</div>
                   <div className="text-sm text-white/60">
-                    {c.members.length} joined · {c.kind === "coach" ? "made by a coach" : `captain ${c.captain ?? "none"}`}
+                    {c.members.length} joined · {c.captain ? `captain ${c.captain}` : c.kind === "coach" ? "made by a coach, no captain yet" : "no captain"}
                     {c.ended ? " · archived" : ""}
                   </div>
                 </div>
               </div>
               {c.members.length > 0 && (
                 <p className="mt-2 text-sm leading-relaxed text-white/70">{c.members.join(", ")}</p>
+              )}
+              {/* Give the club a captain: one of its own members. The captain
+                  then lets players in, so requests stop waiting on a coach. */}
+              {!c.ended && (c.roster ?? []).length > 0 && (
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <label className="text-sm text-white/60" htmlFor={`captain-${c.id}`}>
+                    Captain
+                  </label>
+                  <select
+                    id={`captain-${c.id}`}
+                    className="h-11 min-w-0 flex-1 rounded-xl border border-white/15 bg-black px-3 text-sm text-bone"
+                    value={picked[c.id] ?? c.captainId ?? ""}
+                    onChange={(e) => setPicked({ ...picked, [c.id]: e.target.value })}
+                  >
+                    <option value="">{c.captainId ? "Pick a player" : "No captain: a coach lets players in"}</option>
+                    {(c.roster ?? []).map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    disabled={busy || !picked[c.id] || picked[c.id] === c.captainId}
+                    onClick={() => act(() => setClubCaptain(c.id, picked[c.id]), () => setPicked({ ...picked, [c.id]: "" }))}
+                    className="h-11 rounded-xl border border-white/15 px-4 text-sm font-semibold text-bone disabled:opacity-50"
+                  >
+                    Make captain
+                  </button>
+                </div>
               )}
               {(c.waiting ?? []).length > 0 && !c.ended && (
                 <div className="mt-3 rounded-xl border border-accent/30 bg-accent/[0.06] p-3">

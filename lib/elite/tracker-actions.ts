@@ -72,6 +72,9 @@ import {
   newReferralCode,
   FRIEND_REQUESTS_FULL_MESSAGE,
   CLUB_REQUESTS_FULL_MESSAGE,
+  CAPTAIN_ONLY_MEMBER,
+  CAPTAIN_SAME,
+  mayBeCaptain,
 } from "./tracker";
 
 // The free app: writing it (migration 069). Every write goes through
@@ -655,6 +658,27 @@ export async function removeClubMember(clubId: string, memberId: string): Promis
   return { ok: true };
 }
 
+// The captain makes another member the captain. They stay in the club as
+// a player. Only a member can be given it, and only by the captain: the
+// write itself is held to "still captained by me", so two taps or a
+// hand-over that raced a leave change nothing twice.
+export async function makeCaptain(clubId: string, memberId: string): Promise<{ ok: true } | Fail> {
+  const c = await captainOf(clubId);
+  if (c === "demo") return { ok: true };
+  if ("ok" in c) return c;
+  if (memberId === c.o.profileId) return fail(CAPTAIN_SAME);
+  const members = (await membersOf(c.o.admin, clubId)).map((m) => m.profile_id);
+  if (!mayBeCaptain(c.club, members, memberId)) return fail(CAPTAIN_ONLY_MEMBER);
+  const { error } = await c.o.admin
+    .from("elite_tracker_clubs")
+    .update({ captain_id: memberId })
+    .eq("id", clubId)
+    .eq("captain_id", c.o.profileId);
+  if (error) return fail(OFFLINE);
+  touch();
+  return { ok: true };
+}
+
 // A new link for the club: the old one stops working for everyone who has
 // it (a link that got passed around). Members stay on.
 export async function newClubLink(clubId: string): Promise<{ ok: true; code: string } | Fail> {
@@ -942,6 +966,24 @@ export async function renameClub(clubId: string, nameInput: string): Promise<{ o
   const { error } = await c.admin.from("elite_tracker_clubs").update({ name }).eq("id", clubId);
   if (error) return fail(OFFLINE);
   await closeClubReports(c, clubId, "renamed");
+  revalidatePath("/coach/free");
+  return { ok: true };
+}
+
+// A coach gives any club a captain: one of its own members. A club the
+// coaches made (a 5v5 team) has none until this, and every request to
+// join it waits on a coach; with a captain, the captain lets players in.
+export async function setClubCaptain(clubId: string, memberId: string): Promise<{ ok: true } | Fail> {
+  const c = await coach();
+  if (c.kind === "no") return fail("Only a coach can do this.");
+  if (c.kind === "demo") return { ok: true };
+  const club = typeof clubId === "string" && clubId ? await clubById(c.admin, clubId) : null;
+  if (!club) return fail(NOT_A_CLUB);
+  if (club.captain_id === memberId) return fail(CAPTAIN_SAME);
+  const members = (await membersOf(c.admin, clubId)).map((m) => m.profile_id);
+  if (!mayBeCaptain(club, members, memberId)) return fail(CAPTAIN_ONLY_MEMBER);
+  const { error } = await c.admin.from("elite_tracker_clubs").update({ captain_id: memberId }).eq("id", clubId);
+  if (error) return fail(OFFLINE);
   revalidatePath("/coach/free");
   return { ok: true };
 }

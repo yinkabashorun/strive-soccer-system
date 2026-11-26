@@ -609,6 +609,31 @@ export function nextCaptain(members: { profile_id: string; joined_at: string }[]
   return rest[0]?.profile_id ?? null;
 }
 
+// HANDING A CLUB OVER (Coach Yinka, Nov 26 2026: "for 3 build c"). A
+// captain can make another member the captain, and a coach can give any
+// club a captain (a club the coaches made has none until then, so every
+// request to join waits on a coach). The new captain must be a member of
+// that club right now; a club that has ended is handed to nobody.
+export function mayBeCaptain(
+  club: { archived_at: string | null },
+  memberIds: readonly string[],
+  toId: unknown
+): toId is string {
+  return typeof toId === "string" && toId.length > 0 && !club.archived_at && memberIds.includes(toId);
+}
+
+export const CAPTAIN_ONLY_MEMBER = "Pick a player who is in the club.";
+export const CAPTAIN_SAME = "That player is already the captain.";
+export const HAND_OVER_ROW = "Make someone else captain";
+export const HAND_OVER_DETAIL = "They let players in and run the club. You stay in it.";
+export const HAND_OVER_SHEET_TITLE = "Make someone else captain";
+export const HAND_OVER_SHEET_BODY = "The new captain lets players in, plans sessions and can take players off. You stay in the club as a player.";
+export function handOverAsk(name: string, club: string): string {
+  return `Make ${name} the captain of ${club}?`;
+}
+export const HAND_OVER_ASK_BODY = "You stop being the captain. Only the new captain can hand the club back.";
+export const HAND_OVER_CONFIRM = "Make them captain";
+
 // The one text the coaches get for a reported club name.
 export function clubReportText(club: string, url: string): string {
   return `A club name in the free app was reported: "${club}". Look at it here: ${url}`;
@@ -675,6 +700,10 @@ export type CoachClub = {
   code: string;
   captain: string | null;
   members: string[];
+  // the same members with their ids, and the captain's id, so a coach can
+  // make one of them the captain
+  roster?: { id: string; name: string }[];
+  captainId?: string | null;
   ended: boolean;
   // players asking to join (073): the coaches let them in here
   waiting?: { id: string; name: string }[];

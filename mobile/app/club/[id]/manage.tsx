@@ -7,13 +7,23 @@ import type { PlanCard } from "@shared/app-contract";
 import { clubShareText } from "@shared/club-app";
 import { OPEN_TO_GAMES_LINE, planScore, planSides } from "@shared/club-teams";
 import { fmtDuration } from "@shared/time-trained";
-import { CLUB_NAME_MAX } from "@shared/tracker";
+import {
+  CLUB_NAME_MAX,
+  HAND_OVER_ASK_BODY,
+  HAND_OVER_CONFIRM,
+  HAND_OVER_DETAIL,
+  HAND_OVER_ROW,
+  HAND_OVER_SHEET_BODY,
+  HAND_OVER_SHEET_TITLE,
+  handOverAsk,
+} from "@shared/tracker";
 import { ApiError, OFFLINE_MESSAGE } from "@/api/client";
 import {
   answerGame,
   answerJoinRequest,
   answerScore,
   endClub,
+  makeCaptain,
   enterScore,
   newClubLink,
   refreshClubs,
@@ -108,6 +118,23 @@ export default function Manage() {
           Alert.alert(`Take ${m.name} off ${c.name}?`, "This is for good: the club's code will not let them back in.", [
             { text: "Cancel", style: "cancel" },
             { text: "Take them off", style: "destructive", onPress: () => void act("remove", () => removeMember(c.id, m.id)) },
+          ]),
+      })),
+    });
+
+  // Hand the club over (lib/elite/tracker.ts): pick a member, confirm once.
+  // The captain stays in the club as a player; the screen closes because
+  // it is the captain's alone.
+  const handOver = () =>
+    choose({
+      title: HAND_OVER_SHEET_TITLE,
+      message: HAND_OVER_SHEET_BODY,
+      choices: others.map((m) => ({
+        label: m.name,
+        run: () =>
+          Alert.alert(handOverAsk(m.name, c.name), HAND_OVER_ASK_BODY, [
+            { text: "Cancel", style: "cancel" },
+            { text: HAND_OVER_CONFIRM, onPress: () => void act("captain", () => makeCaptain(c.id, m.id), () => router.back()) },
           ]),
       })),
     });
@@ -270,6 +297,12 @@ export default function Manage() {
           {others.length ? (
             <>
               <SettingRow label="Take a player off" detail="For good: the club's code will not let them back in." onPress={takeOff} />
+              <Hairline />
+            </>
+          ) : null}
+          {others.length && !c.ended ? (
+            <>
+              <SettingRow label={HAND_OVER_ROW} detail={HAND_OVER_DETAIL} onPress={handOver} />
               <Hairline />
             </>
           ) : null}

@@ -4,12 +4,14 @@ import {
   answerClubRequest,
   endMyClub,
   leaveClub,
+  makeCaptain,
   newClubLink,
   removeClubMember,
   renameMyClub,
   reportClub,
 } from "@/lib/elite/tracker-actions";
 import { nyToday } from "@/lib/elite/time";
+import { CAPTAIN_ONLY_MEMBER } from "@/lib/elite/tracker";
 
 // One club.
 //   GET   its page, for one of its members (anyone else: 404)
@@ -58,6 +60,9 @@ export function POST(req: Request, ctx?: Ctx): Promise<Response> {
       case "remove":
         if (typeof body.member !== "string" || !UUID.test(body.member)) return bad("Nobody to take off.");
         return answer(await removeClubMember(id, body.member));
+      case "captain":
+        if (typeof body.member !== "string" || !UUID.test(body.member)) return bad(CAPTAIN_ONLY_MEMBER);
+        return answer(await makeCaptain(id, body.member));
       case "link":
         return answer(await newClubLink(id));
       case "county": {

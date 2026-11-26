@@ -7,7 +7,7 @@ import { getViewer } from "./session";
 import { DELETE_BLOCKED_MESSAGE, accountDeletedText, deleteGate } from "./account";
 import { removePlayerFiles } from "./account-server";
 import { textCoaches } from "./coach-alerts";
-import { hasTracker, removeTrackerFiles } from "./tracker-server";
+import { handOverClubsOf, hasTracker, removeTrackerFiles } from "./tracker-server";
 import { cancelSubscriptions, memberTier } from "./pro-server";
 import { isPro } from "./tiers";
 
@@ -55,6 +55,10 @@ export async function deleteOwnAccount(password: string): Promise<{ error: strin
   // and its posted photos and its profile photo (every account has one,
   // 081, in this same folder), which do not leave by cascade
   await removeTrackerFiles(user.id);
+
+  // a club this account captains is handed to its longest-standing member
+  // first, so it is never left with players and no captain
+  await handOverClubsOf(admin, user.id).catch(() => undefined);
 
   const { error } = await admin.auth.admin.deleteUser(user.id);
   if (error) {

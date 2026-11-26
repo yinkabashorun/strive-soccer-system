@@ -10,6 +10,7 @@ import { setupSteps, type SetupStep } from "@/lib/elite/account-profile";
 import { suggestUsernames } from "@/lib/elite/account-profile-server";
 import { usernameIdeas } from "@/lib/elite/username";
 import { initials } from "@/lib/utils";
+import { CONFIRM_EMAIL_PATH } from "@/lib/elite/email-confirm";
 
 export const metadata = { title: "Welcome · Strive Elite" };
 
@@ -33,6 +34,10 @@ export default async function OnboardingPage({
   const viewer = await getViewer();
   if (!viewer) redirect("/login?next=/onboarding");
   if (viewer.role !== "player" || !viewer.playerId) redirect("/coach");
+  // A new account confirms its email first (093): before the agreement,
+  // the photo and @username, and everything after. False for coaches, the
+  // example tour, and while no sender is set up (email-confirm.ts).
+  if (viewer.emailDue) redirect(CONFIRM_EMAIL_PATH);
 
   let player = await getPlayer(viewer.playerId);
   // Back from the Strive Pro checkout (074): Stripe's own word on the

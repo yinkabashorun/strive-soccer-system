@@ -45,7 +45,7 @@ function Gatekeeper() {
   const me = useMe();
   const segments = useSegments();
   const router = useRouter();
-  const area = ready ? areaFor(signedIn, me.data?.state, me.data?.profileSetup) : null;
+  const area = ready ? areaFor(signedIn, me.data?.state, me.data?.profileSetup, me.data?.emailConfirm) : null;
   // Strive Pro is on for someone who lives in the free tabs (one-app.ts)
   const train = hasTrain(me.data?.state);
 
@@ -227,6 +227,7 @@ export default function RootLayout() {
               <Stack.Screen name="change-password" />
               <Stack.Screen name="delete-account" />
               <Stack.Screen name="profile-setup" options={{ animation: "fade" }} />
+              <Stack.Screen name="confirm-email" options={{ animation: "fade", gestureEnabled: false }} />
             </Stack>
             </UpdateGate>
           </AuthProvider>

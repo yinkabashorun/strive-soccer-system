@@ -160,6 +160,7 @@ export async function loadBootstrap(
         : null,
     quizOwed: carried ? owedMemberSteps(carried) : null,
     profileSetup: await profileSetupFor(viewer),
+    emailConfirm: viewer.emailDue ? { email: viewer.profile.email } : null,
   };
 }
 

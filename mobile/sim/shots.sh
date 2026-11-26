@@ -20,6 +20,9 @@
 # themselves in (the door, the gate, Home, the week arriving, the offer and
 # the free app's first screen).
 #
+# 58 is "confirm": a new free account at "Check your email" (093), the code
+# from its email still to type.
+#
 # The example members: "ok" a member, "onboarding" a new member at the door
 # (03-door: the member card with their photo), "setup" one who still owes
 # the photo and @username, "locked" a FREE account in the free app (its
@@ -114,6 +117,7 @@ SHOTS='
 55-later-week|free_later|my-week|12
 56-later-quiz-start|free_later|onboarding|11
 57-update|update|-|9
+58-confirm-email|confirm|-|10
 '
 
 last=""

@@ -33,7 +33,8 @@ import { oneAppTabs } from "@shared/one-app";
 import { shareText } from "@shared/share-link";
 import { DOOR_NO_MATCH, doorCodeFrom, friendShareText } from "@shared/free-door";
 import { clubRequestSentLine } from "@shared/tracker";
-import type { AppDoorAnswer } from "@shared/app-contract";
+import type { AppDoorAnswer, AppEmailAnswer } from "@shared/app-contract";
+import { CONFIRM_COPY, cleanCode, cleanEmail } from "@shared/email-confirm";
 
 // The example player the screens are drawn with for review screenshots
 // (EXPO_PUBLIC_FIXTURES=1): the browser build (scripts/screenshots.mjs) and
@@ -43,7 +44,7 @@ import type { AppDoorAnswer } from "@shared/app-contract";
 // stills are the real bank's.
 //
 // Which member the example is, chosen per run:
-//   browser    ?state=ok|consent|onboarding|membership|pro_checkout|setup|locked|free_quiz|free_offer|free_later|social|ended|signedout
+//   browser    ?state=ok|consent|onboarding|membership|pro_checkout|setup|locked|free_quiz|free_offer|free_later|social|ended|signedout|confirm
 //   simulator  the launch argument -fixtureState <the same words>, which
 //              iOS hands the app as a setting (sim/shots.sh, sim/flows)
 //
@@ -69,7 +70,12 @@ import type { AppDoorAnswer } from "@shared/app-contract";
 // simulator's "open this link" command cannot be used for that: iOS answers
 // it with an "Open in Strive Elite?" box that stays on screen and covers
 // every picture after it (the first simulator run, Nov 23 2026).
-export const FIXTURE_STATES = ["ok", "consent", "onboarding", "membership", "pro_checkout", "setup", "locked", "free_quiz", "free_offer", "free_later", "social", "ended", "signedout", "update"] as const;
+// "confirm" is a new free account that has not typed the code from its
+// email yet (093): it opens on the confirm-email screen, where 123456 is
+// the right code and anything else is wrong, then goes on to the @username
+// and photo like any new free account.
+export const FIXTURE_STATES = ["ok", "consent", "onboarding", "membership", "pro_checkout", "setup", "locked", "free_quiz", "free_offer", "free_later", "social", "ended", "signedout", "update", "confirm"] as const;
+export const FIXTURE_EMAIL_CODE = "123456";
 
 function chosenState(): string {
   let raw: unknown = null;
@@ -116,6 +122,9 @@ type Live = {
   posted: boolean;
   // came in by the door with a code: in the free app, the quiz not taken yet
   later: boolean;
+  // the code from the email is still owed (093), and where it was sent
+  emailDue?: boolean;
+  email?: string;
 };
 let live: Live | null = null;
 const watchers = new Set<() => void>();
@@ -123,17 +132,18 @@ const watchers = new Set<() => void>();
 function now(): Live {
   if (!live) {
     const s = chosenState();
-    const free = s === "locked" || s === "ended" || s === "free_quiz" || s === "free_offer" || s === "free_later";
+    const free = s === "locked" || s === "ended" || s === "free_quiz" || s === "free_offer" || s === "free_later" || s === "confirm";
     live = {
       signedIn: s !== "signedout",
       free,
       train: s === "social",
       ended: s === "ended",
-      stage: s === "free_quiz" ? "quiz" : s === "free_offer" ? "offer" : "ready",
-      owed: s === "setup" ? ["username", "photo"] : [],
-      username: s === "setup" ? null : "marcus.b",
+      stage: s === "free_quiz" || s === "confirm" ? "quiz" : s === "free_offer" ? "offer" : "ready",
+      owed: s === "setup" || s === "confirm" ? ["username", "photo"] : [],
+      username: s === "setup" || s === "confirm" ? null : "marcus.b",
       posted: false,
       later: s === "free_later",
+      emailDue: s === "confirm",
     };
   }
   return live;
@@ -839,7 +849,30 @@ export function fixtureBootstrap(): AppBootstrap {
       steps: [...l.owed],
       ideas: l.owed.includes("username") ? ["marcus.b", "marcusbryant", "marcus_b"] : [],
     },
+    emailConfirm: l.emailDue ? { email: l.email ?? "marcus@example.com" } : null,
   };
+}
+
+// Email confirmation (093), answered from the example: 123456 is right.
+// The run that joins free (fixtureJoin) is NOT asked for a code, as the live
+// server asks nobody while no email sender is set up; the "confirm" state
+// pictures the screen.
+function fixtureEmail(path: string, body?: unknown): AppEmailAnswer {
+  const l = now();
+  const at = path.slice("/api/app/email/".length);
+  const email = l.email ?? "marcus@example.com";
+  if (at === "send") return { ok: true, email };
+  if (at === "change") {
+    const next = cleanEmail((body as { email?: unknown } | undefined)?.email);
+    if (!next) return { ok: false, reason: "bad_email", error: CONFIRM_COPY.badEmail };
+    l.email = next;
+    return { ok: true, email: next };
+  }
+  const code = cleanCode((body as { code?: unknown } | undefined)?.code);
+  if (!code) return { ok: false, reason: "bad_code", error: CONFIRM_COPY.badCode, email };
+  if (code !== FIXTURE_EMAIL_CODE) return { ok: false, reason: "wrong", error: CONFIRM_COPY.wrong, email };
+  l.emailDue = false;
+  return { ok: true, email };
 }
 
 // The free app's calls, answered from the example and moved on by it.
@@ -967,6 +1000,7 @@ export function fixtureResponse(path: string, method: string, body?: unknown): u
       : { minBuild: 0, link: null };
   }
   if (path.startsWith("/api/app/free/")) return fixtureFree(path, method, body);
+  if (path.startsWith("/api/app/email/")) return fixtureEmail(path, body);
   if (path.startsWith("/api/app/me")) return fixtureBootstrap();
   if (path.startsWith("/api/app/notices/prefs")) return method === "GET" ? { prefs: fixtureNoticePrefs() } : fixtureSavePrefs(body);
   if (path.startsWith("/api/app/notices")) {

@@ -9,6 +9,8 @@ import type { Profile, Role } from "./types";
 import { DEMO_COACH, DEMO_PLAYERS, DEMO_PLAYER_ID } from "./demo";
 import { perRequest } from "./request-cache";
 import { NO_SETUP, setupFromRow, type ProfileSetup } from "./account-profile";
+import { emailDueFromRow } from "./email-confirm";
+import { isEmailConfigured } from "./email";
 
 // Resolves the current viewer for Strive Elite. Uses real Supabase auth
 // when configured; otherwise falls back to a demo cookie set on the login
@@ -36,6 +38,11 @@ export type Viewer = {
   // The profile photo and @username this account owes, if any (081). Read
   // from the same profile row, so it costs no extra trip.
   setup: ProfileSetup;
+  // A new account that has not typed the code from its email yet (093,
+  // lib/elite/email-confirm.ts). Read from the same profile row. False
+  // while no email sender is set up or 093 is not applied, for coaches, for
+  // the example tour, and when the row could not be read.
+  emailDue: boolean;
 };
 
 function demoViewer(role: Role): Viewer {
@@ -53,6 +60,7 @@ function demoViewer(role: Role): Viewer {
       playerId: p.id,
       demo: true,
       setup: NO_SETUP,
+      emailDue: false,
     };
   }
   return {
@@ -67,6 +75,7 @@ function demoViewer(role: Role): Viewer {
     playerId: null,
     demo: true,
     setup: NO_SETUP,
+    emailDue: false,
   };
 }
 
@@ -134,6 +143,7 @@ async function readViewer(): Promise<Viewer | null> {
         playerId,
         demo: false,
         setup: setupFromRow(profile as Record<string, unknown> | null, user.id),
+        emailDue: emailDueFromRow(profile as Record<string, unknown> | null, isEmailConfigured(), role),
       };
     }
   }

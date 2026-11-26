@@ -22,6 +22,8 @@ export const SESSION_AREAS = [
   "/onboarding/:path*",
   "/coach/:path*",
   "/account/:path*",
+  // a new account types the code from its email here (093)
+  "/confirm-email",
   "/log/:path*",
   "/join",
   // Strive Pro sign-up: the server signs the new account in (074)

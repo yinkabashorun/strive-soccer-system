@@ -75,6 +75,10 @@ export const SCREENS: readonly Screen[] = [
   { path: "/account", since: IN_FIRST_BUILD },
   { path: "/account/delete", since: IN_FIRST_BUILD },
   { path: "/account/password", since: IN_FIRST_BUILD },
+  // Email confirmation (093, Nov 26 2026): a new account types the code
+  // from its email before anything else. Every shell sends a new account
+  // here, so it is never "not in the app yet".
+  { path: "/confirm-email", since: IN_FIRST_BUILD },
 
   // The coach side (the review notes give the reviewer a coach login).
   { path: "/coach", since: IN_FIRST_BUILD },

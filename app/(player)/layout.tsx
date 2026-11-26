@@ -25,6 +25,7 @@ import { SUPPORT_EMAIL } from "@/lib/elite/support";
 import { getTracker, quizDone } from "@/lib/elite/tracker-server";
 import { freeLanding } from "@/lib/elite/tracker";
 import { initials } from "@/lib/utils";
+import { CONFIRM_EMAIL_PATH } from "@/lib/elite/email-confirm";
 
 // The tabs (approved mock v4, Nov 20 2026): Home, Week, Courses and You
 // for Strive Pro; Coach before You for an offer with the coach chat. The
@@ -40,6 +41,10 @@ export default async function PlayerLayout({
   if (!viewer) redirect("/login?next=/dashboard");
   // Coaches AND admins live in the coach app, never the player shell.
   if (viewer.role !== "player") redirect("/coach");
+  // A new account confirms its email first (093): before the agreement,
+  // the photo and @username, and everything after. False for coaches, the
+  // example tour, and while no sender is set up (email-confirm.ts).
+  if (viewer.emailDue) redirect(CONFIRM_EMAIL_PATH);
 
   // The Monday 6am ET unlock is NOT run here: the hourly builder does it
   // first thing every hour (app/api/elite/cron/weekly-plans), and running

@@ -1,0 +1,237 @@
+/* The full-app cut (?cut=full-song): screens drawn from the real iPhone app
+   as the simulator pictures it (the app-screens branch), with the film's own
+   type and gold. Every class here starts with x so nothing in mix.html moves. */
+
+/* the iPhone's own floating tab bar */
+.nb{position:absolute;z-index:6;left:12px;right:12px;bottom:20px;height:66px;border-radius:33px;padding:5px;display:flex;
+  background:rgba(26,26,26,.86);backdrop-filter:blur(18px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.09),0 10px 30px rgba(0,0,0,.6)}
+.nt{flex:1;min-width:0;border-radius:28px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  font-size:10.5px;font-weight:600;color:rgba(242,239,232,.82);overflow:hidden;white-space:nowrap;position:relative;z-index:1}
+.nt svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.nt.on{color:var(--bone)}
+.nt.on svg{fill:var(--bone);stroke:var(--bone)}
+.nt.on svg .cut{fill:#2c2c2c;stroke:#2c2c2c}
+.nb .pill{position:absolute;z-index:0;top:5px;bottom:5px;border-radius:28px;background:rgba(255,255,255,.12)}
+.xfadebar{position:absolute;z-index:4;left:0;right:0;bottom:0;height:150px;background:linear-gradient(180deg,rgba(0,0,0,0),#000 62%);pointer-events:none}
+
+/* shared header */
+.xh{display:flex;align-items:flex-start;justify-content:space-between;padding:60px 22px 0}
+.xt{font-size:42px;line-height:.95}
+.xs{font-size:13.5px;color:var(--dim);margin-top:8px}
+.xme{width:56px;height:56px;border-radius:50%;padding:3px;background:conic-gradient(var(--gold) 0 62%,#222 62% 100%)}
+.xme img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;box-shadow:0 0 0 2.5px #000}
+.xx{position:absolute;left:22px;top:62px;width:26px;height:26px}
+.xx svg{width:26px;height:26px;stroke:var(--bone);stroke-width:2;fill:none;stroke-linecap:round}
+.xbtn{height:64px;border-radius:22px;background:var(--bone);color:#000;display:grid;place-items:center;font-family:"BC";font-weight:900;font-size:20px;letter-spacing:2.2px;text-transform:uppercase}
+.xey{font-size:11.5px;font-weight:600;letter-spacing:2.8px;text-transform:uppercase;color:var(--gold)}
+
+/* 1. Friends, before you post */
+.xfaces{display:flex;gap:16px;padding:18px 22px 0}
+.xfaces div{width:62px;text-align:center;font-size:12.5px;font-weight:600;color:var(--dim)}
+.xfaces img{width:62px;height:62px;border-radius:50%;object-fit:cover;display:block;margin-bottom:7px}
+.xfaces .on{color:var(--bone)}
+.xfaces .on img{box-shadow:0 0 0 2.5px #000,0 0 0 4.5px var(--gold)}
+.xhero{position:absolute;left:14px;right:14px;top:262px;height:420px;border-radius:30px;overflow:hidden;background:#101010;box-shadow:inset 0 0 0 1px var(--line)}
+.xhero .bg{position:absolute;inset:-30px;width:calc(100% + 60px);height:calc(100% + 60px);object-fit:cover;filter:blur(22px) brightness(.62)}
+.xhero .sh{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 8%,rgba(0,0,0,.66) 46%,rgba(0,0,0,.94) 78%)}
+.xhero .in{position:absolute;left:22px;right:22px;bottom:22px}
+.xpair{display:flex;margin-bottom:14px}
+.xpair img{width:54px;height:54px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2.5px var(--bone);margin-right:-12px}
+.xhero h2{font-family:"BC";font-weight:900;font-size:35px;line-height:1.02;text-transform:uppercase;margin-top:8px}
+.xhero p{font-size:16px;color:rgba(242,239,232,.85);margin:10px 0 18px}
+
+/* 2. the camera */
+#xcam{background:#000}
+#xcam .vf{position:absolute;left:0;right:0;top:0;bottom:150px;overflow:hidden;border-radius:0 0 30px 30px}
+#xcam .vf img{width:100%;height:100%;object-fit:cover;display:block}
+#xcam .lab{position:absolute;left:0;right:0;top:92px;text-align:center;font-size:12px;font-weight:600;letter-spacing:2.8px;text-transform:uppercase;color:var(--bone);text-shadow:0 1px 8px #000}
+#xcam .sht{position:absolute;left:50%;bottom:42px;width:78px;height:78px;margin-left:-39px;border-radius:50%;box-shadow:inset 0 0 0 4px var(--bone)}
+#xcam .sht i{position:absolute;inset:8px;border-radius:50%;background:var(--bone)}
+#xcam .fl{position:absolute;inset:0;background:#fff;opacity:0}
+
+/* 3. the clock */
+#xclock{text-align:center}
+#xthumb{position:absolute;left:50%;top:128px;width:108px;height:136px;margin-left:-54px;border-radius:22px;object-fit:cover;box-shadow:0 0 0 1px rgba(255,255,255,.14)}
+#xclock .xey{position:absolute;left:0;right:0;top:292px}
+#xdig{position:absolute;left:0;right:0;top:308px;font-family:"BC";font-weight:900;font-size:104px;line-height:1.1;letter-spacing:1px;font-variant-numeric:tabular-nums}
+#xclock .p1{position:absolute;left:44px;right:44px;top:440px;font-size:16.5px;line-height:1.4;color:var(--dim)}
+#xclock .p2{position:absolute;left:0;right:0;top:500px;font-size:13px;color:rgba(242,239,232,.8)}
+#xfin{position:absolute;left:22px;right:22px;top:546px}
+#xclock .p3{position:absolute;left:0;right:0;top:636px;font-size:14.5px;font-weight:600;color:var(--dim)}
+
+/* 4. ready to post */
+#xrphoto{position:absolute;left:92px;top:118px;width:206px;height:268px;border-radius:26px;overflow:hidden;box-shadow:0 0 0 1px rgba(255,255,255,.12)}
+#xrphoto .f{width:100%;height:100%;object-fit:cover;display:block}
+#xrphoto .s{position:absolute;left:10px;top:10px;width:66px;height:84px;border-radius:14px;object-fit:cover;box-shadow:0 0 0 2.5px #000}
+#xready .xey{position:absolute;left:22px;top:408px}
+#xrt{position:absolute;left:22px;top:424px;font-family:"BC";font-weight:900;font-size:64px;line-height:1.1}
+#xready .p1{position:absolute;left:22px;top:502px;font-size:15px;color:var(--dim)}
+.xseg{position:absolute;left:22px;right:22px;top:540px;height:56px;border-radius:18px;background:var(--fill);box-shadow:inset 0 0 0 1px var(--line);display:flex;padding:5px}
+.xseg div{flex:1;border-radius:14px;display:grid;place-items:center;font-weight:600;font-size:15.5px;color:var(--dim)}
+.xseg .on{background:#262626;color:var(--bone)}
+.xline{position:absolute;left:22px;right:22px;top:610px;height:56px;border-radius:18px;background:var(--fill);box-shadow:inset 0 0 0 1px var(--line);display:flex;align-items:center;padding:0 18px;font-size:15.5px;color:var(--bone)}
+#xpost{position:absolute;left:22px;right:22px;top:690px}
+
+/* 5. the feed, open */
+#xfeedin{position:absolute;left:0;right:0;top:232px}
+.xp{margin:0 14px 16px;border-radius:26px;background:var(--fill);box-shadow:inset 0 0 0 1px var(--line);overflow:hidden}
+.xp .hd{display:flex;align-items:center;gap:11px;padding:14px 16px 12px}
+.xp .hd img{width:40px;height:40px;border-radius:50%;object-fit:cover}
+.xp .hd b{display:block;font-weight:600;font-size:15.5px}
+.xp .hd span{font-size:12.5px;color:var(--dim)}
+.xp .ph{position:relative;height:400px;overflow:hidden}
+.xp .ph .f{width:100%;height:100%;object-fit:cover;display:block}
+.xp .ph .s{position:absolute;left:12px;top:12px;width:84px;height:106px;border-radius:16px;object-fit:cover;box-shadow:0 0 0 2.5px #000}
+.xp .ph:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 58%,rgba(0,0,0,.78))}
+.xp .tt{position:absolute;z-index:2;left:18px;bottom:14px;font-family:"BC";font-weight:900;font-size:42px;line-height:.9;text-transform:uppercase}
+.xp .tt small{display:block;font-family:"B";font-weight:600;font-size:11.5px;letter-spacing:2.6px;color:var(--bone);margin-bottom:5px}
+.xp .ac{display:flex;align-items:center;justify-content:space-between;padding:12px 16px 14px;font-size:13px;color:var(--dim)}
+.xprops{height:42px;padding:0 18px;border-radius:21px;background:#000;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16);display:flex;align-items:center;gap:8px;font-weight:600;font-size:14.5px;color:var(--bone)}
+.xprops svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round}
+.xprops.on{background:var(--metal);color:#000;box-shadow:none}
+.xprops.on svg{fill:#000}
+.xburst{position:absolute;z-index:8;width:9px;height:9px;border-radius:2px;background:var(--metal);opacity:0}
+.xlockv{position:absolute;inset:0;z-index:3;display:grid;place-items:center;background:rgba(0,0,0,.35)}
+.xlockv svg{width:34px;height:34px;stroke:var(--bone);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* 6. your week */
+.xwtop{display:flex;align-items:center;gap:22px;padding:22px 22px 0}
+.xwring{position:relative;width:146px;height:146px;flex:none}
+.xwring svg{position:absolute;inset:0}
+.xwring .c{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.xwring b{font-family:"BC";font-weight:900;font-size:30px;line-height:1}
+.xwring span{font-size:12.5px;color:var(--dim);margin-top:5px}
+.xwtxt b{display:block;font-weight:600;font-size:17.5px}
+.xwtxt span{display:block;font-size:14px;color:var(--dim);margin-top:7px}
+.xdays{display:flex;justify-content:space-between;padding:22px 36px 0}
+.xdays div{width:26px;text-align:center;font-size:11.5px;font-weight:600;color:var(--faint)}
+.xdays i{display:block;width:24px;height:24px;border-radius:50%;margin:10px auto 0;background:#161616}
+.xdays .pl i{background:none;box-shadow:inset 0 0 0 2px rgba(242,239,232,.7)}
+.xdays .td{color:var(--bone)}
+.xsec{padding:26px 22px 10px;font-weight:600;font-size:17.5px}
+.xrows{margin:0 14px;border-radius:26px;background:var(--fill);box-shadow:inset 0 0 0 1px var(--line);padding:4px 0}
+.xrow{position:relative;display:flex;align-items:center;gap:12px;height:66px;padding:0 16px;border-radius:20px}
+.xrow .p{font-family:"BC";font-weight:900;font-size:19px;width:16px;color:var(--faint)}
+.xrow img{width:44px;height:44px;border-radius:50%;object-fit:cover;flex:none}
+.xrow .mid{flex:1;min-width:0}
+.xrow .nm{font-weight:600;font-size:15px;white-space:nowrap}
+.xrow .tr{height:5px;border-radius:3px;background:#1d1d1d;margin-top:9px;overflow:hidden}
+.xrow .tr i{display:block;height:100%;width:0;border-radius:3px;background:rgba(242,239,232,.5)}
+.xrow.you .tr i{background:var(--metal)}
+.xrow.you .p{color:var(--bone)}
+.xrow .xtm{font-family:"BC";font-weight:900;font-size:21px;width:84px;text-align:right;font-variant-numeric:tabular-nums}
+
+/* 7. clubs: the group photo on top, the club's week under it */
+.xcl{padding:16px 14px 0}
+.xcc{position:relative;height:182px;border-radius:26px;overflow:hidden;margin-bottom:12px;background:#101010;box-shadow:inset 0 0 0 1px var(--line)}
+.xcc .ph{position:absolute;left:0;right:0;top:0;height:104px;overflow:hidden}
+.xcc .bg{width:100%;height:100%;object-fit:cover;display:block}
+.xcc .sh{position:absolute;left:0;right:0;top:0;height:105px;background:linear-gradient(180deg,rgba(0,0,0,0) 45%,rgba(16,16,16,.75) 82%,#101010 100%)}
+.xcc .r1{position:absolute;left:16px;right:16px;top:82px;display:flex;align-items:flex-end;gap:12px}
+.xcr{width:54px;height:54px;border-radius:50%;object-fit:cover;flex:none;box-shadow:0 0 0 2px #000,0 0 0 4px var(--gold)}
+.xcc .r1 .xcr{width:50px;height:50px}
+.xcc .r1>div:nth-child(2){min-width:0;padding-bottom:1px}
+.xcc .nm{font-family:"BC";font-weight:900;font-size:23px;line-height:1;text-transform:uppercase;white-space:nowrap}
+.xcc .pl{font-size:12.5px;color:var(--dim);margin-top:5px}
+.xcc .xtm{margin-left:auto;text-align:right;flex:none;white-space:nowrap}
+.xcc .xtm b{display:block;font-family:"BC";font-weight:900;font-size:25px;line-height:1}
+.xcc .xtm span{font-size:11.5px;color:var(--dim)}
+.xcc .r2{position:absolute;right:12px;top:12px;display:flex;align-items:center;gap:8px;height:34px;padding:0 6px 0 12px;border-radius:17px;background:rgba(0,0,0,.6);backdrop-filter:blur(8px)}
+.xcc .r2 .xey{font-size:9.5px;letter-spacing:2px}
+.xcc .r2 img{width:24px;height:24px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1.5px var(--gold);margin-left:-3px}
+.xcc .r3{position:absolute;left:16px;right:16px;bottom:13px;font-size:13.5px;color:rgba(242,239,232,.9);white-space:nowrap}
+
+/* 8. a club, its matchup, champs of the week */
+.xkh{position:absolute;left:14px;right:14px;top:104px;height:286px;border-radius:30px;overflow:hidden;background:#111}
+.xkh .bg{width:100%;height:100%;object-fit:cover;display:block}
+.xkh .sh{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.05) 20%,rgba(0,0,0,.7) 56%,rgba(0,0,0,.95) 100%)}
+.xkh .in{position:absolute;left:20px;right:20px;bottom:18px}
+.xkh .xcr{width:60px;height:60px;margin-bottom:12px}
+.xkh h2{font-family:"BC";font-weight:900;font-size:38px;line-height:1;text-transform:uppercase}
+.xkh .co{font-size:14px;color:rgba(242,239,232,.85);margin-top:8px}
+#xchamp{margin-top:9px;font-size:12px;font-weight:700;letter-spacing:3px;text-transform:uppercase;white-space:nowrap}
+.xrec{position:absolute;right:16px;top:16px;border-radius:16px;padding:9px 14px;background:rgba(0,0,0,.55);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);text-align:left}
+.xrec b{display:block;font-family:"BC";font-weight:900;font-size:22px;line-height:1}
+.xrec span{font-size:11.5px;color:var(--dim)}
+.xback{position:absolute;left:22px;top:64px}
+.xback svg{width:24px;height:24px;stroke:var(--bone);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.xmu{position:absolute;left:14px;right:14px;top:404px;height:258px;border-radius:26px;background:var(--fill);box-shadow:inset 0 0 0 1px var(--line);padding:20px}
+.xmu .cols{display:flex;margin-top:16px}
+.xmu .col{flex:1}
+.xmu .who{display:flex;align-items:center;gap:9px;font-weight:600;font-size:15px;white-space:nowrap}
+.xmu .who img{width:34px;height:34px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1.5px #000,0 0 0 3px #3a3a3a}
+.xmu .col:first-child .who img{box-shadow:0 0 0 1.5px #000,0 0 0 3px var(--gold)}
+.xmu .col b{display:block;font-family:"BC";font-weight:900;font-size:44px;line-height:1;margin-top:14px;font-variant-numeric:tabular-nums}
+.xmu .col span{display:block;font-size:12.5px;color:var(--dim);margin-top:6px}
+.xmbar{display:flex;gap:5px;height:7px;margin-top:18px}
+.xmbar i{display:block;height:100%;border-radius:4px;background:#333}
+.xmbar i:first-child{background:var(--bone)}
+#xml{font-weight:600;font-size:16px;margin-top:16px}
+.xtw{position:absolute;left:14px;right:14px;top:676px;height:200px;border-radius:26px;background:var(--fill);box-shadow:inset 0 0 0 1px var(--line);padding:20px}
+.xtw b{display:block;font-family:"BC";font-weight:900;font-size:50px;line-height:1.1;margin-top:6px}
+#xnote{position:absolute;z-index:30;left:10px;right:10px;top:52px;border-radius:24px;padding:13px 14px;display:flex;gap:12px;align-items:center;background:rgba(38,38,38,.92);backdrop-filter:blur(20px);box-shadow:0 12px 40px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.1)}
+#xnote .ic{width:42px;height:42px;border-radius:10px;background:#000;display:grid;place-items:center;flex:none;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+#xnote .ic img{width:30px;height:30px;filter:invert(1)}
+#xnote b{display:block;font-weight:700;font-size:14px;letter-spacing:.2px;line-height:1.25}
+#xnote span{display:block;font-size:13.5px;color:rgba(242,239,232,.82);margin-top:2px}
+#xnote em{position:absolute;right:16px;top:12px;font-style:normal;font-size:12px;color:var(--dim)}
+
+/* 9. Strive Pro adds Train */
+#xpro .xprocard{position:absolute;z-index:7;left:14px;right:14px;bottom:104px;border-radius:26px;padding:20px 20px 22px;background:rgba(18,18,18,.96);box-shadow:inset 0 0 0 1px rgba(200,168,88,.5),0 20px 50px rgba(0,0,0,.8)}
+#xpro .xprocard b{display:block;font-family:"BC";font-weight:900;font-size:30px;line-height:1.05;text-transform:uppercase;margin-top:8px}
+#xpro .xprocard span{display:block;font-size:14.5px;color:var(--dim);margin-top:8px}
+
+/* 10. you */
+.xyc{margin:18px 14px 0;border-radius:26px;background:var(--fill);box-shadow:inset 0 0 0 1px var(--line);padding:22px 20px}
+.xyc .r1{display:flex;align-items:center;gap:18px}
+.xyring{position:relative;width:104px;height:104px;flex:none}
+.xyring svg{position:absolute;inset:0}
+.xyring img{position:absolute;inset:9px;width:86px;height:86px;border-radius:50%;object-fit:cover}
+.xyc h2{font-family:"BC";font-weight:900;font-size:30px;line-height:1;text-transform:uppercase}
+.xyc .un{font-size:14.5px;color:var(--dim);margin-top:7px}
+.xyc .lv{margin-top:20px}
+.xybar{height:6px;border-radius:3px;background:#1d1d1d;margin-top:12px;overflow:hidden}
+.xybar i{display:block;height:100%;width:0;border-radius:3px;background:var(--metal)}
+.xyc .nx{font-size:13.5px;color:var(--dim);margin-top:11px}
+.xyc .two{display:flex;margin-top:18px;padding-top:18px;border-top:1px solid var(--line)}
+.xyc .two div{flex:1}
+.xyc .two b{display:block;font-family:"BC";font-weight:900;font-size:36px;line-height:1}
+.xyc .two span{display:block;font-size:13px;color:var(--dim);margin-top:6px}
+.xmed{display:flex;gap:10px;padding:0 14px}
+.xmed div{flex:1;text-align:center;font-size:11.5px;font-weight:600;color:var(--dim)}
+.xmed i{display:grid;place-items:center;width:64px;height:64px;margin:0 auto 9px;border-radius:50%;background:var(--metal);color:#000;font-style:normal;font-family:"BC";font-weight:900;font-size:19px;letter-spacing:.5px;box-shadow:inset 0 0 0 3px rgba(0,0,0,.18),0 0 26px rgba(200,168,88,.35)}
+.xycl{display:flex;gap:20px;padding:0 22px}
+.xycl div{width:74px;text-align:center;font-size:12.5px;font-weight:600;line-height:1.25}
+.xycl img{width:62px;height:62px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 8px;box-shadow:0 0 0 2px #000,0 0 0 4px var(--gold)}
+.xlab{padding:24px 22px 12px;font-size:11.5px;font-weight:600;letter-spacing:2.8px;text-transform:uppercase;color:var(--dim)}
+
+/* 11. my code */
+#xcode h1{font-family:"BC";font-weight:900;font-size:42px;line-height:1;text-transform:uppercase;padding:112px 22px 0}
+#xcode .p1{font-size:15.5px;line-height:1.4;color:var(--dim);padding:14px 22px 0}
+.xqr{position:absolute;left:44px;top:262px;width:302px;height:302px;border-radius:30px;background:#fff;overflow:hidden}
+.xqr img{position:absolute;inset:14px;width:274px;height:274px;display:block}
+.xqr .scan{position:absolute;left:0;right:0;height:60px;background:linear-gradient(180deg,rgba(200,168,88,0),rgba(200,168,88,.55));border-bottom:3px solid var(--gold);opacity:0}
+.xqr .veil{position:absolute;left:0;right:0;bottom:0;background:#fff}
+#xcode .who{position:absolute;left:0;right:0;top:588px;text-align:center}
+#xcode .who b{display:block;font-family:"BC";font-weight:900;font-size:30px;text-transform:uppercase}
+#xcode .who span{display:block;font-size:14.5px;color:var(--dim);margin-top:6px}
+#xsend{position:absolute;left:22px;right:22px;top:690px}
+
+/* 12. bring your teammates */
+.xsq{position:absolute;left:14px;right:14px;top:150px;border-radius:26px;background:var(--fill);box-shadow:inset 0 0 0 1px var(--line);padding:24px 20px 24px}
+.xsq h2{font-family:"BC";font-weight:900;font-size:31px;line-height:1.04;text-transform:uppercase}
+.xsq .p1{font-size:15px;line-height:1.4;color:var(--dim);margin-top:12px}
+.xboxes{display:flex;gap:10px;margin-top:22px}
+.xbox{position:relative;flex:1;height:132px;border-radius:20px;box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.16);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;font-weight:600;font-size:14px;color:var(--faint);overflow:hidden}
+.xbox .fill{position:absolute;inset:0;border-radius:20px;background:linear-gradient(160deg,rgba(200,168,88,.26),rgba(200,168,88,.06));box-shadow:inset 0 0 0 1.5px var(--gold);opacity:0}
+.xbox img{position:relative;width:54px;height:54px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 2px #000,0 0 0 3.5px var(--gold);opacity:0}
+.xbox span{position:relative}
+.xbox .ck{position:absolute;right:9px;top:9px;width:24px;height:24px;border-radius:50%;background:var(--metal);display:grid;place-items:center;transform:scale(0)}
+.xbox .ck svg{width:14px;height:14px;stroke:#000;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.xearn{position:absolute;left:14px;right:14px;top:520px;border-radius:26px;padding:24px 20px;background:linear-gradient(160deg,#1c170b,#0e0e0e);box-shadow:inset 0 0 0 1.5px var(--gold),0 0 60px rgba(200,168,88,.22);text-align:center}
+.xearn b{display:block;font-family:"BC";font-weight:900;font-size:30px;line-height:1.05;text-transform:uppercase}
+.xearn .xbtn{margin-top:18px}
+
+#xprobar{transform-origin:50% 100%}
+#xproring{position:absolute;z-index:7;left:47px;bottom:53px;width:0;height:0}
+#xproring i{position:absolute;left:-40px;top:-40px;width:80px;height:80px;border-radius:50%;box-shadow:0 0 0 2.5px var(--gold);opacity:0}

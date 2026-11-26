@@ -431,7 +431,7 @@ body{width:540px;height:960px;position:relative;display:block;padding:0}
 .kt .sub{max-width:330px}
 [data-n]{white-space:nowrap}#clubs{z-index:8}#club{z-index:9}#board{z-index:10}#feed{z-index:11}#prof{z-index:12}
 .crow .cc.cc2{width:auto;flex:1}#courses .crow{padding-right:14px}
-</style></head><body>
+</style><link rel="stylesheet" href="full.css"></head><body>
 <svg width="0" height="0" style="position:absolute"><defs><linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0dca0"/><stop offset=".45" stop-color="#c8a858"/><stop offset="1" stop-color="#8c6d2c"/></linearGradient></defs></svg>
 <div id="stage"></div><div id="glow"></div>
 <div id="title"><div class="w">Strive <span class="metal">Elite</span></div><p>The iPhone app, in one minute.</p></div>
@@ -733,6 +733,8 @@ body{width:540px;height:960px;position:relative;display:block;padding:0}
 <div id="end"><div class="l">Open Strive.</div><div class="l">Tap Start.</div><div class="l metal">Train.</div><div class="wm2"><b>Strive <span class="metal">Elite</span></b><span>On iPhone</span></div></div>
 <script type="module">
 import {setup,render,xfade,DURATION,CUT_INFO} from "./mix.src.js";
+// the full-app cut's screens live in their own file and go in before the photos are waited on
+if((new URLSearchParams(location.search).get("cut")||"").startsWith("full")){const x=new XMLHttpRequest();x.open("GET","full.screens.html",false);x.send();document.getElementById("finger").insertAdjacentHTML("beforebegin",x.responseText);}
 const scr=document.getElementById("screen"), wrap=document.getElementById("scrwrap");
 scr.style.transform=`scale(${wrap.clientWidth/390})`;
 await document.fonts.ready;

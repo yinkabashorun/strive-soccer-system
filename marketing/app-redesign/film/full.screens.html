@@ -1,0 +1,202 @@
+<!-- The screens of the full-app cut (?cut=full-song), drawn from the real iPhone app.
+     mix.html pulls this file in before the photos load. Players' names are never in
+     this file: [data-n] and [data-n1] are filled from faces/names.json (not committed). -->
+
+<!-- 1. FRIENDS, before you post -->
+<section class="scr" id="xfr">
+  <div class="xh"><div><div class="bc xt">Today</div><div class="xs">Thursday, Nov 26</div></div><div class="xme"><img src="faces/p-audi.jpg"></div></div>
+  <div class="xfaces">
+    <div><img src="faces/p-audi.jpg">You</div>
+    <div class="on"><img src="faces/p-pink.jpg"><span data-n1="anthony">Player</span></div>
+    <div class="on"><img src="faces/p-kick.jpg"><span data-n1="db">Player</span></div>
+    <div class="on"><img src="faces/p-usa.jpg"><span data-n1="luis">Player</span></div>
+  </div>
+  <div class="xhero">
+    <img class="bg" src="faces/p-pink.jpg">
+    <div class="sh"></div>
+    <div class="in">
+      <div class="xpair"><img src="faces/p-pink.jpg"><img src="faces/p-kick.jpg"><img src="faces/p-usa.jpg"></div>
+      <div class="xey">Today · 3 friends trained</div>
+      <h2><span data-n1="anthony">Player</span> trained<br>1h 15m today</h2>
+      <p>Post yours to see theirs.</p>
+      <div class="xbtn" id="xstart">Start training</div>
+    </div>
+  </div>
+  <div class="nb" data-on="friends"></div>
+</section>
+
+<!-- 2. THE CAMERA: the start photo, then the finish photo -->
+<section class="scr" id="xcam">
+  <div class="vf"><img id="xcamimg" src="faces/club-2.jpg" style="object-position:60% 50%"></div>
+  <div class="lab" id="xcamlab">Start photo</div>
+  <div class="sht" id="xsht"><i></i></div>
+  <div class="fl" id="xfl"></div>
+</section>
+
+<!-- 3. THE CLOCK -->
+<section class="scr" id="xclock">
+  <div class="xx"><svg viewBox="0 0 26 26"><path d="M6 6l14 14M20 6 6 20"/></svg></div>
+  <img id="xthumb" src="faces/club-2.jpg" style="object-position:60% 50%">
+  <div class="xey">Training</div>
+  <div id="xdig">00:00</div>
+  <div class="p1">Put your phone down and train. Take your finish photo when you are done.</div>
+  <div class="p2">The clock counts up to 2 hours 30 minutes.</div>
+  <div class="xbtn" id="xfin">Take my finish photo</div>
+  <div class="p3">Stop without posting</div>
+</section>
+
+<!-- 4. READY TO POST -->
+<section class="scr" id="xready">
+  <div class="xx"><svg viewBox="0 0 26 26"><path d="M6 6l14 14M20 6 6 20"/></svg></div>
+  <div id="xrphoto"><img class="f" src="faces/post-4.jpg" style="object-position:38% 50%"><img class="s" src="faces/club-2.jpg" style="object-position:60% 50%"></div>
+  <div class="xey">Ready to post</div>
+  <div id="xrt">46m</div>
+  <div class="p1">The time between your two photos.</div>
+  <div class="xseg"><div class="on">Training</div><div>Gym</div></div>
+  <div class="xline">Weak foot only.</div>
+  <div class="xbtn" id="xpost">Post to my friends</div>
+</section>
+
+<!-- 5. THE FEED, open -->
+<section class="scr" id="xfeed">
+  <div class="xh"><div><div class="bc xt">Today</div><div class="xs">Thursday, Nov 26</div></div><div class="xme"><img src="faces/p-audi.jpg"></div></div>
+  <div class="xfaces">
+    <div class="on"><img src="faces/p-audi.jpg">You</div>
+    <div class="on"><img src="faces/p-pink.jpg"><span data-n1="anthony">Player</span></div>
+    <div class="on"><img src="faces/p-kick.jpg"><span data-n1="db">Player</span></div>
+    <div class="on"><img src="faces/p-usa.jpg"><span data-n1="luis">Player</span></div>
+  </div>
+  <div id="xfeedin">
+    <div class="xp" id="xmine"><div class="hd"><img src="faces/p-audi.jpg"><div><b>You</b><span>Just now</span></div></div>
+      <div class="ph"><img class="f" src="faces/post-4.jpg" style="object-position:38% 50%"><img class="s" src="faces/club-2.jpg" style="object-position:60% 50%"><div class="tt"><small>Training</small>46m</div></div>
+      <div class="ac"><span>Weak foot only.</span></div></div>
+    <div class="xp xl"><div class="hd"><img src="faces/p-pink.jpg"><div><b><span data-n="anthony">Player</span></b><span>2h ago</span></div></div>
+      <div class="ph"><img class="f" src="faces/post-pink.jpg" style="object-position:50% 40%"><div class="tt"><small>Training</small>1h 15m</div><div class="xlockv"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></svg></div></div>
+      <div class="ac"><div class="xprops" id="xprops"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span id="xpw">Props 5</span></div><span>Finishing after practice.</span></div></div>
+    <div class="xp xl"><div class="hd"><img src="faces/p-kick.jpg"><div><b><span data-n="db">Player</span></b><span>4h ago</span></div></div>
+      <div class="ph"><img class="f" src="faces/post-kick.jpg" style="object-position:45% 45%"><div class="tt"><small>Training</small>1h 30m</div><div class="xlockv"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></svg></div></div>
+      <div class="ac"><div class="xprops"><svg viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg><span>Props 7</span></div></div></div>
+  </div>
+  <i class="xburst"></i><i class="xburst"></i><i class="xburst"></i><i class="xburst"></i><i class="xburst"></i><i class="xburst"></i><i class="xburst"></i><i class="xburst"></i>
+  <div class="xfadebar"></div>
+  <div class="nb" data-on="friends"></div>
+</section>
+
+<!-- 6. YOUR WEEK: the ring, the days, the friends board -->
+<section class="scr" id="xweek">
+  <div class="xh"><div><div class="bc xt">Your week</div><div class="xs">Nov 23 to Nov 29</div></div></div>
+  <div class="xwtop">
+    <div class="xwring"><svg viewBox="0 0 146 146"><circle cx="73" cy="73" r="64" stroke="#161616" stroke-width="11" fill="none"/><circle id="xwarc" cx="73" cy="73" r="64" stroke="url(#gold)" stroke-width="11" fill="none" stroke-linecap="round" stroke-dasharray="402.1" stroke-dashoffset="402.1" transform="rotate(-90 73 73)"/></svg>
+      <div class="c"><b id="xwt">0m</b><span>of 4h</span></div></div>
+    <div class="xwtxt"><b id="xwhead">Trained today.</b><span>Next up: Saturday, about 1h.</span></div>
+  </div>
+  <div class="xdays">
+    <div>M<i></i></div><div>T<i></i></div><div>W<i></i></div><div class="td">T<i></i></div><div>F<i></i></div><div class="pl">S<i></i></div><div>S<i></i></div>
+  </div>
+  <div class="xsec">This week with your friends</div>
+  <div class="xrows">
+    <div class="xrow" data-m="270"><span class="p">1</span><img src="faces/c-gary.jpg"><div class="mid"><div class="nm">Coach Gary</div><div class="tr"><i></i></div></div><div class="xtm">0m</div></div>
+    <div class="xrow" data-m="200"><span class="p">2</span><img src="faces/c-yinka.jpg"><div class="mid"><div class="nm">Coach Yinka</div><div class="tr"><i></i></div></div><div class="xtm">0m</div></div>
+    <div class="xrow you" data-m="165"><span class="p">3</span><img src="faces/p-audi.jpg"><div class="mid"><div class="nm">You</div><div class="tr"><i></i></div></div><div class="xtm">0m</div></div>
+    <div class="xrow" data-m="150"><span class="p">4</span><img src="faces/p-usa.jpg"><div class="mid"><div class="nm"><span data-n="luis">Player</span></div><div class="tr"><i></i></div></div><div class="xtm">0m</div></div>
+  </div>
+  <div class="xfadebar"></div>
+  <div class="nb" data-on="week"></div>
+</section>
+
+<!-- 7. CLUBS: each one on its own group photo -->
+<section class="scr" id="xclubs">
+  <div class="xh"><div><div class="bc xt">Clubs</div></div></div>
+  <div class="xcl">
+    <div class="xcc" id="xcc1"><div class="ph"><img class="bg" src="faces/g-reneg.jpg" style="object-position:50% 30%"></div><div class="sh"></div>
+      <div class="r1"><img class="xcr" src="faces/g-reneg.jpg"><div><div class="nm">Renegados FC</div><div class="pl">16 players</div></div><div class="xtm"><b>31h 20m</b><span>this week</span></div></div>
+      <div class="r2"><span class="xey">Trained today</span><img src="faces/p-pink.jpg"><img src="faces/p-kick.jpg"><img src="faces/p-usa.jpg"></div>
+      <div class="r3">This week: Renegados FC vs Haymarket 08s.</div></div>
+    <div class="xcc"><div class="ph"><img class="bg" src="faces/g-pickup2.jpg" style="object-position:50% 28%"></div><div class="sh"></div>
+      <div class="r1"><img class="xcr" src="faces/g-pickup2.jpg"><div><div class="nm">Sunday Pickup</div><div class="pl">12 players</div></div><div class="xtm"><b>14h 05m</b><span>this week</span></div></div>
+      <div class="r2"><span class="xey">Trained today</span><img src="faces/p-lynch.jpg"><img src="faces/p-curly.jpg"></div>
+      <div class="r3">This week: Sunday Pickup vs Bristow Boys.</div></div>
+    <div class="xcc"><div class="ph"><img class="bg" src="faces/g-strive-wide.jpg" style="object-position:50% 34%"></div><div class="sh"></div>
+      <div class="r1"><img class="xcr" src="faces/g-strive.jpg"><div><div class="nm">Strive Soccer</div><div class="pl">214 players</div></div><div class="xtm"><b>612h</b><span>this week</span></div></div>
+      <div class="r2"><span class="xey">Trained today</span><img src="faces/c-yinka.jpg"><img src="faces/c-gary.jpg"><img src="faces/p-ada.jpg"><img src="faces/p-puma.jpg"></div>
+      <div class="r3">Started by Coach Yinka.</div></div>
+  </div>
+  <div class="nb" data-on="clubs"></div>
+</section>
+
+<!-- 8. A CLUB: this week's matchup, then champs of the week -->
+<section class="scr" id="xclub">
+  <div class="xback"><svg viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg></div>
+  <div class="xkh"><img class="bg" id="xkbg" src="faces/g-reneg.jpg" style="object-position:50% 30%"><div class="sh"></div>
+    <div class="in"><img class="xcr" src="faces/g-reneg.jpg"><h2>Renegados FC</h2><div class="co">Prince William County · 16 players</div><div id="xchamp" class="metal">Strive champs of the week</div></div>
+    <div class="xrec"><b id="xrecn">3-1</b><span>weeks won-lost</span></div></div>
+  <div class="xmu">
+    <div class="xey" id="xmey" style="color:var(--dim)">This week's matchup</div>
+    <div class="cols">
+      <div class="col"><div class="who"><img src="faces/g-reneg.jpg">Renegados FC</div><b id="xma">0m</b><span>time per player</span></div>
+      <div class="col"><div class="who"><img src="faces/g-hs.jpg">Haymarket 08s</div><b id="xmb">0m</b><span>time per player</span></div>
+    </div>
+    <div class="xmbar"><i id="xmba"></i><i id="xmbb"></i></div>
+    <div id="xml">Your club is ahead.</div>
+  </div>
+  <div class="xtw"><div class="xey" style="color:var(--dim)">This week</div><b>31h 20m</b></div>
+  <i class="xburst"></i><i class="xburst"></i><i class="xburst"></i><i class="xburst"></i><i class="xburst"></i><i class="xburst"></i><i class="xburst"></i><i class="xburst"></i><i class="xburst"></i><i class="xburst"></i><i class="xburst"></i><i class="xburst"></i>
+  <div id="xnote"><div class="ic"><img src="../mock/strive-logo.png"></div><div><b>RENEGADOS FC IS STRIVE CHAMPS OF THE WEEK</b><span>You beat Haymarket 08s by 12 minutes per player.</span></div><em>now</em></div>
+  <div class="xfadebar"></div>
+  <div class="nb" data-on="clubs"></div>
+</section>
+
+<!-- 9. STRIVE PRO ADDS TRAIN: the same app, one more tab -->
+<section class="scr" id="xpro">
+  <div id="xprobody"></div>
+  <div class="xfadebar"></div>
+  <div class="xprocard" id="xprocard"><div class="xey">Strive Pro</div><b>A week built around you.</b><span>One drill at a time, with the video. Every Monday.</span></div>
+  <div class="nb" data-on="friends" id="xprobar"></div>
+  <div id="xproring"><i></i><i></i></div>
+</section>
+
+<!-- 10. YOU -->
+<section class="scr" id="xyou">
+  <div class="xh"><div><div class="bc xt">You</div></div></div>
+  <div class="xyc">
+    <div class="r1">
+      <div class="xyring"><svg viewBox="0 0 104 104"><circle cx="52" cy="52" r="48" stroke="#1c1c1c" stroke-width="5" fill="none"/><circle id="xyarc" cx="52" cy="52" r="48" stroke="url(#gold)" stroke-width="5" fill="none" stroke-linecap="round" stroke-dasharray="301.6" stroke-dashoffset="301.6" transform="rotate(-90 52 52)"/></svg><img src="faces/p-audi.jpg"></div>
+      <div><h2>Marcus B.</h2><div class="un">@marcus.b</div></div>
+    </div>
+    <div class="lv"><div class="xey" id="xylvl">Aura level 3</div><div class="xybar"><i id="xybar"></i></div><div class="nx" id="xynx">46m of training to Level 4</div></div>
+    <div class="two"><div><b id="xy1">0m</b><span>this week</span></div><div><b id="xy2">0h</b><span>all time. It only ever goes up.</span></div></div>
+  </div>
+  <div class="xlab">Earned</div>
+  <div class="xmed"><div><i>1ST</i>First session</div><div><i>1 WK</i>Week conquered</div><div><i>10</i>10 sessions</div><div><i>10H</i>10 hours</div></div>
+  <div class="xlab">Clubs</div>
+  <div class="xycl"><div><img src="faces/g-reneg.jpg">Renegados FC</div><div><img src="faces/g-pickup2.jpg">Sunday Pickup</div><div><img src="faces/g-strive.jpg">Strive Soccer</div></div>
+  <div class="xfadebar"></div>
+  <div class="nb" data-on="you" data-five="1"></div>
+</section>
+
+<!-- 11. MY CODE -->
+<section class="scr" id="xcode">
+  <div class="xback"><svg viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg></div>
+  <h1>My code</h1>
+  <div class="p1">A teammate points their iPhone camera at this code. Then they send you a friend request.</div>
+  <div class="xqr" id="xqr"><img src="qr-join.svg"><div class="veil" id="xveil"></div><div class="scan" id="xscan"></div></div>
+  <div class="who"><b>Marcus B.</b><span>@marcus.b</span></div>
+  <div class="xbtn" id="xsend">Send my link</div>
+</section>
+
+<!-- 12. BRING 3 TEAMMATES -->
+<section class="scr" id="xsquad">
+  <div class="xh"><div><div class="bc xt">Friends</div></div></div>
+  <div class="xsq">
+    <h2>Bring 3 teammates. Get a month of Strive Pro.</h2>
+    <div class="p1">A teammate counts when they join with your link and post their first training.</div>
+    <div class="xboxes">
+      <div class="xbox"><div class="fill"></div><img src="faces/p-usa.jpg"><span data-n1="luis">Player</span><div class="ck"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div></div>
+      <div class="xbox"><div class="fill"></div><img src="faces/p-kick.jpg"><span data-n1="db">Player</span><div class="ck"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div></div>
+      <div class="xbox"><div class="fill"></div><img src="faces/p-pink.jpg"><span data-n1="anthony">Player</span><div class="ck"><svg viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></svg></div></div>
+    </div>
+  </div>
+  <div class="xearn" id="xearn"><div class="xey">Three teammates trained</div><b>You earned a month of Strive Pro.</b><div class="xbtn">Start my month</div></div>
+  <i class="xburst"></i><i class="xburst"></i><i class="xburst"></i><i class="xburst"></i><i class="xburst"></i><i class="xburst"></i><i class="xburst"></i><i class="xburst"></i><i class="xburst"></i><i class="xburst"></i>
+  <div class="nb" data-on="friends"></div>
+</section>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ScrollView, Share, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { fmtDuration } from "@shared/time-trained";
+import { ADD_ROW } from "@shared/friend-add";
 import { ApiError, OFFLINE_MESSAGE } from "@/api/client";
 import { answerFriend, refreshFree, useFeed } from "@/api/free";
 import { inviteShare } from "@/social-view";
@@ -229,6 +230,14 @@ export default function Friends() {
           </Label>
         </Press>
       ) : null}
+
+      {/* Add a friend in person: their exact @username, or your own code
+          for them to scan (app/friend). One quiet row, under the invite. */}
+      <Press onPress={() => router.push("/friend/add")} style={styles.invite} accessibilityLabel={ADD_ROW}>
+        <Label dim size={14}>
+          {ADD_ROW}
+        </Label>
+      </Press>
     </Screen>
   );
 }

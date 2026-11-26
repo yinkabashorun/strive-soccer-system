@@ -74,9 +74,11 @@ export async function enterDoorCode(input: {
   if (refused) return { ok: false, error: refused };
   if (!answer) return { ok: false, error: DOOR_NO_MATCH };
 
-  // Not in the free app yet (no quiz answered, the week not set): this
-  // code is how they came in.
-  const fresh = !input.intake?.answers && !input.tracker.quiz_done_at;
+  // Not in the free app yet (no quiz answered, the week not set, and not
+  // already let in by an earlier code): this code is how they came in. A
+  // player who is in the free app and opens a teammate's invite link
+  // (lib/elite/friend-link.ts) is adding a friend, not being brought in.
+  const fresh = !input.intake?.answers && !input.tracker.quiz_done_at && input.intake?.later !== true;
   if (fresh && answer.friendId && !input.tracker.referred_by) {
     await admin
       .from("elite_trackers")

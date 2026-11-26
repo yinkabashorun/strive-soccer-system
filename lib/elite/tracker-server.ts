@@ -560,6 +560,25 @@ export async function requestFriend(requester: string, recipient: string): Promi
   return error ? "error" : "sent";
 }
 
+// What already stands between two players, read BEFORE a request is sent,
+// for the wording only (lib/elite/friend-add.ts: adding a friend by their
+// exact @username). It decides nothing and stores nothing: requestFriend
+// above is still the one place a request is made or refused.
+//   removed   the recipient once took the requester off (071): requestFriend
+//             answers "sent" and stores nothing
+//   waiting   a request from the requester is already waiting on them
+// Null when it could not be read.
+export async function friendAskFacts(requester: string, recipient: string): Promise<{ removed: boolean; waiting: boolean } | null> {
+  const admin = createServiceClient();
+  if (!admin || !friendPair(requester, recipient)) return null;
+  const [removed, waiting] = await Promise.all([
+    admin.from("elite_tracker_unfriends").select("remover").eq("remover", recipient).eq("removed", requester).maybeSingle(),
+    admin.from("elite_tracker_friend_requests").select("requester").eq("requester", requester).eq("recipient", recipient).maybeSingle(),
+  ]);
+  if (removed.error || waiting.error) return null;
+  return { removed: Boolean(removed.data), waiting: Boolean(waiting.data) };
+}
+
 // The requests waiting on this viewer, newest first: first name and last
 // initial only. No photo until they are friends.
 export type FriendRequestView = { id: string; name: string; initials: string };

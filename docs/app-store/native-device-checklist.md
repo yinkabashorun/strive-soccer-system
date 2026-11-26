@@ -387,3 +387,74 @@ camera, notifications, sound or vibration: lines 4 and 10 stay his phone's.
 - [ ] This can only be seen in an App Store build. In TestFlight Apple never shows its rating sheet, and the example build never asks.
 - [ ] In an App Store build on a phone where the app first opened 7 or more days ago: reach the week's target on Week (free), or finish and close the last session of a member's week, or put away a Monday card that says "Your best week yet." Apple's own rating sheet may appear once (Apple decides whether it shows). There is no screen or button of ours for it.
 - [ ] It never appears during a session or while a training clock is running, and never a second time in the same version.
+
+## Adding a friend in person, on two phones only (Nov 26 2026)
+
+Add a friend by exact @username, My code (a QR code), and an invite link
+that opens the app (`lib/elite/friend-add.ts`, `lib/elite/friend-link.ts`).
+The simulator pictures the three screens with example data
+(`sim/shots.sh` 60 to 62, `sim/flows/17-add-a-friend.yaml`). What it
+cannot show is below: the QR code being read, and a link opening the app.
+
+**A link opening the app works only in a signed build with the new
+entitlement** (`applinks:thestriveapp.com` in `mobile/app.json`), made
+AFTER the site's half is live (`/.well-known/apple-app-site-association`
+on main). Never in the simulator's example build, and not in a build made
+before this. The iPhone reads the site's file when the app is installed
+(through Apple's own servers, which can lag by hours): if a link still
+opens the website right after installing, delete the app, install it again
+and try once more before calling it broken.
+
+Two phones, each signed in to its own free account (A and B), neither a
+friend of the other.
+
+1. **By @username.** On A: Friends, scroll to the bottom, "Add a friend".
+   Type B's @username with the @ and in capitals: "Request sent. You and
+   <B> are friends once <B> accepts." The button stays above the keyboard
+   the whole time. The request arrives on the other phone: B's Friends
+   shows it, Accept, and both see each other.
+2. **The refusals.** On A type a username nobody has: "We could not find
+   that @username. Check the spelling." Type A's own: "That is your own
+   @username." Type B's again once you are friends: "You are already
+   friends." Tap the button with the box empty: "Type their @username
+   first."
+3. **A block reads as not found.** On B block A. On A type B's @username:
+   the same "We could not find that @username" line as for a name nobody
+   has. Unblock afterwards.
+4. **My code.** On A: "Add a friend", "Show my code" (and You, "My code").
+   A white card with the QR code, A's name, @username and "My code:
+   XXXXXXXX" under it. Turn the phone's brightness down: the code is still
+   black on white.
+5. **Scan my QR with another iPhone's Camera.** On B open the iPhone's own
+   Camera and point it at A's code: a yellow tag appears under the code.
+   Tap it: the app opens (not Safari) on one screen, "<A's first
+   name> invited you", with A's initials and no photo, and "Send <A> a
+   friend request". Nothing has been sent yet: A's Friends shows no
+   request until B taps the button. Tap it: the request arrives on the
+   other phone (A's Friends).
+6. **Not now.** Scan again on B and tap "Not now": the screen closes to
+   where B was, and A gets nothing.
+7. **A link in Messages opens the app.** A taps "Send my link" and texts
+   it to B. On B tap the link in Messages: the app opens on the same
+   "invited you" screen. Do it once with the app already open on another
+   screen (the invite comes up on top, and the back gesture returns to that
+   screen) and once with the app fully closed (it opens on Friends, then
+   the invite comes up on top).
+8. **A club's link.** The same with a club's invite ("Invite a teammate"
+   on the club page): the screen shows the club's crest and name and "Ask
+   to join <club>"; the captain gets the request under Manage.
+9. **A new player keeps the code.** Sign B out. Tap A's link in Messages:
+   the app opens on sign-in, nothing else. Join free with a new email:
+   after the username and the photo, the code question has A's code
+   already typed. "Use my code" sends the request; "I do not have a code"
+   goes on with nothing sent.
+10. **With the app not installed** the link opens the website page:
+    delete the app from B, tap A's link: Safari opens
+    thestriveapp.com/join with A's first name and the code, as before.
+11. **Other links stay out of the way.** With the app installed, tap a
+    link to thestriveapp.com/join with no code (or with ?w=): the app
+    opens where it was, or on its first screen, and nothing is asked.
+    Links to any other page of the site (/5v5, /pro, /terms) still open
+    Safari.
+12. **Saved passwords still work** on the sign-in screen (the same
+    entitlement list carries both).

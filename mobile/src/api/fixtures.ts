@@ -36,6 +36,9 @@ import { DOOR_NO_MATCH, doorCodeFrom, friendShareText } from "@shared/free-door"
 import { clubRequestSentLine } from "@shared/tracker";
 import type { AppDoorAnswer, AppEmailAnswer } from "@shared/app-contract";
 import { CONFIRM_COPY, cleanCode, cleanEmail } from "@shared/email-confirm";
+import { clubAskLine, friendRequestLine, requestSentLine } from "@shared/tracker";
+import { ADD_ALREADY, ADD_NOT_FOUND, ADD_SELF, usernameToFind, type FriendAddAnswer } from "@shared/friend-add";
+import { INVITE_NOT_ONE, inviteFromParams, type AppInvite } from "@shared/friend-link";
 
 // The example player the screens are drawn with for review screenshots
 // (EXPO_PUBLIC_FIXTURES=1): the browser build (scripts/screenshots.mjs) and
@@ -897,9 +900,36 @@ function fixtureFree(path: string, method: string, body?: unknown): unknown {
   }
   // THE DOOR: any code of the right shape is taken as a club's, and the
   // example account goes straight to the free app (the quiz waits)
+  // ADD A FRIEND by their exact @username (app/friend/add.tsx): the example
+  // knows three names. Marcus's own, a friend he already has, and one
+  // player who is sent a request; any other is a username nobody has.
+  if (at === "friend/ask") {
+    const name = usernameToFind((body as { username?: unknown } | null)?.username);
+    if (name === "marcus.b") return { ok: false, error: ADD_SELF } satisfies FriendAddAnswer;
+    if (name === "diego.r9") return { ok: false, error: ADD_ALREADY } satisfies FriendAddAnswer;
+    if (name === "kai.m") return { ok: true, result: "sent", line: requestSentLine("Kai M.") } satisfies FriendAddAnswer;
+    return { ok: false, error: ADD_NOT_FOUND } satisfies FriendAddAnswer;
+  }
+  // AN INVITE LINK, before anything is sent (app/friend/link.tsx): who it
+  // is from. A club's link is the example club; anything else a teammate.
+  if (at.startsWith("code?")) {
+    const query = new URLSearchParams(at.slice("code?".length));
+    const asked = inviteFromParams({ code: query.get("code"), kind: query.get("kind") });
+    if (!asked) return { ok: false, error: INVITE_NOT_ONE } satisfies AppInvite;
+    return asked.kind === "club"
+      ? ({ ok: true, kind: "club", code: asked.code, id: "c-renegados", name: "Renegados FC", body: clubAskLine(false) } satisfies AppInvite)
+      : ({ ok: true, kind: "friend", code: asked.code, first: "Kai", initials: "KM", body: friendRequestLine("Kai") } satisfies AppInvite);
+  }
   if (at === "code") {
     const typed = doorCodeFrom((body as { code?: unknown } | null)?.code);
     if (!typed) return { ok: false, error: DOOR_NO_MATCH } satisfies AppDoorAnswer;
+    // a player already in the free app opened an invite link: the request
+    // is sent, and nothing about the account moves
+    if (l.stage === "ready") {
+      return typed.kind === "club"
+        ? ({ ok: true, kind: "club", line: clubRequestSentLine("Renegados FC", false), skipped: false } satisfies AppDoorAnswer)
+        : ({ ok: true, kind: "friend", line: requestSentLine("Kai M."), skipped: false } satisfies AppDoorAnswer);
+    }
     l.stage = "ready";
     l.later = true;
     return { ok: true, kind: "club", line: clubRequestSentLine("Renegados FC", false), skipped: true } satisfies AppDoorAnswer;

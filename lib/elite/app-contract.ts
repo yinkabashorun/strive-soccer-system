@@ -162,6 +162,8 @@ export const APP_API = {
   freeReport: "/api/app/free/report",
   freeBlock: "/api/app/free/block",
   freeFriend: "/api/app/free/friend",
+  // add a friend by their exact @username (friend-add.ts)
+  freeFriendAsk: "/api/app/free/friend/ask",
   freeWeek: "/api/app/free/week",
   freeWeekCard: "/api/app/free/week/card",
   freeYou: "/api/app/free/you",

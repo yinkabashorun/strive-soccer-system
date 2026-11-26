@@ -146,7 +146,7 @@ how sure it is. What each answer turned into:
 |---|---|
 | C1 | First compile and TestFlight upload; fix what it flags. Nothing in `native/` has ever been built. |
 | C2 | Native push end to end on a real iPhone (the three `APNS_` values in Vercel). |
-| C3 | Universal links, so a texted link opens the app (needs the Team ID). |
+| C3 | Universal links, so a texted link opens the app (needs the Team ID). BUILT Nov 26 2026 for an invite link only (`/join`), with add a friend by @username and My code (a QR code); not proven on a phone: `native-device-checklist.md`, "Adding a friend in person". |
 | C4 | Prove B2 to B6 on a real phone, not on paper. |
 | C5 | The privacy answers, age rating, categories and review notes entered in App Store Connect from `listing.md`. |
 | C6 | TestFlight with the current members before public review. |

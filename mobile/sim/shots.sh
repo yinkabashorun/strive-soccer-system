@@ -114,6 +114,7 @@ SHOTS='
 55-later-week|free_later|my-week|12
 56-later-quiz-start|free_later|onboarding|11
 57-update|update|-|9
+58-week-recap|recap|my-week|12
 '
 
 last=""

@@ -1,0 +1,36 @@
+# The Monday moment (lib/elite/week-recap.ts): the free account on a Monday
+# opens Week and finds last week's card at the top (its own number, gym on
+# its own line, its place among friends, "Your best week yet." with the
+# small gold mark), taps "Got it", and the card is gone. Opened again, it
+# stays gone: "Got it" is remembered for the week.
+appId: com.strivesoccer.elite
+---
+- launchApp:
+    clearState: true
+    arguments:
+      fixtureState: recap
+- extendedWaitUntil:
+    visible: "Week"
+    timeout: 30000
+- tapOn: "Week"
+- extendedWaitUntil:
+    visible: "Last week you trained 3h 10m.*"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: t90-week-recap
+- tapOn: "Got it"
+- assertNotVisible: "Last week you trained 3h 10m.*"
+- takeScreenshot: t91-week-recap-gone
+- stopApp
+- launchApp:
+    arguments:
+      fixtureState: recap
+- extendedWaitUntil:
+    visible: "Week"
+    timeout: 30000
+- tapOn: "Week"
+- extendedWaitUntil:
+    visible: "Your week"
+    timeout: 15000
+- assertNotVisible: "Last week you trained 3h 10m.*"

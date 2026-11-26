@@ -19,6 +19,7 @@ import { createServiceClient, isSupabaseConfigured } from "./supabase/server";
 import { avatarUrlsOf, clearProfilePhoto, usernamesOf } from "./account-profile-server";
 import type { Viewer } from "./session";
 import { shiftDay } from "./time";
+import { weekRecap, type WeekRecap } from "./week-recap";
 import { clubRankingFor } from "./tracker-ranking";
 import { withLine } from "./club-teams";
 import { NO_APP_VERSION, cleanAppVersion, type AppVersion } from "./app-version";
@@ -407,6 +408,42 @@ export async function friendsWeekFor(viewer: Viewer, today: string): Promise<Boa
     starred: starred.has(id),
     photo: photos.get(id) ?? null,
   }));
+}
+
+// The Monday moment (week-recap.ts): last week's numbers for the card at
+// the top of Week. The player's own counting training per week (the same
+// timed-training sum the board uses: auraLogsOf leaves typed time out, and
+// only training is added), their gym last week when they track gym, and
+// each friend's counting training last week (the board's own reader, for
+// last week). Reads only this player and their own friends; sends nothing.
+export async function weekRecapFor(viewer: Viewer, tracker: Tracker, today: string): Promise<WeekRecap | null> {
+  if (viewer.demo) return null;
+  const admin = createServiceClient();
+  if (!admin) return null;
+  const { monday: thisMonday } = weekOf(today);
+  const lastDay = shiftDay(thisMonday, -1); // Sunday of last week
+  const { monday: lastMonday } = weekOf(lastDay);
+  const [own, lastLogs, friends] = await Promise.all([
+    auraLogsOf(admin, viewer.profile.id),
+    getWeekLogs(viewer.profile.id, lastDay),
+    friendsWeekFor(viewer, lastDay),
+  ]);
+  const byWeek = new Map<string, number>();
+  for (const l of own) {
+    if (l.kind !== "training" || l.trained_on >= thisMonday) continue;
+    const m = weekOf(l.trained_on).monday;
+    byWeek.set(m, (byWeek.get(m) ?? 0) + l.minutes);
+  }
+  const lastWeek = byWeek.get(lastMonday) ?? 0;
+  byWeek.delete(lastMonday);
+  const gym = tracksGym(tracker.grade) ? lastLogs.reduce((s, l) => (l.kind === "gym" ? s + l.minutes : s), 0) : 0;
+  return weekRecap({
+    week: thisMonday,
+    lastWeek,
+    earlier: [...byWeek.values()],
+    gymLastWeek: gym,
+    friends: friends.map((f) => f.minutes),
+  });
 }
 
 // The owner of a link's code, when this viewer could add them: a real

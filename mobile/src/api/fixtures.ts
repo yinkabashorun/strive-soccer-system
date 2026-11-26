@@ -30,6 +30,7 @@ import { buildNoticePrefs, withTopic } from "@shared/notice-prefs";
 import { earnedNotice, newWeekNotice, welcomeNotice, type NoticeTopic } from "@shared/notices";
 import { reminderChoice } from "@shared/reminders";
 import { oneAppTabs } from "@shared/one-app";
+import { weekRecap } from "@shared/week-recap";
 import { shareText } from "@shared/share-link";
 import { DOOR_NO_MATCH, doorCodeFrom, friendShareText } from "@shared/free-door";
 import { clubRequestSentLine } from "@shared/tracker";
@@ -58,7 +59,8 @@ import type { AppDoorAnswer } from "@shared/app-contract";
 // teammate or a club?", lib/elite/free-door.ts): any code of the right
 // shape is taken as a club's, and the account goes straight to the free
 // app. "free_later" is that account afterwards: in the free app, the quiz
-// not taken yet, the one card on Week asking for it.
+// not taken yet, the one card on Week asking for it. "recap" is the
+// "locked" free account on a Monday: last week's card at the top of Week.
 // A run that starts "signedout" and taps Join free
 // becomes a new free account and moves on as it goes (the quiz, the
 // @username and photo, the offer, the week's set-up, a post), all of it
@@ -69,7 +71,7 @@ import type { AppDoorAnswer } from "@shared/app-contract";
 // simulator's "open this link" command cannot be used for that: iOS answers
 // it with an "Open in Strive Elite?" box that stays on screen and covers
 // every picture after it (the first simulator run, Nov 23 2026).
-export const FIXTURE_STATES = ["ok", "consent", "onboarding", "membership", "pro_checkout", "setup", "locked", "free_quiz", "free_offer", "free_later", "social", "ended", "signedout", "update"] as const;
+export const FIXTURE_STATES = ["ok", "consent", "onboarding", "membership", "pro_checkout", "setup", "locked", "free_quiz", "free_offer", "free_later", "social", "ended", "signedout", "update", "recap"] as const;
 
 function chosenState(): string {
   let raw: unknown = null;
@@ -123,7 +125,7 @@ const watchers = new Set<() => void>();
 function now(): Live {
   if (!live) {
     const s = chosenState();
-    const free = s === "locked" || s === "ended" || s === "free_quiz" || s === "free_offer" || s === "free_later";
+    const free = s === "locked" || s === "recap" || s === "ended" || s === "free_quiz" || s === "free_offer" || s === "free_later";
     live = {
       signedIn: s !== "signedout",
       free,
@@ -693,6 +695,9 @@ function fixtureFreeWeek(): AppFreeWeek {
     inviteText: INVITE_TEXT,
     // came in by the door: nothing rated yet, so the card asks for the quiz
     upgrade: l.later ? { area: null, sessions: 0, quiz: true } : { area: "Weak foot", sessions: 4 },
+    // the Monday moment ("recap": the free account on a Monday), said by the
+    // same rule the server uses; every other example member has no card
+    recap: chosenState() !== "recap" ? null : weekRecap({ week: "2026-11-23", lastWeek: 190, earlier: [120, 95, 150], gymLastWeek: 90, friends: [210, 75, 60, 40] }),
   };
 }
 

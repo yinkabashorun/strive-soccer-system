@@ -10,9 +10,11 @@ import { dropSeenKey, parseSeenWeek } from "@shared/experience";
 // doorPassed: the account (its email) that went past the door's "Have a
 // code?" on this phone with no code, so the door is asked once
 // (src/door.ts doorDue).
-export type Prefs = { vibration: boolean; sound: boolean; autoplay: boolean; pushAsked: boolean; pushOn: boolean; firstDaysHidden: boolean; proEndedSeen: boolean; clockKnown: boolean; doorPassed: string };
+// recapSeen: the week (its Monday) whose Monday card was put away with
+// "Got it" on this phone (lib/elite/week-recap.ts recapDue).
+export type Prefs = { vibration: boolean; sound: boolean; autoplay: boolean; pushAsked: boolean; pushOn: boolean; firstDaysHidden: boolean; proEndedSeen: boolean; clockKnown: boolean; doorPassed: string; recapSeen: string };
 
-export const DEFAULT_PREFS: Prefs = { vibration: true, sound: true, autoplay: true, pushAsked: false, pushOn: false, firstDaysHidden: false, proEndedSeen: false, clockKnown: false, doorPassed: "" };
+export const DEFAULT_PREFS: Prefs = { vibration: true, sound: true, autoplay: true, pushAsked: false, pushOn: false, firstDaysHidden: false, proEndedSeen: false, clockKnown: false, doorPassed: "", recapSeen: "" };
 const KEY = "strive.prefs.v1";
 
 let cache: Prefs | null = null;

@@ -16,6 +16,7 @@ import { Avatar, MyAvatar, Star } from "@/Avatar";
 import { PlayerLink } from "@/ProfileParts";
 import { PAGE_TOP, Screen } from "@/Screen";
 import { UpgradeCard } from "@/UpgradeCard";
+import { MondayCard } from "@/MondayCard";
 import { ShareWeekRow } from "@/ShareWeekRow";
 import { shareWeekShown } from "@/share-week";
 import { Body, Button, Card, Hairline, Head, Label, Press, Ring, Skeleton } from "@/ui";
@@ -101,6 +102,9 @@ export default function MyWeek() {
           {w.label}
         </Body>
       </View>
+
+      {/* the Monday moment: last week, once a week, then gone */}
+      <MondayCard recap={w.recap} />
 
       {ended ? (
         <Card style={styles.ended}>

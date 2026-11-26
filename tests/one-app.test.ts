@@ -4,7 +4,8 @@
 // These tests hold that from the rule down to the routes.
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { FREE_APP_TABS, PRO_ENDED_LINE, POST_SESSION_ROW, TRAIN_TAB, firstTab, keepsFreeApp, oneAppTabs, proEnded } from "@/lib/elite/one-app";
+import { FREE_APP_TABS, PRO_ENDED_LINE, POST_SESSION_ROW, TRAIN_TAB, firstTab, getsFreeApp, keepsFreeApp, oneAppTabs, proEnded } from "@/lib/elite/one-app";
+import { seasonOfMember } from "@/lib/elite/pro-social-server";
 import { livesInFreeApp, memberState } from "@/lib/elite/member-gate";
 import { accessAllowed } from "@/lib/elite/app-api";
 import { nativeRouteFor } from "@/lib/elite/notice-routes";
@@ -243,5 +244,66 @@ describe("the phone", () => {
 
   it("the one upgrade card is never shown to a member", () => {
     expect(src("mobile/app/(free)/my-week.tsx")).toContain('<UpgradeCard place="week" member={train}');
+  });
+});
+
+// EVERY STRIVE PRO MEMBER HAS THE WHOLE APP (Coach Yinka, Nov 26 2026: "the
+// heart of the app is the free strava for soccer / social media version ...
+// even improved experience if a player is on pro ... so incredibly
+// seamless"). He bought Strive Pro on the website, opened the iPhone app
+// and found Train alone: no Friends, no Clubs, no board. A member who buys
+// Strive Pro straight away now gets the free app's side made for them.
+describe("every Strive Pro member has the whole app", () => {
+  const on = { tier: "pro", status: "active", onboarded: true, age: 15 };
+
+  it("a Strive Pro member, switched on, quiz done, 13 or older: yes", () => {
+    expect(getsFreeApp(on)).toBe(true);
+    expect(getsFreeApp({ ...on, status: "trialing" })).toBe(true);
+    expect(getsFreeApp({ ...on, age: 13 })).toBe(true);
+  });
+
+  it("the free app is 13 and older: a younger member is never put among friends, and an unknown age is not 13", () => {
+    expect(getsFreeApp({ ...on, age: 12 })).toBe(false);
+    expect(getsFreeApp({ ...on, age: null })).toBe(false);
+    expect(getsFreeApp({ ...on, age: undefined })).toBe(false);
+    expect(getsFreeApp({ ...on, age: Number.NaN })).toBe(false);
+  });
+
+  it("not before the membership is on and the quiz is done, and never for a coaching family", () => {
+    expect(getsFreeApp({ ...on, status: "none" })).toBe(false);
+    expect(getsFreeApp({ ...on, status: "canceled" })).toBe(false);
+    expect(getsFreeApp({ ...on, onboarded: false })).toBe(false);
+    expect(getsFreeApp({ ...on, tier: "elite" })).toBe(false);
+    expect(getsFreeApp({ ...on, tier: "complete" })).toBe(false);
+  });
+
+  it("their week's target follows the season their own quiz gave", () => {
+    expect(seasonOfMember("off_season")).toBe("off_season");
+    expect(seasonOfMember("in_season")).toBe("in_season");
+    expect(seasonOfMember(null)).toBe("in_season");
+  });
+
+  it("the account is made in ONE place, behind the rule, and holds nothing made up", () => {
+    const rule = src("lib/elite/pro-social-server.ts");
+    expect(rule).toContain("!getsFreeApp({");
+    expect(rule).toContain("recommendation(await getTargetTable()");
+    expect(rule).toContain("makeTrackerForMember(profileId, season, target)");
+    // the row: their own code, the season and the coaches' target for it
+    const server = src("lib/elite/tracker-server.ts");
+    const made = server.slice(server.indexOf("export async function makeTrackerForMember"), server.indexOf("export async function hasTracker"));
+    expect(made).toMatch(/insert\(\{\s*profile_id: profileId,\s*referral_code: newReferralCode\(\),\s*season,\s*target_minutes: targetMinutes,\s*\}\)/);
+    expect(made).not.toMatch(/quiz_done_at|quiz_later_at|referred_by|grade/);
+  });
+
+  it("both readers make it: the iPhone app's API and the website's member shell, never while the agreement is owed", () => {
+    const api = src("lib/elite/app-api.ts");
+    expect(api).toMatch(/if \(!tracker && !due\) \{\s*tracker = await ensureFreeApp\(viewer\.profile\.id, player\);/);
+    const shell = src("app/(player)/layout.tsx");
+    expect(shell).toContain("(consent ? null : await ensureFreeApp(viewer.profile.id, player))");
+  });
+
+  it("once made, they are a free player who upgraded: in, and social, with Train in front", () => {
+    expect(memberState({ role: "player", playerId: "p", isFree: true, hasFreeApp: true, consentDue: false, player: proOn })).toEqual({ kind: "ok", social: true });
+    expect(oneAppTabs(true).map((t) => t.label)).toEqual(["Train", "Friends", "Week", "Clubs", "You"]);
   });
 });

@@ -776,7 +776,10 @@ describe("a free account stays free until a membership is on", () => {
   it("the website's member shell and its free shell use the same rule", async () => {
     const { readFileSync } = await import("node:fs");
     const layout = readFileSync("app/(player)/layout.tsx", "utf8");
-    expect(layout).toContain("mayHaveFreeApp(player) ? await getTracker(viewer.profile.id) : null");
+    // the free account is read for every Strive Pro row, and made for a
+    // member who has none (lib/elite/one-app.ts getsFreeApp)
+    expect(layout).toContain("!viewer.demo && mayHaveFreeApp(player)");
+    expect(layout).toContain("(await getTracker(viewer.profile.id)) ?? (consent ? null : await ensureFreeApp(viewer.profile.id, player))");
     expect(layout).toContain('if (state.kind === "free" && freeAccount) redirect(freeLanding(quizDone(freeAccount)));');
     expect(readFileSync("lib/elite/tracker-server.ts", "utf8")).toContain("livesInFreeApp({ hasTracker: true, hasPlayer: true, player })");
   });

@@ -17,6 +17,7 @@ import { consentDue } from "./legal-server";
 import { getTracker, type Tracker } from "./tracker-server";
 import { readIntake, stageOf, type StoredIntake } from "./free-intake-server";
 import { mayHaveFreeApp, memberState, type MemberState } from "./member-gate";
+import { ensureFreeApp } from "./pro-social-server";
 import { profileSetupDue } from "./account-profile";
 import type { Player } from "./types";
 
@@ -113,7 +114,14 @@ export async function loadMemberState(viewer: Viewer): Promise<Loaded> {
   // The free account is read for every Strive Pro row: one whose
   // membership is not on still lives in the free app, and one whose
   // membership IS on keeps the free app and gains the Train tab.
-  const { tracker, intake } = mayHaveFreeApp(player) ? await freeSide() : { tracker: null, intake: null };
+  let { tracker, intake } = mayHaveFreeApp(player) ? await freeSide() : { tracker: null, intake: null };
+  // EVERY STRIVE PRO MEMBER HAS THE WHOLE APP (lib/elite/one-app.ts
+  // getsFreeApp): one who bought Strive Pro straight away gets the free
+  // app's side made here, once, and is then a free player who upgraded.
+  if (!tracker && !due) {
+    tracker = await ensureFreeApp(viewer.profile.id, player);
+    if (tracker) intake = await readIntake(viewer.profile.id).catch(() => null);
+  }
   const state = memberState({
     role: viewer.role,
     playerId: viewer.playerId,

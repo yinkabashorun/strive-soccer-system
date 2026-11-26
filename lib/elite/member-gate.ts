@@ -64,8 +64,10 @@ export function mayBeFree(player: MemberGateInput["player"]): boolean {
 }
 
 // Whether a member row can have a free app account behind it at all: only
-// a Strive Pro row (the row a free account gets when it taps Start, and
-// the row of a member who joined Strive Pro directly, who has none).
+// a Strive Pro row. A free account gets one when it taps Start; a member
+// who bought Strive Pro straight away gets the free app's side made for
+// them the first time they are read (lib/elite/one-app.ts getsFreeApp),
+// so every Strive Pro member 13 or older has both.
 export function mayHaveFreeApp(player: MemberGateInput["player"]): boolean {
   return Boolean(player) && isPro(player?.tier);
 }

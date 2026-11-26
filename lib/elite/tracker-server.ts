@@ -144,6 +144,29 @@ export async function getTracker(profileId: string): Promise<Tracker | null> {
   return { ...row, plan_days: row.plan_days ?? [] };
 }
 
+// A free account made for a Strive Pro member who has none (the rule and
+// the caller: lib/elite/one-app.ts getsFreeApp, pro-social-server.ts). The
+// row holds their own code to share, the season their member quiz gave
+// and the coaches' weekly target for it; nothing else is set. One row per
+// person is held by the table's key: when a second read makes it at the
+// same moment, the insert is refused and the row that exists is read back.
+export async function makeTrackerForMember(profileId: string, season: Season, targetMinutes: number): Promise<Tracker | null> {
+  const admin = createServiceClient();
+  if (!admin) return null;
+  // The code is unique in the database; on the rare clash, draw again.
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const { error } = await admin.from("elite_trackers").insert({
+      profile_id: profileId,
+      referral_code: newReferralCode(),
+      season,
+      target_minutes: targetMinutes,
+    });
+    if (!error) break;
+    if (await getTracker(profileId)) break;
+  }
+  return getTracker(profileId);
+}
+
 export async function hasTracker(profileId: string): Promise<boolean> {
   return (await getTracker(profileId)) !== null;
 }

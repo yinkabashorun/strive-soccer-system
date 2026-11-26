@@ -16,6 +16,7 @@ import { suggestUsernames } from "@/lib/elite/account-profile-server";
 import { consentDue } from "@/lib/elite/legal-server";
 import { NO_PROFILE_GATE, type GateCopy } from "@/lib/elite/gates";
 import { mayHaveFreeApp, memberState } from "@/lib/elite/member-gate";
+import { ensureFreeApp } from "@/lib/elite/pro-social-server";
 import { memberTabs } from "@/lib/elite/experience";
 import { groupSessions } from "@/lib/elite/session-flow";
 import { liveWeekFor } from "@/lib/elite/time";
@@ -80,7 +81,13 @@ export default async function PlayerLayout({
   // ONE APP (lib/elite/one-app.ts): a member who came through the free
   // app keeps it, so the free account is read for every Strive Pro row,
   // on or not (mayHaveFreeApp); state.social says they have both.
-  const freeAccount = !viewer.demo && mayHaveFreeApp(player) ? await getTracker(viewer.profile.id) : null;
+  // EVERY STRIVE PRO MEMBER HAS THE WHOLE APP (getsFreeApp): one who
+  // bought Strive Pro straight away gets the free app's side made here,
+  // once, exactly as the iPhone app's API does (lib/elite/app-api.ts).
+  const freeAccount =
+    !viewer.demo && mayHaveFreeApp(player)
+      ? ((await getTracker(viewer.profile.id)) ?? (consent ? null : await ensureFreeApp(viewer.profile.id, player)))
+      : null;
   const state = memberState({
     role: viewer.role,
     playerId: viewer.playerId,

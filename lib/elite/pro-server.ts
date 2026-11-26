@@ -6,6 +6,9 @@ import { createServiceClient } from "./supabase/server";
 import { isStripeConfigured, stripe } from "@/lib/stripe";
 import { featureOn, isPro, tierOf, type Feature } from "./tiers";
 import {
+  NEXT_MONTH_FREE_NOTE,
+  PRO_CURRENCY,
+  PRO_MONTHLY_CENTS,
   PAYMENTS_OFF_MESSAGE,
   PRO_ALREADY_ACTIVE_MESSAGE,
   PRO_PLAN,
@@ -14,6 +17,7 @@ import {
   proCheckoutParams,
 } from "./pro";
 import { APP_URL } from "./app-url";
+import { paymentMayMove } from "./lifetime";
 import { normalizePhone } from "./sms";
 import type { MembershipTier } from "./types";
 
@@ -206,12 +210,15 @@ export async function syncProAccess(subscriptionId: string, status: string, dele
     .limit(1);
   const profileId = (rows as { profile_id: string | null }[] | null)?.[0]?.profile_id ?? null;
   if (!profileId) return;
-  const { data: player } = await admin
-    .from("elite_players")
-    .select("id, tier")
-    .eq("profile_id", profileId)
-    .maybeSingle();
+  // read with the lifetime column when the database has it (092); before
+  // that nobody has lifetime access and the plain read answers
+  const withLifetime = await admin.from("elite_players").select("id, tier, lifetime_access").eq("profile_id", profileId).maybeSingle();
+  const { data: player } = withLifetime.error
+    ? await admin.from("elite_players").select("id, tier").eq("profile_id", profileId).maybeSingle()
+    : withLifetime;
   if (!player || !isPro(player.tier as string | null)) return;
+  // a lifetime member is never switched off by a payment (lib/elite/lifetime.ts)
+  if (!paymentMayMove(player as { lifetime_access?: boolean | null }, access)) return;
   await admin.from("elite_players").update({ subscription_status: access }).eq("id", player.id);
 }
 
@@ -261,6 +268,41 @@ async function runningSubscriptionIds(profileId: string): Promise<string[]> {
     .map((r) => r.stripe_subscription_id)
     .filter((id): id is string => Boolean(id));
   return [...new Set(ids)];
+}
+
+// THE NEXT MONTH FREE (lib/elite/squad-pass.ts: a player who pays by card
+// and brought three teammates who train). The month's price is put on the
+// member's Stripe account as a credit, which Stripe takes off their next
+// charge by itself: the next month costs nothing and the membership never
+// stops. `key` is the earned month's own id, sent to Stripe as the
+// idempotency key, so a retry or a second tap can never credit twice.
+//   "credited"  done; `id` is Stripe's own record of the credit
+//   "none"      no card subscription is running: the month is kept
+//   "ending"    the subscription is set to stop: the month is kept, and
+//               is started the usual way once the paid one has ended
+//   "failed"    Stripe could not be reached or refused: nothing changed
+export type NextMonthCredit = { result: "credited"; id: string } | { result: "none" | "ending" | "failed" };
+
+export async function creditNextMonth(profileId: string, key: string): Promise<NextMonthCredit> {
+  const ids = await runningSubscriptionIds(profileId);
+  if (ids.length === 0) return { result: "none" };
+  if (!isStripeConfigured()) return { result: "failed" };
+  try {
+    const sub = await stripe().subscriptions.retrieve(ids[0]);
+    if (sub.status !== "active" && sub.status !== "trialing" && sub.status !== "past_due") return { result: "none" };
+    if (sub.cancel_at_period_end || sub.cancel_at) return { result: "ending" };
+    const customer = typeof sub.customer === "string" ? sub.customer : sub.customer?.id;
+    if (!customer) return { result: "failed" };
+    // a negative amount is a credit: it comes off the next invoice
+    const credit = await stripe().customers.createBalanceTransaction(
+      customer,
+      { amount: -PRO_MONTHLY_CENTS, currency: PRO_CURRENCY, description: NEXT_MONTH_FREE_NOTE },
+      { idempotencyKey: `strive-earned-month-${key}` }
+    );
+    return { result: "credited", id: credit.id };
+  } catch {
+    return { result: "failed" };
+  }
 }
 
 // Does this account have a running Strive Pro subscription to cancel?

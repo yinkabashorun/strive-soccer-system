@@ -4,6 +4,7 @@ import { APP_API } from "@shared/app-contract";
 import { SQUAD_FAILED, SQUAD_SEND, SQUAD_START, runningLine, type Squad } from "@shared/squad-pass";
 import { api } from "@/api/client";
 import { keys } from "@/api/queries";
+import { freeKeys } from "@/api/free";
 import { queryClient } from "@/api/queryClient";
 import { Body, Button, Card, Disc, Head, Icon, Label } from "@/ui";
 import { color } from "@/theme";
@@ -23,6 +24,8 @@ export function SquadCard({ squad, onSend }: { squad: Squad; onSend: () => void 
     try {
       await api<{ ok: boolean }>(APP_API.freePass, { method: "POST" });
       await queryClient.invalidateQueries({ queryKey: keys.me });
+      // the card itself changes too (the month is used, the line appears)
+      await queryClient.invalidateQueries({ queryKey: freeKeys.feed });
     } catch (e) {
       setError((e as { message?: string })?.message || SQUAD_FAILED);
     } finally {
@@ -76,6 +79,12 @@ export function SquadCard({ squad, onSend }: { squad: Squad; onSend: () => void 
           {runningLine(squad.runningUntil)}
         </Body>
       ) : null}
+      {/* a player who pays: their next month is free (squad-pass.ts) */}
+      {squad.note ? (
+        <Body size={13} style={{ marginTop: 12 }}>
+          {squad.note}
+        </Body>
+      ) : null}
       {error ? (
         <Body size={13} style={{ marginTop: 12 }}>
           {error}
@@ -83,7 +92,7 @@ export function SquadCard({ squad, onSend }: { squad: Squad; onSend: () => void 
       ) : null}
 
       <View style={{ gap: 10, marginTop: 16 }}>
-        {squad.ready > 0 ? <Button label={SQUAD_START} onPress={start} busy={busy} /> : null}
+        {squad.ready > 0 ? <Button label={squad.start ?? SQUAD_START} onPress={start} busy={busy} /> : null}
         {squad.canEarnMore ? <Button quiet={squad.ready > 0} label={SQUAD_SEND} onPress={onSend} /> : null}
       </View>
     </Card>

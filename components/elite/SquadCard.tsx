@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Check } from "lucide-react";
-import { SQUAD_SEND, SQUAD_START, runningLine, type Squad } from "@/lib/elite/squad-pass";
+import { SQUAD_PAID_START, SQUAD_SEND, SQUAD_START, runningLine, type Squad } from "@/lib/elite/squad-pass";
 import { startMyPass } from "@/lib/elite/squad-pass-actions";
 import { sendLink } from "./send-link";
 
@@ -28,6 +28,9 @@ export function SquadCard({ squad, inviteLink }: { squad: Squad; inviteLink: str
       setError(null);
       const res = await startMyPass();
       if (!res.ok) setError(res.error);
+      // a free player's month starts and they are sent to their week; a
+      // player who pays stays here, where the card says their next month is free
+      else if (squad.start === SQUAD_PAID_START) router.refresh();
       else router.push("/");
     });
 
@@ -61,12 +64,13 @@ export function SquadCard({ squad, inviteLink }: { squad: Squad; inviteLink: str
       ) : null}
 
       {squad.runningUntil ? <p className="mt-3 text-[13px] text-white/60">{runningLine(squad.runningUntil)}</p> : null}
+      {squad.note ? <p className="mt-3 text-[13px] text-white">{squad.note}</p> : null}
       {error ? <p className="mt-3 text-[13px] text-white">{error}</p> : null}
 
       <div className="mt-4 flex flex-col gap-2">
         {squad.ready > 0 ? (
           <button type="button" onClick={begin} disabled={busy} className="inline-flex h-12 items-center justify-center rounded-2xl bg-bone px-6 text-[15px] font-semibold text-black disabled:opacity-60">
-            {SQUAD_START}
+            {squad.start ?? SQUAD_START}
           </button>
         ) : null}
         {squad.canEarnMore ? (

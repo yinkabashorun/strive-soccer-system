@@ -68,6 +68,8 @@ export type Player = {
   // Film Room, the monthly breakdown, the weekly parent report, and 1:1
   // coaching calls. Absent on demo data / pre-029 rows = treated as complete.
   tier?: MembershipTier | null;
+  // keeps the app for life, never charged (092, lib/elite/lifetime.ts)
+  lifetime_access?: boolean | null;
   // Intake + AI memory (012_intake_memory_checkins)
   club?: string;
   dominant_foot?: string;

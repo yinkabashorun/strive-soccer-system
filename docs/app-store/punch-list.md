@@ -111,6 +111,13 @@ left on it. What only a phone can show is `native-device-checklist.md`.
 | N19 | The door: a new free account is asked once for a teammate's or a club's code and goes straight to the free app with one; the quiz and the offer wait behind the one card on Week | BUILT Nov 26 (migration 090 a file, not applied: until it is, a code still asks and nobody skips the quiz). Not proven on a phone (`native-device-checklist.md`, "The door") |
 | N20 | Games between clubs out of the iPhone app (one switch, `lib/elite/club-games.ts`); club training sessions and the weekly matchup stay; the website is unchanged | BUILT Nov 26. The review notes in `listing.md` no longer mention games |
 | N21 | Champs of the week (one notification to the winners, Monday 5 PM to 9 PM New York, and a gold mark for the week) and "Your clock is still running" (one notification the phone gives itself at 1h 30m) | BUILT Nov 26. The champs notification needs 090. Neither is proven on a phone |
+| N22 | Every member, on any membership, has the whole app (Train, Friends, Week, Clubs, You) | LIVE Nov 26 (server side, PR #41). Not proven on a phone |
+| N23 | The oldest build that still works: an update screen with one button, set by the coaches on /coach/free; fails open | BUILT Nov 26, dev branch. From build 10. Not proven on a phone |
+| N24 | One link to the app; an invite opened on an iPhone shows the code and Get the app | BUILT Nov 26, dev branch. HIS: paste the TestFlight public link on /coach/free |
+| N25 | The app's own broken-screen page, and errors reported to the coaches' App errors card | BUILT Nov 26, dev branch. From build 10 |
+| N26 | Sign-up and app calls sized for a whole event on one Wi-Fi | BUILT Nov 26, dev branch (server side) |
+| N27 | Launch numbers on /coach/free: the funnel overall and per club | BUILT Nov 26, dev branch |
+| N28 | The gap list: docs/growth/completeness-2026-11-26.md | OPEN: his calls and the proposed builds are named there |
 | N17 | The upgrade inside the app opens a web checkout: allowed on the US storefront only (from memory, to verify); Apple's in-app purchase is the fallback | DECIDED Nov 25 2026, his "Keep it": United States only, the web checkout stays. Fallback if Apple objects: take the offer out of the iPhone app |
 
 ## B. Research to settle before the first build

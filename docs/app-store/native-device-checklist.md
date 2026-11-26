@@ -342,3 +342,11 @@ simulator's "open this link" with a box that stays on screen.
 
 Read them before asking for a TestFlight build. It does not show the
 camera, notifications, sound or vibration: lines 4 and 10 stay his phone's.
+
+## The update screen, a broken screen, and an invite on an iPhone (Nov 26 2026, from build 10)
+
+- [ ] Settings shows the right build number at the bottom ("Strive Elite 1.0.0 (10)"). The update screen reads the same number.
+- [ ] On /coach/free set "Oldest build that still works" one above the build on the phone. Close the app fully and reopen it: one screen, "A new Strive Elite is ready", and "Get the new version" opens TestFlight. Set it back to 0: the next open goes straight in.
+- [ ] With airplane mode on, the app opens as usual (the check never blocks without an answer).
+- [ ] Paste the TestFlight public link on /coach/free. On an iPhone that is signed out of the website, open an invite link from a text: the page shows the code and "Get the app"; "No iPhone? Join on the web" opens the form with the invite still on it.
+- [ ] After any crash or "That screen did not load" page, the App errors card on /coach shows a line that starts /iphone/ with the build number and the screen.

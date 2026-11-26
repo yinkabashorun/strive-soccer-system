@@ -1,5 +1,6 @@
 import { ScrollView, StyleSheet, View } from "react-native";
-import { useLocalSearchParams, useRouter, type Href } from "expo-router";
+import { CLUB_GAMES_IN_APP } from "@shared/club-games";
+import { Redirect, useLocalSearchParams, useRouter, type Href } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ApiError, OFFLINE_MESSAGE } from "@/api/client";
 import { useClubNear } from "@/api/clubs";
@@ -13,7 +14,17 @@ import { color } from "@/theme";
 // with its crest, name, record and how many players, and "Send a game".
 // Never a player's name. Clubs never message each other: a captain sends a
 // game, and the other captain accepts or passes.
+//
+// Not in the app while games between clubs are out of it
+// (lib/elite/club-games.ts): nothing links here, and anyone who lands on
+// it is sent to the club.
 export default function Near() {
+  const { id: clubId } = useLocalSearchParams<{ id: string }>();
+  if (!CLUB_GAMES_IN_APP) return <Redirect href={`/club/${clubId}` as Href} />;
+  return <NearClubs />;
+}
+
+function NearClubs() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const belowClock = useBelowClock();

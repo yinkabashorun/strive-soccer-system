@@ -16,6 +16,7 @@ import type { Squad } from "./squad-pass";
 import type { InboxRow } from "./bell";
 import type { NoticePrefs } from "./notice-prefs";
 import type { FirstDays } from "./first-days";
+import type { DoorAnswer } from "./free-door";
 
 export type { AppDrill, AppSession, AppWeek, AppYou, LadderRung, AreaMinutes };
 // The Courses library (lib/elite/app-courses.ts): the shelf, and one course.
@@ -130,6 +131,8 @@ export const APP_API = {
   freeOpen: "/api/app/free/open",
   freeJoin: "/api/app/free/join",
   freeIntake: "/api/app/free/intake",
+  // the door (free-door.ts): a teammate's or a club's code, typed once
+  freeCode: "/api/app/free/code",
   freeOffer: "/api/app/free/offer",
   freePlan: "/api/app/free/plan",
   freeUpgrade: "/api/app/free/upgrade",
@@ -185,6 +188,9 @@ export function appCoursePath(slug: string): string {
 
 // ---- The free app (lib/elite/free-app-server.ts) -------------------------
 
+// What the door answers (lib/elite/free-door.ts).
+export type AppDoorAnswer = DoorAnswer;
+
 // Is free sign-up open right now (the coaches' switch at /coach/free)?
 export type AppJoinOpen = { open: boolean };
 
@@ -238,6 +244,9 @@ export type AppFreeFeed = {
   requests: { id: string; name: string; initials: string }[];
   week: { minutes: number; target: number; percent: number };
   invite: string;
+  // what "Send my link" shares: the code to type in the app, and the link
+  // (free-door.ts friendShareText). A link alone opens the website.
+  inviteText?: string;
   // Bring your squad: three teammates who train earn a month (squad-pass.ts)
   squad?: Squad;
   // The first-days list (first-days.ts), or null once it is done or over
@@ -260,10 +269,13 @@ export type AppFreeWeek = {
   entries: { id: string; day: string; label: string; minutes: number; kind: Kind; photo: boolean; timed?: boolean }[];
   board: BoardRow[];
   invite: string;
+  inviteText?: string;
   // What the one upgrade card on this screen is built from
   // (lib/elite/upgrade-card.ts): the weakest area the drill bank trains,
   // and the sessions a week the player's own answers give.
-  upgrade: { area: string | null; sessions: number };
+  // quiz: this player came in by the door and has not rated their game
+  // yet, so the card opens the quiz first and the offer after it.
+  upgrade: { area: string | null; sessions: number; quiz?: boolean };
 };
 
 // Share my week (lib/elite/week-card.ts): the player's own week as a
@@ -280,6 +292,7 @@ export type AppFreeYou = {
   gymLine: string | null;
   starred: boolean;
   invite: string;
+  inviteText?: string;
 };
 
 // A player's profile in the free app (lib/elite/tracker.ts Profile): only
@@ -337,6 +350,9 @@ export type AppClubCard = {
   next: string | null;
   // "This week: Renegados FC vs Sunday Pickup.", or null (083)
   matchup: string | null;
+  // the club won last week's matchup: a gold "Strive champs of the week"
+  // mark for the week after it (club-matchups.ts MatchupView.champs)
+  champs?: boolean;
   // for its captain: answers waiting on them (players asking to join, a
   // game request, a score to enter or confirm)
   waiting: number;

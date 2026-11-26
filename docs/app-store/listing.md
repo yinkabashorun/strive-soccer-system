@@ -45,7 +45,7 @@ Description:
 > Set how much you want to train each week and watch the ring close. See how your week stacks up against your friends.
 >
 > CLUBS
-> Start a club with your team or your pickup crew. Every week your club is matched with another club: the club that trains more per player wins the week. Plan a session or a game with your club.
+> Start a club with your team or your pickup crew. Every week your club is matched with another club: the club that trains more per player wins the week. Plan a training session with your club.
 >
 > STRIVE PRO: A WEEK BUILT AROUND YOU
 > Take the quiz and get a new week of sessions every Monday, built around what you need to work on. One drill at a time, each with its video, and a timer that counts your sets and your rest.
@@ -134,11 +134,11 @@ changes.
 
 > Strive Elite is a training app for soccer players 13 and older.
 >
-> Anyone can join free on the sign-in screen (Join free). A free player takes a short quiz about their game, then is shown Strive Pro once: a weekly training plan built from their answers, as a monthly subscription. "Start Strive Pro" opens our website's checkout. The app is offered on the United States storefront only. "Not now, start free" continues into the free app, which stays free.
+> Anyone can join free on the sign-in screen (Join free). A new player picks a username and a photo, then is asked once, "Have a code from a teammate or a club?". A code sends that teammate a friend request, or asks that club's captain to let the player in, and the player goes straight into the free app. With "I do not have a code" the player takes a short quiz about their game, then is shown Strive Pro once: a weekly training plan built from their answers, as a monthly subscription. "Start Strive Pro" opens our website's checkout. The app is offered on the United States storefront only. "Not now, start free" continues into the free app, which stays free. A player who came in with a code can take the same quiz later from the one card on the Week tab ("See what you get").
 >
 > The free app: a player times their own training between two photos taken in the app's camera ("Start training", then "Finish my training" at least one minute later) and posts it for the friends they accepted. The time between the two photos is what counts toward their weekly target, the friends board and their club. "Trained without the clock?" adds a length by hand, which shows on the player's own week only. A player can start or join a club. There is no public feed and no search: friends are added only by a request the other player accepts, and a club is joined by a code and its captain's approval. Every post, profile photo, Playing for line and club can be reported; any friend or club mate can be blocked (and unblocked under Settings > Blocked players); typed text passes a word filter; every report texts our coaches, who review it within 24 hours and remove the content and the account where needed. Our Terms have zero tolerance for objectionable content.
 >
-> Clubs: a captain can plan a club training session (seen only by that club's members) or a game against another club in the same county that chose to be open to games (seen only by the two clubs). Every session and game shows which club organized it; Strive does not run or supervise them, a captain accepts that before planning and a player before saying they are in. A place is the name of a public field or park: the app refuses street addresses, links and phone numbers. There is no messaging between clubs and no direct messages between players.
+> Clubs: a captain can plan a club training session, seen only by that club's own members. Every session shows which club organized it; Strive does not run or supervise them, a captain accepts that before planning and a player before saying they are in. A place is the name of a public field or park: the app refuses street addresses, links and phone numbers. Clubs do not meet each other through the app: the weekly matchup compares training time only, there is no list of other clubs to browse, no messaging between clubs and no direct messages between players.
 >
 > Strive Pro: a new week of sessions every Monday, one drill at a time with its video and a set timer, a library of courses, and medals for time trained. Members of our coaching program (families who joined with a coach) sign in with the account they made on our website and see the same training screens.
 >

@@ -8,6 +8,7 @@ import { useMyPhoto } from "@/usePhoto";
 import { YouEarned } from "@/YouEarned";
 import { OFFLINE_MESSAGE } from "@/api/client";
 import { refreshFree, useFreeYou, useProfile } from "@/api/free";
+import { inviteShare } from "@/social-view";
 import { ClubRow, LevelBar, PostGrid, TwoNumbers } from "@/ProfileParts";
 import { MyAvatar, Star } from "@/Avatar";
 import { PAGE_TOP, Screen } from "@/Screen";
@@ -127,7 +128,7 @@ export default function Me() {
             <SettingRow
               label="Send my link to a teammate"
               detail="They join, you accept, and you see each other's training."
-              onPress={() => void Share.share({ url: y.invite }).catch(() => undefined)}
+              onPress={() => void Share.share(inviteShare(y)).catch(() => undefined)}
             />
             <Hairline />
           </>

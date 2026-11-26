@@ -87,11 +87,15 @@ export async function sendPushToPlayer(
 }
 
 // The same for a free account (078): its devices are on file by profile.
+// `webOnly`: never to the iPhone app, for a notice about something the
+// app has no screen for (a game between clubs while games are out of the
+// app, lib/elite/club-games.ts).
 export async function sendPushToProfile(
   profileId: string,
-  payload: PushPayload
+  payload: PushPayload,
+  opts: { webOnly?: boolean } = {}
 ): Promise<{ sent: number }> {
-  return sendToDevices("profile_id", profileId, payload);
+  return sendToDevices("profile_id", profileId, payload, opts);
 }
 
 // The filter for "this person's devices": the key asked for, and the other
@@ -128,10 +132,11 @@ async function devicesFilter(
 async function sendToDevices(
   column: "player_id" | "profile_id",
   id: string,
-  payload: PushPayload
+  payload: PushPayload,
+  opts: { webOnly?: boolean } = {}
 ): Promise<{ sent: number }> {
   const web = isPushConfigured();
-  const native = isNativePushConfigured();
+  const native = isNativePushConfigured() && !opts.webOnly;
   if (!web && !native) return { sent: 0 };
   const admin = createServiceClient();
   if (!admin) return { sent: 0 };

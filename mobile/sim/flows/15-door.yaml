@@ -1,0 +1,87 @@
+# THE DOOR by taps, for a player WITH a code: "Have a code from a teammate
+# or a club?", an empty box tapped (it says what a code looks like), a code
+# typed with the two buttons riding on the keyboard, the request sent, then
+# STRAIGHT to the free app: Friends, no quiz, no offer, no week set-up. The
+# quiz waits behind the one card on Week: "See what you get" opens it, with
+# a way back.
+#
+# The same door with no code is in 07-free-funnel.yaml ("I do not have a
+# code", then the quiz as it always was).
+#
+# Example data only (src/api/fixtures.ts): the account is made up, any code
+# of the right shape is taken as a club's, nothing is sent anywhere.
+appId: com.strivesoccer.elite
+---
+- launchApp:
+    clearState: true
+    arguments:
+      fixtureState: free_quiz
+- extendedWaitUntil:
+    visible: "I do not have a code"
+    timeout: 30000
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: t60-door
+
+# The button is never switched off: an empty box says what a code is.
+- tapOn: "Use my code"
+- extendedWaitUntil:
+    visible: "That is not a code.*"
+    timeout: 10000
+- takeScreenshot: t61-door-empty-box
+
+# A tap on the box's name puts the cursor in it. Both ways on stay above
+# the keyboard.
+- tapOn: "Code from a teammate or a club"
+- inputText: "RENE2345"
+- waitForAnimationToEnd:
+    timeout: 2000
+- assertVisible: "Use my code"
+- assertVisible: "I do not have a code"
+- takeScreenshot: t62-door-code-typed
+- tapOn: "Use my code"
+
+# The code asked the club's captain. One button: on to their friends.
+- extendedWaitUntil:
+    visible: "Go to my friends"
+    timeout: 15000
+- assertVisible: "Request sent.*"
+- takeScreenshot: t63-door-request-sent
+- tapOn: "Go to my friends"
+
+# Straight into the free app. No quiz, no offer, no "Your week" set-up.
+- extendedWaitUntil:
+    visible: "Start training"
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: t64-door-friends
+- assertNotVisible: "Not now, start free"
+- assertNotVisible: "Start my week"
+
+# Week: a target is already there (theirs to change), and the ONE card
+# offers the quiz.
+- tapOn: "Week"
+- extendedWaitUntil:
+    visible: "Change your target and days"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 3000
+- scrollUntilVisible:
+    element: "See what you get"
+    direction: DOWN
+    timeout: 15000
+- takeScreenshot: t65-door-week-card
+- tapOn: "See what you get"
+
+# The quiz's first screen, opened over the free app, with a way back.
+- extendedWaitUntil:
+    visible: "Start"
+    timeout: 15000
+- assertVisible: "Close"
+- takeScreenshot: t66-door-quiz-later
+- tapOn: "Start"
+- extendedWaitUntil:
+    visible: "Boy"
+    timeout: 15000
+- takeScreenshot: t67-door-quiz-first-question

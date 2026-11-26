@@ -9,7 +9,7 @@ import { ClockRow } from "@/ClockRow";
 import { OFFLINE_MESSAGE } from "@/api/client";
 import { useMe } from "@/api/queries";
 import { hasTrain } from "@/navigation";
-import { barShare } from "@/social-view";
+import { barShare, inviteShare } from "@/social-view";
 import { setPref, usePrefs } from "@/prefs";
 import { deleteEntry, refreshFree, useFreeWeek } from "@/api/free";
 import { Avatar, MyAvatar, Star } from "@/Avatar";
@@ -91,7 +91,7 @@ export default function MyWeek() {
   const entries = w.entries.filter((e) => !gone.has(e.id));
   const boardTop = Math.max(0, ...w.board.map((r) => r.minutes));
   const alone = w.board.length <= 1;
-  const invite = () => void Share.share({ url: w.invite }).catch(() => undefined);
+  const invite = () => void Share.share(inviteShare(w)).catch(() => undefined);
 
   return (
     <Screen onRefresh={refreshFree}>
@@ -161,7 +161,7 @@ export default function MyWeek() {
         </Press>
       </View>
 
-      <UpgradeCard place="week" member={train} area={w.upgrade.area} sessions={w.upgrade.sessions} />
+      <UpgradeCard place="week" member={train} area={w.upgrade.area} sessions={w.upgrade.sessions} quiz={w.upgrade.quiz === true} />
 
       <View style={{ marginHorizontal: 20, marginTop: 26 }}>
         <Label size={17}>{BOARD_TITLE}</Label>

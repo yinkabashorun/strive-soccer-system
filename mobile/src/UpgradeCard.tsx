@@ -11,7 +11,7 @@ import { color } from "./theme";
 // tab; never for a member; put away for thirty days by "Not now"). This
 // only draws it: a quiet card in the page, never a pop-up, never in the
 // way of anything.
-export function UpgradeCard({ place, member, area, sessions }: { place: UpgradePlace; member: boolean; area: string | null; sessions: number }) {
+export function UpgradeCard({ place, member, area, sessions, quiz }: { place: UpgradePlace; member: boolean; area: string | null; sessions: number; quiz?: boolean }) {
   const router = useRouter();
   // Unknown until the phone's own note is read: nothing is drawn before
   // then, so a card put away never flashes back.
@@ -26,7 +26,7 @@ export function UpgradeCard({ place, member, area, sessions }: { place: UpgradeP
     };
   }, []);
   if (dismissedAt === undefined) return null;
-  const copy = upgradeCard({ place, member, area, sessions, dismissedAt, now: Date.now() });
+  const copy = upgradeCard({ place, member, area, sessions, dismissedAt, now: Date.now(), quiz });
   if (!copy) return null;
 
   function putAway() {
@@ -42,7 +42,9 @@ export function UpgradeCard({ place, member, area, sessions }: { place: UpgradeP
         {copy.line}
       </Body>
       <View style={{ flexDirection: "row", gap: 22, marginTop: 6 }}>
-        <Press onPress={() => router.push("/offer")} style={{ minHeight: 44, justifyContent: "center" }} accessibilityLabel={copy.action}>
+        {/* a player who came in by the door rates their game first; the
+            offer follows the quiz (app/onboarding/[step].tsx) */}
+        <Press onPress={() => router.push(copy.opens === "quiz" ? "/onboarding" : "/offer")} style={{ minHeight: 44, justifyContent: "center" }} accessibilityLabel={copy.action}>
           <Label size={15}>{copy.action}</Label>
         </Press>
         <Press onPress={putAway} style={{ minHeight: 44, justifyContent: "center" }} accessibilityLabel={copy.dismiss}>

@@ -1,9 +1,12 @@
-import { BAR_MIN, barShare, matchupSplit, recordShort } from "@/social-view";
+import { BAR_MIN, barShare, inviteShare, matchupSplit, recordShort } from "@/social-view";
 import { describe, expect, it } from "vitest";
 import { chunkedStorage, CHUNK_SIZE, MAX_CHUNKS, parseCount, splitValue, type KV } from "@/auth/chunks";
 import { applyDone } from "@/week-cache";
 import { overlay, outcomeOf, parseTicks, queueTick, REFUSED_LINE, retryDelayMs, settle, UNSENT_LINE, type Tick } from "@/outbox-core";
-import { ONE_APP_ROUTE, hasFreeApp, areaFor, areaHome, hasTrain, homeOf, inArea, pushRoute, tappedNotice } from "@/navigation";
+import { LOCAL_CLOCK, ONE_APP_ROUTE, hasFreeApp, areaFor, areaHome, hasTrain, homeOf, inArea, localRoute, pushRoute, tappedNotice } from "@/navigation";
+import { doorDue, quizWasLater } from "@/door";
+import { doorCodeFrom, friendShareText } from "@shared/free-door";
+import { clockNudgeAt } from "@shared/training-clock";
 import { clipOrder, clipsInView, liveClip, pickedAfterScroll, pickedAfterTap } from "@/course-view";
 import { drillEyebrow, repsTiles } from "@/drill-view";
 import { APP_TABS, oneAppTabBar } from "@/tabs";
@@ -172,12 +175,17 @@ describe("where the app belongs", () => {
     expect(quizStepIds({ state: { kind: "onboarding" }, quizOwed: null })).not.toContain("username");
   });
 
-  it("walks a free account: the quiz, the photo, the offer, the free app", () => {
+  // Nov 26 2026: the photo and @username moved AHEAD of the quiz for a free
+  // account, so the door's code ("Have a code from a teammate or a club?")
+  // can send a friend request or a club request that carries them.
+  it("walks a free account: the photo, the door and the quiz, the offer, the free app", () => {
     const owed = { username: null, hasPhoto: false, photoUrl: null, steps: ["username", "photo"] as ("username" | "photo")[], ideas: [] };
     const set = { ...owed, username: "marcus.b", hasPhoto: true, steps: [] };
-    // the quiz first, whatever else is owed
-    expect(areaFor(true, { kind: "free", stage: "quiz" }, owed)).toBe("free-quiz");
-    // then the photo and @username, before the offer that shows their card
+    // the photo and @username first, whatever stage the account is at
+    expect(areaFor(true, { kind: "free", stage: "quiz" }, owed)).toBe("profile");
+    // then the door and the quiz, on the same spot
+    expect(areaFor(true, { kind: "free", stage: "quiz" }, set)).toBe("free-quiz");
+    // an account from before this order still owes them before the offer
     expect(areaFor(true, { kind: "free", stage: "offer" }, owed)).toBe("profile");
     expect(areaFor(true, { kind: "free", stage: "offer" }, set)).toBe("free-offer");
     expect(areaFor(true, { kind: "free", stage: "ready" }, set)).toBe("free");
@@ -222,9 +230,17 @@ describe("where the app belongs", () => {
       for (const area of ["app", "gate", "free-offer", "free-quiz", "sign-in"] as const) expect(inArea(area, segs), `${area} ${segs.join("/")}`).toBe(false);
     }
     // never a member's screens
-    for (const seg of ["(tabs)", "session", "course", "extra", "checkin", "drop", "onboarding"]) {
+    for (const seg of ["(tabs)", "session", "course", "extra", "checkin", "drop"]) {
       expect(inArea("free", [seg])).toBe(false);
     }
+    // THE QUIZ, LATER: a free player who came in by the door takes it from
+    // the one card on Week, so its screens open over the free app for them.
+    // Never for a member with Train (their quiz is behind them).
+    expect(inArea("free", ["onboarding"])).toBe(true);
+    expect(inArea("free", ["onboarding", "onBall"])).toBe(true);
+    expect(inArea("free", ["onboarding"], true)).toBe(false);
+    expect(inArea("free", ["onboarding", "onBall"], true)).toBe(false);
+    expect(inArea("app", ["onboarding"])).toBe(false);
     // and a member never the free app's
     expect(inArea("app", ["(free)"])).toBe(false);
     expect(inArea("app", ["post"])).toBe(false);
@@ -232,6 +248,83 @@ describe("where the app belongs", () => {
     // deleting the account is never behind anything
     expect(inArea("free-quiz", ["delete-account"])).toBe(true);
     expect(inArea("free-offer", ["settings"])).toBe(true);
+  });
+
+  // THE DOOR (lib/elite/free-door.ts): asked once, of a new free account
+  // that has not taken the quiz; never of anyone who is in the free app.
+  it("shows the door's code screen once, to a new free account only", () => {
+    const email = "marcus@example.com";
+    expect(doorDue({ stage: "quiz", email, passed: "" })).toBe(true);
+    expect(doorDue({ stage: "quiz", email, passed: null })).toBe(true);
+    // "I do not have a code" is remembered on this phone for that account
+    expect(doorDue({ stage: "quiz", email, passed: email })).toBe(false);
+    expect(doorDue({ stage: "quiz", email, passed: " Marcus@Example.com " })).toBe(false);
+    // another account on the same phone is asked for itself
+    expect(doorDue({ stage: "quiz", email: "kai@example.com", passed: email })).toBe(true);
+    // in the free app (came in by a code, or finished the quiz), at the
+    // offer, or where the quiz cannot be stored: never
+    for (const stage of ["ready", "offer", "web", null, undefined] as const) expect(doorDue({ stage, email, passed: "" }), String(stage)).toBe(false);
+  });
+
+  it("after a quiz taken later, the screen opens the offer itself; a new player's is the gatekeeper's", () => {
+    expect(quizWasLater({ kind: "free", stage: "ready" })).toBe(true);
+    expect(quizWasLater({ kind: "free", stage: "offer" })).toBe(false);
+    expect(quizWasLater({ kind: "free", stage: "quiz" })).toBe(false);
+    expect(quizWasLater({ kind: "ok", social: true })).toBe(false);
+    expect(quizWasLater(null)).toBe(false);
+  });
+
+  it("the one card on Week asks a player with no answers for the quiz first", () => {
+    const now = Date.UTC(2026, 10, 26);
+    const later = upgradeCard({ place: "week", member: false, area: null, sessions: 0, dismissedAt: null, now, quiz: true });
+    expect(later).toEqual({
+      title: "A week built around your game.",
+      line: "Rate your game in a few taps. Then see what your first week would go after.",
+      action: "See what you get",
+      dismiss: "Not now",
+      opens: "quiz",
+    });
+    // still the one card: one place, never for a member, put away the same way
+    expect(upgradeCard({ place: "friends", member: false, area: null, sessions: 0, dismissedAt: null, now, quiz: true })).toBeNull();
+    expect(upgradeCard({ place: "week", member: true, area: null, sessions: 0, dismissedAt: null, now, quiz: true })).toBeNull();
+    expect(upgradeCard({ place: "week", member: false, area: null, sessions: 0, dismissedAt: now - 1000, now, quiz: true })).toBeNull();
+    // with answers it names their own area and opens the offer, as before
+    expect(upgradeCard({ place: "week", member: false, area: "Weak foot", sessions: 4, dismissedAt: null, now })?.opens).toBe("offer");
+    // and with neither answers nor the quiz flag, nothing is shown
+    expect(upgradeCard({ place: "week", member: false, area: null, sessions: 0, dismissedAt: null, now })).toBeNull();
+  });
+
+  it("Send my link shares the code to type and the link; an older server's link alone still works", () => {
+    const link = "https://thestriveapp.com/join?ref=ABCD2345";
+    const text = friendShareText({ code: "ABCD2345", link });
+    expect(text).toBe("Train with me on Strive Elite.\nMy code: ABCD2345\nhttps://thestriveapp.com/join?ref=ABCD2345");
+    expect(inviteShare({ invite: link, inviteText: text })).toEqual({ message: text });
+    expect(inviteShare({ invite: link })).toEqual({ url: link });
+    // what is shared is what the door reads: the whole pasted invite works
+    expect(doorCodeFrom(text)).toEqual({ code: "ABCD2345", kind: "friend" });
+  });
+
+  // THE CLOCK LEFT RUNNING: one notification the phone gives itself.
+  it("the clock's own notice: once, at 1h 30m, only with notifications already allowed", () => {
+    const started = Date.UTC(2026, 10, 26, 21, 0, 0);
+    const at = started + 90 * 60_000;
+    expect(clockNudgeAt({ startedMs: started, finished: false, allowed: true, nowMs: started })).toBe(at);
+    expect(clockNudgeAt({ startedMs: started, finished: false, allowed: true, nowMs: started + 60 * 60_000 })).toBe(at);
+    // never asked for: with notifications not allowed there is none
+    expect(clockNudgeAt({ startedMs: started, finished: false, allowed: false, nowMs: started })).toBeNull();
+    // the finish photo is taken, or there is no clock: taken back
+    expect(clockNudgeAt({ startedMs: started, finished: true, allowed: true, nowMs: started })).toBeNull();
+    expect(clockNudgeAt({ startedMs: null, finished: false, allowed: true, nowMs: started })).toBeNull();
+    // a clock opened after 1h 30m is never told about the past
+    expect(clockNudgeAt({ startedMs: started, finished: false, allowed: true, nowMs: at })).toBeNull();
+    expect(clockNudgeAt({ startedMs: started, finished: false, allowed: true, nowMs: at + 5 * 60_000 })).toBeNull();
+    // a tap opens the clock, for whoever has the free app, and nothing else does
+    expect(localRoute("free", { url: undefined, topic: undefined, open: LOCAL_CLOCK })).toBe("/post");
+    expect(localRoute("app", { url: undefined, topic: undefined, open: LOCAL_CLOCK })).toBeNull();
+    expect(localRoute("free", { url: "/log", topic: "friends" })).toBeNull();
+    expect(localRoute("free", { url: undefined, topic: undefined, open: "settings" })).toBeNull();
+    // what the phone hands over for it, as the notifications library shapes it
+    expect(tappedNotice({ notification: { request: { content: { data: { open: "clock" } }, trigger: { type: "date" } } } }).open).toBe("clock");
   });
 
   it("lets someone signed out join free, and nothing else", () => {

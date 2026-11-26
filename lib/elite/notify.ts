@@ -141,13 +141,16 @@ export async function notifyPlayer(
 // A free account: it has no member row and no bell, so a notice is its
 // push. Its caller has already claimed it (elite_free_notices,
 // elite_plan_notices, the insert that made an earned month).
-export async function notifyProfile(profileId: string, notice: Notice): Promise<NotifyResult> {
+//
+// `webOnly`: the push goes to browsers and never to the iPhone app (a game
+// between clubs while games are out of the app, lib/elite/club-games.ts).
+export async function notifyProfile(profileId: string, notice: Notice, opts: { webOnly?: boolean } = {}): Promise<NotifyResult> {
   try {
     if (!notice.push || !profileId) return NOTHING;
     const db = createServiceClient();
     if (!db) return NOTHING;
     if (topicIsOff(await topicsOff(db, profileId), notice.topic)) return { bell: "none", pushed: 0, held: "topic_off" };
-    const { sent } = await sendPushToProfile(profileId, pushOf(notice));
+    const { sent } = await sendPushToProfile(profileId, pushOf(notice), opts);
     return { bell: "none", pushed: sent, held: null };
   } catch {
     return NOTHING;

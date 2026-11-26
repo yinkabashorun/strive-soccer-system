@@ -8,11 +8,14 @@ import { createServiceClient } from "./supabase/server";
 import { notifyProfile } from "./notify";
 import { isPushConfigured } from "./push";
 import { isNativePushConfigured } from "./apns";
-import { clubPlanNotice, friendPostNotice, propsNotice } from "./notices";
+import { clubChampsNotice, clubPlanNotice, friendPostNotice, propsNotice } from "./notices";
+import { everyRow } from "./supabase/every-row";
+import { champsDue, champsOf, lastMonday, matchupMonday, type MatchupRow } from "./club-matchups";
 import { claimOutcome, maySend } from "./announce";
 import { blocksWith, friendIdsOf, namesOf, type Admin } from "./tracker-server";
 import { planById, teamRowsOf } from "./club-teams-server";
 import { planDayAt, planWhat } from "./club-teams";
+import { planInApp } from "./club-games";
 import {
   clubPlanReceivers,
   friendPostReceivers,
@@ -155,10 +158,74 @@ export async function noticeClubPlan(input: { planId: string; byId: string }): P
       what: planWhat(plan, other ? clubs.get(other) ?? null : null),
       when,
     });
-    const res = await notifyProfile(r.profileId, notice);
+    // a game is not in the iPhone app while games are out of it
+    // (club-games.ts): its notice goes to browsers only, so a tap never
+    // opens a club page with no game on it
+    const res = await notifyProfile(r.profileId, notice, { webOnly: !planInApp(plan.kind) });
     if (res.pushed > 0) sent++;
   }
   return sent;
+}
+
+// CHAMPS OF THE WEEK (lib/elite/notices.ts clubChampsNotice): on Monday
+// evening the players of every club that WON last week's matchup hear it,
+// once. Who: the players counted in that matchup (the list stored with
+// it) who are still in the club. Each send is claimed first in
+// elite_champs_notices (090), keyed (week, club, player): a second run
+// that hour, a retry or a later hour sends nothing, and so does a ledger
+// that cannot be written (090 not applied). A draw and a loss send
+// nothing to anyone. Never throws.
+export async function noticeClubChamps(opts: { today: string; hour: number }): Promise<{ sent: number }> {
+  try {
+    if (!champsDue(opts)) return { sent: 0 };
+    const admin = ready();
+    if (!admin) return { sent: 0 };
+    const week = lastMonday(matchupMonday(opts.today));
+    type Raw = Omit<MatchupRow, "roster"> & { roster: string[] | null };
+    const rows = (
+      await everyRow<Raw>((from, to) =>
+        admin
+          .from("elite_club_matchups")
+          .select("week_monday, club_id, opponent_id, roster, minutes, players, result, decided_at")
+          .eq("week_monday", week)
+          .order("club_id")
+          .range(from, to)
+      )
+    ).map((r) => ({ ...r, roster: r.roster ?? [] }));
+    const winners = champsOf(rows);
+    if (winners.length === 0) return { sent: 0 };
+    const clubIds = [...new Set(winners.flatMap((w) => [w.clubId, w.otherId]))];
+    const names = new Map((await teamRowsOf(admin, clubIds)).map((c) => [c.id, c]));
+    let sent = 0;
+    for (const w of winners) {
+      const club = names.get(w.clubId);
+      const other = names.get(w.otherId);
+      // a club that ended since, or whose opponent is gone, is told nothing
+      if (!club || club.archived_at || !other) continue;
+      const { data } = await admin.from("elite_tracker_club_members").select("profile_id").eq("club_id", w.clubId);
+      const still = new Set(((data as { profile_id: string }[] | null) ?? []).map((m) => m.profile_id));
+      const counted = w.roster.filter((id) => still.has(id));
+      const devices = await withDevices(admin, counted);
+      for (const id of counted) {
+        if (!devices.has(id)) continue;
+        if (!maySend(await claimChamps(admin, week, w.clubId, id))) continue;
+        const res = await notifyProfile(id, clubChampsNotice({ club: club.name, clubId: w.clubId, other: other.name, gap: w.gap, weekMonday: week }));
+        if (res.pushed > 0) sent++;
+      }
+    }
+    return { sent };
+  } catch {
+    return { sent: 0 };
+  }
+}
+
+async function claimChamps(admin: Admin, weekMonday: string, clubId: string, profileId: string) {
+  try {
+    const { error } = await admin.from("elite_champs_notices").insert({ week_monday: weekMonday, club_id: clubId, profile_id: profileId });
+    return claimOutcome(error);
+  } catch {
+    return "failed" as const;
+  }
 }
 
 async function claimPlan(admin: Admin, planId: string, profileId: string) {

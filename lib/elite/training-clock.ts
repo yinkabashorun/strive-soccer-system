@@ -151,6 +151,33 @@ export const CLOCK_WORDS = {
   overlap: "You already have training timed for then.",
 } as const;
 
+// ---- The clock is still running ------------------------------------------
+
+// ONE notification the PHONE gives itself (Coach Yinka, Nov 26 2026: yes
+// to "a nudge when a clock is still running"), for a clock left running
+// after training ended. It is set on the phone when the clock starts and
+// taken back when the finish photo is taken, the clock is posted or it is
+// stopped, so it works with no signal at a field and the server sends
+// nothing. Once per clock, at 1 hour 30 minutes, and only on a phone where
+// notifications are already allowed: the clock never asks for them.
+// (mobile/src/clock-nudge.ts sets it.) The words are held to the rule
+// every notice is held to (tests/push-texts.test.ts).
+export const CLOCK_NUDGE_MINUTES = 90;
+export const CLOCK_NUDGE = {
+  title: "Your clock is still running",
+  body: `${Math.floor(CLOCK_NUDGE_MINUTES / 60)}h ${CLOCK_NUDGE_MINUTES % 60}m so far. Your finish photo stops it.`,
+} as const;
+
+// When the phone should give the nudge, as a time on its own clock, or
+// null for "none": no clock, a clock whose finish photo is taken,
+// notifications not allowed, or 1 hour 30 minutes already behind it (a
+// clock opened late is never nudged about the past).
+export function clockNudgeAt(input: { startedMs: number | null; finished: boolean; allowed: boolean; nowMs: number }): number | null {
+  if (!input.allowed || input.startedMs === null || input.finished) return null;
+  const at = input.startedMs + CLOCK_NUDGE_MINUTES * 60_000;
+  return at > input.nowMs + 1_000 ? at : null;
+}
+
 // ---- On the server ------------------------------------------------------
 
 export type ClockRefusal = "bad" | "short" | "expired";

@@ -29,3 +29,11 @@ export function recordShort(line: string | null | undefined): string | null {
   if (!m) return null;
   return Number(m[3]) > 0 ? `${m[1]}-${m[2]}-${m[3]}` : `${m[1]}-${m[2]}`;
 }
+
+// What "Send my link" hands the share sheet. The words carry the player's
+// code to type in the app AND their link (lib/elite/free-door.ts
+// friendShareText): a link alone opens the website, never the app. A
+// server from before the words existed sends the link alone, as before.
+export function inviteShare(p: { invite: string; inviteText?: string }): { message: string } | { url: string } {
+  return p.inviteText ? { message: p.inviteText } : { url: p.invite };
+}

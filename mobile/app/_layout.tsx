@@ -14,7 +14,7 @@ import { PERSIST_MAX_AGE, persister, queryClient } from "@/api/queryClient";
 import { setGateListener } from "@/api/client";
 import { fixtureRoute } from "@/api/fixtures";
 import { FIXTURES } from "@/config";
-import { areaFor, areaHome, inArea, pushRoute, tappedNotice, type Area, type TappedNotice, hasTrain } from "@/navigation";
+import { areaFor, areaHome, inArea, localRoute, pushRoute, tappedNotice, type Area, type TappedNotice, hasTrain } from "@/navigation";
 import { clearBadge, keepTokenFresh } from "@/push";
 import { loadOutbox } from "@/outbox";
 import { loadClock } from "@/clock";
@@ -104,6 +104,11 @@ function Gatekeeper() {
   const settledIn = useRef(false);
   settledIn.current = inside;
 
+  // a notice the phone gave itself (the clock left running) opens its own
+  // screen; everything else opens what the site's notice names
+  const routeOf = (notice: TappedNotice) =>
+    localRoute(where.current, notice) ?? pushRoute(where.current, notice.url, notice.topic, withTrain.current);
+
   useEffect(() => {
     const take = (res: Notifications.NotificationResponse | null) => {
       if (!res || res.actionIdentifier !== Notifications.DEFAULT_ACTION_IDENTIFIER) return;
@@ -113,7 +118,7 @@ function Gatekeeper() {
       if (lastTap.current === id) return;
       lastTap.current = id;
       const notice = tappedNotice(res);
-      if (settledIn.current) router.navigate(pushRoute(where.current, notice.url, notice.topic, withTrain.current) as Href);
+      if (settledIn.current) router.navigate(routeOf(notice) as Href);
       else waiting.current = notice;
     };
     try {
@@ -130,7 +135,7 @@ function Gatekeeper() {
     if (!inside || !waiting.current) return;
     const notice = waiting.current;
     waiting.current = null;
-    router.navigate(pushRoute(where.current, notice.url, notice.topic, withTrain.current) as Href);
+    router.navigate(routeOf(notice) as Href);
   }, [inside, router]);
 
   // No number sits on the app's icon: whatever is there is cleared each

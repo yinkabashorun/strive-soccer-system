@@ -20,6 +20,7 @@
 // builder here, add it to the list in tests/push-texts.test.ts, and send it
 // with notifyPlayer / notifyProfile. Nothing else.
 import { isQuietTime } from "./free-notices";
+import { champsBeatLine } from "./club-matchup-words";
 
 // The choice a notice belongs to (Account, Notifications), and the group it
 // stacks under on an iPhone's lock screen.
@@ -42,6 +43,7 @@ export const NOTICE_KINDS = [
   "props",
   "squad_pass",
   "club_plan",
+  "club_champs",
 ] as const;
 export type NoticeKind = (typeof NOTICE_KINDS)[number];
 // A kind is a string in the database, and one this build does not know (a
@@ -64,6 +66,7 @@ export const KIND_TOPIC: Record<NoticeKind, NoticeTopic> = {
   props: "friends",
   squad_pass: "friends",
   club_plan: "clubs",
+  club_champs: "clubs",
 };
 
 // Which channels a kind uses. The bell row is the record; the push is the
@@ -90,6 +93,7 @@ const CHANNELS: Record<NoticeKind, { push: boolean; bell: boolean }> = {
   props: { push: true, bell: false },
   squad_pass: { push: true, bell: false },
   club_plan: { push: true, bell: false },
+  club_champs: { push: true, bell: false },
 };
 
 // The kinds that always arrive quietly (in the list, no sound, no screen
@@ -370,6 +374,33 @@ export function clubPlanNotice(input: { planId: string; club: string; clubId: st
   });
 }
 
+// CHAMPS OF THE WEEK. Coach Yinka's own words for it, Nov 26 2026: "your
+// club won the week need to be hype like. (CLUB NAME IS STRIVE CHAMPS OF
+// THE WEEK)". Sent once to each player counted in a matchup their club
+// WON (never for a draw or a loss), on Monday evening, claimed first in
+// elite_champs_notices (090). The body is the true margin, in the matchup
+// card's own words.
+//
+// It is the ONE notice whose title is in capitals (CAPITALS_ALLOWED,
+// below): that is the hype he asked for, for a thing a club earned. A
+// club name so long that the line would not fit a lock screen goes in the
+// body instead, and the title is the mark alone.
+export const CHAMPS_TITLE_TAIL = "IS STRIVE CHAMPS OF THE WEEK";
+export const CHAMPS_TITLE_ALONE = "STRIVE CHAMPS OF THE WEEK";
+const TITLE_MAX = 60;
+
+export function clubChampsNotice(input: { club: string; clubId: string; other: string; gap: number; weekMonday: string }): Notice {
+  const full = `${input.club.toUpperCase()} ${CHAMPS_TITLE_TAIL}`;
+  const fits = full.length <= TITLE_MAX;
+  return make("club_champs", {
+    title: fits ? full : CHAMPS_TITLE_ALONE,
+    body: champsBeatLine({ who: fits ? "You" : input.club, other: input.other, gap: input.gap }),
+    path: `/log/club/${input.clubId}`,
+    key: `club_champs:${input.clubId}:${input.weekMonday}`,
+    collapse: `club_champs:${input.clubId}`,
+  });
+}
+
 // ---------------------------------------------------------------------
 // The choices (Account, Notifications)
 // ---------------------------------------------------------------------
@@ -378,7 +409,7 @@ export const TOPIC_CHOICE: Record<NoticeTopic, { label: string; detail: string }
   week: { label: "Your week", detail: "A new week, and one reminder at your usual time." },
   coach: { label: "Your coach", detail: "Messages, Film Room and check-in calls." },
   friends: { label: "Friends", detail: "A friend posted, props, your earned month." },
-  clubs: { label: "Clubs", detail: "Your club's sessions and games." },
+  clubs: { label: "Clubs", detail: "Your club's sessions and games, and a week your club wins." },
 };
 
 // The topics an account is offered a switch for. A member: the week, and
@@ -455,7 +486,12 @@ const SELLING =
   /\$\s?\d|\b\d+\s?% off\b|\b\d[\d.,]*\s*(dollars?\s+)?(a|per|each|every)\s+(month|week|year)\b|\b(price|pricing|discount|sale|offer|deal|upgrade|membership fee|per month|\/mo|free trial|limited time|spots? left|renew|subscribe|buy)\b/i;
 const GUILT = /\b(streak|missed|behind|falling behind|slacking|lazy|disappoint\w*|last chance|don'?t lose)\b/i;
 
-export function pushTextProblems(text: { title: string; body: string }): string[] {
+// The kinds whose TITLE may be in capitals. One, by Coach Yinka's own
+// word (see clubChampsNotice). The body is still held to the rule, and
+// tests/push-texts.test.ts holds this set to exactly that one kind.
+export const CAPITALS_ALLOWED: ReadonlySet<string> = new Set(["club_champs"]);
+
+export function pushTextProblems(text: { title: string; body: string }, opts: { titleInCapitals?: boolean } = {}): string[] {
   const problems: string[] = [];
   const title = text.title.trim();
   const body = text.body.trim();
@@ -473,7 +509,7 @@ export function pushTextProblems(text: { title: string; body: string }): string[
     if (/[—–]/.test(value)) problems.push(`${name} has a long dash`);
     if (/\p{Extended_Pictographic}/u.test(value)) problems.push(`${name} has an emoji`);
     if (/\b(AI|automated|algorithm)\b/.test(value)) problems.push(`${name} names the machinery`);
-    if (/\b[A-Z]{4,}\b/.test(value.replace(/\b(ET|PM|AM|ECNL|MLS|NEXT)\b/g, ""))) {
+    if (!(name === "title" && opts.titleInCapitals) && /\b[A-Z]{4,}\b/.test(value.replace(/\b(ET|PM|AM|ECNL|MLS|NEXT)\b/g, ""))) {
       problems.push(`${name} is in capitals`);
     }
   }
@@ -484,7 +520,7 @@ export function pushTextProblems(text: { title: string; body: string }): string[
 // under. Used by the list test and by the sender (a notice that fails is
 // never sent with a bad address).
 export function noticeProblems(n: Notice): string[] {
-  const problems = pushTextProblems(n);
+  const problems = pushTextProblems(n, { titleInCapitals: CAPITALS_ALLOWED.has(n.kind) });
   if (!cleanNoticePath(n.path)) problems.push("path is not a page of ours");
   if (!NOTICE_TOPICS.includes(n.topic)) problems.push("unknown topic");
   if (n.key !== null && (!n.key || n.key.length > 120)) problems.push("bad key");

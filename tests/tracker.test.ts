@@ -703,6 +703,9 @@ describe("free accounts are invisible to everything a member query reads", () =>
     // the quiz a free account takes in the iPhone app (082) and the week's
     // set-up after it: the account's own row, after the app API's gate
     "lib/elite/free-intake-server.ts",
+    // the door (090): a new free account's typed code is looked up as a
+    // teammate's, and who sent them is recorded on the account's own row
+    "lib/elite/free-door-server.ts",
     // the weekly club matchup (083): which clubs can be matched, and the
     // training of a matchup's stored players; what leaves it is a club's
     // name and its time per player, never a player

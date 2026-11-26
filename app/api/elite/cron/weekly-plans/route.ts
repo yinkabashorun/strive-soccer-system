@@ -4,8 +4,9 @@ import { createServiceClient } from "@/lib/elite/supabase/server";
 import { unlockDueWeeks } from "@/lib/elite/unlock";
 import { sendTrainingReminders } from "@/lib/elite/reminders-server";
 import { runClubMatchups } from "@/lib/elite/club-matchups-server";
+import { noticeClubChamps } from "@/lib/elite/free-notices-server";
 import { endDuePasses } from "@/lib/elite/squad-pass-server";
-import { isSundayEveNY, nyHour } from "@/lib/elite/time";
+import { isSundayEveNY, nyHour, nyToday } from "@/lib/elite/time";
 
 export const runtime = "nodejs";
 export const maxDuration = 300;
@@ -71,8 +72,15 @@ export async function GET(req: Request) {
   // account is a free account again, nothing of its own is lost.
   await endDuePasses().catch(() => ({ ended: 0 }));
 
-  // The weekly club matchup: its own step, run last, never throwing.
-  const clubMatchups = () => runClubMatchups({ authed }).catch(() => ({ status: "failed" as const }));
+  // The weekly club matchup: its own step, run last, never throwing. Then
+  // CHAMPS OF THE WEEK: on Monday evening (5 to 9 PM New York) the players
+  // of every club that won last week hear it, once each (claimed in
+  // elite_champs_notices, 090; nothing is sent until that is applied).
+  const clubMatchups = async () => {
+    const matchups = await runClubMatchups({ authed }).catch(() => ({ status: "failed" as const }));
+    const champs = await noticeClubChamps({ today: nyToday(), hour: nyHour() }).catch(() => ({ sent: 0 }));
+    return { ...matchups, champs: champs.sent };
+  };
 
   if (isSundayEveNY() && nyHour() < 15) {
     return NextResponse.json({ ok: true, skipped: "sunday before 3pm ET", reminders, matchups: await clubMatchups() });

@@ -268,6 +268,10 @@ export type MatchupView = {
   // no matchup on
   cardLine: string | null;
   recordLine: string;
+  // CHAMPS OF THE WEEK: the club won last week's matchup. A gold mark on
+  // its card and its page for the week after the win, from the stored
+  // result alone.
+  champs: boolean;
 };
 
 const sideView = (id: string, name: string, per: number): MatchupSide => ({ id, name, minutes: per, time: fmtDuration(per) });
@@ -293,6 +297,7 @@ export function matchupView(input: {
   // last week's result, when it was decided
   const before = mineOf(lastMonday(monday));
   const last = before?.result && before.opponent_id ? matchupResultLine(before.result, input.nameOf(before.opponent_id)) : null;
+  const champs = Boolean(before?.opponent_id) && before?.result === "win";
   const decidedSides = (row: MatchupRow) => {
     const other = theirsOf(row);
     return {
@@ -318,16 +323,51 @@ export function matchupView(input: {
       last: live === now ? last : null,
       cardLine: matchupCardLine(input.club.name, otherName),
       recordLine,
+      champs,
     };
   }
   // Monday, before this week's matching has run: last week's result stands
   if (!now && before?.result && before.opponent_id) {
-    return { state: "over", ...decidedSides(before), line: last!, last: null, cardLine: null, recordLine };
+    return { state: "over", ...decidedSides(before), line: last!, last: null, cardLine: null, recordLine, champs };
   }
   const line = now
     ? MATCHUP_NONE_LINE
     : input.club.members < MATCHUP_MIN_PLAYERS
       ? matchupSmallLine(MATCHUP_MIN_PLAYERS)
       : MATCHUP_SOON_LINE;
-  return { state: "none", mine: null, theirs: null, line, last, cardLine: null, recordLine };
+  return { state: "none", mine: null, theirs: null, line, last, cardLine: null, recordLine, champs };
+}
+
+// ---- Champs of the week -----------------------------------------------------
+
+// The winners of one decided week, each with the club it beat and by how
+// many minutes per player. A draw has no winner; a club with nobody to
+// play won nothing; a side whose other side is missing is left out (the
+// gap cannot be said truthfully).
+export type Champs = { clubId: string; otherId: string; roster: string[]; gap: number };
+
+export function champsOf(rows: MatchupRow[]): Champs[] {
+  const by = new Map(rows.map((r) => [`${r.week_monday}:${r.club_id}`, r]));
+  const out: Champs[] = [];
+  for (const r of rows) {
+    if (r.result !== "win" || !r.opponent_id || !r.decided_at) continue;
+    const other = by.get(`${r.week_monday}:${r.opponent_id}`);
+    if (!other || !other.decided_at) continue;
+    const gap =
+      perPlayerMinutes(r.minutes ?? 0, r.players ?? r.roster.length) -
+      perPlayerMinutes(other.minutes ?? 0, other.players ?? other.roster.length);
+    if (gap > 0) out.push({ clubId: r.club_id, otherId: r.opponent_id, roster: r.roster, gap });
+  }
+  return out;
+}
+
+// When the winners are told: Monday in New York, from 5:00 PM and never
+// after 9:00 PM. (A new week is announced from 4:00 PM, lib/elite/
+// announce.ts: the two never land on top of each other.) A Monday whose
+// window passed with the hourly run down sends nothing: news of last week
+// on a Tuesday is not news.
+export const CHAMPS_FROM_HOUR = 17;
+export const CHAMPS_UNTIL_HOUR = 21;
+export function champsDue(input: { today: string; hour: number }): boolean {
+  return input.today === matchupMonday(input.today) && input.hour >= CHAMPS_FROM_HOUR && input.hour < CHAMPS_UNTIL_HOUR;
 }

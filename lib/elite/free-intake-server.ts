@@ -16,6 +16,7 @@ import {
 } from "./free-intake";
 import { cleanPlanDays, cleanTarget, recommendation, setUpDone, type TargetRow } from "./tracker";
 import { profileSetupDue, SETUP_REFUSED, type ProfileSetup } from "./account-profile";
+import { DOOR_SEASON } from "./free-door";
 
 export type StoredIntake = {
   // false while migration 082 is not applied (or the row could not be
@@ -24,9 +25,13 @@ export type StoredIntake = {
   answers: FreeAnswers | null;
   // the Stripe checkout this account last opened, if any (a pointer only)
   checkout: string | null;
+  // THE DOOR (migration 090, lib/elite/free-door.ts): this player came in
+  // with a teammate's or a club's code and takes the quiz later. false
+  // while 090 is not applied: then nobody skips anything.
+  later: boolean;
 };
 
-const NONE: StoredIntake = { available: false, answers: null, checkout: null };
+const NONE: StoredIntake = { available: false, answers: null, checkout: null, later: false };
 
 // Read apart from the rest of the row, so a database without the columns
 // yet never takes the free account itself away (lib/elite/tracker-server.ts
@@ -44,7 +49,42 @@ export async function readIntake(profileId: string): Promise<StoredIntake> {
   const answers = row.intake && typeof row.intake === "object" ? cleanFreeAnswers(row.intake) : null;
   // an answer set that is not whole is no answer set: the quiz is asked
   const whole = answers && firstUnansweredFree(answers) === -1 ? answers : null;
-  return { available: true, answers: whole, checkout: row.upgrade_checkout ?? null };
+  return { available: true, answers: whole, checkout: row.upgrade_checkout ?? null, later: await readLater(admin, profileId) };
+}
+
+// Read apart from the quiz itself, so a database without the column yet
+// (090 not applied) answers "nobody skips" and takes nothing else away.
+async function readLater(admin: NonNullable<ReturnType<typeof createServiceClient>>, profileId: string): Promise<boolean> {
+  try {
+    const { data, error } = await admin.from("elite_trackers").select("quiz_later_at").eq("profile_id", profileId).maybeSingle();
+    return !error && Boolean((data as { quiz_later_at?: string | null } | null)?.quiz_later_at);
+  } catch {
+    return false;
+  }
+}
+
+// THE DOOR: this player came in with a real code, so the quiz waits. Only
+// lib/elite/free-door-server.ts calls it, in the same call that accepted
+// the code. With no target yet, the week gets the in-season row of the
+// coaches' own table, the player's to change from Week. Answers false
+// when it could not be written (090 not applied): then nobody skips.
+export async function markQuizLater(profileId: string, targets: TargetRow[]): Promise<boolean> {
+  const admin = createServiceClient();
+  if (!admin) return false;
+  try {
+    const { data: row } = await admin.from("elite_trackers").select("target_minutes").eq("profile_id", profileId).maybeSingle();
+    const hasTarget = Boolean((row as { target_minutes: number | null } | null)?.target_minutes);
+    const { error } = await admin
+      .from("elite_trackers")
+      .update({
+        quiz_later_at: new Date().toISOString(),
+        ...(hasTarget ? {} : { target_minutes: recommendation(targets, DOOR_SEASON).minutes }),
+      })
+      .eq("profile_id", profileId);
+    return !error;
+  } catch {
+    return false;
+  }
 }
 
 // Can the database store a free account's quiz yet (migration 082)?
@@ -59,7 +99,7 @@ export function stageOf(
   tracker: { quiz_done_at?: string | null; target_minutes?: number | null; plan_days?: readonly number[] | null },
   intake: StoredIntake
 ): FreeStage {
-  return freeStage({ available: intake.available, hasIntake: intake.answers !== null, planned: setUpDone(tracker) });
+  return freeStage({ available: intake.available, hasIntake: intake.answers !== null, planned: setUpDone(tracker), later: intake.later });
 }
 
 export type SaveResult = { ok: true } | { ok: false; error: string; step?: number; status: number };
@@ -116,7 +156,9 @@ export async function saveFreePlan(input: {
     .eq("profile_id", input.profileId)
     .maybeSingle();
   const now = row as { quiz_done_at: string | null; season: string | null } | null;
-  if (!now?.season) return { ok: false, error: "Answer the quiz first.", status: 409 };
+  // A player who came in by the door has no season yet and may still set
+  // their own target and days (the in-season row is what they were given).
+  if (!now || (!now.season && !(await readLater(admin, input.profileId)))) return { ok: false, error: "Answer the quiz first.", status: 409 };
   const { error } = await admin
     .from("elite_trackers")
     .update({

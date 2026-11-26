@@ -205,12 +205,14 @@ describe("the words", () => {
     const src = code("lib/elite/free-notices-server.ts");
     // through the one sender (lib/elite/notify.ts), never the push layer itself
     expect(src).not.toMatch(/sendPushToProfile\(/);
-    expect((src.match(/notifyProfile\(/g) ?? []).length).toBe(3);
+    // a friend's post, props, a club's plan, and champs of the week
+    expect((src.match(/notifyProfile\(/g) ?? []).length).toBe(4);
+    expect(src).toContain("clubChampsNotice({ club: club.name, clubId: w.clubId, other: other.name, gap: w.gap, weekMonday: week })");
     expect(src).toContain("friendPostNotice({ first, nyDate: today })");
     expect(src).toContain("propsNotice({ first, postId: input.postId })");
     // the one about clubs (087): its words are the list's too
     expect(src).toContain("const notice = clubPlanNotice({");
-    expect(src).toContain("notifyProfile(r.profileId, notice)");
+    expect(src).toContain("notifyProfile(r.profileId, notice,");
   });
 });
 

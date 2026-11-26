@@ -1,6 +1,8 @@
 import { UUID, appJson, appRoute, readJson } from "@/lib/elite/app-api";
 import { answerGame, answerScore, cancelPlan, enterScore, reportPlan, setImIn } from "@/lib/elite/club-teams-actions";
 import { NEEDS_ORGANIZER_OK, NEEDS_PLAYER_OK, cleanPlanReason } from "@/lib/elite/club-teams";
+import { CLUB_GAMES_OFF_MESSAGE, clubGamesInApp, planActionInApp } from "@/lib/elite/club-games";
+import { planKindFor } from "@/lib/elite/club-app-server";
 
 // One session or game: what a player or a captain does with it, through
 // the website's own action for it (each checks again that the caller is a
@@ -31,28 +33,44 @@ export function POST(req: Request, ctx?: { params?: { id?: string } }): Promise<
       if (res.error === NEEDS_ORGANIZER_OK) return { ok: false, needs: "organizer" };
       return bad(res.error);
     };
+    // Games between clubs are not in the app (lib/elite/club-games.ts):
+    // while they are out, the app acts on a club's training session only,
+    // so a game made on the website can never be joined, answered or
+    // scored from a hand-made request. Asked once the body has been
+    // checked, right before the website's own action (which still checks
+    // who is asking for itself).
+    const act = async (run: () => Promise<{ ok: true } | { ok: false; error: string }>) => {
+      if (!clubGamesInApp()) {
+        const kind = await planKindFor(id);
+        if (!kind) return bad(GONE);
+        if (!planActionInApp(body?.do, kind, false)) return bad(CLUB_GAMES_OFF_MESSAGE);
+      }
+      return answer(await run());
+    };
     switch (body?.do) {
       case "in":
-        return answer(await setImIn(id, true));
+        return act(() => setImIn(id, true));
       case "out":
-        return answer(await setImIn(id, false));
+        return act(() => setImIn(id, false));
       case "accept":
-        return answer(await answerGame(id, true));
+        return act(() => answerGame(id, true));
       case "pass":
-        return answer(await answerGame(id, false));
+        return act(() => answerGame(id, false));
       case "cancel":
-        return answer(await cancelPlan(id));
-      case "score":
-        if (typeof body.club !== "number" || typeof body.opponent !== "number") return bad("Enter both scores.");
-        return answer(await enterScore(id, body.club, body.opponent));
+        return act(() => cancelPlan(id));
+      case "score": {
+        const { club, opponent } = body;
+        if (typeof club !== "number" || typeof opponent !== "number") return bad("Enter both scores.");
+        return act(() => enterScore(id, club, opponent));
+      }
       case "confirm":
-        return answer(await answerScore(id, true));
+        return act(() => answerScore(id, true));
       case "dispute":
-        return answer(await answerScore(id, false));
+        return act(() => answerScore(id, false));
       case "report": {
         const reason = cleanPlanReason(body.reason);
         if (!reason) return bad("Pick what is wrong.");
-        return answer(await reportPlan(id, reason));
+        return act(() => reportPlan(id, reason));
       }
       default:
         return bad("That did not go through. Try again.");

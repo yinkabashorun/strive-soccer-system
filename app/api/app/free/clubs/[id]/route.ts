@@ -1,6 +1,5 @@
 import { UUID, appJson, appRoute, readJson } from "@/lib/elite/app-api";
-import { appClubPageFor } from "@/lib/elite/club-app-server";
-import { setClubCounty } from "@/lib/elite/club-teams-actions";
+import { appClubPageFor, setClubCountyFromApp } from "@/lib/elite/club-app-server";
 import {
   answerClubRequest,
   endMyClub,
@@ -21,7 +20,8 @@ import { nyToday } from "@/lib/elite/time";
 //     { do: "rename", name }               the captain
 //     { do: "remove", member }             the captain takes a player off, for good
 //     { do: "link" }                       the captain makes a new link: the old code stops working
-//     { do: "county", county, open }       the captain: the county, and Open to games
+//     { do: "county", county, open }       the captain: the county (and Open to games,
+//                                          only while games between clubs are in the app)
 //     { do: "end" }                        the captain ends the club
 //     { do: "request", player, accept }    the captain lets a player in, or not
 export const dynamic = "force-dynamic";
@@ -63,7 +63,9 @@ export function POST(req: Request, ctx?: Ctx): Promise<Response> {
       case "county": {
         const county = body.county === null || body.county === "" ? null : body.county;
         if ((county !== null && typeof county !== "string") || typeof body.open !== "boolean") return bad("Pick your club's county from the list.");
-        return answer(await setClubCounty(id, county, body.open));
+        // "Open to games" is the app's to change only while games between
+        // clubs are in it (lib/elite/club-games.ts, setClubCountyFromApp)
+        return answer(await setClubCountyFromApp(id, county, body.open));
       }
       case "end":
         return answer(await endMyClub(id));

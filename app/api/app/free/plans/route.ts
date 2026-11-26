@@ -1,6 +1,7 @@
 import { UUID, appJson, appRoute, readJson } from "@/lib/elite/app-api";
 import { planGame, planTraining } from "@/lib/elite/club-teams-actions";
 import { NEEDS_ORGANIZER_OK } from "@/lib/elite/club-teams";
+import { CLUB_GAMES_OFF_MESSAGE, clubGamesInApp } from "@/lib/elite/club-games";
 
 // The captain plans for the club, through the website's own actions: a
 // training session (members only), or a game sent to another club, which
@@ -21,6 +22,8 @@ export const POST = appRoute({ name: "free-plans", access: "free_app", limit: 20
   const input = { day: body.day, time: body.time, minutes: body.minutes, place: body.place, title: body.title };
   let res: Awaited<ReturnType<typeof planTraining>>;
   if (body.kind === "game") {
+    // games between clubs are not in the app (lib/elite/club-games.ts)
+    if (!clubGamesInApp()) return bad(CLUB_GAMES_OFF_MESSAGE);
     if (typeof body.opponent !== "string" || !UUID.test(body.opponent)) return bad("Pick the club you want to play.");
     res = await planGame(body.club, body.opponent, input);
   } else res = await planTraining(body.club, input);

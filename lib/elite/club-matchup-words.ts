@@ -50,6 +50,16 @@ export function matchupResultLine(result: MatchupResult, other: string): string 
   return "The week was a draw.";
 }
 
+// CHAMPS OF THE WEEK (Coach Yinka, Nov 26 2026: "your club won the week
+// need to be hype like. (CLUB NAME IS STRIVE CHAMPS OF THE WEEK)"). A club
+// that won its matchup carries this mark, in gold, for the week after it,
+// and its players are told once (lib/elite/notices.ts clubChampsNotice).
+export const CHAMPS_MARK = "Strive champs of the week";
+// By how much, in the words of the matchup card.
+export function champsBeatLine(input: { who: string; other: string; gap: number }): string {
+  return `${input.who} beat ${input.other} by ${minutesWord(input.gap)} per player.`;
+}
+
 // A week with nobody to play, a club still too small, and a club that
 // reached its size after Monday.
 export const MATCHUP_NONE_LINE = "No matchup this week. There was no other club to play.";
@@ -91,5 +101,7 @@ export function everyMatchupSentence(): string[] {
     MATCHUP_SOON_LINE,
     matchupRecordLine({ wins: 3, losses: 1, draws: 0 }),
     matchupCardLine("Renegados FC", other),
+    CHAMPS_MARK,
+    champsBeatLine({ who: "You", other, gap: 12 }),
   ];
 }

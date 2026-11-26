@@ -10,6 +10,7 @@
 // in notice-prefs-server.ts.
 import { TOPIC_CHOICE, topicIsOff, topicsFor, type NoticeTopic } from "./notices";
 import { REMINDER_CHOICES, REMINDER_QUESTION, choiceForHour, type ReminderChoiceKey } from "./reminders";
+import { CLUBS_TOPIC_DETAIL_NO_GAMES, CLUB_GAMES_IN_APP } from "./club-games";
 
 export type NoticePrefs = {
   // The switches this account is offered, in order. Empty when the choices
@@ -51,6 +52,14 @@ export function buildNoticePrefs(i: {
         }
       : null;
   return { topics, reminder };
+}
+
+// The same choices as the iPhone app shows them: while games between
+// clubs are out of the app (lib/elite/club-games.ts) the Clubs switch
+// names no games.
+export function prefsForApp(prefs: NoticePrefs, games: boolean = CLUB_GAMES_IN_APP): NoticePrefs {
+  if (games) return prefs;
+  return { ...prefs, topics: prefs.topics.map((t) => (t.key === "clubs" ? { ...t, detail: CLUBS_TOPIC_DETAIL_NO_GAMES } : t)) };
 }
 
 // The stored list after one switch is flipped.

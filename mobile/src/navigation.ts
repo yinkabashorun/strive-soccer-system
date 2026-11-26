@@ -10,14 +10,18 @@ import { firstTab, type OneAppTabKey } from "@shared/one-app";
 //               exists)
 //   agreement   "Before you train", once
 //   profile     the photo and the @username (081), whoever owes them: a
-//               new member BEFORE the door (the member card on the door
-//               carries their photo), a free account after its quiz and
-//               before the offer (the offer shows their card), and a
-//               member from before 081 once, before the app
+//               new member BEFORE "You're in" (the member card there
+//               carries their photo), a new free account FIRST, before
+//               the code and the quiz (a friend request and a club
+//               request carry the photo, and the offer shows their card),
+//               and a member from before 081 once, before the app
 //   onboarding  the door, the quiz, building
 //   gate        a screen that says what is happening and what is next
 //   app         the member tabs and everything one tap from them
-//   free-quiz   a free account that has not taken the quiz: the same quiz
+//   free-quiz   a free account that has not taken the quiz: THE DOOR
+//               first ("Have a code from a teammate or a club?",
+//               lib/elite/free-door.ts: a real code goes straight to the
+//               free app and the quiz waits), then the same quiz
 //   free-offer  a free account after the quiz: the offer, then the week's
 //               set-up (a target and the days)
 //   free        the free tabs and everything one tap from them. ONE APP
@@ -49,9 +53,10 @@ export function areaFor(
     case "free":
       // the quiz cannot be stored yet: the free app is the website's
       if (state.stage === "web") return "gate";
-      if (state.stage === "quiz") return "free-quiz";
-      // after the quiz, the photo comes before the offer and the free app
+      // the photo and the @username come first for a free account: before
+      // the door's code, the quiz, the offer and the free app
       if (owed) return "profile";
+      if (state.stage === "quiz") return "free-quiz";
       return state.stage === "offer" ? "free-offer" : "free";
     default:
       return "gate";
@@ -137,6 +142,10 @@ export function inArea(area: Area, segments: readonly string[], train = false): 
   // family waits for the coach, and the screen says so).
   if (seg === "onboarding" && segments[1] === "building") return true;
   if (area === "app") return APP_ROUTES.has(seg) || seg === "";
+  // A free player who came in by the door takes the quiz later, from the
+  // one card on Week: the quiz's screens open over the free app for them.
+  // Never for a member (their quiz is behind them).
+  if (area === "free" && seg === "onboarding") return !train;
   if (area === "free") return FREE_ROUTES.has(seg) || (train && TRAIN_ROUTES.has(seg));
   if (area === "free-offer") return FREE_OFFER_ROUTES.has(seg);
   if (area === "onboarding" || area === "free-quiz") return seg === "onboarding";
@@ -165,11 +174,22 @@ export function pushRoute(area: Area | null, url: unknown, topic?: unknown, trai
 // the payload as Apple delivers it, which the notifications library hands
 // over under trigger.payload (its own `data` is filled only by its own
 // relay, which we do not use; it is read as a fallback all the same).
-export type TappedNotice = { url: unknown; topic: unknown };
+//
+// `open`: a notice the PHONE gave itself names a screen of the app instead
+// (the one there is: "clock", the training clock left running,
+// src/clock-nudge.ts).
+export type TappedNotice = { url: unknown; topic: unknown; open?: unknown };
 
 export function tappedNotice(res: unknown): TappedNotice {
   const request = (res as { notification?: { request?: { trigger?: unknown; content?: { data?: unknown } } } } | null)?.notification?.request;
   const payload = (request?.trigger as { payload?: Record<string, unknown> | null } | null | undefined)?.payload ?? null;
   const data = (request?.content?.data as Record<string, unknown> | null | undefined) ?? null;
-  return { url: payload?.url ?? data?.url, topic: payload?.topic ?? data?.topic };
+  return { url: payload?.url ?? data?.url, topic: payload?.topic ?? data?.topic, open: data?.open };
+}
+
+// Where a notice the phone gave itself opens. The clock's is the only one:
+// it opens the clock, for whoever has the free app. Null for anything else.
+export const LOCAL_CLOCK = "clock";
+export function localRoute(area: Area | null, notice: TappedNotice): string | null {
+  return area === "free" && notice.open === LOCAL_CLOCK ? "/post" : null;
 }

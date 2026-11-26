@@ -30,7 +30,7 @@ import {
   signPhotos,
   type Admin,
 } from "./tracker-server";
-import { clubTeamFor, nearYouFor, opponentsFor, playAcceptancesOf, teamAsksFor, type TeamAsks } from "./club-teams-server";
+import { clubTeamFor, nearYouFor, opponentsFor, planById, playAcceptancesOf, teamAsksFor, teamRowsOf, type TeamAsks } from "./club-teams-server";
 import { setClubCounty } from "./club-teams-actions";
 import { confirmClub, startClub } from "./tracker-actions";
 import { matchupFor } from "./club-matchups-server";
@@ -49,16 +49,19 @@ import {
   type PhotoViewer,
 } from "./tracker";
 import type { AppClubNear, AppClubPage, AppClubTile, AppClubs } from "./app-contract";
+import { clubGamesInApp, clubPageForApp, planInApp, waitingForApp } from "./club-games";
 
 // What waits on a captain for one club: players asking to join, a game
 // another club sent, and a score to enter or confirm.
+// While games are out of the app (lib/elite/club-games.ts) only the players
+// asking to join are counted: a captain is never told something waits that
+// the app has no screen for.
 function waitingFor(clubId: string, input: { requests: { clubId: string }[]; asks: TeamAsks | null; toEnter: number }): number {
-  return (
-    input.requests.filter((r) => r.clubId === clubId).length +
-    (input.asks?.games.filter((g) => g.toId === clubId).length ?? 0) +
-    (input.asks?.scores.filter((s) => s.toId === clubId).length ?? 0) +
-    input.toEnter
-  );
+  return waitingForApp({
+    requests: input.requests.filter((r) => r.clubId === clubId).length,
+    gameAsks: input.asks?.games.filter((g) => g.toId === clubId).length ?? 0,
+    scores: (input.asks?.scores.filter((s) => s.toId === clubId).length ?? 0) + input.toEnter,
+  });
 }
 
 const weekMinutesOf = (club: MyClub) => club.members.reduce((s, m) => s + (m.minutes ?? 0), 0);
@@ -82,7 +85,7 @@ export async function appClubsFor(viewer: Viewer, today: string): Promise<AppClu
       ]);
       const newest = photos.find((t) => t.state === "open");
       const plans = splitPlans(team.plans);
-      const next = plans.next.find((p) => p.status === "on") ?? null;
+      const next = plans.next.find((p) => p.status === "on" && planInApp(p.kind)) ?? null;
       return {
         id: c.id,
         name: c.name,
@@ -94,6 +97,7 @@ export async function appClubsFor(viewer: Viewer, today: string): Promise<AppClu
         today: trainedToday(c.members, today),
         next: next ? nextLine(next, c.id) : null,
         matchup: matchup?.cardLine ?? null,
+        ...(matchup?.champs ? { champs: true } : {}),
         waiting: c.captain
           ? waitingFor(c.id, { requests, asks, toEnter: plans.results.filter((p) => p.result?.canEnter).length })
           : 0,
@@ -166,7 +170,9 @@ export async function appClubPageFor(viewer: Viewer, clubId: string, today: stri
     today,
   });
   const plans = splitPlans(team.plans);
-  return {
+  // clubPageForApp: nothing of games reaches the app while they are out
+  // of it (lib/elite/club-games.ts)
+  return clubPageForApp<AppClubPage>({
     id: club.id,
     name: club.name,
     today,
@@ -197,12 +203,14 @@ export async function appClubPageFor(viewer: Viewer, clubId: string, today: stri
             .map((g) => ({ id: g.id, from: g.from, fromId: g.fromId, when: g.when, minutes: g.minutes, place: g.place })),
         }
       : null,
-  };
+  });
 }
 
 // Clubs near you, for the club's captain only: the clubs in its county
 // that chose to be open to games, and any club it already played.
 export async function appClubNearFor(viewer: Viewer, clubId: string): Promise<AppClubNear | null> {
+  // clubs near you exist to send a game: nothing while games are out of the app
+  if (!clubGamesInApp()) return null;
   const near = await nearYouFor(viewer, clubId);
   if (!near) return null;
   const listed = new Set(near.rows.map((r) => r.id));
@@ -225,6 +233,29 @@ export async function appClubNearFor(viewer: Viewer, clubId: string): Promise<Ap
       ...again.map((o) => ({ id: o.id, name: o.name, record: "", members: 0, refusal: null, played: true })),
     ],
   };
+}
+
+// ---- Games out of the app (lib/elite/club-games.ts) ---------------------------
+
+// What kind of plan this is ("training" or "game"), or null when it is not
+// there: the app's plan route asks before it acts, so a game made on the
+// website can never be joined, answered or scored from the app while games
+// are out of it.
+export async function planKindFor(planId: string): Promise<string | null> {
+  const admin = createServiceClient();
+  if (!admin) return null;
+  return (await planById(admin, planId).catch(() => null))?.kind ?? null;
+}
+
+// The captain sets the club's county from the app. "Open to games" is the
+// app's to change only while games are in it; otherwise the county is
+// saved and the switch stays as the website left it (off with no county,
+// as the database requires).
+export async function setClubCountyFromApp(clubId: string, county: string | null, open: boolean) {
+  if (clubGamesInApp()) return setClubCounty(clubId, county, open);
+  const admin = createServiceClient();
+  const stored = admin ? (await teamRowsOf(admin, [clubId]).catch(() => []))[0]?.open_to_games === true : false;
+  return setClubCounty(clubId, county, county !== null && stored);
 }
 
 // ---- Two writes the app makes in one step -------------------------------------

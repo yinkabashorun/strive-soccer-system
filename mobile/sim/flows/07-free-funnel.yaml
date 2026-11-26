@@ -393,8 +393,12 @@ appId: com.strivesoccer.elite
 # The feed is open now, with their own post first. Its one line sits under
 # the photo, so it is scrolled to (the run on 3108e77 looked for it without
 # scrolling and stopped here, with the post right there on screen).
+# The face, the name and the time are one link to a screen reader ("You.
+# Just now"), which is what the tapping tool matches, so the wait matches
+# the whole of it (the run on 83a8cec waited for "Just now" alone and
+# stopped here with the post on screen).
 - extendedWaitUntil:
-    visible: "Just now"
+    visible: ".*Just now.*"
     timeout: 20000
 - waitForAnimationToEnd:
     timeout: 4000

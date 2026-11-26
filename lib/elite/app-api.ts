@@ -115,7 +115,7 @@ export async function loadMemberState(viewer: Viewer): Promise<Loaded> {
   // membership is not on still lives in the free app, and one whose
   // membership IS on keeps the free app and gains the Train tab.
   let { tracker, intake } = mayHaveFreeApp(player) ? await freeSide() : { tracker: null, intake: null };
-  // EVERY STRIVE PRO MEMBER HAS THE WHOLE APP (lib/elite/one-app.ts
+  // EVERY MEMBER HAS THE WHOLE APP (lib/elite/one-app.ts
   // getsFreeApp): one who bought Strive Pro straight away gets the free
   // app's side made here, once, and is then a free player who upgraded.
   if (!tracker && !due) {

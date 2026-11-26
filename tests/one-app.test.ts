@@ -41,7 +41,11 @@ describe("who keeps the free app", () => {
     expect(keepsFreeApp({ hasTracker: true, hasPlayer: true, tier: "pro" })).toBe(true);
     // no free account behind them: nothing to keep
     expect(keepsFreeApp({ hasTracker: false, hasPlayer: true, tier: "pro" })).toBe(false);
-    // an invite family is not a free account
+    // a coaching family has the whole app while the membership is on, and
+    // waits on the coach, as it always did, while it is not
+    expect(keepsFreeApp({ hasTracker: true, hasPlayer: true, tier: "elite", status: "active" })).toBe(true);
+    expect(keepsFreeApp({ hasTracker: true, hasPlayer: true, tier: "complete", status: "trialing" })).toBe(true);
+    expect(keepsFreeApp({ hasTracker: true, hasPlayer: true, tier: "elite", status: "none" })).toBe(false);
     expect(keepsFreeApp({ hasTracker: true, hasPlayer: true, tier: "elite" })).toBe(false);
   });
 
@@ -83,7 +87,7 @@ describe("who keeps the free app", () => {
     const s = src("lib/elite/tracker-server.ts");
     expect(s).toMatch(/export async function trackerFor[\s\S]{0,200}freeSideOf\(viewer\)\)\?\.tracker/);
     expect(s).toMatch(/export async function freeAccountFor[\s\S]{0,200}side\.lives \? side\.tracker : null/);
-    expect(s).toMatch(/keepsFreeApp\(\{ hasTracker: true, hasPlayer: true, tier: player\?\.tier \}\)/);
+    expect(s).toMatch(/keepsFreeApp\(\{ hasTracker: true, hasPlayer: true, tier: player\?\.tier, status: player\?\.subscription_status \}\)/);
     // the Account page and what a phone is filed under must tell a free
     // account from a member (a member's Account has Cancel Strive Pro)
     for (const p of ["app/account/page.tsx", "app/account/delete/page.tsx", "app/api/elite/push/subscribe/route.ts", "app/api/elite/push/native/route.ts"]) {
@@ -253,7 +257,7 @@ describe("the phone", () => {
 // seamless"). He bought Strive Pro on the website, opened the iPhone app
 // and found Train alone: no Friends, no Clubs, no board. A member who buys
 // Strive Pro straight away now gets the free app's side made for them.
-describe("every Strive Pro member has the whole app", () => {
+describe("every member has the whole app", () => {
   const on = { tier: "pro", status: "active", onboarded: true, age: 15 };
 
   it("a Strive Pro member, switched on, quiz done, 13 or older: yes", () => {
@@ -269,12 +273,15 @@ describe("every Strive Pro member has the whole app", () => {
     expect(getsFreeApp({ ...on, age: Number.NaN })).toBe(false);
   });
 
-  it("not before the membership is on and the quiz is done, and never for a coaching family", () => {
+  it("not before the membership is on and the quiz is done; every membership gets it", () => {
     expect(getsFreeApp({ ...on, status: "none" })).toBe(false);
     expect(getsFreeApp({ ...on, status: "canceled" })).toBe(false);
     expect(getsFreeApp({ ...on, onboarded: false })).toBe(false);
-    expect(getsFreeApp({ ...on, tier: "elite" })).toBe(false);
-    expect(getsFreeApp({ ...on, tier: "complete" })).toBe(false);
+    // Coach Yinka, Nov 26 2026: "yes everybody should get it"
+    expect(getsFreeApp({ ...on, tier: "elite" })).toBe(true);
+    expect(getsFreeApp({ ...on, tier: "complete" })).toBe(true);
+    expect(getsFreeApp({ ...on, tier: "elite", status: "none" })).toBe(false);
+    expect(getsFreeApp({ ...on, tier: "elite", age: 12 })).toBe(false);
   });
 
   it("their week's target follows the season their own quiz gave", () => {

@@ -81,7 +81,7 @@ export default async function PlayerLayout({
   // ONE APP (lib/elite/one-app.ts): a member who came through the free
   // app keeps it, so the free account is read for every Strive Pro row,
   // on or not (mayHaveFreeApp); state.social says they have both.
-  // EVERY STRIVE PRO MEMBER HAS THE WHOLE APP (getsFreeApp): one who
+  // EVERY MEMBER HAS THE WHOLE APP (getsFreeApp): one who
   // bought Strive Pro straight away gets the free app's side made here,
   // once, exactly as the iPhone app's API does (lib/elite/app-api.ts).
   const freeAccount =

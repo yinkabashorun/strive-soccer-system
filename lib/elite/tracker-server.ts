@@ -296,7 +296,7 @@ export async function freeSideOf(viewer: Viewer): Promise<{ tracker: Tracker; li
     .eq("id", viewer.playerId)
     .maybeSingle();
   const player = (data as { tier: string | null; subscription_status: string | null } | null) ?? null;
-  if (!keepsFreeApp({ hasTracker: true, hasPlayer: true, tier: player?.tier })) return null;
+  if (!keepsFreeApp({ hasTracker: true, hasPlayer: true, tier: player?.tier, status: player?.subscription_status })) return null;
   return { tracker, lives: livesInFreeApp({ hasTracker: true, hasPlayer: true, player }) };
 }
 

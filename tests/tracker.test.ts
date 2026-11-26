@@ -503,7 +503,7 @@ describe("where a signed-in person belongs", () => {
     // is not switched on (lib/elite/member-gate.ts livesInFreeApp).
     const server = code("lib/elite/tracker-server.ts");
     expect(server).toContain("if (!viewer.playerId) return { tracker, lives: true };");
-    expect(server).toContain("if (!keepsFreeApp({ hasTracker: true, hasPlayer: true, tier: player?.tier })) return null;");
+    expect(server).toContain("if (!keepsFreeApp({ hasTracker: true, hasPlayer: true, tier: player?.tier, status: player?.subscription_status })) return null;");
     expect(server).toContain("return { tracker, lives: livesInFreeApp({ hasTracker: true, hasPlayer: true, player }) };");
   });
 

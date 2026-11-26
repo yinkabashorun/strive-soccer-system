@@ -12,9 +12,12 @@ import { dropSeenKey, parseSeenWeek } from "@shared/experience";
 // (src/door.ts doorDue).
 // recapSeen: the week (its Monday) whose Monday card was put away with
 // "Got it" on this phone (lib/elite/week-recap.ts recapDue).
-export type Prefs = { vibration: boolean; sound: boolean; autoplay: boolean; pushAsked: boolean; pushOn: boolean; firstDaysHidden: boolean; proEndedSeen: boolean; clockKnown: boolean; doorPassed: string; recapSeen: string };
+// firstOpen: when the app first opened on this phone (ISO), and
+// ratingAsked: the version the App Store rating was last asked in
+// (src/rating-ask.ts).
+export type Prefs = { vibration: boolean; sound: boolean; autoplay: boolean; pushAsked: boolean; pushOn: boolean; firstDaysHidden: boolean; proEndedSeen: boolean; clockKnown: boolean; doorPassed: string; recapSeen: string; firstOpen: string; ratingAsked: string };
 
-export const DEFAULT_PREFS: Prefs = { vibration: true, sound: true, autoplay: true, pushAsked: false, pushOn: false, firstDaysHidden: false, proEndedSeen: false, clockKnown: false, doorPassed: "", recapSeen: "" };
+export const DEFAULT_PREFS: Prefs = { vibration: true, sound: true, autoplay: true, pushAsked: false, pushOn: false, firstDaysHidden: false, proEndedSeen: false, clockKnown: false, doorPassed: "", recapSeen: "", firstOpen: "", ratingAsked: "" };
 const KEY = "strive.prefs.v1";
 
 let cache: Prefs | null = null;
@@ -22,11 +25,19 @@ const listeners = new Set<(p: Prefs) => void>();
 
 export async function loadPrefs(): Promise<Prefs> {
   if (cache) return cache;
+  let read = false;
   try {
     const raw = await AsyncStorage.getItem(KEY);
     cache = { ...DEFAULT_PREFS, ...(raw ? (JSON.parse(raw) as Partial<Prefs>) : {}) };
+    read = true;
   } catch {
     cache = { ...DEFAULT_PREFS };
+  }
+  // the first time the app opened on this phone, kept from then on (only
+  // written when the stored settings were read, so they are never lost)
+  if (read && !cache.firstOpen) {
+    cache = { ...cache, firstOpen: new Date().toISOString() };
+    await AsyncStorage.setItem(KEY, JSON.stringify(cache)).catch(() => undefined);
   }
   return cache;
 }

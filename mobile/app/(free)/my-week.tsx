@@ -17,6 +17,8 @@ import { PlayerLink } from "@/ProfileParts";
 import { PAGE_TOP, Screen } from "@/Screen";
 import { UpgradeCard } from "@/UpgradeCard";
 import { MondayCard } from "@/MondayCard";
+import { askForRating } from "@/rating";
+import { weekAtTarget } from "@/rating-ask";
 import { ShareWeekRow } from "@/ShareWeekRow";
 import { shareWeekShown } from "@/share-week";
 import { Body, Button, Card, Hairline, Head, Label, Press, Ring, Skeleton } from "@/ui";
@@ -49,6 +51,12 @@ export default function MyWeek() {
     if (train && prefs.proEndedSeen) void setPref("proEndedSeen", false);
   }, [train, prefs.proEndedSeen]);
   const [gone, setGone] = useState<ReadonlySet<string>>(new Set());
+  // the week reached its target: one of the good moments to ask for an App
+  // Store rating (src/rating-ask.ts says whether it may)
+  const atTarget = w ? weekAtTarget(w.minutes, w.target) : false;
+  useEffect(() => {
+    if (atTarget) void askForRating("week_target");
+  }, [atTarget]);
 
   function remove(id: string) {
     Alert.alert("Delete this entry?", "The time comes off your week.", [
@@ -104,7 +112,7 @@ export default function MyWeek() {
       </View>
 
       {/* the Monday moment: last week, once a week, then gone */}
-      <MondayCard recap={w.recap} />
+      <MondayCard recap={w.recap} onDismiss={(r) => (r.best ? void askForRating("best_week") : undefined)} />
 
       {ended ? (
         <Card style={styles.ended}>

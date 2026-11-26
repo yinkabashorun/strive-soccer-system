@@ -69,7 +69,7 @@ import type { AppDoorAnswer } from "@shared/app-contract";
 // simulator's "open this link" command cannot be used for that: iOS answers
 // it with an "Open in Strive Elite?" box that stays on screen and covers
 // every picture after it (the first simulator run, Nov 23 2026).
-export const FIXTURE_STATES = ["ok", "consent", "onboarding", "membership", "pro_checkout", "setup", "locked", "free_quiz", "free_offer", "free_later", "social", "ended", "signedout"] as const;
+export const FIXTURE_STATES = ["ok", "consent", "onboarding", "membership", "pro_checkout", "setup", "locked", "free_quiz", "free_offer", "free_later", "social", "ended", "signedout", "update"] as const;
 
 function chosenState(): string {
   let raw: unknown = null;
@@ -958,6 +958,14 @@ function fixtureTotalAfter(body: unknown): number {
 }
 
 export function fixtureResponse(path: string, method: string, body?: unknown): unknown {
+  // "update": the server says this build is too old (the example build is
+  // build 1), so the run can picture the update screen. Any other example
+  // member: every build works.
+  if (path.startsWith("/api/app/version")) {
+    return chosenState() === "update"
+      ? { minBuild: 2, link: "https://testflight.apple.com/join/example" }
+      : { minBuild: 0, link: null };
+  }
   if (path.startsWith("/api/app/free/")) return fixtureFree(path, method, body);
   if (path.startsWith("/api/app/me")) return fixtureBootstrap();
   if (path.startsWith("/api/app/notices/prefs")) return method === "GET" ? { prefs: fixtureNoticePrefs() } : fixtureSavePrefs(body);

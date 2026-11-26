@@ -1039,6 +1039,7 @@ describe("friends", () => {
       "reportClub",
       "reportLine",
       "reportPost",
+      "saveAppVersion",
       "saveQuiz",
       "saveTargetRow",
       "setFreeSignupOpen",

@@ -1,5 +1,8 @@
 import { redirect } from "next/navigation";
 import { FreeAdmin } from "@/components/elite/FreeAdmin";
+import { AppLinkAdmin } from "@/components/elite/AppLinkAdmin";
+import { NO_APP_VERSION } from "@/lib/elite/app-version";
+import { getAppVersion } from "@/lib/elite/tracker-server";
 import { ReportsQueue } from "@/components/elite/ReportsQueue";
 import { ClubsAdmin } from "@/components/elite/ClubsAdmin";
 import { LineReports } from "@/components/elite/LineReports";
@@ -31,6 +34,7 @@ export default async function CoachFreePage() {
   const data = viewer.demo ? demoOverview(nyToday()) : await getFreeOverview();
   const waitlist = viewer.demo ? [] : await getWaitlist();
   const teams = viewer.demo ? demoTeamsOverview() : await getTeamsOverview();
+  const appVersion = viewer.demo ? NO_APP_VERSION : await getAppVersion();
   const openReports =
     data.reports.length + data.clubReports.length + data.lineReports.length + teams.plans.filter((p) => p.reports.length > 0).length;
   const joinedOn = (iso: string) =>
@@ -59,6 +63,8 @@ export default async function CoachFreePage() {
       <TeamsAdmin data={teams} />
 
       <FreeAdmin open={data.open} joinUrl={`${APP_URL}/join`} targets={data.targets} />
+
+      <AppLinkAdmin link={appVersion.link} minBuild={appVersion.minBuild} />
 
       <WaitlistAdmin rows={waitlist} open={data.open} />
 

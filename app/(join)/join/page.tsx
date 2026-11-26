@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { JoinForm } from "@/components/elite/JoinForm";
+import { GetTheApp } from "@/components/elite/GetTheApp";
+import { isIos } from "@/lib/elite/install";
 import { UnderAge } from "@/components/elite/UnderAge";
 import { WaitlistForm } from "@/components/elite/WaitlistForm";
 import { WaitlistStatus } from "@/components/elite/WaitlistStatus";
@@ -11,7 +13,7 @@ import { WAITLIST_COOKIE, cleanSource, cleanWaitlistCode, waitlistLink } from "@
 import { nyToday } from "@/lib/elite/time";
 import { getViewer } from "@/lib/elite/session";
 import { isSupabaseConfigured } from "@/lib/elite/supabase/server";
-import { homePathFor, inviteLandingFor, isFreeSignupOpen, trackerFor } from "@/lib/elite/tracker-server";
+import { getAppVersion, homePathFor, inviteLandingFor, isFreeSignupOpen, trackerFor } from "@/lib/elite/tracker-server";
 import {
   JOIN_AGE_COOKIE,
   birthYears,
@@ -36,7 +38,7 @@ export const dynamic = "force-dynamic";
 export default async function JoinPage({
   searchParams,
 }: {
-  searchParams?: { ref?: string; club?: string; w?: string; src?: string };
+  searchParams?: { ref?: string; club?: string; w?: string; src?: string; web?: string };
 }) {
   const ref = cleanReferralCode(searchParams?.ref);
   const club = cleanClubCode(searchParams?.club);
@@ -92,6 +94,22 @@ export default async function JoinPage({
   // Who sent the link: a friend's first name and initials, or a club's
   // name and crest. Nothing more is shown to someone not signed in.
   const invite = await inviteLandingFor(ref, club);
+
+  // On an iPhone, once the coaches have saved the link to the app
+  // (/coach/free), an invite points to the APP: training is timed there,
+  // and only timed training counts on the board. The code from the invite
+  // is shown to type at the app's door. ?web=1 is the way past it, for a
+  // player with no iPhone; every other device goes straight to the form.
+  const app = searchParams?.web === "1" ? null : (await getAppVersion()).link;
+  if (app && isIos(headers().get("user-agent") ?? "")) {
+    const web = new URLSearchParams({ web: "1" });
+    if (ref) web.set("ref", ref);
+    if (club) web.set("club", club);
+    const src = cleanSource(searchParams?.src);
+    if (src) web.set("src", src);
+    return <GetTheApp invite={invite} code={club ?? ref} link={app} webHref={`/join?${web.toString()}`} />;
+  }
+
   return (
     <JoinForm
       configured={configured}

@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { JOIN_TRIES_PER_ADDRESS, resetRateLimits } from "@/lib/rate-limit";
 
 // The native iPhone app's JSON API (app/api/app/*). What is held here:
 //   - nobody gets in without a well-formed bearer token that Supabase
@@ -574,6 +575,10 @@ async function handler(route: keyof typeof ROUTES, method: string) {
 }
 
 beforeEach(() => {
+  // each case is one caller from the start: the limiter counts a signed-in
+  // caller as themselves (lib/rate-limit.ts), and every case here signs in
+  // as the same one
+  resetRateLimits();
   s.prefsSave = true;
   s.viewer = viewer();
   s.player = player();
@@ -726,10 +731,12 @@ describe("nobody is signed in yet", () => {
     const join = () =>
       POST(new Request("https://thestriveapp.com/api/app/free/join", { method: "POST", headers: { "x-forwarded-for": "12.12.12.12" }, body: "{}" }));
     const codes: number[] = [];
-    for (let i = 0; i < 12; i++) codes.push((await join()).status);
-    expect(codes.slice(0, 10).every((c) => c === 200)).toBe(true);
-    expect(codes.slice(10)).toEqual([429, 429]);
-    expect(s.calls.filter((c) => c.fn === "join")).toHaveLength(10);
+    // a whole tournament joins from one Wi-Fi: the limit is the event's
+    // size, not a household's (lib/rate-limit.ts, tests/launch-day-limits)
+    for (let i = 0; i < JOIN_TRIES_PER_ADDRESS + 2; i++) codes.push((await join()).status);
+    expect(codes.slice(0, JOIN_TRIES_PER_ADDRESS).every((c) => c === 200)).toBe(true);
+    expect(codes.slice(JOIN_TRIES_PER_ADDRESS)).toEqual([429, 429]);
+    expect(s.calls.filter((c) => c.fn === "join")).toHaveLength(JOIN_TRIES_PER_ADDRESS);
     const src = (await import("node:fs")).readFileSync("app/api/app/free/join/route.ts", "utf8");
     expect(src).toContain('import { POST as join } from "@/app/api/elite/auth/join/route"');
   });

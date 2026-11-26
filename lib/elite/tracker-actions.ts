@@ -28,6 +28,7 @@ import {
 } from "./tracker-server";
 import { DEMO_ASK, DEMO_CLUB_ASK, demoClubs, readDemoState, writeDemoState } from "./tracker-demo";
 import { TYPED } from "./training-clock";
+import { cleanAppLink, cleanBuild } from "./app-version";
 import {
   BIRTH_REQUIRED_MESSAGE,
   BLOCKED_LINK_MESSAGE,
@@ -793,6 +794,34 @@ export async function setFreeSignupOpen(open: boolean): Promise<{ ok: true } | F
       { key: "free_signup_open", value: open === true, updated_at: new Date().toISOString() },
       { onConflict: "key" }
     );
+  if (error) return fail(OFFLINE);
+  revalidatePath("/coach/free");
+  revalidatePath("/join");
+  return { ok: true };
+}
+
+// The iPhone app's two settings (lib/elite/app-version.ts): the one link
+// to the app, and the oldest build that still works. A link that is not
+// Apple's own (TestFlight or the App Store) is refused, and so is a build
+// number that is not a whole number; an empty link clears it.
+export async function saveAppVersion(input: { link: string; minBuild: string | number }): Promise<{ ok: true } | Fail> {
+  const c = await coach();
+  if (c.kind === "no") return fail("Only a coach can change this.");
+  const typed = typeof input.link === "string" ? input.link.trim() : "";
+  const link = typed ? cleanAppLink(typed) : null;
+  if (typed && !link) return fail("That is not a TestFlight or App Store link. Paste the link that starts with https://testflight.apple.com or https://apps.apple.com.");
+  const minBuild = cleanBuild(input.minBuild === "" ? 0 : input.minBuild);
+  if (minBuild === null) return fail("The build number is a whole number, like 10. Use 0 to let every build work.");
+  if (c.kind === "demo") return { ok: true };
+  const now = new Date().toISOString();
+  const { error } = await c.admin.from("elite_settings").upsert(
+    [
+      // the value column is never null: an empty string is "no link"
+      { key: "app_link", value: link ?? "", updated_at: now },
+      { key: "app_min_build", value: minBuild, updated_at: now },
+    ],
+    { onConflict: "key" }
+  );
   if (error) return fail(OFFLINE);
   revalidatePath("/coach/free");
   revalidatePath("/join");

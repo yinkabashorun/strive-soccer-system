@@ -1,5 +1,6 @@
 import { publicAppRoute } from "@/lib/elite/app-api";
 import { POST as join } from "@/app/api/elite/auth/join/route";
+import { JOIN_TRIES_PER_ADDRESS, JOIN_WINDOW_MS } from "@/lib/rate-limit";
 
 // Join free from the iPhone app: the website's own free sign-up route, so
 // there is one set of rules (the coaches' switch, 13 and older with
@@ -9,4 +10,4 @@ import { POST as join } from "@/app/api/elite/auth/join/route";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-export const POST = publicAppRoute({ name: "free-join", limit: 10, windowMs: 10 * 60_000 }, (req) => join(req));
+export const POST = publicAppRoute({ name: "free-join", limit: JOIN_TRIES_PER_ADDRESS, windowMs: JOIN_WINDOW_MS }, (req) => join(req));

@@ -28,7 +28,7 @@ subtitle or the screenshots either way.
 | Marketing URL | optional | leave empty |
 | Copyright | | 2026, then the legal name on the Apple account (HIS) |
 | Price | | Free to download. Strive Pro is a subscription started on the website (see "The payment decision") |
-| Availability | | United States only to start (HIS call) |
+| Availability | | United States only (his call, Nov 25 2026) |
 
 Promotional text (170):
 
@@ -104,7 +104,7 @@ app adds nothing new to the list: its posts are photos and other user
 content, its birth month and year sit under other user content (used only
 for the 13-and-older check). Tracking: No.
 
-## The payment decision (HIS, before submitting)
+## The payment decision (DECIDED Nov 25 2026, his "Keep it": United States only, the web checkout stays)
 
 After the free quiz the app shows one offer screen for Strive Pro with its
 monthly price, and "Start Strive Pro" opens a web checkout (Stripe) in a

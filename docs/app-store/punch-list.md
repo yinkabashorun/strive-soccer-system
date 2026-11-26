@@ -108,7 +108,7 @@ left on it. What only a phone can show is `native-device-checklist.md`.
 | N15 | Links that open the app (a texted link opens the right screen) | TODO, after N6 is proven on a phone |
 | N16 | Review notes, age rating and privacy answers rewritten for the native app in `listing.md` | DONE Nov 25 (the training clock added the same day). His to approve (D8), then entered in App Store Connect (C5) |
 | N18 | The training clock: training timed between a start photo and a finish photo, both from the app's camera; only timed training counts on the boards | DONE Nov 25, on main for the next build (migration 089 applied). Not proven: the camera, a locked phone, airplane mode (`native-device-checklist.md`, "The training clock") |
-| N17 | The upgrade inside the app opens a web checkout: allowed on the US storefront only (from memory, to verify); Apple's in-app purchase is the fallback | HIS (D14), before review |
+| N17 | The upgrade inside the app opens a web checkout: allowed on the US storefront only (from memory, to verify); Apple's in-app purchase is the fallback | DECIDED Nov 25 2026, his "Keep it": United States only, the web checkout stays. Fallback if Apple objects: take the offer out of the iPhone app |
 
 ## B. Research to settle before the first build
 

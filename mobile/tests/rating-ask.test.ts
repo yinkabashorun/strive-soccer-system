@@ -1,7 +1,7 @@
 // When the app asks for an App Store rating (src/rating-ask.ts, asked by
 // src/rating.ts): Apple's own sheet, at a good moment, once per version.
-import { readFileSync, readdirSync, statSync } from "node:fs";
-import path from "node:path";
+// The source checks (one file asks, no screen of ours) are in the site's
+// tests/rating-ask-source.test.ts, which can read files.
 import { describe, expect, it } from "vitest";
 import { RATING_MIN_DAYS, ratingDue, ratingVersion, weekAtTarget, type RatingFacts } from "@/rating-ask";
 
@@ -17,14 +17,6 @@ const ok: RatingFacts = {
   clockRunning: false,
   fixtures: false,
 };
-
-const mobile = path.resolve(__dirname, "..");
-function files(dir: string): string[] {
-  return readdirSync(dir).flatMap((n) => {
-    const p = path.join(dir, n);
-    return statSync(p).isDirectory() ? files(p) : /\.(ts|tsx)$/.test(n) ? [p] : [];
-  });
-}
 
 describe("the App Store rating ask", () => {
   it("asks at a good moment once the account is a week old here", () => {
@@ -63,21 +55,5 @@ describe("the App Store rating ask", () => {
     expect(weekAtTarget(240, 240)).toBe(true);
     expect(weekAtTarget(239, 240)).toBe(false);
     expect(weekAtTarget(10, 0)).toBe(false);
-  });
-
-  it("only Apple's own sheet, asked from one file, after isAvailableAsync, recorded either way", () => {
-    const src = readFileSync(path.join(mobile, "src/rating.ts"), "utf8");
-    expect(src).toContain("StoreReview.isAvailableAsync()");
-    expect(src).toContain("StoreReview.requestReview()");
-    expect(src).toContain("fixtures: FIXTURES");
-    // recorded before Apple's sheet, so it counts whether or not it showed
-    expect(src.indexOf('setPref("ratingAsked"')).toBeLessThan(src.indexOf("StoreReview.requestReview()"));
-    const all = [...files(path.join(mobile, "app")), ...files(path.join(mobile, "src"))];
-    const using = all.filter((f) => readFileSync(f, "utf8").includes("expo-store-review")).map((f) => path.relative(mobile, f));
-    expect(using).toEqual(["src/rating.ts"]);
-    // no screen of ours asks it, no button: only the moments call it
-    const callers = all.filter((f) => /askForRating\(/.test(readFileSync(f, "utf8"))).map((f) => path.relative(mobile, f)).sort();
-    expect(callers).toEqual(["app/(free)/my-week.tsx", "app/session/[n].tsx", "src/rating.ts"]);
-    for (const f of all) expect(readFileSync(f, "utf8"), f).not.toMatch(/rate (the|this) app|enjoying strive|like the app\?/i);
   });
 });

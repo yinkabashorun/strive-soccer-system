@@ -362,17 +362,19 @@ appId: com.strivesoccer.elite
     timeout: 20000
 - waitForAnimationToEnd:
     timeout: 3000
-# nobody picks a length: it is the time between the two photos
-- assertVisible: "Ready to post\\. 45m\\..*"
+# nobody picks a length: it is the time between the two photos. The example
+# clock starts 45 minutes in and keeps running while this flow visits
+# Friends and Week, so the minutes are matched as a range, never one number.
+- assertVisible: "Ready to post\\. 4[5-9]m\\..*"
 # Forgot to stop the clock: time comes off, five minutes a tap, and back
 - tapOn: "Finished before you took this photo\\?"
 - tapOn: "5 min less"
 - tapOn: "5 min less"
-- assertVisible: "Ready to post\\. 35m\\..*"
+- assertVisible: "Ready to post\\. 3[5-9]m\\..*"
 - takeScreenshot: t36a-clock-time-off
 - tapOn: "5 min more"
 - tapOn: "5 min more"
-- assertVisible: "Ready to post\\. 45m\\..*"
+- assertVisible: "Ready to post\\. 4[5-9]m\\..*"
 - takeScreenshot: t36-clock-ready
 - tapOn: "One line about your training"
 - inputText: "Weak foot only."

@@ -51,6 +51,9 @@ export const SCREENS: readonly Screen[] = [
   { path: "/privacy", since: IN_FIRST_BUILD },
   { path: "/terms", since: IN_FIRST_BUILD },
   { path: "/support", since: IN_FIRST_BUILD },
+  // For parents (Nov 26 2026): a plain page for a player's parent, public,
+  // like /support and /privacy, and allowed to open from inside the app.
+  { path: "/parents", since: IN_FIRST_BUILD },
   // read by the iPhone itself (saved passwords), never opened as a screen
   { path: "/.well-known/apple-app-site-association", since: IN_FIRST_BUILD },
   { path: APP_UNAVAILABLE_PATH, since: IN_FIRST_BUILD },

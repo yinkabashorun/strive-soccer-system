@@ -246,6 +246,14 @@ export function JoinForm({
             </li>
           ))}
         </ul>
+        {/* beside "A parent or guardian should review these terms with you" */}
+        <p className="text-[14px] text-white/70">
+          For a parent:{" "}
+          <AppLink href="/parents" title="For parents" className="tap underline underline-offset-2">
+            how the app works
+          </AppLink>
+          .
+        </p>
         <label className="flex min-h-[44px] items-start gap-3 rounded-2xl bg-[#141414] p-4 text-[15px] leading-snug text-bone">
           <input
             type="checkbox"

@@ -6,6 +6,7 @@ import type { AppDrill, AppSession, AppWeek, AppYou } from "./app-payload";
 import type { AppCourse, AppCourseCard, AppCourseLevel, AppCourseList, AppCourseStep, AppLessonBlock } from "./app-courses";
 import type { LadderRung } from "./home";
 import type { AreaMinutes } from "./time-trained";
+import type { WeekRecap } from "./week-recap";
 import type { FreeStage } from "./free-intake";
 import type { QuizStepId } from "./quiz";
 import type { BoardRow, Face, Kind, LockedCard, OpenCard, StripDay, TodayLine } from "./tracker";
@@ -276,6 +277,10 @@ export type AppFreeWeek = {
   // quiz: this player came in by the door and has not rated their game
   // yet, so the card opens the quiz first and the offer after it.
   upgrade: { area: string | null; sessions: number; quiz?: boolean };
+  // The Monday moment (lib/elite/week-recap.ts): last week in a few lines,
+  // shown once a week at the top of Week. Absent or null: no card (a week
+  // with nothing in it is never mentioned). Older builds ignore it.
+  recap?: WeekRecap | null;
 };
 
 // Share my week (lib/elite/week-card.ts): the player's own week as a

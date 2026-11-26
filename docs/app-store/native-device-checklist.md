@@ -350,3 +350,15 @@ camera, notifications, sound or vibration: lines 4 and 10 stay his phone's.
 - [ ] With airplane mode on, the app opens as usual (the check never blocks without an answer).
 - [ ] Paste the TestFlight public link on /coach/free. On an iPhone that is signed out of the website, open an invite link from a text: the page shows the code and "Get the app"; "No iPhone? Join on the web" opens the form with the invite still on it.
 - [ ] After any crash or "That screen did not load" page, the App errors card on /coach shows a line that starts /iphone/ with the build number and the screen.
+
+## The Monday moment, on a phone (Nov 26 2026)
+
+- [ ] A free account that trained timed sessions last week opens Week on Monday: one card at the top, "Last week you trained ...". Gym shows as its own line only when gym was logged. With two or more friends who trained, a place line shows only when it is in the top half. "Your best week yet." with the small gold star only after three earlier weeks of training.
+- [ ] Tap "Got it": the card is gone. Close the app fully and reopen Week: still gone. Next Monday a new card shows once.
+- [ ] A week with no timed training (or only typed time) shows no card at all. No notification arrives for any of this.
+
+## The App Store rating ask, on a phone (Nov 26 2026)
+
+- [ ] This can only be seen in an App Store build. In TestFlight Apple never shows its rating sheet, and the example build never asks.
+- [ ] In an App Store build on a phone where the app first opened 7 or more days ago: reach the week's target on Week (free), or finish and close the last session of a member's week, or put away a Monday card that says "Your best week yet." Apple's own rating sheet may appear once (Apple decides whether it shows). There is no screen or button of ours for it.
+- [ ] It never appears during a session or while a training clock is running, and never a second time in the same version.

@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Loader2 } from "lucide-react";
 import { updatePlayerFields } from "@/lib/elite/coach-actions";
 import type { MembershipTier } from "@/lib/elite/types";
+import { LIFETIME_LABEL, LIFETIME_OFF_LINE, LIFETIME_ON_LINE } from "@/lib/elite/lifetime";
 import { cn } from "@/lib/utils";
 
 const OPTIONS: { value: MembershipTier; label: string; sub: string }[] = [
@@ -20,12 +21,26 @@ const OPTIONS: { value: MembershipTier; label: string; sub: string }[] = [
 export function TierControl({
   playerId,
   initial,
+  lifetime: initialLifetime = false,
 }: {
   playerId: string;
   initial: MembershipTier;
+  lifetime?: boolean;
 }) {
   const [tier, setTier] = useState<MembershipTier>(initial);
+  const [lifetime, setLifetime] = useState(initialLifetime);
   const [pending, start] = useTransition();
+
+  // Lifetime access (lib/elite/lifetime.ts): the app for life, never
+  // charged. A promise to a family, so it is its own switch.
+  function flipLifetime() {
+    const next = !lifetime;
+    setLifetime(next);
+    start(async () => {
+      const res = await updatePlayerFields(playerId, { lifetime_access: next });
+      if (!res.ok) setLifetime(!next);
+    });
+  }
 
   function set(value: MembershipTier) {
     if (value === tier) return;
@@ -66,6 +81,25 @@ export function TierControl({
         Complete unlocks film review, the weekly parent report, and coaching calls. Pro has no
         Film Room, coach chat, calls or clips.
       </p>
+      <div className="mt-4 flex items-center justify-between gap-4 border-t border-white/[0.07] pt-4">
+        <div>
+          <div className="text-sm font-medium text-bone">
+            {LIFETIME_LABEL}: {lifetime ? "on" : "off"}
+          </div>
+          <div className="mt-0.5 text-xs text-white/45">{lifetime ? LIFETIME_ON_LINE : LIFETIME_OFF_LINE}</div>
+        </div>
+        <button
+          type="button"
+          onClick={flipLifetime}
+          aria-pressed={lifetime}
+          className={cn(
+            "min-h-[44px] shrink-0 rounded-xl border px-4 text-sm font-medium transition-all",
+            lifetime ? "border-accent/40 bg-accent/[0.08] text-accent" : "border-white/10 bg-white/[0.02] text-white/60 hover:border-white/20"
+          )}
+        >
+          {lifetime ? "Turn off" : "Turn on"}
+        </button>
+      </div>
     </div>
   );
 }

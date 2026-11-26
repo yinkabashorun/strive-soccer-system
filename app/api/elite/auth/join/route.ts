@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/elite/supabase/server";
 import { establishSession } from "@/lib/elite/session-start";
 import { normalizePhone } from "@/lib/elite/sms";
-import { rateLimit, clientIp } from "@/lib/rate-limit";
+import { rateLimit, clientIp, JOIN_TRIES_PER_ADDRESS, JOIN_WINDOW_MS } from "@/lib/rate-limit";
 import { AGREEMENT_REQUIRED_MESSAGE, agreementComplete } from "@/lib/elite/legal";
 import { recordConsent } from "@/lib/elite/legal-server";
 import { nyToday } from "@/lib/elite/time";
@@ -39,7 +39,8 @@ export const dynamic = "force-dynamic";
 // POST { birth: { month, year }, firstName, lastName, email, phone, password, ref?, club?, agreed }
 //   -> { ok, signedIn, next } | { error, reason? }
 export async function POST(req: Request) {
-  if (!rateLimit(`join:${clientIp(req)}`, 10, 10 * 60_000)) {
+  // a whole tournament joins from one Wi-Fi (lib/rate-limit.ts)
+  if (!rateLimit(`join:${clientIp(req)}`, JOIN_TRIES_PER_ADDRESS, JOIN_WINDOW_MS)) {
     return NextResponse.json(
       { error: "Too many attempts. Please wait a few minutes and try again." },
       { status: 429 }

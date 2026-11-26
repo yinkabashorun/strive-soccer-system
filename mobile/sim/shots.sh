@@ -113,6 +113,7 @@ SHOTS='
 54-later-friends|free_later|-|12|film
 55-later-week|free_later|my-week|12
 56-later-quiz-start|free_later|onboarding|11
+57-update|update|-|9
 '
 
 last=""

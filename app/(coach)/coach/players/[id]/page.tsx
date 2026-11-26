@@ -335,7 +335,7 @@ export default async function PlayerProfile({
 
         {/* Side column */}
         <div className="space-y-5 lg:col-span-2">
-          <TierControl playerId={player.id} initial={player.tier ?? "elite"} />
+          <TierControl playerId={player.id} initial={player.tier ?? "elite"} lifetime={player.lifetime_access === true} />
 
           <StatusControl
             playerId={player.id}

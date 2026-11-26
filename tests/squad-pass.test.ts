@@ -109,10 +109,12 @@ describe("on the server", () => {
     expect(server).not.toMatch(/createClient\(\)/);
   });
 
-  it("starting takes no card, starts one month for two taps, and never touches a paying member", () => {
-    expect(server).not.toMatch(/stripe|checkout/i);
+  it("starting takes no card, starts one month for two taps, and never switches a paying member's membership", () => {
+    // no checkout is ever opened from here; a paying member's month is a
+    // credit, made in pro-server.ts (tests/next-month-free.test.ts)
+    expect(server).not.toMatch(/checkout/i);
     expect(server).toContain('.is("started_at", null)');
-    expect(server).toContain('row.subscription_status === "active"');
+    expect(server).toContain('if (row && isPro(row.tier) && row.subscription_status === "active") return creditPass(admin, profileId, next);');
     expect(server).toContain('.update({ subscription_status: "trialing" }).eq("id", row.id).neq("subscription_status", "active")');
   });
 

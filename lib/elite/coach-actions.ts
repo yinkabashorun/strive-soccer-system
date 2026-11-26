@@ -50,7 +50,7 @@ export async function updatePlayerArrays(
 // Update simple scalar fields (today_focus, level, next_session_at, etc.).
 export async function updatePlayerFields(
   playerId: string,
-  patch: Record<string, string | number | null>
+  patch: Record<string, string | number | boolean | null>
 ) {
   if (!(await requireCoach())) return { ok: false };
   const supabase = createClient();

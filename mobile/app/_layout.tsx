@@ -19,9 +19,17 @@ import { clearBadge, keepTokenFresh } from "@/push";
 import { loadOutbox } from "@/outbox";
 import { loadClock } from "@/clock";
 import { loadPrefs } from "@/prefs";
+import { UpdateGate } from "@/UpdateGate";
+import { BrokenScreen } from "@/BrokenScreen";
+import { noteScreen, reportUncaught } from "@/report-error";
 import { color } from "@/theme";
 
 SplashScreen.preventAutoHideAsync().catch(() => undefined);
+
+// A screen that cannot be drawn shows the app's own screen and tells the
+// coaches (src/BrokenScreen.tsx); an error nothing caught is told too.
+export const ErrorBoundary = BrokenScreen;
+reportUncaught();
 
 // A member gate that moved under a request (the agreement came due, the
 // membership was switched off): read who this is again and follow it.
@@ -45,6 +53,11 @@ function Gatekeeper() {
     if (!area) return;
     if (!inArea(area, segments, train)) router.replace(areaHome(area, train) as Href);
   }, [area, segments, router, train]);
+
+  // where the app is, for an error report (src/report-error.ts)
+  useEffect(() => {
+    noteScreen(segments);
+  }, [segments]);
 
   // A phone that already said yes stays on file, for a member and for a
   // free account alike (the server keeps each under its own kind).
@@ -174,6 +187,9 @@ export default function RootLayout() {
         <PersistQueryClientProvider client={queryClient} persistOptions={{ persister, maxAge: PERSIST_MAX_AGE, buster: "2" }}>
           <AuthProvider>
             <StatusBar style="light" />
+            {/* a build too old to work shows one screen and nothing else
+                (src/UpdateGate.tsx); every other build goes straight through */}
+            <UpdateGate>
             <Gatekeeper />
             <Stack
               screenOptions={{
@@ -212,6 +228,7 @@ export default function RootLayout() {
               <Stack.Screen name="delete-account" />
               <Stack.Screen name="profile-setup" options={{ animation: "fade" }} />
             </Stack>
+            </UpdateGate>
           </AuthProvider>
         </PersistQueryClientProvider>
       </SafeAreaProvider>

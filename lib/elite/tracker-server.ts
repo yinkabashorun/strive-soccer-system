@@ -21,6 +21,7 @@ import type { Viewer } from "./session";
 import { shiftDay } from "./time";
 import { clubRankingFor } from "./tracker-ranking";
 import { withLine } from "./club-teams";
+import { NO_APP_VERSION, cleanAppVersion, type AppVersion } from "./app-version";
 import { livesInFreeApp } from "./member-gate";
 import { keepsFreeApp } from "./one-app";
 import {
@@ -229,6 +230,24 @@ export async function isFreeSignupOpen(): Promise<boolean> {
     .maybeSingle();
   if (error || !data) return false;
   return data.value === true;
+}
+
+// The oldest build of the iPhone app that still works, and the one link to
+// the app (lib/elite/app-version.ts). Two rows of the same settings table
+// the sign-up switch lives in. Anything that cannot be read answers "every
+// build works, no link": this must never lock a player out.
+export async function getAppVersion(): Promise<AppVersion> {
+  const admin = createServiceClient();
+  if (!admin) return NO_APP_VERSION;
+  try {
+    const { data, error } = await admin.from("elite_settings").select("key, value").in("key", ["app_min_build", "app_link"]);
+    if (error || !data) return NO_APP_VERSION;
+    const rows = data as { key: string; value: unknown }[];
+    const of = (key: string) => rows.find((r) => r.key === key)?.value;
+    return cleanAppVersion({ minBuild: of("app_min_build"), link: of("app_link") });
+  } catch {
+    return NO_APP_VERSION;
+  }
 }
 
 // ---- Who is looking ---------------------------------------------------

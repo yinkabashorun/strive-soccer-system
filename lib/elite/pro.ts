@@ -10,6 +10,9 @@ import { FREE_AGE_STATEMENT, FREE_MIN_AGE, ageFromBirth, type Birth } from "./tr
 
 export const PRO_MONTHLY_CENTS = 2900;
 export const PRO_CURRENCY = "usd";
+// What the member reads on their Stripe receipt beside the credit that
+// makes an earned month free (lib/elite/pro-server.ts creditNextMonth).
+export const NEXT_MONTH_FREE_NOTE = "Free month: 3 teammates trained";
 export const PRO_PRODUCT_NAME = "Strive Pro";
 
 // "$29": whole dollars drop the cents, anything else keeps them.

@@ -9,7 +9,7 @@
 // call the existing lib/elite functions and server actions; no business
 // rule is written twice for the app.
 import { NextResponse } from "next/server";
-import { clientIp, rateLimit } from "@/lib/rate-limit";
+import { ADDRESS_CEILING_FACTOR, callerKey, clientIp, rateLimit } from "@/lib/rate-limit";
 import { parseBearer, runWithBearer } from "./supabase/bearer";
 import { getViewer, type Viewer } from "./session";
 import { getPlayer } from "./data";
@@ -142,11 +142,17 @@ export function appRoute(
   return async (req: Request) => {
     const write = req.method !== "GET";
     const limit = opts.limit ?? (write ? 60 : 120);
-    if (!rateLimit(`app:${opts.name}:${clientIp(req)}`, limit, opts.windowMs ?? 60_000)) {
+    const windowMs = opts.windowMs ?? 60_000;
+    const token = parseBearer(req.headers.get("authorization"));
+    // A signed-in caller is limited as themselves, never as their network
+    // address: a whole team opens the app on one Wi-Fi (lib/rate-limit.ts).
+    // The address keeps a far higher ceiling, so made-up tokens are held.
+    const ip = clientIp(req);
+    if (!rateLimit(`app:${opts.name}:ip:${ip}`, token ? limit * ADDRESS_CEILING_FACTOR : limit, windowMs)) {
       return appJson(SLOW_DOWN, 429);
     }
-    const token = parseBearer(req.headers.get("authorization"));
     if (!token) return appJson(SIGNED_OUT, 401);
+    if (!rateLimit(`app:${opts.name}:${callerKey(token)}`, limit, windowMs)) return appJson(SLOW_DOWN, 429);
 
     return runWithBearer(token, async () => {
       const viewer = await getViewer();

@@ -6,7 +6,7 @@ import { createServiceClient } from "./supabase/server";
 import { notifyProfile } from "./notify";
 import { squadPassNotice } from "./notices";
 import { recordConsent } from "./legal-server";
-import { createProMember } from "./pro-server";
+import { createProMember, creditNextMonth, hasRunningSubscription } from "./pro-server";
 import { getTracker, type Tracker } from "./tracker-server";
 import { ageOf } from "./free-upgrade-server";
 import { fmtBreakDate } from "./breaks";
@@ -18,8 +18,12 @@ import {
   PASS_DAYS,
   SQUAD_ALREADY_MEMBER,
   SQUAD_FAILED,
+  SQUAD_KEPT_UNTIL_END,
   SQUAD_NOT_READY,
   buildSquad,
+  paidNote,
+  squadPrize,
+  type SquadPrize,
   passEndsAt,
   passesEarned,
   type Squad,
@@ -27,12 +31,36 @@ import {
 } from "./squad-pass";
 import type { Viewer } from "./session";
 
-type Pass = { id: string; number: number; started_at: string | null; ends_at: string | null; ended_at: string | null };
+type Pass = {
+  id: string;
+  number: number;
+  started_at: string | null;
+  ends_at: string | null;
+  ended_at: string | null;
+  // when the month was used to make a paying member's next month free (091)
+  credited_at?: string | null;
+};
 const PASS_COLUMNS = "id, number, started_at, ends_at, ended_at";
 
+// Read with the 091 column when the database has it. Before 091 is applied
+// that read is refused, and the months are read without it, so the card
+// never loses an earned month over a column that is not there yet.
 async function passesOf(admin: SupabaseClient, profileId: string): Promise<Pass[]> {
+  const full = await admin.from("elite_pro_passes").select(`${PASS_COLUMNS}, credited_at`).eq("profile_id", profileId).order("number");
+  if (!full.error) return (full.data as Pass[] | null) ?? [];
   const { data } = await admin.from("elite_pro_passes").select(PASS_COLUMNS).eq("profile_id", profileId).order("number");
   return (data as Pass[] | null) ?? [];
+}
+
+// What three teammates earn this account (lib/elite/squad-pass.ts
+// squadPrize): read from its own member row and its card subscription.
+async function prizeFor(admin: SupabaseClient, profileId: string): Promise<SquadPrize> {
+  const { data } = await admin.from("elite_players").select("tier, subscription_status").eq("profile_id", profileId).maybeSingle();
+  const row = data as { tier: string | null; subscription_status: string | null } | null;
+  const memberOn = row?.subscription_status === "active" || row?.subscription_status === "trialing";
+  const earnedMonthRunning = Boolean(row && isPro(row.tier) && row.subscription_status === "trialing");
+  const paysByCard = Boolean(row && isPro(row.tier) && row.subscription_status === "active") && (await hasRunningSubscription(profileId));
+  return squadPrize({ memberOn, earnedMonthRunning, paysByCard });
 }
 
 const isRunning = (p: Pass, now: number) => Boolean(p.started_at && p.ends_at && !p.ended_at && new Date(p.ends_at).getTime() > now);
@@ -72,10 +100,11 @@ export async function squadFor(profileId: string): Promise<Squad> {
   const empty = buildSquad({ trained: [], joined: [], passes: [], runningUntil: null });
   const admin = createServiceClient();
   if (!admin) return empty;
-  const [{ data: brought }, { data: counts }, passes] = await Promise.all([
+  const [{ data: brought }, { data: counts }, passes, prize] = await Promise.all([
     admin.from("elite_trackers").select("profile_id, created_at").eq("referred_by", profileId).order("created_at"),
     admin.from("elite_squad_counts").select("teammate, counted_at").eq("profile_id", profileId).order("counted_at"),
     passesOf(admin, profileId).catch(() => [] as Pass[]),
+    prizeFor(admin, profileId).catch((): SquadPrize => "month"),
   ]);
   const counted = ((counts as { teammate: string }[] | null) ?? []).map((c) => c.teammate);
   const joinedIds = ((brought as { profile_id: string }[] | null) ?? []).map((b) => b.profile_id).filter((id) => !counted.includes(id));
@@ -96,6 +125,11 @@ export async function squadFor(profileId: string): Promise<Squad> {
     joined: joinedIds.map(person),
     passes: passes.map((p) => ({ started: Boolean(p.started_at), running: isRunning(p, now) })),
     runningUntil: until ? fmtBreakDate(until) : null,
+    prize,
+    note: paidNote(
+      passes.map((p) => p.credited_at),
+      new Date(now)
+    ),
   });
 }
 
@@ -118,8 +152,12 @@ export async function startPass(viewer: Viewer, userAgent: string | null): Promi
     return (data as { id: string; tier: string | null; subscription_status: string | null } | null) ?? null;
   };
   let row = await ownRow();
-  // a paying member (or a member on another membership) keeps the month for later
-  if (row && (!isPro(row.tier) || row.subscription_status === "active")) return { ok: false, error: SQUAD_ALREADY_MEMBER, status: 409 };
+  // A PLAYER WHO PAYS BY CARD: their next month is free (the month's price
+  // as a credit on their Stripe account). Anyone else who is already a
+  // member (another membership, or switched on with no card) keeps the
+  // month for later, as before.
+  if (row && isPro(row.tier) && row.subscription_status === "active") return creditPass(admin, profileId, next);
+  if (row && !isPro(row.tier)) return { ok: false, error: SQUAD_ALREADY_MEMBER, status: 409 };
   if (!row) {
     const tracker: Tracker | null = await getTracker(profileId);
     if (!tracker) return { ok: false, error: SQUAD_FAILED, status: 409 };
@@ -156,6 +194,43 @@ export async function startPass(viewer: Viewer, userAgent: string | null): Promi
   }
   await recordConsent({ profileId, source: "in_app", userAgent }).catch(() => false);
   return { ok: true };
+}
+
+// A paying member's earned month, used as their next month free.
+//
+// The order is what makes it safe to tap twice, retry, or lose signal:
+//   1. the month is CLAIMED first (only a month nobody has used can be
+//      claimed, so two taps claim one), and closed in the same write: it is
+//      used, not running, so the hourly job never touches it
+//   2. then Stripe is asked for the credit, with the month's own id as the
+//      idempotency key, so the same month can never be credited twice
+//   3. if Stripe says no, the claim is taken back and the month is whole
+// Before migration 091 the claim is refused by the database (the column is
+// not there), nothing reaches Stripe, and the month is kept as it was.
+async function creditPass(admin: SupabaseClient, profileId: string, pass: Pass): Promise<PassStart> {
+  const now = new Date().toISOString();
+  const { data: claimed, error } = await admin
+    .from("elite_pro_passes")
+    .update({ started_at: now, ends_at: now, ended_at: now, credited_at: now })
+    .eq("id", pass.id)
+    .is("started_at", null)
+    .select("id");
+  if (error) return { ok: false, error: SQUAD_ALREADY_MEMBER, status: 409 };
+  if (!claimed?.length) return { ok: true }; // the other tap used it
+  const giveBack = () =>
+    admin.from("elite_pro_passes").update({ started_at: null, ends_at: null, ended_at: null, credited_at: null }).eq("id", pass.id);
+
+  const credit = await creditNextMonth(profileId, pass.id);
+  if (credit.result === "credited") {
+    // Stripe's own record of it, kept beside the month (best effort: the
+    // credit stands whether or not this line is written)
+    await admin.from("elite_pro_passes").update({ stripe_credit_id: credit.id }).eq("id", pass.id);
+    return { ok: true };
+  }
+  await giveBack();
+  if (credit.result === "ending") return { ok: false, error: SQUAD_KEPT_UNTIL_END, status: 409 };
+  if (credit.result === "none") return { ok: false, error: SQUAD_ALREADY_MEMBER, status: 409 };
+  return { ok: false, error: SQUAD_FAILED, status: 502 };
 }
 
 // The hourly job: an earned month whose time is up is closed. The

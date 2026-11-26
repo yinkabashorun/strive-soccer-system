@@ -95,7 +95,7 @@ vi.mock("@/lib/elite/legal-server", () => ({
     return true;
   },
 }));
-vi.mock("@/lib/rate-limit", () => ({ rateLimit: () => state.rateOk, clientIp: () => "1.2.3.4" }));
+vi.mock("@/lib/rate-limit", () => ({ rateLimit: () => state.rateOk, clientIp: () => "1.2.3.4", JOIN_TRIES_PER_ADDRESS: 150, JOIN_WINDOW_MS: 600000 }));
 
 import { POST } from "@/app/api/elite/auth/join/route";
 

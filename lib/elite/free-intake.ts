@@ -182,10 +182,17 @@ export function mergeOwed(stored: QuizAnswers, typed: QuizAnswers): QuizAnswers 
 //   offer   answered; the week (a target and the days) is not set yet, so
 //           the offer is the next screen and the week's set-up follows it
 //   ready   in the free app
+//
+// THE DOOR (lib/elite/free-door.ts, migration 090): a player who came in
+// with a teammate's or a club's code is in the free app at once (`later`).
+// The quiz and the offer wait behind the one upgrade card on Week, and
+// answering the quiz then never puts the offer and the week's set-up back
+// in their way as a gate: `later` is "ready" whatever else is true.
 export type FreeStage = "web" | "quiz" | "offer" | "ready";
 
-export function freeStage(i: { available: boolean; hasIntake: boolean; planned: boolean }): FreeStage {
+export function freeStage(i: { available: boolean; hasIntake: boolean; planned: boolean; later?: boolean }): FreeStage {
   if (!i.available) return "web";
+  if (i.later) return "ready";
   if (!i.hasIntake) return "quiz";
   return i.planned ? "ready" : "offer";
 }

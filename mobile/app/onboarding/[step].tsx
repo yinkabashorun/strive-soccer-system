@@ -27,8 +27,11 @@ import { FREE_QUESTIONS, FREE_STEPS, freeStepReady, type FreeAnswers, type FreeS
 import { GOALS, GRADES } from "@shared/tracker";
 import { weakSpotPhrase } from "@shared/experience";
 import { sessionsFor, sessionsWord } from "@shared/training";
-import { useMe, useSubmitQuiz } from "@/api/queries";
-import { rereadMe, saveIntake } from "@/api/free";
+import type { AppBootstrap } from "@shared/app-contract";
+import { keys, useMe, useSubmitQuiz } from "@/api/queries";
+import { queryClient } from "@/api/queryClient";
+import { quizWasLater } from "@/door";
+import { refreshFree, rereadMe, saveIntake } from "@/api/free";
 import { ApiError } from "@/api/client";
 import { FormScreen, useRevealOnFocus } from "@/FormScreen";
 import { MEDIA_BASE } from "@/config";
@@ -90,6 +93,15 @@ export default function QuizStep() {
         await saveIntake(now);
         await clear();
         await rereadMe();
+        // A player who came in by a code (lib/elite/free-door.ts) took the
+        // quiz from the one card on Week: they are in the free app already,
+        // so nothing moves them. The quiz closes and the offer it was for
+        // opens over the free app; closing the offer is Week again.
+        if (quizWasLater(queryClient.getQueryData<AppBootstrap>(keys.me)?.state)) {
+          void refreshFree(); // the card on Week names their own area from now on
+          if (router.canDismiss()) router.dismissAll();
+          router.replace("/offer");
+        }
       } catch (e) {
         setSaving(false);
         setError(e instanceof ApiError ? e.message : "That did not save. Check your connection and try again.");

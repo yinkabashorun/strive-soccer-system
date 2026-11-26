@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CLUB_GAMES_IN_APP } from "@shared/club-games";
 import { Share, StyleSheet, TextInput, View } from "react-native";
 import { useRouter, type Href } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -109,7 +110,9 @@ export default function StartClub() {
         <CountyPicker value={county} onChange={setCounty} />
       </View>
       <Label dim size={12.5} style={{ marginTop: 8, lineHeight: 18, fontFamily: font.body }}>
-        Clubs play games against clubs in their own county. You can leave it out and set it later.
+        {CLUB_GAMES_IN_APP
+          ? "Clubs play games against clubs in their own county. You can leave it out and set it later."
+          : "Your club's weekly matchup is with a club in your county first. You can leave it out and set it later."}
       </Label>
       {error ? (
         <Body size={13.5} style={{ color: color.danger, marginTop: 14 }}>

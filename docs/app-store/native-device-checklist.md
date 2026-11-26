@@ -245,6 +245,88 @@ clock is on main, and migration 089 applied.
     phone: the simulator's pictures and the tests hold it. If it ever
     shows ("This one was not timed"), both buttons clear it.
 
+## The door, champs of the week and the clock's own notice, on a phone only (Nov 26 2026)
+
+His three calls of Nov 26. Needs a build made after they are on main. The
+door's "straight to my friends" and the champs notification also need
+migration 090 applied; until then a code still asks and the quiz comes
+next, and no champs notification is sent.
+
+THE DOOR ("Have a code from a teammate or a club?")
+
+1. **The order.** Join free with a new email: after "Create my account"
+   comes the username, then the photo, THEN the code question. Not the
+   quiz first.
+2. **No code.** Tap "I do not have a code": "tell us about your game",
+   Start, the quiz, the offer, "Your week", Friends. Exactly as before.
+   Close the app and open it again mid-quiz: the code question does not
+   come back.
+3. **The keyboard.** On the code question tap the box: both buttons ("Use
+   my code", "I do not have a code") sit above the keyboard. Tap "Use my
+   code" with the box empty: one line says what a code looks like.
+4. **A teammate's code.** On a second phone (or the website) open Friends,
+   "Send my link": the message now carries "My code: XXXXXXXX" and the
+   link. Type that code at the door on the new account: "Request sent. You
+   and <name> are friends once <name> accepts.", then "Go to my friends"
+   opens Friends. No quiz, no offer, no "Your week". The first phone has
+   the friend request to accept.
+5. **A club's code.** The same with a club's code (the club page, "Invite
+   a teammate": "Club code: XXXXXXXX"): the captain's phone has the
+   request under Manage; once let in, the club is on the new player's
+   Clubs tab.
+6. **Paste the whole invite.** Paste the whole shared message (words, code
+   and link) into the box: it is read the same as the code alone.
+7. **A wrong code.** Eight characters that are nobody's: "That code did
+   not match a teammate or a club. Check it and try again." Your own code:
+   it says it is your own.
+8. **The week of a player who came in by a code.** Week shows a 4 hour
+   target and "Change your target and days" works. No Training / Gym
+   choice until the quiz's grade is answered.
+9. **The quiz, later.** On Week the one card reads "A week built around
+   your game." Tap "See what you get": the quiz opens with a Close in the
+   corner. Finish it: the offer shows, and "Not now" lands back in the
+   free app, NOT on "Your week". THIS IS THE STEP ONLY A PHONE PROVES (the
+   quiz closes and the offer opens in one move); if it lands anywhere
+   else, tell me where.
+10. **Never again.** Sign out and back in on that account: no code
+    question.
+
+GAMES BETWEEN CLUBS ARE NOT IN THE APP
+
+11. A club's page shows its weekly matchup and its weeks record, and no
+    games record, no "Plan a game", no "Clubs near you". Manage has no
+    "Open to games". A captain can still plan a training session and
+    members can still tap "I'm in". The website is unchanged.
+
+CHAMPS OF THE WEEK
+
+12. **The notification.** The Monday after your club wins a matchup,
+    between 5 PM and 9 PM New York, every player who was counted in that
+    matchup gets one notification: "<CLUB NAME> IS STRIVE CHAMPS OF THE
+    WEEK" with "You beat <other club> by N minutes per player." Once. A
+    club that lost or drew gets nothing.
+13. **The tap.** Tapping it opens that club's page.
+14. **The mark.** That club's card on the Clubs tab and its page show
+    "Strive champs of the week" in gold for that week, and it is gone the
+    week after unless they win again.
+15. **Switched off.** With Clubs switched off under Settings,
+    Notifications, the champs notification does not arrive.
+
+THE CLOCK IS STILL RUNNING
+
+16. **It arrives.** With notifications on, start a clock and leave it: at
+    1 hour 30 minutes the phone shows "Your clock is still running" / "1h
+    30m so far. Your finish photo stops it." Once, even with no signal
+    (airplane mode) and with the app swiped away.
+17. **The tap.** Tapping it opens the clock, ready for the finish photo.
+18. **Taken back.** Start a clock, then take the finish photo (or "Stop
+    without posting") before 1h 30m: nothing arrives later. To check
+    without waiting, the wait is one number (CLOCK_NUDGE_MINUTES in
+    lib/elite/training-clock.ts) I can shorten in a test build.
+19. **Never asked for.** On a phone where notifications were never turned
+    on, starting a clock raises no permission question and nothing
+    arrives.
+
 ## Seeing the phone from here
 
 `.github/workflows/ios-simulator-screens.yml` (built Nov 23 2026 on his

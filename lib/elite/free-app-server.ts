@@ -73,6 +73,7 @@ import { shareLinkFor } from "./share-link-server";
 import type { Viewer } from "./session";
 import { squadFor } from "./squad-pass-server";
 import { firstDays } from "./first-days";
+import { friendShareText } from "./free-door";
 import { parentLinkFor } from "./parent-link-server";
 import { PARENT_SEND, parentShareText } from "./parent-link";
 
@@ -112,6 +113,12 @@ export async function offerFor(viewer: Viewer, answers: FreeAnswers, stage: Free
   };
 }
 
+// What "Send my link" shares: the player's code to type in the app, and
+// their link (a link alone opens the website, never the app).
+function inviteTextOf(tracker: Tracker): string {
+  return friendShareText({ code: tracker.referral_code, link: joinLink(APP_URL, tracker.referral_code) });
+}
+
 export async function planFor(tracker: Tracker): Promise<AppFreePlan> {
   const season: Season = tracker.season ?? "in_season";
   const row = recommendation(await getTargetTable(), season);
@@ -144,6 +151,7 @@ export async function freeFeedFor(viewer: Viewer, tracker: Tracker, today: strin
     requests,
     week: { minutes: week.minutes, target: week.target, percent: week.percent },
     invite: joinLink(APP_URL, tracker.referral_code),
+    inviteText: inviteTextOf(tracker),
     squad,
     firstDays: first
       ? firstDays({ joinedAt: tracker.created_at, friends: feed.friendCount, ...first }, Date.now())
@@ -191,7 +199,10 @@ export async function freeWeekFor(
       .map((l) => ({ id: l.id, day: l.trained_on, label: dayLabel(l.trained_on), minutes: l.minutes, kind: l.kind, photo: Boolean(l.photo), timed: l.timed !== false })),
     board: friendsBoard([me, ...friends], viewer.profile.id),
     invite: joinLink(APP_URL, tracker.referral_code),
-    upgrade: { area: preview?.areas[0] ?? null, sessions: answers ? sessionsFrom(answers) : 0 },
+    inviteText: inviteTextOf(tracker),
+    // no answers: the player came in by the door (free-door.ts), and the
+    // one card on Week opens the quiz before the offer
+    upgrade: { area: preview?.areas[0] ?? null, sessions: answers ? sessionsFrom(answers) : 0, ...(answers ? {} : { quiz: true }) },
   };
 }
 
@@ -236,6 +247,7 @@ export async function freeYouFor(viewer: Viewer, tracker: Tracker, today: string
     gymLine: tracksGym(tracker.grade) ? gymThisWeekLine(week.gymMinutes) : null,
     starred: Boolean(tracker.starred_at),
     invite: joinLink(APP_URL, tracker.referral_code),
+    inviteText: inviteTextOf(tracker),
   };
 }
 

@@ -14,6 +14,8 @@ import Animated, { FadeIn } from "react-native-reanimated";
 import { Crest, CrestGlow } from "@/Crest";
 import { HERO_SHADE, Shade } from "@/Shade";
 import { recordShort } from "@/social-view";
+import { CLUB_GAMES_IN_APP } from "@shared/club-games";
+import { CHAMPS_MARK } from "@shared/club-matchup-words";
 import { MatchupCard } from "@/MatchupCard";
 import { PlanCardView } from "@/PlanCards";
 import { choose } from "@/sheet";
@@ -188,8 +190,12 @@ export default function Club() {
               <Body size={13.5} style={{ marginTop: 4, color: "rgba(242,239,232,0.8)" }}>
                 {[c.countyName, `${c.membersCount} ${c.membersCount === 1 ? "player" : "players"}`, c.ended ? "Ended" : null].filter(Boolean).join(" · ")}
               </Body>
+              {/* earned last week, so it is gold: the club won its matchup */}
+              {c.matchup?.champs ? <Eyebrow style={{ marginTop: 10 }}>{CHAMPS_MARK}</Eyebrow> : null}
               <View style={styles.chips}>
-                <RecordChip big={c.record} small={c.record === "New" ? "no games yet" : "games won-lost"} says={c.recordLine} />
+                {/* the games record only while games between clubs are in
+                    the app (lib/elite/club-games.ts) */}
+                {CLUB_GAMES_IN_APP ? <RecordChip big={c.record} small={c.record === "New" ? "no games yet" : "games won-lost"} says={c.recordLine} /> : null}
                 {weeks ? <RecordChip big={weeks} small="weeks won-lost" says={c.matchup!.recordLine} /> : null}
               </View>
             </View>
@@ -246,12 +252,12 @@ export default function Club() {
               </Eyebrow>
               <View style={styles.plan}>
                 <Button quiet label="Plan a session" onPress={() => router.push(`/club/${c.id}/plan` as Href)} />
-                <Button quiet label="Plan a game" onPress={() => router.push(`/club/${c.id}/near` as Href)} />
+                {CLUB_GAMES_IN_APP ? <Button quiet label="Plan a game" onPress={() => router.push(`/club/${c.id}/near` as Href)} /> : null}
               </View>
             </>
           ) : null}
 
-          {c.results.length ? (
+          {CLUB_GAMES_IN_APP && c.results.length ? (
             <>
               <Eyebrow gold={false} style={styles.section}>
                 Games

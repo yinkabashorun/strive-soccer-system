@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ScrollView, Share, StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
@@ -48,6 +48,14 @@ export default function Offer() {
   // After the quiz there is nowhere to go back to: the quiet button goes on
   // to the week's set-up. Opened later from the free app, it closes.
   const first = me.data?.state.kind === "free" && me.data.state.stage === "offer";
+
+  // A player who came in by the door (lib/elite/free-door.ts) has not rated
+  // their game yet, so there is no offer to name: the server says so, and
+  // the quiz opens in its place. The offer follows it.
+  const quizFirst = offer.error instanceof ApiError && offer.error.code === "quiz_first";
+  useEffect(() => {
+    if (quizFirst) router.replace("/onboarding");
+  }, [quizFirst, router]);
 
   async function start() {
     setError(null);

@@ -8,6 +8,8 @@ import {
   TOPIC_CHOICE,
   checkinFeedbackNotice,
   clubPlanNotice,
+  clubChampsNotice,
+  CAPITALS_ALLOWED,
   coachAttendingNotice,
   coachMessageNotice,
   coachNameFor,
@@ -30,6 +32,7 @@ import { apnsBody, apnsCollapseId, apnsHeaders } from "../lib/elite/apns";
 import { webPushBody } from "../lib/elite/push";
 import { pushOf } from "../lib/elite/notify";
 import { ACHIEVEMENT_RULES } from "../lib/elite/achievement-rules";
+import { CLOCK_NUDGE, CLOCK_NUDGE_MINUTES } from "../lib/elite/training-clock";
 
 const root = join(__dirname, "..");
 const read = (p: string) => readFileSync(join(root, p), "utf8");
@@ -98,6 +101,8 @@ const EVERY_NOTICE: Record<string, Notice> = {
   "squad pass earned": squadPassNotice({ number: 1 }),
   "club session planned": clubPlanNotice({ planId: PLAN, club: "Sunday Pickup", clubId: CLUB, what: "Club training", when: "Thu, Nov 26 at 6:00 PM" }),
   "club game on": clubPlanNotice({ planId: PLAN, club: "Sunday Pickup", clubId: CLUB, what: "Game against Renegados FC", when: "Sat, Nov 28 at 10:00 AM" }),
+  "champs of the week": clubChampsNotice({ club: "Renegados FC", clubId: CLUB, other: "Sunday Pickup", gap: 12, weekMonday: "2026-11-23" }),
+  "champs of the week, a long club name": clubChampsNotice({ club: "Gainesville High School Varsity Boys Soccer", clubId: CLUB, other: "Sunday Pickup", gap: 1, weekMonday: "2026-11-23" }),
 };
 
 const words = (n: Notice) => ({ title: n.title, body: n.body, path: n.path, key: n.key });
@@ -254,6 +259,44 @@ describe("the list: every notice, word for word", () => {
     });
     expect(EVERY_NOTICE["club game on"].body).toBe("Game against Renegados FC Sat, Nov 28 at 10:00 AM.");
   });
+
+  // Coach Yinka, Nov 26 2026: "your club won the week need to be hype
+  // like. (CLUB NAME IS STRIVE CHAMPS OF THE WEEK)"
+  it("champs of the week: his words, the club's name in capitals, the true margin", () => {
+    expect(words(EVERY_NOTICE["champs of the week"])).toEqual({
+      title: "RENEGADOS FC IS STRIVE CHAMPS OF THE WEEK",
+      body: "You beat Sunday Pickup by 12 minutes per player.",
+      path: `/log/club/${CLUB}`,
+      key: `club_champs:${CLUB}:2026-11-23`,
+    });
+    // a name too long for a lock screen goes in the body; the title is the mark alone
+    const long = EVERY_NOTICE["champs of the week, a long club name"];
+    expect(long.title).toBe("STRIVE CHAMPS OF THE WEEK");
+    expect(long.body).toBe("Gainesville High School Varsity Boys Soccer beat Sunday Pickup by 1 minute per player.");
+    for (const n of [EVERY_NOTICE["champs of the week"], long]) expect(n.title.length).toBeLessThanOrEqual(60);
+    // one per club per week, replaced on the lock screen by next week's
+    expect(EVERY_NOTICE["champs of the week"].collapse).toBe(`club_champs:${CLUB}`);
+  });
+
+  it("it is the ONE notice in capitals, in its title only, by his own word", () => {
+    expect([...CAPITALS_ALLOWED]).toEqual(["club_champs"]);
+    const champs = EVERY_NOTICE["champs of the week"];
+    // without the named exception the rule still catches it
+    expect(pushTextProblems(champs)).toEqual(["title is in capitals"]);
+    expect(noticeProblems(champs)).toEqual([]);
+    // the exception is the title's alone: a body in capitals is still refused
+    expect(pushTextProblems({ title: champs.title, body: "YOU BEAT THEM ALL WEEK." }, { titleInCapitals: true })).toEqual(["body is in capitals"]);
+    // and no other kind is let through by it
+    const shouted = { ...EVERY_NOTICE["club session planned"], title: "SUNDAY PICKUP TRAINS TONIGHT" };
+    expect(noticeProblems(shouted)).toContain("title is in capitals");
+  });
+
+  // The one notification the PHONE gives itself (lib/elite/training-clock.ts)
+  it("the clock left running: once, at 1 hour 30 minutes, held to the same rule", () => {
+    expect(CLOCK_NUDGE).toEqual({ title: "Your clock is still running", body: "1h 30m so far. Your finish photo stops it." });
+    expect(CLOCK_NUDGE_MINUTES).toBe(90);
+    expect(pushTextProblems(CLOCK_NUDGE)).toEqual([]);
+  });
 });
 
 describe("which channel each kind uses, and the topic it belongs to", () => {
@@ -277,6 +320,7 @@ describe("which channel each kind uses, and the topic it belongs to", () => {
       props: "push",
       squad_pass: "push",
       club_plan: "push",
+      club_champs: "push",
     });
   });
 
@@ -302,6 +346,7 @@ describe("which channel each kind uses, and the topic it belongs to", () => {
       props: "friends",
       squad_pass: "friends",
       club_plan: "clubs",
+      club_champs: "clubs",
     });
     for (const n of Object.values(EVERY_NOTICE)) expect(n.topic).toBe(KIND_TOPIC[n.kind as keyof typeof KIND_TOPIC]);
   });

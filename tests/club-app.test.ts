@@ -285,7 +285,10 @@ describe("the one notification that pulls a club together", () => {
     const src = code("lib/elite/free-notices-server.ts");
     const fn = src.slice(src.indexOf("export async function noticeClubPlan"));
     expect(fn.indexOf("claimPlan(admin, plan.id, r.profileId)")).toBeGreaterThan(-1);
-    expect(fn.indexOf("claimPlan(admin, plan.id, r.profileId)")).toBeLessThan(fn.indexOf("notifyProfile(r.profileId, notice)"));
+    expect(fn.indexOf("claimPlan(admin, plan.id, r.profileId)")).toBeLessThan(fn.indexOf("notifyProfile(r.profileId, notice,"));
+    // a game's notice never reaches the iPhone app while games between
+    // clubs are out of it (lib/elite/club-games.ts): browsers only
+    expect(fn).toContain("notifyProfile(r.profileId, notice, { webOnly: !planInApp(plan.kind) })");
     expect(fn).toContain("if (!maySend(await claimPlan(admin, plan.id, r.profileId))) continue;");
     expect(fn).toContain('.from("elite_plan_notices").insert({ plan_id: planId, profile_id: profileId })');
     // inside the free app's quiet hours, and only to a phone left on
@@ -307,8 +310,9 @@ describe("the one notification that pulls a club together", () => {
     // a game that is only sent (still waiting on the other captain) tells nobody
     const planGame = actions.slice(actions.indexOf("export async function planGame"), actions.indexOf("export async function answerGame"));
     expect(planGame).not.toContain("noticeClubPlan");
-    // and it is the only new notification: three profile pushes in all
-    expect((code("lib/elite/free-notices-server.ts").match(/notifyProfile\(/g) ?? []).length).toBe(3);
+    // four profile pushes in all: a friend's post, props, this one, and
+    // champs of the week (Nov 26 2026, tests/club-games.test.ts)
+    expect((code("lib/elite/free-notices-server.ts").match(/notifyProfile\(/g) ?? []).length).toBe(4);
   });
 });
 
@@ -361,11 +365,11 @@ describe("the app's club routes use the website's rules, never their own", () =>
     // an address is refused where the website refuses it
     expect(code("lib/elite/club-teams-actions.ts")).toContain("const place = cleanPlace(input.place);");
     const one = code("app/api/app/free/plans/[id]/route.ts");
-    for (const call of ["setImIn(id, true)", "answerGame(id, true)", "cancelPlan(id)", "enterScore(id, body.club, body.opponent)", "answerScore(id, false)", "reportPlan(id, reason)"]) {
+    for (const call of ["setImIn(id, true)", "answerGame(id, true)", "cancelPlan(id)", "enterScore(id, club, opponent)", "answerScore(id, false)", "reportPlan(id, reason)"]) {
       expect(one, call).toContain(call);
     }
     const club = code("app/api/app/free/clubs/[id]/route.ts");
-    for (const call of ["leaveClub(id)", "reportClub(id)", "renameMyClub(id, body.name)", "removeClubMember(id, body.member)", "newClubLink(id)", "setClubCounty(id, county, body.open)", "endMyClub(id)", "answerClubRequest(id, body.player, body.accept)"]) {
+    for (const call of ["leaveClub(id)", "reportClub(id)", "renameMyClub(id, body.name)", "removeClubMember(id, body.member)", "newClubLink(id)", "setClubCountyFromApp(id, county, body.open)", "endMyClub(id)", "answerClubRequest(id, body.player, body.accept)"]) {
       expect(club, call).toContain(call);
     }
     expect(code("app/api/app/free/play-terms/route.ts")).toContain("acceptPlayTerms(body.kind)");

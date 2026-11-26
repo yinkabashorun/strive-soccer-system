@@ -338,6 +338,7 @@ describe("the one upgrade prompt in the free app", () => {
       line: "Four sessions a week, one drill at a time with the video.",
       action: "See what you get",
       dismiss: "Not now",
+      opens: "offer",
     });
     expect(upgradeCard({ ...base, sessions: sessionsFor("off_season") })?.line).toBe("Six sessions a week, one drill at a time with the video.");
     // nothing to name, nothing shown

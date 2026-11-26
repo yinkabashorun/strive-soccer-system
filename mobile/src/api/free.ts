@@ -4,6 +4,7 @@ import {
   APP_API,
   appProfilePath,
   type AppBlocked,
+  type AppDoorAnswer,
   type AppFreeFeed,
   type AppFreePlan,
   type AppFreeWeek,
@@ -52,7 +53,15 @@ function useIsFree(stage?: "ready"): boolean {
 
 export function useOffer() {
   const free = useIsFree();
-  return useQuery({ queryKey: freeKeys.offer, queryFn: () => api<AppOffer>(APP_API.freeOffer), enabled: free, staleTime: 60_000 });
+  return useQuery({
+    queryKey: freeKeys.offer,
+    queryFn: () => api<AppOffer>(APP_API.freeOffer),
+    enabled: free,
+    staleTime: 60_000,
+    // "quiz first" (a player who came in by the door) is an answer, not a
+    // failure to try again: the offer screen opens the quiz at once
+    retry: (count, error) => !(error instanceof ApiError && error.status === 409) && count < 2,
+  });
 }
 
 export function usePlan() {
@@ -107,6 +116,9 @@ export function refreshFree(): Promise<unknown> {
 type Ok = { ok: boolean; error?: string };
 
 export const saveIntake = (answers: FreeAnswers) => api<Ok>(APP_API.freeIntake, { method: "POST", body: { answers } });
+// The door (app/onboarding/index.tsx, src/CodeDoor.tsx): a teammate's or a
+// club's code, typed once by a new free account.
+export const enterCode = (code: string) => api<AppDoorAnswer>(APP_API.freeCode, { method: "POST", body: { code } });
 export const savePlan = (target: number, days: number[]) => api<Ok>(APP_API.freePlan, { method: "POST", body: { target, days } });
 export const startUpgrade = () => api<AppUpgradeStart>(APP_API.freeUpgrade, { method: "POST", timeoutMs: 30_000 });
 export const confirmUpgrade = () => api<{ active: boolean }>(APP_API.freeUpgradeConfirm, { method: "POST", timeoutMs: 30_000 });

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { CLUB_GAMES_IN_APP } from "@shared/club-games";
 import { Alert, Share, StyleSheet, TextInput, View } from "react-native";
 import { useLocalSearchParams, useRouter, type Href } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -202,8 +203,12 @@ export default function Manage() {
       {c.ended ? null : (
         <Section title="Plan">
           <SettingRow label="Plan a session" detail="Training for your club. Only your members see it." onPress={() => router.push(`/club/${c.id}/plan` as Href)} />
-          <Hairline />
-          <SettingRow label="Plan a game" detail="Against a club in your county that is open to games." onPress={() => router.push(`/club/${c.id}/near` as Href)} />
+          {CLUB_GAMES_IN_APP ? (
+            <>
+              <Hairline />
+              <SettingRow label="Plan a game" detail="Against a club in your county that is open to games." onPress={() => router.push(`/club/${c.id}/near` as Href)} />
+            </>
+          ) : null}
         </Section>
       )}
 
@@ -236,6 +241,10 @@ export default function Manage() {
         <View style={{ marginTop: 12 }}>
           <CountyPicker value={c.county} onChange={(county) => void act("county", () => setClubCounty(c.id, county, county ? c.open : false))} />
         </View>
+        {/* "Open to games" only while games between clubs are in the app
+            (lib/elite/club-games.ts); the server keeps the switch as the
+            website left it either way */}
+        {CLUB_GAMES_IN_APP ? (
         <Card style={{ padding: 0, marginTop: 12 }}>
           <SettingRow
             label="Open to games"
@@ -249,6 +258,7 @@ export default function Manage() {
             {OPEN_TO_GAMES_LINE}
           </Body>
         </Card>
+        ) : null}
 
         <Card style={{ padding: 0, marginTop: 12 }}>
           {c.ended ? null : (

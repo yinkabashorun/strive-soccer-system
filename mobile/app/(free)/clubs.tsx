@@ -1,4 +1,5 @@
 import { StyleSheet, View } from "react-native";
+import { CHAMPS_MARK } from "@shared/club-matchup-words";
 import { Image } from "expo-image";
 import { useRouter, type Href } from "expo-router";
 import type { AppClubCard } from "@shared/app-contract";
@@ -97,7 +98,7 @@ function ClubCard({ club, onPress }: { club: AppClubCard; onPress: () => void })
     <Press
       onPress={onPress}
       style={styles.card}
-      accessibilityLabel={`${club.name}. ${club.weekTime} trained this week.${who ? ` Trained today: ${who}.` : ""}${club.matchup ? ` ${club.matchup}` : ""}`}
+      accessibilityLabel={`${club.name}.${club.champs ? ` ${CHAMPS_MARK}.` : ""} ${club.weekTime} trained this week.${who ? ` Trained today: ${who}.` : ""}${club.matchup ? ` ${club.matchup}` : ""}`}
     >
       {club.photo ? (
         <>
@@ -116,6 +117,8 @@ function ClubCard({ club, onPress }: { club: AppClubCard; onPress: () => void })
           <Body dim size={13}>
             {`${club.members} ${club.members === 1 ? "player" : "players"}${club.ended ? " · Ended" : ""}`}
           </Body>
+          {/* earned last week, so it is gold: the club won its matchup */}
+          {club.champs ? <Eyebrow style={{ marginTop: 6 }}>{CHAMPS_MARK}</Eyebrow> : null}
         </View>
         <View style={{ alignItems: "flex-end" }}>
           <Head size={30}>{club.weekTime}</Head>

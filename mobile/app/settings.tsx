@@ -17,6 +17,7 @@ import { NoticeChoices } from "@/NoticeChoices";
 import { Body, Card, Hairline, Head, Icon, Label, Press, SettingRow } from "@/ui";
 import { useBelowClock } from "@/Screen";
 import { color } from "@/theme";
+import { CLUB_GAMES_IN_APP } from "@shared/club-games";
 
 // Settings: what this phone does (notifications, vibration, the timer's
 // tones, drill demos), what the account is told about (one switch per kind
@@ -57,7 +58,9 @@ export default function Settings() {
           label="Notifications"
           detail={
             free
-              ? "A friend posts or gives you props, or your club plans a session or a game. Nothing else."
+              ? CLUB_GAMES_IN_APP
+                ? "A friend posts or gives you props, or your club plans a session or a game. Nothing else."
+                : "A friend posts or gives you props, your club plans a session, or your club wins the week. Nothing else."
               : whatNotifications({ coachTime: featureOn(me.data?.player?.tier, "coachChat"), friends: hasTrain(me.data?.state) })
           }
           value={p.pushOn}

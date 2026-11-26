@@ -399,7 +399,9 @@ describe("where it runs and what it writes to", () => {
   });
 
   it("is its own step on the hourly run, after the plan builder, inside its own catch", () => {
-    expect(cron).toContain("const clubMatchups = () => runClubMatchups({ authed }).catch(() => ({ status: \"failed\" as const }));");
+    expect(cron).toContain("const matchups = await runClubMatchups({ authed }).catch(() => ({ status: \"failed\" as const }));");
+    // champs of the week is told after the matchups are settled, inside its own catch
+    expect(cron.indexOf("await runClubMatchups({ authed })")).toBeLessThan(cron.indexOf("await noticeClubChamps({ today: nyToday(), hour: nyHour() }).catch("));
     expect(cron.indexOf("await runPlanBuilder(")).toBeLessThan(cron.lastIndexOf("await clubMatchups()"));
     // the builder never waits on it and never sees it throw
     expect(run).toMatch(/export async function runClubMatchups[\s\S]*try \{[\s\S]*\} catch \(e\) \{/);
@@ -430,8 +432,15 @@ describe("where it runs and what it writes to", () => {
     expect(run).toContain("everyRow<MatchupLog>");
   });
 
-  it("sends no notification: the card is the pull", () => {
+  // Nov 24 2026: the matchup sent nothing at all. Nov 26 2026 (Coach
+  // Yinka: "YES" to telling a club it won, in his own words): the winners
+  // are told once, by its own sender (tests/club-games.test.ts). The run
+  // that matches and decides still sends nothing itself, and nobody is
+  // ever told about a week they are behind in, lost or drew.
+  it("the run itself sends nothing: the card is the pull", () => {
     expect(run).not.toMatch(/sendPush|sendSms|textCoaches|notice/);
-    expect(code("lib/elite/notices.ts")).not.toMatch(/matchup/i);
+    const notices = code("lib/elite/notices.ts");
+    expect(notices.match(/make\("club_[a-z]+"/g)).toEqual(['make("club_plan"', 'make("club_champs"']);
+    expect(notices).not.toMatch(/matchupAheadLine|matchupResultLine|lost the week|is ahead/);
   });
 });

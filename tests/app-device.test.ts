@@ -541,9 +541,15 @@ describe("the free app", () => {
     const users = sources.filter((f) => /<UpgradeCard\b/.test(code(f))).map(rel);
     expect(users).toEqual(["app/(free)/my-week.tsx"]);
     expect(code(path.join(root, "app/(free)/my-week.tsx")).match(/<UpgradeCard\b/g)?.length).toBe(1);
-    // the only ways to the offer: that card, and a locked course
+    // the only ways to the offer: that card, a locked course, and the end
+    // of the quiz for a player who came in by the door (the card on Week
+    // opened the quiz for them first, so it is still the one card's road)
     const toOffer = sources.filter((f) => /["`]\/offer["`]/.test(code(f))).map(rel).sort();
-    expect(toOffer).toEqual(["src/CoursesList.tsx", "src/UpgradeCard.tsx"]);
+    expect(toOffer).toEqual(["app/onboarding/[step].tsx", "src/CoursesList.tsx", "src/UpgradeCard.tsx"]);
+    const quiz = code(path.join(root, "app/onboarding/[step].tsx"));
+    expect(quiz).toMatch(/if \(quizWasLater\([^\n]+\{\s*void refreshFree\(\);[^\n]*\s*if \(router\.canDismiss\(\)\) router\.dismissAll\(\);\s*router\.replace\("\/offer"\);/);
+    // the card's one action opens the quiz only for a player with no answers
+    expect(code(path.join(root, "src/UpgradeCard.tsx"))).toContain('router.push(copy.opens === "quiz" ? "/onboarding" : "/offer")');
     // nothing on Friends, on You, or after a post
     for (const f of ["app/(free)/friends.tsx", "app/(free)/me.tsx", "app/post.tsx", "src/FeedCards.tsx"]) {
       expect(code(path.join(root, f)), f).not.toMatch(/upgrade|Strive Pro|\/offer|a month|membership/i);
@@ -553,7 +559,7 @@ describe("the free app", () => {
   it("the card is a card in the page: whether it shows is the one shared rule", () => {
     const card = code(path.join(root, "src/UpgradeCard.tsx"));
     expect(card).toContain('from "@shared/upgrade-card"');
-    expect(card).toContain("upgradeCard({ place, member, area, sessions, dismissedAt, now: Date.now() })");
+    expect(card).toContain("upgradeCard({ place, member, area, sessions, dismissedAt, now: Date.now(), quiz })");
     expect(card).not.toMatch(/<Modal\b|Alert\.alert|presentation/);
     // the price is never written on the phone: the offer's words are the
     // server's (the example data stands in for the server, and says so)
@@ -802,9 +808,11 @@ describe("the member card", () => {
 
   it("the photo is picked before any screen that shows the card", () => {
     const nav = code(path.join(root, "src/navigation.ts"));
-    // a new member: before the door. A free account: before the offer.
+    // a new member: before "You're in". A free account: FIRST, before the
+    // door's code, the quiz, the offer and the free app (a friend request
+    // and a club request carry the photo, and the offer shows their card).
     expect(nav).toMatch(/case "onboarding":\s*return owed \? "profile" : "onboarding";/);
-    expect(nav).toMatch(/if \(owed\) return "profile";\s*return state\.stage === "offer" \? "free-offer" : "free";/);
+    expect(nav).toMatch(/if \(state\.stage === "web"\) return "gate";\s*if \(owed\) return "profile";\s*if \(state\.stage === "quiz"\) return "free-quiz";\s*return state\.stage === "offer" \? "free-offer" : "free";/);
     // and it is one screen, never a step of the quiz, so nobody is asked twice
     const quiz = code(path.join(root, "app/onboarding/[step].tsx"));
     expect(quiz).not.toMatch(/PhotoStep|UsernameStep/);

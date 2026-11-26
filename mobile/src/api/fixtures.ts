@@ -31,6 +31,9 @@ import { earnedNotice, newWeekNotice, welcomeNotice, type NoticeTopic } from "@s
 import { reminderChoice } from "@shared/reminders";
 import { oneAppTabs } from "@shared/one-app";
 import { shareText } from "@shared/share-link";
+import { DOOR_NO_MATCH, doorCodeFrom, friendShareText } from "@shared/free-door";
+import { clubRequestSentLine } from "@shared/tracker";
+import type { AppDoorAnswer } from "@shared/app-contract";
 
 // The example player the screens are drawn with for review screenshots
 // (EXPO_PUBLIC_FIXTURES=1): the browser build (scripts/screenshots.mjs) and
@@ -40,7 +43,7 @@ import { shareText } from "@shared/share-link";
 // stills are the real bank's.
 //
 // Which member the example is, chosen per run:
-//   browser    ?state=ok|consent|onboarding|membership|pro_checkout|setup|locked|free_quiz|free_offer|social|ended|signedout
+//   browser    ?state=ok|consent|onboarding|membership|pro_checkout|setup|locked|free_quiz|free_offer|free_later|social|ended|signedout
 //   simulator  the launch argument -fixtureState <the same words>, which
 //              iOS hands the app as a setting (sim/shots.sh, sim/flows)
 //
@@ -51,7 +54,12 @@ import { shareText } from "@shared/share-link";
 // front. "ended" is the free account again after Strive Pro ended, with
 // the one calm line on Week. "free_quiz"
 // is a free account that has not taken the quiz, "free_offer" one that has
-// and is at the offer. A run that starts "signedout" and taps Join free
+// and is at the offer. "free_quiz" opens on THE DOOR ("Have a code from a
+// teammate or a club?", lib/elite/free-door.ts): any code of the right
+// shape is taken as a club's, and the account goes straight to the free
+// app. "free_later" is that account afterwards: in the free app, the quiz
+// not taken yet, the one card on Week asking for it.
+// A run that starts "signedout" and taps Join free
 // becomes a new free account and moves on as it goes (the quiz, the
 // @username and photo, the offer, the week's set-up, a post), all of it
 // kept in memory only.
@@ -61,7 +69,7 @@ import { shareText } from "@shared/share-link";
 // simulator's "open this link" command cannot be used for that: iOS answers
 // it with an "Open in Strive Elite?" box that stays on screen and covers
 // every picture after it (the first simulator run, Nov 23 2026).
-export const FIXTURE_STATES = ["ok", "consent", "onboarding", "membership", "pro_checkout", "setup", "locked", "free_quiz", "free_offer", "social", "ended", "signedout"] as const;
+export const FIXTURE_STATES = ["ok", "consent", "onboarding", "membership", "pro_checkout", "setup", "locked", "free_quiz", "free_offer", "free_later", "social", "ended", "signedout"] as const;
 
 function chosenState(): string {
   let raw: unknown = null;
@@ -106,6 +114,8 @@ type Live = {
   owed: ("username" | "photo")[];
   username: string | null;
   posted: boolean;
+  // came in by the door with a code: in the free app, the quiz not taken yet
+  later: boolean;
 };
 let live: Live | null = null;
 const watchers = new Set<() => void>();
@@ -113,7 +123,7 @@ const watchers = new Set<() => void>();
 function now(): Live {
   if (!live) {
     const s = chosenState();
-    const free = s === "locked" || s === "ended" || s === "free_quiz" || s === "free_offer";
+    const free = s === "locked" || s === "ended" || s === "free_quiz" || s === "free_offer" || s === "free_later";
     live = {
       signedIn: s !== "signedout",
       free,
@@ -123,6 +133,7 @@ function now(): Live {
       owed: s === "setup" ? ["username", "photo"] : [],
       username: s === "setup" ? null : "marcus.b",
       posted: false,
+      later: s === "free_later",
     };
   }
   return live;
@@ -144,7 +155,7 @@ export function fixtureSignedIn(): boolean {
 // "Create my account" on the join screens: a new free account, at the quiz,
 // that still owes its @username and its photo.
 export function fixtureJoin(): void {
-  live = { signedIn: true, free: true, train: false, ended: false, stage: "quiz", owed: ["username", "photo"], username: null, posted: false };
+  live = { signedIn: true, free: true, train: false, ended: false, stage: "quiz", owed: ["username", "photo"], username: null, posted: false, later: false };
   moved();
 }
 
@@ -627,6 +638,7 @@ function fixtureFeed(): AppFreeFeed {
     requests: l.posted ? [] : [{ id: "r-kai", name: "Kai M.", initials: "KM" }],
     week: { minutes, target: TARGET, percent: Math.round((minutes / TARGET) * 100) },
     invite: "https://thestriveapp.com/join?ref=EXAMPLE2",
+    inviteText: INVITE_TEXT,
     // the first-days list: posted and on a club, friends and props still open
     firstDays: firstDays({ joinedAt: new Date(Date.now() - 2 * 86_400_000).toISOString(), posted: true, friends: 1, clubs: 1, gaveProps: false }, Date.now()),
     // bring your squad: one teammate trained, one joined and has not posted
@@ -638,6 +650,8 @@ function fixtureFeed(): AppFreeFeed {
     }),
   };
 }
+
+const INVITE_TEXT = friendShareText({ code: "EXAMPLE2", link: "https://thestriveapp.com/join?ref=EXAMPLE2" });
 
 function fixtureFreeWeek(): AppFreeWeek {
   const l = now();
@@ -676,7 +690,9 @@ function fixtureFreeWeek(): AppFreeWeek {
       "me"
     ),
     invite: "https://thestriveapp.com/join?ref=EXAMPLE2",
-    upgrade: { area: "Weak foot", sessions: 4 },
+    inviteText: INVITE_TEXT,
+    // came in by the door: nothing rated yet, so the card asks for the quiz
+    upgrade: l.later ? { area: null, sessions: 0, quiz: true } : { area: "Weak foot", sessions: 4 },
   };
 }
 
@@ -690,6 +706,7 @@ function fixtureFreeYou(): AppFreeYou {
     gymLine: "Gym this week: 30m",
     starred: false,
     invite: "https://thestriveapp.com/join?ref=EXAMPLE2",
+    inviteText: INVITE_TEXT,
   };
 }
 
@@ -834,8 +851,20 @@ function fixtureFree(path: string, method: string, body?: unknown): unknown {
   if (at === "open") return { open: true };
   if (at === "join") return { ok: true, signedIn: false };
   if (at === "intake") {
-    l.stage = "offer";
+    // a player who came in by the door stays in the free app; the quiz is
+    // simply answered now
+    if (l.later) l.later = false;
+    else l.stage = "offer";
     return { ok: true };
+  }
+  // THE DOOR: any code of the right shape is taken as a club's, and the
+  // example account goes straight to the free app (the quiz waits)
+  if (at === "code") {
+    const typed = doorCodeFrom((body as { code?: unknown } | null)?.code);
+    if (!typed) return { ok: false, error: DOOR_NO_MATCH } satisfies AppDoorAnswer;
+    l.stage = "ready";
+    l.later = true;
+    return { ok: true, kind: "club", line: clubRequestSentLine("Renegados FC", false), skipped: true } satisfies AppDoorAnswer;
   }
   if (at === "offer") return { ...FIXTURE_OFFER, later: l.stage === "ready" ? "Not now" : "Not now, start free" } satisfies AppOffer;
   if (at === "plan") {

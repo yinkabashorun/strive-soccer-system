@@ -1,5 +1,6 @@
 import { appJson, appRoute, readJson } from "@/lib/elite/app-api";
 import { loadNoticePrefs, saveNoticeTopic, saveReminderChoice } from "@/lib/elite/notice-prefs-server";
+import { prefsForApp } from "@/lib/elite/notice-prefs";
 
 // "Notifications" in the iPhone app's Settings: one switch per topic that
 // applies to this account, and for a member the reminder time. The same
@@ -8,7 +9,8 @@ import { loadNoticePrefs, saveNoticeTopic, saveReminderChoice } from "@/lib/elit
 export const dynamic = "force-dynamic";
 
 export const GET = appRoute({ name: "notice-prefs", access: "person" }, async ({ viewer }) => ({
-  prefs: await loadNoticePrefs(viewer),
+  // the app names no games under Clubs while they are out of it
+  prefs: prefsForApp(await loadNoticePrefs(viewer)),
 }));
 
 // One change a request: { topic, on } flips a switch, { reminder } is the
@@ -22,5 +24,5 @@ export const POST = appRoute({ name: "notice-prefs", access: "person", limit: 30
     typeof body.topic === "string"
       ? await saveNoticeTopic(viewer, body.topic, body.on)
       : await saveReminderChoice(viewer, body.reminder);
-  return appJson(saved, saved.ok ? 200 : 400);
+  return appJson(saved.ok ? { ...saved, prefs: prefsForApp(saved.prefs) } : saved, saved.ok ? 200 : 400);
 });

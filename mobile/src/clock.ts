@@ -12,6 +12,7 @@ import { FIXTURES } from "./config";
 import type { PickedPhoto } from "./post-api";
 import { queryClient } from "./api/queryClient";
 import { setPref } from "./prefs";
+import { syncClockNudge } from "./clock-nudge";
 import { START_TELL_AT_MS, clockFields, clockView, parseClock, refusalIsFinal, resendDelayMs, startWorthTelling, type Clock, type ClockView, type Pending, type Shot } from "./clock-core";
 
 // THE TRAINING CLOCK, kept on this phone (clock-core.ts says what a clock
@@ -56,6 +57,9 @@ function subscribe(l: () => void) {
 async function keep(next: Clock | null): Promise<void> {
   clock = next;
   emit();
+  // the one "your clock is still running" notice follows the clock: set
+  // while it counts, taken back the moment it is finished, posted or stopped
+  void syncClockNudge(next);
   try {
     if (next) await AsyncStorage.setItem(CLOCK_KEY, JSON.stringify(next));
     else await AsyncStorage.removeItem(CLOCK_KEY);
@@ -72,6 +76,7 @@ export async function loadClock(): Promise<void> {
   if (!clock && stored) {
     clock = stored;
     emit();
+    void syncClockNudge(stored);
   }
   planTelling();
   void resendClock();

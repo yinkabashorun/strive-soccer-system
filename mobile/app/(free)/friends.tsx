@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { fmtDuration } from "@shared/time-trained";
 import { ApiError, OFFLINE_MESSAGE } from "@/api/client";
 import { answerFriend, refreshFree, useFeed } from "@/api/free";
+import { inviteShare } from "@/social-view";
 import { Avatar, MyAvatar, Star } from "@/Avatar";
 import { PlayerLink } from "@/ProfileParts";
 import type { LockedCard } from "@shared/tracker";
@@ -54,7 +55,7 @@ export default function Friends() {
   }
 
   const post = () => router.push(OPEN_CLOCK);
-  const invite = () => f && void Share.share({ url: f.invite }).catch(() => undefined);
+  const invite = () => f && void Share.share(inviteShare(f)).catch(() => undefined);
 
   if (!f) {
     return (

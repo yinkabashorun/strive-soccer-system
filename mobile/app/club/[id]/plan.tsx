@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { CLUB_GAMES_IN_APP } from "@shared/club-games";
 import { ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -41,7 +42,8 @@ export default function Plan() {
   const near = useClubNear(vs ? id : undefined);
   const c = club.data;
   const other = vs ? near.data?.rows.find((r) => r.id === vs) ?? null : null;
-  const game = Boolean(vs);
+  // a game only while games between clubs are in the app (club-games.ts)
+  const game = CLUB_GAMES_IN_APP && Boolean(vs);
 
   const [day, setDay] = useState<string | null>(null);
   const [time, setTime] = useState<string>(PLAN_TIME_DEFAULT);

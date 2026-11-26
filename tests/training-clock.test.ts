@@ -25,6 +25,9 @@ import {
   clockWords,
   countsOnBoards,
   settleClock,
+  CLOCK_NUDGE,
+  CLOCK_NUDGE_MINUTES,
+  clockNudgeAt,
 } from "@/lib/elite/training-clock";
 import { boardMinutes, onBoards, buildFeed, ownsStartPath, startPhotoPath, type PostRow, type TrainingLog } from "@/lib/elite/tracker";
 import { clockLogId, nyDayOf } from "@/lib/elite/training-clock-server";
@@ -450,5 +453,72 @@ describe("the iPhone app", () => {
     expect(code("components/elite/FriendsFeed.tsx")).toContain("card.timed === false");
     // the website has no clock, and says so before a length is posted
     expect(code("components/elite/PostComposer.tsx")).toContain("{WEB_TYPED_LINE}");
+  });
+});
+
+// THE CLOCK LEFT RUNNING (Coach Yinka, Nov 26 2026: "YES"): the one
+// notification the PHONE gives itself. Set when a clock starts, for 1 hour
+// 30 minutes in; taken back the moment the finish photo is taken, the
+// clock is posted, or it is stopped. Once, and only on a phone where
+// notifications are already allowed.
+describe("your clock is still running", () => {
+  const started = Date.UTC(2026, 10, 26, 21, 0, 0);
+
+  it("says his words, once, at 1 hour 30 minutes, inside the 2 hour 30 minute cap", () => {
+    expect(CLOCK_NUDGE).toEqual({ title: "Your clock is still running", body: "1h 30m so far. Your finish photo stops it." });
+    expect(CLOCK_NUDGE_MINUTES).toBe(90);
+    expect(CLOCK_NUDGE_MINUTES).toBeLessThan(CLOCK_CAP_MINUTES);
+    expect(clockNudgeAt({ startedMs: started, finished: false, allowed: true, nowMs: started })).toBe(started + 90 * MIN);
+  });
+
+  it("is never set without permission already given, on a finished clock, or for a moment that has passed", () => {
+    expect(clockNudgeAt({ startedMs: started, finished: false, allowed: false, nowMs: started })).toBeNull();
+    expect(clockNudgeAt({ startedMs: started, finished: true, allowed: true, nowMs: started })).toBeNull();
+    expect(clockNudgeAt({ startedMs: null, finished: false, allowed: true, nowMs: started })).toBeNull();
+    expect(clockNudgeAt({ startedMs: started, finished: false, allowed: true, nowMs: started + 90 * MIN })).toBeNull();
+    expect(clockNudgeAt({ startedMs: started, finished: false, allowed: true, nowMs: started + 200 * MIN })).toBeNull();
+  });
+
+  it("the phone follows the clock: every change of the clock sets it again or takes it back", () => {
+    const store = code("mobile/src/clock.ts");
+    // the one place a clock is kept (start, finish photo, retake, post, stop) and the one place it is loaded
+    expect(store.match(/void syncClockNudge\(/g)?.length).toBe(2);
+    const keep = store.slice(store.indexOf("async function keep("));
+    expect(keep.indexOf("void syncClockNudge(next);")).toBeGreaterThan(-1);
+    expect(keep.indexOf("void syncClockNudge(next);")).toBeLessThan(keep.indexOf("AsyncStorage.setItem(CLOCK_KEY"));
+  });
+
+  it("one notice at most, never asked for, never through the server", () => {
+    const nudge = code("mobile/src/clock-nudge.ts");
+    // one identifier: setting it again replaces it; taken back first, every time
+    expect(nudge).toContain('export const CLOCK_NUDGE_ID = "strive.clock.running";');
+    expect(nudge.indexOf("cancelScheduledNotificationAsync(CLOCK_NUDGE_ID)")).toBeLessThan(nudge.indexOf("scheduleNotificationAsync({"));
+    expect(nudge).toContain("if (!clock || clock.finish) return;");
+    expect(nudge).toContain("identifier: CLOCK_NUDGE_ID,");
+    // a date, once: never a repeat
+    expect(nudge).toContain("trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: new Date(at) }");
+    expect(nudge).not.toMatch(/repeats|TIME_INTERVAL|DAILY|WEEKLY/);
+    // it reads the permission and never asks for it
+    expect(nudge).toContain("getPermissionsAsync()");
+    expect(nudge).not.toMatch(/requestPermissionsAsync/);
+    // the words are the shared ones; a tap opens the clock
+    expect(nudge).toContain("content: { title: CLOCK_NUDGE.title, body: CLOCK_NUDGE.body, data: { open: LOCAL_CLOCK } }");
+    expect(nudge).not.toMatch(/\bapi\(|fetch\(/);
+    // the example build gives no notifications
+    expect(nudge).toContain("if (FIXTURES) return;");
+    // and it is the only local notification in the app
+    const schedulers = walk(join(root, "mobile/app"))
+      .concat(walk(join(root, "mobile/src")))
+      .filter((f) => /\.(ts|tsx)$/.test(f))
+      .map((f) => f.slice(root.length + 1))
+      .filter((f) => /scheduleNotificationAsync/.test(code(f)));
+    expect(schedulers).toEqual(["mobile/src/clock-nudge.ts"]);
+  });
+
+  it("a tap on it opens the clock, for an account with the free app", () => {
+    const nav = code("mobile/src/navigation.ts");
+    expect(nav).toContain('export const LOCAL_CLOCK = "clock";');
+    expect(nav).toMatch(/export function localRoute\(/);
+    expect(code("mobile/app/_layout.tsx")).toContain("localRoute(");
   });
 });

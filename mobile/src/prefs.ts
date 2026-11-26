@@ -7,9 +7,12 @@ import { dropSeenKey, parseSeenWeek } from "@shared/experience";
 // two one-time moments (the notifications ask, the Monday drop).
 // clockKnown: this player has started a training clock before, so "Start
 // training" goes straight to the camera (src/clock-core.ts cameraFirst).
-export type Prefs = { vibration: boolean; sound: boolean; autoplay: boolean; pushAsked: boolean; pushOn: boolean; firstDaysHidden: boolean; proEndedSeen: boolean; clockKnown: boolean };
+// doorPassed: the account (its email) that went past the door's "Have a
+// code?" on this phone with no code, so the door is asked once
+// (src/door.ts doorDue).
+export type Prefs = { vibration: boolean; sound: boolean; autoplay: boolean; pushAsked: boolean; pushOn: boolean; firstDaysHidden: boolean; proEndedSeen: boolean; clockKnown: boolean; doorPassed: string };
 
-export const DEFAULT_PREFS: Prefs = { vibration: true, sound: true, autoplay: true, pushAsked: false, pushOn: false, firstDaysHidden: false, proEndedSeen: false, clockKnown: false };
+export const DEFAULT_PREFS: Prefs = { vibration: true, sound: true, autoplay: true, pushAsked: false, pushOn: false, firstDaysHidden: false, proEndedSeen: false, clockKnown: false, doorPassed: "" };
 const KEY = "strive.prefs.v1";
 
 let cache: Prefs | null = null;

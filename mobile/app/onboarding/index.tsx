@@ -7,10 +7,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { emptyAnswers } from "@shared/quiz";
 import { useMe, useSubmitQuiz } from "@/api/queries";
 import { ApiError } from "@/api/client";
+import { CodeDoor } from "@/CodeDoor";
+import { doorDue } from "@/door";
 import { MemberCard } from "@/MemberCard";
+import { loadPrefs, prefsNow, usePrefs } from "@/prefs";
 import { quizStepIds } from "@/quiz-steps";
 import { useMyPhoto } from "@/usePhoto";
-import { Body, Button, Head } from "@/ui";
+import { Body, Button, Head, Icon, Press } from "@/ui";
 import { color } from "@/theme";
 
 // The door (experience.md, moment 1): the Strive mark, a gold line draws,
@@ -19,12 +22,35 @@ import { color } from "@/theme";
 // @username: both are picked before the door (app/profile-setup.tsx), so
 // there is always a photo to show here.
 //
-// A FREE account opens on the same spot with its own first screen: what
-// the quiz is for, and one tap to start it. Nothing here says it is in
-// anything yet.
+// A FREE account opens on the same spot with its own first screens:
+//   1. "Have a code from a teammate or a club?" (src/CodeDoor.tsx,
+//      lib/elite/free-door.ts), once, for a NEW account only. A real code
+//      goes straight to the free app; the quiz waits behind the one card
+//      on Week.
+//   2. what the quiz is for, and one tap to start it. This is also where
+//      that card on Week opens, later, for a player who came in by a code.
+// Nothing here says it is in anything yet.
 export default function Door() {
   const me = useMe();
-  return me.data?.state.kind === "free" ? <FreeStart firstName={me.data.viewer.firstName} /> : <MemberDoor />;
+  return me.data?.state.kind === "free" ? <FreeDoor /> : <MemberDoor />;
+}
+
+function FreeDoor() {
+  const me = useMe();
+  const [prefs, setPref] = usePrefs();
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    void loadPrefs().then(() => setLoaded(true));
+  }, []);
+  // black for the moment the phone's own note is read, so the code screen
+  // never flashes at someone who already went past it
+  if (!loaded || !me.data) return <View style={styles.fill} />;
+  const email = me.data.viewer.email;
+  const stage = me.data.state.kind === "free" ? me.data.state.stage : null;
+  if (doorDue({ stage, email, passed: prefs.doorPassed || prefsNow().doorPassed })) {
+    return <CodeDoor onNoCode={() => setPref("doorPassed", email)} />;
+  }
+  return <FreeStart firstName={me.data.viewer.firstName} />;
 }
 
 function MemberDoor() {
@@ -93,8 +119,16 @@ function FreeStart({ firstName }: { firstName: string }) {
   const insets = useSafeAreaInsets();
   const me = useMe();
   const first = quizStepIds(me.data)[0];
+  // Opened from the one card on Week by a player who came in by a code:
+  // the free app is behind this screen, so there is a way back to it.
+  const fromWeek = me.data?.state.kind === "free" && me.data.state.stage === "ready";
   return (
     <View style={[styles.fill, { paddingTop: insets.top + 64, paddingBottom: insets.bottom + 28 }]}>
+      {fromWeek ? (
+        <Press onPress={() => router.back()} style={[styles.close, { top: insets.top + 8 }]} accessibilityLabel="Close">
+          <Icon name="close" />
+        </Press>
+      ) : null}
       <Animated.View entering={FadeIn.duration(500)}>
         <Image source={require("../../assets/splash.png")} style={styles.mark} contentFit="contain" />
       </Animated.View>
@@ -116,4 +150,5 @@ const styles = StyleSheet.create({
   fill: { flex: 1, backgroundColor: color.black, alignItems: "center", paddingHorizontal: 24 },
   mark: { width: 96, height: 96 },
   line: { width: 64, height: 1.5, backgroundColor: color.gold, marginTop: 20 },
+  close: { position: "absolute", left: 16, width: 44, height: 44, justifyContent: "center", zIndex: 2 },
 });

@@ -10,6 +10,7 @@ import type {
   PlanCard,
 } from "@shared/app-contract";
 import { clubShareText, clubWeek, splitPlans } from "@shared/club-app";
+import { CLUB_GAMES_IN_APP, clubPageForApp, waitingForApp } from "@shared/club-games";
 import { matchupAheadLine, matchupCardLine, matchupRecordLine, matchupResultLine, MATCHUP_NONE_LINE } from "@shared/club-matchup-words";
 import { gamesRecordLine, resultLine } from "@shared/club-teams";
 import { fmtDuration } from "@shared/time-trained";
@@ -140,6 +141,8 @@ function matchupOn(mine: { id: string; name: string }, theirs: { id: string; nam
     last: matchupResultLine("win", CATHARPIN.name),
     cardLine: matchupCardLine(mine.name, theirs.name),
     recordLine: matchupRecordLine(record),
+    // last week was won: the gold mark for this week
+    champs: true,
   };
 }
 
@@ -231,7 +234,7 @@ function page(id: string, ctx: Ctx): AppClubPage | null {
       recordLine: gamesRecordLine({ wins: 1, losses: 1, draws: 0, played: 2 }),
       membersCount: PICKUP_SEEDS.length,
       week: clubWeek({ minutes: total, best: 300 }),
-      matchup: { state: "none", mine: null, theirs: null, line: MATCHUP_NONE_LINE, last: matchupResultLine("draw", BRISTOW.name), cardLine: null, recordLine: matchupRecordLine({ wins: 1, losses: 1, draws: 1 }) },
+      matchup: { state: "none", mine: null, theirs: null, line: MATCHUP_NONE_LINE, last: matchupResultLine("draw", BRISTOW.name), cardLine: null, recordLine: matchupRecordLine({ wins: 1, losses: 1, draws: 1 }), champs: false },
       members: members(PICKUP_SEEDS, ctx),
       ...splitPlans([toConfirm]),
       photos: [],
@@ -265,6 +268,7 @@ function page(id: string, ctx: Ctx): AppClubPage | null {
         last: null,
         cardLine: null,
         recordLine: matchupRecordLine({ wins: 1, losses: 0, draws: 0 }),
+        champs: true,
       },
       members: members(GAINESVILLE_SEEDS, ctx),
       next: [],
@@ -301,8 +305,10 @@ function page(id: string, ctx: Ctx): AppClubPage | null {
   return null;
 }
 
+// The example answers as the real server does: nothing of games reaches
+// the app while they are out of it (lib/elite/club-games.ts).
 function card(id: string, ctx: Ctx): AppClubCard {
-  const p = page(id, ctx)!;
+  const p = clubPageForApp(page(id, ctx)!);
   const next = p.next.find((x) => x.status === "on");
   const first = p.photos.find((t) => t.state === "open");
   return {
@@ -316,7 +322,14 @@ function card(id: string, ctx: Ctx): AppClubCard {
     today: p.members.filter((x) => x.today).map((x) => ({ id: x.id, first: x.you ? "You" : x.name.split(" ")[0], initials: x.initials, photo: x.photo, you: x.you })),
     next: next ? `${next.kind === "training" ? next.title ?? "Club training" : `Game against ${(next.opponent ?? next.organizer).name}`} · ${next.when}` : null,
     matchup: p.matchup?.cardLine ?? null,
-    waiting: p.manage ? p.manage.requests.length + p.manage.games.length + p.results.filter((x) => x.result?.canAnswer || x.result?.canEnter).length : 0,
+    ...(p.matchup?.champs ? { champs: true } : {}),
+    waiting: p.manage
+      ? waitingForApp({
+          requests: p.manage.requests.length,
+          gameAsks: p.manage.games.length,
+          scores: p.results.filter((x) => x.result?.canAnswer || x.result?.canEnter).length,
+        })
+      : 0,
   };
 }
 
@@ -366,13 +379,13 @@ export function fixtureClubs(at: string, method: string, body: unknown, ctx: Ctx
   if (at.startsWith("clubs/")) {
     const [id, more] = at.slice("clubs/".length).split("/");
     if (more === "near") {
-      if (id !== PICKUP.id) throw notFound();
+      if (!CLUB_GAMES_IN_APP || id !== PICKUP.id) throw notFound();
       return { near: NEAR };
     }
     if (method === "GET") {
-      const club = page(id, ctx);
-      if (!club) throw notFound();
-      return { club };
+      const raw = page(id, ctx);
+      if (!raw) throw notFound();
+      return { club: clubPageForApp(raw) };
     }
     if (b.do === "request" && typeof b.player === "string") live.answered.add(b.player);
     return { ok: true, ...(b.do === "link" ? { code: "NEWC2345" } : {}) } satisfies AppClubAnswer;

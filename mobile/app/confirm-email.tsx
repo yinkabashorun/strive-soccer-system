@@ -23,6 +23,14 @@ import { color, font } from "@/theme";
 // said plainly), and Wrong email? Change it, a second state of the same
 // screen. Delete my account and Sign out stay one tap away. Every word is
 // lib/elite/email-confirm.ts CONFIRM_COPY, the website's own.
+// Where the code box rests when the keyboard comes up: far enough down
+// that the title and "We sent a 6 digit code to <email>" stay on screen.
+// The page's default brought the box to the top, which scrolled the
+// address a player is checking out of sight (seen in the simulator's
+// picture, Nov 26 2026). The box sits about this far down the page, so
+// the page does not move at all.
+const CODE_REVEAL_TOP = 240;
+
 export default function ConfirmEmail() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -102,6 +110,7 @@ export default function ConfirmEmail() {
   return (
     <FormScreen
       safeTop
+      revealTop={CODE_REVEAL_TOP}
       contentStyle={{ paddingTop: 52, paddingHorizontal: 24, paddingBottom: 24 }}
       footer={
         <View style={[styles.cta, { paddingBottom: insets.bottom + 16 }]}>

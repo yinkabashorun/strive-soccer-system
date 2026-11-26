@@ -260,3 +260,17 @@ describe("the words", () => {
     expect(web).toContain('autoComplete="one-time-code"');
   });
 });
+
+// Found in the simulator's picture (Nov 26 2026): with the keyboard up the
+// page brought the code box to the top and scrolled "Check your email" and
+// the address the code was sent to out of sight.
+describe("the code screen keeps its title and the address on screen", () => {
+  it("the box rests where it already is when the keyboard comes up", () => {
+    const { readFileSync } = require("node:fs") as typeof import("node:fs");
+    const screen = readFileSync("mobile/app/confirm-email.tsx", "utf8");
+    expect(screen).toContain("revealTop={CODE_REVEAL_TOP}");
+    const top = Number(/const CODE_REVEAL_TOP = (\d+);/.exec(screen)?.[1]);
+    // the box sits a little over 200 points down the page (title, two lines, the field's name)
+    expect(top).toBeGreaterThanOrEqual(220);
+  });
+});

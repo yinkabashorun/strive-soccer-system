@@ -3,6 +3,7 @@ import { FreeAdmin } from "@/components/elite/FreeAdmin";
 import { AppLinkAdmin } from "@/components/elite/AppLinkAdmin";
 import { NO_APP_VERSION } from "@/lib/elite/app-version";
 import { getAppVersion } from "@/lib/elite/tracker-server";
+import { LaunchNumbersCard } from "@/components/elite/LaunchNumbersCard";
 import { ReportsQueue } from "@/components/elite/ReportsQueue";
 import { ClubsAdmin } from "@/components/elite/ClubsAdmin";
 import { LineReports } from "@/components/elite/LineReports";
@@ -10,6 +11,7 @@ import { StarToggle } from "@/components/elite/StarToggle";
 import { WaitlistAdmin } from "@/components/elite/WaitlistAdmin";
 import { TeamsAdmin } from "@/components/elite/TeamsAdmin";
 import { demoTeamsOverview, getTeamsOverview } from "@/lib/elite/club-teams-coach";
+import { getLaunchNumbers } from "@/lib/elite/launch-numbers-server";
 import { getWaitlist } from "@/lib/elite/waitlist-server";
 import { getViewer } from "@/lib/elite/session";
 import { APP_URL } from "@/lib/elite/app-url";
@@ -21,7 +23,9 @@ import { GOALS, GRADES, LEVELS, labelOf } from "@/lib/elite/tracker";
 export const metadata = { title: "Free app · Strive Elite" };
 export const dynamic = "force-dynamic";
 
-// The coach's view of the free app (migration 069): reported posts and
+// The coach's view of the free app (migration 069): the launch numbers
+// first (is a new player getting going, overall and club by club; left
+// off the page when they cannot be read whole), then reported posts and
 // profile lines first (remove, clear or no action), then the switch that opens or closes free
 // sign-up, the link to hand out, the two recommended targets, and
 // everyone who has a free account, each with their aura level and the
@@ -35,6 +39,7 @@ export default async function CoachFreePage() {
   const waitlist = viewer.demo ? [] : await getWaitlist();
   const teams = viewer.demo ? demoTeamsOverview() : await getTeamsOverview();
   const appVersion = viewer.demo ? NO_APP_VERSION : await getAppVersion();
+  const launch = await getLaunchNumbers();
   const openReports =
     data.reports.length + data.clubReports.length + data.lineReports.length + teams.plans.filter((p) => p.reports.length > 0).length;
   const joinedOn = (iso: string) =>
@@ -53,6 +58,8 @@ export default async function CoachFreePage() {
         No drills, no courses, no plan from us. 13 and older. Free accounts never appear on the
         roster.
       </p>
+
+      {launch ? <LaunchNumbersCard numbers={launch} /> : null}
 
       <ReportsQueue reports={data.reports} />
 

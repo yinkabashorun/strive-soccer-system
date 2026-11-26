@@ -18,6 +18,8 @@ import type { FreeAnswers } from "@shared/free-intake";
 import type { Kind } from "@shared/tracker";
 import type { Multipart } from "@shared/upload-body";
 import type { AppWeekCard } from "@shared/app-contract";
+import type { FriendAddAnswer } from "@shared/friend-add";
+import { inviteAsTyped, type AppInvite, type AskedInvite } from "@shared/friend-link";
 import { ApiError, api } from "./client";
 import { keys, useMe } from "./queries";
 import { queryClient } from "./queryClient";
@@ -35,6 +37,7 @@ export const freeKeys = {
   profiles: ["free", "profile"] as const,
   profile: (id: string) => ["free", "profile", id] as const,
   blocked: ["free", "blocked"] as const,
+  invite: (code: string, kind: string | null) => ["free", "invite", code, kind] as const,
 };
 
 // Is free sign-up open? Asked from the sign-in screen, signed out.
@@ -132,6 +135,25 @@ export const removeFriend = (id: string) => api<Ok>(appProfilePath(id), { method
 export const reportProfile = (id: string, what: "photo" | "line") => api<Ok>(appProfilePath(id), { method: "POST", body: { do: what === "photo" ? "report_photo" : "report_line" } });
 export const unblockPlayer = (id: string) => api<Ok>(APP_API.freeBlocked, { method: "POST", body: { id } });
 export const answerFriend = (id: string, accept: boolean) => api<Ok>(APP_API.freeFriend, { method: "POST", body: { id, accept } });
+// Add a friend by their EXACT @username (app/friend/add.tsx): that one
+// player is sent a request to accept. Never a search.
+export const askFriend = (username: string) => api<FriendAddAnswer>(APP_API.freeFriendAsk, { method: "POST", body: { username } });
+// An invite link a player opened (app/friend/link.tsx): who it is from,
+// read before anything is sent. A link that is no invite is an answer,
+// not a failure to try again.
+export function useInvite(asked: AskedInvite | null) {
+  const free = useIsFree("ready");
+  return useQuery({
+    queryKey: freeKeys.invite(asked?.code ?? "", asked?.kind ?? null),
+    queryFn: () => api<AppInvite>(`${APP_API.freeCode}?code=${asked!.code}${asked!.kind ? `&kind=${asked!.kind}` : ""}`),
+    enabled: free && Boolean(asked),
+    staleTime: 60_000,
+    retry: (count, error) => !(error instanceof ApiError && error.status === 400) && count < 2,
+  });
+}
+// The invite screen's one button: the door's own route, which asks the way
+// the website's link does (a friend request, or the club's captain).
+export const sendInvite = (asked: AskedInvite) => enterCode(inviteAsTyped(asked));
 // Share my week: the player's own week as a story-size picture, drawn on
 // the server, with the words that go with it (src/ShareWeekRow.tsx).
 export const getWeekCard = () => api<AppWeekCard>(APP_API.freeWeekCard, { timeoutMs: 30_000 });

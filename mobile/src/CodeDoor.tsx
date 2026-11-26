@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import Animated, { FadeInDown } from "react-native-reanimated";
@@ -21,6 +21,7 @@ import { enterCode, rereadMe } from "@/api/free";
 import { signOutEverywhere } from "@/account";
 import { FormScreen } from "@/FormScreen";
 import { openHome } from "@/go-home";
+import { dropInvite, heldInvite, useHeldInvite } from "@/invite";
 import { LabeledField } from "@/LabeledField";
 import { Body, Button, Eyebrow, Head, Label, Press } from "@/ui";
 import { color, font } from "@/theme";
@@ -40,13 +41,31 @@ import { color, font } from "@/theme";
 // button with no word of why. Both ways on are the page's footer, so they
 // ride on the keyboard while the code is typed (FormScreen: a button under
 // a box was behind the keyboard three times before this screen existed).
+//
+// A player who opened a teammate's or a club's invite LINK before they had
+// an account (lib/elite/friend-link.ts) finds that code already typed here:
+// the app kept it (src/invite.ts). It is still theirs to send or to clear;
+// nothing is sent until "Use my code" is tapped.
 export function CodeDoor({ onNoCode }: { onNoCode: () => void }) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const [code, setCode] = useState("");
+  const held = useHeldInvite();
+  const [code, setCode] = useState(() => heldInvite()?.code ?? "");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState<{ line: string; skipped: boolean } | null>(null);
+
+  // a link opened while this screen is up: its code is typed in, unless the
+  // player has typed one of their own
+  useEffect(() => {
+    if (held) setCode((typed) => (typed.trim() ? typed : held.code));
+  }, [held]);
+
+  // going on with no code: an invite the app was keeping is not brought up again
+  function noCode() {
+    dropInvite();
+    onNoCode();
+  }
 
   async function use() {
     if (!doorCodeFrom(code)) return setError(DOOR_NOT_A_CODE);
@@ -55,6 +74,8 @@ export function CodeDoor({ onNoCode }: { onNoCode: () => void }) {
     try {
       const res = await enterCode(code);
       if (!res.ok) return setError(res.error);
+      // the invite the app was keeping is used: it is not offered a second time
+      dropInvite();
       setDone({ line: res.line, skipped: res.skipped });
     } catch (e) {
       setError(e instanceof ApiError ? e.message : OFFLINE_MESSAGE);
@@ -122,7 +143,7 @@ export function CodeDoor({ onNoCode }: { onNoCode: () => void }) {
             </View>
           ) : null}
           <Button label={DOOR_USE} busy={busy} onPress={() => void use()} />
-          <Button quiet style={{ marginTop: 10 }} label={DOOR_NO_CODE} onPress={onNoCode} />
+          <Button quiet style={{ marginTop: 10 }} label={DOOR_NO_CODE} onPress={noCode} />
         </View>
       }
     >

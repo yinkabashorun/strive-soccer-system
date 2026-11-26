@@ -309,6 +309,19 @@ vi.mock("@/lib/elite/club-games", async (actual) => ({
 }));
 // the door: its lookups and writes are stood in for (its rules: tests/free-door.test.ts)
 vi.mock("@/lib/elite/free-door-server", () => ({ enterDoorCode: call("enterDoorCode") }));
+// adding a friend in person: its lookups are stood in for (its rules: tests/add-friend.test.ts)
+vi.mock("@/lib/elite/friend-add-server", () => ({
+  askFriendByUsername: async (...args: unknown[]) => {
+    s.calls.push({ fn: "askFriendByUsername", args });
+    return args[1] === "kai.m"
+      ? { ok: true, result: "sent", line: "Request sent. You and Kai M. are friends once Kai M. accepts." }
+      : { ok: false, error: "We could not find that @username. Check the spelling." };
+  },
+  inviteFor: async (...args: unknown[]) => {
+    s.calls.push({ fn: "inviteFor", args });
+    return { ok: true, kind: "friend", code: (args[1] as { code: string }).code, first: "Kai", initials: "KM", body: "When Kai accepts, you see each other's training and the photos you post." };
+  },
+}));
 vi.mock("@/lib/elite/club-teams-actions", () => ({
   acceptPlayTerms: call("acceptPlayTerms"),
   planTraining: call("planTraining"),
@@ -449,6 +462,7 @@ const ROUTES = {
   freeReport: () => import("@/app/api/app/free/report/route"),
   freeBlock: () => import("@/app/api/app/free/block/route"),
   freeFriend: () => import("@/app/api/app/free/friend/route"),
+  freeFriendAsk: () => import("@/app/api/app/free/friend/ask/route"),
   freeWeek: () => import("@/app/api/app/free/week/route"),
   freeWeekCard: () => import("@/app/api/app/free/week/card/route"),
   freeYou: () => import("@/app/api/app/free/you/route"),
@@ -516,6 +530,9 @@ const TABLE: { route: keyof typeof ROUTES; method: "GET" | "POST" | "DELETE"; ac
   { route: "freeReport", method: "POST", access: "free_app" },
   { route: "freeBlock", method: "POST", access: "free_app" },
   { route: "freeFriend", method: "POST", access: "free_app" },
+  // adding a friend in person: by exact @username, and who an invite link is from
+  { route: "freeFriendAsk", method: "POST", access: "free_app" },
+  { route: "freeCode", method: "GET", access: "free_app" },
   { route: "freeWeek", method: "GET", access: "free_app" },
   { route: "freeWeekCard", method: "GET", access: "free_app" },
   { route: "freeYou", method: "GET", access: "free_app" },
@@ -1025,6 +1042,83 @@ describe("the free app's bodies are checked first", () => {
     const res = await (await handler("freeCode", "POST"))(req("POST", { body: { code: "ABCD2345" } }));
     expect(res.status).toBe(409);
     expect(s.calls.filter((c) => c.fn === "enterDoorCode")).toEqual([]);
+  });
+
+  // ADD A FRIEND IN PERSON (Nov 26 2026). The route hands over what was
+  // typed and who is asking (from the token), and answers the one line the
+  // server function answers. A few tries a minute, a few more a day.
+  it("add a friend: the typed @username and the caller go to the one function", async () => {
+    freeAccount();
+    const h = await handler("freeFriendAsk", "POST");
+    const res = await h(req("POST", { body: { username: "kai.m", profileId: "someone-else", id: "x" } }));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ ok: true, result: "sent", line: "Request sent. You and Kai M. are friends once Kai M. accepts." });
+    expect(s.calls[0].fn).toBe("askFriendByUsername");
+    expect((s.calls[0].args[0] as { profile: { id: string } }).profile.id).toBe("u1"); // the account comes from the token
+    expect(s.calls[0].args.slice(1)).toEqual(["kai.m"]);
+    // nobody found is a 400 with the one line the screen shows
+    const none = await h(req("POST", { body: { username: "nobody.here" } }));
+    expect(none.status).toBe(400);
+    expect(await none.json()).toEqual({ ok: false, error: "We could not find that @username. Check the spelling." });
+  });
+
+  it("add a friend: an empty box asks nothing of the server function", async () => {
+    freeAccount();
+    const h = await handler("freeFriendAsk", "POST");
+    for (const body of [{}, null, { username: "" }, { username: "   " }, { username: 12 }, { username: ["kai.m"] }]) {
+      const res = await h(req("POST", { body }));
+      expect(res.status).toBe(400);
+      expect(await res.json()).toEqual({ ok: false, error: "Type their @username first." });
+    }
+    expect(s.calls).toEqual([]);
+  });
+
+  it("add a friend: 10 tries a minute and 30 a day per player, and a try that found nobody counts", async () => {
+    freeAccount();
+    const h = await handler("freeFriendAsk", "POST");
+    for (let i = 0; i < 10; i++) expect((await h(req("POST", { body: { username: "nobody.here" } }))).status).toBe(400);
+    expect((await h(req("POST", { body: { username: "kai.m" } }))).status).toBe(429);
+    // the next minutes: the day's own count carries on, from any network address
+    const { rateLimit } = await import("@/lib/rate-limit");
+    const realNow = Date.now;
+    try {
+      let minute = 0;
+      for (let sent = 10; sent < 30; sent++) {
+        if (sent % 10 === 0) Date.now = () => realNow() + ++minute * 61_000;
+        expect((await h(req("POST", { body: { username: "nobody.here" } }))).status, String(sent)).toBe(400);
+      }
+      Date.now = () => realNow() + ++minute * 61_000;
+      const over = await h(req("POST", { body: { username: "kai.m" } }));
+      expect(over.status).toBe(400);
+      expect(await over.json()).toEqual({ ok: false, error: "That is a lot of friend requests for one day. Send more tomorrow." });
+      expect(s.calls.filter((c) => c.fn === "askFriendByUsername")).toHaveLength(30);
+      // the day's count is this player's own: another player is not held by it
+      expect(rateLimit("app:free-friend-ask:day:someone-else", 30, 86_400_000)).toBe(true);
+    } finally {
+      Date.now = realNow;
+    }
+  });
+
+  it("an invite link: who it is from is read for a well-formed code only, and sends nothing", async () => {
+    freeAccount();
+    const h = await handler("freeCode", "GET");
+    const at = (query: string) =>
+      h(new Request(`https://thestriveapp.com/api/app/free/code${query}`, { headers: { authorization: `Bearer ${TOKEN}`, "x-forwarded-for": "10.9.9.9" } }));
+    const res = await at("?code=abcd2345&kind=friend");
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({ ok: true, kind: "friend", code: "ABCD2345", first: "Kai", initials: "KM" });
+    expect(s.calls[0].fn).toBe("inviteFor");
+    expect((s.calls[0].args[0] as { profile_id: string }).profile_id).toBe("u1");
+    expect(s.calls[0].args[1]).toEqual({ code: "ABCD2345", kind: "friend" });
+    // a kind it does not know is no kind; a code that is not one is refused before any lookup
+    await at("?code=ABCD2345&kind=admin");
+    expect(s.calls[1].args[1]).toEqual({ code: "ABCD2345", kind: null });
+    for (const bad of ["", "?code=", "?code=ABCD234", "?kind=friend", "?code=..%2F..%2Fx"]) {
+      const no = await at(bad);
+      expect(no.status, bad).toBe(400);
+      expect(await no.json()).toEqual({ ok: false, error: "That link is not an invite. Ask your teammate to send their link again." });
+    }
+    expect(s.calls.map((c) => c.fn)).toEqual(["inviteFor", "inviteFor"]);
   });
 
   it("the offer needs the quiz", async () => {

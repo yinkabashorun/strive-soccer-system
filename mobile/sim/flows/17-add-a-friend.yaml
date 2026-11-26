@@ -1,0 +1,86 @@
+# ADDING A FRIEND IN PERSON, by taps (lib/elite/friend-add.ts): the quiet
+# "Add a friend" row under the invite on Friends opens the screen. An empty
+# box tapped says what to type (the button is never switched off); a
+# username nobody has gets the one plain line; a real one sends a request
+# and says so, with the button riding on the keyboard the whole time. Then
+# "Show my code": the player's own QR code, who it is for, and the same
+# code in letters.
+#
+# Not here, because only two real phones can show it: another iPhone's
+# camera reading the code and opening the app on "Kai invited you"
+# (docs/app-store/native-device-checklist.md). That screen is pictured by
+# launch argument (sim/shots.sh, 62-invite-link).
+#
+# Example data only (src/api/fixtures.ts): every name is made up, the
+# example knows the usernames marcus.b (his own), diego.r9 (a friend
+# already) and kai.m, and nothing is sent anywhere.
+appId: com.strivesoccer.elite
+---
+- launchApp:
+    clearState: true
+    arguments:
+      fixtureState: locked
+- extendedWaitUntil:
+    visible: "Start training"
+    timeout: 30000
+- scrollUntilVisible:
+    element: "Add a friend"
+    direction: DOWN
+    timeout: 40000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: t95-friends-add-row
+- tapOn: "Add a friend"
+- extendedWaitUntil:
+    visible: "Send a friend request"
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 3000
+- takeScreenshot: t96-add-a-friend
+
+# The button is never switched off: an empty box says what to type.
+- tapOn: "Send a friend request"
+- extendedWaitUntil:
+    visible: "Type their @username first."
+    timeout: 10000
+
+# A tap on the box's name puts the cursor in it. A username nobody has gets
+# one plain line, and the button stays above the keyboard.
+- tapOn: "Their @username"
+- inputText: "nobody.here"
+- waitForAnimationToEnd:
+    timeout: 2000
+- assertVisible: "Send a friend request"
+- tapOn: "Send a friend request"
+- extendedWaitUntil:
+    visible: "We could not find that @username. Check the spelling."
+    timeout: 10000
+- takeScreenshot: t97-add-not-found
+
+# The exact username of a player: the request is sent, and the screen says
+# what happens next.
+- eraseText: 20
+- inputText: "kai.m"
+- waitForAnimationToEnd:
+    timeout: 2000
+- takeScreenshot: t98-add-username-typed
+- tapOn: "Send a friend request"
+- extendedWaitUntil:
+    visible: "Request sent. You and Kai M. are friends once Kai M. accepts."
+    timeout: 15000
+- takeScreenshot: t99-add-request-sent
+- tapOn: "Add another friend"
+
+# My code: the QR code, whose it is, and the code in letters.
+- extendedWaitUntil:
+    visible: "Show my code"
+    timeout: 10000
+- tapOn: "Show my code"
+- extendedWaitUntil:
+    visible: "Your QR code. A teammate scans it to send you a friend request."
+    timeout: 15000
+- waitForAnimationToEnd:
+    timeout: 3000
+- assertVisible: "My code: EXAMPLE2"
+- assertVisible: "Send my link"
+- takeScreenshot: t99b-my-code

@@ -21,7 +21,7 @@
         "UISupportedInterfaceOrientations": ["UIInterfaceOrientationPortrait"],
         "NSPhotoLibraryAddUsageDescription": "Strive Elite saves the picture of your week to your photo library when you choose Save Image."
       },
-      "associatedDomains": ["webcredentials:thestriveapp.com"],
+      "associatedDomains": ["webcredentials:thestriveapp.com", "applinks:thestriveapp.com"],
       "entitlements": { "aps-environment": "production" },
       "privacyManifests": {
         "NSPrivacyTracking": false,

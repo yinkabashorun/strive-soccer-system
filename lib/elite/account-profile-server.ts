@@ -12,7 +12,7 @@
 // lived before; 081 copies those over.
 import { createServiceClient } from "./supabase/server";
 import { POST_BUCKET, POST_URL_SECONDS, AVATAR_MAX_BYTES, avatarPath, looksLikeJpeg, ownsAvatarPath } from "./tracker";
-import { normalizeUsername, usernameIdeas, usernameProblem, type UsernameProblem } from "./username";
+import { USERNAME_PATTERN, normalizeUsername, usernameIdeas, usernameProblem, type UsernameProblem } from "./username";
 import { NO_SETUP, setupFromRow, type ProfileSetup } from "./account-profile";
 
 type Admin = NonNullable<ReturnType<typeof createServiceClient>>;
@@ -197,6 +197,21 @@ export async function usernamesOf(admin: Admin, ids: string[]): Promise<Map<stri
     for (const r of (data as { id: string; username: string | null }[] | null) ?? []) if (r.username) out.set(r.id, r.username);
   }
   return out;
+}
+
+// The ONE account that has exactly this username, or null. A username is
+// stored in lower case (081 holds it in the database), so an equals on the
+// normalized name is the exact match with capitals ignored: never part of
+// a name, never a pattern, never a list. "offline" when it could not be
+// read. For adding a friend by their @username (lib/elite/friend-add-server.ts).
+export async function accountByUsername(admin: Admin, name: string): Promise<{ id: string; full_name: string } | null | "offline"> {
+  const exact = normalizeUsername(name);
+  // a name that is not shaped like a username is one nobody has
+  if (!USERNAME_PATTERN.test(exact)) return null;
+  const { data, error } = await admin.from("elite_profiles").select("id, full_name").eq("username", exact).limit(2);
+  if (error) return "offline";
+  const rows = (data as { id: string; full_name: string | null }[] | null) ?? [];
+  return rows.length === 1 ? { id: rows[0].id, full_name: rows[0].full_name ?? "" } : null;
 }
 
 // ilike with no wildcards: an underscore in a username is a literal.

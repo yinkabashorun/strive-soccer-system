@@ -1,6 +1,7 @@
 import { Share, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { STAR_LABEL, initialsOf } from "@shared/tracker";
+import { ADD_MY_CODE_DETAIL, MY_CODE_TITLE } from "@shared/friend-add";
 import { useMe, useYou } from "@/api/queries";
 import { MemberCard } from "@/MemberCard";
 import { hasTrain } from "@/navigation";
@@ -130,6 +131,9 @@ export default function Me() {
               detail="They join, you accept, and you see each other's training."
               onPress={() => void Share.share(inviteShare(y)).catch(() => undefined)}
             />
+            <Hairline />
+            {/* the same invite as a code to scan (app/friend/code.tsx) */}
+            <SettingRow label={MY_CODE_TITLE} detail={ADD_MY_CODE_DETAIL} onPress={() => router.push("/friend/code")} />
             <Hairline />
           </>
         ) : null}

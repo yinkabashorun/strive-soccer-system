@@ -21,6 +21,7 @@ import { loadClock } from "@/clock";
 import { loadPrefs } from "@/prefs";
 import { UpdateGate } from "@/UpdateGate";
 import { BrokenScreen } from "@/BrokenScreen";
+import { InviteOpener } from "@/InviteOpener";
 import { noteScreen, reportUncaught } from "@/report-error";
 import { color } from "@/theme";
 
@@ -161,7 +162,11 @@ function Gatekeeper() {
     return () => sub.remove();
   }, []);
 
-  return null;
+  // Beside the gatekeeper, and under the same rule as a tapped notice: an
+  // invite link the phone handed over (app/+native-intent.ts) is opened
+  // for a player who is in the free app, and never past a gate
+  // (src/InviteOpener.tsx). It draws nothing.
+  return <InviteOpener />;
 }
 
 export default function RootLayout() {

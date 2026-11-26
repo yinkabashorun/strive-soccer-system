@@ -327,6 +327,31 @@ THE CLOCK IS STILL RUNNING
     on, starting a clock raises no permission question and nothing
     arrives.
 
+## Email confirmation, on a phone only (Nov 26 2026, migration 093)
+
+Only shows once RESEND_API_KEY is set in Vercel and migration 093 is
+applied; until then nobody is asked. Make a new free account with an email
+you can open on the same phone.
+
+1. Right after "Create my account" the app opens on "Check your email" with
+   the address you typed, before the @username and the photo.
+2. The code arrives in Mail ("Your Strive Elite code"), and the box offers
+   it above the number pad (iOS fills a code from Mail). Tap it: the box
+   holds 6 digits.
+3. The number pad comes up by itself and Confirm stays above it.
+4. Type a wrong code and tap Confirm: "That code does not match. Check the
+   email and try again." and the box empties.
+5. Tap Send a new code: "Sent. Check your email." and the line under it
+   counts down to the next one. A second tap inside the minute says how long
+   to wait. The new email's code works, the old one does not.
+6. Wrong email? Change it: one email box, Send the code. The code goes to
+   the new address and the screen says it.
+7. Airplane mode: Confirm says it could not reach Strive; back online it
+   works on the next tap.
+8. The right code moves you straight on to the @username. Close the app and
+   open it again: it does not ask for the code again.
+9. Delete my account and Sign out on the screen both work.
+
 ## Seeing the phone from here
 
 `.github/workflows/ios-simulator-screens.yml` (built Nov 23 2026 on his

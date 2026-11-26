@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/elite/supabase/server";
 import { establishSession } from "@/lib/elite/session-start";
+import { sendFirstCode } from "@/lib/elite/email-confirm-server";
 import { emailHasFreeAccount } from "@/lib/elite/tracker-server";
 import { createProMember } from "@/lib/elite/pro-server";
 import { rateLimit, clientIp } from "@/lib/rate-limit";
@@ -148,6 +149,9 @@ export async function POST(req: Request) {
   // 5) signed in here, on the server (lib/elite/session-start.ts). If it
   // does not take, the account exists and the form sends them to sign in,
   // where the app offers the checkout.
+  // 4a) the code that confirms the email (093), best effort
+  await sendFirstCode(userId);
+
   const signedIn = await establishSession(fields.email, fields.password);
   return NextResponse.json({ ok: true, signedIn });
 }

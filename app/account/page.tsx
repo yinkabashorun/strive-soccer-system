@@ -36,7 +36,8 @@ export default async function AccountPage() {
   const tracker = viewer.demo ? null : await freeAccountFor(viewer);
   // ...or while it still owes its profile photo and username (081): the
   // one-time screen links here so Sign out and Delete stay reachable.
-  if (tracker && !profileSetupDue(viewer.setup) && !(await consentDue(viewer.profile.id))) redirect(FREE_SETTINGS);
+  // ...or while it still has to confirm its email (093).
+  if (tracker && !viewer.emailDue && !profileSetupDue(viewer.setup) && !(await consentDue(viewer.profile.id))) redirect(FREE_SETTINGS);
   const isMember = isPlayer && !tracker;
   const home = !isPlayer ? "/coach" : tracker ? FREE_WEEK : "/dashboard";
   const canDelete = deleteGate(viewer).allowed;

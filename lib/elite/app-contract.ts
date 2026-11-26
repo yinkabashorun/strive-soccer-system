@@ -85,7 +85,16 @@ export type AppBootstrap = {
     // a few usernames to offer, when the username is still owed
     ideas: string[];
   };
+  // A new account that has not typed the code from its email yet (093,
+  // lib/elite/email-confirm.ts): the phone shows the confirm-email screen
+  // before anything else. Null when nothing is owed, and always null while
+  // no email sender is set up or 093 is not applied. Optional so an older
+  // server's answer still reads as "nothing owed".
+  emailConfirm?: null | { email: string };
 };
+
+// What sending, checking and changing the code answer (email-confirm.ts).
+export type { ConfirmAnswer as AppEmailAnswer } from "./email-confirm";
 
 // The Inbox (lib/elite/bell.ts inboxRows): the member's notes, each once,
 // newest first, with where each opens.
@@ -128,6 +137,10 @@ export const APP_API = {
   courses: "/api/app/courses",
   notices: "/api/app/notices",
   noticePrefs: "/api/app/notices/prefs",
+  // email confirmation (093)
+  emailSend: "/api/app/email/send",
+  emailConfirm: "/api/app/email/confirm",
+  emailChange: "/api/app/email/change",
   // the free app
   freeOpen: "/api/app/free/open",
   freeJoin: "/api/app/free/join",

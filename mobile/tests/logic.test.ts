@@ -153,6 +153,25 @@ describe("where the app belongs", () => {
     expect(areaFor(true, { kind: "membership", gate: { title: "", body: "", emailCoach: true } })).toBe("gate");
   });
 
+  it("asks a new account for the code from its email before anything else (093)", () => {
+    const owed = { username: null, hasPhoto: false, photoUrl: null, steps: ["username", "photo"] as ("username" | "photo")[], ideas: [] };
+    const due = { email: "m@example.com" };
+    expect(areaFor(true, { kind: "free", stage: "quiz" }, owed, due)).toBe("confirm-email");
+    expect(areaFor(true, { kind: "onboarding" }, owed, due)).toBe("confirm-email");
+    expect(areaFor(true, { kind: "consent" }, null, due)).toBe("confirm-email");
+    expect(areaFor(true, { kind: "ok" }, null, due)).toBe("confirm-email");
+    // nothing owed, or an older server that does not send it: as before
+    expect(areaFor(true, { kind: "free", stage: "quiz" }, owed, null)).toBe("profile");
+    expect(areaFor(true, { kind: "ok" }, null, undefined)).toBe("app");
+    // a coach is never asked
+    expect(areaFor(true, { kind: "coach" }, null, due)).toBe("gate");
+    expect(inArea("confirm-email", ["confirm-email"])).toBe(true);
+    expect(inArea("confirm-email", ["(free)"])).toBe(false);
+    // Delete my account stays one tap away
+    expect(inArea("confirm-email", ["delete-account"])).toBe(true);
+    expect(areaHome("confirm-email")).toBe("/confirm-email");
+  });
+
   it("asks a member from before 081 for the photo and username after the gate", () => {
     const owed = { username: null, hasPhoto: false, photoUrl: null, steps: ["username", "photo"] as ("username" | "photo")[], ideas: [] };
     expect(areaFor(true, { kind: "ok" }, owed)).toBe("profile");

@@ -385,6 +385,11 @@ vi.mock("@/app/api/elite/push/native/route", () => ({
     return new Response(JSON.stringify({ ok: true }), { status: 200 });
   },
 }));
+vi.mock("@/lib/elite/email-confirm-server", () => ({
+  sendCode: call("sendCode"),
+  confirmCode: call("confirmCode"),
+  changeEmail: call("changeEmail"),
+}));
 vi.mock("@/lib/elite/profile-actions", () => ({
   checkUsername: async (n: string) => (s.calls.push({ fn: "checkUsername", args: [n] }), { ok: true, name: n }),
   saveUsername: async (n: string) => (s.calls.push({ fn: "saveUsername", args: [n] }), { ok: true, name: n }),
@@ -466,6 +471,10 @@ const ROUTES = {
   freeClubPlans: () => import("@/app/api/app/free/plans/route"),
   freeClubPlan: () => import("@/app/api/app/free/plans/[id]/route"),
   freePlayTerms: () => import("@/app/api/app/free/play-terms/route"),
+  // email confirmation (093)
+  emailSend: () => import("@/app/api/app/email/send/route"),
+  emailConfirm: () => import("@/app/api/app/email/confirm/route"),
+  emailChange: () => import("@/app/api/app/email/change/route"),
 };
 // The two routes nobody is signed in for yet.
 const PUBLIC = {
@@ -540,6 +549,9 @@ const TABLE: { route: keyof typeof ROUTES; method: "GET" | "POST" | "DELETE"; ac
   { route: "freeClubPlans", method: "POST", access: "free_app" },
   { route: "freeClubPlan", method: "POST", access: "free_app" },
   { route: "freePlayTerms", method: "POST", access: "free_app" },
+  { route: "emailSend", method: "POST", access: "account" },
+  { route: "emailConfirm", method: "POST", access: "account" },
+  { route: "emailChange", method: "POST", access: "account" },
 ];
 const FOR_FREE = new Set<Access>(["free", "free_only", "free_app"]);
 
@@ -712,6 +724,37 @@ describe("every route", () => {
       expect(res.status === 403).toBe(FOR_FREE.has(row.access) || row.access === "player" || row.access === "member");
     });
   }
+});
+
+describe("an email still to confirm (093)", () => {
+  for (const row of TABLE) {
+    it(`${row.method} ${row.route}: only account routes answer until the code is typed`, async () => {
+      const h = await handler(row.route, row.method);
+      s.viewer = { ...viewer(), emailDue: true } as Viewer;
+      const res = await h(req(row.method, { body: {} }));
+      if (row.access === "account") expect(res.status).not.toBe(403);
+      else {
+        expect(res.status).toBe(403);
+        expect(s.calls).toEqual([]);
+      }
+    });
+  }
+
+  it("the three email routes hand the server only the caller's own account and what was typed", async () => {
+    await (await handler("emailSend", "POST"))(req("POST", { body: { profileId: "someone-else" } }));
+    await (await handler("emailConfirm", "POST"))(req("POST", { body: { code: "123456", profileId: "someone-else" } }));
+    await (await handler("emailChange", "POST"))(req("POST", { body: { email: "new@example.com" } }));
+    expect(s.calls).toEqual([
+      { fn: "sendCode", args: ["u1"] },
+      { fn: "confirmCode", args: ["u1", "123456"] },
+      { fn: "changeEmail", args: ["u1", "new@example.com"] },
+    ]);
+  });
+
+  it("a code that is not text reaches the server as nothing", async () => {
+    await (await handler("emailConfirm", "POST"))(req("POST", { body: { code: 123456 } }));
+    expect(s.calls).toEqual([{ fn: "confirmCode", args: ["u1", null] }]);
+  });
 });
 
 describe("nobody is signed in yet", () => {

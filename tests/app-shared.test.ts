@@ -211,6 +211,12 @@ describe("the phone's build", () => {
     expect(steps).not.toContain("CODE_SIGN_IDENTITY");
     expect(wf).toContain("<string>app-store-connect</string>");
     expect(readFileSync(path.join(root, "mobile/src/config.ts"), "utf8")).toContain('process.env.EXPO_PUBLIC_FIXTURES === "1"');
+    // the build number is typed every time: a default goes stale after each
+    // build and Apple refuses a repeated number only after the whole compile
+    const input = wf.slice(wf.indexOf("build_number:"), wf.indexOf("permissions:"));
+    expect(input).toContain("required: true");
+    expect(input).not.toMatch(/default:/);
+    expect(input).not.toMatch(/\d+ or more/);
   });
 
   // The simulator check on GitHub's Mac (ios-simulator-screens.yml) builds

@@ -2,8 +2,11 @@
 # Expo) and uploads it to TestFlight. The older Capacitor shell (native/)
 # keeps its own workflow, "iOS to TestFlight"; both upload to the same App
 # Store Connect app (bundle ID com.strivesoccer.elite), so the build number
-# must always be higher than the last upload of EITHER (5 or more after
-# Capacitor build 4).
+# must always be higher than the last upload of EITHER. The box carries NO
+# default on purpose: a default goes stale after every build (it still said
+# 5 when the next build was 9), and a number Apple already has is refused
+# only after the whole 25 minute compile. The app shows the build it is on
+# at the bottom of Settings.
 #
 # Runs ONLY when started by hand: GitHub > Actions > "Native iOS to
 # TestFlight" > Run workflow. No Expo account and no EAS: the project is
@@ -22,9 +25,8 @@ on:
   workflow_dispatch:
     inputs:
       build_number:
-        description: "Build number (higher than the last upload of either app: 5 or more)"
+        description: "Build number: one higher than the last build you ran"
         required: true
-        default: "5"
 
 permissions:
   contents: read

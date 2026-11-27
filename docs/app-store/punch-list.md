@@ -123,9 +123,9 @@ left on it. What only a phone can show is `native-device-checklist.md`.
 | N31 | Email confirmation: a 6 digit code before a new account enters the app | ON MAIN Nov 26 (PR #43), for build 10. DARK until RESEND_API_KEY is in Vercel and migration 093 is applied (both his word) |
 | N32 | Add a friend by exact @username, My code (QR), invite links open the app | ON MAIN Nov 26 (PR #43), for build 10. Universal links only in a signed build made after the site is live |
 | N33 | The Monday card (no notification), the rating ask, a page for parents | ON MAIN Nov 26 (PR #43), for build 10 |
-| N34 | The set timer counts the drill's own time (it restarted whenever a tick saved); a rest can be skipped | ON THE DEV BRANCH Nov 27, for build 11 |
-| N35 | The words name the person (no they, them, their), contractions, "+1 minute", the drill tiles' labels | ON THE DEV BRANCH Nov 27, for build 11 |
-| N36 | Where you stand this week on Friends and over the board; the board above the upgrade card; a club card's matchup as a score | ON THE DEV BRANCH Nov 27, for build 11. Not proven on a phone |
+| N34 | The set timer counts the drill's own time (it restarted whenever a tick saved); a rest can be skipped | ON MAIN Nov 27 (PR #44), for build 11 |
+| N35 | The words name the person (no they, them, their), contractions, "+1 minute", the drill tiles' labels | ON MAIN Nov 27 (PR #44), for build 11 |
+| N36 | Where you stand this week on Friends and over the board; the board above the upgrade card; a club card's matchup as a score | ON MAIN Nov 27 (PR #44), for build 11. Not proven on a phone |
 | N17 | The upgrade inside the app opens a web checkout: allowed on the US storefront only (from memory, to verify); Apple's in-app purchase is the fallback | DECIDED Nov 25 2026, his "Keep it": United States only, the web checkout stays. Fallback if Apple objects: take the offer out of the iPhone app |
 
 ## B. Research to settle before the first build

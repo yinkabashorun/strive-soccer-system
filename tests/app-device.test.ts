@@ -1129,17 +1129,24 @@ describe("the words name the person, and the scores come first", () => {
     expect(week.indexOf("{BOARD_TITLE}")).toBeGreaterThan(0);
     expect(week.indexOf("{BOARD_TITLE}")).toBeLessThan(week.indexOf("<UpgradeCard"));
     expect(week.indexOf("<StandingLine board={w.board}")).toBeGreaterThan(week.indexOf("{BOARD_TITLE}"));
+    expect(week).toContain("<StandingLine board={w.board} perDay={perDayMinutes(w.target, w.planDays.length)}");
     expect(week.indexOf("<StandingLine board={w.board}")).toBeLessThan(week.indexOf("{w.board.map("));
   });
 
-  it("Friends says where you stand this week under the date, one tap from the board", () => {
+  it("Friends says where you stand this week under the date, and a tap starts training", () => {
     const friends = code(path.join(root, "app/(free)/friends.tsx"));
-    expect(friends).toContain("const board = useFreeWeek().data?.board ?? null;");
-    expect(friends).toContain('<StandingLine board={board} onPress={() => router.navigate("/(free)/my-week")}');
+    expect(friends).toContain("const myWeek = useFreeWeek().data;");
+    // a session is the player's own planned day, and the line says a session wins it: the tap opens the clock
+    expect(friends).toContain("const perDay = myWeek ? perDayMinutes(myWeek.target, myWeek.planDays.length) : null;");
+    expect(friends).toContain("<StandingLine board={board} perDay={perDay} onPress={post}");
+    expect(friends).toContain("const post = () => router.push(OPEN_CLOCK);");
     expect(friends.indexOf("{f.date}")).toBeLessThan(friends.indexOf("<StandingLine"));
     expect(friends.indexOf("<StandingLine")).toBeLessThan(friends.indexOf("<ClockRow"));
     const line = code(path.join(root, "src/StandingLine.tsx"));
-    expect(line).toContain("standingLine(board)");
+    expect(line).toContain("standingLine(board, perDay)");
+    // the payoff, in gold because it was earned
+    expect(line).toContain("passedFriend(last.current, board)");
+    expect(line).toContain("<Eyebrow style={{ marginBottom: 4 }}>{`You passed ${passed}`}</Eyebrow>");
     expect(line).toContain("if (!s) return null;");
   });
 

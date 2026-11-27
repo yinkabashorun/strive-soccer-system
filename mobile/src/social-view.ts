@@ -39,19 +39,36 @@ export function inviteShare(p: { invite: string; inviteText?: string }): { messa
 }
 
 // WHERE YOU STAND THIS WEEK: one line from the friends board, said at the
-// top of Friends and over the board on Week, so the gap to the next friend
-// is the first thing a player reads ("You're 2nd of 5 this week. 18m to
-// pass Diego."). Among friends only, from training that counts on the
-// board. It never says what anyone has not done: a player with no time yet
-// reads who leads; a friend is only ever named with time on the board.
-// Null with no friends on the board, or when nobody has trained yet.
+// top of Friends and over the board on Week. It says the one thing a
+// player cares about (the owner, Nov 27 2026: "just say what they care
+// about. you're 1 session away from beating (name)"):
+//
+//   "You're 1 session away from beating Nico."
+//
+// A SESSION IS THE PLAYER'S OWN: the length of one training day in the
+// plan they set ("4 days. About 1h a day." is a 1 hour session), or one
+// hour for a player with no days picked yet. So the line is a promise the
+// app can keep: train one of your own sessions on the clock, and you pass
+// that friend if that friend does not train in the meantime. The friend
+// named is always the NEXT one up, the closest one to beat.
+//
+// Among friends only, from training that counts on the board. It never
+// says what anyone has not done: a friend is only ever named with time on
+// the board. Null with no friends on the board, or when nobody has trained.
 export type StandRow = { me: boolean; name: string; minutes: number };
 export type Standing = { strong: string; rest: string | null };
 
-export function ordinal(n: number): string {
-  const tens = n % 100;
-  if (tens >= 11 && tens <= 13) return `${n}th`;
-  return `${n}${["th", "st", "nd", "rd"][n % 10] ?? "th"}`;
+export const SESSION_FALLBACK_MINUTES = 60;
+
+// One of the player's own sessions, in minutes: a planned day's length.
+export function sessionMinutes(perDay: number | null | undefined): number {
+  return perDay && perDay > 0 ? perDay : SESSION_FALLBACK_MINUTES;
+}
+
+// How many of those sessions put the player in FRONT of a friend who is
+// `gap` minutes ahead: level is not beating, so the gap has to be passed.
+export function sessionsToBeat(gap: number, session: number): number {
+  return Math.max(1, Math.ceil((Math.max(0, gap) + 1) / Math.max(1, session)));
 }
 
 const firstOf = (name: string): string => name.trim().split(/\s+/)[0] || "A friend";
@@ -61,29 +78,46 @@ const span = (m: number): string => {
   return r % 60 ? `${Math.floor(r / 60)}h ${r % 60}m` : `${Math.floor(r / 60)}h`;
 };
 
-export function standingLine(board: readonly StandRow[]): Standing | null {
+export function standingLine(board: readonly StandRow[], perDay?: number | null): Standing | null {
   const me = board.find((r) => r.me);
   const others = board.filter((r) => !r.me);
   if (!me || others.length === 0) return null;
   const trained = others.filter((r) => r.minutes > 0).sort((a, b) => b.minutes - a.minutes);
-  if (!(me.minutes > 0)) {
-    const leader = trained[0];
-    return leader ? { strong: `${firstOf(leader.name)} leads your friends this week`, rest: `${span(leader.minutes)} so far.` } : null;
-  }
+  if (trained.length === 0 && !(me.minutes > 0)) return null;
   const above = trained.filter((r) => r.minutes > me.minutes);
-  if (above.length === 0) {
-    const level = trained.find((r) => r.minutes === me.minutes);
-    if (level) return { strong: `You and ${firstOf(level.name)} are level at the top`, rest: "Your next session takes the lead." };
-    const next = trained[0];
-    return { strong: "You lead your friends this week", rest: next ? `${firstOf(next.name)} is ${span(me.minutes - next.minutes)} back.` : null };
+  if (above.length > 0) {
+    // the closest friend to beat, and how many of the player's own sessions it takes
+    const next = above[above.length - 1];
+    const n = sessionsToBeat(next.minutes - me.minutes, sessionMinutes(perDay));
+    return { strong: `You're ${n} ${n === 1 ? "session" : "sessions"} away from beating ${firstOf(next.name)}`, rest: null };
   }
-  const ahead = above[above.length - 1];
+  const level = trained.find((r) => r.minutes === me.minutes);
+  if (level) return { strong: `You and ${firstOf(level.name)} are tied`, rest: "Your next session puts you in front." };
+  const chaser = trained[0];
   return {
-    strong: `You're ${ordinal(above.length + 1)} of ${board.length} this week`,
-    rest: `${span(ahead.minutes - me.minutes)} to pass ${firstOf(ahead.name)}.`,
+    strong: others.length === 1 ? `You're beating ${firstOf(others[0].name)} this week` : "You're beating all your friends this week",
+    rest: chaser ? `${firstOf(chaser.name)} is ${span(me.minutes - chaser.minutes)} from catching you.` : null,
   };
 }
 
 export function standingSaid(s: Standing): string {
   return s.rest ? `${s.strong}. ${s.rest}` : `${s.strong}.`;
+}
+
+// THE PAYOFF: the friend a player just passed. Between two reads of the
+// board, a friend who was in front and is now behind, while the player's
+// own time went up (so it is the player's training that did it, never a
+// friend's deleted post). The one passed last (the highest) is named.
+export function passedFriend(before: readonly StandRow[] | null | undefined, after: readonly StandRow[]): string | null {
+  const was = before?.find((r) => r.me);
+  const now = after.find((r) => r.me);
+  if (!before || !was || !now || !(now.minutes > was.minutes)) return null;
+  const passed = after
+    .filter((r) => !r.me && r.minutes > 0 && r.minutes < now.minutes)
+    .filter((r) => {
+      const then = before.find((b) => !b.me && b.name === r.name);
+      return then !== undefined && then.minutes > was.minutes;
+    })
+    .sort((a, b) => b.minutes - a.minutes);
+  return passed[0] ? firstOf(passed[0].name) : null;
 }

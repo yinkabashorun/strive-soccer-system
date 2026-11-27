@@ -461,7 +461,7 @@ friend of the other.
 
 ## Where you stand, the board and the club score, on a phone (Nov 27 2026, from build 11)
 
-- Friends, with at least one friend who has trained this week: under the date one line says where you stand ("You're 3rd of 4 this week. 30m to pass Nico."). A tap on it opens Week.
+- Friends, with at least one friend who has trained this week: under the date one line says where you stand ("You're 1 session away from beating Nico."). A tap on it opens the training clock. Train one of your own sessions on the clock, post it, and come back: a gold "You passed Nico" sits over the line.
 - Week: the friends board is right under the week's days, with the same line over it. The upgrade card is under the board and Share my week.
 - With no friends yet, or when nobody has trained this week: no line at all on either tab.
 - Clubs, a club in a matchup this week: the card shows "This week vs <club>", both times per player, one bar and who is ahead.

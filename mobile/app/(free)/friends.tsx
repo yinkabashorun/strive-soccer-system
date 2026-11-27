@@ -3,6 +3,7 @@ import { ScrollView, Share, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { fmtDuration } from "@shared/time-trained";
 import { ADD_ROW } from "@shared/friend-add";
+import { perDayMinutes } from "@shared/tracker";
 import { ApiError, OFFLINE_MESSAGE } from "@/api/client";
 import { answerFriend, refreshFree, useFeed, useFreeWeek } from "@/api/free";
 import { inviteShare } from "@/social-view";
@@ -36,7 +37,10 @@ export default function Friends() {
   const feed = useFeed();
   const f = feed.data;
   // the friends board, for the one line that says where you stand this week
-  const board = useFreeWeek().data?.board ?? null;
+  const myWeek = useFreeWeek().data;
+  const board = myWeek?.board ?? null;
+  // one of the player's own sessions: a planned day's length
+  const perDay = myWeek ? perDayMinutes(myWeek.target, myWeek.planDays.length) : null;
   const clockLabel = useClockButton();
   // posts taken off the feed here (reported, blocked, deleted) and requests
   // answered, until the next read says the same
@@ -102,8 +106,8 @@ export default function Friends() {
           <Body dim size={13.5} style={{ marginTop: 6 }}>
             {f.date}
           </Body>
-          {/* where you stand this week: the board's own gap, one tap from the board */}
-          {board ? <StandingLine board={board} onPress={() => router.navigate("/(free)/my-week")} style={{ marginTop: 2 }} /> : null}
+          {/* where you stand this week; it says a session wins it, so a tap starts one */}
+          {board ? <StandingLine board={board} perDay={perDay} onPress={post} style={{ marginTop: 2 }} /> : null}
         </View>
         <Press
           onPress={() => router.navigate("/(free)/my-week")}

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Alert, Share, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { fmtDuration } from "@shared/time-trained";
-import { BOARD_EMPTY_LINE, BOARD_TITLE, STAR_LABEL, firstNameOf, initialsOf, stripDayLabel } from "@shared/tracker";
+import { BOARD_EMPTY_LINE, BOARD_TITLE, STAR_LABEL, firstNameOf, initialsOf, perDayMinutes, stripDayLabel } from "@shared/tracker";
 import { PRO_ENDED_DISMISS, PRO_ENDED_LINE } from "@shared/one-app";
 import { NOT_TIMED } from "@shared/training-clock";
 import { ClockRow } from "@/ClockRow";
@@ -177,7 +177,7 @@ export default function MyWeek() {
       <View style={{ marginHorizontal: 20, marginTop: 26 }}>
         <Label size={17}>{BOARD_TITLE}</Label>
         {/* where you stand, and the gap to the next friend */}
-        <StandingLine board={w.board} style={{ marginTop: 6 }} />
+        <StandingLine board={w.board} perDay={perDayMinutes(w.target, w.planDays.length)} style={{ marginTop: 6 }} />
         <Card style={{ marginTop: 10, padding: 0 }}>
           {w.board.map((r, i) => (
             <View key={r.id}>

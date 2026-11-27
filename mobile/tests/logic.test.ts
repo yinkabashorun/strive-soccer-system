@@ -1,4 +1,4 @@
-import { BAR_MIN, barShare, inviteShare, matchupSplit, ordinal, recordShort, standingLine, standingSaid } from "@/social-view";
+import { BAR_MIN, barShare, inviteShare, matchupSplit, passedFriend, recordShort, SESSION_FALLBACK_MINUTES, sessionMinutes, sessionsToBeat, standingLine, standingSaid } from "@/social-view";
 import { describe, expect, it } from "vitest";
 import { chunkedStorage, CHUNK_SIZE, MAX_CHUNKS, parseCount, splitValue, type KV } from "@/auth/chunks";
 import { applyDone } from "@/week-cache";
@@ -1023,37 +1023,62 @@ describe("the training clock on the phone", () => {
 
 describe("where you stand this week (Friends and Week)", () => {
   const row = (name: string, minutes: number, me = false) => ({ name, minutes, me });
-  it("says the place and the gap to the next friend up", () => {
-    const s = standingLine([row("Diego R.", 75), row("Marcus B.", 57, true), row("Kai T.", 30), row("Nico A.", 0)]);
-    expect(s).toEqual({ strong: "You're 2nd of 4 this week", rest: "18m to pass Diego." });
-    expect(standingSaid(s!)).toBe("You're 2nd of 4 this week. 18m to pass Diego.");
+  it("says the one thing a player cares about: how many of their own sessions beat the next friend up", () => {
+    // a 1 hour session (4h over 4 days), 18 minutes back: one session does it
+    const s = standingLine([row("Diego R.", 75), row("Marcus B.", 57, true), row("Kai T.", 30), row("Nico A.", 0)], 60);
+    expect(s).toEqual({ strong: "You're 1 session away from beating Diego", rest: null });
+    expect(standingSaid(s!)).toBe("You're 1 session away from beating Diego.");
     // the friend named is the next one up, never the leader two places away
-    expect(standingLine([row("A One", 200), row("B Two", 90), row("Me", 60, true)])!.rest).toBe("30m to pass B.");
-    expect(standingLine([row("A One", 200), row("Me", 65, true)])!.rest).toBe("2h 15m to pass A.");
+    expect(standingLine([row("A One", 200), row("B Two", 90), row("Me", 60, true)], 60)!.strong).toBe("You're 1 session away from beating B");
+    // a longer gap takes more sessions, and a shorter session takes more of them
+    expect(standingLine([row("A One", 200), row("Me", 65, true)], 60)!.strong).toBe("You're 3 sessions away from beating A");
+    expect(standingLine([row("A One", 200), row("Me", 65, true)], 45)!.strong).toBe("You're 4 sessions away from beating A");
+    // no time yet: the same line, aimed at the closest friend with time
+    expect(standingLine([row("Me", 0, true), row("Diego R.", 75), row("Kai T.", 20)], 60)!.strong).toBe("You're 1 session away from beating Kai");
   });
-  it("in front: says so, and how far back the next friend is", () => {
-    expect(standingLine([row("Me", 90, true), row("Diego R.", 78), row("Kai T.", 0)])).toEqual({ strong: "You lead your friends this week", rest: "Diego is 12m back." });
+  it("a session is the player's own planned day, and beating means passing, not tying", () => {
+    expect(sessionMinutes(45)).toBe(45);
+    expect(sessionMinutes(0)).toBe(SESSION_FALLBACK_MINUTES);
+    expect(sessionMinutes(null)).toBe(60);
+    expect(sessionsToBeat(18, 60)).toBe(1);
+    expect(sessionsToBeat(59, 60)).toBe(1);
+    // exactly one session back: one session only ties, so it takes two
+    expect(sessionsToBeat(60, 60)).toBe(2);
+    expect(sessionsToBeat(0, 60)).toBe(1);
+    // with no plan given, a session is one hour
+    expect(standingLine([row("A One", 130), row("Me", 65, true)])!.strong).toBe("You're 2 sessions away from beating A");
+  });
+  it("in front: says so, and how close the next friend is", () => {
+    expect(standingLine([row("Me", 90, true), row("Diego R.", 78), row("Kai T.", 0)], 60)).toEqual({ strong: "You're beating all your friends this week", rest: "Diego is 12m from catching you." });
+    expect(standingLine([row("Me", 90, true), row("Diego R.", 78)], 60)).toEqual({ strong: "You're beating Diego this week", rest: "Diego is 12m from catching you." });
     // nobody else has time yet: nothing is said about anyone
-    expect(standingLine([row("Me", 90, true), row("Kai T.", 0)])).toEqual({ strong: "You lead your friends this week", rest: null });
-    expect(standingLine([row("Me", 60, true), row("Diego R.", 60)])).toEqual({ strong: "You and Diego are level at the top", rest: "Your next session takes the lead." });
+    expect(standingLine([row("Me", 90, true), row("Kai T.", 0), row("Nico A.", 0)], 60)).toEqual({ strong: "You're beating all your friends this week", rest: null });
+    expect(standingLine([row("Me", 60, true), row("Diego R.", 60)], 60)).toEqual({ strong: "You and Diego are tied", rest: "Your next session puts you in front." });
   });
   it("never says what a player has not done", () => {
-    // no time yet: who leads, nothing about the player
-    expect(standingLine([row("Me", 0, true), row("Diego R.", 75), row("Kai T.", 20)])).toEqual({ strong: "Diego leads your friends this week", rest: "1h 15m so far." });
     // nobody has trained, or no friends on the board: no line at all
-    expect(standingLine([row("Me", 0, true), row("Diego R.", 0)])).toBeNull();
-    expect(standingLine([row("Me", 40, true)])).toBeNull();
-    expect(standingLine([])).toBeNull();
+    expect(standingLine([row("Me", 0, true), row("Diego R.", 0)], 60)).toBeNull();
+    expect(standingLine([row("Me", 40, true)], 60)).toBeNull();
+    expect(standingLine([], 60)).toBeNull();
     for (const board of [
-      [row("Me", 0, true), row("Diego R.", 75)],
+      [row("Me", 0, true), row("Diego R.", 75), row("Kai T.", 0)],
       [row("Me", 10, true), row("Diego R.", 75), row("Kai T.", 0)],
       [row("Me", 90, true), row("Diego R.", 75), row("Kai T.", 0)],
     ]) {
-      const said = standingSaid(standingLine(board)!);
+      const said = standingSaid(standingLine(board, 60)!);
       expect(said).not.toMatch(/Kai|has not|hasn't|missed|behind|last|streak|\b(they|them|their)\b/i);
     }
   });
-  it("counts places the way people say them", () => {
-    expect([1, 2, 3, 4, 11, 12, 13, 21, 22, 23, 101, 111].map(ordinal)).toEqual(["1st", "2nd", "3rd", "4th", "11th", "12th", "13th", "21st", "22nd", "23rd", "101st", "111th"]);
+  it("the payoff: names the friend the player's own training just passed", () => {
+    const before = [row("Diego R.", 75), row("Nico A.", 60), row("Me", 30, true)];
+    expect(passedFriend(before, [row("Diego R.", 75), row("Nico A.", 60), row("Me", 70, true)])).toBe("Nico");
+    // passed both: the one passed last is named
+    expect(passedFriend(before, [row("Diego R.", 75), row("Nico A.", 60), row("Me", 90, true)])).toBe("Diego");
+    // level is not passed; nothing on the first read; nothing when the player's time did not go up
+    expect(passedFriend(before, [row("Diego R.", 75), row("Nico A.", 60), row("Me", 60, true)])).toBeNull();
+    expect(passedFriend(null, before)).toBeNull();
+    expect(passedFriend(before, [row("Diego R.", 75), row("Nico A.", 10), row("Me", 30, true)])).toBeNull();
+    // a friend who was already behind is not "passed"
+    expect(passedFriend([row("Kai T.", 10), row("Me", 30, true)], [row("Kai T.", 10), row("Me", 90, true)])).toBeNull();
   });
 });

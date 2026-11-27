@@ -112,7 +112,7 @@ export const COUNTY_GROUPS: { state: County["state"]; label: string; counties: C
 ];
 
 export const COUNTY_MESSAGE = "Pick your club's county from the list.";
-export const OPEN_NEEDS_COUNTY_MESSAGE = "Pick your club's county first. Clubs only play clubs in their own county.";
+export const OPEN_NEEDS_COUNTY_MESSAGE = "Pick your club's county first. Clubs only play clubs in the same county.";
 
 // ---- Clubs as the rules see them --------------------------------------------
 
@@ -270,9 +270,9 @@ export const PLAN_REFUSED: Record<PlanRefusal, string> = {
   not_captain: "Only the club's captain can plan for the club.",
   ended: "That club has ended.",
   self: "A club cannot play itself.",
-  no_county: "Pick your club's county first. Clubs only play clubs in their own county.",
+  no_county: "Pick your club's county first. Clubs only play clubs in the same county.",
   not_open: "That club is not taking games right now.",
-  other_county: "Clubs only play clubs in their own county.",
+  other_county: "Clubs only play clubs in the same county.",
   too_many: `Your club has ${PENDING_GAMES_MAX} game requests waiting. Wait for an answer or cancel one first.`,
 };
 
@@ -422,7 +422,7 @@ export function planWhat(plan: { kind: PlanKind; title: string | null }, otherCl
 // The small line over a card: what it is and who it is for.
 export function planLabel(card: Pick<PlanCard, "kind" | "status" | "result">): string {
   if (card.kind === "training") return "Club training · Members only";
-  if (card.status === "pending") return "Game · Waiting on their captain";
+  if (card.status === "pending") return "Game · Waiting on the other captain";
   return card.result?.state === "confirmed" ? "Game · Final" : "Game · Club vs club";
 }
 
@@ -718,7 +718,7 @@ export function cleanEvent(input: EventInput): { ok: true; fields: EventFields }
   };
 }
 
-export const WAIVER_REQUIRED_MESSAGE = "Add the waiver link before opening entries. Every player accepts it when they say they're in.";
+export const WAIVER_REQUIRED_MESSAGE = "Add the waiver link before opening entries. Every player accepts it before tapping I'm in.";
 
 // May a coach open this event for entries? It needs its waiver link, and
 // it must not have started.
@@ -847,7 +847,7 @@ export function entryState(input: { roster: { in_at: string | null }[]; sent_at:
 export function entryLine(state: EntryState, waiting: number): string {
   if (state === "paid") return "Spot locked.";
   if (state === "sent") return "Entered. Pay to lock your spot.";
-  return waiting === 1 ? "Waiting on 1 player to say they're in." : `Waiting on ${waiting} players to say they're in.`;
+  return waiting === 1 ? "Waiting on 1 player to tap I'm in." : `Waiting on ${waiting} players to tap I'm in.`;
 }
 
 export function rosterAskLine(club: string, event: string): string {

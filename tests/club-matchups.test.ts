@@ -279,7 +279,7 @@ describe("what a club's page shows", () => {
     expect(v.line).toBe("Your club is ahead by 12 minutes per player.");
     expect(v.cardLine).toBe("This week: Renegados FC vs Sunday Pickup.");
     expect(view({ rows: [row({})], theirRows: [b], logs: [log("b1", MON, 240)] }).line).toBe("Sunday Pickup is ahead by 60 minutes per player.");
-    expect(view({ rows: [row({})], theirRows: [b] }).line).toBe("It is tied.");
+    expect(view({ rows: [row({})], theirRows: [b] }).line).toBe("It's tied.");
   });
 
   it("says last week's result under this week's", () => {

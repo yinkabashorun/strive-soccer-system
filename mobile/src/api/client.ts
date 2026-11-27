@@ -24,7 +24,7 @@ export class ApiError extends Error {
   }
 }
 
-export const OFFLINE_MESSAGE = "We could not reach Strive. Check your connection and try again.";
+export const OFFLINE_MESSAGE = "We couldn't reach Strive. Check your connection and try again.";
 
 // `upload` is a file as bytes (lib/elite/upload-body.ts). Never a FormData: this
 // Expo version's fetch refuses a React Native file part, and the request

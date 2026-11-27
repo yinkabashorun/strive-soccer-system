@@ -56,7 +56,7 @@ export default function WeekPlan() {
     const opening = first;
     try {
       const res = await savePlan(target, days);
-      if (!res.ok) return setError(res.error ?? "That did not save. Try again.");
+      if (!res.ok) return setError(res.error ?? "That didn't save. Try again.");
       await queryClient.invalidateQueries({ queryKey: freeKeys.plan });
       await refreshFree();
       if (!opening) return router.back();

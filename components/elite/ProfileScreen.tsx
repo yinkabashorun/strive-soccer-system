@@ -249,7 +249,7 @@ export function ProfileScreen({
             ...(profile.friend ? [{ label: "Remove from my friends", icon: <IconPerson />, onClick: () => setStep("friends") }] : []),
             { label: `Block ${first}`, icon: <IconBlock />, red: true, onClick: () => setStep("block") },
           ]}
-          note={`${first} is not told if you report or block them.`}
+          note={`${first} is never told about a report or a block.`}
         />
       )}
 
@@ -267,7 +267,7 @@ export function ProfileScreen({
               onClick: () => act(() => removeFriend(profile.id), () => router.push(FREE_HOME)),
             },
           ]}
-          note={`${first} is not told. Their link can add you again.`}
+          note={`${first} isn't told. ${first}'s link can add you again.`}
         />
       )}
 
@@ -285,7 +285,7 @@ export function ProfileScreen({
               onClick: () => act(() => blockPlayer(profile.id), () => router.push(FREE_HOME)),
             },
           ]}
-          note={`You stop being friends and you stop seeing each other's training. ${first} is not told, and their link will not add you again. You can unblock them in Settings.`}
+          note={`You stop being friends and you stop seeing each other's training. ${first} isn't told, and ${first}'s link won't add you again. You can unblock ${first} in Settings.`}
         />
       )}
 
@@ -303,7 +303,7 @@ export function ProfileScreen({
               onClick: () => act(() => reportLine(profile.id, reportStep), () => setStep("sent")),
             },
           ]}
-          note={`${first} is not told who reported it.`}
+          note={`${first} isn't told who reported it.`}
         />
       )}
 

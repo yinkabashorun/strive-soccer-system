@@ -46,7 +46,7 @@ appId: com.strivesoccer.elite
 
 # A tap on the box's name puts the cursor in it. A username nobody has gets
 # one plain line, and the button stays above the keyboard.
-- tapOn: "Their @username"
+- tapOn: "Your friend's @username"
 - inputText: "nobody.here"
 - waitForAnimationToEnd:
     timeout: 2000
@@ -73,9 +73,9 @@ appId: com.strivesoccer.elite
 
 # My code: the QR code, whose it is, and the code in letters.
 - extendedWaitUntil:
-    visible: "Show my code"
+    visible: "Show my QR code"
     timeout: 10000
-- tapOn: "Show my code"
+- tapOn: "Show my QR code"
 - extendedWaitUntil:
     visible: "Your QR code. A teammate scans it to send you a friend request."
     timeout: 15000

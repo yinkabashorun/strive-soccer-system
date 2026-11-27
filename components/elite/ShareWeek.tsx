@@ -102,7 +102,7 @@ export function ShareWeek({
     const file = await fetchCard();
     setBusy(false);
     if (!file) {
-      setNote("We could not make your card just now. Try again in a minute.");
+      setNote("We couldn't make your card just now. Try again in a minute.");
       return;
     }
     ready.current = { stamp, file };

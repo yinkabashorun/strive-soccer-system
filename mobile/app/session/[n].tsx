@@ -115,7 +115,10 @@ function Player({ week, session }: { week: AppWeek; session: AppSession }) {
     clock.current = showDrill(clock.current, onScreen, Date.now());
   }, [onScreen]);
   const skills = drills.filter((d) => d.kind === "skill");
-  const plan = useMemo(() => (drill ? parseReps(drill.reps) : null), [drill]);
+  // read from the words, not the object: the same drill comes back as a new
+  // object each time a tick saves, and its timer must not start over
+  const reps = drill?.reps ?? null;
+  const plan = useMemo(() => (reps ? parseReps(reps) : null), [reps]);
 
   function done() {
     if (!drill) return;
@@ -350,7 +353,7 @@ function Finish({
       <View style={{ alignItems: "center", marginTop: insets.top + (push === "ask" ? 30 : 70) }}>
         <Ring size={push === "ask" ? 200 : 240} stroke={12} value={1} track="rgba(200,168,88,0.16)">
           <Head size={72} style={{ color: color.gold }}>{`+${shown}`}</Head>
-          <Eyebrow gold={false}>Minutes</Eyebrow>
+          <Eyebrow gold={false}>{finish.added === 1 ? "Minute" : "Minutes"}</Eyebrow>
         </Ring>
         <Animated.View entering={FadeIn.delay(500).duration(400)} style={{ alignItems: "center", paddingHorizontal: 24 }}>
           <Head size={38} style={{ marginTop: 22, textAlign: "center" }}>

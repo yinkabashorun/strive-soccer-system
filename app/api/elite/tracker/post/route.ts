@@ -103,7 +103,7 @@ export async function POST(req: Request) {
     const put = await attachSessionPhoto({ profileId: viewer.profile.id, logId, caption, photo });
     if (put === "missing") return no(POST_SESSION_NOT_READY, 409);
     if (put === "posted") return no("You already posted this session.", 409);
-    if (put === "error") return no("Your post was not saved. Check your connection and try again.", 502);
+    if (put === "error") return no("Your post wasn't saved. Check your connection and try again.", 502);
     await noticeFriendPost(viewer.profile.id, today).catch(() => 0);
     await countTeammate(viewer.profile.id).catch(() => undefined);
     revalidatePath(FREE_HOME);
@@ -121,7 +121,7 @@ export async function POST(req: Request) {
     weekTarget: tracker.target_minutes,
   });
   if (!saved.ok && saved.dayCap) return no(DAY_CAP_MESSAGE, 400);
-  if (!saved.ok) return no("Your post was not saved. Check your connection and try again.", 502);
+  if (!saved.ok) return no("Your post wasn't saved. Check your connection and try again.", 502);
   // the club teammates who trained with them, if any were tapped (077):
   // each gets a card to add the same time to their own week. Clubmates
   // only and never across a block, checked on the server.

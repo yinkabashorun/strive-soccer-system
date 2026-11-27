@@ -71,8 +71,8 @@ describe("three teammates who train earn a month", () => {
   it("says it in plain words, with the membership's own name and no price", () => {
     expect(SQUAD_TITLE).toBe("Bring 3 teammates. Get a month of Strive Pro.");
     expect(waitingLine([])).toBeNull();
-    expect(waitingLine(people(1))).toBe("Player 0 joined. They count once they post their first training.");
-    expect(waitingLine(people(3))).toBe("Player 0 and 2 more joined. Each counts once they post their first training.");
+    expect(waitingLine(people(1))).toBe("Player 0 joined. Player 0 counts after posting a first training.");
+    expect(waitingLine(people(3))).toBe("Player 0 and 2 more joined. Each teammate counts after posting a first training.");
     expect(runningLine("Thu, Dec 24")).toBe("Your earned month of Strive Pro runs until Thu, Dec 24.");
     const push = squadPassNotice({ number: 1 });
     for (const line of [SQUAD_TITLE, SQUAD_BODY, SQUAD_READY_TITLE, SQUAD_READY_BODY, push.title, push.body]) {

@@ -27,6 +27,7 @@ import {
 } from "./tracker";
 import type { Proof } from "./training-clock";
 import type { PlanCard } from "./club-teams";
+import type { MatchupView } from "./club-matchups";
 
 // ---- Joining by code -------------------------------------------------------
 
@@ -197,4 +198,24 @@ export function splitPlans(cards: PlanCard[]): { next: PlanCard[]; results: Plan
 // The server checks the day again (cleanStart): this only fills the picker.
 export function planDays(today: string, count = 14): string[] {
   return Array.from({ length: count }, (_, i) => shiftDay(today, i));
+}
+
+// ---- The matchup on a club's card ------------------------------------------
+
+// The weekly matchup as a score on the club's card (Nov 27 2026: the card
+// said only who plays who; the score is what brings a player back). Only
+// while a matchup is ON and both sides are known; the two numbers are each
+// club's time per player, the matchup's own measure, and the line is the
+// matchup card's own line.
+export type ClubRace = { other: string; mine: number; theirs: number; mineTime: string; theirsTime: string; line: string };
+export function cardRace(matchup: MatchupView | null | undefined): ClubRace | null {
+  if (!matchup || matchup.state !== "on" || !matchup.mine || !matchup.theirs) return null;
+  return {
+    other: matchup.theirs.name,
+    mine: matchup.mine.minutes,
+    theirs: matchup.theirs.minutes,
+    mineTime: matchup.mine.time,
+    theirsTime: matchup.theirs.time,
+    line: matchup.line,
+  };
 }

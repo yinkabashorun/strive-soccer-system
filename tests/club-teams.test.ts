@@ -512,7 +512,7 @@ describe("Strive events", () => {
     expect(entryState({ roster: [{ in_at: null }, { in_at: "x" }], sent_at: null, paid_at: null })).toBe("waiting");
     expect(entryState({ roster: [{ in_at: "x" }], sent_at: null, paid_at: null })).toBe("sent");
     expect(entryState({ roster: [{ in_at: "x" }], sent_at: "x", paid_at: "x" })).toBe("paid");
-    expect(entryLine("waiting", 2)).toBe("Waiting on 2 players to say they're in.");
+    expect(entryLine("waiting", 2)).toBe("Waiting on 2 players to tap I'm in.");
     expect(entryLine("sent", 0)).toBe("Entered. Pay to lock your spot.");
     expect(entryLine("paid", 0)).toBe("Spot locked.");
     expect(entryLine("sent", 0)).not.toMatch(/held|locked/);

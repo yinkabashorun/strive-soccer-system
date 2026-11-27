@@ -6,6 +6,7 @@
 // with `song` counts in that song's measured beats (song-beats.json, 172 BPM),
 // beat 0 = the song's beat `from`, and every time below follows those beats.
 import { setup as setupApp, renderApp } from "./film.src.js";
+import { setupFull, renderFull, FULL_FROM } from "./full.src.js";
 import SONG1 from "./song-beats.json" with { type: "json" };
 import SONGL from "./song-beats-loop.json" with { type: "json" };
 
@@ -24,7 +25,11 @@ const B = 60 / BPM;
 // screen points the camera can push into (screen px, 390 x 844)
 const P = { card: [195, 525], tiles: [195, 480], steps: [195, 420], cards: [195, 430], hero: [195, 400], count: [195, 430],
   drill: [195, 560], ring: [195, 320], fring: [195, 240], dots: [110, 600], ycard: [195, 190], mid: [195, 422],
-  kyou: [195, 260], kpod: [195, 300], kprops: [110, 600], kstar: [150, 250] };
+  kyou: [195, 260], kpod: [195, 300], kprops: [110, 600], kstar: [150, 250],
+  // the full-app cut's screens (full.screens.html)
+  xhero: [195, 470], xstart: [195, 630], dig: [195, 365], rt: [130, 450], xpostb: [195, 700], post: [195, 470], xprops: [110, 560],
+  wring: [110, 240], wrows: [195, 590], clubs: [195, 330], mu: [195, 530], champ: [150, 350], note: [195, 110],
+  procard: [195, 640], bar: [110, 780], ylvl: [170, 300], med: [195, 560], qr: [195, 413], boxes: [195, 400], earn: [195, 560] };
 const C = (s = 1, f = "mid", y = 0, ry = 0) => ({ s, f: P[f], y, ry });
 
 // shot: [beat, beats, masterFrom, masterTo, camera keys [[frac, cam]...]]
@@ -122,6 +127,53 @@ export const CUTS = {
     flash: [26, 51, 88, 108], done: [42, 44, 46], shimmer: [51], deviceOut: 110, tension: [34, 40],
     end: [[111, "OPEN STRIVE."], [112, "TAP START."], [113, "*TRAIN.*"]], mark: 114,
   },
+  // THE FULL APP on his song (Nov 26 2026): the same looped song and the same style as short-song,
+  // drawn from the real iPhone app. Master times from 100 up are full.src.js scenes; the session,
+  // the courses and the starred profile are the walkthrough's own scenes. Every tap, unlock, pass
+  // and stamp is placed so it lands on a song beat (the beat is worked out beside each scene's times).
+  "full-song": {
+    song: { from: 3, loop: true }, full: true,
+    len: 144,
+    open: [[1, "YOU TRAIN."], [4, "NOW *PROVE IT.*"]], openOut: 6,
+    shots: [
+      // friends, the clock, the post
+      [6, 6, 100.25, 103.6, [[0, C(1.0)], [0.55, C(1.08, "xhero")], [1, C(1.2, "xstart")]]],
+      [12, 4, 120.3, 122.9, [[0, C(1.04)], [1, C(1.12, "dig")]]],
+      [16, 6, 122.9, 126.5, [[0, C(1.12, "dig")], [0.66, C(1.32, "dig")], [1, C(1.1, "dig")]]],
+      [22, 6, 140.15, 144.35, [[0, C(1.04)], [0.35, C(1.08)], [0.62, C(1.28, "rt")], [1, C(1.1, "xpostb")]]],
+      [28, 12, 160.05, 166.6, [[0, C(1.0)], [0.25, C(1.1, "post")], [0.5, C(1.06, "post")], [0.7, C(1.28, "xprops")], [1, C(1.06)]]],
+      // the week and the friends board
+      [40, 12, 180.1, 186.7, [[0, C(1.0)], [0.2, C(1.16, "wring")], [0.42, C(1.2, "wrows")], [1, C(1.26, "wrows")]]],
+      // clubs, the matchup, champs of the week
+      [52, 6, 200.05, 203.35, [[0, C(1.0)], [1, C(1.1, "clubs")]]],
+      [58, 14, 220.05, 227.05, [[0, C(1.0)], [0.2, C(1.22, "mu")], [0.52, C(1.26, "mu")], [0.66, C(1.3, "champ")], [0.8, C(1.12, "note")], [1, C(1.14, "note")]]],
+      // Strive Pro adds Train: the week, the session, the courses
+      [72, 6, 240.1, 243.6, [[0, C(1.0)], [1, C(1.05)]]],
+      [78, 4, 21.8, 23.3, [[0, C(1.08, "hero")], [1, C(1.0)]]],
+      [82, 6, 24.08, 26.66, [[0, C(1.22, "count")], [1, C(1.32, "count")]]],
+      [88, 8, 26.6, 32.6, [[0, C(1.0)], [1, C(1.08, "drill")]]],
+      [96, 6, 37.5, 39.9, [[0, C(1.06)], [0.45, C(1.34, "fring")], [1, C(1.38, "fring")]]],
+      [102, 4, 49.5, 51.4, [[0, C(1.02)], [1, C(1.1)]]],
+      // you, the star, your teammates
+      [106, 8, 260.1, 265.3, [[0, C(1.0)], [0.28, C(1.22, "ylvl")], [0.5, C(1.24, "ylvl")], [0.72, C(1.16, "med")], [1, C(1.2, "med")]]],
+      [114, 8, 75.45, 78.09, [[0, C(1.04)], [0.35, C(1.1)], [0.65, C(1.3, "kstar")], [1, C(1.34, "kstar")]]],
+      [122, 6, 280.1, 283.4, [[0, C(1.02)], [0.5, C(1.2, "qr")], [1, C(1.24, "qr")]]],
+      [128, 8, 300.1, 305.7, [[0, C(1.0)], [0.22, C(1.18, "boxes")], [0.62, C(1.2, "boxes")], [0.8, C(1.12, "earn")], [1, C(1.14, "earn")]]],
+    ],
+    words: [[6, "YOUR FRIENDS *TRAINED TODAY.*"], [9, "POST YOURS TO SEE *THEIRS.*"], [12, "START THE *CLOCK.*"],
+      [16, "PHONE DOWN. *TRAIN.*"], [22, "NO FAKE *HOURS.*"], [28, "POST *IT.*"], [30, "NOW YOU SEE *THEIRS.*"], [36, "GIVE *PROPS.*"],
+      [40, "YOUR *WEEK.*"], [43, "COMPETE WITH YOUR *FRIENDS.*"], [46, "MOVE *UP.*"], [50, "OUTWORK YOUR *COACH.*"],
+      [52, "YOUR *CLUBS.*"], [53, "YOUR CLUB *TEAM.*"], [54, "YOUR PICKUP *SQUAD.*"], [55, "AND *STRIVE SOCCER.*"],
+      [58, "CLUB VS *CLUB.*"], [61, "MOST TRAINING PER PLAYER *WINS.*"], [66, "*STRIVE CHAMPS* OF THE WEEK."],
+      [72, "WANT *MORE?*"], [74, "STRIVE PRO ADDS *TRAIN.*"], [78, "A WEEK BUILT AROUND *YOU.*"], [82, ""],
+      [88, "ONE DRILL AT A *TIME.*"], [90, "*DONE.*"], [92, "*DONE.*"], [94, "*DONE.*"], [96, "SESSION *DONE.*"],
+      [102, "COURSES ON *TOP.*"], [104, "SPEED. STRENGTH. *FIRST TOUCH.*"],
+      [106, "YOUR *LEVEL.*"], [109, "LEVEL *UP.*"], [110, "EARN YOUR *MEDALS.*"],
+      [114, "THE BEST GET A *STAR.*"], [118, "WILL YOU BE THE NEXT *STRIVE STAR?*"],
+      [122, "ADD YOUR *TEAMMATES.*"], [128, "BRING *3.*"], [133, "GET A MONTH OF *PRO.*"], [136, ""]],
+    flash: [13, 23, 30, 46, 50, 66, 99, 109, 133], done: [90, 92, 94], shimmer: [99], deviceOut: 136, tension: [82, 88],
+    end: [[137, "OPEN STRIVE."], [138, "TAP START."], [139, "*TRAIN.*"]], mark: 140,
+  },
 };
 
 const cutName = new URLSearchParams(location.search).get("cut") || "long";
@@ -153,8 +205,11 @@ export const CUT_INFO = { name: cutName, bpm: CUT.song ? SONG.bpm : BPM, song: C
   open: CUT.open.map((w) => w[0]), end: CUT.end.map((w) => w[0]), cuts: CUT.shots.map((s) => s[0]), deviceOut: CUT.deviceOut, tension: CUT.tension, mark: CUT.mark, drop: CUT.shots[0][0] };
 
 let k = 0.789;
+// master time 100 and up is the full-app cut's own scenes; under it, the walkthrough's
+const draw = (m) => (m >= FULL_FROM ? renderFull(m) : renderApp(m));
 export function setup() {
   setupApp();
+  if (CUT.full) setupFull();
   k = $("#scrwrap").clientWidth / 390;
 }
 
@@ -221,7 +276,7 @@ export function render(t, force) {
     // camera and the app by beats made both speed up and slow down from beat to beat
     const t0s = tb(b0), fu = (t - t0s) / (tb(b0 + n) - t0s), f = cl(fu);
     // the app keeps running through a dissolve (fu a little under 0 or over 1), the camera holds
-    renderApp(mix(m0, m1, force != null ? fu : f));
+    draw(mix(m0, m1, force != null ? fu : f));
     const c = camAt(cam, f);
     // a cut on the beat lands softly: the new shot starts a touch closer and settles into place
     const since = t - tb(b0), settle = si === 0 ? 0 : 0.5 * (1 - outExpo(cl(since / 0.5)));

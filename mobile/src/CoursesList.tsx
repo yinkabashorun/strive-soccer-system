@@ -51,7 +51,7 @@ export function CoursesList() {
   if (!featured) {
     return (
       <Card style={styles.empty}>
-        <Body dim>The first course is on its way. It shows up here the moment it is ready.</Body>
+        <Body dim>The first course is on its way. It shows up here the moment it's ready.</Body>
       </Card>
     );
   }

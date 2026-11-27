@@ -9,7 +9,7 @@ import type {
   MatchupView,
   PlanCard,
 } from "@shared/app-contract";
-import { clubShareText, clubWeek, splitPlans } from "@shared/club-app";
+import { cardRace, clubShareText, clubWeek, splitPlans } from "@shared/club-app";
 import { CLUB_GAMES_IN_APP, clubPageForApp, waitingForApp } from "@shared/club-games";
 import { matchupAheadLine, matchupCardLine, matchupRecordLine, matchupResultLine, MATCHUP_NONE_LINE } from "@shared/club-matchup-words";
 import { gamesRecordLine, resultLine } from "@shared/club-teams";
@@ -322,6 +322,7 @@ function card(id: string, ctx: Ctx): AppClubCard {
     today: p.members.filter((x) => x.today).map((x) => ({ id: x.id, first: x.you ? "You" : x.name.split(" ")[0], initials: x.initials, photo: x.photo, you: x.you })),
     next: next ? `${next.kind === "training" ? next.title ?? "Club training" : `Game against ${(next.opponent ?? next.organizer).name}`} · ${next.when}` : null,
     matchup: p.matchup?.cardLine ?? null,
+    ...(cardRace(p.matchup) ? { race: cardRace(p.matchup)! } : {}),
     ...(p.matchup?.champs ? { champs: true } : {}),
     waiting: p.manage
       ? waitingForApp({

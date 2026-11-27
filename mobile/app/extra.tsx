@@ -31,7 +31,7 @@ export default function Extra() {
     try {
       const res = await add.mutateAsync(body);
       if (!res.ok) {
-        setError(res.error ?? "That did not work. Try again.");
+        setError(res.error ?? "That didn't work. Try again.");
         return;
       }
       // The new session is in the week before the player opens it.
@@ -39,7 +39,7 @@ export default function Extra() {
       if (res.session) router.replace(`/session/${res.session}`);
       else router.back();
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "That did not work. Try again.");
+      setError(e instanceof ApiError ? e.message : "That didn't work. Try again.");
     }
   }
 

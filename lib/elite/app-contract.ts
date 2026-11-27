@@ -352,6 +352,9 @@ export type AppUsernameAnswer = { ok: true; name: string } | { ok: false; name: 
 
 export type { ClubFace, ClubMemberRow, ClubWeek, MatchupView, PlanCard };
 
+// The weekly matchup on a club's card: the score, not only who plays.
+export type AppClubRace = { other: string; mine: number; theirs: number; mineTime: string; theirsTime: string; line: string };
+
 // A club on the Clubs tab: alive at a glance.
 export type AppClubCard = {
   id: string;
@@ -370,6 +373,10 @@ export type AppClubCard = {
   next: string | null;
   // "This week: Renegados FC vs Sunday Pickup.", or null (083)
   matchup: string | null;
+  // this week's matchup as a live score, while one is on: each club's
+  // time per player and who is ahead (club-app.ts cardRace). A server
+  // from before it sends none, and the card keeps the plain line.
+  race?: AppClubRace;
   // the club won last week's matchup: a gold "Strive champs of the week"
   // mark for the week after it (club-matchups.ts MatchupView.champs)
   champs?: boolean;

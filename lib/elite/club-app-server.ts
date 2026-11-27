@@ -35,7 +35,7 @@ import { setClubCounty } from "./club-teams-actions";
 import { confirmClub, startClub } from "./tracker-actions";
 import { matchupFor } from "./club-matchups-server";
 import { NEEDS_ORGANIZER_OK, PENDING_GAMES_MAX, PLAN_REFUSED, eventDay } from "./club-teams";
-import { CLUB_CODE_MESSAGE, clubBoard, clubShareText, clubWeek, clubWeeks, clubWeeksSince, nextLine, splitPlans, trainedToday } from "./club-app";
+import { CLUB_CODE_MESSAGE, clubBoard, clubShareText, clubWeek, clubWeeks, clubWeeksSince, cardRace, nextLine, splitPlans, trainedToday } from "./club-app";
 import {
   GRID_MAX,
   buildFeed,
@@ -97,6 +97,7 @@ export async function appClubsFor(viewer: Viewer, today: string): Promise<AppClu
         today: trainedToday(c.members, today),
         next: next ? nextLine(next, c.id) : null,
         matchup: matchup?.cardLine ?? null,
+        ...(cardRace(matchup) ? { race: cardRace(matchup)! } : {}),
         ...(matchup?.champs ? { champs: true } : {}),
         waiting: c.captain
           ? waitingFor(c.id, { requests, asks, toEnter: plans.results.filter((p) => p.result?.canEnter).length })

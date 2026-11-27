@@ -5,6 +5,7 @@ import { Check, Pause, Play, RotateCcw, Timer } from "lucide-react";
 import {
   clock,
   parseReps,
+  skipLabel,
   stepSeconds,
   timerNext,
   timerStart,
@@ -160,6 +161,8 @@ export function SetTimer({ reps }: { reps: string }) {
               ? "Time"
               : `All ${plan.sets} sets done`;
   const working = step.phase === "work";
+  // a rest, and the short count before a set, can always be cut short
+  const skip = skipLabel(step);
 
   return (
     <div
@@ -207,7 +210,7 @@ export function SetTimer({ reps }: { reps: string }) {
             <div className="mt-1 text-sm text-white/65">Tap Done below when you are finished.</div>
           ) : (
             <div className="mt-1 text-sm text-white/65">
-              {working ? "Count your reps, then tap Set done." : "Start the next set when you are ready."}
+              {working ? "Count your reps, then tap Set done." : "Start the next set when you're ready."}
             </div>
           )}
         </div>
@@ -216,6 +219,13 @@ export function SetTimer({ reps }: { reps: string }) {
           <span className="metal-disc grid h-12 w-12 shrink-0 place-items-center rounded-full animate-check-pop">
             <Check className="h-6 w-6" strokeWidth={3.5} />
           </span>
+        ) : skip ? (
+          <button
+            onClick={() => enter(timerNext(plan, step))}
+            className="h-12 shrink-0 rounded-2xl bg-white px-4 text-sm font-bold uppercase tracking-wide text-black active:scale-[0.97]"
+          >
+            {skip}
+          </button>
         ) : total !== null ? (
           <button
             onClick={running ? pause : resume}

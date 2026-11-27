@@ -60,7 +60,7 @@ export default function Club() {
     setError(null);
     try {
       const res = await run();
-      if (!res.ok) return setError(res.error ?? "That did not go through. Try again.");
+      if (!res.ok) return setError(res.error ?? "That didn't go through. Try again.");
       void refreshClubs();
       after();
     } catch (e) {
@@ -71,7 +71,7 @@ export default function Club() {
   function more(page: AppClubPage) {
     const others = page.members.filter((m) => !m.you);
     choose({
-      message: "Leaving keeps the friends you made. To cut one off, block them.",
+      message: "You keep the friends you made here. To cut a friend off, block that friend.",
       choices: [
         ...(page.captain
           ? []
@@ -94,7 +94,7 @@ export default function Club() {
                 run: () =>
                   choose({
                     title: "Block a player",
-                    message: "You stop seeing each other anywhere in the app. They are not told.",
+                    message: "You stop seeing each other anywhere in the app. The player you block isn't told.",
                     choices: others.map((m) => ({
                       label: m.name,
                       destructive: true,
@@ -108,7 +108,7 @@ export default function Club() {
           label: "Leave the club",
           destructive: true,
           run: () =>
-            Alert.alert(`Leave ${page.name}?`, "Leaving keeps the friends you made. To cut one off, block them.", [
+            Alert.alert(`Leave ${page.name}?`, "You keep the friends you made here. To cut a friend off, block that friend.", [
               { text: "Cancel", style: "cancel" },
               { text: "Leave the club", style: "destructive", onPress: () => void act(() => leaveClub(page.id), () => router.back()) },
             ]),
@@ -156,7 +156,7 @@ export default function Club() {
       {!c ? (
         club.isError || club.isPaused ? (
           <View style={{ margin: 20 }}>
-            <Body dim>{club.error instanceof ApiError && club.error.status === 404 ? "That club is not there any more." : OFFLINE_MESSAGE}</Body>
+            <Body dim>{club.error instanceof ApiError && club.error.status === 404 ? "That club isn't there anymore." : OFFLINE_MESSAGE}</Body>
             <Button quiet style={{ marginTop: 16 }} label="Try again" busy={club.isFetching} onPress={() => void club.refetch()} />
           </View>
         ) : (
@@ -296,7 +296,7 @@ export default function Club() {
             {c.share ? (
               <SettingRow
                 label="Invite a teammate"
-                detail={c.byCoach ? "Send the club's code. The coaches let them in." : "Send the club's code. The captain lets them in."}
+                detail={c.byCoach ? "Send the club's code. The coaches let your teammate in." : "Send the club's code. The captain lets your teammate in."}
                 onPress={() => void Share.share({ message: c.share!.text }).catch(() => undefined)}
               />
             ) : null}

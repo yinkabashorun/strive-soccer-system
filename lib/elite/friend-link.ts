@@ -115,7 +115,7 @@ export const INVITE_EYEBROW = "Invite";
 export const INVITE_NOT_NOW = "Not now";
 export const INVITE_DONE = "Done";
 export const INVITE_SENT_EYEBROW = "Asked";
-export const INVITE_NOT_ONE = "That link is not an invite. Ask your teammate to send their link again.";
+export const INVITE_NOT_ONE = "That link is not an invite. Ask your teammate to send the link again.";
 
 export function inviteFriendTitle(first: string): string {
   return `${first} invited you`;

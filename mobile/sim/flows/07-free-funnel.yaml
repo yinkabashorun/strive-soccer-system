@@ -1,6 +1,6 @@
 # The free funnel by taps, start to finish, for a player with NO code: Join
 # free from the sign-in screen, the join screens, the @username and photo,
-# the door ("I do not have a code"), the quiz, the offer, "Not now, start
+# the door ("I don't have a code"), the quiz, the offer, "Not now, start
 # free", the week's target and days, Friends (locked), the training clock
 # and its post, the feed unlocked, and Week.
 #
@@ -116,12 +116,12 @@ appId: com.strivesoccer.elite
 # so the path from here is exactly what it always was. (With a code:
 # sim/flows/15-door.yaml.)
 - extendedWaitUntil:
-    visible: "I do not have a code"
+    visible: "I don't have a code"
     timeout: 20000
 - waitForAnimationToEnd:
     timeout: 3000
 - takeScreenshot: t25c-door
-- tapOn: "I do not have a code"
+- tapOn: "I don't have a code"
 
 
 # The quiz: the same screens a member takes, minus the three only a member

@@ -1,7 +1,7 @@
 import { Share, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { STAR_LABEL, initialsOf } from "@shared/tracker";
-import { ADD_MY_CODE_DETAIL, MY_CODE_TITLE } from "@shared/friend-add";
+import { ADD_MY_CODE_DETAIL, MY_CODE_TITLE, SEND_LINK_DETAIL, SEND_LINK_ROW } from "@shared/friend-add";
 import { useMe, useYou } from "@/api/queries";
 import { MemberCard } from "@/MemberCard";
 import { hasTrain } from "@/navigation";
@@ -127,8 +127,8 @@ export default function Me() {
         {y ? (
           <>
             <SettingRow
-              label="Send my link to a teammate"
-              detail="They join, you accept, and you see each other's training."
+              label={SEND_LINK_ROW}
+              detail={SEND_LINK_DETAIL}
               onPress={() => void Share.share(inviteShare(y)).catch(() => undefined)}
             />
             <Hairline />

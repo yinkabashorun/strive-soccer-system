@@ -212,7 +212,7 @@ describe("the clock on the screen", () => {
       expect(line, line).not.toMatch(/!/);
     }
     expect(CLOCK_WORDS.startBody).toBe("Take a photo to start the clock. Take one more when you finish. The time between your two photos is your training.");
-    expect(CLOCK_WORDS.cap).toBe("The clock counts up to 2 hours 30 minutes.");
+    expect(CLOCK_WORDS.cap).toBe("One session counts up to 2 hours 30 minutes.");
     expect(CLOCK_WORDS.expiredBody).toContain("3 hours");
     expect(TYPED_LINE).toBe("It shows on your week. It does not count on the board.");
   });

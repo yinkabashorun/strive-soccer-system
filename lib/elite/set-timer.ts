@@ -72,6 +72,28 @@ export function parseReps(reps: string | null | undefined): RepsPlan | null {
   return { sets, workSec, restSec };
 }
 
+// A plan as one value. The timer starts again only when this changes: the
+// screen behind it hands over a NEW object for the same drill every time a
+// tick saves or the week is read again, and a timer that restarted on that
+// jumped back to "Get ready" in the middle of a set (found Nov 26 2026).
+export function planKey(plan: RepsPlan): string {
+  return `${plan.sets}|${plan.workSec ?? "-"}|${plan.restSec ?? "-"}`;
+}
+
+function span(sec: number): string {
+  if (sec % 60 === 0) return `${sec / 60} min`;
+  if (sec > 60) return `${Math.floor(sec / 60)} min ${sec % 60} sec`;
+  return `${sec} sec`;
+}
+
+// What the timer is about to run, in the coach's own numbers, shown under
+// the short "Get ready" count so nobody reads that count as the set.
+export function planLine(plan: RepsPlan): string {
+  const sets = plan.sets === 1 ? "1 set" : `${plan.sets} sets`;
+  const work = plan.workSec !== null ? `${sets} of ${span(plan.workSec)}` : sets;
+  return plan.restSec !== null ? `${work}. Rest ${span(plan.restSec)}.` : `${work}.`;
+}
+
 export type TimerPhase =
   | "ready" // a few seconds to get set before a timed set
   | "work" // the set itself (timed, or waiting for "Set done")
@@ -108,6 +130,18 @@ export function timerNext(plan: RepsPlan, step: TimerStep): TimerStep {
     case "done":
       return step;
   }
+}
+
+// A rest is the player's to cut short, and so is the short "Get ready"
+// count (Coach Yinka, Nov 26 2026: "allow them to skip the rest period").
+// One button, the same words on the website and in the iPhone app; null
+// means this step has nothing to skip.
+export const SKIP_REST = "Skip rest";
+export const START_NOW = "Start now";
+export function skipLabel(step: TimerStep): string | null {
+  if (step.phase === "rest") return SKIP_REST;
+  if (step.phase === "ready") return START_NOW;
+  return null;
 }
 
 // "0:47", "1:30"

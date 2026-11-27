@@ -28,7 +28,7 @@ export async function acceptAgreement(_prev: AgreeState, formData: FormData): Pr
     guardianName: agreed.name,
     userAgent: headers().get("user-agent"),
   });
-  if (!ok) return { error: "That did not save. Check your connection and try again." };
+  if (!ok) return { error: "That didn't save. Check your connection and try again." };
 
   revalidatePath("/", "layout");
   redirect("/dashboard");

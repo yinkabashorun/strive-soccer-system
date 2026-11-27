@@ -421,7 +421,7 @@ friend of the other.
 3. **A block reads as not found.** On B block A. On A type B's @username:
    the same "We could not find that @username" line as for a name nobody
    has. Unblock afterwards.
-4. **My code.** On A: "Add a friend", "Show my code" (and You, "My code").
+4. **My code.** On A: "Add a friend", "Show my QR code" (and You, "My QR code").
    A white card with the QR code, A's name, @username and "My code:
    XXXXXXXX" under it. Turn the phone's brightness down: the code is still
    black on white.
@@ -458,3 +458,13 @@ friend of the other.
     Safari.
 12. **Saved passwords still work** on the sign-in screen (the same
     entitlement list carries both).
+
+## Where you stand, the board and the club score, on a phone (Nov 27 2026, from build 11)
+
+- Friends, with at least one friend who has trained this week: under the date one line says where you stand ("You're 3rd of 4 this week. 30m to pass Nico."). A tap on it opens Week.
+- Week: the friends board is right under the week's days, with the same line over it. The upgrade card is under the board and Share my week.
+- With no friends yet, or when nobody has trained this week: no line at all on either tab.
+- Clubs, a club in a matchup this week: the card shows "This week vs <club>", both times per player, one bar and who is ahead.
+- Finish a session that adds one minute: the ring reads "+1 MINUTE".
+- A drill's timer: start it, tick the drill before it on another screen or wait for a tick to save; the timer keeps counting and does not go back to "Get ready". During a rest, "Skip rest" starts the next set.
+

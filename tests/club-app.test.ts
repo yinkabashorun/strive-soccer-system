@@ -10,6 +10,7 @@ import {
   clubWeeks,
   clubWeeksSince,
   nextLine,
+  cardRace,
   planDays,
   splitPlans,
   trainedToday,
@@ -213,7 +214,7 @@ describe("what is next", () => {
   });
   it("the label, the sides and the score are one rule for the website and the app", () => {
     expect(planLabel(card())).toBe("Club training · Members only");
-    expect(planLabel(card({ kind: "game", status: "pending" }))).toBe("Game · Waiting on their captain");
+    expect(planLabel(card({ kind: "game", status: "pending" }))).toBe("Game · Waiting on the other captain");
     expect(planSides(game, "c2")).toEqual({ ours: game.opponent, theirs: game.organizer });
     const scored = { ...game, result: { state: "confirmed" as const, score: [3, 1] as [number, number], line: null, canEnter: false, canAnswer: false } };
     expect(planScore(scored, "c1")).toEqual([3, 1]);
@@ -381,5 +382,18 @@ describe("the app's club routes use the website's rules, never their own", () =>
     expect(start.indexOf("playAcceptancesOf(admin, viewer.profile.id)")).toBeLessThan(start.indexOf("await startClub(name)"));
     expect(start).toContain('needs: "organizer"');
     expect(start).toContain("setClubCounty(started.id, county, false)");
+  });
+
+  it("a club's card carries this week's matchup as a score, only while one is on", () => {
+    const side = (id: string, name: string, minutes: number) => ({ id, name, minutes, time: `${minutes}m` });
+    const base = { last: null, cardLine: "This week: Renegados FC vs Haymarket 08s.", recordLine: "Weeks won: 3. Weeks lost: 1. Draws: 0.", champs: false };
+    const on = { ...base, state: "on" as const, mine: side("c1", "Renegados FC", 52), theirs: side("c2", "Haymarket 08s", 40), line: "Your club is ahead by 12 minutes per player." };
+    expect(cardRace(on)).toEqual({ other: "Haymarket 08s", mine: 52, theirs: 40, mineTime: "52m", theirsTime: "40m", line: "Your club is ahead by 12 minutes per player." });
+    // a decided week, no matchup, and no matchup table at all: the card keeps its plain line
+    expect(cardRace({ ...on, state: "over" })).toBeNull();
+    expect(cardRace({ ...base, state: "none", mine: null, theirs: null, line: "No matchup this week." })).toBeNull();
+    expect(cardRace(null)).toBeNull();
+    const server = code("lib/elite/club-app-server.ts");
+    expect(server).toContain("...(cardRace(matchup) ? { race: cardRace(matchup)! } : {}),");
   });
 });

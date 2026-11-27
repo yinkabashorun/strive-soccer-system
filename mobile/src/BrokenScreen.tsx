@@ -14,7 +14,7 @@ import { color } from "@/theme";
 //
 // It stands outside everything the app wraps its screens in, so it uses
 // nothing that needs them: fixed spacing, no safe-area reading, no data.
-export const BROKEN_TITLE = "That screen did not load";
+export const BROKEN_TITLE = "That screen didn't load";
 export const BROKEN_BODY = "Nothing of yours is lost. Try it again.";
 export const BROKEN_RETRY = "Try again";
 

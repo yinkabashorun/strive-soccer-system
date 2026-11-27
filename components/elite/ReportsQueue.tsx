@@ -22,7 +22,7 @@ export function ReportsQueue({ reports }: { reports: ReportedPost[] }) {
     setError(null);
     start(async () => {
       const res = await run();
-      if (!res.ok) return setError(res.error ?? "That did not go through. Try again.");
+      if (!res.ok) return setError(res.error ?? "That didn't go through. Try again.");
       setGone((g) => new Set([...g, id]));
       router.refresh();
     });

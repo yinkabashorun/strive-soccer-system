@@ -8,6 +8,9 @@ import {
   ADD_EMPTY,
   ADD_FIELD,
   ADD_MY_CODE,
+  ADD_ROW_DETAIL,
+  SEND_LINK_DETAIL,
+  SEND_LINK_ROW,
   ADD_MY_CODE_DETAIL,
   ADD_NOT_FOUND,
   ADD_OFFLINE,
@@ -178,7 +181,7 @@ describe("what a player is told", () => {
   it("your own, a friend you have, and a request still waiting each have their own line", () => {
     expect(friendAddAnswer(found({ self: true, result: null }))).toEqual({ ok: false, error: "That is your own @username." });
     expect(friendAddAnswer(found({ result: "already" }))).toEqual({ ok: false, error: "You are already friends." });
-    expect(friendAddAnswer(found({ waitingBefore: true, result: "sent" }))).toEqual({ ok: false, error: "You already asked. They have not answered yet." });
+    expect(friendAddAnswer(found({ waitingBefore: true, result: "sent" }))).toEqual({ ok: false, error: "You already asked. Your friend has not answered yet." });
     // 30 waiting, and this one is among them
     expect(friendAddAnswer(found({ waitingBefore: true, result: "too_many" }))).toEqual({ ok: false, error: ADD_WAITING });
   });
@@ -195,12 +198,15 @@ describe("what a player is told", () => {
       ADD_MY_CODE_DETAIL, MY_CODE_TITLE, MY_CODE_BODY, MY_CODE_SEND, MY_CODE_SAID, myCodeLine("ABCD2345"), INVITE_NOT_NOW, INVITE_NOT_ONE,
       inviteFriendTitle("Kai"), inviteFriendButton("Kai"), inviteClubButton("Sunday Pickup"),
     ];
+    // his word, Nov 26 2026: name who is meant, never "they", "them" or "their"
+    for (const line of [...lines, ADD_ROW_DETAIL, SEND_LINK_ROW, SEND_LINK_DETAIL]) expect(line, line).not.toMatch(/\b(they|them|their)\b/i);
+    expect(ADD_MY_CODE_DETAIL).toBe("Standing next to a friend? Share your QR code.");
     for (const line of lines) {
       expect(line, line).not.toMatch(/[—–]/);
       expect(line, line).not.toMatch(/\b(AI|automated|algorithm|invalid|error|search|discover|nearby|contacts|location)\b/i);
       expect(line.length, line).toBeLessThanOrEqual(120);
     }
-    expect(ADD_FIELD).toBe("Their @username");
+    expect(ADD_FIELD).toBe("Your friend's @username");
     expect(ADD_SEND).toBe("Send a friend request");
     expect(inviteFriendButton("Kai")).toBe("Send Kai a friend request");
     expect(inviteClubButton("Sunday Pickup")).toBe("Ask to join Sunday Pickup");
@@ -635,7 +641,7 @@ describe("in the app", () => {
     expect(shots).toContain("61-my-code|locked|friend/code|11");
     expect(shots).toContain("62-invite-link|locked|friend/link?code=EXAMPLE2|11");
     const flow = read("mobile/sim/flows/17-add-a-friend.yaml");
-    expect(flow).toContain('tapOn: "Their @username"');
+    expect(flow).toContain('tapOn: "Your friend\'s @username"');
     expect(flow).toContain('inputText: "kai.m"');
     expect(flow).toContain(`visible: "${requestSentLine("Kai M.")}"`);
     expect(flow).toContain(`visible: "${MY_CODE_SAID}"`);

@@ -37,7 +37,7 @@ export function PlanCardView({ card, clubId }: { card: PlanCard; clubId: string 
       if (res.ok) {
         done();
         void refreshClubs();
-      } else if (!res.declined) setError(res.error ?? "That did not go through. Try again.");
+      } else if (!res.declined) setError(res.error ?? "That didn't go through. Try again.");
     } catch (e) {
       setError(e instanceof ApiError ? e.message : OFFLINE_MESSAGE);
     } finally {

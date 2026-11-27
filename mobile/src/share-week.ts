@@ -9,7 +9,7 @@ import { hasWeekToShare, isPngDataUri } from "@shared/week-card";
 // What the row says.
 export const SHARE_WEEK_ROW = { title: "Share my week", detail: "Put your week on your story." } as const;
 // Said under the row when the card could not be made (the website's words).
-export const SHARE_WEEK_FAILED = "We could not make your card just now. Try again in a minute.";
+export const SHARE_WEEK_FAILED = "We couldn't make your card just now. Try again in a minute.";
 
 // The row is there once the player has trained this week, and not before:
 // the same rule the server makes the card by.

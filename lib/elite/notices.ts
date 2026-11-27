@@ -319,7 +319,7 @@ export function reminderNotice(f: ReminderFacts & { nyDate: string }): Notice {
 export function remindersPausedNotice(input: { nyDate: string }): Notice {
   return make("reminders_paused", {
     title: "Reminders are paused",
-    body: "Your week is here whenever you are ready.",
+    body: "Your week is here whenever you're ready.",
     path: "/dashboard",
     key: `reminders_paused:${input.nyDate}`,
     collapse: "reminder",
@@ -331,7 +331,7 @@ export function remindersPausedNotice(input: { nyDate: string }): Notice {
 export function friendPostNotice(input: { first: string; nyDate: string }): Notice {
   return make("friend_post", {
     title: `${input.first} just posted`,
-    body: "Their post opens when you post yours today.",
+    body: `${input.first}'s post opens when you post yours today.`,
     path: "/log",
     key: `friend_post:${input.nyDate}`,
     collapse: "friend_post",
@@ -352,7 +352,7 @@ export function propsNotice(input: { first: string; postId: string }): Notice {
 export function squadPassNotice(input: { number: number }): Notice {
   return make("squad_pass", {
     title: "You earned a month of Strive Pro",
-    body: "Three teammates trained. Start it when you are ready.",
+    body: "Three teammates trained. Start it when you're ready.",
     path: "/log",
     key: `squad_pass:${input.number}`,
   });

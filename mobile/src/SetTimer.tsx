@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { clock, stepSeconds, timerNext, timerStart, type RepsPlan, type TimerStep } from "@shared/set-timer";
+import { clock, planKey, planLine, skipLabel, stepSeconds, timerNext, timerStart, type RepsPlan, type TimerStep } from "@shared/set-timer";
 import { cue, feel } from "./feel";
 import { Body, Button, Head, Eyebrow, Ring } from "./ui";
 import { color } from "./theme";
@@ -32,7 +32,11 @@ export function SetTimer({ plan, name, onClose }: { plan: RepsPlan; name: string
       const secs = stepSeconds(plan, next);
       setStep(next);
       setPausedLeft(null);
-      setEndsAt(secs === null ? null : Date.now() + secs * 1000);
+      // the screen's own clock is brought up to this moment too, or the first
+      // frame of a step counts the time the player spent before tapping
+      const t = Date.now();
+      setNow(t);
+      setEndsAt(secs === null ? null : t + secs * 1000);
       lastTick.current = null;
       if (next.phase === "work") cue("go");
       else if (next.phase === "rest" || next.phase === "between") cue("rest");
@@ -42,9 +46,17 @@ export function SetTimer({ plan, name, onClose }: { plan: RepsPlan; name: string
     [plan]
   );
 
+  // The timer starts once for a drill's sets. It is keyed on what the sets
+  // ARE (planKey), not on the object: the session behind it redraws with a
+  // new object whenever a tick saves, and that must never restart a set.
+  const key = planKey(plan);
+  const enterRef = useRef(enter);
+  enterRef.current = enter;
+  const planRef = useRef(plan);
+  planRef.current = plan;
   useEffect(() => {
-    enter(timerStart(plan));
-  }, [plan, enter]);
+    enterRef.current(timerStart(planRef.current));
+  }, [key]);
 
   useEffect(() => {
     if (endsAt === null || pausedLeft !== null) return;
@@ -66,17 +78,21 @@ export function SetTimer({ plan, name, onClose }: { plan: RepsPlan; name: string
   }, [left, pausedLeft, enter, plan, step]);
 
   const waiting = left === null && step.phase !== "done";
+  // a rest, and the short count before a set, can always be cut short
+  const skip = skipLabel(step);
   const value = total && left !== null ? left / total : step.phase === "done" ? 1 : 0;
   const after =
     step.phase === "work" && step.set < plan.sets
       ? plan.restSec
         ? `Then ${plan.restSec} seconds of rest`
-        : "Then the next set when you are ready"
+        : "Then the next set when you're ready"
       : step.phase === "rest" || step.phase === "between"
         ? `Next: set ${step.set + 1} of ${plan.sets}`
         : step.phase === "work"
           ? "Last set"
-          : "";
+          : step.phase === "ready"
+            ? planLine(plan)
+            : "";
 
   return (
     <Animated.View entering={FadeIn.duration(250)} exiting={FadeOut.duration(200)} style={[StyleSheet.absoluteFill, styles.wrap]}>
@@ -121,15 +137,17 @@ export function SetTimer({ plan, name, onClose }: { plan: RepsPlan; name: string
                 label={step.phase === "work" ? "Set done" : "Start set"}
                 onPress={() => enter(timerNext(plan, step))}
               />
-            ) : step.phase === "rest" || step.phase === "ready" ? (
-              <Button style={{ flex: 1 }} label={step.phase === "rest" ? "Skip rest" : "Start now"} onPress={() => enter(timerNext(plan, step))} />
+            ) : skip ? (
+              <Button style={{ flex: 1 }} label={skip} onPress={() => enter(timerNext(plan, step))} />
             ) : (
               <Button
                 style={{ flex: 1 }}
                 label={pausedLeft !== null ? "Resume" : "Pause"}
                 onPress={() => {
                   if (pausedLeft !== null) {
-                    setEndsAt(Date.now() + pausedLeft * 1000);
+                    const t = Date.now();
+                    setNow(t);
+                    setEndsAt(t + pausedLeft * 1000);
                     setPausedLeft(null);
                   } else if (left !== null) setPausedLeft(left);
                 }}

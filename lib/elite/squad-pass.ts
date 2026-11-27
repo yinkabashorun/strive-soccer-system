@@ -84,9 +84,9 @@ export type Squad = {
 };
 
 export const SQUAD_TITLE = `Bring ${TEAMMATES_PER_PASS} teammates. Get a month of ${PRO_PRODUCT_NAME}.`;
-export const SQUAD_BODY = "A teammate counts when they join with your link and post their first training.";
+export const SQUAD_BODY = "A teammate counts after joining with your link and posting a first training.";
 export const SQUAD_READY_TITLE = `You earned a month of ${PRO_PRODUCT_NAME}.`;
-export const SQUAD_READY_BODY = `Three teammates trained. Start it when you are ready: your weeks are built around you for ${PASS_DAYS} days. No card.`;
+export const SQUAD_READY_BODY = `Three teammates trained. Start it when you're ready: your weeks are built around you for ${PASS_DAYS} days. No card.`;
 export const SQUAD_START = "Start my month";
 export const SQUAD_SEND = "Send my link";
 export const SQUAD_NOT_READY = "There is no earned month to start yet.";
@@ -141,8 +141,8 @@ export function paidNote(creditedAt: readonly (string | null | undefined)[], now
 export function waitingLine(joined: readonly SquadPerson[]): string | null {
   if (joined.length === 0) return null;
   const first = joined[0].name;
-  if (joined.length === 1) return `${first} joined. They count once they post their first training.`;
-  return `${first} and ${joined.length - 1} more joined. Each counts once they post their first training.`;
+  if (joined.length === 1) return `${first} joined. ${first} counts after posting a first training.`;
+  return `${first} and ${joined.length - 1} more joined. Each teammate counts after posting a first training.`;
 }
 
 export function runningLine(until: string): string {

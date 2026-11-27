@@ -54,5 +54,5 @@ export async function savePhoto(uri: string): Promise<void> {
     upload: oneFileForm("photo", "photo.jpg", "image/jpeg", bytes),
     timeoutMs: 60_000,
   });
-  if (!res.ok) throw new ApiError(400, null, res.error ?? "Your photo was not saved. Try again.");
+  if (!res.ok) throw new ApiError(400, null, res.error ?? "Your photo wasn't saved. Try again.");
 }

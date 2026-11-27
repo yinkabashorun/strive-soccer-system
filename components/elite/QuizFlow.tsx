@@ -342,7 +342,7 @@ export function QuizFlow({
                 type="email"
                 value={a.parentEmail}
                 onChange={(e) => setA((p) => ({ ...p, parentEmail: e.target.value }))}
-                placeholder="Their email (optional)"
+                placeholder="Parent's email (optional)"
                 aria-label="Parent email"
                 className={fieldCls}
               />
@@ -360,7 +360,7 @@ export function QuizFlow({
                   type="tel"
                   value={a.parentPhone}
                   onChange={(e) => setA((p) => ({ ...p, parentPhone: e.target.value }))}
-                  placeholder="Their phone, for texts"
+                  placeholder="Parent's phone, for texts"
                   aria-label="Parent phone"
                   className={fieldCls}
                 />

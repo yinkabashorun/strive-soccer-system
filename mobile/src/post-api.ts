@@ -45,5 +45,5 @@ export async function postTraining(input: { photo: PickedPhoto; caption: string;
     if (!bytes || bytes.length === 0 || bytes.length > POST_MAX_BYTES) throw new ApiError(0, "photo", POST_REFUSED_PHOTO);
   }
   const res = await sendPost(fileForm(fields, { field: "photo", fileName: "post.jpg", type: "image/jpeg", bytes }));
-  if (!res.ok) throw new ApiError(400, null, res.error ?? "Your post was not saved. Try again.");
+  if (!res.ok) throw new ApiError(400, null, res.error ?? "Your post wasn't saved. Try again.");
 }

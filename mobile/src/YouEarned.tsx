@@ -1,6 +1,6 @@
 import { StyleSheet, View } from "react-native";
 import { achievementMark } from "@shared/achievement-rules";
-import { fmtDuration } from "@shared/time-trained";
+import { fmtDuration, nextMedalLine } from "@shared/time-trained";
 import type { AppYou } from "@shared/app-contract";
 import { Body, Card, Disc, Hairline, Head, Label, Medal } from "@/ui";
 import { color } from "@/theme";
@@ -40,7 +40,7 @@ export function YouEarned({ y }: { y: AppYou }) {
           <Label size={17}>Earned</Label>
           {y.next ? (
             <Body dim size={13}>
-              {`${y.next.hours} hours in ${fmtDuration(y.next.minutesAway)}`}
+              {nextMedalLine(y.next.hours, y.next.minutesAway)}
             </Body>
           ) : null}
         </View>

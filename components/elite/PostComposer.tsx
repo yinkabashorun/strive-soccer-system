@@ -181,11 +181,11 @@ export function PostComposer({
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.ok) {
         setBusy(null);
-        return setError(data.error || "Your post was not saved. Try again.");
+        return setError(data.error || "Your post wasn't saved. Try again.");
       }
     } catch {
       setBusy(null);
-      return setError("Your post was not saved. Check your connection and try again.");
+      return setError("Your post wasn't saved. Check your connection and try again.");
     }
     if (ask) {
       shown();
@@ -231,7 +231,7 @@ export function PostComposer({
       }).catch(() => null);
       if (!res || !res.ok) {
         setBusy(null);
-        return setError(res && !res.ok ? res.error : "That take was not saved. Try again.");
+        return setError(res && !res.ok ? res.error : "That take wasn't saved. Try again.");
       }
       landing = drillHref(res.drillId);
     }
@@ -239,7 +239,7 @@ export function PostComposer({
       const res = await logTraining(minutes, gym ? kind : "training").catch(() => null);
       if (!res || !res.ok) {
         setBusy(null);
-        return setError(res && !res.ok ? res.error : "Your time was not saved. Check your connection and try again.");
+        return setError(res && !res.ok ? res.error : "Your time wasn't saved. Check your connection and try again.");
       }
     }
     done(landing);
@@ -252,7 +252,7 @@ export function PostComposer({
     const res = await logTraining(minutes, gym ? kind : "training").catch(() => null);
     if (!res || !res.ok) {
       setBusy(null);
-      return setError(res && !res.ok ? res.error : "That was not saved. Check your connection and try again.");
+      return setError(res && !res.ok ? res.error : "That wasn't saved. Check your connection and try again.");
     }
     done(FREE_WEEK);
   }

@@ -86,7 +86,7 @@ async function takePhoto(): Promise<Shoot> {
     const a = res.canceled ? null : res.assets[0];
     return a ? { photo: { uri: a.uri, width: a.width, height: a.height } } : null;
   } catch {
-    return { failed: "The camera did not open. Try again." };
+    return { failed: "The camera didn't open. Try again." };
   }
 }
 
@@ -270,7 +270,7 @@ function ClockPost({ go }: { go: boolean }) {
       await then(shot.photo);
       feel("drill");
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "That photo could not be used. Take another one.");
+      setError(e instanceof ApiError ? e.message : "That photo couldn't be used. Take another one.");
     } finally {
       setBusy(false);
     }
@@ -358,7 +358,7 @@ function ClockPost({ go }: { go: boolean }) {
     setBusy(true);
     try {
       const res = await logTraining(minutes, kind);
-      if (!res.ok) throw new ApiError(400, null, res.error ?? "Your time was not saved. Try again.");
+      if (!res.ok) throw new ApiError(400, null, res.error ?? "Your time wasn't saved. Try again.");
       feel("drill");
       await leave();
     } catch (e) {

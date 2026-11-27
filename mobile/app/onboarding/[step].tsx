@@ -104,7 +104,7 @@ export default function QuizStep() {
         }
       } catch (e) {
         setSaving(false);
-        setError(e instanceof ApiError ? e.message : "That did not save. Check your connection and try again.");
+        setError(e instanceof ApiError ? e.message : "That didn't save. Check your connection and try again.");
       }
       return;
     }
@@ -118,7 +118,7 @@ export default function QuizStep() {
         params: { spot: weakSpotPhrase(lowestAttributes(now.attrs)) ?? "you", sessions: sessionsWord(sessionsFor(load)) },
       });
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "That did not save. Check your connection and try again.");
+      setError(e instanceof ApiError ? e.message : "That didn't save. Check your connection and try again.");
     }
   }
 
@@ -349,9 +349,9 @@ function Answers({ id, a, pick, set }: { id: QuizStepId | FreeStepId; a: FreeAns
     case "parent":
       return (
         <View style={{ gap: 12 }}>
-          <Field value={a.parentName} onChange={(parentName) => set({ parentName })} placeholder="Their full name" />
-          <Field value={a.parentEmail} onChange={(parentEmail) => set({ parentEmail })} placeholder="Their email (optional)" keyboard="email-address" />
-          <Field value={a.parentPhone} onChange={(parentPhone) => set({ parentPhone })} placeholder="Their phone" keyboard="phone-pad" />
+          <Field value={a.parentName} onChange={(parentName) => set({ parentName })} placeholder="Parent's full name" />
+          <Field value={a.parentEmail} onChange={(parentEmail) => set({ parentEmail })} placeholder="Parent's email (optional)" keyboard="email-address" />
+          <Field value={a.parentPhone} onChange={(parentPhone) => set({ parentPhone })} placeholder="Parent's phone" keyboard="phone-pad" />
         </View>
       );
     default:

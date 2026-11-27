@@ -1111,7 +1111,7 @@ describe("the free app's bodies are checked first", () => {
     for (const body of [{}, null, { username: "" }, { username: "   " }, { username: 12 }, { username: ["kai.m"] }]) {
       const res = await h(req("POST", { body }));
       expect(res.status).toBe(400);
-      expect(await res.json()).toEqual({ ok: false, error: "Type their @username first." });
+      expect(await res.json()).toEqual({ ok: false, error: "Type your friend's @username first." });
     }
     expect(s.calls).toEqual([]);
   });
@@ -1159,7 +1159,7 @@ describe("the free app's bodies are checked first", () => {
     for (const bad of ["", "?code=", "?code=ABCD234", "?kind=friend", "?code=..%2F..%2Fx"]) {
       const no = await at(bad);
       expect(no.status, bad).toBe(400);
-      expect(await no.json()).toEqual({ ok: false, error: "That link is not an invite. Ask your teammate to send their link again." });
+      expect(await no.json()).toEqual({ ok: false, error: "That link is not an invite. Ask your teammate to send the link again." });
     }
     expect(s.calls.map((c) => c.fn)).toEqual(["inviteFor", "inviteFor"]);
   });

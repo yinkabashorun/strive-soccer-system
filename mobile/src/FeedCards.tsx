@@ -69,7 +69,7 @@ export function OpenPost({ card, onGone }: { card: AppOpenCard; onGone: () => vo
     setError(null);
     try {
       const res = await run();
-      if (!res.ok) return setError(res.error ?? "That did not go through. Try again.");
+      if (!res.ok) return setError(res.error ?? "That didn't go through. Try again.");
       onGone();
     } catch (e) {
       setError(e instanceof ApiError ? e.message : OFFLINE_MESSAGE);
@@ -81,7 +81,7 @@ export function OpenPost({ card, onGone }: { card: AppOpenCard; onGone: () => vo
     sheet(
       {
         title: "What is wrong with it?",
-        message: `The post leaves your feed and a coach looks at it. ${card.first} is not told who reported it.`,
+        message: `The post leaves your feed and a coach looks at it. ${card.first} isn't told who reported it.`,
         options: [...labels, "Cancel"],
         cancelButtonIndex: labels.length,
       },
@@ -95,7 +95,7 @@ export function OpenPost({ card, onGone }: { card: AppOpenCard; onGone: () => vo
   function block() {
     Alert.alert(
       `Block ${card.first}?`,
-      `You stop being friends and you stop seeing each other's training. ${card.first} is not told, and their link will not add you again.`,
+      `You stop being friends and you stop seeing each other's training. ${card.first} isn't told, and ${card.first}'s link won't add you again.`,
       [
         { text: "Cancel", style: "cancel" },
         { text: `Block ${card.first}`, style: "destructive", onPress: () => void act(() => blockPlayer(card.ownerId)) },
@@ -116,7 +116,7 @@ export function OpenPost({ card, onGone }: { card: AppOpenCard; onGone: () => vo
     }
     sheet(
       {
-        message: `${card.first} is not told if you report or block them.`,
+        message: `${card.first} is never told about a report or a block.`,
         options: ["Report this post", `Block ${card.first}`, "Cancel"],
         destructiveButtonIndex: [0, 1],
         cancelButtonIndex: 2,

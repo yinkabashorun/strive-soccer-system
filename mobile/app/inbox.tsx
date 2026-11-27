@@ -71,7 +71,7 @@ export default function Inbox() {
         {!notes ? (
           inbox.isError ? (
             <Body dim style={{ marginTop: 22 }}>
-              We could not reach Strive. Check your connection and pull down to try again.
+              We couldn't reach Strive. Check your connection and pull down to try again.
             </Body>
           ) : (
             <View style={{ marginTop: 22, gap: 10 }}>

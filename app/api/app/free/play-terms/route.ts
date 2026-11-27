@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 
 export const POST = appRoute({ name: "free-play-terms", access: "free_app", limit: 20 }, async ({ req }) => {
   const body = await readJson(req);
-  if (body?.kind !== "organizer" && body?.kind !== "player") return appJson({ ok: false, error: "That did not go through. Try again." }, 400);
+  if (body?.kind !== "organizer" && body?.kind !== "player") return appJson({ ok: false, error: "That didn't go through. Try again." }, 400);
   const res = await acceptPlayTerms(body.kind);
   return res.ok ? { ok: true } : appJson({ ok: false, error: res.error }, 400);
 });

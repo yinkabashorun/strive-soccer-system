@@ -112,17 +112,20 @@ left on it. What only a phone can show is `native-device-checklist.md`.
 | N20 | Games between clubs out of the iPhone app (one switch, `lib/elite/club-games.ts`); club training sessions and the weekly matchup stay; the website is unchanged | BUILT Nov 26. The review notes in `listing.md` no longer mention games |
 | N21 | Champs of the week (one notification to the winners, Monday 5 PM to 9 PM New York, and a gold mark for the week) and "Your clock is still running" (one notification the phone gives itself at 1h 30m) | BUILT Nov 26. The champs notification needs 090. Neither is proven on a phone |
 | N22 | Every member, on any membership, has the whole app (Train, Friends, Week, Clubs, You) | LIVE Nov 26 (server side, PR #41). Not proven on a phone |
-| N23 | The oldest build that still works: an update screen with one button, set by the coaches on /coach/free; fails open | BUILT Nov 26, dev branch. From build 10. Not proven on a phone |
-| N24 | One link to the app; an invite opened on an iPhone shows the code and Get the app | BUILT Nov 26, dev branch. HIS: paste the TestFlight public link on /coach/free |
-| N25 | The app's own broken-screen page, and errors reported to the coaches' App errors card | BUILT Nov 26, dev branch. From build 10 |
-| N26 | Sign-up and app calls sized for a whole event on one Wi-Fi | BUILT Nov 26, dev branch (server side) |
-| N27 | Launch numbers on /coach/free: the funnel overall and per club | BUILT Nov 26, dev branch |
+| N23 | The oldest build that still works: an update screen with one button, set by the coaches on /coach/free; fails open | ON MAIN Nov 26 (PR #42). From build 10. Not proven on a phone |
+| N24 | One link to the app; an invite opened on an iPhone shows the code and Get the app | ON MAIN Nov 26 (PR #42). HIS: paste the TestFlight public link on /coach/free |
+| N25 | The app's own broken-screen page, and errors reported to the coaches' App errors card | ON MAIN Nov 26 (PR #42). From build 10 |
+| N26 | Sign-up and app calls sized for a whole event on one Wi-Fi | ON MAIN Nov 26 (PR #42) (server side) |
+| N27 | Launch numbers on /coach/free: the funnel overall and per club | ON MAIN Nov 26 (PR #42) |
 | N28 | The gap list: docs/growth/completeness-2026-11-26.md | OPEN: his calls and the proposed builds are named there |
 | N29 | A paying player's earned month is their next month free; lifetime access | LIVE Nov 26 (PR #42, migrations 091 and 092 applied). A real Stripe credit is not proven |
-| N30 | A club's captaincy can be handed over (the captain, a coach, and on account deletion) | BUILT Nov 26, dev branch |
-| N31 | Email confirmation: a 6 digit code before a new account enters the app | BUILT Nov 26, dev branch. DARK until RESEND_API_KEY is in Vercel and migration 093 is applied (both his word) |
-| N32 | Add a friend by exact @username, My code (QR), invite links open the app | BUILT Nov 26, dev branch. Universal links only in a signed build made after the site is live |
-| N33 | The Monday card (no notification), the rating ask, a page for parents | BUILT Nov 26, dev branch |
+| N30 | A club's captaincy can be handed over (the captain, a coach, and on account deletion) | ON MAIN Nov 26 (PR #43), for build 10 |
+| N31 | Email confirmation: a 6 digit code before a new account enters the app | ON MAIN Nov 26 (PR #43), for build 10. DARK until RESEND_API_KEY is in Vercel and migration 093 is applied (both his word) |
+| N32 | Add a friend by exact @username, My code (QR), invite links open the app | ON MAIN Nov 26 (PR #43), for build 10. Universal links only in a signed build made after the site is live |
+| N33 | The Monday card (no notification), the rating ask, a page for parents | ON MAIN Nov 26 (PR #43), for build 10 |
+| N34 | The set timer counts the drill's own time (it restarted whenever a tick saved); a rest can be skipped | ON THE DEV BRANCH Nov 27, for build 11 |
+| N35 | The words name the person (no they, them, their), contractions, "+1 minute", the drill tiles' labels | ON THE DEV BRANCH Nov 27, for build 11 |
+| N36 | Where you stand this week on Friends and over the board; the board above the upgrade card; a club card's matchup as a score | ON THE DEV BRANCH Nov 27, for build 11. Not proven on a phone |
 | N17 | The upgrade inside the app opens a web checkout: allowed on the US storefront only (from memory, to verify); Apple's in-app purchase is the fallback | DECIDED Nov 25 2026, his "Keep it": United States only, the web checkout stays. Fallback if Apple objects: take the offer out of the iPhone app |
 
 ## B. Research to settle before the first build

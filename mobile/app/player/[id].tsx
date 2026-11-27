@@ -49,7 +49,7 @@ export default function Player() {
     setNote(null);
     try {
       const res = await run();
-      if (!res.ok) return setNote(res.error ?? "That did not go through. Try again.");
+      if (!res.ok) return setNote(res.error ?? "That didn't go through. Try again.");
       void refreshFree();
       void refreshClubs();
       router.back();
@@ -63,7 +63,7 @@ export default function Player() {
     setNote(null);
     try {
       const res = await reportProfile(p.id, what);
-      setNote(res.ok ? "Sent to the coaches. Thank you." : res.error ?? "That did not go through. Try again.");
+      setNote(res.ok ? "Sent to the coaches. Thank you." : res.error ?? "That didn't go through. Try again.");
     } catch (e) {
       setNote(e instanceof ApiError ? e.message : OFFLINE_MESSAGE);
     }
@@ -86,7 +86,7 @@ export default function Player() {
     if (!p || p.you) return;
     const first = p.first;
     choose({
-      message: `${first} is not told if you report, remove or block them.`,
+      message: `${first} is never told about a report, a removal or a block.`,
       choices: [
         ...(p.photo ? [{ label: "Report the profile photo", destructive: true, run: () => void report("photo") }] : []),
         ...(p.playingFor ? [{ label: "Report the Playing for line", destructive: true, run: () => void report("line") }] : []),
@@ -95,7 +95,7 @@ export default function Player() {
               {
                 label: "Remove from my friends",
                 run: () =>
-                  Alert.alert(`Take ${first} off your friends?`, `You stop seeing each other's training. ${first} is not told. Their link can add you again.`, [
+                  Alert.alert(`Take ${first} off your friends?`, `You stop seeing each other's training. ${first} isn't told. ${first}'s link can add you again.`, [
                     { text: "Cancel", style: "cancel" },
                     { text: "Remove from my friends", style: "destructive", onPress: () => void leave(() => removeFriend(p.id)) },
                   ]),
@@ -108,7 +108,7 @@ export default function Player() {
           run: () =>
             Alert.alert(
               `Block ${first}?`,
-              `You stop being friends and you stop seeing each other's training. ${first} is not told, and their link will not add you again. You can unblock them in Settings.`,
+              `You stop being friends and you stop seeing each other's training. ${first} isn't told, and ${first}'s link won't add you again. You can unblock ${first} in Settings.`,
               [
                 { text: "Cancel", style: "cancel" },
                 { text: `Block ${first}`, style: "destructive", onPress: () => void leave(() => blockPlayer(p.id)) },
@@ -209,7 +209,7 @@ export default function Player() {
               onPress={give}
               style={[styles.props, propped ? styles.propsOn : null]}
               accessibilityRole="button"
-              accessibilityLabel={propped ? "Take your props back" : `Give ${p.first} props on their latest training`}
+              accessibilityLabel={propped ? "Take your props back" : `Give ${p.first} props on ${p.first}'s latest training`}
             >
               <Label size={15} style={propped ? { color: color.black } : null}>
                 {propped ? "Props given" : `Give ${p.first} props`}

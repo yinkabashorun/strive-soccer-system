@@ -132,6 +132,18 @@ export function timerNext(plan: RepsPlan, step: TimerStep): TimerStep {
   }
 }
 
+// A rest is the player's to cut short, and so is the short "Get ready"
+// count (Coach Yinka, Nov 26 2026: "allow them to skip the rest period").
+// One button, the same words on the website and in the iPhone app; null
+// means this step has nothing to skip.
+export const SKIP_REST = "Skip rest";
+export const START_NOW = "Start now";
+export function skipLabel(step: TimerStep): string | null {
+  if (step.phase === "rest") return SKIP_REST;
+  if (step.phase === "ready") return START_NOW;
+  return null;
+}
+
 // "0:47", "1:30"
 export function clock(totalSeconds: number): string {
   const s = Math.max(0, Math.ceil(totalSeconds));

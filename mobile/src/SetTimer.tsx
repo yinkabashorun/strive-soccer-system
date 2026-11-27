@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
 import Animated, { FadeIn, FadeOut } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { clock, planKey, planLine, stepSeconds, timerNext, timerStart, type RepsPlan, type TimerStep } from "@shared/set-timer";
+import { clock, planKey, planLine, skipLabel, stepSeconds, timerNext, timerStart, type RepsPlan, type TimerStep } from "@shared/set-timer";
 import { cue, feel } from "./feel";
 import { Body, Button, Head, Eyebrow, Ring } from "./ui";
 import { color } from "./theme";
@@ -78,6 +78,8 @@ export function SetTimer({ plan, name, onClose }: { plan: RepsPlan; name: string
   }, [left, pausedLeft, enter, plan, step]);
 
   const waiting = left === null && step.phase !== "done";
+  // a rest, and the short count before a set, can always be cut short
+  const skip = skipLabel(step);
   const value = total && left !== null ? left / total : step.phase === "done" ? 1 : 0;
   const after =
     step.phase === "work" && step.set < plan.sets
@@ -135,8 +137,8 @@ export function SetTimer({ plan, name, onClose }: { plan: RepsPlan; name: string
                 label={step.phase === "work" ? "Set done" : "Start set"}
                 onPress={() => enter(timerNext(plan, step))}
               />
-            ) : step.phase === "rest" || step.phase === "ready" ? (
-              <Button style={{ flex: 1 }} label={step.phase === "rest" ? "Skip rest" : "Start now"} onPress={() => enter(timerNext(plan, step))} />
+            ) : skip ? (
+              <Button style={{ flex: 1 }} label={skip} onPress={() => enter(timerNext(plan, step))} />
             ) : (
               <Button
                 style={{ flex: 1 }}

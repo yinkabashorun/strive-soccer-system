@@ -7,6 +7,7 @@ import {
   parseReps,
   planKey,
   planLine,
+  skipLabel,
   stepSeconds,
   timerNext,
   timerStart,
@@ -175,6 +176,32 @@ describe("the iPhone app's timer starts once and shows the coach's own numbers",
     expect(planLine(parseReps("3 x 10 reps, rest 30 sec")!)).toBe("3 sets. Rest 30 sec.");
     expect(planLine(parseReps("5 mins")!)).toBe("1 set of 5 min.");
     expect(read("mobile/src/SetTimer.tsx")).toContain('step.phase === "ready"\n            ? planLine(plan)');
+  });
+});
+
+// Coach Yinka, Nov 26 2026: "allow them to skip the rest period".
+describe("a rest can always be skipped", () => {
+  const plan = parseReps("3 x 1 min, rest 30 sec")!;
+
+  it("skipping a rest starts the next set, and the last set has no rest to skip", () => {
+    expect(timerNext(plan, { phase: "rest", set: 1 })).toEqual({ phase: "work", set: 2 });
+    expect(timerNext(plan, { phase: "rest", set: 2 })).toEqual({ phase: "work", set: 3 });
+    expect(timerNext(plan, { phase: "work", set: 3 })).toEqual({ phase: "done", set: 3 });
+  });
+
+  it("the button reads Skip rest during a rest and Start now during the count before a set", () => {
+    expect(skipLabel({ phase: "rest", set: 1 })).toBe("Skip rest");
+    expect(skipLabel({ phase: "ready", set: 1 })).toBe("Start now");
+    for (const phase of ["work", "between", "done"] as const) expect(skipLabel({ phase, set: 1 })).toBeNull();
+  });
+
+  it("the website's timer and the iPhone app's timer both offer it, from the one rule", () => {
+    for (const file of ["components/elite/SetTimer.tsx", "mobile/src/SetTimer.tsx"]) {
+      const timer = read(file);
+      expect(timer, file).toContain("const skip = skipLabel(step);");
+      expect(timer, file).toMatch(/skip \? \(\s*<(button|Button)/);
+      expect(timer, file).toContain("enter(timerNext(plan, step))");
+    }
   });
 });
 

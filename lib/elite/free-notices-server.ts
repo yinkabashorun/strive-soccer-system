@@ -13,9 +13,9 @@ import { everyRow } from "./supabase/every-row";
 import { champsDue, champsOf, lastMonday, matchupMonday, type MatchupRow } from "./club-matchups";
 import { claimOutcome, maySend } from "./announce";
 import { blocksWith, friendIdsOf, namesOf, type Admin } from "./tracker-server";
-import { perDayMinutes, weekOf } from "./tracker";
+import { weekOf } from "./tracker";
 import { TYPED } from "./training-clock";
-import { passedBy, sessionMinutes, sessionsToBeat } from "./standing";
+import { passedBy } from "./standing";
 import { planById, teamRowsOf } from "./club-teams-server";
 import { planDayAt, planWhat } from "./club-teams";
 import { planInApp } from "./club-games";
@@ -136,7 +136,7 @@ async function boardEntries(admin: Admin, ids: string[], today: string): Promise
 // A player's timed training just went on the friends board (a finished
 // clock, or a finished Strive Pro session): every accepted friend it put
 // them in FRONT of hears "<First> just passed you", once a day at most per
-// friend, with how many of that friend's own sessions take the place back.
+// friend, with the training that did it.
 //
 // `entryId` is the entry just written. The player's time before it is
 // their week without that entry, so an entry that is not on this week's
@@ -164,20 +164,14 @@ export async function noticeFriendPassed(input: { posterId: string; entryId: str
     const [blocks, devices] = await Promise.all([blocksWith(admin, input.posterId, passed), withDevices(admin, passed)]);
     const receivers = friendPassedReceivers({ posterId: input.posterId, passed, blocks, withDevice: devices });
     if (receivers.length === 0) return [];
-    // each friend's own plan: a session is one of THEIR training days
-    const { data: plans } = await admin.from("elite_trackers").select("profile_id, target_minutes, plan_days").in("profile_id", receivers);
-    type Plan = { profile_id: string; target_minutes: number | null; plan_days: number[] | null };
-    const planOf = new Map(((plans as Plan[] | null) ?? []).map((t) => [t.profile_id, t]));
     const first = noticeName((await namesOf(admin, [input.posterId])).get(input.posterId) ?? "");
     const key = passedKey(input.today);
     const told: string[] = [];
     for (const id of receivers) {
       // one a day per friend, whoever passes them: claimed before it is sent
       if (!maySend(await claim(admin, id, key.kind, key, input.today))) continue;
-      const plan = planOf.get(id);
-      const session = sessionMinutes(perDayMinutes(plan?.target_minutes ?? 0, (plan?.plan_days ?? []).length));
-      const sessions = sessionsToBeat(after - (minutes.get(id) ?? 0), session);
-      await notifyProfile(id, friendPassedNotice({ first, sessions, nyDate: input.today }));
+      // the fact, then the jab: the training that did the passing
+      await notifyProfile(id, friendPassedNotice({ first, minutes: entry.minutes, nyDate: input.today }));
       told.push(id);
     }
     return told;

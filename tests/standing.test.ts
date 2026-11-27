@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { SESSION_FALLBACK_MINUTES, passedBy, sessionMinutes, sessionsToBeat } from "../lib/elite/standing";
 import { PASSED_REF, friendPassedReceivers, friendPostReceivers, noticeKey, passedKey } from "../lib/elite/free-notices";
-import { friendPassedNotice, noticeProblems, pushTextProblems, takeBackLine } from "../lib/elite/notices";
+import { friendPassedNotice, noticeProblems, passedBody, pushTextProblems } from "../lib/elite/notices";
 import { perDayMinutes } from "../lib/elite/tracker";
 
 // "<First> just passed you" (Coach Yinka's yes, Nov 27 2026): a friend's
@@ -71,21 +71,22 @@ describe("a session is the player's own, and beating means passing", () => {
 });
 
 describe("the words", () => {
-  it("say what happened, and how many of the reader's own sessions take it back", () => {
-    const one = friendPassedNotice({ first: "Nico", sessions: 1, nyDate: "2026-11-27" });
+  it("say what happened in his words: the fact, then the teammate's jab", () => {
+    const one = friendPassedNotice({ first: "Nico", minutes: 45, nyDate: "2026-11-27" });
     expect({ title: one.title, body: one.body, path: one.path, key: one.key }).toEqual({
       title: "Nico just passed you",
-      body: "One session takes it back.",
+      body: "Trained 45m just now. You good with that?",
       path: "/log",
       key: "friend_passed:2026-11-27",
     });
-    expect(friendPassedNotice({ first: "Nico", sessions: 3, nyDate: "2026-11-27" }).body).toBe("3 sessions take it back.");
-    expect(takeBackLine(0)).toBe("One session takes it back.");
-    expect(takeBackLine(2)).toBe("2 sessions take it back.");
+    expect(friendPassedNotice({ first: "Nico", minutes: 75, nyDate: "2026-11-27" }).body).toBe("Trained 1h 15m just now. You good with that?");
+    expect(passedBody(0)).toBe("Trained 1m just now. You good with that?");
+    // the cold slogan is the version that makes him turn notifications off
+    expect(passedBody(45)).not.toMatch(/your move/i);
   });
   it("no order, no sale, nothing missed, no shouting, and it names the friend", () => {
-    for (const sessions of [1, 2, 7]) {
-      const n = friendPassedNotice({ first: "Nico", sessions, nyDate: "2026-11-27" });
+    for (const minutes of [1, 45, 150]) {
+      const n = friendPassedNotice({ first: "Nico", minutes, nyDate: "2026-11-27" });
       expect(noticeProblems(n)).toEqual([]);
       expect(pushTextProblems({ title: n.title, body: n.body })).toEqual([]);
       expect(`${n.title} ${n.body}`).not.toMatch(/\b(they|them|their)\b|behind|missed|streak|!|Strive Pro|upgrade/i);
@@ -95,7 +96,7 @@ describe("the words", () => {
   });
   it("opens Friends, the page a friend's post opens (so builds 10 and 11 open it too)", () => {
     const routes = code("lib/elite/notice-routes.ts");
-    expect(friendPassedNotice({ first: "Nico", sessions: 1, nyDate: "2026-11-27" }).path).toBe("/log");
+    expect(friendPassedNotice({ first: "Nico", minutes: 45, nyDate: "2026-11-27" }).path).toBe("/log");
     expect(routes).toContain('if (path === "/log") return home;');
     expect(routes).toContain('if (path === "/log") return "/(free)/friends";');
   });
@@ -164,14 +165,12 @@ describe("the sender", () => {
     expect(fn).toContain("blocksWith(admin, input.posterId, passed)");
     expect(fn).toContain("friendPassedReceivers({ posterId: input.posterId, passed, blocks, withDevice: devices })");
   });
-  it("claims before it sends, through the one sender, with the receiver's own session", () => {
+  it("claims before it sends, through the one sender, with the training that did the passing", () => {
     const claimAt = fn.indexOf("claim(admin, id, key.kind, key, input.today)");
-    const sendAt = fn.indexOf("notifyProfile(id, friendPassedNotice({ first, sessions, nyDate: input.today }))");
+    const sendAt = fn.indexOf("notifyProfile(id, friendPassedNotice({ first, minutes: entry.minutes, nyDate: input.today }))");
     expect(claimAt).toBeGreaterThan(-1);
     expect(sendAt).toBeGreaterThan(claimAt);
     expect(fn).toContain("const key = passedKey(input.today);");
-    expect(fn).toContain("sessionMinutes(perDayMinutes(plan?.target_minutes ?? 0, (plan?.plan_days ?? []).length))");
-    expect(fn).toContain("sessionsToBeat(after - (minutes.get(id) ?? 0), session)");
     // a notice that cannot go never fails the training that caused it
     expect(fn).toMatch(/\} catch \{\s*return \[\];\s*\}/);
   });

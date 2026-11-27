@@ -20,6 +20,7 @@
 // builder here, add it to the list in tests/push-texts.test.ts, and send it
 // with notifyPlayer / notifyProfile. Nothing else.
 import { isQuietTime } from "./free-notices";
+import { fmtDuration } from "./time-trained";
 import { champsBeatLine } from "./club-matchup-words";
 
 // The choice a notice belongs to (Account, Notifications), and the group it
@@ -345,18 +346,24 @@ export function friendPostNotice(input: { first: string; nyDate: string }): Noti
 // 2026, to go with the line "You're 1 session away from beating Nico.").
 // Sent to a friend the poster's own timed training just put them in front
 // of, once a day at most per person (free-notices.ts passedKey), never at
-// night. `sessions` is how many of the RECEIVER'S own sessions take the
-// place back (lib/elite/standing.ts sessionsToBeat, from the plan they
-// set), so the line is a promise the app can keep.
-export function takeBackLine(sessions: number): string {
-  const n = Math.max(1, Math.round(sessions));
-  return n === 1 ? "One session takes it back." : `${n} sessions take it back.`;
+// night.
+//
+// THE WORDS ARE HIS (the copy quiz, moment 1, Nov 27 2026): of four ways to
+// say it, the two that make him open the app were the plain fact ("Nico's
+// ahead of you now. He trained 45 minutes today.") and the teammate's jab
+// ("You good with that?"); the cold slogan ("Your move.") is the one that
+// makes him turn notifications off. So the body is the fact, then the jab:
+// `minutes` is the training the friend just did, the entry that did the
+// passing. What it takes to get the place back is the line the app opens
+// on ("You're 1 session away from beating Nico.").
+export function passedBody(minutes: number): string {
+  return `Trained ${fmtDuration(Math.max(1, Math.round(minutes)))} just now. You good with that?`;
 }
 
-export function friendPassedNotice(input: { first: string; sessions: number; nyDate: string }): Notice {
+export function friendPassedNotice(input: { first: string; minutes: number; nyDate: string }): Notice {
   return make("friend_passed", {
     title: `${input.first} just passed you`,
-    body: takeBackLine(input.sessions),
+    body: passedBody(input.minutes),
     path: "/log",
     key: `friend_passed:${input.nyDate}`,
     collapse: "friend_passed",

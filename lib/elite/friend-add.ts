@@ -28,12 +28,16 @@ import { FRIEND_REQUESTS_FULL_MESSAGE, requestSentLine } from "./tracker";
 import { USERNAME_PATTERN, normalizeUsername } from "./username";
 
 // ---- The words ----------------------------------------------------------
+// Coach Yinka, Nov 26 2026, on the You page: "the copy on this page is shit
+// when you keep saying they ... it should be like share with your QR code".
+// So every line names who it means ("your friend") and never says they,
+// them or their; tests/add-friend.test.ts holds it.
 
 export const ADD_ROW = "Add a friend";
-export const ADD_ROW_DETAIL = "By their @username, or show them your code.";
+export const ADD_ROW_DETAIL = "Type a friend's @username, or share your QR code.";
 export const ADD_TITLE = "Add a friend";
-export const ADD_BODY = "Type their @username exactly. They get your request, and you are friends once they accept.";
-export const ADD_FIELD = "Their @username";
+export const ADD_BODY = "Type your friend's @username exactly. Once your friend accepts, you see each other's training.";
+export const ADD_FIELD = "Your friend's @username";
 export const ADD_PLACEHOLDER = "@username";
 export const ADD_SEND = "Send a friend request";
 export const ADD_SENT_EYEBROW = "Asked";
@@ -41,22 +45,25 @@ export const ADD_SENT_EYEBROW = "Asked";
 export const ADD_FRIENDS_EYEBROW = "Friends";
 export const ADD_ANOTHER = "Add another friend";
 export const ADD_DONE = "Done";
-export const ADD_MY_CODE = "Show my code";
-export const ADD_MY_CODE_DETAIL = "Standing next to them? They scan it with their iPhone camera.";
+export const ADD_MY_CODE = "Show my QR code";
+export const ADD_MY_CODE_DETAIL = "Standing next to a friend? Share your QR code.";
 
-export const ADD_EMPTY = "Type their @username first.";
+export const ADD_EMPTY = "Type your friend's @username first.";
 // ONE line for a username nobody has, a block either way and a player who
 // took the one asking off: which of the three it was is never said.
 export const ADD_NOT_FOUND = "We could not find that @username. Check the spelling.";
 export const ADD_SELF = "That is your own @username.";
 export const ADD_ALREADY = "You are already friends.";
-export const ADD_WAITING = "You already asked. They have not answered yet.";
+export const ADD_WAITING = "You already asked. Your friend has not answered yet.";
 export const ADD_DAY_FULL = "That is a lot of friend requests for one day. Send more tomorrow.";
 export const ADD_OFFLINE = "We could not reach the server. Try again in a minute.";
 
-export const MY_CODE_TITLE = "My code";
-export const MY_CODE_BODY = "A teammate opens their iPhone camera and points it at this code. Then they send you a friend request.";
+export const MY_CODE_TITLE = "My QR code";
+export const MY_CODE_BODY = "Your friend points an iPhone camera at this code. You accept the request, and you see each other's training.";
 export const MY_CODE_SEND = "Send my link";
+// the invite row on the You page, beside My QR code
+export const SEND_LINK_ROW = "Send my link to a teammate";
+export const SEND_LINK_DETAIL = "Your teammate joins, you accept, and you see each other's training.";
 // what a screen reader says for the picture (and what the tapped pass looks for)
 export const MY_CODE_SAID = "Your QR code. A teammate scans it to send you a friend request.";
 export function myCodeLine(code: string): string {

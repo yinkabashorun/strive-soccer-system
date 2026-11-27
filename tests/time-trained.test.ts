@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { fmtDuration, timeTrained, weekMinutes } from "@/lib/elite/time-trained";
+import { fmtDuration, nextMedalLine, timeTrained, weekMinutes } from "@/lib/elite/time-trained";
 import type { Homework } from "@/lib/elite/types";
 
 // Offer stack item 8 (Oct 12 2026): progress counts time trained and
@@ -73,6 +73,13 @@ describe("timeTrained", () => {
   it("weekMinutes is one week's completed minutes", () => {
     expect(weekMinutes(week1, 1)).toBe(35);
     expect(weekMinutes(week1, 2)).toBe(0);
+  });
+});
+
+describe("the next medal, beside Earned on the You tab", () => {
+  it("says how far, then which medal", () => {
+    expect(nextMedalLine(5, 106)).toBe("1h 46m to your 5 hour medal");
+    expect(nextMedalLine(1, 12)).toBe("12m to your 1 hour medal");
   });
 });
 

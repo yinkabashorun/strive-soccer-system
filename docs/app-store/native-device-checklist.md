@@ -421,7 +421,7 @@ friend of the other.
 3. **A block reads as not found.** On B block A. On A type B's @username:
    the same "We could not find that @username" line as for a name nobody
    has. Unblock afterwards.
-4. **My code.** On A: "Add a friend", "Show my code" (and You, "My code").
+4. **My code.** On A: "Add a friend", "Show my QR code" (and You, "My QR code").
    A white card with the QR code, A's name, @username and "My code:
    XXXXXXXX" under it. Turn the phone's brightness down: the code is still
    black on white.

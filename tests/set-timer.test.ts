@@ -5,6 +5,8 @@ import {
   READY_SECONDS,
   clock,
   parseReps,
+  planKey,
+  planLine,
   stepSeconds,
   timerNext,
   timerStart,
@@ -130,6 +132,49 @@ describe("the timer walks the sets", () => {
     expect(timer).not.toContain("toggleHomework");
     expect(read("components/elite/DeviceSettings.tsx")).toContain("SOUND_PREF_KEY");
     expect(read("lib/elite/sound.ts")).toContain("SOUND_PREF_KEY");
+  });
+});
+
+// Found on a phone, Nov 26 2026 (Coach Yinka: "the timer doesn't count down
+// the same time as we put for the drill"): the iPhone app's timer restarted
+// itself, back to its five second "Get ready", whenever the session behind
+// it redrew with a new object for the same drill, which happens each time a
+// tick saves. The timer now starts on what the sets ARE, never on the object.
+describe("the iPhone app's timer starts once and shows the coach's own numbers", () => {
+  it("two readings of the same words are the same timer", () => {
+    const a = parseReps("3 x 1 min, rest 30 sec")!;
+    const b = parseReps("3 x 1 min, rest 30 sec")!;
+    expect(a).not.toBe(b);
+    expect(planKey(a)).toBe(planKey(b));
+    expect(planKey(a)).not.toBe(planKey(parseReps("3 x 90 sec, rest 30 sec")!));
+    expect(planKey(parseReps("3 x 10 reps, rest 30 sec")!)).not.toBe(planKey(parseReps("3 x 30 sec")!));
+  });
+
+  it("the app starts the timer on the plan's value, and reads the plan from the words", () => {
+    const timer = read("mobile/src/SetTimer.tsx");
+    expect(timer).toContain("const key = planKey(plan);");
+    expect(timer).toContain("}, [key]);");
+    // the old effect, which ran again for every new object
+    expect(timer).not.toContain("}, [plan, enter]);");
+    const session = read("mobile/app/session/[n].tsx");
+    expect(session).toContain("useMemo(() => (reps ? parseReps(reps) : null), [reps])");
+    expect(session).not.toContain("parseReps(drill.reps) : null), [drill]");
+  });
+
+  it("a step's first frame never counts the time spent before the tap", () => {
+    const timer = read("mobile/src/SetTimer.tsx");
+    // entering a step and resuming both bring the screen's clock up to now
+    expect(timer.match(/setNow\(t\);/g)?.length).toBe(2);
+  });
+
+  it("under Get ready it says what is about to run, in the coach's numbers", () => {
+    expect(planLine(parseReps("3 x 1 min, rest 30 sec")!)).toBe("3 sets of 1 min. Rest 30 sec.");
+    expect(planLine(parseReps("3 x 90 sec, rest 30 sec")!)).toBe("3 sets of 1 min 30 sec. Rest 30 sec.");
+    expect(planLine(parseReps("6 x 45 sec on, 45 sec off")!)).toBe("6 sets of 45 sec. Rest 45 sec.");
+    expect(planLine(parseReps("3 x 30 sec")!)).toBe("3 sets of 30 sec.");
+    expect(planLine(parseReps("3 x 10 reps, rest 30 sec")!)).toBe("3 sets. Rest 30 sec.");
+    expect(planLine(parseReps("5 mins")!)).toBe("1 set of 5 min.");
+    expect(read("mobile/src/SetTimer.tsx")).toContain('step.phase === "ready"\n            ? planLine(plan)');
   });
 });
 

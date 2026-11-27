@@ -115,6 +115,13 @@ export function weekMinutes(rows: Homework[], week: number): number {
 
 // "4h 20m" / "45m" / "0m" - the one way time trained is written anywhere
 // a player or parent sees it.
+// The line beside "Earned" on the You tab: how far the next hours medal is,
+// said the way a player reads it ("1h 46m to your 5 hour medal"). It used to
+// read "5 hours in 1h 46m", which nobody could parse (Coach Yinka, Nov 26 2026).
+export function nextMedalLine(hours: number, minutesAway: number): string {
+  return `${fmtDuration(minutesAway)} to your ${hours} hour medal`;
+}
+
 export function fmtDuration(minutes: number): string {
   const m = Math.max(0, Math.round(minutes));
   if (m < 60) return `${m}m`;

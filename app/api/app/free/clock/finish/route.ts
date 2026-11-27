@@ -1,6 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { appJson, appRoute } from "@/lib/elite/app-api";
-import { noticeFriendPost } from "@/lib/elite/free-notices-server";
+import { noticeFriendPassed, noticeFriendPost } from "@/lib/elite/free-notices-server";
 import { countTeammate } from "@/lib/elite/squad-pass-server";
 import { OFFENSIVE_MESSAGE, isOffensive } from "@/lib/elite/text-filter";
 import {
@@ -79,7 +79,11 @@ export const POST = appRoute({ name: "free-clock-finish", access: "free_app", li
   // said once: only the write that made the entry tells friends and counts
   // a teammate (the same finish sent again changes nothing)
   if (saved.fresh) {
-    await noticeFriendPost(viewer.profile.id, nyDayOf(Date.now())).catch(() => 0);
+    const today = nyDayOf(Date.now());
+    // a friend this training just put them in front of hears "just passed
+    // you", and only that. Training only: gym is on no board.
+    const passed = kind === "training" ? await noticeFriendPassed({ posterId: viewer.profile.id, entryId: saved.id, today }).catch(() => []) : [];
+    await noticeFriendPost(viewer.profile.id, today, passed).catch(() => 0);
     await countTeammate(viewer.profile.id).catch(() => undefined);
   }
   revalidatePath(FREE_HOME);

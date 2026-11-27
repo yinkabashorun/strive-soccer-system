@@ -300,7 +300,7 @@ describe("the rule is held everywhere time is added up or written", () => {
     const sessionBranch = web.slice(web.indexOf("if (sessionRef && viewer.playerId) {"), web.indexOf("const saved = await savePost("));
     expect(sessionBranch).toContain("countTeammate(viewer.profile.id)");
     // the clock counts one only for the write that made the entry
-    expect(code("app/api/app/free/clock/finish/route.ts")).toMatch(/if \(saved\.fresh\) \{[\s\S]{0,200}countTeammate\(viewer\.profile\.id\)/);
+    expect(code("app/api/app/free/clock/finish/route.ts")).toMatch(/if \(saved\.fresh\) \{[\s\S]{0,500}countTeammate\(viewer\.profile\.id\)/);
   });
 
   it("a post a coach removes comes off every board, and deleting a post deletes both its photos", () => {

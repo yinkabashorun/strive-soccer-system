@@ -15,6 +15,7 @@ import {
   coachNameFor,
   earnedNotice,
   filmFeedbackNotice,
+  friendPassedNotice,
   friendPostNotice,
   interruptionFor,
   newWeekNotice,
@@ -97,6 +98,8 @@ const EVERY_NOTICE: Record<string, Notice> = {
   "reminder, last session of the week": reminderNotice({ ...facts, session: 4, lastOpen: true }),
   "reminders paused": remindersPausedNotice({ nyDate: "2026-11-24" }),
   "friend posted": friendPostNotice({ first: "Kai", nyDate: "2026-11-24" }),
+  "friend passed you": friendPassedNotice({ first: "Kai", minutes: 45, nyDate: "2026-11-24" }),
+  "friend passed you, a long one": friendPassedNotice({ first: "Kai", minutes: 90, nyDate: "2026-11-24" }),
   props: propsNotice({ first: "Kai", postId: POST }),
   "squad pass earned": squadPassNotice({ number: 1 }),
   "club session planned": clubPlanNotice({ planId: PLAN, club: "Sunday Pickup", clubId: CLUB, what: "Club training", when: "Thu, Nov 26 at 6:00 PM" }),
@@ -239,6 +242,16 @@ describe("the list: every notice, word for word", () => {
       path: "/log",
       key: "friend_post:2026-11-24",
     });
+    // a friend's own timed training put them in front on the friends board
+    // (Coach Yinka's yes, Nov 27 2026), in the words he picked in the copy
+    // quiz: the fact, then the teammate's jab
+    expect(words(EVERY_NOTICE["friend passed you"])).toEqual({
+      title: "Kai just passed you",
+      body: "Trained 45m just now. You good with that?",
+      path: "/log",
+      key: "friend_passed:2026-11-24",
+    });
+    expect(EVERY_NOTICE["friend passed you, a long one"].body).toBe("Trained 1h 30m just now. You good with that?");
     expect(words(EVERY_NOTICE.props)).toEqual({
       title: "Kai gave you props",
       body: "On your training post.",
@@ -317,6 +330,7 @@ describe("which channel each kind uses, and the topic it belongs to", () => {
       reminder: "push",
       reminders_paused: "push",
       friend_post: "push",
+      friend_passed: "push",
       props: "push",
       squad_pass: "push",
       club_plan: "push",
@@ -343,6 +357,7 @@ describe("which channel each kind uses, and the topic it belongs to", () => {
       checkin_days: "coach",
       coach_attending: "coach",
       friend_post: "friends",
+      friend_passed: "friends",
       props: "friends",
       squad_pass: "friends",
       club_plan: "clubs",

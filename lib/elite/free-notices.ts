@@ -3,6 +3,10 @@
 //   - "Diego just posted": when an accepted friend posts and they have not
 //     posted today. At most ONE a day: the first friend post triggers it,
 //     later ones that day do not. Never across a block.
+//   - "Diego just passed you": when an accepted friend's own timed
+//     training puts them in front on the friends board. At most ONE a day,
+//     whoever passes them (passedKey). Never across a block. A friend told
+//     this is not also told "just posted" for the same training.
 //   - "Diego gave you props": at most one per post, and at most three a
 //     day.
 //   - "<Club>: Club training Tue, Nov 24 at 6:00 PM.": when a
@@ -50,6 +54,35 @@ export function noticeKey(
   return { kind, ny_date: input.postDay ?? input.today, ref: input.postId ?? "" };
 }
 
+// "<First> just passed you" is claimed in the SAME ledger. Its kind column
+// is held by the database to the two values above (078's check), and a
+// pass belongs to the same family as a friend's post, so it is filed under
+// "friend_post" with its own ref: one row per person per New York day,
+// whoever passes them, and it never meets a friend's-post claim (ref "").
+// No migration. If a later migration widens that check, this is the one
+// line that changes.
+export const PASSED_REF = "passed";
+export function passedKey(today: string): { kind: NoticeKind; ny_date: string; ref: string } {
+  return { kind: "friend_post", ny_date: today, ref: PASSED_REF };
+}
+
+// Who hears that a friend passed them: the friends the standing rule named
+// (lib/elite/standing.ts passedBy), never across a block either way, and
+// only those with a device on file.
+export function friendPassedReceivers(input: {
+  posterId: string;
+  passed: string[];
+  blocks: { blocker: string; blocked: string }[];
+  withDevice: ReadonlySet<string>;
+}): string[] {
+  const blocked = new Set<string>();
+  for (const b of input.blocks) {
+    if (b.blocker === input.posterId) blocked.add(b.blocked);
+    if (b.blocked === input.posterId) blocked.add(b.blocker);
+  }
+  return [...new Set(input.passed)].filter((id) => id !== input.posterId && !blocked.has(id) && input.withDevice.has(id));
+}
+
 // Who hears about a friend's post: their accepted friends, never across a
 // block either way, only those with a device on file, and not one who has
 // posted today already (they can see it).
@@ -59,6 +92,8 @@ export function friendPostReceivers(input: {
   blocks: { blocker: string; blocked: string }[];
   withDevice: Set<string>;
   postedToday: Set<string>;
+  // friends this same training just told "passed you": one push, not two
+  skip?: readonly string[];
 }): string[] {
   const blocked = new Set<string>();
   for (const b of input.blocks) {
@@ -70,7 +105,8 @@ export function friendPostReceivers(input: {
       id !== input.posterId &&
       !blocked.has(id) &&
       input.withDevice.has(id) &&
-      !input.postedToday.has(id)
+      !input.postedToday.has(id) &&
+      !(input.skip ?? []).includes(id)
   );
 }
 

@@ -43,3 +43,32 @@ moments):
 
 Used so far: the push itself now reads "Nico just passed you" / "Trained
 45m just now. You good with that?" (the fact, then the jab).
+
+## Moment 2: you just finished training and posted it
+
+- 2A. "Posted. 45 minutes on your week."
+- 2B. "45 minutes. That's how you do it."
+- 2C. "45 minutes in. You just passed Nico."
+- 2D. "Locked in. 45 minutes on the board."
+
+His answers:
+- Q1 (would screenshot): 2C, "but none are really good". Better, his own:
+  "Posted, continue outworking the competition" or "45 minutes locked in,
+  excellent work".
+- Q2 (cringe): none. But 2D and 2B are "too plain if you're trying to
+  motivate or instigate". 2A is plain too, but "professional or standard".
+- Q3 (his own words): "lets go boys another sesh in the books", with "but
+  im also a guy lol".
+
+What it says about the voice:
+- Every line has a job: MOTIVATE or INSTIGATE. A line that only reports is
+  plain. Plain is acceptable where the app is being professional (a
+  receipt, a setting), never where it is meant to move the player.
+- Praise is welcome and said straight: "excellent work".
+- "The competition" is the frame: you are outworking someone.
+- "Locked in" lands when it carries the number and the praise with it, not
+  on its own.
+- His lines are a little longer and warmer than my clipped ones.
+- He flagged it himself: he is a guy, and the app is for girls too. So no
+  "boys", "bro" or "king" in the app's own voice; the energy without the
+  gendered words.

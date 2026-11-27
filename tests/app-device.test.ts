@@ -528,7 +528,7 @@ describe("the free app", () => {
     expect(me).toContain("{train && member ? <YouEarned y={member} /> : null}");
     // the free numbers, the invite row and Settings are there for everyone
     expect(me).toContain("y.weekMinutes");
-    expect(me).toContain('label="Send my link to a teammate"');
+    expect(me).toContain("label={SEND_LINK_ROW}");
     const session = code(path.join(root, "app/session/[n].tsx"));
     expect(session).toMatch(/hasTrain\(me\.data\?\.state\) && finish\.added >= 1/);
     expect(session).toContain("/post?session=${week.week}-${session.n}");

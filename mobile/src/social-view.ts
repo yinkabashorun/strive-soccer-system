@@ -37,3 +37,53 @@ export function recordShort(line: string | null | undefined): string | null {
 export function inviteShare(p: { invite: string; inviteText?: string }): { message: string } | { url: string } {
   return p.inviteText ? { message: p.inviteText } : { url: p.invite };
 }
+
+// WHERE YOU STAND THIS WEEK: one line from the friends board, said at the
+// top of Friends and over the board on Week, so the gap to the next friend
+// is the first thing a player reads ("You're 2nd of 5 this week. 18m to
+// pass Diego."). Among friends only, from training that counts on the
+// board. It never says what anyone has not done: a player with no time yet
+// reads who leads; a friend is only ever named with time on the board.
+// Null with no friends on the board, or when nobody has trained yet.
+export type StandRow = { me: boolean; name: string; minutes: number };
+export type Standing = { strong: string; rest: string | null };
+
+export function ordinal(n: number): string {
+  const tens = n % 100;
+  if (tens >= 11 && tens <= 13) return `${n}th`;
+  return `${n}${["th", "st", "nd", "rd"][n % 10] ?? "th"}`;
+}
+
+const firstOf = (name: string): string => name.trim().split(/\s+/)[0] || "A friend";
+const span = (m: number): string => {
+  const r = Math.max(1, Math.round(m));
+  if (r < 60) return `${r}m`;
+  return r % 60 ? `${Math.floor(r / 60)}h ${r % 60}m` : `${Math.floor(r / 60)}h`;
+};
+
+export function standingLine(board: readonly StandRow[]): Standing | null {
+  const me = board.find((r) => r.me);
+  const others = board.filter((r) => !r.me);
+  if (!me || others.length === 0) return null;
+  const trained = others.filter((r) => r.minutes > 0).sort((a, b) => b.minutes - a.minutes);
+  if (!(me.minutes > 0)) {
+    const leader = trained[0];
+    return leader ? { strong: `${firstOf(leader.name)} leads your friends this week`, rest: `${span(leader.minutes)} so far.` } : null;
+  }
+  const above = trained.filter((r) => r.minutes > me.minutes);
+  if (above.length === 0) {
+    const level = trained.find((r) => r.minutes === me.minutes);
+    if (level) return { strong: `You and ${firstOf(level.name)} are level at the top`, rest: "Your next session takes the lead." };
+    const next = trained[0];
+    return { strong: "You lead your friends this week", rest: next ? `${firstOf(next.name)} is ${span(me.minutes - next.minutes)} back.` : null };
+  }
+  const ahead = above[above.length - 1];
+  return {
+    strong: `You're ${ordinal(above.length + 1)} of ${board.length} this week`,
+    rest: `${span(ahead.minutes - me.minutes)} to pass ${firstOf(ahead.name)}.`,
+  };
+}
+
+export function standingSaid(s: Standing): string {
+  return s.rest ? `${s.strong}. ${s.rest}` : `${s.strong}.`;
+}

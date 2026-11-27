@@ -7,7 +7,7 @@ import type { FreeStage } from "@shared/free-intake";
 // Only to a free account that has not taken the quiz and is not in the
 // free app: stage "quiz". A player who came in by a code is "ready" at
 // once and never sees it again; so is everyone who finished the quiz. A
-// player who said "I do not have a code" is remembered on this phone by
+// player who said "I don't have a code" is remembered on this phone by
 // their email, so the door is asked once and the quiz's own first screen
 // is what they come back to.
 //

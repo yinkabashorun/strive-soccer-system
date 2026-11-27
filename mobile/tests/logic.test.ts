@@ -1,4 +1,4 @@
-import { BAR_MIN, barShare, inviteShare, matchupSplit, recordShort } from "@/social-view";
+import { BAR_MIN, barShare, inviteShare, matchupSplit, ordinal, recordShort, standingLine, standingSaid } from "@/social-view";
 import { describe, expect, it } from "vitest";
 import { chunkedStorage, CHUNK_SIZE, MAX_CHUNKS, parseCount, splitValue, type KV } from "@/auth/chunks";
 import { applyDone } from "@/week-cache";
@@ -275,7 +275,7 @@ describe("where the app belongs", () => {
     const email = "marcus@example.com";
     expect(doorDue({ stage: "quiz", email, passed: "" })).toBe(true);
     expect(doorDue({ stage: "quiz", email, passed: null })).toBe(true);
-    // "I do not have a code" is remembered on this phone for that account
+    // "I don't have a code" is remembered on this phone for that account
     expect(doorDue({ stage: "quiz", email, passed: email })).toBe(false);
     expect(doorDue({ stage: "quiz", email, passed: " Marcus@Example.com " })).toBe(false);
     // another account on the same phone is asked for itself
@@ -388,8 +388,8 @@ describe("a drill's tiles", () => {
     expect(repsTiles("5 mins")).toEqual([{ big: "5 min", small: "one set" }]);
     // words it cannot time are shown exactly as written
     expect(repsTiles("Until it feels easy", 6)).toEqual([
-      { big: "Until it feels easy", small: "the work" },
-      { big: "6 min", small: "about" },
+      { big: "Until it feels easy", small: "what to do" },
+      { big: "6 min", small: "about this long" },
     ]);
     expect(drillEyebrow("skill", 1, 3)).toBe("Drill 2 of 3");
     expect(drillEyebrow("warmup", -1, 3)).toBe("Warm-up");
@@ -1018,5 +1018,42 @@ describe("the training clock on the phone", () => {
   it("keeps a clock the server could not be reached for, and lets go of one it will never take", () => {
     for (const reason of ["short", "expired", "bad", "overlap", "day_cap"]) expect(refusalIsFinal(reason), reason).toBe(true);
     for (const reason of [null, undefined, "", "server", "offline", 7]) expect(refusalIsFinal(reason), String(reason)).toBe(false);
+  });
+});
+
+describe("where you stand this week (Friends and Week)", () => {
+  const row = (name: string, minutes: number, me = false) => ({ name, minutes, me });
+  it("says the place and the gap to the next friend up", () => {
+    const s = standingLine([row("Diego R.", 75), row("Marcus B.", 57, true), row("Kai T.", 30), row("Nico A.", 0)]);
+    expect(s).toEqual({ strong: "You're 2nd of 4 this week", rest: "18m to pass Diego." });
+    expect(standingSaid(s!)).toBe("You're 2nd of 4 this week. 18m to pass Diego.");
+    // the friend named is the next one up, never the leader two places away
+    expect(standingLine([row("A One", 200), row("B Two", 90), row("Me", 60, true)])!.rest).toBe("30m to pass B.");
+    expect(standingLine([row("A One", 200), row("Me", 65, true)])!.rest).toBe("2h 15m to pass A.");
+  });
+  it("in front: says so, and how far back the next friend is", () => {
+    expect(standingLine([row("Me", 90, true), row("Diego R.", 78), row("Kai T.", 0)])).toEqual({ strong: "You lead your friends this week", rest: "Diego is 12m back." });
+    // nobody else has time yet: nothing is said about anyone
+    expect(standingLine([row("Me", 90, true), row("Kai T.", 0)])).toEqual({ strong: "You lead your friends this week", rest: null });
+    expect(standingLine([row("Me", 60, true), row("Diego R.", 60)])).toEqual({ strong: "You and Diego are level at the top", rest: "Your next session takes the lead." });
+  });
+  it("never says what a player has not done", () => {
+    // no time yet: who leads, nothing about the player
+    expect(standingLine([row("Me", 0, true), row("Diego R.", 75), row("Kai T.", 20)])).toEqual({ strong: "Diego leads your friends this week", rest: "1h 15m so far." });
+    // nobody has trained, or no friends on the board: no line at all
+    expect(standingLine([row("Me", 0, true), row("Diego R.", 0)])).toBeNull();
+    expect(standingLine([row("Me", 40, true)])).toBeNull();
+    expect(standingLine([])).toBeNull();
+    for (const board of [
+      [row("Me", 0, true), row("Diego R.", 75)],
+      [row("Me", 10, true), row("Diego R.", 75), row("Kai T.", 0)],
+      [row("Me", 90, true), row("Diego R.", 75), row("Kai T.", 0)],
+    ]) {
+      const said = standingSaid(standingLine(board)!);
+      expect(said).not.toMatch(/Kai|has not|hasn't|missed|behind|last|streak|\b(they|them|their)\b/i);
+    }
+  });
+  it("counts places the way people say them", () => {
+    expect([1, 2, 3, 4, 11, 12, 13, 21, 22, 23, 101, 111].map(ordinal)).toEqual(["1st", "2nd", "3rd", "4th", "11th", "12th", "13th", "21st", "22nd", "23rd", "101st", "111th"]);
   });
 });

@@ -25,7 +25,7 @@ export default function Blocked() {
     setNote(null);
     try {
       const res = await unblockPlayer(id);
-      if (!res.ok) setNote(res.error ?? "That did not go through. Try again.");
+      if (!res.ok) setNote(res.error ?? "That didn't go through. Try again.");
       else await refreshFree();
     } catch (e) {
       setNote(e instanceof ApiError ? e.message : OFFLINE_MESSAGE);

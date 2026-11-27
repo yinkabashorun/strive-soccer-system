@@ -68,7 +68,7 @@ describe("the words", () => {
     expect(clubAskQuestion("Bull Run")).toBe("Ask to join Bull Run?");
     expect(clubAskLine(false)).toContain("The club's captain lets you in");
     expect(clubAskLine(true)).toContain("The coaches let you in");
-    expect(clubRequestSentLine("Bull Run", false)).toBe("Request sent. You are in Bull Run once the captain lets you in.");
+    expect(clubRequestSentLine("Bull Run", false)).toBe("Request sent. You're in Bull Run once the captain lets you in.");
     for (const l of [clubAskLine(true), clubAskLine(false), CLUB_REQUESTS_FULL_MESSAGE]) expect(l).not.toMatch(/—/);
   });
 });

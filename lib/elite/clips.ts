@@ -90,11 +90,11 @@ export function clipCooldownMessage(opensAtIso: string): string {
   return `You already sent a clip. The next one opens ${day}. Film Room is open every week for more.`;
 }
 
-// One line for a player whose camera did not open (punch list A26): the
+// One line for a player whose camera didn't open (punch list A26): the
 // phone's own setting, named the way the phone names it. Shown when the
 // picker closes with no clip.
 export function cameraHint(inApp: boolean): string {
   return inApp
-    ? "No clip picked. If the camera did not open, turn it on in Settings, then Strive Elite, then Camera."
-    : "No clip picked. If the camera did not open, allow the camera for this site in your browser's settings.";
+    ? "No clip picked. If the camera didn't open, turn it on in Settings, then Strive Elite, then Camera."
+    : "No clip picked. If the camera didn't open, allow the camera for this site in your browser's settings.";
 }

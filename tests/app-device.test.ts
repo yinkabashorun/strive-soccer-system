@@ -1063,7 +1063,7 @@ describe("the social half is built like the training loop", () => {
     expect(page).toContain("<LevelBar aura={p.aura} />");
     expect(page).toContain("<TwoNumbers weekMinutes={p.weekMinutes} allMinutes={p.allMinutes} mine={p.you} />");
     // one menu, the iPhone's own sheet; the player is never told
-    expect(page).toContain("is not told if you report, remove or block them.");
+    expect(page).toContain("is never told about a report, a removal or a block.");
     for (const label of ['"Report the profile photo"', '"Report the Playing for line"', '"Remove from my friends"', "`Block ${first}`"]) {
       expect(page, label).toContain(label);
     }
@@ -1099,3 +1099,62 @@ describe("a switched-off control looks switched off", () => {
     expect(button).toContain("disabled={disabled || busy}");
   });
 });
+
+// Nov 27 2026, the owner on build 10: "what can we improve copy wise? and
+// also stickyness of the layout", after "the copy on this page is shit when
+// you keep saying they".
+describe("the words name the person, and the scores come first", () => {
+  // every word a player can read: JSX text and string literals, comments out
+  const spoken = (f: string) =>
+    code(f)
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      .split("\n")
+      .filter((l) => !/^\s*(import |export type |type |\} from )/.test(l))
+      .join("\n");
+  const screens = sources.filter((f) => !/src\/api\/fixtures/.test(rel(f)));
+
+  it("no screen says they, them or their for a person the player cannot see", () => {
+    for (const f of screens) {
+      const text = spoken(f);
+      // strings and JSX text only: what is between quotes, backticks, or tags
+      const said = [...text.matchAll(/"([^"\n]*)"|`([^`]*)`|>([^<>{}\n]+)</g)].map((m) => m[1] ?? m[2] ?? m[3] ?? "").join("\n");
+      // a name worked out in code (${theirs.name}) is not a word on the screen
+      const words = said.replace(/\$\{[^}]*\}/g, "X");
+      expect(words, rel(f)).not.toMatch(/\b(they|them|their)\b/i);
+    }
+  });
+
+  it("Week shows the friends board, with where you stand, before the one upgrade card", () => {
+    const week = code(path.join(root, "app/(free)/my-week.tsx"));
+    expect(week.indexOf("{BOARD_TITLE}")).toBeGreaterThan(0);
+    expect(week.indexOf("{BOARD_TITLE}")).toBeLessThan(week.indexOf("<UpgradeCard"));
+    expect(week.indexOf("<StandingLine board={w.board}")).toBeGreaterThan(week.indexOf("{BOARD_TITLE}"));
+    expect(week.indexOf("<StandingLine board={w.board}")).toBeLessThan(week.indexOf("{w.board.map("));
+  });
+
+  it("Friends says where you stand this week under the date, one tap from the board", () => {
+    const friends = code(path.join(root, "app/(free)/friends.tsx"));
+    expect(friends).toContain("const board = useFreeWeek().data?.board ?? null;");
+    expect(friends).toContain('<StandingLine board={board} onPress={() => router.navigate("/(free)/my-week")}');
+    expect(friends.indexOf("{f.date}")).toBeLessThan(friends.indexOf("<StandingLine"));
+    expect(friends.indexOf("<StandingLine")).toBeLessThan(friends.indexOf("<ClockRow"));
+    const line = code(path.join(root, "src/StandingLine.tsx"));
+    expect(line).toContain("standingLine(board)");
+    expect(line).toContain("if (!s) return null;");
+  });
+
+  it("a club's card shows the matchup as a score, and falls back to the plain line", () => {
+    const clubs = code(path.join(root, "app/(free)/clubs.tsx"));
+    expect(clubs).toContain("{club.race ? (");
+    expect(clubs).toContain("matchupSplit(club.race.mine, club.race.theirs)");
+    expect(clubs).toContain("{club.race.mineTime}");
+    expect(clubs).toContain("{club.race.theirsTime}");
+    expect(clubs).toContain(") : club.matchup ? (");
+  });
+
+  it("one minute is a minute on the finish ring", () => {
+    expect(code(path.join(root, "app/session/[n].tsx"))).toContain('{finish.added === 1 ? "Minute" : "Minutes"}');
+    expect(read(path.resolve(root, "../components/elite/SessionPlayer.tsx"))).toContain('{minutes === 1 ? "Minute" : "Minutes"}');
+  });
+});
+

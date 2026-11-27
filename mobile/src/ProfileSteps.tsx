@@ -127,7 +127,7 @@ export function PhotoStep({ seenBy, initialUri, onDone }: { seenBy: string; init
         ? await ImagePicker.launchCameraAsync({ allowsEditing: true, aspect: [1, 1], quality: 0.9, cameraType: ImagePicker.CameraType.front })
         : await ImagePicker.launchImageLibraryAsync({ mediaTypes: ["images"], allowsEditing: true, aspect: [1, 1], quality: 0.9 });
     } catch {
-      return setError(camera ? "The camera did not open. Choose from your photos instead." : "Your photos did not open. Try again.");
+      return setError(camera ? "The camera didn't open. Choose from your photos instead." : "Your photos didn't open. Try again.");
     }
     if (res.canceled || !res.assets[0]) return;
     setUri(res.assets[0].uri);

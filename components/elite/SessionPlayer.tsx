@@ -778,7 +778,7 @@ function Finish({
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
               <span className="metal-text m-head text-[68px] leading-none tabular-nums">+{added}</span>
-              <span className="mt-1 text-[11px] font-semibold uppercase tracking-[0.26em] text-white/60">Minutes</span>
+              <span className="mt-1 text-[11px] font-semibold uppercase tracking-[0.26em] text-white/60">{minutes === 1 ? "Minute" : "Minutes"}</span>
             </div>
           </div>
 

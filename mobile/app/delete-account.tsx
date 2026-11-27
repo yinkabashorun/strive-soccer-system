@@ -66,7 +66,7 @@ export default function DeleteAccount() {
           </Eyebrow>
           <View style={{ marginTop: 10, gap: 6 }}>
             {[
-              "Payment records. They are held by our payment processor and kept as long as tax and accounting rules require.",
+              "Payment records. Our payment processor holds these for as long as tax and accounting rules require.",
               "Monthly billing. Deleting the account does not stop a payment by itself. We are told the moment you delete, and we stop it.",
               "Texts already delivered to your phone.",
             ].map((l) => (

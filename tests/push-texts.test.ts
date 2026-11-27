@@ -226,7 +226,7 @@ describe("the list: every notice, word for word", () => {
     });
     expect(words(EVERY_NOTICE["reminders paused"])).toEqual({
       title: "Reminders are paused",
-      body: "Your week is here whenever you are ready.",
+      body: "Your week is here whenever you're ready.",
       path: "/dashboard",
       key: "reminders_paused:2026-11-24",
     });
@@ -235,7 +235,7 @@ describe("the list: every notice, word for word", () => {
   it("the free app: a friend posted, props, the earned month, a club's plan", () => {
     expect(words(EVERY_NOTICE["friend posted"])).toEqual({
       title: "Kai just posted",
-      body: "Their post opens when you post yours today.",
+      body: "Kai's post opens when you post yours today.",
       path: "/log",
       key: "friend_post:2026-11-24",
     });
@@ -247,7 +247,7 @@ describe("the list: every notice, word for word", () => {
     });
     expect(words(EVERY_NOTICE["squad pass earned"])).toEqual({
       title: "You earned a month of Strive Pro",
-      body: "Three teammates trained. Start it when you are ready.",
+      body: "Three teammates trained. Start it when you're ready.",
       path: "/log",
       key: "squad_pass:1",
     });
@@ -418,7 +418,7 @@ describe("the rule: inform, never order, never sell, never shout", () => {
   });
 
   it("an earned month is not read as a price", () => {
-    expect(pushTextProblems({ title: "You earned a month of Strive Pro", body: "Three teammates trained. Start it when you are ready." })).toEqual([]);
+    expect(pushTextProblems({ title: "You earned a month of Strive Pro", body: "Three teammates trained. Start it when you're ready." })).toEqual([]);
   });
 
   it("a notice with a bad address, an unknown topic or no channel is refused", () => {

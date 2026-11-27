@@ -28,7 +28,7 @@ export default function ChangePassword() {
       setCurrent("");
       setNext("");
     } catch (e) {
-      setMsg({ ok: false, text: e instanceof ApiError ? e.message : "That did not work. Try again." });
+      setMsg({ ok: false, text: e instanceof ApiError ? e.message : "That didn't work. Try again." });
     }
   }
 

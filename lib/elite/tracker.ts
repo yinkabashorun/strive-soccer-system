@@ -532,7 +532,7 @@ export function clubAskLine(byCoach: boolean): string {
   return `${byCoach ? "The coaches let you in" : "The club's captain lets you in"}. Then you become friends with everyone in the club, and the club shows on your profile.`;
 }
 export function clubRequestSentLine(name: string, byCoach: boolean): string {
-  return `Request sent. You are in ${name} once ${byCoach ? "the coaches let" : "the captain lets"} you in.`;
+  return `Request sent. You're in ${name} once ${byCoach ? "the coaches let" : "the captain lets"} you in.`;
 }
 export const CLUB_REQUESTS_PENDING_MAX = 10;
 export const CLUB_REQUESTS_FULL_MESSAGE = "You have a lot of club requests waiting already. Give the captains a little time.";
@@ -625,14 +625,14 @@ export function mayBeCaptain(
 export const CAPTAIN_ONLY_MEMBER = "Pick a player who is in the club.";
 export const CAPTAIN_SAME = "That player is already the captain.";
 export const HAND_OVER_ROW = "Make someone else captain";
-export const HAND_OVER_DETAIL = "They let players in and run the club. You stay in it.";
+export const HAND_OVER_DETAIL = "The new captain lets players in and runs the club. You stay in it.";
 export const HAND_OVER_SHEET_TITLE = "Make someone else captain";
 export const HAND_OVER_SHEET_BODY = "The new captain lets players in, plans sessions and can take players off. You stay in the club as a player.";
 export function handOverAsk(name: string, club: string): string {
   return `Make ${name} the captain of ${club}?`;
 }
 export const HAND_OVER_ASK_BODY = "You stop being the captain. Only the new captain can hand the club back.";
-export const HAND_OVER_CONFIRM = "Make them captain";
+export const HAND_OVER_CONFIRM = "Make captain";
 
 // The one text the coaches get for a reported club name.
 export function clubReportText(club: string, url: string): string {

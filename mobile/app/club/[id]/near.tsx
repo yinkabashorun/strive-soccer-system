@@ -57,7 +57,7 @@ function NearClubs() {
       ) : (
         <>
           <Body dim size={13.5} style={{ marginTop: 6 }}>
-            {n.club.countyName ? `Open to games in ${n.club.countyName}.` : "Pick your club's county in Manage first. Clubs play clubs in their own county."}
+            {n.club.countyName ? `Open to games in ${n.club.countyName}.` : "Pick your club's county in Manage first. Clubs play clubs in the same county."}
           </Body>
           {n.club.county && !n.club.open ? (
             <Body dim size={13.5} style={{ marginTop: 8 }}>

@@ -17,7 +17,7 @@ appId: com.strivesoccer.elite
     arguments:
       fixtureState: free_quiz
 - extendedWaitUntil:
-    visible: "I do not have a code"
+    visible: "I don't have a code"
     timeout: 30000
 - waitForAnimationToEnd:
     timeout: 3000
@@ -37,7 +37,7 @@ appId: com.strivesoccer.elite
 - waitForAnimationToEnd:
     timeout: 2000
 - assertVisible: "Use my code"
-- assertVisible: "I do not have a code"
+- assertVisible: "I don't have a code"
 - takeScreenshot: t62-door-code-typed
 - tapOn: "Use my code"
 

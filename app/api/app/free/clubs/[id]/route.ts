@@ -78,7 +78,7 @@ export function POST(req: Request, ctx?: Ctx): Promise<Response> {
         if (typeof body.player !== "string" || !UUID.test(body.player) || typeof body.accept !== "boolean") return bad("That request is gone.");
         return answer(await answerClubRequest(id, body.player, body.accept));
       default:
-        return bad("That did not go through. Try again.");
+        return bad("That didn't go through. Try again.");
     }
   })(req);
 }

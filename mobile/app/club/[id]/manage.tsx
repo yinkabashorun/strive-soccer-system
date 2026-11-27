@@ -76,7 +76,7 @@ export default function Manage() {
       if (res.ok) {
         await refreshClubs();
         after?.(res.code);
-      } else if (!res.declined) setError(res.error ?? "That did not go through. Try again.");
+      } else if (!res.declined) setError(res.error ?? "That didn't go through. Try again.");
     } catch (e) {
       setError(e instanceof ApiError ? e.message : OFFLINE_MESSAGE);
     } finally {
@@ -110,14 +110,14 @@ export default function Manage() {
   const takeOff = () =>
     choose({
       title: "Take a player off",
-      message: "The club's code will not let them back in. They stay friends with everyone they made friends with here.",
+      message: "The club's code won't let that player back in. The friends that player made here stay friends.",
       choices: others.map((m) => ({
         label: m.name,
         destructive: true,
         run: () =>
-          Alert.alert(`Take ${m.name} off ${c.name}?`, "This is for good: the club's code will not let them back in.", [
+          Alert.alert(`Take ${m.name} off ${c.name}?`, `This is for good: the club's code won't let ${m.name} back in.`, [
             { text: "Cancel", style: "cancel" },
-            { text: "Take them off", style: "destructive", onPress: () => void act("remove", () => removeMember(c.id, m.id)) },
+            { text: `Take ${m.name} off`, style: "destructive", onPress: () => void act("remove", () => removeMember(c.id, m.id)) },
           ]),
       })),
     });
@@ -140,7 +140,7 @@ export default function Manage() {
     });
 
   const newCode = () =>
-    Alert.alert("Make a new code?", "The old code and link stop working for everyone who has them. Your members stay in the club.", [
+    Alert.alert("Make a new code?", "The old code and the old link stop working for everyone. Your members stay in the club.", [
       { text: "Cancel", style: "cancel" },
       {
         text: "Make a new code",
@@ -296,7 +296,7 @@ export default function Manage() {
           )}
           {others.length ? (
             <>
-              <SettingRow label="Take a player off" detail="For good: the club's code will not let them back in." onPress={takeOff} />
+              <SettingRow label="Take a player off" detail="For good: the club's code won't let that player back in." onPress={takeOff} />
               <Hairline />
             </>
           ) : null}

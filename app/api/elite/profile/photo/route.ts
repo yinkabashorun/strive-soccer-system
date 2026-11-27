@@ -78,7 +78,7 @@ export async function POST(req: Request) {
   }
 
   if (!(await saveProfilePhoto(viewer.profile.id, photo))) {
-    return no("Your photo was not saved. Check your connection and try again.", 502);
+    return no("Your photo wasn't saved. Check your connection and try again.", 502);
   }
   // Every screen that shows it, and the gate that asked for it.
   revalidatePath("/", "layout");

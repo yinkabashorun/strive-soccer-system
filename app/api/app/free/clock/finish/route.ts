@@ -29,7 +29,7 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 const no = (error: string, status: number, reason?: string) => appJson({ ok: false, error, ...(reason ? { reason } : {}) }, status);
-const NOT_SAVED = "Your training was not saved. Check your connection and try again.";
+const NOT_SAVED = "Your training wasn't saved. Check your connection and try again.";
 
 async function jpegOf(part: FormDataEntryValue | null): Promise<Uint8Array | null | "big"> {
   if (!(part instanceof Blob) || part.size === 0) return null;

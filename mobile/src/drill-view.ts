@@ -18,8 +18,8 @@ export function repsTiles(reps: string, minutes?: number): Tile[] {
   if (!plan) {
     const words = reps.trim();
     const tiles: Tile[] = [];
-    if (words) tiles.push({ big: words, small: "the work" });
-    if (minutes) tiles.push({ big: `${minutes} min`, small: "about" });
+    if (words) tiles.push({ big: words, small: "what to do" });
+    if (minutes) tiles.push({ big: `${minutes} min`, small: "about this long" });
     return tiles;
   }
   const work = plan.workSec !== null ? span(plan.workSec) : null;

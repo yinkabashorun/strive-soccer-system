@@ -215,7 +215,7 @@ describe("the door's words", () => {
     expect(DOOR_TITLE).toBe("Have a code from a teammate or a club?");
     expect(DOOR_FIELD).toBe("Code from a teammate or a club");
     expect(DOOR_USE).toBe("Use my code");
-    expect(DOOR_NO_CODE).toBe("I do not have a code");
+    expect(DOOR_NO_CODE).toBe("I don't have a code");
     expect(DOOR_TO_FRIENDS).toBe("Go to my friends");
     expect(DOOR_KEEP_GOING).toBe("Keep going");
     expect(DOOR_WORKED).toBe("Your code worked");

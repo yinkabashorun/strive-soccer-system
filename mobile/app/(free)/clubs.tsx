@@ -10,6 +10,7 @@ import { Avatar, MyAvatar } from "@/Avatar";
 import { CrestGlow, Crest } from "@/Crest";
 import { PAGE_TOP, Screen } from "@/Screen";
 import { Shade } from "@/Shade";
+import { matchupSplit } from "@/social-view";
 import { Body, Button, Card, Eyebrow, Head, Label, Press, Skeleton } from "@/ui";
 import { color, radius } from "@/theme";
 
@@ -98,7 +99,7 @@ function ClubCard({ club, onPress }: { club: AppClubCard; onPress: () => void })
     <Press
       onPress={onPress}
       style={styles.card}
-      accessibilityLabel={`${club.name}.${club.champs ? ` ${CHAMPS_MARK}.` : ""} ${club.weekTime} trained this week.${who ? ` Trained today: ${who}.` : ""}${club.matchup ? ` ${club.matchup}` : ""}`}
+      accessibilityLabel={`${club.name}.${club.champs ? ` ${CHAMPS_MARK}.` : ""} ${club.weekTime} trained this week.${who ? ` Trained today: ${who}.` : ""}${club.race ? ` This week against ${club.race.other}. ${club.race.line}` : club.matchup ? ` ${club.matchup}` : ""}`}
     >
       {club.photo ? (
         <>
@@ -144,9 +145,28 @@ function ClubCard({ club, onPress }: { club: AppClubCard; onPress: () => void })
         </View>
       ) : null}
 
-      {club.next || club.matchup || club.waiting ? (
+      {club.next || club.matchup || club.race || club.waiting ? (
         <View style={styles.lines}>
-          {club.matchup ? <Body size={13.5}>{club.matchup}</Body> : null}
+          {/* this week's matchup as a score: each club's time per player,
+              this club's share of the two as one bar, and who is ahead */}
+          {club.race ? (
+            <View>
+              <Eyebrow gold={false}>{`This week vs ${club.race.other}`}</Eyebrow>
+              <View style={styles.race}>
+                <Head size={22}>{club.race.mineTime}</Head>
+                <View style={styles.split}>
+                  <View style={[styles.mine, { flex: matchupSplit(club.race.mine, club.race.theirs) }]} />
+                  <View style={[styles.theirs, { flex: 1 - matchupSplit(club.race.mine, club.race.theirs) }]} />
+                </View>
+                <Head size={22} style={{ color: color.dim }}>
+                  {club.race.theirsTime}
+                </Head>
+              </View>
+              <Body size={13.5}>{club.race.line}</Body>
+            </View>
+          ) : club.matchup ? (
+            <Body size={13.5}>{club.matchup}</Body>
+          ) : null}
           {club.next ? (
             <Body dim size={13.5}>
               {`Next up: ${club.next}`}
@@ -165,6 +185,10 @@ const styles = StyleSheet.create({
   today: { marginTop: 18 },
   faces: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 8 },
   lines: { marginTop: 16, gap: 4 },
+  race: { flexDirection: "row", alignItems: "center", gap: 10, marginTop: 6, marginBottom: 4 },
+  split: { flex: 1, flexDirection: "row", gap: 3, height: 8 },
+  mine: { height: 8, borderRadius: 4, backgroundColor: color.bone },
+  theirs: { height: 8, borderRadius: 4, backgroundColor: "rgba(242,239,232,0.22)" },
   empty: { marginHorizontal: 14, marginTop: 16, paddingVertical: 30, paddingHorizontal: 22 },
   code: { minHeight: 44, alignSelf: "center", justifyContent: "center" },
 });

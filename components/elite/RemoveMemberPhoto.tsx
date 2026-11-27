@@ -23,7 +23,7 @@ export function RemoveMemberPhoto({ playerId }: { playerId: string }) {
           onClick={() =>
             start(async () => {
               const res = await removeMemberPhoto(playerId);
-              setNote(res.ok ? "Removed. They are asked for a new one." : "That did not work. Try again.");
+              setNote(res.ok ? "Removed. They are asked for a new one." : "That didn't work. Try again.");
               setSure(false);
             })
           }

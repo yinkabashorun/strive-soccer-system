@@ -31,7 +31,7 @@ export default function Agreement() {
     try {
       await consent.mutateAsync({ guardian, terms, guardianName: name });
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "That did not save. Check your connection and try again.");
+      setError(e instanceof ApiError ? e.message : "That didn't save. Check your connection and try again.");
     }
   }
 

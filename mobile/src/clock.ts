@@ -217,7 +217,7 @@ async function attempt(c: Clock, p: Pending): Promise<ClockSent> {
   try {
     const res = await api<{ ok: boolean; minutes?: number; error?: string; reason?: string }>(APP_API.freeClockFinish, { method: "POST", upload, timeoutMs: 120_000 });
     if (res.ok) return { ok: true, minutes: res.minutes ?? 0 };
-    return { ok: false, final: refusalIsFinal(res.reason), reason: res.reason ?? null, message: res.error ?? "Your training was not saved. Try again." };
+    return { ok: false, final: refusalIsFinal(res.reason), reason: res.reason ?? null, message: res.error ?? "Your training wasn't saved. Try again." };
   } catch (e) {
     if (e instanceof ApiError) {
       const reason = typeof e.data?.reason === "string" ? e.data.reason : null;

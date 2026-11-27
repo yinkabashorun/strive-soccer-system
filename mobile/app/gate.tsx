@@ -27,7 +27,7 @@ export default function Gate() {
       : state?.kind === "coach"
         ? { title: "The coach side is on the website", body: "Rosters, plans and calls live at thestriveapp.com. This app is for players.", emailCoach: false }
         : state?.kind === "free"
-          ? { title: "Your friends and your week are on the website", body: "They open in this app soon. Until then they are at thestriveapp.com.", emailCoach: false }
+          ? { title: "Your friends and your week are on the website", body: "Both open in this app soon. Until then, find your friends and your week at thestriveapp.com.", emailCoach: false }
           : { title: "Almost there", body: "", emailCoach: false };
 
   return (

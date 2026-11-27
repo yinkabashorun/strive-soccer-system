@@ -16,6 +16,7 @@ import { Avatar, MyAvatar, Star } from "@/Avatar";
 import { PlayerLink } from "@/ProfileParts";
 import { PAGE_TOP, Screen } from "@/Screen";
 import { UpgradeCard } from "@/UpgradeCard";
+import { StandingLine } from "@/StandingLine";
 import { MondayCard } from "@/MondayCard";
 import { askForRating } from "@/rating";
 import { weekAtTarget } from "@/rating-ask";
@@ -34,7 +35,7 @@ import { color } from "@/theme";
 // (lib/elite/training-clock.ts).
 //
 // The ONE upgrade prompt of the free app sits on this screen, under the
-// week (src/UpgradeCard.tsx; lib/elite/upgrade-card.ts decides whether it
+// friends board (src/UpgradeCard.tsx; lib/elite/upgrade-card.ts decides whether it
 // shows). There is none anywhere else.
 export default function MyWeek() {
   const router = useRouter();
@@ -173,10 +174,10 @@ export default function MyWeek() {
         </Press>
       </View>
 
-      <UpgradeCard place="week" member={train} area={w.upgrade.area} sessions={w.upgrade.sessions} quiz={w.upgrade.quiz === true} />
-
       <View style={{ marginHorizontal: 20, marginTop: 26 }}>
         <Label size={17}>{BOARD_TITLE}</Label>
+        {/* where you stand, and the gap to the next friend */}
+        <StandingLine board={w.board} style={{ marginTop: 6 }} />
         <Card style={{ marginTop: 10, padding: 0 }}>
           {w.board.map((r, i) => (
             <View key={r.id}>
@@ -217,6 +218,10 @@ export default function MyWeek() {
       {/* Share my week: one quiet row, under the board so the board keeps
           the first screen. There once the player has trained this week. */}
       {shareWeekShown(w.minutes) ? <ShareWeekRow /> : null}
+
+      {/* the ONE upgrade prompt: under the board, so the board keeps the
+          first screen and the friends come before the offer */}
+      <UpgradeCard place="week" member={train} area={w.upgrade.area} sessions={w.upgrade.sessions} quiz={w.upgrade.quiz === true} />
 
       {entries.length ? (
         <View style={{ marginHorizontal: 20, marginTop: 26 }}>

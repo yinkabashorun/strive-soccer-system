@@ -73,7 +73,7 @@ export function POST(req: Request, ctx?: { params?: { id?: string } }): Promise<
         return act(() => reportPlan(id, reason));
       }
       default:
-        return bad("That did not go through. Try again.");
+        return bad("That didn't go through. Try again.");
     }
   })(req);
 }

@@ -373,7 +373,7 @@ function OpenPost({ card, onGone }: { card: OpenCardView; onGone: () => void }) 
                   { label: `Block ${card.first}`, icon: <IconBlock />, red: true, onClick: () => setMenu("block") },
                 ]
           }
-          note={card.mine ? undefined : `${card.first} is not told if you report or block them.`}
+          note={card.mine ? undefined : `${card.first} is never told about a report or a block.`}
         />
       )}
 
@@ -383,7 +383,7 @@ function OpenPost({ card, onGone }: { card: OpenCardView; onGone: () => void }) 
           title="What is wrong with it?"
           onClose={() => setMenu(null)}
           rows={REPORT_REASONS.map((r) => ({ label: r.label, checked: reason === r.id, onClick: () => setReason(r.id) }))}
-          note={`The post leaves your feed and a coach looks at it. ${card.first} is not told who reported it.`}
+          note={`The post leaves your feed and a coach looks at it. ${card.first} isn't told who reported it.`}
         >
           <div className="px-4 pt-2">
             {error && <p className="pb-2 text-sm text-red-400">{error}</p>}
@@ -405,7 +405,7 @@ function OpenPost({ card, onGone }: { card: OpenCardView; onGone: () => void }) 
           title={`Block ${card.first}?`}
           onClose={() => setMenu(null)}
           rows={[{ label: `Block ${card.first}`, icon: <IconBlock />, red: true, disabled: busy, onClick: () => act(() => blockPlayer(card.ownerId)) }]}
-          note={`You stop being friends and you stop seeing each other's training. ${card.first} is not told, and their link will not add you again. You can unblock them in Settings.`}
+          note={`You stop being friends and you stop seeing each other's training. ${card.first} isn't told, and ${card.first}'s link won't add you again. You can unblock ${card.first} in Settings.`}
         >
           {error && <p className="px-[22px] pt-1 text-sm text-red-400">{error}</p>}
         </ActionSheet>

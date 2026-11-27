@@ -42,7 +42,7 @@ export default function StartClub() {
         feel("session");
         await refreshClubs();
         setMade({ id: res.id, code: res.code, name: name.trim().replace(/\s+/g, " ") });
-      } else if (!res.declined) setError(res.error ?? "That did not go through. Try again.");
+      } else if (!res.declined) setError(res.error ?? "That didn't go through. Try again.");
     } catch (e) {
       setError(e instanceof ApiError ? e.message : OFFLINE_MESSAGE);
     } finally {
@@ -92,7 +92,7 @@ export default function StartClub() {
         Start a club
       </Head>
       <Body dim style={{ marginTop: 10 }}>
-        {`Your team. Your pickup crew. The players you train with. You are the captain: you let each player in, and they become friends with everyone in the club. You can be in ${CLUBS_PER_PLAYER} clubs.`}
+        {`Your team. Your pickup crew. The players you train with. You're the captain. You let each player in, and everyone in the club becomes friends. You can be in ${CLUBS_PER_PLAYER} clubs.`}
       </Body>
       <TextInput
         style={styles.input}
@@ -111,7 +111,7 @@ export default function StartClub() {
       </View>
       <Label dim size={12.5} style={{ marginTop: 8, lineHeight: 18, fontFamily: font.body }}>
         {CLUB_GAMES_IN_APP
-          ? "Clubs play games against clubs in their own county. You can leave it out and set it later."
+          ? "Clubs play games against clubs in the same county. You can leave it out and set it later."
           : "Your club's weekly matchup is with a club in your county first. You can leave it out and set it later."}
       </Label>
       {error ? (

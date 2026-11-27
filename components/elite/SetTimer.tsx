@@ -210,7 +210,7 @@ export function SetTimer({ reps }: { reps: string }) {
             <div className="mt-1 text-sm text-white/65">Tap Done below when you are finished.</div>
           ) : (
             <div className="mt-1 text-sm text-white/65">
-              {working ? "Count your reps, then tap Set done." : "Start the next set when you are ready."}
+              {working ? "Count your reps, then tap Set done." : "Start the next set when you're ready."}
             </div>
           )}
         </div>

@@ -32,7 +32,7 @@ export const DOOR_BODY = "Type the code and you go straight to your friends. It 
 export const DOOR_FIELD = "Code from a teammate or a club";
 export const DOOR_PLACEHOLDER = "Code";
 export const DOOR_USE = "Use my code";
-export const DOOR_NO_CODE = "I do not have a code";
+export const DOOR_NO_CODE = "I don't have a code";
 // after a code that asked: the small line over what it did, and where the
 // one button goes
 export const DOOR_WORKED = "Your code worked";

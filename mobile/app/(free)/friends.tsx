@@ -4,7 +4,7 @@ import { useRouter } from "expo-router";
 import { fmtDuration } from "@shared/time-trained";
 import { ADD_ROW } from "@shared/friend-add";
 import { ApiError, OFFLINE_MESSAGE } from "@/api/client";
-import { answerFriend, refreshFree, useFeed } from "@/api/free";
+import { answerFriend, refreshFree, useFeed, useFreeWeek } from "@/api/free";
 import { inviteShare } from "@/social-view";
 import { Avatar, MyAvatar, Star } from "@/Avatar";
 import { PlayerLink } from "@/ProfileParts";
@@ -17,6 +17,7 @@ import { Body, Button, Card, Eyebrow, Hairline, Head, Label, Press, Ring, Skelet
 import { color } from "@/theme";
 import { SquadCard } from "@/SquadCard";
 import { FirstDaysCard } from "@/FirstDaysCard";
+import { StandingLine } from "@/StandingLine";
 
 // Friends (the free app's first tab; the website's /log): who trained
 // today, friend requests, and the feed. A friend's post from today stays
@@ -34,6 +35,8 @@ export default function Friends() {
   const router = useRouter();
   const feed = useFeed();
   const f = feed.data;
+  // the friends board, for the one line that says where you stand this week
+  const board = useFreeWeek().data?.board ?? null;
   const clockLabel = useClockButton();
   // posts taken off the feed here (reported, blocked, deleted) and requests
   // answered, until the next read says the same
@@ -48,7 +51,7 @@ export default function Friends() {
     setRequestError(null);
     try {
       const res = await answerFriend(id, accept);
-      if (!res.ok) return setRequestError(res.error ?? "That did not go through. Try again.");
+      if (!res.ok) return setRequestError(res.error ?? "That didn't go through. Try again.");
       hide(`r:${id}`);
     } catch (e) {
       setRequestError(e instanceof ApiError ? e.message : OFFLINE_MESSAGE);
@@ -99,6 +102,8 @@ export default function Friends() {
           <Body dim size={13.5} style={{ marginTop: 6 }}>
             {f.date}
           </Body>
+          {/* where you stand this week: the board's own gap, one tap from the board */}
+          {board ? <StandingLine board={board} onPress={() => router.navigate("/(free)/my-week")} style={{ marginTop: 2 }} /> : null}
         </View>
         <Press
           onPress={() => router.navigate("/(free)/my-week")}
@@ -192,7 +197,7 @@ export default function Friends() {
             Your friends' training lands here
           </Head>
           <Body dim style={{ textAlign: "center", marginTop: 10 }}>
-            Send your link to a teammate. Accept their request, and you see each other's training every day.
+            Send your link to a teammate. Accept your teammate's request, and you see each other's training every day.
           </Body>
           {f.squad ? null : <Button quiet style={{ marginTop: 18 }} label="Send my link" onPress={invite} />}
         </Card>

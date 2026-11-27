@@ -76,7 +76,7 @@ export default function Plan() {
         await refreshClubs();
         if (game) setSent(true);
         else router.back();
-      } else if (!res.declined) setError(res.error ?? "That did not go through. Try again.");
+      } else if (!res.declined) setError(res.error ?? "That didn't go through. Try again.");
     } catch (e) {
       setError(e instanceof ApiError ? e.message : OFFLINE_MESSAGE);
     } finally {
@@ -97,7 +97,7 @@ export default function Plan() {
         <Eyebrow style={{ marginTop: 14 }}>Sent</Eyebrow>
         <Head size={36} style={{ marginTop: 10 }}>{`Your game is with ${other.name}'s captain`}</Head>
         <Body dim style={{ marginTop: 12 }}>
-          {`${other.name}'s captain accepts or passes. Until then only your club sees it. When the captain accepts, both clubs see it and can say they are in.`}
+          {`${other.name}'s captain accepts or passes. Until then only your club sees it. When the captain accepts, both clubs see it and every player can tap I'm in.`}
         </Body>
         <Button style={{ marginTop: 24 }} label="Done" onPress={() => router.back()} />
       </FormScreen>

@@ -31,7 +31,7 @@ export default function Checkin() {
       feel("drill");
       setDone(true);
     } catch (e) {
-      setError(e instanceof ApiError ? e.message : "That did not save. Try again.");
+      setError(e instanceof ApiError ? e.message : "That didn't save. Try again.");
     }
   }
 

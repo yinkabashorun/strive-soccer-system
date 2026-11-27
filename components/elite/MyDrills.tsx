@@ -54,7 +54,7 @@ export function MyDrillsList({ drills, canAdd, example }: { drills: MyDrill[]; c
     setError(null);
     const res = await createDrill(name).catch(() => null);
     setBusy(false);
-    if (!res || !res.ok) return setError(res && !res.ok ? res.error : "That was not saved. Try again.");
+    if (!res || !res.ok) return setError(res && !res.ok ? res.error : "That wasn't saved. Try again.");
     router.push(drillHref(res.id));
     router.refresh();
   }
@@ -188,7 +188,7 @@ export function DrillScreen({
     if (!takeLengthOk(seconds)) return setError(TAKE_TOO_LONG);
     const takeId = crypto.randomUUID();
     const path = takePath(profileId, takeId, takeExtension(file.name, file.type));
-    if (!path) return setError("That video could not be used. Try another one.");
+    if (!path) return setError("That video couldn't be used. Try another one.");
     setPercent(0);
     const up = await uploadClip(file, path, setPercent, { bucket: POST_BUCKET, maxMb: TAKE_MAX_MB });
     if (!up.ok) {
@@ -197,13 +197,13 @@ export function DrillScreen({
     }
     const res = await saveTake({ drillId: drill.id, takeId, path, seconds: Number.isFinite(seconds) ? seconds : null }).catch(() => null);
     setPercent(null);
-    if (!res || !res.ok) return setError(res && !res.ok ? res.error : "That take was not saved. Try again.");
+    if (!res || !res.ok) return setError(res && !res.ok ? res.error : "That take wasn't saved. Try again.");
     router.refresh();
   }
 
   async function run(p: Promise<{ ok: true } | { ok: false; error: string }>, after?: () => void) {
     const res = await p.catch(() => null);
-    if (!res || !res.ok) return setError(res && !res.ok ? res.error : "That was not saved. Try again.");
+    if (!res || !res.ok) return setError(res && !res.ok ? res.error : "That wasn't saved. Try again.");
     after?.();
     router.refresh();
   }

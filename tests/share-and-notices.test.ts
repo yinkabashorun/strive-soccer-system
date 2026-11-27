@@ -186,7 +186,7 @@ describe("the words", () => {
     // "Post yours to see it." was an instruction; it says what happens instead
     expect({ title: posted.title, body: posted.body, path: posted.path }).toEqual({
       title: "Diego just posted",
-      body: "Their post opens when you post yours today.",
+      body: "Diego's post opens when you post yours today.",
       path: "/log",
     });
     expect({ title: props.title, body: props.body, path: props.path }).toEqual({

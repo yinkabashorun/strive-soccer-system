@@ -85,7 +85,7 @@ export function SetTimer({ plan, name, onClose }: { plan: RepsPlan; name: string
     step.phase === "work" && step.set < plan.sets
       ? plan.restSec
         ? `Then ${plan.restSec} seconds of rest`
-        : "Then the next set when you are ready"
+        : "Then the next set when you're ready"
       : step.phase === "rest" || step.phase === "between"
         ? `Next: set ${step.set + 1} of ${plan.sets}`
         : step.phase === "work"

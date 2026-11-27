@@ -16,5 +16,5 @@ export const POST = appRoute({ name: "consent", access: "account", limit: 10 }, 
     guardianName: agreed.name,
     userAgent: req.headers.get("user-agent"),
   });
-  return ok ? { ok: true } : appJson({ ok: false, error: "That did not save. Check your connection and try again." }, 500);
+  return ok ? { ok: true } : appJson({ ok: false, error: "That didn't save. Check your connection and try again." }, 500);
 });

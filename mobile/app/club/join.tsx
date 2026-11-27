@@ -31,7 +31,7 @@ export default function JoinClub() {
     setBusy(true);
     try {
       const res = await askToJoin(clean);
-      if (!res.ok) return setError(res.error ?? "That did not go through. Try again.");
+      if (!res.ok) return setError(res.error ?? "That didn't go through. Try again.");
       await refreshClubs();
       setDone({ line: res.line ?? "Request sent.", id: res.id });
     } catch (e) {

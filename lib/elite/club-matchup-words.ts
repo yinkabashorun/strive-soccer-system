@@ -36,7 +36,7 @@ const minutesWord = (n: number) => `${n} ${n === 1 ? "minute" : "minutes"}`;
 // While the week is on: who is ahead, by how many minutes per player.
 export function matchupAheadLine(input: { mine: number; theirs: number; other: string }): string {
   const gap = Math.abs(input.mine - input.theirs);
-  if (gap === 0) return "It is tied.";
+  if (gap === 0) return "It's tied.";
   return input.mine > input.theirs
     ? `Your club is ahead by ${minutesWord(gap)} per player.`
     : `${input.other} is ahead by ${minutesWord(gap)} per player.`;

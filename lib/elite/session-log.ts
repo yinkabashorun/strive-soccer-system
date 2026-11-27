@@ -17,6 +17,8 @@
 //   - the database holds the day's 8 hours (071), as for any entry
 //   - a drill unticked later takes the entry back off the week, unless a
 //     photo was posted on it (a post is never deleted from under friends)
+//   - the write that puts it on the week tells a friend it just passed
+//     ("<First> just passed you", once a day at most per friend)
 //   - it has no photo, so it unlocks nothing in the feed. The finish
 //     screen offers "Post it to your friends", which adds a photo to THIS
 //     entry (attachSessionPhoto): the time is never counted twice.
@@ -26,6 +28,7 @@ import { createHash } from "node:crypto";
 import { createServiceClient } from "./supabase/server";
 import { creditedMinutes } from "./time-trained";
 import { nyToday } from "./time";
+import { noticeFriendPassed } from "./free-notices-server";
 
 // elite_training_logs.minutes is checked 1 to 300 (069)
 export const SESSION_LOG_MAX = 300;
@@ -99,7 +102,12 @@ export async function settleSessionLog(i: { playerId: string; profileId: string;
       week_target: (tracker as { target_minutes: number | null }).target_minutes || null,
     });
     // 23505: this session is already on the week. That is the point.
-    return !error || String(error.code ?? "") === "23505";
+    if (error) return String(error.code ?? "") === "23505";
+    // The write that put the session on the week, and only that one, tells
+    // a friend it just passed (free-notices-server.ts). A session written
+    // again meets the key above and tells nobody.
+    await noticeFriendPassed({ posterId: i.profileId, entryId: id, today: nyToday() }).catch(() => []);
+    return true;
   } catch {
     return false;
   }

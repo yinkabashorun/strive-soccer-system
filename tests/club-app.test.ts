@@ -311,9 +311,10 @@ describe("the one notification that pulls a club together", () => {
     // a game that is only sent (still waiting on the other captain) tells nobody
     const planGame = actions.slice(actions.indexOf("export async function planGame"), actions.indexOf("export async function answerGame"));
     expect(planGame).not.toContain("noticeClubPlan");
-    // four profile pushes in all: a friend's post, props, this one, and
-    // champs of the week (Nov 26 2026, tests/club-games.test.ts)
-    expect((code("lib/elite/free-notices-server.ts").match(/notifyProfile\(/g) ?? []).length).toBe(4);
+    // five profile pushes in all: a friend's post, a friend passing you
+    // (Nov 27 2026, tests/standing.test.ts), props, this one, and champs
+    // of the week (Nov 26 2026, tests/club-games.test.ts)
+    expect((code("lib/elite/free-notices-server.ts").match(/notifyProfile\(/g) ?? []).length).toBe(5);
   });
 });
 

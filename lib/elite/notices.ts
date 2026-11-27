@@ -40,6 +40,7 @@ export const NOTICE_KINDS = [
   "reminder",
   "reminders_paused",
   "friend_post",
+  "friend_passed",
   "props",
   "squad_pass",
   "club_plan",
@@ -63,6 +64,7 @@ export const KIND_TOPIC: Record<NoticeKind, NoticeTopic> = {
   checkin_days: "coach",
   coach_attending: "coach",
   friend_post: "friends",
+  friend_passed: "friends",
   props: "friends",
   squad_pass: "friends",
   club_plan: "clubs",
@@ -90,6 +92,7 @@ const CHANNELS: Record<NoticeKind, { push: boolean; bell: boolean }> = {
   reminder: { push: true, bell: false },
   reminders_paused: { push: true, bell: false },
   friend_post: { push: true, bell: false },
+  friend_passed: { push: true, bell: false },
   props: { push: true, bell: false },
   squad_pass: { push: true, bell: false },
   club_plan: { push: true, bell: false },
@@ -326,7 +329,7 @@ export function remindersPausedNotice(input: { nyDate: string }): Notice {
   });
 }
 
-// The free app's three (free-notices.ts and squad-pass.ts decide when).
+// The free app's own (free-notices.ts and squad-pass.ts decide when).
 // `first` is the friend's first name.
 export function friendPostNotice(input: { first: string; nyDate: string }): Notice {
   return make("friend_post", {
@@ -335,6 +338,28 @@ export function friendPostNotice(input: { first: string; nyDate: string }): Noti
     path: "/log",
     key: `friend_post:${input.nyDate}`,
     collapse: "friend_post",
+  });
+}
+
+// A FRIEND JUST PASSED YOU on the friends board (Coach Yinka's yes, Nov 27
+// 2026, to go with the line "You're 1 session away from beating Nico.").
+// Sent to a friend the poster's own timed training just put them in front
+// of, once a day at most per person (free-notices.ts passedKey), never at
+// night. `sessions` is how many of the RECEIVER'S own sessions take the
+// place back (lib/elite/standing.ts sessionsToBeat, from the plan they
+// set), so the line is a promise the app can keep.
+export function takeBackLine(sessions: number): string {
+  const n = Math.max(1, Math.round(sessions));
+  return n === 1 ? "One session takes it back." : `${n} sessions take it back.`;
+}
+
+export function friendPassedNotice(input: { first: string; sessions: number; nyDate: string }): Notice {
+  return make("friend_passed", {
+    title: `${input.first} just passed you`,
+    body: takeBackLine(input.sessions),
+    path: "/log",
+    key: `friend_passed:${input.nyDate}`,
+    collapse: "friend_passed",
   });
 }
 
@@ -408,7 +433,7 @@ export function clubChampsNotice(input: { club: string; clubId: string; other: s
 export const TOPIC_CHOICE: Record<NoticeTopic, { label: string; detail: string }> = {
   week: { label: "Your week", detail: "A new week, and one reminder at your usual time." },
   coach: { label: "Your coach", detail: "Messages, Film Room and check-in calls." },
-  friends: { label: "Friends", detail: "A friend posted, props, your earned month." },
+  friends: { label: "Friends", detail: "A friend posted or passed you, props, your earned month." },
   clubs: { label: "Clubs", detail: "Your club's sessions and games, and a week your club wins." },
 };
 

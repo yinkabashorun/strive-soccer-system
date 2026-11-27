@@ -8,21 +8,26 @@ import { createServiceClient } from "./supabase/server";
 import { notifyProfile } from "./notify";
 import { isPushConfigured } from "./push";
 import { isNativePushConfigured } from "./apns";
-import { clubChampsNotice, clubPlanNotice, friendPostNotice, propsNotice } from "./notices";
+import { clubChampsNotice, clubPlanNotice, friendPassedNotice, friendPostNotice, propsNotice } from "./notices";
 import { everyRow } from "./supabase/every-row";
 import { champsDue, champsOf, lastMonday, matchupMonday, type MatchupRow } from "./club-matchups";
 import { claimOutcome, maySend } from "./announce";
 import { blocksWith, friendIdsOf, namesOf, type Admin } from "./tracker-server";
+import { perDayMinutes, weekOf } from "./tracker";
+import { TYPED } from "./training-clock";
+import { passedBy, sessionMinutes, sessionsToBeat } from "./standing";
 import { planById, teamRowsOf } from "./club-teams-server";
 import { planDayAt, planWhat } from "./club-teams";
 import { planInApp } from "./club-games";
 import {
   clubPlanReceivers,
+  friendPassedReceivers,
   friendPostReceivers,
   isQuietTime,
   noticeKey,
   noticeName,
   nyClock,
+  passedKey,
   propsWithinDay,
   type NoticeKind,
 } from "./free-notices";
@@ -62,8 +67,10 @@ async function withDevices(admin: Admin, ids: string[]): Promise<Set<string>> {
 }
 
 // A free player posted a photo: their accepted friends who have not
-// posted today hear about it, once a day at most.
-export async function noticeFriendPost(posterId: string, today: string): Promise<number> {
+// posted today hear about it, once a day at most. `skip`: friends this
+// same training just told "passed you" (noticeFriendPassed), who are not
+// told twice about one thing.
+export async function noticeFriendPost(posterId: string, today: string, skip: readonly string[] = []): Promise<number> {
   const admin = ready();
   if (!admin) return 0;
   const friends = await friendIdsOf(admin, posterId);
@@ -85,6 +92,7 @@ export async function noticeFriendPost(posterId: string, today: string): Promise
     blocks,
     withDevice: devices,
     postedToday: new Set(((posted as { profile_id: string }[] | null) ?? []).map((r) => r.profile_id)),
+    skip,
   });
   if (receivers.length === 0) return 0;
   const first = noticeName((await namesOf(admin, [posterId])).get(posterId) ?? "");
@@ -95,6 +103,87 @@ export async function noticeFriendPost(posterId: string, today: string): Promise
     if (res.pushed > 0) sent++;
   }
   return sent;
+}
+
+// The friends board's own count this week for some accounts, entry by
+// entry: training (never gym) whose length was not typed, Monday to Sunday
+// (the same rows tracker-server.ts friendsWeekFor adds up).
+async function boardEntries(admin: Admin, ids: string[], today: string): Promise<{ id: string; profile_id: string; minutes: number }[]> {
+  const { monday, sunday } = weekOf(today);
+  const out: { id: string; profile_id: string; minutes: number }[] = [];
+  for (let i = 0; i < ids.length; i += 200) {
+    const some = ids.slice(i, i + 200);
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await admin
+        .from("elite_training_logs")
+        .select("id, profile_id, minutes")
+        .in("profile_id", some)
+        .eq("kind", "training")
+        .neq("proof", TYPED)
+        .gte("trained_on", monday)
+        .lte("trained_on", sunday)
+        .order("id")
+        .range(from, from + 999);
+      if (error) throw new Error(error.message);
+      const rows = (data as { id: string; profile_id: string; minutes: number }[] | null) ?? [];
+      out.push(...rows);
+      if (rows.length < 1000) break;
+    }
+  }
+  return out;
+}
+
+// A player's timed training just went on the friends board (a finished
+// clock, or a finished Strive Pro session): every accepted friend it put
+// them in FRONT of hears "<First> just passed you", once a day at most per
+// friend, with how many of that friend's own sessions take the place back.
+//
+// `entryId` is the entry just written. The player's time before it is
+// their week without that entry, so an entry that is not on this week's
+// board (gym, a typed length, a clock from an earlier week sent late)
+// passes nobody. Returns the friends who were told, so the same training
+// does not also tell them "just posted". Never throws.
+export async function noticeFriendPassed(input: { posterId: string; entryId: string; today: string }): Promise<string[]> {
+  try {
+    const admin = ready();
+    if (!admin) return [];
+    const friends = await friendIdsOf(admin, input.posterId);
+    if (friends.length === 0) return [];
+    const rows = await boardEntries(admin, [input.posterId, ...friends], input.today);
+    const entry = rows.find((r) => r.id === input.entryId && r.profile_id === input.posterId);
+    if (!entry) return [];
+    const minutes = new Map<string, number>();
+    for (const r of rows) minutes.set(r.profile_id, (minutes.get(r.profile_id) ?? 0) + r.minutes);
+    const after = minutes.get(input.posterId) ?? 0;
+    const passed = passedBy({
+      before: after - entry.minutes,
+      after,
+      friends: friends.map((id) => ({ id, minutes: minutes.get(id) ?? 0 })),
+    }).map((f) => f.id);
+    if (passed.length === 0) return [];
+    const [blocks, devices] = await Promise.all([blocksWith(admin, input.posterId, passed), withDevices(admin, passed)]);
+    const receivers = friendPassedReceivers({ posterId: input.posterId, passed, blocks, withDevice: devices });
+    if (receivers.length === 0) return [];
+    // each friend's own plan: a session is one of THEIR training days
+    const { data: plans } = await admin.from("elite_trackers").select("profile_id, target_minutes, plan_days").in("profile_id", receivers);
+    type Plan = { profile_id: string; target_minutes: number | null; plan_days: number[] | null };
+    const planOf = new Map(((plans as Plan[] | null) ?? []).map((t) => [t.profile_id, t]));
+    const first = noticeName((await namesOf(admin, [input.posterId])).get(input.posterId) ?? "");
+    const key = passedKey(input.today);
+    const told: string[] = [];
+    for (const id of receivers) {
+      // one a day per friend, whoever passes them: claimed before it is sent
+      if (!maySend(await claim(admin, id, key.kind, key, input.today))) continue;
+      const plan = planOf.get(id);
+      const session = sessionMinutes(perDayMinutes(plan?.target_minutes ?? 0, (plan?.plan_days ?? []).length));
+      const sessions = sessionsToBeat(after - (minutes.get(id) ?? 0), session);
+      await notifyProfile(id, friendPassedNotice({ first, sessions, nyDate: input.today }));
+      told.push(id);
+    }
+    return told;
+  } catch {
+    return [];
+  }
 }
 
 // A friend gave props on a post: its owner hears about it, once per post

@@ -1,3 +1,5 @@
+import { SESSION_FALLBACK_MINUTES, sessionMinutes, sessionsToBeat } from "@shared/standing";
+
 // The small rules behind the social half's pictures (Nov 24 2026: Friends,
 // Week and Clubs polished to the training loop's standard). Pure, tested
 // in tests/logic.test.ts.
@@ -58,18 +60,10 @@ export function inviteShare(p: { invite: string; inviteText?: string }): { messa
 export type StandRow = { me: boolean; name: string; minutes: number };
 export type Standing = { strong: string; rest: string | null };
 
-export const SESSION_FALLBACK_MINUTES = 60;
-
-// One of the player's own sessions, in minutes: a planned day's length.
-export function sessionMinutes(perDay: number | null | undefined): number {
-  return perDay && perDay > 0 ? perDay : SESSION_FALLBACK_MINUTES;
-}
-
-// How many of those sessions put the player in FRONT of a friend who is
-// `gap` minutes ahead: level is not beating, so the gap has to be passed.
-export function sessionsToBeat(gap: number, session: number): number {
-  return Math.max(1, Math.ceil((Math.max(0, gap) + 1) / Math.max(1, session)));
-}
+// What a session is and how many beat a friend: one rule for this line and
+// for the server's "Nico just passed you" notification
+// (lib/elite/standing.ts, imported at the top of this file).
+export { SESSION_FALLBACK_MINUTES, sessionMinutes, sessionsToBeat };
 
 const firstOf = (name: string): string => name.trim().split(/\s+/)[0] || "A friend";
 const span = (m: number): string => {

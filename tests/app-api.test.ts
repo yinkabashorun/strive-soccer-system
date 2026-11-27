@@ -344,6 +344,7 @@ vi.mock("@/lib/elite/training-clock-server", () => ({
 }));
 vi.mock("@/lib/elite/free-notices-server", () => ({
   noticeFriendPost: async (...args: unknown[]) => (s.calls.push({ fn: "noticeFriendPost", args }), 1),
+  noticeFriendPassed: async (...args: unknown[]) => (s.calls.push({ fn: "noticeFriendPassed", args }), ["u7"]),
 }));
 vi.mock("@/lib/elite/squad-pass-server", () => ({
   countTeammate: async (...args: unknown[]) => void s.calls.push({ fn: "countTeammate", args }),
@@ -1275,7 +1276,10 @@ describe("the free app's bodies are checked first", () => {
     expect(saved).toMatchObject({ profileId: "u1", kind: "training", caption: "Weak foot only.", weekTarget: 240, times: { started: 1_700_000_000_000, ended: 1_700_002_700_000, sent: 1_700_002_705_000 } });
     expect(Buffer.from(saved.startPhoto as Uint8Array).includes(Buffer.from("Exif"))).toBe(false);
     // friends hear of it and a teammate counts: once, for the write that made the entry
-    expect(s.calls.slice(1).map((c) => c.fn)).toEqual(["noticeFriendPost", "countTeammate"]);
+    // a friend this training passed hears that, and is left out of "just posted"
+    expect(s.calls.slice(1).map((c) => c.fn)).toEqual(["noticeFriendPassed", "noticeFriendPost", "countTeammate"]);
+    expect(s.calls[1].args).toEqual([{ posterId: "u1", entryId: "c1", today: "2026-11-25" }]);
+    expect(s.calls[2].args).toEqual(["u1", "2026-11-25", ["u7"]]);
 
     // "finished before I took this photo": time comes off in whole steps, or not at all
     s.calls.length = 0;

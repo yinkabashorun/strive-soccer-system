@@ -72,3 +72,28 @@ What it says about the voice:
 - He flagged it himself: he is a guy, and the app is for girls too. So no
   "boys", "bro" or "king" in the app's own voice; the energy without the
   gendered words.
+
+## Moment 3: mid-week, the other club is ahead in the matchup
+
+- 3A. "Haymarket 08s is ahead by 12 minutes per player." (the app today)
+- 3B. "Haymarket 08s is up 12 minutes a player. Is your club letting that
+  happen?"
+- 3C. "12 minutes a player. That's all Haymarket 08s has on your club. One
+  session each closes it."
+- 3D. "Haymarket 08s is outworking your club this week. 12 minutes a
+  player."
+
+His answers:
+- Q1 (makes him train or text the club): 3B. Also his own: "You're getting
+  outworked by Haymarket, let's go." And "(club name) works nicely": saying
+  the club's own name in the line. "There should be a mix."
+- Q2 (cringe): none.
+- Q3 (what he would send the club chat): 3B.
+
+What it says about the voice:
+- The question jab wins a second time ("Is your club letting that happen?").
+- "Getting outworked" plus "let's go" is the other shape he reaches for:
+  the hard fact, then the rally.
+- Name the club (and the other club) in the line. Names make it theirs.
+- A MIX: the same moment should not always say the same sentence. A few
+  lines per moment, rotated.

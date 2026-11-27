@@ -130,7 +130,7 @@ function clock(u) {
   const SHOT = 0.95;
   if (u < SHOT + 0.5) {
     vis("xcam", 1); const s = S.xcam;
-    $("#xcamlab").textContent = "Start photo"; $("#xcamimg").src = $("#xthumb").src; $("#xcamimg").style.objectPosition = "60% 50%";
+    $("#xcamlab").textContent = "Start photo"; $("#xcamimg").src = $("#xthumb").src; $("#xcamimg").style.objectPosition = "50% 50%";
     st($(".vf", s), { transform: `scale(${mix(1.06, 1, E(u, 0, 0.6))})`, opacity: 1 });
     st($("#xsht"), { transform: `scale(${press(u, SHOT - 0.05)})` });
     const f = u - SHOT; st($("#xfl"), { opacity: f < 0 ? 0 : f < 0.05 ? f / 0.05 : 1 - out3(cl((f - 0.05) / 0.4)) });
@@ -160,7 +160,7 @@ function ready(u) {
   const SHOT = 0.75;
   if (u < SHOT + 0.5) {
     vis("xcam", 1); const s = S.xcam;
-    $("#xcamlab").textContent = "Finish photo"; $("#xcamimg").src = $("#xrphoto .f").src; $("#xcamimg").style.objectPosition = "38% 50%";
+    $("#xcamlab").textContent = "Finish photo"; $("#xcamimg").src = $("#xrphoto .f").src; $("#xcamimg").style.objectPosition = "50% 50%";
     st($(".vf", s), { transform: `scale(${mix(1.06, 1, E(u, 0, 0.6))})` });
     st($("#xsht"), { transform: `scale(${press(u, SHOT - 0.05)})` });
     const f = u - SHOT; st($("#xfl"), { opacity: f < 0 ? 0 : f < 0.05 ? f / 0.05 : 1 - out3(cl((f - 0.05) / 0.4)) });

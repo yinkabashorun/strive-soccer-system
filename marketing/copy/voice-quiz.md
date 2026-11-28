@@ -173,3 +173,28 @@ What it says about the voice:
 how boys talk in a group chat, and every line still has to read fine to a
 girl: competitive energy, jabs and rallies stay; a word that only fits a
 boy ("boys", "bro", "king", "dawg") stays out of what the app itself says.
+
+## Moment 6: the text the app writes for a player to send a teammate
+
+- 6A. "Train with me on Strive Elite. My code: KAI123" (the app today)
+- 6B. "I'm putting my training on Strive now. Add me so we can see who's
+  really working. Code: KAI123"
+- 6C. "Bet you can't outwork me this week. Get on Strive. Code: KAI123"
+- 6D. "We're all tracking our training on Strive. You in? Code: KAI123"
+
+His answers:
+- Q1 (would send): 6C. Or his own: "let's grind on Strive Elite."
+- Q2, Q3: not answered.
+
+What it says about the voice:
+- The invite is a CHALLENGE ("Bet you can't outwork me this week") or a
+  rally ("Let's grind"), never an announcement.
+- "Outwork" is his word in four of six moments now. "Grind" joins "locked
+  in", "getting work in", "on the come up", "let's go", "let's work".
+
+### Open: the word "AI"
+
+Asked twice whether "never say AI" still holds for Strive Pro's own words
+(he said "AI coach" when describing it to a teammate). Not answered, so
+the standing rule holds: no "AI", "automated" or "algorithm" anywhere a
+player or parent reads.

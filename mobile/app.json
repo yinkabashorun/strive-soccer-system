@@ -19,7 +19,8 @@
         "ITSAppUsesNonExemptEncryption": false,
         "CFBundleDisplayName": "Strive Elite",
         "UISupportedInterfaceOrientations": ["UIInterfaceOrientationPortrait"],
-        "NSPhotoLibraryAddUsageDescription": "Strive Elite saves the picture of your week to your photo library when you choose Save Image."
+        "NSPhotoLibraryAddUsageDescription": "Strive Elite saves your training card and the picture of your week to your photo library when you share or save them.",
+        "LSApplicationQueriesSchemes": ["instagram-stories"]
       },
       "associatedDomains": ["webcredentials:thestriveapp.com", "applinks:thestriveapp.com"],
       "entitlements": { "aps-environment": "production" },
@@ -62,6 +63,14 @@
         }
       ],
       ["expo-video", { "supportsBackgroundPlayback": false, "supportsPictureInPicture": false }],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Strive Elite opens your photo library so you can choose your profile photo.",
+          "savePhotosPermission": "Strive Elite saves your training card and the picture of your week to your photo library when you share or save them.",
+          "isAccessMediaLocationEnabled": false
+        }
+      ],
       "expo-image",
       "expo-secure-store",
       "expo-web-browser"

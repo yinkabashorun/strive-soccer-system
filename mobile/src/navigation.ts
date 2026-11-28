@@ -124,12 +124,13 @@ export function homeOf(state: AppMemberState | null | undefined): string {
 // and the profile screens: changing the photo or the username from
 // Settings).
 const APP_ROUTES = new Set(["(tabs)", "session", "course", "drop", "extra", "checkin", "inbox", "settings", "change-password", "delete-account", "profile-setup"]);
-// The same for the free app: posting, the offer (opened from the one card
+// The same for the free app: posting and the training card made from a
+// post (app/card.tsx), the offer (opened from the one card
 // on Week, or a locked course), the week's set-up, a club and everything
 // one tap from it, a friend's profile, the blocked list, adding a friend
 // (by @username, your own code, and the screen an invite link opens:
 // app/friend), and the profile screens.
-const FREE_ROUTES = new Set(["(free)", "post", "offer", "week-plan", "club", "player", "friend", "blocked", "settings", "change-password", "delete-account", "profile-setup"]);
+const FREE_ROUTES = new Set(["(free)", "post", "card", "offer", "week-plan", "club", "player", "friend", "blocked", "settings", "change-password", "delete-account", "profile-setup"]);
 // What Strive Pro adds to the free tabs, one tap from Train: the session,
 // the Monday drop, extra work, the check-in, a course and the Inbox.
 const TRAIN_ROUTES = new Set(["session", "drop", "extra", "checkin", "course", "inbox"]);

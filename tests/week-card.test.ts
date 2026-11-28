@@ -197,9 +197,12 @@ describe("Share my week in the iPhone app", () => {
     const imported = [...(row + rules).matchAll(/from "([^"]+)"/g)].map((m) => m[1]).filter((n) => !n.startsWith("@/") && !n.startsWith("@shared/") && !n.startsWith("."));
     expect(imported.sort()).toEqual(["expo-image-manipulator", "react", "react-native"]);
     for (const n of imported) expect(declared, n).toContain(n);
-    for (const n of ["expo-file-system", "expo-sharing", "expo-media-library", "react-native-share", "react-native-view-shot"]) {
+    for (const n of ["expo-file-system", "expo-sharing"]) {
       expect(declared, n).not.toContain(n);
     }
+    // the capture, Photos and Instagram packages came with the training card
+    // (Nov 28 2026) and stay out of this row (tests/session-card.test.ts
+    // holds that only src/card-native.ts imports them)
   });
 
   it("the example build is handed the words and no picture, so it reads and writes nothing", () => {

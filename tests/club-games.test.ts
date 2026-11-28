@@ -230,7 +230,9 @@ describe("every reader goes through the switch", () => {
 describe("the free app leads with two scores", () => {
   // The level is the player's own: You, and a profile. Every other screen
   // of the free app leads with the friends board or the club's matchup.
-  const LEVEL_HOMES = ["mobile/app/(free)/me.tsx", "mobile/app/player/[id].tsx", "mobile/src/ProfileParts.tsx"];
+  // The training card (app/card.tsx, Nov 28 2026) carries the player's own
+  // level on the picture they share, read from the You tab's answer.
+  const LEVEL_HOMES = ["mobile/app/(free)/me.tsx", "mobile/app/player/[id].tsx", "mobile/src/ProfileParts.tsx", "mobile/app/card.tsx"];
 
   it("the level is drawn on You and a profile, and nowhere else in the app", () => {
     const found: string[] = [];

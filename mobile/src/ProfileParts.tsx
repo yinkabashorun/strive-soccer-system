@@ -6,6 +6,7 @@ import { fmtDuration } from "@shared/time-trained";
 import type { AppProfile } from "@shared/app-contract";
 import { Crest } from "@/Crest";
 import { PhotoViewer, type ViewedPhoto } from "@/PhotoViewer";
+import { cardFromProfile, openCard } from "@/card-source";
 import { Body, Eyebrow, Head, Label, Press } from "@/ui";
 import { color } from "@/theme";
 
@@ -113,7 +114,8 @@ export function ClubRow({ clubs }: { clubs: AppProfile["clubs"] }) {
 // grid is simply not there: nobody is ever shown as not having trained.
 export function PostGrid({ posts, first, mine }: { posts: AppProfile["posts"]; first: string; mine: boolean }) {
   const { width } = useWindowDimensions();
-  const [open, setOpen] = useState<ViewedPhoto | null>(null);
+  const router = useRouter();
+  const [open, setOpen] = useState<(ViewedPhoto & { post: AppProfile["posts"][number] }) | null>(null);
   if (posts.length === 0) return null;
   const gap = 3;
   const side = Math.floor((width - gap * 2) / 3);
@@ -130,7 +132,7 @@ export function PostGrid({ posts, first, mine }: { posts: AppProfile["posts"]; f
             <Press
               key={p.id}
               style={{ width: side, height: side, backgroundColor: color.fill2 }}
-              onPress={() => setOpen({ uri: p.photoUrl, said, time, kind: p.kind })}
+              onPress={() => setOpen({ uri: p.photoUrl, said, time, kind: p.kind, post: p })}
               accessibilityRole="imagebutton"
               accessibilityLabel={`${said}. Open the photo.`}
             >
@@ -142,7 +144,20 @@ export function PostGrid({ posts, first, mine }: { posts: AppProfile["posts"]; f
           );
         })}
       </View>
-      <PhotoViewer photo={open} onClose={() => setOpen(null)} />
+      <PhotoViewer
+        photo={open}
+        onClose={() => setOpen(null)}
+        // your own photo makes your training card (app/card.tsx); a friend's never does
+        onMakeCard={
+          mine && open
+            ? () => {
+                const post = open.post;
+                setOpen(null);
+                openCard(router, cardFromProfile(post));
+              }
+            : undefined
+        }
+      />
     </View>
   );
 }

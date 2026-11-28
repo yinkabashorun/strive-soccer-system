@@ -15,9 +15,12 @@ import { dropSeenKey, parseSeenWeek } from "@shared/experience";
 // firstOpen: when the app first opened on this phone (ISO), and
 // ratingAsked: the version the App Store rating was last asked in
 // (src/rating-ask.ts).
-export type Prefs = { vibration: boolean; sound: boolean; autoplay: boolean; pushAsked: boolean; pushOn: boolean; firstDaysHidden: boolean; proEndedSeen: boolean; clockKnown: boolean; doorPassed: string; recapSeen: string; firstOpen: string; ratingAsked: string };
+// cardsSaved: the training cards (each a photo and a quote,
+// lib/elite/session-card.ts cardKey) already saved to Photos from this
+// phone, newest last, so a card is saved once and not again on every share.
+export type Prefs = { vibration: boolean; sound: boolean; autoplay: boolean; pushAsked: boolean; pushOn: boolean; firstDaysHidden: boolean; proEndedSeen: boolean; clockKnown: boolean; doorPassed: string; recapSeen: string; firstOpen: string; ratingAsked: string; cardsSaved: string[] };
 
-export const DEFAULT_PREFS: Prefs = { vibration: true, sound: true, autoplay: true, pushAsked: false, pushOn: false, firstDaysHidden: false, proEndedSeen: false, clockKnown: false, doorPassed: "", recapSeen: "", firstOpen: "", ratingAsked: "" };
+export const DEFAULT_PREFS: Prefs = { vibration: true, sound: true, autoplay: true, pushAsked: false, pushOn: false, firstDaysHidden: false, proEndedSeen: false, clockKnown: false, doorPassed: "", recapSeen: "", firstOpen: "", ratingAsked: "", cardsSaved: [] };
 const KEY = "strive.prefs.v1";
 
 let cache: Prefs | null = null;

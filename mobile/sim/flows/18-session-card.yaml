@@ -1,0 +1,47 @@
+# YOUR CARD, by taps (app/card.tsx, lib/elite/session-card.ts): the
+# training card a post opens, made from the example still (src/card-source.ts
+# exampleCardSource). The card first with no quote, then "Add a quote" opens
+# the list and one tap puts the quote on the card, then Save to Photos, then
+# Close goes back to the free app with nothing lost.
+#
+# Example data only: the example build never captures, saves or shares
+# (app/card.tsx guards each on FIXTURES), so "Saved to Photos." here is the
+# line a saved card shows, not a saved card. The picture itself (1080 x
+# 1920), Photos asking once, the "no" path and Instagram opening with the
+# card are a real phone's to show (docs/app-store/native-device-checklist.md,
+# "The training card"). There is no Instagram story button in this build:
+# no Meta app ID is set.
+appId: com.strivesoccer.elite
+---
+- launchApp:
+    clearState: true
+    arguments:
+      fixtureState: locked
+      fixtureRoute: card
+- extendedWaitUntil:
+    visible: "Save to Photos"
+    timeout: 30000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: t90-card
+- assertVisible: "More"
+- assertNotVisible: "Instagram story"
+- tapOn: "Add a quote"
+- extendedWaitUntil:
+    visible: "Pick a quote"
+    timeout: 10000
+- takeScreenshot: t91-card-quotes
+- tapOn: "Pressure is a privilege. Billie Jean King"
+- waitForAnimationToEnd:
+    timeout: 4000
+- assertVisible: "Change the quote"
+- takeScreenshot: t92-card-with-quote
+- tapOn: "Save to Photos"
+- extendedWaitUntil:
+    visible: "Saved to Photos."
+    timeout: 10000
+- takeScreenshot: t93-card-saved
+- tapOn: "Close"
+- extendedWaitUntil:
+    visible: "Start training"
+    timeout: 20000

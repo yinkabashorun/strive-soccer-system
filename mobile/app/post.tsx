@@ -6,10 +6,11 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { CAPTION_MAX, KINDS, LOG_CHIPS, POST_RULES_LINE, chipLabel, lockedLine, type Kind } from "@shared/tracker";
 import { POST_SESSION_DETAIL, POST_SESSION_ROW } from "@shared/one-app";
+import { seedDay } from "@shared/voice";
 import { CLOCK_MIN_SECONDS, CLOCK_WORDS, TYPED_LINE, clockFace, clockLength, lessApplied, lessMax } from "@shared/training-clock";
 import { useMe } from "@/api/queries";
 import { ApiError, OFFLINE_MESSAGE } from "@/api/client";
-import { logTraining, refreshFree, useFeed } from "@/api/free";
+import { fetchFeedNow, logTraining, refreshFree, useFeed } from "@/api/free";
 import { Avatar } from "@/Avatar";
 import { finishClock, retakeFinish, sendClock, startClock, stopClock, storedClock, takeClockNote, useClockView } from "@/clock";
 import { cameraFirst, clockView, lessStep, readyMinutes, shotUri } from "@/clock-core";
@@ -17,8 +18,9 @@ import { FIXTURES } from "@/config";
 import { feel, tick } from "@/feel";
 import { FormScreen } from "@/FormScreen";
 import { postTraining, type PickedPhoto } from "@/post-api";
-import { loadPrefs, setPref, usePrefs } from "@/prefs";
-import { turnOnNotifications } from "@/push";
+import { loadPrefs, usePrefs } from "@/prefs";
+import { AskNotifications } from "@/AskNotifications";
+import { openCard, sessionCardFrom } from "@/card-source";
 import { Body, Button, Eyebrow, Head, Icon, Label, Press } from "@/ui";
 import { color, font } from "@/theme";
 
@@ -182,43 +184,6 @@ function Footer({ error, calm, children }: { error: string | null; calm?: boolea
   );
 }
 
-// Asked once, after the first post that went up: whether to say when a
-// friend posts, with the reason. Nothing else is asked or offered here.
-function AskNotifications({ onDone }: { onDone: () => void }) {
-  const insets = useSafeAreaInsets();
-  const [turningOn, setTurningOn] = useState(false);
-  return (
-    <View style={[styles.fill, { paddingTop: insets.top + 90, paddingBottom: insets.bottom + 24, paddingHorizontal: 24 }]}>
-      <Head size={34}>Know the moment your friends post?</Head>
-      <Body dim style={{ marginTop: 12 }}>
-        We tell you when a friend posts or gives you props. Never more than that, and never late at night.
-      </Body>
-      <Body dim size={13} style={{ marginTop: 10 }}>
-        You can change this any time in Settings.
-      </Body>
-      <View style={{ flex: 1 }} />
-      <Button
-        label="Turn on notifications"
-        busy={turningOn}
-        onPress={() => {
-          setTurningOn(true);
-          void turnOnNotifications()
-            .catch(() => false)
-            .then(onDone);
-        }}
-      />
-      <Button
-        quiet
-        style={{ marginTop: 10 }}
-        label="Not now"
-        onPress={() => {
-          void setPref("pushAsked", true).then(onDone);
-        }}
-      />
-    </View>
-  );
-}
-
 function useLeave() {
   const router = useRouter();
   return async () => {
@@ -231,6 +196,7 @@ function useLeave() {
 
 function ClockPost({ go }: { go: boolean }) {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const leave = useLeave();
   const me = useMe();
   const [prefs] = usePrefs();
@@ -337,6 +303,9 @@ function ClockPost({ go }: { go: boolean }) {
   async function post() {
     setError(null);
     setBusy(true);
+    // What the training card is made from, read now: a post that goes up
+    // clears the clock and its photos from the phone.
+    const made = clock?.finish ? { photo: shotUri(clock.finish), startedMs: clock.start.atMs, finishedMs: clock.finish.atMs } : null;
     const res = await sendClock(kind, caption, less);
     setBusy(false);
     // A refusal that is final cleared the clock: the start screen says why.
@@ -344,6 +313,17 @@ function ClockPost({ go }: { go: boolean }) {
     // footer reads it off the clock itself).
     if (!res.ok) return setError(!res.final && res.message === CLOCK_WORDS.kept ? null : res.message);
     feel("drill");
+    // THE CARD FIRST (lib/elite/session-card.ts), with the minutes the
+    // server counted; the notifications ask follows it, once
+    // (app/card.tsx). Closing the card goes back to where posting started.
+    if (made?.photo && res.minutes > 0) {
+      void refreshFree();
+      return openCard(
+        router,
+        { key: `clock:${made.startedMs}`, photo: made.photo, day: seedDay(new Date(made.finishedMs)), minutes: res.minutes, kind, note: caption.trim() || null, askAfter: !prefs.pushAsked },
+        "replace"
+      );
+    }
     // asked once, after the first post that went up
     if (!prefs.pushAsked) {
       void refreshFree();
@@ -629,6 +609,7 @@ function ClockPost({ go }: { go: boolean }) {
 
 function SessionPost({ session }: { session: string }) {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const leave = useLeave();
   const [prefs] = usePrefs();
   const [photo, setPhoto] = useState<PickedPhoto | null>(null);
@@ -653,8 +634,16 @@ function SessionPost({ session }: { session: string }) {
     setError(null);
     setBusy(true);
     try {
-      await postTraining({ photo, session, caption });
+      const id = await postTraining({ photo, session, caption });
       feel("drill");
+      // the card first, with the session's own minutes read back from the
+      // feed; when the post cannot be read back, no card and nothing else
+      // changes
+      const card = sessionCardFrom(await fetchFeedNow().catch(() => undefined), id, photo.uri);
+      if (card) {
+        void refreshFree();
+        return openCard(router, { ...card, askAfter: !prefs.pushAsked }, "replace");
+      }
       if (!prefs.pushAsked) {
         void refreshFree();
         return setAsking(true);
@@ -726,7 +715,6 @@ function SessionPost({ session }: { session: string }) {
 
 const styles = StyleSheet.create({
   waiting: { flexDirection: "row", alignItems: "center", gap: 14, marginTop: 22, padding: 14, borderRadius: 18, backgroundColor: color.fill2 },
-  fill: { flex: 1, backgroundColor: color.black },
   preview: { width: "62%", alignSelf: "center", aspectRatio: 4 / 5, borderRadius: 24, overflow: "hidden", backgroundColor: color.fill2, marginTop: 6 },
   // the start photo, small, in the corner of the finish photo
   inset: { position: "absolute", left: 10, top: 10, width: "34%", aspectRatio: 4 / 5, borderRadius: 12, overflow: "hidden", borderWidth: 2, borderColor: color.black, backgroundColor: color.fill2 },

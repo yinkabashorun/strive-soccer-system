@@ -20,6 +20,9 @@
 # themselves in (the door, the gate, Home, the week arriving, the offer and
 # the free app's first screen).
 #
+# 63 is the training card a post opens (app/card.tsx), made from the
+# example still with no quote.
+#
 # 58 is "confirm": a new free account at "Check your email" (093), the code
 # from its email still to type.
 #
@@ -129,6 +132,7 @@ SHOTS='
 60-add-friend|locked|friend/add|10
 61-my-code|locked|friend/code|11
 62-invite-link|locked|friend/link?code=EXAMPLE2|11
+session-card|locked|card|11
 '
 
 last=""

@@ -13,6 +13,7 @@ import {
   cardCapture,
   cardFace,
   cardKey,
+  cardLine,
   cardSaid,
   cardShade,
   shadeAt,
@@ -48,21 +49,15 @@ const base: CardInput = {
   kind: "training",
   note: "Weak foot only.",
   quoteId: null,
-  stats: { weekMinutes: 250, allMinutes: 1860, level: 4 },
 };
 
 describe("what is on the card", () => {
-  it("the brand line, the day and the short name; the time said the app's way; the line; the three numbers; the link", () => {
+  it("the brand line, the day and the short name; the session's time said the app's way; what they worked on; the link", () => {
     const f = cardFace(base);
     expect(f.dateLine).toBe("Sat, Nov 28 · Marcus B.");
     expect(f.eyebrow).toBe("Trained today");
     expect(f.time).toBe("1h 15m");
     expect(f.note).toBe("Weak foot only.");
-    expect(f.stats).toEqual([
-      { value: "4h 10m", label: "this week" },
-      { value: "31h", label: "all time" },
-      { value: "LVL 4", label: "level" },
-    ]);
     expect(f.link).toBe(CARD_LINK);
     expect(CARD_LINK).toBe("thestriveapp.com/join");
     expect(f.quote).toBeNull();
@@ -83,10 +78,37 @@ describe("what is on the card", () => {
     expect(f.note).toBeNull();
     expect(f.dateLine).toBe("Sat, Nov 28");
   });
-  it("numbers the phone never loaded leave the row off, never blanks or zeros", () => {
-    expect(cardFace({ ...base, stats: null }).stats).toBeNull();
-    expect(cardFace({ ...base, stats: { weekMinutes: Number.NaN, allMinutes: 10, level: 2 } }).stats).toBeNull();
-    expect(cardFace({ ...base, stats: { weekMinutes: 0, allMinutes: 10, level: 0 } }).stats).toBeNull();
+  // Coach Yinka, Nov 28 2026: "it should just be the time of their session
+  // and they can put what they worked on".
+  it("just the session's time and what they worked on: no week total, no all-time total, no level", () => {
+    const f = cardFace(base);
+    expect(Object.keys(f).sort()).toEqual(["badge", "dateLine", "eyebrow", "link", "note", "quote", "time"]);
+    expect(cardSaid(f)).toBe("Strive Elite. Sat, Nov 28 · Marcus B.. Trained today, 1h 15m. Weak foot only.. thestriveapp.com/join");
+    expect(cardSaid(f)).not.toMatch(/this week|all time|level|lvl/i);
+    const drawn = code("mobile/src/SessionCard.tsx");
+    expect(drawn).not.toMatch(/stats|weekMinutes|allMinutes|aura/);
+    expect(code("mobile/app/card.tsx")).not.toMatch(/weekMinutes|allMinutes|aura/);
+  });
+  it("what they worked on is one line, the post's own length at most, and nothing when empty", () => {
+    expect(cardLine("  Weak foot\n only.  ")).toBe("Weak foot only.");
+    expect(cardLine("   ")).toBeNull();
+    expect(cardLine(null)).toBeNull();
+    expect(cardLine("x".repeat(200))?.length).toBe(80);
+    expect(cardFace({ ...base, note: "First touch\nand finishing" }).note).toBe("First touch and finishing");
+  });
+  it("the card screen has a box for it: it starts as the post's line, and it changes the card, never the post", () => {
+    const card = code("mobile/app/card.tsx");
+    expect(CARD_WORDS.line).toBe("What did you work on?");
+    expect(card).toContain('const [line, setLine] = useState(() => src?.note ?? "");');
+    expect(card).toContain("placeholder={CARD_WORDS.line}");
+    expect(card).toContain("accessibilityLabel={CARD_WORDS.line}");
+    expect(card).toContain("maxLength={CAPTION_MAX}");
+    expect(card).toContain("note: line, quoteId });");
+    expect(card).toContain("cardKey(src.key, quoteId, line)");
+    // the shared typing page, with the room for the clock left outside what scrolls
+    expect(card).toMatch(/<FormScreen safeTop\b/);
+    // nothing is sent anywhere from the card screen but the picture itself
+    expect(card).not.toMatch(/api\(|postJson|fetch\(/);
   });
   it("nothing on it claims a time was timed, names a friend or a place on a board", () => {
     for (const quoteId of [null, ...QUOTES.map((q) => q.id)]) {
@@ -154,12 +176,12 @@ describe("the picture", () => {
     // the words really do start below that line: the block's bottom edge and its tallest height, in the picture's pixels
     const card = code("mobile/src/SessionCard.tsx");
     expect(card).toContain("bottom: px(230)");
-    const tallest = 34 + 246 + 114 + 176; // the gold line, the time, a two-line note, the row of three
+    const tallest = 34 + 246 + 10 + 116; // the gold line, the time, a two-line note
     expect((1920 - 230 - tallest) / 1920).toBeGreaterThanOrEqual(CARD_WORDS_TOP);
     expect(card).toMatch(/eyebrow: \{[^}]*textShadowColor/);
   });
-  it("the card leaves room on the screen for the buttons under it", () => {
-    expect(code("mobile/app/card.tsx")).toContain("(height * 0.52) / CARD_POINTS.height");
+  it("the card leaves room on the screen for the line's box, the quote row and the buttons", () => {
+    expect(code("mobile/app/card.tsx")).toContain("(height * 0.42) / CARD_POINTS.height");
   });
 });
 
@@ -187,6 +209,10 @@ describe("saved to Photos once per card version", () => {
     expect(cardKey("post:1", null)).toBe(cardKey("post:1", null));
     expect(cardKey("post:1", null)).not.toBe(cardKey("post:1", "king-adjust"));
     expect(cardKey("post:1", "king-adjust")).not.toBe(cardKey("post:2", "king-adjust"));
+    // a changed line is a new card; the same line typed with stray spaces is not
+    expect(cardKey("post:1", null, "Weak foot only.")).not.toBe(cardKey("post:1", null, "First touch."));
+    expect(cardKey("post:1", null, " Weak foot  only. ")).toBe(cardKey("post:1", null, "Weak foot only."));
+    expect(cardKey("post:1", null, "")).toBe(cardKey("post:1", null));
   });
   it("remembered newest last, never twice, kept to the last few", () => {
     let saved: string[] = [];
@@ -265,11 +291,6 @@ describe("where it lives in the app", () => {
     const card = code("mobile/app/card.tsx");
     expect(card).toContain("if (src?.askAfter && !prefsNow().pushAsked)");
     expect(card).toContain("<AskNotifications onDone={() => void leave()} />");
-  });
-  it("the numbers are the You tab's own answer, never worked out again", () => {
-    const card = code("mobile/app/card.tsx");
-    expect(card).toContain("const you = useFreeYou().data;");
-    expect(card).toContain("{ weekMinutes: you.weekMinutes, allMinutes: you.allMinutes, level: you.aura.level }");
   });
   it("Make my card is on your own post in the feed and your own photo on You, never on a friend's", () => {
     const feed = code("mobile/src/FeedCards.tsx");

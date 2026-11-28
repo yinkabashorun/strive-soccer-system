@@ -2,30 +2,33 @@
 // complete your session and take the picture with text over it. literally
 // copy strava with our own spin"; "an option to add a quote to it, then you
 // can push it to your story"; "every time you post it must save to camera
-// roll"; "just do insta").
+// roll"; "just do insta"). Nov 28, after seeing it on a phone screen: "I
+// think it should just be the time of their session and they can put what
+// they worked on": the row of three numbers (this week, all time, level)
+// came off, and the card screen has a box for the line.
 //
 // A story-size picture, 1080 x 1920, made ON THE PHONE from the player's
 // own photo of the session, full bleed, with a dark fall top and bottom so
 // the words read:
 //   top     STRIVE ELITE, then the day and the player's short name
 //   quote   only when the player picked one, with who said it
-//   bottom  "Trained today" (or "Gym today"), the time big, their one line
-//   row     this week, all time, level: the numbers Week and You show,
-//           read from the same answer the You tab reads (never worked out
-//           a second way); left off when the phone never loaded them
+//   bottom  "Trained today" (or "Gym today"), the session's time big, and
+//           what they worked on: the post's one line, which they can write
+//           or change on the card screen (the card's words only; the post
+//           is not changed)
 //   link    thestriveapp.com/join
 //   badge   the App Store badge, only once the app is live there
 //
-// What is never on it: a friend's name, a place on a board, anything not
-// done, and nothing that says a typed entry was timed.
+// What is never on it: a friend's name, a place on a board, a total or a
+// level, anything not done, and nothing that says a typed entry was timed.
 //
 // The small rules of the screen are here too: which buttons show, and the
-// key that saves a card to Photos once per version (same photo and same
-// quote is never saved twice). Pure: shared with the phone
+// key that saves a card to Photos once per version (same photo, same quote
+// and same line is never saved twice). Pure: shared with the phone
 // ("@shared/session-card"), tested in tests/session-card.test.ts.
 import { quoteById, type Quote } from "./quotes";
 import { fmtDuration } from "./time-trained";
-import { dayLabel, type Kind } from "./tracker";
+import { CAPTION_MAX, dayLabel, type Kind } from "./tracker";
 import { pickLine } from "./voice";
 
 // ---- the picture ---------------------------------------------------------
@@ -68,25 +71,26 @@ export const CARD_LINK = "thestriveapp.com/join";
 // the small gold "Trained today" line, the highest of the bottom words). On
 // the first simulator pictures (Nov 28 2026) the fall was still nearly clear
 // there, and the gold line could not be read over bright grass. Held by
-// tests/session-card.test.ts with shadeAt.
-export const CARD_WORDS_TOP = 0.58;
+// tests/session-card.test.ts with shadeAt. With the row of three numbers
+// gone the words start lower, so more of the photo is left untouched.
+export const CARD_WORDS_TOP = 0.64;
 export const CARD_WORDS_DARK = 0.6;
 export function cardShade(hasQuote: boolean): [number, number][] {
   return hasQuote
     ? [
         [0, 0.7],
         [0.36, 0.42],
-        [0.48, 0],
+        [0.5, 0],
         [CARD_WORDS_TOP, CARD_WORDS_DARK + 0.02],
-        [0.8, 0.84],
+        [0.82, 0.84],
         [1, 0.92],
       ]
     : [
         [0, 0.55],
         [0.22, 0],
-        [0.42, 0],
+        [0.48, 0],
         [CARD_WORDS_TOP, CARD_WORDS_DARK + 0.02],
-        [0.8, 0.84],
+        [0.82, 0.84],
         [1, 0.92],
       ];
 }
@@ -115,17 +119,14 @@ export function quoteSize(text: string): number {
 
 // ---- what is on it -------------------------------------------------------
 
-export type CardStats = { weekMinutes: number; allMinutes: number; level: number };
-
 export type CardInput = {
   day: string; // the entry's day, YYYY-MM-DD (New York)
   today: string; // today in New York, YYYY-MM-DD
   name: string; // "Marcus B."
   minutes: number; // the entry's own minutes
   kind: Kind;
-  note: string | null; // the player's one line
+  note: string | null; // what they worked on, their one line
   quoteId: string | null;
-  stats: CardStats | null; // null: never loaded on this phone, so the row is left off
 };
 
 export type CardFace = {
@@ -134,40 +135,29 @@ export type CardFace = {
   eyebrow: string;
   time: string;
   note: string | null;
-  stats: { value: string; label: string }[] | null;
   link: string;
   badge: boolean;
 };
 
-function whole(n: unknown): number | null {
-  return typeof n === "number" && Number.isFinite(n) && n >= 0 ? Math.round(n) : null;
+// What they worked on, as it is set on the card: one line, no line breaks,
+// the post's own length at most.
+export function cardLine(text: string | null | undefined): string | null {
+  const line = (text ?? "").replace(/\s+/g, " ").trim().slice(0, CAPTION_MAX);
+  return line || null;
 }
 
 export function cardFace(i: CardInput): CardFace {
   const name = i.name.trim();
-  const note = i.note?.replace(/\s+/g, " ").trim() || null;
+  const note = cardLine(i.note);
   const isToday = i.day === i.today;
   // a card made later from an older post says the day, not "today"
   const eyebrow = i.kind === "gym" ? (isToday ? "Gym today" : "Gym") : isToday ? "Trained today" : "Trained";
-  const s = i.stats;
-  const week = whole(s?.weekMinutes);
-  const all = whole(s?.allMinutes);
-  const level = whole(s?.level);
-  const stats =
-    week === null || all === null || level === null || level < 1
-      ? null
-      : [
-          { value: fmtDuration(week), label: "this week" },
-          { value: fmtDuration(all), label: "all time" },
-          { value: `LVL ${level}`, label: "level" },
-        ];
   return {
     dateLine: name ? `${dayLabel(i.day)} · ${name}` : dayLabel(i.day),
     quote: quoteById(i.quoteId),
     eyebrow,
     time: fmtDuration(Math.max(0, i.minutes)),
     note,
-    stats,
     link: CARD_LINK,
     badge: APP_STORE_BADGE_LIVE,
   };
@@ -181,7 +171,6 @@ export function cardSaid(f: CardFace): string {
     f.quote ? `${f.quote.text} ${f.quote.by}` : null,
     `${f.eyebrow}, ${f.time}`,
     f.note,
-    f.stats ? f.stats.map((s) => `${s.value} ${s.label}`).join(", ") : null,
     f.link,
   ]
     .filter(Boolean)
@@ -200,11 +189,12 @@ export function cardButtons(input: { instagram: boolean; metaAppId: string | nul
   return [...(input.instagram && /^\d{5,20}$/.test(id) ? (["instagram"] as const) : []), "save", "more"];
 }
 
-// One card version: the photo (the post's own key) and the quote. Sharing
-// it again, or Save to Photos after a share, does not put a second copy in
-// Photos; a new quote is a new card and is saved once more.
-export function cardKey(photoKey: string, quoteId: string | null): string {
-  return `${photoKey}|${quoteId ?? "none"}`;
+// One card version: the photo (the post's own key), the quote and the line.
+// Sharing it again, or Save to Photos after a share, does not put a second
+// copy in Photos; a new quote or a changed line is a new card and is saved
+// once more.
+export function cardKey(photoKey: string, quoteId: string | null, line: string | null = null): string {
+  return `${photoKey}|${quoteId ?? "none"}|${cardLine(line) ?? ""}`;
 }
 
 export const SAVED_KEEP = 40;
@@ -223,6 +213,7 @@ export function rememberSaved(saved: readonly string[], key: string, keep = SAVE
 export const CARD_WORDS = {
   eyebrow: "Your card",
   titles: ["In the books.", "That one's yours.", "Locked in."],
+  line: "What did you work on?",
   quoteRow: "Add a quote",
   quoteChange: "Change the quote",
   quoteSheet: "Pick a quote",

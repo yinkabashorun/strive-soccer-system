@@ -481,8 +481,12 @@ phone's to prove.
 1. **The card after a post.** Train on the clock, take the finish photo,
    post. "Your card" opens straight away: your finish photo full bleed,
    STRIVE ELITE at the top with today's date and your name, "Trained today"
-   and the time the post counted, your line if you wrote one, and this
-   week, all time and your level. Close: you are back where you started
+   and the time the post counted, and what you worked on if you wrote a
+   line. No totals, no level. Under the card, the box "What did you work
+   on?" holds that line: type a new one and the card changes as you type,
+   the box stays above the keyboard, and the keyboard's Done puts the
+   keyboard away. The post on Friends keeps the line it was posted with.
+   Close: you are back where you started
    posting, the post is on Friends. The first time ever, "Know the moment
    your friends post?" comes after the card, not before it.
 2. **The card after a session's photo** (Strive Pro): finish a session,
@@ -504,7 +508,8 @@ phone's to prove.
    1080 x 1920), sharp, nothing cut off at the edges.
 6. **Saved once.** Tap More, share it somewhere, then Save to Photos again:
    still ONE copy in Photos. Pick a quote and share again: now a second
-   copy, the one with the quote.
+   copy, the one with the quote. Change the line and save: one more copy,
+   with the new line.
 7. **The "no" path.** On another phone (or after Settings, Strive Elite,
    Photos, None), tap More: the share sheet still opens with the card, and
    the line says it was not saved, with Open Settings, which opens the
@@ -515,6 +520,5 @@ phone's to prove.
    purple around it. Without Instagram on the phone, or with no app ID in
    the build, the button is not there, and More still reaches Instagram.
 9. **No signal.** Airplane mode, then Make my card on a post you have
-   opened before: the card is made and saved with the photo and numbers
-   already on the phone; if the numbers never loaded, the row of three is
-   simply not there.
+   opened before: the card is made and saved with the photo already on the
+   phone.

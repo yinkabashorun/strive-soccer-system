@@ -1,8 +1,10 @@
 # YOUR CARD, by taps (app/card.tsx, lib/elite/session-card.ts): the
 # training card a post opens, made from the example still (src/card-source.ts
-# exampleCardSource). The card first with no quote, then "Add a quote" opens
-# the list and one tap puts the quote on the card, then Save to Photos, then
-# Close goes back to the free app with nothing lost.
+# exampleCardSource). The card first with no quote: just the session's time
+# and what they worked on. Then the line is typed over in the box under the
+# card, then "Add a quote" opens the list and one tap puts the quote on the
+# card, then Save to Photos, then Close goes back to the free app with
+# nothing lost.
 #
 # Example data only: the example build never captures, saves or shares
 # (app/card.tsx guards each on FIXTURES), so "Saved to Photos." here is the
@@ -24,10 +26,22 @@ appId: com.strivesoccer.elite
 - waitForAnimationToEnd:
     timeout: 4000
 - takeScreenshot: t90-card
-# the card leaves room for the buttons under it (app/card.tsx): More is on
-# the first screen with no scroll. The run on a108f95 had it off the screen.
+# the card leaves room for what is under it (app/card.tsx): More is on the
+# first screen with no scroll. The run on a108f95 had it off the screen.
 - assertVisible: "More"
 - assertNotVisible: "Instagram story"
+# What they worked on: the box starts as the post's line ("Weak foot only.")
+# and typing changes the card. The keyboard's own Done puts the keyboard
+# away, and the quote row is back in reach.
+- tapOn: "What did you work on?"
+- eraseText: 40
+- inputText: "First touch and finishing"
+- takeScreenshot: t90b-card-line-typing
+- pressKey: Enter
+- waitForAnimationToEnd:
+    timeout: 4000
+- assertVisible: "Add a quote"
+- takeScreenshot: t90c-card-line-set
 - tapOn: "Add a quote"
 - extendedWaitUntil:
     visible: "Pick a quote"

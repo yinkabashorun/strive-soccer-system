@@ -64,20 +64,6 @@ export function SessionCard({ face, photo, onReady, cardRef }: Props) {
             {face.note}
           </Text>
         ) : null}
-        {face.stats ? (
-          <View style={styles.stats}>
-            {face.stats.map((s) => (
-              <View key={s.label}>
-                <Text allowFontScaling={false} style={styles.statValue}>
-                  {s.value}
-                </Text>
-                <Text allowFontScaling={false} style={styles.statLabel}>
-                  {s.label}
-                </Text>
-              </View>
-            ))}
-          </View>
-        ) : null}
       </View>
 
       <View style={styles.foot}>
@@ -119,10 +105,7 @@ const styles = StyleSheet.create({
     textShadowRadius: px(10),
   },
   time: { fontFamily: font.head, fontSize: px(230), lineHeight: px(240), marginTop: px(6), color: color.bone },
-  note: { fontFamily: font.label, fontSize: px(40), lineHeight: px(52), marginTop: px(10), color: color.bone },
-  stats: { flexDirection: "row", gap: px(56), marginTop: px(40), paddingTop: px(30), borderTopWidth: px(2), borderTopColor: "rgba(242,239,232,0.25)" },
-  statValue: { fontFamily: font.head, fontSize: px(64), lineHeight: px(74), letterSpacing: px(1), color: color.bone },
-  statLabel: { fontFamily: font.label, fontSize: px(26), letterSpacing: px(4), textTransform: "uppercase", color: "rgba(242,239,232,0.62)", marginTop: px(4) },
+  note: { fontFamily: font.label, fontSize: px(46), lineHeight: px(58), marginTop: px(10), color: color.bone },
   foot: { position: "absolute", left: px(72), right: px(72), bottom: px(110), flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   link: { fontFamily: font.label, fontSize: px(30), color: "rgba(242,239,232,0.85)" },
 });

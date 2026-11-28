@@ -104,8 +104,10 @@ export default function CardScreen() {
   const buttons = cardButtons({ instagram, metaAppId: META_APP_ID });
   const quote = quoteById(quoteId);
 
-  // the card, scaled to fit what is left of the screen
-  const scale = Math.min((width - 40) / CARD_POINTS.width, (height * 0.6) / CARD_POINTS.height);
+  // the card, scaled to fit what is left of the screen: just over half its
+  // height, so the quote row and two buttons sit under it without a scroll
+  // (at 0.6 the simulator's first picture had the last button off the screen)
+  const scale = Math.min((width - 40) / CARD_POINTS.width, (height * 0.52) / CARD_POINTS.height);
   const shown = { width: CARD_POINTS.width * scale, height: CARD_POINTS.height * scale };
 
   function close() {

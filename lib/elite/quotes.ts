@@ -31,7 +31,7 @@ export const QUOTES: readonly Quote[] = [
   { id: "federer-easy", text: "The truth is, I had to work very hard to make it look easy.", by: "Roger Federer" },
   { id: "wooden-quick", text: "Be quick, but don't hurry.", by: "John Wooden" },
   { id: "wooden-masterpiece", text: "Make each day your masterpiece.", by: "John Wooden" },
-  { id: "kipchoge-free", text: "The disciplined ones in life are free.", by: "Eliud Kipchoge" },
+  { id: "kipchoge-free", text: "Only the disciplined ones in life are free.", by: "Eliud Kipchoge" },
   { id: "clear-systems", text: "You do not rise to the level of your goals. You fall to the level of your systems.", by: "James Clear" },
   { id: "summitt-discipline", text: "Discipline yourself so no one else has to.", by: "Pat Summitt" },
   { id: "klopp-believer", text: "We have to change from doubter to believer.", by: "Jurgen Klopp" },

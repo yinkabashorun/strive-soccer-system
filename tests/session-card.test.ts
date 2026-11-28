@@ -15,6 +15,9 @@ import {
   cardKey,
   cardSaid,
   cardShade,
+  shadeAt,
+  CARD_WORDS_TOP,
+  CARD_WORDS_DARK,
   cardTitle,
   quoteSize,
   rememberSaved,
@@ -139,6 +142,24 @@ describe("the picture", () => {
       for (let i = 1; i < s.length; i++) expect(s[i][0]).toBeGreaterThan(s[i - 1][0]);
     }
     expect(cardShade(true)[1][0]).toBeGreaterThan(cardShade(false)[1][0]);
+  });
+  it("the fall is already dark where the bottom words start, and the middle of the photo stays clear", () => {
+    // the first simulator pictures: the gold line over bright grass could not be read
+    for (const q of [true, false]) {
+      const s = cardShade(q);
+      for (const at of [CARD_WORDS_TOP, 0.7, 0.8, 0.9, 1]) expect(shadeAt(s, at)).toBeGreaterThanOrEqual(CARD_WORDS_DARK);
+      // and somewhere in the middle the photo is untouched
+      expect(Math.min(...s.map((x) => x[1]))).toBe(0);
+    }
+    // the words really do start below that line: the block's bottom edge and its tallest height, in the picture's pixels
+    const card = code("mobile/src/SessionCard.tsx");
+    expect(card).toContain("bottom: px(230)");
+    const tallest = 34 + 246 + 114 + 176; // the gold line, the time, a two-line note, the row of three
+    expect((1920 - 230 - tallest) / 1920).toBeGreaterThanOrEqual(CARD_WORDS_TOP);
+    expect(card).toMatch(/eyebrow: \{[^}]*textShadowColor/);
+  });
+  it("the card leaves room on the screen for the buttons under it", () => {
+    expect(code("mobile/app/card.tsx")).toContain("(height * 0.52) / CARD_POINTS.height");
   });
 });
 

@@ -395,6 +395,16 @@ appId: com.strivesoccer.elite
 # the post button rides on the keyboard
 - takeScreenshot: t36b-post-typing
 - tapOn: "Post to my friends"
+# the training card comes first (app/card.tsx): made from the finish photo,
+# closed with one tap, nothing lost. The run on a108f95 looked for the
+# notifications ask here, with the card right there on screen.
+- extendedWaitUntil:
+    visible: "Save to Photos"
+    timeout: 20000
+- waitForAnimationToEnd:
+    timeout: 4000
+- takeScreenshot: t36c-post-card
+- tapOn: "Close"
 # asked once, after the first post, with the reason
 - extendedWaitUntil:
     visible: "Not now"

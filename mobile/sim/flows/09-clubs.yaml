@@ -28,12 +28,22 @@ appId: com.strivesoccer.elite
 - tapOn: "Renegados FC.*"
 
 # The club's page: its week, and this week's matchup right under it.
+# The matchup's line is two lines long now ("Renegados FC is outworking
+# Haymarket 08s this week. Don't let up."), which carries "How it works"
+# under the fold: the run on a108f95 waited for it with the club's page
+# right there. Wait for the page, then bring the link up.
 - extendedWaitUntil:
-    visible: "How it works"
+    visible: "trained by your club"
     timeout: 20000
 - waitForAnimationToEnd:
     timeout: 4000
 - takeScreenshot: t51-club
+- scrollUntilVisible:
+    element: "How it works"
+    direction: DOWN
+    speed: 40
+    visibilityPercentage: 100
+    timeout: 20000
 - tapOn: "How it works"
 - extendedWaitUntil:
     visible: "Gym time does not count."

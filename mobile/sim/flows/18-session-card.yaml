@@ -24,6 +24,8 @@ appId: com.strivesoccer.elite
 - waitForAnimationToEnd:
     timeout: 4000
 - takeScreenshot: t90-card
+# the card leaves room for the buttons under it (app/card.tsx): More is on
+# the first screen with no scroll. The run on a108f95 had it off the screen.
 - assertVisible: "More"
 - assertNotVisible: "Instagram story"
 - tapOn: "Add a quote"

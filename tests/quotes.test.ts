@@ -24,7 +24,7 @@ const BRIEF: [string, string][] = [
   ["The truth is, I had to work very hard to make it look easy.", "Roger Federer"],
   ["Be quick, but don't hurry.", "John Wooden"],
   ["Make each day your masterpiece.", "John Wooden"],
-  ["The disciplined ones in life are free.", "Eliud Kipchoge"],
+  ["Only the disciplined ones in life are free.", "Eliud Kipchoge"],
   ["You do not rise to the level of your goals. You fall to the level of your systems.", "James Clear"],
   ["Discipline yourself so no one else has to.", "Pat Summitt"],
   ["We have to change from doubter to believer.", "Jurgen Klopp"],

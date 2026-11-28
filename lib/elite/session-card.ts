@@ -63,21 +63,44 @@ export const CARD_LINK = "thestriveapp.com/join";
 
 // The dark falls, as [where 0 to 1 down the card, how dark]. With a quote
 // the top fall runs further down, under the quote.
+//
+// The bottom fall is already dark where the words start (CARD_WORDS_TOP:
+// the small gold "Trained today" line, the highest of the bottom words). On
+// the first simulator pictures (Nov 28 2026) the fall was still nearly clear
+// there, and the gold line could not be read over bright grass. Held by
+// tests/session-card.test.ts with shadeAt.
+export const CARD_WORDS_TOP = 0.58;
+export const CARD_WORDS_DARK = 0.6;
 export function cardShade(hasQuote: boolean): [number, number][] {
   return hasQuote
     ? [
         [0, 0.7],
         [0.36, 0.42],
-        [0.5, 0],
-        [0.56, 0],
-        [1, 0.9],
+        [0.48, 0],
+        [CARD_WORDS_TOP, CARD_WORDS_DARK + 0.02],
+        [0.8, 0.84],
+        [1, 0.92],
       ]
     : [
         [0, 0.55],
         [0.22, 0],
-        [0.48, 0],
-        [1, 0.88],
+        [0.42, 0],
+        [CARD_WORDS_TOP, CARD_WORDS_DARK + 0.02],
+        [0.8, 0.84],
+        [1, 0.92],
       ];
+}
+
+// How dark a fall is at one point down the card (straight lines between
+// its stops).
+export function shadeAt(stops: [number, number][], at: number): number {
+  if (at <= stops[0][0]) return stops[0][1];
+  for (let i = 1; i < stops.length; i++) {
+    const [a, da] = stops[i - 1];
+    const [b, db] = stops[i];
+    if (at <= b) return da + ((at - a) / (b - a)) * (db - da);
+  }
+  return stops[stops.length - 1][1];
 }
 
 // How big the quote is set, in the picture's pixels: a short quote big, a

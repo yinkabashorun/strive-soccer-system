@@ -192,9 +192,12 @@ What it says about the voice:
 - "Outwork" is his word in four of six moments now. "Grind" joins "locked
   in", "getting work in", "on the come up", "let's go", "let's work".
 
-### Open: the word "AI"
+### The word "AI": allowed for Strive Pro (his ruling, Nov 28 2026)
 
-Asked twice whether "never say AI" still holds for Strive Pro's own words
-(he said "AI coach" when describing it to a teammate). Not answered, so
-the standing rule holds: no "AI", "automated" or "algorithm" anywhere a
-player or parent reads.
+"you can say ai, or say an ai coached trained by a bundesliga academy
+player for 8 months". So Strive Pro's own words to players may say "AI
+coach". Two facts in his second line need his confirmation before it is
+used: Gary's record is Fortuna Koln U19 in the U19 Bundesliga ("a U19
+Bundesliga player"), and "8 months" (the app's record starts September
+2026). The coaching program's copy to parents keeps "I build every plan"
+until he says otherwise.

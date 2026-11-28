@@ -16,7 +16,7 @@ import Animated, {
   useReducedMotion,
 } from "react-native-reanimated";
 import { COUNT_IN_INTRO_MS, COUNT_IN_STEP_MS, countInNext, countInWanted, nextMilestone, type CountInState } from "@shared/experience";
-import { afterSessionLine, milestoneCrossed, milestoneLabel, nextStep } from "@shared/session-flow";
+import { afterSessionLine, milestoneCrossed, milestoneEarnedLine, milestoneLabel, nextStep } from "@shared/session-flow";
 import { parseReps } from "@shared/set-timer";
 import { fmtDuration } from "@shared/time-trained";
 import type { AppSession, AppWeek } from "@shared/app-contract";
@@ -382,7 +382,7 @@ function Finish({
           <View style={{ flex: 1 }}>
             <Label size={16}>{crossed ? milestoneLabel(crossed) : `Next up: ${milestoneLabel(next!.hours)}`}</Label>
             <Body dim size={13}>
-              {crossed ? "Earned today. It stays yours." : `${fmtDuration(next!.minutesAway)} away.`}
+              {crossed ? milestoneEarnedLine(crossed) : `${fmtDuration(next!.minutesAway)} away.`}
             </Body>
           </View>
         </Animated.View>

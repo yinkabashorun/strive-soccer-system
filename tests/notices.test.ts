@@ -164,7 +164,7 @@ describe("the one sender: a member", () => {
 
 describe("the one sender: a free account", () => {
   it("has no bell: the notice is its push, under its own switch", async () => {
-    const posted = friendPostNotice({ first: "Kai", nyDate: "2026-11-24" });
+    const posted = friendPostNotice({ first: "Kai", nyDate: "2026-11-24", kind: "training", minutes: 45 });
     expect(await notifyProfile("u9", posted)).toEqual({ bell: "none", pushed: 1, held: null });
     expect(db.inserts).toEqual([]);
     expect(pushes[0]).toMatchObject({ to: "u9", kind: "profile", payload: { url: "/log", topic: "friends", collapse: "friend_post" } });

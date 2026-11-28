@@ -1,17 +1,69 @@
 import { StyleSheet, View } from "react-native";
-import { recapDue, type WeekRecap } from "@shared/week-recap";
+import { recapDue, weekCardDue, weekCardLines, type WeekCard, type WeekRecap } from "@shared/week-recap";
 import { setPref, usePrefs } from "@/prefs";
 import { Star } from "@/Avatar";
 import { Body, Card, Label, Press } from "@/ui";
 import { color } from "@/theme";
 
-// The Monday moment (lib/elite/week-recap.ts): last week in a few lines,
-// at the top of Week. The server decides what is said (and sends nothing
-// for a week with nothing in it); this phone only remembers, per week,
-// that "Got it" was tapped, so the card shows once a week and is gone for
-// good once put away. Next week brings its own card. No notification.
-export function MondayCard({ recap, onDismiss }: { recap: WeekRecap | null | undefined; onDismiss?: (recap: WeekRecap) => void }) {
+// The week's card (lib/elite/week-recap.ts weekCard): Sunday from noon New
+// York about the week so far, and Monday about the week closed, at the top
+// of Week. The server decides what is said and when (and sends nothing for
+// a week with nothing in it); this phone only remembers, per week the card
+// is about, that "Got it" was tapped, so one tap covers Sunday's card and
+// Monday's. No notification.
+//
+// A server from before the week's card sends only `recap` (the Monday
+// moment): then that card is drawn as it always was.
+export function MondayCard({
+  card,
+  recap,
+  onDismiss,
+}: {
+  card?: WeekCard | null;
+  recap?: WeekRecap | null;
+  onDismiss?: (best: boolean) => void;
+}) {
   const [prefs] = usePrefs();
+  if (card !== undefined) {
+    if (!card || !weekCardDue(card, prefs.recapSeen)) return null;
+    return (
+      <Card style={styles.card}>
+        <View accessible accessibilityLabel={weekCardLines(card).join(" ")}>
+          {card.best ? (
+            // earned: the small gold mark, never a gold button
+            <View style={styles.bestRow}>
+              <Star size={14} />
+              <Label size={17} style={{ color: color.gold }}>
+                {card.headline}
+              </Label>
+            </View>
+          ) : (
+            <Label size={17}>{card.headline}</Label>
+          )}
+          {card.gym ? (
+            <Body dim size={14} style={{ marginTop: 4 }}>
+              {card.gym}
+            </Body>
+          ) : null}
+          {card.friends ? (
+            <Body size={14.5} style={{ marginTop: 6 }}>
+              {card.friends}
+            </Body>
+          ) : null}
+          <Label size={14.5} style={{ marginTop: 6 }}>
+            {card.close}
+          </Label>
+        </View>
+        <GotIt
+          label={card.dismiss}
+          onPress={() => {
+            void setPref("recapSeen", card.week);
+            onDismiss?.(card.best);
+          }}
+        />
+      </Card>
+    );
+  }
   if (!recap || !recapDue(recap, prefs.recapSeen)) return null;
   const said = [recap.trained, recap.gym, recap.place, recap.best].filter(Boolean).join(" ");
   return (
@@ -29,7 +81,6 @@ export function MondayCard({ recap, onDismiss }: { recap: WeekRecap | null | und
           </Body>
         ) : null}
         {recap.best ? (
-          // earned: the small gold mark, never a gold button
           <View style={styles.best}>
             <Star size={14} />
             <Label size={14.5} style={{ color: color.gold }}>
@@ -38,24 +89,30 @@ export function MondayCard({ recap, onDismiss }: { recap: WeekRecap | null | und
           </View>
         ) : null}
       </View>
-      <Press
+      <GotIt
+        label={recap.dismiss}
         onPress={() => {
           void setPref("recapSeen", recap.week);
-          onDismiss?.(recap);
+          onDismiss?.(Boolean(recap.best));
         }}
-        style={styles.got}
-        accessibilityLabel={recap.dismiss}
-      >
-        <Label dim size={14}>
-          {recap.dismiss}
-        </Label>
-      </Press>
+      />
     </Card>
+  );
+}
+
+function GotIt({ label, onPress }: { label: string; onPress: () => void }) {
+  return (
+    <Press onPress={onPress} style={styles.got} accessibilityLabel={label}>
+      <Label dim size={14}>
+        {label}
+      </Label>
+    </Press>
   );
 }
 
 const styles = StyleSheet.create({
   card: { marginHorizontal: 20, marginTop: 18, padding: 16 },
   best: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 8 },
+  bestRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   got: { minHeight: 44, justifyContent: "center", alignSelf: "flex-start", marginTop: 4 },
 });

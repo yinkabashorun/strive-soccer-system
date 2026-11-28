@@ -19,7 +19,8 @@ import { createServiceClient, isSupabaseConfigured } from "./supabase/server";
 import { avatarUrlsOf, clearProfilePhoto, usernamesOf } from "./account-profile-server";
 import type { Viewer } from "./session";
 import { shiftDay } from "./time";
-import { weekRecap, type WeekRecap } from "./week-recap";
+import { seedDay } from "./voice";
+import { weekCard, weekCardMoment, weekRecap, type WeekCard, type WeekRecap } from "./week-recap";
 import { clubRankingFor } from "./tracker-ranking";
 import { withLine } from "./club-teams";
 import { NO_APP_VERSION, cleanAppVersion, type AppVersion } from "./app-version";
@@ -444,6 +445,46 @@ export async function weekRecapFor(viewer: Viewer, tracker: Tracker, today: stri
     earlier: [...byWeek.values()],
     gymLastWeek: gym,
     friends: friends.map((f) => f.minutes),
+  });
+}
+
+// The week's card (week-recap.ts weekCard): Sunday from noon New York,
+// this week so far; Monday, last week closed. The same reads as the Monday
+// moment above (the board's own timed-training sums), for the week the
+// card is about, with each friend's name so the line can name them. Null
+// on every other day. Reads only this player and their own friends.
+export async function weekCardFor(viewer: Viewer, tracker: Tracker, now: Date = new Date()): Promise<WeekCard | null> {
+  if (viewer.demo) return null;
+  const moment = weekCardMoment(now);
+  if (!moment) return null;
+  const admin = createServiceClient();
+  if (!admin) return null;
+  const today = seedDay(now); // the New York day of `now`
+  const { monday: thisMonday } = weekOf(today);
+  // a day inside the week the card is about
+  const aboutDay = moment === "sunday" ? today : shiftDay(thisMonday, -1);
+  const { monday: aboutMonday } = weekOf(aboutDay);
+  const [own, logs, friends] = await Promise.all([
+    auraLogsOf(admin, viewer.profile.id),
+    getWeekLogs(viewer.profile.id, aboutDay),
+    friendsWeekFor(viewer, aboutDay),
+  ]);
+  const byWeek = new Map<string, number>();
+  for (const l of own) {
+    if (l.kind !== "training" || l.trained_on > aboutDay) continue;
+    const m = weekOf(l.trained_on).monday;
+    byWeek.set(m, (byWeek.get(m) ?? 0) + l.minutes);
+  }
+  const mine = byWeek.get(aboutMonday) ?? 0;
+  byWeek.delete(aboutMonday);
+  const gym = tracksGym(tracker.grade) ? logs.reduce((s, l) => (l.kind === "gym" ? s + l.minutes : s), 0) : 0;
+  return weekCard({
+    moment,
+    week: aboutMonday,
+    mine,
+    earlier: [...byWeek.values()],
+    gym,
+    friends: friends.map((f) => ({ name: f.name, minutes: f.minutes })),
   });
 }
 

@@ -1,12 +1,13 @@
 // THE DAILY PULL (Nov 22 2026): the free app's notifications, as pure
 // rules. A free player who turned notifications on hears:
-//   - "Diego just posted": when an accepted friend posts and they have not
-//     posted today. At most ONE a day: the first friend post triggers it,
+//   - a friend posted ("Diego's getting work in", notices.ts
+//     friendPostLines): when an accepted friend posts and the receiver has
+//     not posted today. At most ONE a day: the first friend post triggers it,
 //     later ones that day do not. Never across a block.
 //   - "Diego just passed you": when an accepted friend's own timed
 //     training puts them in front on the friends board. At most ONE a day,
 //     whoever passes them (passedKey). Never across a block. A friend told
-//     this is not also told "just posted" for the same training.
+//     this is not also told a friend posted for the same training.
 //   - "Diego gave you props": at most one per post, and at most three a
 //     day.
 //   - "<Club>: Club training Tue, Nov 24 at 6:00 PM.": when a

@@ -26,6 +26,7 @@
 //
 // Pure, and shared with the phone ("@shared/free-door").
 import { cleanReferralCode } from "./tracker";
+import { pickLine, seedDay } from "./voice";
 
 export const DOOR_TITLE = "Have a code from a teammate or a club?";
 export const DOOR_BODY = "Type the code and you go straight to your friends. It is in the invite your teammate or your captain sent you.";
@@ -67,8 +68,19 @@ export function doorCodeFrom(raw: unknown): DoorCode | null {
 // link, so a teammate with the app types the code and one without it
 // opens the link. (A club's invite is clubShareText, lib/elite/club-app.ts,
 // the same shape.)
-export function friendShareText(input: { code: string; link: string }): string {
-  return `Train with me on Strive Elite.\nMy code: ${input.code}\n${input.link}`;
+//
+// The first line is in the app's voice and rotates (the voice guide, moment
+// 6), held still by the code and the New York day; the "My code:" line and
+// the link never change, because the door reads the code out of the pasted
+// text (doorCodeFrom).
+export const FRIEND_SHARE_FIRST_LINES: readonly string[] = [
+  "Bet you can't outwork me this week. Get on Strive Elite.",
+  "Let's grind on Strive Elite.",
+  "I'm locked in on Strive Elite. You in?",
+];
+export function friendShareText(input: { code: string; link: string; day?: string }): string {
+  const first = pickLine(FRIEND_SHARE_FIRST_LINES, `invite:${input.code}:${input.day ?? seedDay()}`);
+  return `${first}\nMy code: ${input.code}\n${input.link}`;
 }
 
 // What the door answers.

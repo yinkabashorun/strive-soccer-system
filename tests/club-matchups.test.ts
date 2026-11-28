@@ -26,6 +26,7 @@ import {
   MATCHUP_SOON_LINE,
   everyMatchupSentence,
   matchupAheadLine,
+  matchupAheadLines,
   matchupCardLine,
   matchupTitle,
   matchupRecordLine,
@@ -276,10 +277,15 @@ describe("what a club's page shows", () => {
     expect(v.state).toBe("on");
     expect(v.mine).toEqual({ id: "a", name: "Renegados FC", minutes: 72, time: "1h 12m" });
     expect(v.theirs).toEqual({ id: "b", name: "Sunday Pickup", minutes: 60, time: "1h" });
-    expect(v.line).toBe("Your club is ahead by 12 minutes per player.");
+    // the line names both clubs and the gap, one of a few, held still by
+    // the club and the day (lib/elite/voice.ts)
+    const ahead = matchupAheadLines({ mine: 72, theirs: 60, other: "Sunday Pickup", club: "Renegados FC" });
+    expect(ahead).toContain(v.line);
+    expect(v.line).toBe(matchupAheadLine({ mine: 72, theirs: 60, other: "Sunday Pickup", club: "Renegados FC", seed: "a:2026-11-25" }));
     expect(v.cardLine).toBe("This week: Renegados FC vs Sunday Pickup.");
-    expect(view({ rows: [row({})], theirRows: [b], logs: [log("b1", MON, 240)] }).line).toBe("Sunday Pickup is ahead by 60 minutes per player.");
-    expect(view({ rows: [row({})], theirRows: [b] }).line).toBe("It's tied.");
+    const behind = view({ rows: [row({})], theirRows: [b], logs: [log("b1", MON, 240)] }).line;
+    expect(matchupAheadLines({ mine: 0, theirs: 60, other: "Sunday Pickup", club: "Renegados FC" })).toContain(behind);
+    expect(view({ rows: [row({})], theirRows: [b] }).line).toBe("It's tied with Sunday Pickup. The next session decides it.");
   });
 
   it("says last week's result under this week's", () => {
@@ -362,7 +368,16 @@ describe("the words, for a 9 year old", () => {
   });
 
   it("says a minute as a minute", () => {
-    expect(matchupAheadLine({ mine: 61, theirs: 60, other: "Sunday Pickup" })).toBe("Your club is ahead by 1 minute per player.");
+    expect(matchupAheadLines({ mine: 61, theirs: 60, other: "Sunday Pickup", club: "Renegados FC" })).toEqual([
+      "Renegados FC is up 1 minute a player on Sunday Pickup. Keep it there.",
+      "Renegados FC is outworking Sunday Pickup this week. Don't let up.",
+      "1 minute a player in front of Sunday Pickup. Excellent work, Renegados FC.",
+    ]);
+    expect(matchupAheadLines({ mine: 60, theirs: 72, other: "Sunday Pickup", club: "Renegados FC" })).toEqual([
+      "Sunday Pickup is up 12 minutes a player. Is Renegados FC letting that happen?",
+      "Renegados FC, you're getting outworked by Sunday Pickup. Let's go.",
+      "Sunday Pickup is 12 minutes a player in front. Renegados FC, let's work.",
+    ]);
     expect(matchupCardLine("Renegados FC", "Sunday Pickup")).toBe("This week: Renegados FC vs Sunday Pickup.");
   });
 

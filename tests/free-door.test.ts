@@ -16,9 +16,10 @@ import {
   DOOR_WORKED,
   doorCodeFrom,
   friendShareText,
+  FRIEND_SHARE_FIRST_LINES,
 } from "@/lib/elite/free-door";
 import { freeStage } from "@/lib/elite/free-intake";
-import { clubShareText } from "@/lib/elite/club-app";
+import { clubShareFirstLines, clubShareText } from "@/lib/elite/club-app";
 import { clubLink, joinLink } from "@/lib/elite/tracker";
 import { upgradeCard } from "@/lib/elite/upgrade-card";
 import { pushTextProblems } from "@/lib/elite/notices";
@@ -49,12 +50,26 @@ describe("what a typed or pasted code is", () => {
   });
 
   it("the whole invite, pasted as it was sent, is read", () => {
-    const friend = friendShareText({ code: "ABCD2345", link: joinLink(APP, "ABCD2345") });
-    expect(friend).toBe("Train with me on Strive Elite.\nMy code: ABCD2345\nhttps://thestriveapp.com/join?ref=ABCD2345");
+    const friend = friendShareText({ code: "ABCD2345", link: joinLink(APP, "ABCD2345"), day: "2026-11-28" });
+    expect(FRIEND_SHARE_FIRST_LINES.map((l) => `${l}\nMy code: ABCD2345\nhttps://thestriveapp.com/join?ref=ABCD2345`)).toContain(friend);
     expect(doorCodeFrom(friend)).toEqual({ code: "ABCD2345", kind: "friend" });
     const club = clubShareText({ name: "Sunday Pickup", code: "WXYZ6789", appUrl: APP });
     expect(club).toContain("Club code: WXYZ6789");
     expect(doorCodeFrom(club)).toEqual({ code: "WXYZ6789", kind: "club" });
+    // every first line the rotation can send, with the link and without it
+    // (cut off by whatever carried it), still reads as the code
+    for (const line of FRIEND_SHARE_FIRST_LINES) {
+      expect(doorCodeFrom(`${line}\nMy code: ABCD2345\n${joinLink(APP, "ABCD2345")}`)).toEqual({ code: "ABCD2345", kind: "friend" });
+      expect(doorCodeFrom(`${line}\nMy code: abcd2345`)).toEqual({ code: "ABCD2345", kind: null });
+    }
+    for (const line of clubShareFirstLines("Sunday Pickup")) {
+      expect(doorCodeFrom(`${line}\nClub code: WXYZ6789\n${clubLink(APP, "WXYZ6789")}`)).toEqual({ code: "WXYZ6789", kind: "club" });
+      expect(doorCodeFrom(`${line}\nClub code: WXYZ6789`)).toEqual({ code: "WXYZ6789", kind: "club" });
+    }
+    // every day's pick is one of them, and each is reachable
+    const seen = new Set<string>();
+    for (let d = 1; d <= 28; d++) seen.add(friendShareText({ code: "ABCD2345", link: "x", day: `2026-11-${String(d).padStart(2, "0")}` }).split("\n")[0]);
+    expect([...seen].sort()).toEqual([...FRIEND_SHARE_FIRST_LINES].sort());
     // the words alone, with the link cut off by whatever carried them
     expect(doorCodeFrom("Join Sunday Pickup on Strive Elite.\nClub code: WXYZ6789")).toEqual({ code: "WXYZ6789", kind: "club" });
     expect(doorCodeFrom("Train with me on Strive Elite.\nMy code: abcd2345")).toEqual({ code: "ABCD2345", kind: null });
@@ -260,8 +275,7 @@ describe("the invites carry the code to type", () => {
   });
 
   it("a club's invite already does", () => {
-    expect(clubShareText({ name: "Renegados FC", code: "WXYZ6789", appUrl: APP })).toBe(
-      "Join Renegados FC on Strive Elite.\nClub code: WXYZ6789\nhttps://thestriveapp.com/join?club=WXYZ6789"
-    );
+    const text = clubShareText({ name: "Renegados FC", code: "WXYZ6789", appUrl: APP, day: "2026-11-28" });
+    expect(clubShareFirstLines("Renegados FC").map((l) => `${l}\nClub code: WXYZ6789\nhttps://thestriveapp.com/join?club=WXYZ6789`)).toContain(text);
   });
 });

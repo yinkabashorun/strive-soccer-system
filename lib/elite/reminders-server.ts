@@ -50,6 +50,9 @@ type RosterRow = {
   current_week: number | null;
   reminder_hour?: number | null;
   reminders_paused_at?: string | null;
+  // the quiz's weakest areas, weakest first (the reminder's one title that
+  // names the area reads the first)
+  weaknesses?: string[] | null;
 };
 
 // The members to look at, with their own reminder hour and the pause's
@@ -59,7 +62,7 @@ async function rosterOf(admin: SupabaseClient, ids: string[]): Promise<RosterRow
   const on = ["active", "trialing"];
   const full = await admin
     .from("elite_players")
-    .select(`${base}, reminder_hour, reminders_paused_at`)
+    .select(`${base}, reminder_hour, reminders_paused_at, weaknesses`)
     .in("subscription_status", on)
     .in("id", ids);
   if (!full.error) return (full.data as RosterRow[] | null) ?? [];
@@ -207,7 +210,7 @@ export async function sendTrainingReminders(): Promise<ReminderRun> {
       run.paused++;
       continue;
     }
-    const told = await notifyPlayer(p.id, reminderNotice({ ...facts, nyDate: today }));
+    const told = await notifyPlayer(p.id, reminderNotice({ ...facts, area: p.weaknesses?.[0] ?? null, nyDate: today, to: p.id }));
     if (told.pushed > 0) run.sent++;
   }
   return run;

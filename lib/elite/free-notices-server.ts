@@ -66,11 +66,55 @@ async function withDevices(admin: Admin, ids: string[]): Promise<Set<string>> {
   );
 }
 
+// What a post is, for the words of the notice (notices.ts friendPostLines):
+// training or gym, its own minutes, and whether its time counts on the
+// friends board (a timed clock or a finished session; training-clock.ts
+// countsOnBoards).
+// `entryId`: the entry, when its minutes are not at hand (a finished
+// session's photo), read from the row.
+export type PostFacts = { kind: "training" | "gym"; minutes: number; timed: boolean; entryId?: string };
+
+// The friends board's own count for TODAY: timed training (never gym, never
+// a typed length), the same rows the board adds up. Empty when it cannot be
+// read, so no "outworking you" line is said on a guess.
+async function boardToday(admin: Admin, ids: string[], today: string): Promise<Map<string, number> | null> {
+  try {
+    const out = new Map<string, number>();
+    for (let i = 0; i < ids.length; i += 200) {
+      const some = ids.slice(i, i + 200);
+      for (let from = 0; ; from += 1000) {
+        const { data, error } = await admin
+          .from("elite_training_logs")
+          .select("profile_id, minutes")
+          .in("profile_id", some)
+          .eq("kind", "training")
+          .neq("proof", TYPED)
+          .eq("trained_on", today)
+          .order("id")
+          .range(from, from + 999);
+        if (error) return null;
+        const rows = (data as { profile_id: string; minutes: number }[] | null) ?? [];
+        for (const r of rows) out.set(r.profile_id, (out.get(r.profile_id) ?? 0) + r.minutes);
+        if (rows.length < 1000) break;
+      }
+    }
+    return out;
+  } catch {
+    return null;
+  }
+}
+
 // A free player posted a photo: their accepted friends who have not
 // posted today hear about it, once a day at most. `skip`: friends this
 // same training just told "passed you" (noticeFriendPassed), who are not
-// told twice about one thing.
-export async function noticeFriendPost(posterId: string, today: string, skip: readonly string[] = []): Promise<number> {
+// told twice about one thing. `post`: what was posted, for the number in
+// the words (the receivers and the cap are not touched by it).
+export async function noticeFriendPost(
+  posterId: string,
+  today: string,
+  skip: readonly string[] = [],
+  post: PostFacts = { kind: "training", minutes: 0, timed: false }
+): Promise<number> {
   const admin = ready();
   if (!admin) return 0;
   const friends = await friendIdsOf(admin, posterId);
@@ -96,10 +140,19 @@ export async function noticeFriendPost(posterId: string, today: string, skip: re
   });
   if (receivers.length === 0) return 0;
   const first = noticeName((await namesOf(admin, [posterId])).get(posterId) ?? "");
+  // the number: for timed training the poster's board-counted training
+  // today, and each receiver's own, so the jab is only said when it is true
+  let own = post.minutes;
+  if (!(own > 0) && post.entryId) {
+    const { data } = await admin.from("elite_training_logs").select("minutes").eq("id", post.entryId).eq("profile_id", posterId).maybeSingle();
+    own = Number((data as { minutes: number } | null)?.minutes ?? 0) || 0;
+  }
+  const board = post.kind === "training" && post.timed ? await boardToday(admin, [posterId, ...receivers], today) : null;
+  const minutes = board ? Math.max(board.get(posterId) ?? 0, own) : own;
   let sent = 0;
   for (const id of receivers) {
     if (!maySend(await claim(admin, id, "friend_post", noticeKey("friend_post", { today }), today))) continue;
-    const res = await notifyProfile(id, friendPostNotice({ first, nyDate: today }));
+    const res = await notifyProfile(id, friendPostNotice({ first, nyDate: today, kind: post.kind, minutes, mine: board ? board.get(id) ?? 0 : null, to: id }));
     if (res.pushed > 0) sent++;
   }
   return sent;
@@ -171,7 +224,7 @@ export async function noticeFriendPassed(input: { posterId: string; entryId: str
       // one a day per friend, whoever passes them: claimed before it is sent
       if (!maySend(await claim(admin, id, key.kind, key, input.today))) continue;
       // the fact, then the jab: the training that did the passing
-      await notifyProfile(id, friendPassedNotice({ first, minutes: entry.minutes, nyDate: input.today }));
+      await notifyProfile(id, friendPassedNotice({ first, minutes: entry.minutes, nyDate: input.today, to: id }));
       told.push(id);
     }
     return told;

@@ -1279,7 +1279,7 @@ describe("the free app's bodies are checked first", () => {
     // a friend this training passed hears that, and is left out of "just posted"
     expect(s.calls.slice(1).map((c) => c.fn)).toEqual(["noticeFriendPassed", "noticeFriendPost", "countTeammate"]);
     expect(s.calls[1].args).toEqual([{ posterId: "u1", entryId: "c1", today: "2026-11-25" }]);
-    expect(s.calls[2].args).toEqual(["u1", "2026-11-25", ["u7"]]);
+    expect(s.calls[2].args).toEqual(["u1", "2026-11-25", ["u7"], { kind: "training", minutes: 45, timed: true }]);
 
     // "finished before I took this photo": time comes off in whole steps, or not at all
     s.calls.length = 0;

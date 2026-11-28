@@ -9,7 +9,7 @@ import { IconBlock, IconBolt, IconFlag, IconPerson, IconTrash } from "./FreeIcon
 import { blockPlayer, deleteLog, reportPost, toggleProps } from "@/lib/elite/tracker-actions";
 import { fmtDuration } from "@/lib/elite/time-trained";
 import { feel } from "@/lib/elite/native";
-import { REPORT_REASONS, lockedHeadline, lockedHeadlineLines, lockedLine } from "@/lib/elite/tracker";
+import { FRIENDS_EMPTY_LINE, FRIENDS_EMPTY_TITLE, REPORT_REASONS, lockedHeadline, lockedHeadlineLines, lockedLine } from "@/lib/elite/tracker";
 import type { ClubRequestView, FeedView, FriendRequestView, OpenCardView } from "@/lib/elite/tracker-server";
 import type { LockedCard } from "@/lib/elite/tracker";
 import { NOT_TIMED } from "@/lib/elite/training-clock";
@@ -109,8 +109,8 @@ export function FriendsFeed({
 
       {feed.friendCount === 0 ? (
         <Empty
-          title="Your friends' training lands here"
-          line="Send your link to a teammate. Accept their request, and you see each other's training every day."
+          title={FRIENDS_EMPTY_TITLE}
+          line={FRIENDS_EMPTY_LINE}
           inviteLink={squad ? undefined : inviteLink}
         />
       ) : cards.length === 0 ? (

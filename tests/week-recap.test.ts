@@ -3,7 +3,20 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
-import { ordinal, recapDue, recapIsBest, recapPlace, weekRecap, type WeekRecapInput } from "@/lib/elite/week-recap";
+import {
+  ordinal,
+  recapDue,
+  recapIsBest,
+  recapPlace,
+  weekCard,
+  weekCardDue,
+  weekCardFriendsLine,
+  weekCardLines,
+  weekCardMoment,
+  weekRecap,
+  type WeekCardInput,
+  type WeekRecapInput,
+} from "@/lib/elite/week-recap";
 
 const root = path.resolve(__dirname, "..");
 const read = (f: string) => readFileSync(path.join(root, f), "utf8");
@@ -109,5 +122,100 @@ describe("the Monday moment", () => {
     expect(read("components/elite/MyWeek.tsx")).toContain("<MondayCard");
     // the earned mark is gold, the button is not
     expect(card).not.toMatch(/<Button[^>]*gold/);
+  });
+});
+
+// ---- The week's card (the voice guide, moment 8) ---------------------------
+
+const ny = (iso: string) => new Date(iso);
+describe("the week's card: when it shows", () => {
+  it("Sunday from noon New York, all of Monday, never otherwise", () => {
+    // Sun Nov 29 2026, EST (UTC-5)
+    expect(weekCardMoment(ny("2026-11-29T16:59:00Z"))).toBeNull(); // 11:59 AM
+    expect(weekCardMoment(ny("2026-11-29T17:00:00Z"))).toBe("sunday"); // 12:00 PM
+    expect(weekCardMoment(ny("2026-11-30T04:59:00Z"))).toBe("sunday"); // 11:59 PM Sunday
+    expect(weekCardMoment(ny("2026-11-30T05:00:00Z"))).toBe("monday"); // 12:00 AM Monday
+    expect(weekCardMoment(ny("2026-12-01T04:59:00Z"))).toBe("monday"); // 11:59 PM Monday
+    expect(weekCardMoment(ny("2026-12-01T05:00:00Z"))).toBeNull(); // Tuesday
+    for (const d of ["2026-12-02", "2026-12-03", "2026-12-04", "2026-12-05"]) expect(weekCardMoment(ny(`${d}T17:00:00Z`)), d).toBeNull();
+    expect(weekCardMoment(ny("2026-11-28T23:00:00Z"))).toBeNull(); // Saturday evening
+  });
+  it("holds across a clock change: noon New York, whatever the offset", () => {
+    // Sun Nov 1 2026, clocks fall back at 2 AM: noon is 17:00Z (EST)
+    expect(weekCardMoment(ny("2026-11-01T16:59:00Z"))).toBeNull();
+    expect(weekCardMoment(ny("2026-11-01T17:00:00Z"))).toBe("sunday");
+    // Sun Mar 8 2026, clocks spring forward: noon is 16:00Z (EDT)
+    expect(weekCardMoment(ny("2026-03-08T15:59:00Z"))).toBeNull();
+    expect(weekCardMoment(ny("2026-03-08T16:00:00Z"))).toBe("sunday");
+  });
+  it("one Got it covers Sunday's card and Monday's: both are keyed to the week they are about", () => {
+    const input: WeekCardInput = { moment: "sunday", week: "2026-11-23", mine: 120, earlier: [], gym: 0, friends: [] };
+    const sun = weekCard(input)!;
+    const mon = weekCard({ ...input, moment: "monday" })!;
+    expect([sun.week, mon.week]).toEqual(["2026-11-23", "2026-11-23"]);
+    expect(weekCardDue(sun, null)).toBe(true);
+    expect(weekCardDue(sun, "2026-11-23")).toBe(false);
+    expect(weekCardDue(mon, "2026-11-23")).toBe(false); // dismissed Sunday, stays dismissed Monday
+    expect(weekCardDue(weekCard({ ...input, week: "2026-11-30" }), "2026-11-23")).toBe(true); // next week's is new
+    expect(weekCardDue(null, null)).toBe(false);
+  });
+});
+
+describe("the week's card: the words", () => {
+  const sun: WeekCardInput = { moment: "sunday", week: "2026-11-23", mine: 190, earlier: [], gym: 0, friends: [] };
+  it("nothing that counts, no card", () => {
+    expect(weekCard({ ...sun, mine: 0, gym: 90 })).toBeNull();
+  });
+  it("Sunday: the week so far; Monday: the week closed", () => {
+    expect(weekCardLines(weekCard(sun)!)).toEqual(["3h 10m this week.", "Finish it strong."]);
+    expect(weekCardLines(weekCard({ ...sun, moment: "monday" })!)).toEqual(["3h 10m last week.", "Run it back."]);
+  });
+  it("Best week yet only when it beats every earlier week (three to beat)", () => {
+    expect(weekCard({ ...sun, earlier: [100, 120, 150] })?.headline).toBe("Best week yet: 3h 10m.");
+    expect(weekCard({ ...sun, moment: "monday", earlier: [100, 120, 150] })?.headline).toBe("Best week yet: 3h 10m.");
+    expect(weekCard({ ...sun, earlier: [100, 120, 300] })?.headline).toBe("3h 10m this week.");
+    expect(weekCard({ ...sun, earlier: [100, 120] })?.best).toBe(false);
+  });
+  it("names friends only when it is true, two at most; never the old place line", () => {
+    const f = (name: string, minutes: number) => ({ name, minutes });
+    expect(weekCardFriendsLine("sunday", 100, [f("Nico A.", 60)])).toBe("You're outworking Nico.");
+    expect(weekCardFriendsLine("sunday", 100, [f("Nico A.", 60), f("Diego R.", 80), f("Kai T.", 10)])).toBe("You're outworking Diego and Nico.");
+    expect(weekCardFriendsLine("monday", 100, [f("Nico A.", 60), f("Diego R.", 80)])).toBe("You outworked Diego and Nico.");
+    expect(weekCardFriendsLine("sunday", 100, [f("Kai T.", 150), f("Nico A.", 60)])).toBe("Only Kai has done more. You've still got today.");
+    expect(weekCardFriendsLine("monday", 100, [f("Kai T.", 150), f("Nico A.", 60)])).toBe("Only Kai did more. This week that changes.");
+    // two or more in front: nothing said; friends who did not train are never named
+    expect(weekCardFriendsLine("sunday", 100, [f("Kai T.", 150), f("Diego R.", 120)])).toBeNull();
+    expect(weekCardFriendsLine("sunday", 100, [f("Kai T.", 0)])).toBeNull();
+    expect(weekCardFriendsLine("sunday", 100, [f("Kai T.", 100)])).toBeNull(); // level is neither
+    const card = weekCard({ ...sun, gym: 90, friends: [f("Nico A.", 60)] })!;
+    expect(weekCardLines(card)).toEqual(["3h 10m this week.", "Gym: 1h 30m.", "You're outworking Nico.", "Finish it strong."]);
+    expect(JSON.stringify(card)).not.toMatch(/friends who trained|\d(st|nd|rd|th) of/);
+  });
+  it("one number a line, no exclamation, no they/them/their", () => {
+    const f = (name: string, minutes: number) => ({ name, minutes });
+    for (const moment of ["sunday", "monday"] as const) {
+      for (const friends of [[], [f("Nico A.", 60)], [f("Kai T.", 400)], [f("Nico A.", 60), f("Diego R.", 80)]]) {
+        for (const earlier of [[], [10, 20, 30]]) {
+          for (const line of weekCardLines(weekCard({ ...sun, moment, friends, earlier, gym: 45 })!)) {
+            expect((line.match(/\d+h( \d+m)?|\d+m\b/g) ?? []).length, line).toBeLessThanOrEqual(1);
+            expect(line, line).not.toMatch(/!|\b(they|them|their)\b/i);
+          }
+        }
+      }
+    }
+  });
+  it("builds 10 and 11 keep the Monday moment as it was; the week's card rides in its own field", () => {
+    const server = read("lib/elite/free-app-server.ts");
+    expect(server).toContain("weekRecapFor(viewer, tracker, today).catch(() => null)");
+    expect(server).toContain("weekCardFor(viewer, tracker).catch(() => null)");
+    expect(server).toContain("weekCard: card,");
+    expect(read("lib/elite/app-contract.ts")).toMatch(/weekCard\?: WeekCard \| null;/);
+    const phone = read("mobile/src/MondayCard.tsx");
+    expect(phone).toContain("if (card !== undefined)");
+    expect(phone).toContain("weekCardDue(card, prefs.recapSeen)");
+    expect(read("mobile/app/(free)/my-week.tsx")).toContain("<MondayCard card={w.weekCard} recap={w.recap}");
+    const fn = read("lib/elite/tracker-server.ts");
+    const card = fn.slice(fn.indexOf("export async function weekCardFor"), fn.indexOf("// The owner of a link's code"));
+    expect(card).not.toMatch(/sendPush|notify|insert\(|upsert\(/);
   });
 });

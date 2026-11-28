@@ -12,6 +12,7 @@ import {
   drillName,
   isDone,
   milestoneCrossed,
+  milestoneEarnedLine,
   milestoneLabel,
   nextStep,
   sessionProgress,
@@ -812,7 +813,7 @@ function Finish({
             <MedalLine
               disc={milestone < 10 ? `${milestone}H` : `${milestone}`}
               title={milestoneLabel(milestone)}
-              line="Every minute of it is yours for good."
+              line={milestoneEarnedLine(milestone)}
             />
           ) : next ? (
             <MedalLine

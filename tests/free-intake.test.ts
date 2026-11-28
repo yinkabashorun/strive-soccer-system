@@ -21,7 +21,7 @@ import {
 } from "@/lib/elite/free-intake";
 import { ATTRIBUTES, QUIZ_STEPS, attributesWeakestFirst, firstUnanswered, lowestAttributes, quizInput } from "@/lib/elite/quiz";
 import { weekPreview } from "@/lib/elite/bank-conform";
-import { UPGRADE_CARD_PLACES, UPGRADE_CARD_REST_DAYS, parseDismissedAt, upgradeCard } from "@/lib/elite/upgrade-card";
+import { UPGRADE_CARD_LINE, UPGRADE_CARD_PLACES, UPGRADE_CARD_REST_DAYS, parseDismissedAt, upgradeCard } from "@/lib/elite/upgrade-card";
 import { OFFER_GETS, OFFER_LATER, OFFER_LATER_FIRST, OFFER_PRICE, OFFER_PRODUCT, OFFER_START, OFFER_TERMS, offerHeadline } from "@/lib/elite/offer";
 import { PRO_APP_RETURN, PRO_PRICE_LINE, PRO_PRODUCT_NAME, proCheckoutParams } from "@/lib/elite/pro";
 import { sessionsFor } from "@/lib/elite/training";
@@ -332,15 +332,15 @@ describe("the one upgrade prompt in the free app", () => {
     for (const place of ["friends", "you", "post", "offer", ""]) expect(upgradeCard({ ...base, place }), place).toBeNull();
   });
 
-  it("names their own weakest area and the sessions their answers give", () => {
+  it("names their own weakest area, in the app's voice", () => {
     expect(upgradeCard(base)).toEqual({
       title: "A week built around your weak foot.",
-      line: "Four sessions a week, one drill at a time with the video.",
+      line: "You put in the work. Make sure it's on what you need, not what's comfortable.",
       action: "See what you get",
       dismiss: "Not now",
       opens: "offer",
     });
-    expect(upgradeCard({ ...base, sessions: sessionsFor("off_season") })?.line).toBe("Six sessions a week, one drill at a time with the video.");
+    expect(upgradeCard({ ...base, sessions: sessionsFor("off_season") })?.line).toBe(UPGRADE_CARD_LINE);
     // nothing to name, nothing shown
     expect(upgradeCard({ ...base, area: null })).toBeNull();
     expect(upgradeCard({ ...base, area: "  " })).toBeNull();

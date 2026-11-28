@@ -29,6 +29,7 @@ import {
   type Notice,
 } from "../lib/elite/notices";
 import { checkinAnnouncement, filmRoomAnnouncement } from "../lib/elite/film-room";
+import { seedHash } from "../lib/elite/voice";
 import { apnsBody, apnsCollapseId, apnsHeaders } from "../lib/elite/apns";
 import { webPushBody } from "../lib/elite/push";
 import { pushOf } from "../lib/elite/notify";
@@ -76,6 +77,16 @@ const checkin = checkinAnnouncement({
 
 const facts = { session: 2, drills: 4, drillsLeft: 4, minutes: 22, lastOpen: false, nyDate: "2026-11-24" };
 
+// A line that rotates (lib/elite/voice.ts) is pinned here line by line: the
+// receiver whose seed picks the i-th of n lines on that day.
+function toPicking(seedOf: (to: string) => string, n: number, i: number): string {
+  for (let k = 0; k < 10_000; k++) if (seedHash(seedOf(`p${k}`)) % n === i) return `p${k}`;
+  throw new Error("no seed");
+}
+const reminderTo = (n: number, i: number) => toPicking((to) => `reminder:${to}:2026-11-24`, n, i);
+const postTo = (n: number, i: number) => toPicking((to) => `friend_post:${to}:2026-11-24`, n, i);
+const passedTo = (i: number) => toPicking((to) => `friend_passed:${to}:2026-11-24`, 3, i);
+
 // name -> the notice
 const EVERY_NOTICE: Record<string, Notice> = {
   "new week, with a name": newWeekNotice({ first: "Sam", week: 8, firstWeek: false, focus: FOCUS }),
@@ -92,14 +103,23 @@ const EVERY_NOTICE: Record<string, Notice> = {
   "coach attending, no date": coachAttendingNotice({ gameId: DAY, gameDate: null }),
   earned: earnedNotice({ title: "10 Sessions", detail: "Ten full sessions in the bank" }),
   welcome: welcomeNotice(),
-  "reminder, session ready": reminderNotice(facts),
+  "reminder, session ready": reminderNotice({ ...facts, area: "Weak foot", to: reminderTo(3, 0) }),
+  "reminder, session ready, the minutes": reminderNotice({ ...facts, area: "Weak foot", to: reminderTo(3, 1) }),
+  "reminder, session ready, the weakest area": reminderNotice({ ...facts, area: "Weak foot", to: reminderTo(3, 2) }),
+  "reminder, session ready, 1v1 as the area": reminderNotice({ ...facts, area: "Dribbling and 1v1", to: reminderTo(3, 2) }),
   "reminder, session started": reminderNotice({ ...facts, drillsLeft: 2 }),
   "reminder, one drill to go": reminderNotice({ ...facts, drillsLeft: 1 }),
   "reminder, last session of the week": reminderNotice({ ...facts, session: 4, lastOpen: true }),
   "reminders paused": remindersPausedNotice({ nyDate: "2026-11-24" }),
-  "friend posted": friendPostNotice({ first: "Kai", nyDate: "2026-11-24" }),
-  "friend passed you": friendPassedNotice({ first: "Kai", minutes: 45, nyDate: "2026-11-24" }),
-  "friend passed you, a long one": friendPassedNotice({ first: "Kai", minutes: 90, nyDate: "2026-11-24" }),
+  "friend posted": friendPostNotice({ first: "Kai", nyDate: "2026-11-24", kind: "training", minutes: 75, mine: 20, to: postTo(3, 0) }),
+  "friend posted, on the come up": friendPostNotice({ first: "Kai", nyDate: "2026-11-24", kind: "training", minutes: 75, mine: 20, to: postTo(3, 1) }),
+  "friend posted, outworking you": friendPostNotice({ first: "Kai", nyDate: "2026-11-24", kind: "training", minutes: 75, mine: 20, to: postTo(3, 2) }),
+  "friend posted, gym": friendPostNotice({ first: "Kai", nyDate: "2026-11-24", kind: "gym", minutes: 45, to: postTo(1, 0) }),
+  "friend posted, no length read": friendPostNotice({ first: "Kai", nyDate: "2026-11-24", kind: "training", minutes: 0, to: postTo(1, 0) }),
+  "friend passed you": friendPassedNotice({ first: "Kai", minutes: 45, nyDate: "2026-11-24", to: passedTo(0) }),
+  "friend passed you, letting it stand": friendPassedNotice({ first: "Kai", minutes: 45, nyDate: "2026-11-24", to: passedTo(1) }),
+  "friend passed you, put in": friendPassedNotice({ first: "Kai", minutes: 45, nyDate: "2026-11-24", to: passedTo(2) }),
+  "friend passed you, a long one": friendPassedNotice({ first: "Kai", minutes: 90, nyDate: "2026-11-24", to: passedTo(0) }),
   props: propsNotice({ first: "Kai", postId: POST }),
   "squad pass earned": squadPassNotice({ number: 1 }),
   "club session planned": clubPlanNotice({ planId: PLAN, club: "Sunday Pickup", clubId: CLUB, what: "Club training", when: "Thu, Nov 26 at 6:00 PM" }),
@@ -220,6 +240,26 @@ describe("the list: every notice, word for word", () => {
       path: "/dashboard",
       key: "reminder:2026-11-24",
     });
+    // the ordinary day rotates its title (voice guide, moment 9); the area
+    // title only for a player whose weakest area is known
+    expect(words(EVERY_NOTICE["reminder, session ready, the minutes"])).toEqual({
+      title: "22 minutes today. That's it.",
+      body: "Session 2 is ready. 22 minutes.",
+      path: "/dashboard",
+      key: "reminder:2026-11-24",
+    });
+    expect(words(EVERY_NOTICE["reminder, session ready, the weakest area"])).toEqual({
+      title: "Your weak foot won't work on itself",
+      body: "Session 2 is ready. 22 minutes.",
+      path: "/dashboard",
+      key: "reminder:2026-11-24",
+    });
+    expect(EVERY_NOTICE["reminder, session ready, 1v1 as the area"].title).toBe("Your 1v1 dribbling won't work on itself");
+    for (const area of [null, undefined, "", "first touch under pressure"]) {
+      for (let k = 0; k < 40; k++) {
+        expect(reminderNotice({ ...facts, area, to: `p${k}` }).title, String(area)).not.toMatch(/work on itself/);
+      }
+    }
     expect(EVERY_NOTICE["reminder, one drill to go"].body).toBe("1 drill to go.");
     expect(words(EVERY_NOTICE["reminder, last session of the week"])).toEqual({
       title: "One more session completes your week",
@@ -236,12 +276,24 @@ describe("the list: every notice, word for word", () => {
   });
 
   it("the free app: a friend posted, props, the earned month, a club's plan", () => {
+    // the number is the hook (voice guide, moment 5)
     expect(words(EVERY_NOTICE["friend posted"])).toEqual({
-      title: "Kai just posted",
-      body: "Kai's post opens when you post yours today.",
+      title: "Kai's getting work in",
+      body: "1h 15m today. You training today?",
       path: "/log",
       key: "friend_post:2026-11-24",
     });
+    expect(words(EVERY_NOTICE["friend posted, on the come up"])).toMatchObject({ title: "Kai is on the come up", body: "1h 15m today. Let's work." });
+    expect(words(EVERY_NOTICE["friend posted, outworking you"])).toMatchObject({ title: "Kai is outworking you today", body: "1h 15m. Let's go." });
+    expect(words(EVERY_NOTICE["friend posted, gym"])).toMatchObject({ title: "Kai's getting work in", body: "45m in the gym today. You training today?" });
+    expect(words(EVERY_NOTICE["friend posted, no length read"])).toMatchObject({ title: "Kai's getting work in", body: "You training today?" });
+    // "outworking you" only to a receiver who has done less today
+    for (const mine of [75, 90, null, undefined]) {
+      for (let k = 0; k < 60; k++) {
+        expect(friendPostNotice({ first: "Kai", nyDate: "2026-11-24", kind: "training", minutes: 75, mine, to: `p${k}` }).title).not.toMatch(/outworking/);
+      }
+    }
+    for (const n of Object.values(EVERY_NOTICE)) expect(n.body).not.toMatch(/opens when you post/);
     // a friend's own timed training put them in front on the friends board
     // (Coach Yinka's yes, Nov 27 2026), in the words he picked in the copy
     // quiz: the fact, then the teammate's jab
@@ -251,6 +303,8 @@ describe("the list: every notice, word for word", () => {
       path: "/log",
       key: "friend_passed:2026-11-24",
     });
+    expect(EVERY_NOTICE["friend passed you, letting it stand"].body).toBe("45m just now. You letting that stand?");
+    expect(EVERY_NOTICE["friend passed you, put in"].body).toBe("Put in 45m just now. Let's go.");
     expect(EVERY_NOTICE["friend passed you, a long one"].body).toBe("Trained 1h 30m just now. You good with that?");
     expect(words(EVERY_NOTICE.props)).toEqual({
       title: "Kai gave you props",

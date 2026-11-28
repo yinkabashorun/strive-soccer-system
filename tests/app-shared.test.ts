@@ -58,7 +58,7 @@ describe("what the phone shares with the site", () => {
   }
 
   it("the phone really does share the rules", () => {
-    for (const name of ["session-flow", "set-timer", "experience", "quiz", "time-trained", "app-contract", "sign-in", "account"]) {
+    for (const name of ["session-flow", "set-timer", "experience", "quiz", "time-trained", "app-contract", "sign-in", "account", "voice"]) {
       expect(shared.has(name), name).toBe(true);
     }
   });

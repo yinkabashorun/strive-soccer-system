@@ -12,6 +12,8 @@
 // A SESSION IS THE PLAYER'S OWN: the length of one training day in the
 // plan they set ("4 days. About 1h a day." is a 1 hour session), or one
 // hour for a player with no days picked yet.
+import { fmtDuration } from "./time-trained";
+
 export const SESSION_FALLBACK_MINUTES = 60;
 
 // One of the player's own sessions, in minutes: a planned day's length
@@ -41,4 +43,14 @@ export type StandingRow = { id: string; minutes: number };
 export function passedBy(input: { before: number; after: number; friends: readonly StandingRow[] }): StandingRow[] {
   if (!(input.after > input.before)) return [];
   return input.friends.filter((f) => f.minutes > 0 && f.minutes > input.before && f.minutes < input.after);
+}
+
+// What the phone says the moment the player's own training lands on the
+// board and no friend was passed (the voice guide, moment 2; the phone's
+// rule is mobile/src/social-view.ts landedLine). `added` is the minutes it
+// added. Here, beside the rest of the board's rules, so the site's word
+// tests hold these lines too.
+export function landedLines(added: number): string[] {
+  const t = fmtDuration(Math.max(1, Math.round(added)));
+  return [`${t} locked in. Excellent work.`, "Posted. Keep outworking the competition.", "Another one in the books. Let's work."];
 }

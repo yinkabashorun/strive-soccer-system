@@ -319,7 +319,7 @@ export function matchupView(input: {
       state: "on",
       mine,
       theirs,
-      line: matchupAheadLine({ mine: mine.minutes, theirs: theirs.minutes, other: otherName }),
+      line: matchupAheadLine({ mine: mine.minutes, theirs: theirs.minutes, other: otherName, club: input.club.name, seed: `${input.club.id}:${input.today}` }),
       last: live === now ? last : null,
       cardLine: matchupCardLine(input.club.name, otherName),
       recordLine,

@@ -97,3 +97,41 @@ What it says about the voice:
 - Name the club (and the other club) in the line. Names make it theirs.
 - A MIX: the same moment should not always say the same sentence. A few
   lines per moment, rotated.
+
+## Moment 4: the one upgrade card on the Week tab (Strive Pro)
+
+- 4A. "A week built around your weak foot. Four sessions a week, one drill
+  at a time with the video." (the app today)
+- 4B. "You're putting in the hours. Are they fixing your weak foot?"
+- 4C. "You train hard. Train on the right thing. A week built around your
+  weak foot."
+- 4D. "4 hours this week, excellent work. Now aim it. A week built around
+  your weak foot."
+
+His answers:
+- Q1 (makes him tap): "4D is good". Better, "something more logical like:
+  congrats on the hard work, but make sure you aren't rowing your boat in
+  the wrong direction."
+- Q2 (feels like an ad): "all except 4a". UNCLEAR next to his Q1 (4D is
+  good): asked him which way he meant it.
+- Q3 (how he would tell a teammate what Strive Pro is), his words, which
+  he called way too long: "you are able to input your exact situation into
+  an ai coach, that will assign you sessions from the strive drill bank
+  that will actually make you improve on what you need, not whats
+  comfortable. its very easy to follow and has videos to every session.
+  you also have access to full courses for specific areas you are
+  struggling in. like weak foot, speed, ball mastery, or even strength
+  training, this way you always have the best drills to work on when your
+  at the field."
+
+What it says about the voice:
+- For the ask, LOGIC beats hype: praise the work, then the reason (effort
+  aimed the wrong way is wasted). A picture helps ("rowing your boat in the
+  wrong direction").
+- Lines to keep, his: "what you need, not what's comfortable"; "very easy
+  to follow"; "videos to every session"; "the best drills to work on when
+  you're at the field".
+- FLAG, his to rule on: he says "AI coach" when he explains it to a
+  teammate. The standing rule (Policies, personalization) is never "AI",
+  "automated" or "algorithm" in anything a player or parent reads. Asked
+  him whether that rule holds for Strive Pro's own copy.

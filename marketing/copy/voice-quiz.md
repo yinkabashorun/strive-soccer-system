@@ -166,3 +166,10 @@ What it says about the voice:
   has coached.
 - NOT CHANGED YET: 5A is live today. It is rewritten with the rest at the
   end of the quiz.
+
+### Who the voice is for (his words, Nov 28 2026)
+
+"more for boys but also can work with girls". So the voice leans toward
+how boys talk in a group chat, and every line still has to read fine to a
+girl: competitive energy, jabs and rallies stay; a word that only fits a
+boy ("boys", "bro", "king", "dawg") stays out of what the app itself says.

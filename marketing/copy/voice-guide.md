@@ -52,6 +52,11 @@ what you need, not what's comfortable.
 non-negotiable, consistency, unlock, journey, crush it, beast mode, any
 exclamation mark, any emoji.
 
+**Strive Pro's selling pieces, his words (Nov 28):** "drills you can do at
+home" ("dont forget that selling piece"), "what you need, not what's
+comfortable", "videos to every session", "very easy to follow", full
+courses for the areas a player is struggling in.
+
 **Strive Pro:** "AI coach" may be said (his ruling, Nov 28). Coach Gary is
 "a U19 Bundesliga player", and his photo may sit beside the line. "8
 months" is not used until Coach Yinka says what it counts.

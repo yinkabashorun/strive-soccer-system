@@ -201,3 +201,37 @@ used: Gary's record is Fortuna Koln U19 in the U19 Bundesliga ("a U19
 Bundesliga player"), and "8 months" (the app's record starts September
 2026). The coaching program's copy to parents keeps "I build every plan"
 until he says otherwise.
+
+Nov 28 2026, his answers to the two facts: "yes u19 works, we can also use
+a picture of coach Gary." So "a U19 Bundesliga player" is the wording, and
+Coach Gary's photo may sit beside it. "8 months" was not answered: it stays
+out of every line until he says what it counts.
+
+### The positioning line: "Strava for ballers"
+
+His words, Nov 28 2026: "also remember and use (strava for ballers)". The
+short way to say what the free app is. Where it can go: how he and Carla
+describe it out loud, DMs, captions, the pitch to the 5v5 captains. Where
+it cannot go (flagged to him): the App Store listing, the app's name or
+subtitle, or paid ads, because it uses another company's trademark and
+Apple refuses listings that name other apps.
+
+## Moment 7: a new player opens Friends with no friends on the app yet
+
+- 7A. "Your friends' training lands here. Send your link to a teammate."
+  (the app today)
+- 7B. "Training alone? Nobody can see you outwork them. Add a teammate."
+- 7C. "No one on here to outwork yet. Who's first? Send your code."
+- 7D. "It hits different when your teammates can see it. Add one."
+
+His answers:
+- Q1 (gets him to send his code): 7D. Or his own: "It hits different when
+  the whole friend group is locked in."
+- Q2 (cringe): 7C.
+- Q3: his line above.
+
+What it says about the voice:
+- With nobody to jab yet, the pull is BELONGING: the whole friend group,
+  locked in together. "It hits different" is his phrase.
+- 7C fails where it reaches for a jab with no one to aim it at. The jab
+  needs a real name and a real number behind it.

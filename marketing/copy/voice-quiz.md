@@ -235,3 +235,28 @@ What it says about the voice:
   locked in together. "It hits different" is his phrase.
 - 7C fails where it reaches for a jab with no one to aim it at. The jab
   needs a real name and a real number behind it.
+
+## Moment 8: the card that sums up last week
+
+- 8A. "Last week you trained 4h 10m. 2nd of 5 friends who trained." (the
+  app today)
+- 8B. "4h 10m last week. Your best week yet. Excellent work."
+- 8C. "Best week yet: 4h 10m. You outworked Nico and Diego. New week, run
+  it back."
+- 8D. "4h 10m last week. Only Kai did more. This week that changes."
+
+His answers:
+- Q1 (would screenshot): 8C, "8D is good too".
+- Q2 (cringe): 8A, "too much numbers i wouldnt read it its spammy".
+- Q3: "dont you mean sunday? id feel accomplished and pushed closer to my
+  goals".
+
+What it says about the voice:
+- ONE number a line. Two numbers in a row ("4h 10m", "2nd of 5") read as
+  spam and do not get read.
+- Names again: who you outworked, who is still ahead.
+- The feeling to write toward after a good week: accomplished, and closer
+  to MY goal. The player's own goal (they give it in the quiz) belongs in
+  the lines that look back.
+- He expects the week's summary on SUNDAY, not Monday. Asked him whether
+  the card should move to Sunday evening.

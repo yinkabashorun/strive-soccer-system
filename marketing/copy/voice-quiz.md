@@ -260,3 +260,30 @@ What it says about the voice:
   the lines that look back.
 - He expects the week's summary on SUNDAY, not Monday. Asked him whether
   the card should move to Sunday evening.
+
+## Moment 9: the daily reminder a Strive Pro member gets (a push)
+
+- 9A. "Session 2 is ready" / "4 drills, about 22 minutes." (the app today)
+- 9B. "Session 2 is ready" / "22 minutes. You locked in today?"
+- 9C. "22 minutes today" / "One session closer to making varsity."
+- 9D. "Your weak foot isn't fixing itself" / "Session 2. 22 minutes."
+
+His answers:
+- Q1 (opens the app and trains): 9D, with two changes: say "Session 2 is
+  ready" (my reading of "but say session 2 is"), and soften the first
+  line: "your weak foot won't work on itself" instead of "isn't fixing
+  itself", "less pushy".
+- Q2 (turns notifications off): 9C, "if its repetitive".
+- Q3 (what gets him off the couch): "a motivational quote, then tap to
+  start session".
+
+What it says about the voice:
+- A push can press, but one notch softer than a jab between friends: the
+  app is not the friend. "Won't work on itself" over "isn't fixing itself".
+- The same line every day is the real turn-off, more than any one line. A
+  daily message MUST rotate.
+- He wants a motivational QUOTE in the reminder, and the tap to start the
+  session itself. To settle with him: whose quotes (his own and Coach
+  Gary's lines are the safe, true source; a famous player's words have to
+  be exact and checked), and a tap that opens the session, not the Train
+  tab (a build).

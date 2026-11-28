@@ -112,8 +112,10 @@ His answers:
 - Q1 (makes him tap): "4D is good". Better, "something more logical like:
   congrats on the hard work, but make sure you aren't rowing your boat in
   the wrong direction."
-- Q2 (feels like an ad): "all except 4a". UNCLEAR next to his Q1 (4D is
-  good): asked him which way he meant it.
+- Q2 (feels like an ad): "all except 4a", and when asked which way he
+  meant it: "4a doesnt feel like an ad". So 4B, 4C and 4D all read as ads
+  to him, 4D included, even though its shape (praise, then aim it) is the
+  one he liked. The ask has to sound like the app talking, not an advert.
 - Q3 (how he would tell a teammate what Strive Pro is), his words, which
   he called way too long: "you are able to input your exact situation into
   an ai coach, that will assign you sessions from the strive drill bank
@@ -135,3 +137,32 @@ What it says about the voice:
   teammate. The standing rule (Policies, personalization) is never "AI",
   "automated" or "algorithm" in anything a player or parent reads. Asked
   him whether that rule holds for Strive Pro's own copy.
+
+## Moment 5: a friend just posted their training (a push)
+
+- 5A. "Diego just posted" / "Diego's post opens when you post yours
+  today." (the app today)
+- 5B. "Diego just trained 1h 15m" / "Post yours to see it."
+- 5C. "Diego's getting work in. 1h 15m today." / "You training today?"
+- 5D. "Diego is outworking you today" / "1h 15m. Let's go."
+
+His answers:
+- Q1 (opens the app): 5C and 5D.
+- Q2 (turns notifications off): 5A, the line the app sends today.
+- Q3 (what he would text a teammate who just trained): "lets go dawg keep
+  it up", "lets work", "on the come up".
+- Then, on his own words: "but it also has to appeal to girls".
+
+What it says about the voice:
+- The number is the hook ("1h 15m today"). A push that hides it behind a
+  rule ("opens when you post yours") is the turn-off.
+- Both shapes work again: the question ("You training today?") and the
+  hard fact with the rally ("outworking you today", "Let's go").
+- To a friend who trained he is SUPPORTIVE first: "keep it up", "let's
+  work", "on the come up". The jab is for the one who is not training.
+- IT HAS TO APPEAL TO GIRLS, his rule, said twice now. The energy stays;
+  "dawg", "bro", "boys", "king" stay out of the app's own voice. Worth
+  doing before the rewrite ships: read the ten model lines to two girls he
+  has coached.
+- NOT CHANGED YET: 5A is live today. It is rewritten with the rest at the
+  end of the quiz.

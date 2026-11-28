@@ -287,3 +287,23 @@ What it says about the voice:
   Gary's lines are the safe, true source; a famous player's words have to
   be exact and checked), and a tap that opens the session, not the Train
   tab (a build).
+
+## Moment 10: you just earned your 5 hour medal
+
+- 10A. "5 hours trained. Earned today. It stays yours." (the app today)
+- 10B. "5 hours in. That's real work. Excellent."
+- 10C. "5 hours of work nobody made you do. That's the difference."
+- 10D. "5 hour medal. Nico's still on 3. Keep going."
+
+His answers:
+- Q1 (would screenshot): 10A and 10C.
+- Q2 (cringe): 10D.
+- Q3 (his story caption): "Lets go just the beginning".
+
+What it says about the voice:
+- A win is personal. Putting a friend's number in it is the cringe.
+- "It stays yours" already works, and so does naming what the work says
+  about the player ("nobody made you do").
+- "Just the beginning" is his frame for an achievement: it points forward.
+
+The guide written from all ten: `voice-guide.md`.

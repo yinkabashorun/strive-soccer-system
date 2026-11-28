@@ -5,6 +5,7 @@ import {
   CLUB_CODE_MESSAGE,
   clubBoard,
   clubCodeFrom,
+  clubShareFirstLines,
   clubShareText,
   clubWeek,
   clubWeeks,
@@ -76,9 +77,17 @@ describe("joining by code", () => {
     expect(CLUB_CODE_MESSAGE).toMatch(/captain/);
   });
   it("the share sheet sends the link AND the code", () => {
-    expect(clubShareText({ name: "Renegados FC", code: "ABCD2345", appUrl: "https://thestriveapp.com" })).toBe(
-      "Join Renegados FC on Strive Elite.\nClub code: ABCD2345\nhttps://thestriveapp.com/join?club=ABCD2345"
-    );
+    expect(clubShareFirstLines("Renegados FC")).toEqual([
+      "Join Renegados FC on Strive Elite. We're getting work in.",
+      "Renegados FC is on Strive Elite. You in?",
+      "We need you in Renegados FC. Get on Strive Elite.",
+    ]);
+    const text = clubShareText({ name: "Renegados FC", code: "ABCD2345", appUrl: "https://thestriveapp.com", day: "2026-11-28" });
+    expect(clubShareFirstLines("Renegados FC").map((l) => `${l}\nClub code: ABCD2345\nhttps://thestriveapp.com/join?club=ABCD2345`)).toContain(text);
+    expect(clubShareText({ name: "Renegados FC", code: "ABCD2345", appUrl: "https://thestriveapp.com", day: "2026-11-28" })).toBe(text);
+    for (let d = 1; d <= 28; d++) {
+      expect(clubCodeFrom(clubShareText({ name: "Renegados FC", code: "ABCD2345", appUrl: "https://thestriveapp.com", day: `2026-11-${String(d).padStart(2, "0")}` }))).toBe("ABCD2345");
+    }
   });
   it("asks; the captain lets them in (073)", () => {
     const server = code("lib/elite/club-app-server.ts");

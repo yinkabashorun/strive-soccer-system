@@ -104,7 +104,7 @@ export async function POST(req: Request) {
     if (put === "missing") return no(POST_SESSION_NOT_READY, 409);
     if (put === "posted") return no("You already posted this session.", 409);
     if (put === "error") return no("Your post wasn't saved. Check your connection and try again.", 502);
-    await noticeFriendPost(viewer.profile.id, today).catch(() => 0);
+    await noticeFriendPost(viewer.profile.id, today, [], { kind: "training", minutes: 0, timed: true, entryId: logId }).catch(() => 0);
     await countTeammate(viewer.profile.id).catch(() => undefined);
     revalidatePath(FREE_HOME);
     revalidatePath(FREE_WEEK);
@@ -128,7 +128,8 @@ export async function POST(req: Request) {
   await tagTogether({ posterId: viewer.profile.id, logId: saved.id, kind, raw: form.get("with") }).catch(() => 0);
   // Friends who have not posted today hear about it (078): one a day at
   // most, accepted friends only, never across a block, never at night.
-  await noticeFriendPost(viewer.profile.id, today).catch(() => 0);
+  // the website has no clock: every length posted here is typed
+  await noticeFriendPost(viewer.profile.id, today, [], { kind, minutes, timed: false }).catch(() => 0);
   // Bring your squad (086) counts a teammate on their first TIMED training
   // only (the clock, or a finished session above): a photo with a typed
   // length proves nothing, so it counts nobody (training-clock.ts).

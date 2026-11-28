@@ -1144,10 +1144,11 @@ describe("the words name the person, and the scores come first", () => {
     expect(friends.indexOf("<StandingLine")).toBeLessThan(friends.indexOf("<ClockRow"));
     const line = code(path.join(root, "src/StandingLine.tsx"));
     expect(line).toContain("standingLine(board, perDay)");
-    // the payoff, in gold because it was earned
-    expect(line).toContain("passedFriend(last.current, board)");
-    expect(line).toContain("<Eyebrow style={{ marginBottom: 4 }}>{`You passed ${passed}`}</Eyebrow>");
-    expect(line).toContain("if (!s) return null;");
+    // the payoff, in gold because it was earned: whenever the player's own
+    // time went up (the voice guide, moment 2), a friend passed named
+    expect(line).toContain("landedLine(last.current, board, seedDay())");
+    expect(line).toContain("{landed ? <Eyebrow");
+    expect(line).toContain("if (!s && !landed) return null;");
   });
 
   it("a club's card shows the matchup as a score, and falls back to the plain line", () => {

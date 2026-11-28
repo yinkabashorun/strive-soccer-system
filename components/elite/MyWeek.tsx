@@ -26,7 +26,7 @@ import { TrackerSheet } from "./TrackerSheet";
 import { usePostLauncher } from "./FreeShell";
 import { FreeAvatar } from "./FreeAvatar";
 import { MondayCard } from "./MondayCard";
-import type { WeekRecap } from "@/lib/elite/week-recap";
+import type { WeekCard } from "@/lib/elite/week-recap";
 
 // My week (mock screen 4), the accountability piece: the week's training
 // against the target, the seven days (planned outlined, trained filled,
@@ -49,7 +49,7 @@ export function MyWeek({
   inviteLink,
   programHref,
   shareLink,
-  recap = null,
+  card = null,
 }: {
   logs: TrainingLog[]; // this week's, newest first
   target: number; // training minutes a week
@@ -68,7 +68,7 @@ export function MyWeek({
   // App Store app, where the line is not drawn (programLink in tracker.ts).
   programHref: string | null;
   shareLink: string; // their own join link for everything they share (share-link.ts)
-  recap?: WeekRecap | null; // the Monday moment (week-recap.ts), last week in a few lines
+  card?: WeekCard | null; // the week's card (week-recap.ts weekCard), Sunday noon and Monday
 }) {
   const router = useRouter();
   const { logOnly, profile } = usePostLauncher();
@@ -113,7 +113,7 @@ export function MyWeek({
       </header>
 
       {/* the Monday moment: last week, once a week, then gone */}
-      <MondayCard recap={recap} />
+      <MondayCard card={card} />
 
       <div className="relative mx-auto mt-[18px] h-[204px] w-[204px]">
         <svg viewBox="0 0 236 236" className="absolute inset-0 h-full w-full" aria-hidden>

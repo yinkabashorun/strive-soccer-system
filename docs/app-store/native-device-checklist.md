@@ -376,11 +376,13 @@ camera, notifications, sound or vibration: lines 4 and 10 stay his phone's.
 - [ ] Paste the TestFlight public link on /coach/free. On an iPhone that is signed out of the website, open an invite link from a text: the page shows the code and "Get the app"; "No iPhone? Join on the web" opens the form with the invite still on it.
 - [ ] After any crash or "That screen did not load" page, the App errors card on /coach shows a line that starts /iphone/ with the build number and the screen.
 
-## The Monday moment, on a phone (Nov 26 2026)
+## The week's card, on a phone (Nov 26 2026; moved to Sunday noon Nov 28 2026)
 
-- [ ] A free account that trained timed sessions last week opens Week on Monday: one card at the top, "Last week you trained ...". Gym shows as its own line only when gym was logged. With two or more friends who trained, a place line shows only when it is in the top half. "Your best week yet." with the small gold star only after three earlier weeks of training.
-- [ ] Tap "Got it": the card is gone. Close the app fully and reopen Week: still gone. Next Monday a new card shows once.
+- [ ] A free account that trained timed sessions this week opens Week on SUNDAY from 12:00 PM New York: one card at the top about the week so far, "Best week yet: ..." (with the small gold star, only after three earlier weeks of training) or "... this week.", gym on its own line only when gym was logged, then at most one line about friends ("You're outworking Nico.", or "Only Kai has done more. You've still got today."), then "Finish it strong." Before noon on Sunday there is no card.
+- [ ] Not opened on Sunday: on MONDAY the same card shows about the week just closed, "... last week." or "Best week yet: ...", "You outworked ..." or "Only Kai did more. This week that changes.", then "Run it back."
+- [ ] Tap "Got it" on Sunday: the card is gone, and Monday's does not come back. Close the app fully and reopen Week: still gone. From Tuesday there is no card until the next Sunday noon.
 - [ ] A week with no timed training (or only typed time) shows no card at all. No notification arrives for any of this.
+- [ ] Builds 10 and 11 still show the old Monday card ("Last week you trained ...") and never a Sunday card.
 
 ## The App Store rating ask, on a phone (Nov 26 2026)
 

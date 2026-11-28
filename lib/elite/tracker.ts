@@ -444,6 +444,10 @@ export type BoardEntry = { id: string; name: string; minutes: number; starred?: 
 export type BoardRow = BoardEntry & { place: number; time: string; me: boolean };
 export const BOARD_CAP = 10;
 export const BOARD_TITLE = "This week with your friends";
+// Friends with no friends yet (the voice guide, moment 7): the website's
+// feed and the app's Friends tab say the same two lines.
+export const FRIENDS_EMPTY_TITLE = "It hits different when the whole friend group is locked in";
+export const FRIENDS_EMPTY_LINE = "Send your link to a teammate. Accept your teammate's request, and you see each other's training every day.";
 export const BOARD_EMPTY_LINE = "Send your link to a teammate and see who trains more this week.";
 
 export function friendsBoard(entries: BoardEntry[], meId: string, cap: number = BOARD_CAP): BoardRow[] {

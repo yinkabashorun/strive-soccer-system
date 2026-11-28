@@ -146,8 +146,16 @@ describe("a friend just posted", () => {
     const src = code("lib/elite/free-notices-server.ts");
     expect(src).toContain("friendIdsOf(admin, posterId)");
     expect(src).toContain("blocksWith(admin, posterId, friends)");
-    expect(src.indexOf("claim(admin, id, \"friend_post\"")).toBeLessThan(src.indexOf("notifyProfile(id, friendPostNotice({ first, nyDate: today }))"));
-    expect(code("app/api/elite/tracker/post/route.ts")).toContain("noticeFriendPost(viewer.profile.id, today)");
+    const sendAt = src.indexOf("notifyProfile(id, friendPostNotice({ first, nyDate: today, kind: post.kind, minutes, mine: board ? board.get(id) ?? 0 : null, to: id }))");
+    expect(sendAt).toBeGreaterThan(-1);
+    expect(src.indexOf("claim(admin, id, \"friend_post\"")).toBeLessThan(sendAt);
+    // the website's post is a typed length; a session's photo is timed
+    const web = code("app/api/elite/tracker/post/route.ts");
+    expect(web).toContain("noticeFriendPost(viewer.profile.id, today, [], { kind, minutes, timed: false })");
+    expect(web).toContain('noticeFriendPost(viewer.profile.id, today, [], { kind: "training", minutes: 0, timed: true, entryId: logId })');
+    // the receivers are worked out before the number is: the number never
+    // changes who hears it
+    expect(src.indexOf("friendPostReceivers({")).toBeLessThan(src.indexOf("boardToday(admin, [posterId, ...receivers], today)"));
   });
 });
 
@@ -181,12 +189,13 @@ describe("props", () => {
 
 describe("the words", () => {
   it("say what happened, no emoji, no exclamation mark", () => {
-    const posted = friendPostNotice({ first: "Diego", nyDate: "2026-11-24" });
+    const posted = friendPostNotice({ first: "Diego", nyDate: "2026-11-24", kind: "gym", minutes: 75 });
     const props = propsNotice({ first: "Diego", postId: "post-1" });
     // "Post yours to see it." was an instruction; it says what happens instead
+    // and the number is the hook (the voice guide, moment 5)
     expect({ title: posted.title, body: posted.body, path: posted.path }).toEqual({
-      title: "Diego just posted",
-      body: "Diego's post opens when you post yours today.",
+      title: "Diego's getting work in",
+      body: "1h 15m in the gym today. You training today?",
       path: "/log",
     });
     expect({ title: props.title, body: props.body, path: props.path }).toEqual({
@@ -207,9 +216,9 @@ describe("the words", () => {
     expect(src).not.toMatch(/sendPushToProfile\(/);
     // a friend's post, a friend passing you, props, a club's plan, and champs of the week
     expect((src.match(/notifyProfile\(/g) ?? []).length).toBe(5);
-    expect(src).toContain("friendPassedNotice({ first, minutes: entry.minutes, nyDate: input.today })");
+    expect(src).toContain("friendPassedNotice({ first, minutes: entry.minutes, nyDate: input.today, to: id })");
     expect(src).toContain("clubChampsNotice({ club: club.name, clubId: w.clubId, other: other.name, gap: w.gap, weekMonday: week })");
-    expect(src).toContain("friendPostNotice({ first, nyDate: today })");
+    expect(src).toContain("friendPostNotice({ first, nyDate: today, kind: post.kind, minutes,");
     expect(src).toContain("propsNotice({ first, postId: input.postId })");
     // the one about clubs (087): its words are the list's too
     expect(src).toContain("const notice = clubPlanNotice({");

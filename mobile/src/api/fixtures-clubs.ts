@@ -137,7 +137,7 @@ function matchupOn(mine: { id: string; name: string }, theirs: { id: string; nam
     state: "on",
     mine: { ...mine, minutes: perMine, time: fmtDuration(perMine) },
     theirs: { ...theirs, minutes: perTheirs, time: fmtDuration(perTheirs) },
-    line: matchupAheadLine({ mine: perMine, theirs: perTheirs, other: theirs.name }),
+    line: matchupAheadLine({ mine: perMine, theirs: perTheirs, other: theirs.name, club: mine.name, seed: `${mine.id}:example` }),
     last: matchupResultLine("win", CATHARPIN.name),
     cardLine: matchupCardLine(mine.name, theirs.name),
     recordLine: matchupRecordLine(record),

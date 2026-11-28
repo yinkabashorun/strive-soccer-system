@@ -22,6 +22,9 @@
 import { isQuietTime } from "./free-notices";
 import { fmtDuration } from "./time-trained";
 import { champsBeatLine } from "./club-matchup-words";
+import { pickLine } from "./voice";
+import { areaWords } from "./free-intake";
+import { ATTRIBUTES } from "./quiz";
 
 // The choice a notice belongs to (Account, Notifications), and the group it
 // stacks under on an iPhone's lock screen.
@@ -290,12 +293,38 @@ export type ReminderFacts = {
   minutes: number;
   // it is the last plan session of the week with work left
   lastOpen: boolean;
+  // the player's weakest area, a label of the quiz's own list (quiz.ts
+  // ATTRIBUTES, elite_players.weaknesses[0]); absent when not known
+  area?: string | null;
 };
 
 const drillsWord = (n: number) => (n === 1 ? "1 drill" : `${n} drills`);
 const minutesWord = (n: number) => (n === 1 ? "about 1 minute" : `about ${n} minutes`);
+const plainMinutes = (n: number) => (n === 1 ? "1 minute" : `${n} minutes`);
 
-export function reminderNotice(f: ReminderFacts & { nyDate: string }): Notice {
+// The weakest area in the player's own words ("weak foot"), only when it is
+// one of the quiz's own areas: a free-typed old answer is never put in a
+// title.
+export function reminderArea(label: string | null | undefined): string | null {
+  const known = ATTRIBUTES.find((a) => a.label === (label ?? "").trim());
+  return known ? areaWords(known.label) : null;
+}
+
+// The ordinary day's titles, a mix (marketing/copy/voice-guide.md, moment
+// 9): each only when it is true. With the session's own name in the title
+// the body is the session card's figures; otherwise the body names the
+// session and its minutes.
+export function reminderReadyLines(f: ReminderFacts): { title: string; body: string }[] {
+  const plain = `Session ${f.session} is ready`;
+  const named = `Session ${f.session} is ready. ${plainMinutes(f.minutes)}.`;
+  const lines = [{ title: plain, body: `${drillsWord(f.drills)}, ${minutesWord(f.minutes)}.` }];
+  if (f.minutes > 0) lines.push({ title: `${plainMinutes(f.minutes)} today. That's it.`, body: named });
+  const area = reminderArea(f.area);
+  if (area) lines.push({ title: `Your ${area} won't work on itself`, body: named });
+  return lines;
+}
+
+export function reminderNotice(f: ReminderFacts & { nyDate: string; to?: string }): Notice {
   const at = { path: "/dashboard", key: `reminder:${f.nyDate}`, collapse: "reminder" };
   if (f.lastOpen) {
     return make("reminder", {
@@ -311,11 +340,7 @@ export function reminderNotice(f: ReminderFacts & { nyDate: string }): Notice {
       ...at,
     });
   }
-  return make("reminder", {
-    title: `Session ${f.session} is ready`,
-    body: `${drillsWord(f.drills)}, ${minutesWord(f.minutes)}.`,
-    ...at,
-  });
+  return make("reminder", { ...pickLine(reminderReadyLines(f), `reminder:${f.to ?? ""}:${f.nyDate}`), ...at });
 }
 
 // The last word after five reminders nobody answered: then silence, until
@@ -332,10 +357,38 @@ export function remindersPausedNotice(input: { nyDate: string }): Notice {
 
 // The free app's own (free-notices.ts and squad-pass.ts decide when).
 // `first` is the friend's first name.
-export function friendPostNotice(input: { first: string; nyDate: string }): Notice {
+//
+// A FRIEND POSTED (the copy quiz, moment 5, Nov 28 2026): the number is the
+// hook. `minutes` is what the post is worth: the poster's board-counted
+// training today for a timed training post, the post's own length
+// otherwise. `mine` is the receiver's own board-counted training today,
+// given only when it is known; the jab "outworking you today" is said only
+// when it is true. `to` (the receiver) seeds the pick.
+export function friendPostLines(input: { first: string; kind?: "training" | "gym"; minutes: number; mine?: number | null }): { title: string; body: string }[] {
+  // a length that could not be read is never said as a number
+  if (!(input.minutes > 0)) return [{ title: `${input.first}'s getting work in`, body: "You training today?" }];
+  const t = fmtDuration(Math.max(1, Math.round(input.minutes)));
+  if (input.kind === "gym") return [{ title: `${input.first}'s getting work in`, body: `${t} in the gym today. You training today?` }];
+  const lines = [
+    { title: `${input.first}'s getting work in`, body: `${t} today. You training today?` },
+    { title: `${input.first} is on the come up`, body: `${t} today. Let's work.` },
+  ];
+  if (typeof input.mine === "number" && input.mine < input.minutes) {
+    lines.push({ title: `${input.first} is outworking you today`, body: `${t}. Let's go.` });
+  }
+  return lines;
+}
+
+export function friendPostNotice(input: {
+  first: string;
+  nyDate: string;
+  kind?: "training" | "gym";
+  minutes: number;
+  mine?: number | null;
+  to?: string;
+}): Notice {
   return make("friend_post", {
-    title: `${input.first} just posted`,
-    body: `${input.first}'s post opens when you post yours today.`,
+    ...pickLine(friendPostLines(input), `friend_post:${input.to ?? ""}:${input.nyDate}`),
     path: "/log",
     key: `friend_post:${input.nyDate}`,
     collapse: "friend_post",
@@ -356,14 +409,21 @@ export function friendPostNotice(input: { first: string; nyDate: string }): Noti
 // `minutes` is the training the friend just did, the entry that did the
 // passing. What it takes to get the place back is the line the app opens
 // on ("You're 1 session away from beating Nico.").
-export function passedBody(minutes: number): string {
-  return `Trained ${fmtDuration(Math.max(1, Math.round(minutes)))} just now. You good with that?`;
+//
+// A mix (marketing/copy/voice-guide.md, rule 9): three bodies, the pick
+// held still by who it is for and the day (lib/elite/voice.ts).
+export function passedBodies(minutes: number): string[] {
+  const t = fmtDuration(Math.max(1, Math.round(minutes)));
+  return [`Trained ${t} just now. You good with that?`, `${t} just now. You letting that stand?`, `Put in ${t} just now. Let's go.`];
+}
+export function passedBody(minutes: number, seed = ""): string {
+  return pickLine(passedBodies(minutes), `friend_passed:${seed}`);
 }
 
-export function friendPassedNotice(input: { first: string; minutes: number; nyDate: string }): Notice {
+export function friendPassedNotice(input: { first: string; minutes: number; nyDate: string; to?: string }): Notice {
   return make("friend_passed", {
     title: `${input.first} just passed you`,
-    body: passedBody(input.minutes),
+    body: passedBody(input.minutes, `${input.to ?? ""}:${input.nyDate}`),
     path: "/log",
     key: `friend_passed:${input.nyDate}`,
     collapse: "friend_passed",

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { View, type StyleProp, type ViewStyle } from "react-native";
-import { passedFriend, standingLine, standingSaid, type StandRow } from "./social-view";
+import { seedDay } from "@shared/voice";
+import { landedLine, standingLine, standingSaid, type StandRow } from "./social-view";
 import { Body, Eyebrow, Label, Press } from "./ui";
 
 // Where you stand this week, in one line (src/social-view.ts standingLine):
@@ -11,11 +12,13 @@ import { Body, Eyebrow, Label, Press } from "./ui";
 // `perDay`: the length of one of the player's own training days, which is
 // what "a session" means in the line.
 //
-// The payoff: when the board comes back with a friend passed since this
-// screen last read it, a gold "You passed Nico" sits over the line until
-// the screen is left. Gold, because it was earned.
+// The payoff (the voice guide, moment 2): when the board comes back with
+// the player's own time up since this screen last read it, a gold line sits
+// over the standing line until the screen is left: "You just passed Nico."
+// when a friend was passed, else one of a few ("45m locked in. Excellent
+// work."). Gold, because it was earned.
 //
-// Nothing is drawn with no friends on the board yet.
+// With no friends on the board yet only the gold line can show.
 export function StandingLine({
   board,
   perDay,
@@ -28,23 +31,25 @@ export function StandingLine({
   style?: StyleProp<ViewStyle>;
 }) {
   const last = useRef<readonly StandRow[] | null>(null);
-  const [passed, setPassed] = useState<string | null>(null);
+  const [landed, setLanded] = useState<string | null>(null);
   useEffect(() => {
-    const who = passedFriend(last.current, board);
-    if (who) setPassed(who);
+    const line = landedLine(last.current, board, seedDay());
+    if (line) setLanded(line);
     last.current = board;
   }, [board]);
 
   const s = standingLine(board, perDay);
-  if (!s) return null;
-  const said = `${passed ? `You passed ${passed}. ` : ""}${standingSaid(s)}`;
+  if (!s && !landed) return null;
+  const said = [landed, s ? standingSaid(s) : null].filter(Boolean).join(" ");
   const words = (
     <>
-      {passed ? <Eyebrow style={{ marginBottom: 4 }}>{`You passed ${passed}`}</Eyebrow> : null}
-      <Body dim size={14} numberOfLines={2}>
-        <Label size={14}>{`${s.strong}.`}</Label>
-        {s.rest ? ` ${s.rest}` : ""}
-      </Body>
+      {landed ? <Eyebrow style={{ marginBottom: s ? 4 : 0 }}>{landed}</Eyebrow> : null}
+      {s ? (
+        <Body dim size={14} numberOfLines={2}>
+          <Label size={14}>{`${s.strong}.`}</Label>
+          {s.rest ? ` ${s.rest}` : ""}
+        </Body>
+      ) : null}
     </>
   );
   if (!onPress) {

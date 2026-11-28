@@ -196,8 +196,14 @@ describe("what the reminder says", () => {
     ]);
     const facts = reminderFacts(week);
     expect(facts).toEqual({ session: 2, drills: 4, drillsLeft: 4, minutes: 22, lastOpen: false });
+    // the ordinary day rotates its title among the true ones (voice guide,
+    // moment 9), held still by who and the day
     const n = reminderNotice({ ...facts!, nyDate: "2026-11-24" });
-    expect([n.title, n.body]).toEqual(["Session 2 is ready", "4 drills, about 22 minutes."]);
+    expect([
+      ["Session 2 is ready", "4 drills, about 22 minutes."],
+      ["22 minutes today. That's it.", "Session 2 is ready. 22 minutes."],
+    ]).toContainEqual([n.title, n.body]);
+    expect(reminderNotice({ ...facts!, nyDate: "2026-11-24" })).toEqual(n);
   });
 
   it("a session already started says how many drills are to go", () => {
@@ -225,7 +231,9 @@ describe("what the reminder says", () => {
     const server = read("lib/elite/reminders-server.ts");
     expect(server).toContain("duration_min");
     expect(server).toContain("reminderFacts(");
-    expect(server).toContain("reminderNotice({ ...facts, nyDate: today })");
+    expect(server).toContain("reminderNotice({ ...facts, area: p.weaknesses?.[0] ?? null, nyDate: today, to: p.id })");
+    // the weakest area rides in the roster's own read, no second query
+    expect(server).toContain("reminder_hour, reminders_paused_at, weaknesses");
   });
 });
 

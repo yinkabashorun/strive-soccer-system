@@ -1,4 +1,4 @@
-import { BAR_MIN, barShare, inviteShare, matchupSplit, passedFriend, recordShort, SESSION_FALLBACK_MINUTES, sessionMinutes, sessionsToBeat, standingLine, standingSaid } from "@/social-view";
+import { BAR_MIN, barShare, inviteShare, landedLine, landedLines, matchupSplit, passedFriend, recordShort, SESSION_FALLBACK_MINUTES, sessionMinutes, sessionsToBeat, standingLine, standingSaid } from "@/social-view";
 import { describe, expect, it } from "vitest";
 import { chunkedStorage, CHUNK_SIZE, MAX_CHUNKS, parseCount, splitValue, type KV } from "@/auth/chunks";
 import { applyDone } from "@/week-cache";
@@ -316,7 +316,7 @@ describe("where the app belongs", () => {
   it("Send my link shares the code to type and the link; an older server's link alone still works", () => {
     const link = "https://thestriveapp.com/join?ref=ABCD2345";
     const text = friendShareText({ code: "ABCD2345", link });
-    expect(text).toBe("Train with me on Strive Elite.\nMy code: ABCD2345\nhttps://thestriveapp.com/join?ref=ABCD2345");
+    expect(text).toMatch(/\nMy code: ABCD2345\nhttps:\/\/thestriveapp\.com\/join\?ref=ABCD2345$/);
     expect(inviteShare({ invite: link, inviteText: text })).toEqual({ message: text });
     expect(inviteShare({ invite: link })).toEqual({ url: link });
     // what is shared is what the door reads: the whole pasted invite works
@@ -1080,5 +1080,27 @@ describe("where you stand this week (Friends and Week)", () => {
     expect(passedFriend(before, [row("Diego R.", 75), row("Nico A.", 10), row("Me", 30, true)])).toBeNull();
     // a friend who was already behind is not "passed"
     expect(passedFriend([row("Kai T.", 10), row("Me", 30, true)], [row("Kai T.", 10), row("Me", 90, true)])).toBeNull();
+  });
+  it("right after your own training lands: a gold line, the friend passed named, else one of three", () => {
+    const before = [row("Diego R.", 75), row("Nico A.", 60), row("Me", 30, true)];
+    expect(landedLine(before, [row("Diego R.", 75), row("Nico A.", 60), row("Me", 70, true)], "2026-11-28")).toBe("You just passed Nico.");
+    // time up, nobody passed: one of the three, with the minutes it added
+    const kai = [row("Kai T.", 10), row("Me", 30, true)];
+    const after = [row("Kai T.", 10), row("Me", 75, true)];
+    expect(landedLines(45)).toEqual(["45m locked in. Excellent work.", "Posted. Keep outworking the competition.", "Another one in the books. Let's work."]);
+    const said = landedLine(kai, after, "2026-11-28");
+    expect(landedLines(45)).toContain(said);
+    // held still: the same reads, the same line
+    expect(landedLine(kai, after, "2026-11-28")).toBe(said);
+    // every one of the three is reachable
+    const seen = new Set<string>();
+    for (let m = 31; m < 200; m++) seen.add(landedLine(kai, [row("Kai T.", 10), row("Me", m, true)], "2026-11-28")!.replace(/^\d+(h \d+m|h|m)/, "{t}"));
+    expect(seen.size).toBe(3);
+    // a player alone on the board still gets it
+    expect(landedLine([row("Me", 0, true)], [row("Me", 20, true)], "2026-11-28")).toMatch(/20m locked in|Posted|in the books/);
+    // nothing on the first read, nothing when the time did not go up
+    expect(landedLine(null, after, "2026-11-28")).toBeNull();
+    expect(landedLine(after, after, "2026-11-28")).toBeNull();
+    expect(landedLine(after, kai, "2026-11-28")).toBeNull();
   });
 });

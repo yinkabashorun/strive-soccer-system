@@ -9,20 +9,21 @@
 //   - never a pop-up: it is a card in the page, and it never stands in the
 //     way of posting, the feed or the week.
 //   - "Not now" puts it away for UPGRADE_CARD_REST_DAYS (kept on the phone).
-//   - it names the player's own weakest area and the sessions a week their
-//     own answers give (lib/elite/training.ts sessionsFor): a card with no
-//     area to name does not show at all.
+//   - it names the player's own weakest area: a card with no area to name
+//     (or no sessions a week from their answers, lib/elite/training.ts
+//     sessionsFor) does not show at all. Its line is the ask in the app's
+//     voice (marketing/copy/voice-guide.md, moment 4), the same for all.
 //   - a player who came in by the door (lib/elite/free-door.ts) has not
 //     rated their game yet, so there is no area to name: the SAME card, in
 //     the same place, asks for a few taps first. It opens the quiz, and
 //     the offer follows it. Still one card, never a second one.
 import { areaWords } from "./free-intake";
-import { sessionsWord } from "./training";
 
 export const UPGRADE_CARD_PLACES = ["week"] as const;
 export type UpgradePlace = (typeof UPGRADE_CARD_PLACES)[number];
 
 export const UPGRADE_CARD_REST_DAYS = 30;
+export const UPGRADE_CARD_LINE = "You put in the work. Make sure it's on what you need, not what's comfortable.";
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 // opens: where the card's one action goes. "quiz" for a player with no
@@ -53,10 +54,12 @@ export function upgradeCard(i: {
   }
   const area = (i.area ?? "").trim();
   if (!area || !Number.isInteger(i.sessions) || i.sessions <= 0) return null;
-  const count = sessionsWord(i.sessions);
   return {
     title: `A week built around your ${areaWords(area)}.`,
-    line: `${count.charAt(0).toUpperCase()}${count.slice(1)} sessions a week, one drill at a time with the video.`,
+    // the ask in the app's own voice, not an ad's (the copy quiz, moment 4,
+    // Nov 28 2026: praise the work, then the reason; "what you need, not
+    // what's comfortable" is Coach Yinka's own line)
+    line: UPGRADE_CARD_LINE,
     action: "See what you get",
     dismiss: "Not now",
     opens: "offer",

@@ -6,7 +6,7 @@ import type { AppDrill, AppSession, AppWeek, AppYou } from "./app-payload";
 import type { AppCourse, AppCourseCard, AppCourseLevel, AppCourseList, AppCourseStep, AppLessonBlock } from "./app-courses";
 import type { LadderRung } from "./home";
 import type { AreaMinutes } from "./time-trained";
-import type { WeekRecap } from "./week-recap";
+import type { WeekCard, WeekRecap } from "./week-recap";
 import type { FreeStage } from "./free-intake";
 import type { QuizStepId } from "./quiz";
 import type { BoardRow, Face, Kind, LockedCard, OpenCard, StripDay, TodayLine } from "./tracker";
@@ -296,6 +296,11 @@ export type AppFreeWeek = {
   // shown once a week at the top of Week. Absent or null: no card (a week
   // with nothing in it is never mentioned). Older builds ignore it.
   recap?: WeekRecap | null;
+  // THE WEEK'S CARD (lib/elite/week-recap.ts weekCard), Sunday from noon
+  // New York and Monday, for builds after 11. Additive: builds 10 and 11
+  // never read it, and `recap` above is sent to them as before. A build
+  // that reads it shows it and not `recap`; present and null: no card.
+  weekCard?: WeekCard | null;
 };
 
 // Share my week (lib/elite/week-card.ts): the player's own week as a

@@ -30,7 +30,7 @@ import { buildNoticePrefs, withTopic } from "@shared/notice-prefs";
 import { earnedNotice, newWeekNotice, welcomeNotice, type NoticeTopic } from "@shared/notices";
 import { reminderChoice } from "@shared/reminders";
 import { oneAppTabs } from "@shared/one-app";
-import { weekRecap } from "@shared/week-recap";
+import { weekCard, weekRecap } from "@shared/week-recap";
 import { shareText } from "@shared/share-link";
 import { DOOR_NO_MATCH, doorCodeFrom, friendShareText } from "@shared/free-door";
 import { clubRequestSentLine } from "@shared/tracker";
@@ -711,6 +711,19 @@ function fixtureFreeWeek(): AppFreeWeek {
     // the Monday moment ("recap": the free account on a Monday), said by the
     // same rule the server uses; every other example member has no card
     recap: chosenState() !== "recap" ? null : weekRecap({ week: "2026-11-23", lastWeek: 190, earlier: [120, 95, 150], gymLastWeek: 90, friends: [210, 75, 60, 40] }),
+    // the week's card (Sunday noon and Monday), the Monday one here, said by
+    // the same rule the server uses
+    weekCard:
+      chosenState() !== "recap"
+        ? null
+        : weekCard({
+            moment: "monday",
+            week: "2026-11-16",
+            mine: 190,
+            earlier: [120, 95, 150],
+            gym: 90,
+            friends: [{ name: "Diego R.", minutes: 210 }, { name: "Nico A.", minutes: 75 }, { name: "Jalen T.", minutes: 60 }],
+          }),
   };
 }
 

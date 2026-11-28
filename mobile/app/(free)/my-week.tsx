@@ -112,8 +112,8 @@ export default function MyWeek() {
         </Body>
       </View>
 
-      {/* the Monday moment: last week, once a week, then gone */}
-      <MondayCard recap={w.recap} onDismiss={(r) => (r.best ? void askForRating("best_week") : undefined)} />
+      {/* the week's card: Sunday noon and Monday, then gone */}
+      <MondayCard card={w.weekCard} recap={w.recap} onDismiss={(best) => (best ? void askForRating("best_week") : undefined)} />
 
       {ended ? (
         <Card style={styles.ended}>

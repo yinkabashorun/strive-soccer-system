@@ -1,4 +1,5 @@
-import { SESSION_FALLBACK_MINUTES, sessionMinutes, sessionsToBeat } from "@shared/standing";
+import { SESSION_FALLBACK_MINUTES, landedLines, sessionMinutes, sessionsToBeat } from "@shared/standing";
+import { pickLine } from "@shared/voice";
 
 // The small rules behind the social half's pictures (Nov 24 2026: Friends,
 // Week and Clubs polished to the training loop's standard). Pure, tested
@@ -114,4 +115,20 @@ export function passedFriend(before: readonly StandRow[] | null | undefined, aft
     })
     .sort((a, b) => b.minutes - a.minutes);
   return passed[0] ? firstOf(passed[0].name) : null;
+}
+
+// RIGHT AFTER YOUR OWN TRAINING LANDS (the voice guide, moment 2): between
+// two reads of the board, the player's own time went up, so a gold line
+// says so. A friend passed is named; otherwise one of three lines, with the
+// minutes the training added. Held still by the seed (the day and the new
+// total), so a redraw never swaps it. Null when the player's time did not go
+// up (the first read included).
+export { landedLines };
+export function landedLine(before: readonly StandRow[] | null | undefined, after: readonly StandRow[], day: string): string | null {
+  const was = before?.find((r) => r.me);
+  const now = after.find((r) => r.me);
+  if (!before || !was || !now || !(now.minutes > was.minutes)) return null;
+  const who = passedFriend(before, after);
+  if (who) return `You just passed ${who}.`;
+  return pickLine(landedLines(now.minutes - was.minutes), `landed:${day}:${now.minutes}`);
 }

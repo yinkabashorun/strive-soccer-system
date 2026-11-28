@@ -8,7 +8,8 @@
 // sentence, none of the words a 9 year old would not know, no long dashes,
 // and nothing that names or counts who did not train.
 //
-// Pure: no imports.
+// Pure: only the voice's own picker (lib/elite/voice.ts).
+import { pickLine } from "./voice";
 
 export const MATCHUP_TITLE = "This week's matchup";
 // A week that is decided, shown until the next one is matched on Monday.
@@ -33,13 +34,32 @@ export const MATCHUP_HOW_LINES: readonly string[] = [
 
 const minutesWord = (n: number) => `${n} ${n === 1 ? "minute" : "minutes"}`;
 
-// While the week is on: who is ahead, by how many minutes per player.
-export function matchupAheadLine(input: { mine: number; theirs: number; other: string }): string {
+// While the week is on: who is ahead, by how many minutes per player, in
+// the app's voice (marketing/copy/voice-guide.md; Coach Yinka's answers to
+// moment 3 of the copy quiz, Nov 28 2026: the question jab "Is your club
+// letting that happen?", his own "You're getting outworked by Haymarket,
+// let's go", "(club name) works nicely" and "there should be a mix").
+// Both clubs are named, the gap is the one number, and the line is one of
+// a few, picked by the seed (the club and the day) so it holds still.
+export function matchupAheadLines(input: { mine: number; theirs: number; other: string; club: string }): string[] {
   const gap = Math.abs(input.mine - input.theirs);
-  if (gap === 0) return "It's tied.";
+  const { other, club } = input;
+  if (gap === 0) return [`It's tied with ${other}. The next session decides it.`];
+  const n = minutesWord(gap);
   return input.mine > input.theirs
-    ? `Your club is ahead by ${minutesWord(gap)} per player.`
-    : `${input.other} is ahead by ${minutesWord(gap)} per player.`;
+    ? [
+        `${club} is up ${n} a player on ${other}. Keep it there.`,
+        `${club} is outworking ${other} this week. Don't let up.`,
+        `${n.charAt(0).toUpperCase()}${n.slice(1)} a player in front of ${other}. Excellent work, ${club}.`,
+      ]
+    : [
+        `${other} is up ${n} a player. Is ${club} letting that happen?`,
+        `${club}, you're getting outworked by ${other}. Let's go.`,
+        `${other} is ${n} a player in front. ${club}, let's work.`,
+      ];
+}
+export function matchupAheadLine(input: { mine: number; theirs: number; other: string; club: string; seed: string }): string {
+  return pickLine(matchupAheadLines(input), `matchup:${input.seed}`);
 }
 
 // Once the week is over.
@@ -90,9 +110,9 @@ export function everyMatchupSentence(): string[] {
     MATCHUP_HOW_LINK,
     MATCHUP_HOW_TITLE,
     ...MATCHUP_HOW_LINES,
-    matchupAheadLine({ mine: 72, theirs: 60, other }),
-    matchupAheadLine({ mine: 60, theirs: 61, other }),
-    matchupAheadLine({ mine: 60, theirs: 60, other }),
+    ...matchupAheadLines({ mine: 72, theirs: 60, other, club: "Renegados FC" }),
+    ...matchupAheadLines({ mine: 60, theirs: 61, other, club: "Renegados FC" }),
+    ...matchupAheadLines({ mine: 60, theirs: 60, other, club: "Renegados FC" }),
     matchupResultLine("win", other),
     matchupResultLine("loss", other),
     matchupResultLine("draw", other),

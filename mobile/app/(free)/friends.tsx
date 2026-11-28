@@ -3,7 +3,7 @@ import { ScrollView, Share, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { fmtDuration } from "@shared/time-trained";
 import { ADD_ROW } from "@shared/friend-add";
-import { perDayMinutes } from "@shared/tracker";
+import { FRIENDS_EMPTY_LINE, FRIENDS_EMPTY_TITLE, perDayMinutes } from "@shared/tracker";
 import { ApiError, OFFLINE_MESSAGE } from "@/api/client";
 import { answerFriend, refreshFree, useFeed, useFreeWeek } from "@/api/free";
 import { inviteShare } from "@/social-view";
@@ -198,10 +198,10 @@ export default function Friends() {
       {f.friendCount === 0 ? (
         <Card style={styles.empty}>
           <Head size={28} style={{ textAlign: "center" }}>
-            Your friends' training lands here
+            {FRIENDS_EMPTY_TITLE}
           </Head>
           <Body dim style={{ textAlign: "center", marginTop: 10 }}>
-            Send your link to a teammate. Accept your teammate's request, and you see each other's training every day.
+            {FRIENDS_EMPTY_LINE}
           </Body>
           {f.squad ? null : <Button quiet style={{ marginTop: 18 }} label="Send my link" onPress={invite} />}
         </Card>

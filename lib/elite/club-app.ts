@@ -13,6 +13,7 @@
 //     yet this week is listed after them with no place and no time)
 import { fmtDuration } from "./time-trained";
 import { shiftDay } from "./time";
+import { pickLine, seedDay } from "./voice";
 import {
   CLUB_CAP,
   cleanClubCode,
@@ -45,8 +46,15 @@ export const CLUB_CODE_MESSAGE = "That is not a club code. Ask your captain for 
 
 // What the iPhone share sheet sends: the link AND the code, so a teammate
 // with the app can type the code and one without it can open the link.
-export function clubShareText(input: { name: string; code: string; appUrl: string }): string {
-  return `Join ${input.name} on Strive Elite.\nClub code: ${input.code}\n${clubLink(input.appUrl, input.code)}`;
+// The first line rotates in the app's voice (the voice guide, moment 6),
+// held still by the code and the New York day; the "Club code:" line and
+// the link never change (clubCodeFrom and the door read them).
+export function clubShareFirstLines(name: string): string[] {
+  return [`Join ${name} on Strive Elite. We're getting work in.`, `${name} is on Strive Elite. You in?`, `We need you in ${name}. Get on Strive Elite.`];
+}
+export function clubShareText(input: { name: string; code: string; appUrl: string; day?: string }): string {
+  const first = pickLine(clubShareFirstLines(input.name), `club_invite:${input.code}:${input.day ?? seedDay()}`);
+  return `${first}\nClub code: ${input.code}\n${clubLink(input.appUrl, input.code)}`;
 }
 
 // ---- Who trained today -----------------------------------------------------

@@ -83,7 +83,7 @@ export const POST = appRoute({ name: "free-clock-finish", access: "free_app", li
     // a friend this training just put them in front of hears "just passed
     // you", and only that. Training only: gym is on no board.
     const passed = kind === "training" ? await noticeFriendPassed({ posterId: viewer.profile.id, entryId: saved.id, today }).catch(() => []) : [];
-    await noticeFriendPost(viewer.profile.id, today, passed).catch(() => 0);
+    await noticeFriendPost(viewer.profile.id, today, passed, { kind, minutes: saved.minutes, timed: true }).catch(() => 0);
     await countTeammate(viewer.profile.id).catch(() => undefined);
   }
   revalidatePath(FREE_HOME);

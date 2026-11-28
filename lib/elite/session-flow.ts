@@ -8,6 +8,7 @@
 // a player sees when a session ends is exactly what lands on their total.
 import type { Homework } from "./types";
 import { DEFAULT_DRILL_MIN, cappedSeconds, creditedMinutes, fmtDuration } from "./time-trained";
+import { pickLine, seedDay } from "./voice";
 
 export type DrillKind = "warmup" | "finisher" | "skill";
 
@@ -211,6 +212,18 @@ export function milestoneCrossed(minutesBefore: number, minutesAfter: number): n
 
 export function milestoneLabel(hours: number): string {
   return hours === 1 ? "1 hour trained" : `${hours} hours trained`;
+}
+
+// The line under a medal just earned on the finish screen (the voice
+// guide, moment 10): a mix, and personal, nobody else in it. Held still by
+// the medal and the New York day. The iPhone app and the website say it
+// from here.
+export function milestoneEarnedLines(hours: number): string[] {
+  const n = hours === 1 ? "1 hour" : `${hours} hours`;
+  return ["Earned today. It stays yours.", "It stays yours. Just the beginning.", `${n} of work nobody made you do. That's the difference.`];
+}
+export function milestoneEarnedLine(hours: number, day: string = seedDay()): string {
+  return pickLine(milestoneEarnedLines(hours), `medal:${hours}:${day}`);
 }
 
 // The feel of each moment, lightest to strongest. One ladder, used by the

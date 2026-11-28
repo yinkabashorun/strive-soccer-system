@@ -1,0 +1,85 @@
+13:42:25.925 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Define variables RUNNING
+13:42:25.927 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Define variables COMPLETED
+13:42:25.929 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Apply configuration RUNNING
+13:42:25.930 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Apply configuration COMPLETED
+13:42:25.930 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Launch app "com.strivesoccer.elite" with clear state (launch arguments: {fixtureState=locked, fixtureRoute=card}) RUNNING
+13:42:25.931 [ INFO] maestro.Maestro.clearAppState$lambda$9: Clearing app state com.strivesoccer.elite
+13:42:37.886 [ INFO] maestro.Maestro.launchApp$lambda$6: Launching app com.strivesoccer.elite
+13:42:37.889 [ INFO] maestro.Maestro.launchApp$lambda$6: Stopping com.strivesoccer.elite app during launch
+13:42:39.885 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Launch app "com.strivesoccer.elite" with clear state (launch arguments: {fixtureState=locked, fixtureRoute=card}) COMPLETED
+13:42:39.886 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Save to Photos" is visible RUNNING
+13:42:47.246 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Save to Photos" is visible COMPLETED
+13:42:47.248 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Wait for animation to end within 4000 ms RUNNING
+13:42:47.305 [ INFO] maestro.Maestro.waitForAnimationToEnd$lambda$54: Waiting for animation to end with timeout 4000
+13:42:47.310 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+13:42:47.310 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+13:42:47.736 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+13:42:47.736 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+13:42:49.288 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Wait for animation to end within 4000 ms COMPLETED
+13:42:49.288 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Take screenshot t90-card RUNNING
+13:42:49.290 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+13:42:49.291 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+13:42:49.577 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Take screenshot t90-card COMPLETED
+13:42:49.578 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "More" is visible RUNNING
+13:42:49.884 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "More" is visible COMPLETED
+13:42:49.884 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Instagram story" is not visible RUNNING
+13:42:50.798 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Instagram story" is not visible COMPLETED
+13:42:50.798 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on "Add a quote" RUNNING
+13:42:51.088 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=Add a quote, title=, value=, text=, hintText=, resource-id=, bounds=[21,653][381,713], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=21, y=653, width=360, height=60))
+13:42:51.555 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via trusted pre-wait hierarchy (null settle, no recent scroll)
+13:42:51.556 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Try tapping at (201, 683) using hierarchy based logic for wait
+13:42:51.557 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+13:42:51.558 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+13:42:53.550 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Something have changed in the UI judging by view hierarchy. Proceed.
+13:42:53.552 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on "Add a quote" COMPLETED
+13:42:53.552 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Pick a quote" is visible RUNNING
+13:42:53.929 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Pick a quote" is visible COMPLETED
+13:42:53.930 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Take screenshot t91-card-quotes RUNNING
+13:42:53.934 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+13:42:53.936 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+13:42:54.095 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Take screenshot t91-card-quotes COMPLETED
+13:42:54.096 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on "Pressure is a privilege. Billie Jean King" RUNNING
+13:42:54.444 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=Pressure is a privilege. Billie Jean King, title=, value=radio button, text=radio button, hintText=, resource-id=, bounds=[0,412][402,481], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=0, y=412, width=402, height=69))
+13:42:54.790 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via trusted pre-wait hierarchy (null settle, no recent scroll)
+13:42:54.792 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Try tapping at (201, 446) using hierarchy based logic for wait
+13:42:54.793 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+13:42:54.793 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+13:42:56.384 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Something have changed in the UI judging by view hierarchy. Proceed.
+13:42:56.384 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on "Pressure is a privilege. Billie Jean King" COMPLETED
+13:42:56.385 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Wait for animation to end within 4000 ms RUNNING
+13:42:56.386 [ INFO] maestro.Maestro.waitForAnimationToEnd$lambda$54: Waiting for animation to end with timeout 4000
+13:42:56.387 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+13:42:56.387 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+13:42:56.758 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+13:42:56.758 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+13:42:57.694 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Wait for animation to end within 4000 ms COMPLETED
+13:42:57.695 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Change the quote" is visible RUNNING
+13:42:58.073 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Change the quote" is visible COMPLETED
+13:42:58.073 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Take screenshot t92-card-with-quote RUNNING
+13:42:58.076 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+13:42:58.078 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+13:42:58.346 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Take screenshot t92-card-with-quote COMPLETED
+13:42:58.346 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on "Save to Photos" RUNNING
+13:42:58.618 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=Save to Photos, title=, value=, text=, hintText=, resource-id=, bounds=[20,732][382,792], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=20, y=732, width=362, height=60))
+13:42:59.005 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via trusted pre-wait hierarchy (null settle, no recent scroll)
+13:42:59.006 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Try tapping at (201, 762) using hierarchy based logic for wait
+13:42:59.008 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+13:42:59.008 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+13:43:00.191 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Something have changed in the UI judging by view hierarchy. Proceed.
+13:43:00.203 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on "Save to Photos" COMPLETED
+13:43:00.203 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Saved to Photos." is visible RUNNING
+13:43:00.557 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Saved to Photos." is visible COMPLETED
+13:43:00.557 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Take screenshot t93-card-saved RUNNING
+13:43:00.560 [ INFO] maestro.Maestro.takeScreenshot: Taking screenshot
+13:43:00.562 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+13:43:00.859 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Take screenshot t93-card-saved COMPLETED
+13:43:00.862 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Tap on "Close" RUNNING
+13:43:01.101 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tapping on element:  UiElement(treeNode=TreeNode(attributes={accessibilityText=Close, title=, value=, text=, hintText=, resource-id=, bounds=[12,68][56,112], enabled=true, focused=false, selected=false, checked=false}, children=[], clickable=null, enabled=true, focused=false, checked=false, selected=false), bounds=Bounds(x=12, y=68, width=44, height=44))
+13:43:01.512 [ INFO] maestro.Maestro.tap-HgV9Ck0: Tap aimed via trusted pre-wait hierarchy (null settle, no recent scroll)
+13:43:01.513 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Try tapping at (34, 90) using hierarchy based logic for wait
+13:43:01.514 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to byte array
+13:43:01.514 [TRACE] maestro.utils.ScreenshotUtils.takeScreenshot: Taking screenshot to output sink
+13:43:04.074 [ INFO] maestro.Maestro.screenshotBasedTap-ogj28Uc: Something have changed in the UI judging by view hierarchy. Proceed.
+13:43:04.076 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Tap on "Close" COMPLETED
+13:43:04.076 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandStart: Assert that "Start training" is visible RUNNING
+13:43:04.511 [ INFO] maestro.cli.runner.CliConsoleListener.onCommandFinished: Assert that "Start training" is visible COMPLETED

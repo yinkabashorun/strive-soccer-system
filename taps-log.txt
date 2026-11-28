@@ -1,0 +1,24 @@
+
+Waiting for flows to complete...
+[Passed] 04-check-in-keyboard (41s)
+[Passed] 11-inbox (53s)
+[Passed] 12-one-app (3m 15s)
+[Passed] 07-free-funnel (5m 2s)
+[Passed] 14-share-week (34s)
+[Passed] 10-first-days-and-squad (1m 9s)
+[Passed] 18-session-card (43s)
+[Passed] 16-confirm-email (51s)
+[Passed] 08-week-and-earned (58s)
+[Passed] 16-week-recap (44s)
+[Passed] 17-add-a-friend (1m 24s)
+[Passed] 09-clubs (1m 29s)
+[Passed] 02-username-and-photo (52s)
+[Passed] 15-door (1m 23s)
+[Passed] 06-courses (1m 51s)
+[Passed] 01-sign-in-keyboard (1m 57s)
+[Passed] 05-quiz (38s)
+[Passed] 03-session (2m 25s)
+[Passed] 13-profile (1m 8s)
+
+19/19 Flows Passed in 27m 58s
+

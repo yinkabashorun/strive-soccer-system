@@ -470,3 +470,51 @@ friend of the other.
 - Finish a session that adds one minute: the ring reads "+1 MINUTE".
 - A drill's timer: start it, tick the drill before it on another screen or wait for a tick to save; the timer keeps counting and does not go back to "Get ready". During a rest, "Skip rest" starts the next set.
 
+
+## The training card, on a phone only (Nov 28 2026, the first build after it)
+
+The card is made on the phone (app/card.tsx, lib/elite/session-card.ts).
+The simulator's example build shows the screen but never captures, saves or
+shares (mobile/sim/flows/18-session-card.yaml), so each of these is a real
+phone's to prove.
+
+1. **The card after a post.** Train on the clock, take the finish photo,
+   post. "Your card" opens straight away: your finish photo full bleed,
+   STRIVE ELITE at the top with today's date and your name, "Trained today"
+   and the time the post counted, your line if you wrote one, and this
+   week, all time and your level. Close: you are back where you started
+   posting, the post is on Friends. The first time ever, "Know the moment
+   your friends post?" comes after the card, not before it.
+2. **The card after a session's photo** (Strive Pro): finish a session,
+   "Post it to your friends", take the photo, post. The card opens with the
+   session's own time.
+3. **Make my card later.** On Friends, your own post's three dots: "Make my
+   card" opens the card from that post's photo. On You, tap one of your own
+   photos: "Make my card" under it. A friend's post and a friend's photo
+   never offer it.
+4. **The quote.** "Add a quote" opens the list; one tap puts the quote on
+   the card at once, with who said it in small gold letters. "No quote"
+   takes it off. The longest one (Clear, "You do not rise ...") still sits
+   above the time.
+5. **Photos asks once.** On a phone that never saved a card, tap Save to
+   Photos: iOS asks to ADD photos (not to read them), with "Strive Elite
+   saves your training card and the picture of your week to your photo
+   library when you share or save them." Allow: "Saved to Photos." Open the
+   Photos app: one picture, 1080 x 1920 (Photos, the picture, swipe up:
+   1080 x 1920), sharp, nothing cut off at the edges.
+6. **Saved once.** Tap More, share it somewhere, then Save to Photos again:
+   still ONE copy in Photos. Pick a quote and share again: now a second
+   copy, the one with the quote.
+7. **The "no" path.** On another phone (or after Settings, Strive Elite,
+   Photos, None), tap More: the share sheet still opens with the card, and
+   the line says it was not saved, with Open Settings, which opens the
+   app's own settings page.
+8. **Instagram** (only once a Meta app ID is set as EXPO_PUBLIC_META_APP_ID
+   in the build): with Instagram installed, "Instagram story" shows first;
+   tap it: Instagram opens on a new story with the card filling it, no
+   purple around it. Without Instagram on the phone, or with no app ID in
+   the build, the button is not there, and More still reaches Instagram.
+9. **No signal.** Airplane mode, then Make my card on a post you have
+   opened before: the card is made and saved with the photo and numbers
+   already on the phone; if the numbers never loaded, the row of three is
+   simply not there.

@@ -166,9 +166,14 @@ describe("the phone's build", () => {
       "Strive Elite uses the camera for your start photo and your finish photo when you train, and for your profile photo.",
     );
     expect(picker.photosPermission).toBe("Strive Elite opens your photo library so you can choose your profile photo.");
-    expect(app.ios.infoPlist.NSPhotoLibraryAddUsageDescription).toBe(
-      "Strive Elite saves the picture of your week to your photo library when you choose Save Image.",
-    );
+    // add-only: the training card (app/card.tsx, saved on every share) and
+    // the picture of your week; the Photos plugin is handed the same words
+    // so its own default can never take their place
+    const SAVE = "Strive Elite saves your training card and the picture of your week to your photo library when you share or save them.";
+    expect(app.ios.infoPlist.NSPhotoLibraryAddUsageDescription).toBe(SAVE);
+    const library = app.plugins.find((p: unknown) => Array.isArray(p) && p[0] === "expo-media-library")[1];
+    expect(library.savePhotosPermission).toBe(SAVE);
+    expect(library.photosPermission).toBe(picker.photosPermission);
     for (const said of [picker.cameraPermission, picker.photosPermission, app.ios.infoPlist.NSPhotoLibraryAddUsageDescription]) {
       expect(said).not.toMatch(/coach|clip|film|video|\u2014/i);
     }

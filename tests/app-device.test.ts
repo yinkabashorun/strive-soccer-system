@@ -587,8 +587,13 @@ describe("the free app", () => {
     expect(post.match(/if \(!prefs\.pushAsked\) \{/g)?.length).toBe(2);
     const typedAdd = post.slice(post.indexOf("async function addTyped()"), post.indexOf("if (asking)"));
     expect(typedAdd).not.toContain("pushAsked");
-    expect(post).toContain("Know the moment your friends post?");
-    expect(post).toContain("turnOnNotifications()");
+    // the ask itself is one shared screen: after the training card when a
+    // post opens one (app/card.tsx), on the post screen when it does not
+    const ask = code(path.join(root, "src/AskNotifications.tsx"));
+    expect(ask).toContain("Know the moment your friends post?");
+    expect(ask).toContain("turnOnNotifications()");
+    expect(post).toContain("<AskNotifications onDone={() => void leave()} />");
+    expect(code(path.join(root, "app/card.tsx"))).toContain("<AskNotifications onDone={() => void leave()} />");
     // and never from the tabs themselves
     for (const f of pages) expect(code(f), rel(f)).not.toMatch(/turnOnNotifications|requestPermissionsAsync/);
   });
@@ -1047,8 +1052,10 @@ describe("the social half is built like the training loop", () => {
     // no photos to show: the grid is simply not there
     expect(parts).toMatch(/export function PostGrid[\s\S]{0,400}if \(posts\.length === 0\) return null;/);
     // a tap opens the photo full screen; the whole photo, never cropped,
-    // and nothing can be saved, shared or sent from there
-    expect(parts).toContain("<PhotoViewer photo={open} onClose={() => setOpen(null)} />");
+    // and nothing can be saved, shared or sent from there. Your OWN photo
+    // has one button more, Make my card (app/card.tsx); a friend's never
+    expect(parts).toMatch(/<PhotoViewer\s+photo=\{open\}\s+onClose=\{\(\) => setOpen\(null\)\}/);
+    expect(parts).toMatch(/onMakeCard=\{\s*mine && open/);
     const viewer = code(path.join(root, "src/PhotoViewer.tsx"));
     expect(viewer).toContain('contentFit="contain"');
     expect(viewer).toContain('accessibilityLabel="Close the photo"');

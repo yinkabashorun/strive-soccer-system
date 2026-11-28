@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { Alert, StyleSheet, View } from "react-native";
 import { Image } from "expo-image";
+import { useRouter } from "expo-router";
+import { CARD_WORDS } from "@shared/session-card";
 import { fmtDuration } from "@shared/time-trained";
 import { REPORT_REASONS, STAR_LABEL, lockedHeadline, lockedHeadlineLines, lockedLine, type LockedCard } from "@shared/tracker";
 import type { AppOpenCard } from "@shared/app-contract";
 import { NOT_TIMED } from "@shared/training-clock";
 import { ApiError, OFFLINE_MESSAGE } from "./api/client";
 import { blockPlayer, deleteEntry, reportPost, toggleProps } from "./api/free";
+import { cardFromFeed, openCard } from "./card-source";
 import { Avatar, MyAvatar, Star } from "./Avatar";
 import { PlayerLink } from "./ProfileParts";
 import { feel } from "./feel";
@@ -24,7 +27,8 @@ import { color, radius } from "./theme";
 //
 // OPEN: the photo full width, who and when, how long on the photo, the
 // note, and one tap of props. The three dots open the iPhone's own sheet:
-// Report this post and Block on anyone else's post, Delete on your own.
+// Report this post and Block on anyone else's post; Make my card (the
+// training card, app/card.tsx) and Delete on your own.
 // A report or a block takes the post off this feed at once.
 //
 // A post timed by the clock shows its START photo small in the corner of
@@ -52,6 +56,7 @@ export function LockedPost({ card, first, friendsToday }: { card: LockedCard; fi
 }
 
 export function OpenPost({ card, onGone }: { card: AppOpenCard; onGone: () => void }) {
+  const router = useRouter();
   const [props, setProps] = useState({ count: card.props, on: card.propped });
   const [error, setError] = useState<string | null>(null);
 
@@ -112,7 +117,10 @@ export function OpenPost({ card, onGone }: { card: AppOpenCard; onGone: () => vo
 
   function more() {
     if (card.mine) {
-      return sheet({ options: ["Delete my post", "Cancel"], destructiveButtonIndex: 0, cancelButtonIndex: 1 }, (i) => i === 0 && remove());
+      // your own post: make its training card again (app/card.tsx), or delete it
+      return sheet({ options: [CARD_WORDS.make, "Delete my post", "Cancel"], destructiveButtonIndex: 1, cancelButtonIndex: 2 }, (i) =>
+        i === 0 ? openCard(router, cardFromFeed(card)) : i === 1 ? remove() : undefined
+      );
     }
     sheet(
       {

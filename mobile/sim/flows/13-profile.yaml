@@ -22,7 +22,7 @@ appId: com.strivesoccer.elite
     timeout: 4000
 - takeScreenshot: t80-player
 - assertVisible: "Training photos"
-- tapOn: "Give Diego props on their latest training"
+- tapOn: "Give Diego props on Diego's latest training"
 - extendedWaitUntil:
     visible: "Take your props back"
     timeout: 8000

@@ -41,7 +41,7 @@ appId: com.strivesoccer.elite
 # The button is never switched off: an empty box says what to type.
 - tapOn: "Send a friend request"
 - extendedWaitUntil:
-    visible: "Type their @username first."
+    visible: "Type your friend's @username first."
     timeout: 10000
 
 # A tap on the box's name puts the cursor in it. A username nobody has gets

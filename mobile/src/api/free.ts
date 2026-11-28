@@ -77,6 +77,12 @@ export function useFeed() {
   return useQuery({ queryKey: freeKeys.feed, queryFn: () => api<AppFreeFeed>(APP_API.freeFeed), enabled: free });
 }
 
+// The feed read again now, whatever is on screen: the training card reads a
+// session's post back from it (src/card-source.ts sessionCardFrom).
+export function fetchFeedNow(): Promise<AppFreeFeed> {
+  return queryClient.fetchQuery({ queryKey: freeKeys.feed, queryFn: () => api<AppFreeFeed>(APP_API.freeFeed), staleTime: 0 });
+}
+
 export function useFreeWeek() {
   const free = useIsFree("ready");
   return useQuery({ queryKey: freeKeys.week, queryFn: () => api<AppFreeWeek>(APP_API.freeWeek), enabled: free });

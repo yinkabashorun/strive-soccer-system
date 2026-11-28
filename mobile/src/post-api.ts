@@ -25,7 +25,9 @@ export type PickedPhoto = { uri: string; width: number; height: number };
 // week, written by the server from the session itself, so no length is
 // ever sent from the phone. (Training outside a session is timed by the
 // clock, src/clock.ts, which sends its own two photos.)
-export async function postTraining(input: { photo: PickedPhoto; caption: string; session: string }): Promise<void> {
+// It answers the new post's id (the training card reads the post back by
+// it, app/card.tsx), or null when the server sent none.
+export async function postTraining(input: { photo: PickedPhoto; caption: string; session: string }): Promise<string | null> {
   const fields: Record<string, string> = { session: input.session, caption: input.caption.trim() };
   let bytes: Uint8Array | null = null;
   // The example build sends nothing anywhere: the picked photo is not read.
@@ -46,4 +48,5 @@ export async function postTraining(input: { photo: PickedPhoto; caption: string;
   }
   const res = await sendPost(fileForm(fields, { field: "photo", fileName: "post.jpg", type: "image/jpeg", bytes }));
   if (!res.ok) throw new ApiError(400, null, res.error ?? "Your post wasn't saved. Try again.");
+  return typeof res.id === "string" && res.id ? res.id : null;
 }
